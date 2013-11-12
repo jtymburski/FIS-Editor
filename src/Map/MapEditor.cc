@@ -23,3 +23,9 @@ MapEditor::MapEditor() : QGLWidget()
 MapEditor::~MapEditor()
 {
 }
+
+void MapEditor::paintGL()
+{
+  qglColor(QColor(255,255,255,128));
+  renderText(0,0,0,"Test");
+}

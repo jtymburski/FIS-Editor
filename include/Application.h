@@ -14,6 +14,8 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QMessageBox>
+#include <QHBoxLayout>
+#include <QDockWidget>
 #include <windows.h>
 #include "Map/MapEditor.h"
 
@@ -37,8 +39,23 @@ public:
 
 private:
   /* Map editor pointer */
+  QWidget* sidebar;
+  QDockWidget* dock;
   MapEditor* map_editor;
-  QAction *newAction, *loadAction, *saveAction, *quitAction;
+  QAction *new_action;
+  QAction *load_action;
+  QAction *save_action;
+  QAction *quit_action;
+  QAction *saveas_action;
+  QAction *recentfiles_action;
+  QAction *undo_action;
+  QAction *redo_action;
+  QAction *findreplace_action;
+  QAction *copy_action;
+  QAction *paste_action;
+  QAction *cut_action;
+  QAction *mapsize_action;
+
   
   /*------------------- Constants -----------------------*/
   //const static short kTICK_DELAY; /* The tick time, in ms */

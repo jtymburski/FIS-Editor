@@ -21,6 +21,8 @@ public:
   /* Destructor function */
   ~MapEditor();
 
+protected:
+  void paintGL();
 private:
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
