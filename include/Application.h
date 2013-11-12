@@ -9,7 +9,12 @@
 #define APPLICATION_H
 
 #include <QMainWindow>
-
+#include <QAction>
+#include <QToolBar>
+#include <QMenuBar>
+#include <QMenu>
+#include <QMessageBox>
+#include <windows.h>
 #include "Map/MapEditor.h"
 
 class Application : public QMainWindow
@@ -33,6 +38,7 @@ public:
 private:
   /* Map editor pointer */
   MapEditor* map_editor;
+  QAction *newAction, *loadAction, *saveAction, *quitAction;
   
   /*------------------- Constants -----------------------*/
   //const static short kTICK_DELAY; /* The tick time, in ms */
@@ -43,7 +49,8 @@ private:
 private:
   /* Switches the widget inside the stack (plus appropriate calls needed) */
   //void switchWidget(int index);
-
+  void setupTopMenu();
+  QString username;
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -62,7 +69,7 @@ signals:
  *===========================================================================*/
 public slots:
   /* Called when the game is closed to return the application back to title */
-  //void closeGame();
+  void closeEditor();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
