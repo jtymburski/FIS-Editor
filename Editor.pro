@@ -25,12 +25,12 @@ SOURCES += \
     ./src/Main.cc \
     ./src/Application.cc \
     ./src/Map/MapEditor.cc \
-    ../Project/src/Sound.cc
+    ../Project-Qt/src/Sound.cc
 
 HEADERS += \
     ./include/Application.h \
     ./include/Map/MapEditor.h \
-    ../Project/include/Sound.h
+    ../Project-Qt/include/Sound.h
 
 INCLUDEPATH += ./include
-INCLUDEPATH += ../Project/include
+INCLUDEPATH += ../Project-Qt/include
