@@ -17,13 +17,14 @@
 
 Application::Application(QWidget* parent) : QMainWindow(parent)
 {
+  toolbox = new SpriteToolbox(this);
   sidebar = new QWidget(this);
   sidebar->setMaximumSize(1100,720);
-  sidebar->setMinimumSize(256,720);
+  sidebar->setMinimumSize(256,256);
   dock = new QDockWidget("Toolbox");
   dock->setWidget(sidebar);
   map_editor = new MapEditor();
-  map_editor->setMinimumSize(128,128);
+  map_editor->setMinimumSize(512,512);
   map_editor->setMaximumSize(1280,720);
   addDockWidget(Qt::LeftDockWidgetArea,dock);
   dock->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -35,7 +36,7 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
 
   setupTopMenu();
 
-  setFixedSize(1280,720);
+  //setFixedSize(1280,720);
 }
 
 Application::~Application()

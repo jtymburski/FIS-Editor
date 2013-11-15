@@ -18,6 +18,7 @@
 #include <QDockWidget>
 #include <windows.h>
 #include "Map/MapEditor.h"
+#include "SpriteToolbox.h"
 
 class Application : public QMainWindow
 {
@@ -40,6 +41,7 @@ public:
 private:
   /* Map editor pointer */
   QWidget* sidebar;
+  SpriteToolbox* toolbox;
   QDockWidget* dock;
   MapEditor* map_editor;
   QAction *new_action;
