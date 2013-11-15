@@ -7,6 +7,7 @@ TARGET = UnivursaEditor
 TEMPLATE = app
 
 CONFIG += qt
+CONFIG += console
 DESTDIR = ./bin
 macx {
   INCLUDEPATH += "/Library/Frameworks/SDL.framework/Headers/"
@@ -26,13 +27,15 @@ SOURCES += \
     ./src/Application.cc \
     ./src/Map/MapEditor.cc \
     ./src/SpriteToolbox.cc \
-    ../Project-Qt/src/Sound.cc
+    ../Project-Qt/src/Sound.cc \
+    src/SpriteChoice.cc
 
 HEADERS += \
     ./include/Application.h \
     ./include/Map/MapEditor.h \
     ./include/SpriteToolbox.h \
-    ../Project-Qt/include/Sound.h
+    ../Project-Qt/include/Sound.h \
+    include/SpriteChoice.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project-Qt/include

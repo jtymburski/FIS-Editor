@@ -9,6 +9,12 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QPainter>
+#include <QDebug>
+#include <QVector>
+#include <QHBoxLayout>
+#include "SpriteChoice.h"
 
 class SpriteToolbox : public QWidget
 {
@@ -19,10 +25,17 @@ public:
 
   /* Destructor function */
   ~SpriteToolbox();
+public slots:
+  void openDialog();
 protected:
   void paintEvent(QPaintEvent *);
+  //void keyPressEvent(QKeyEvent *);
 private:
   QPushButton* directory;
+  QFileDialog* library;
+  QImage* pic;
+ // QHBoxLayout* layout;
+  QVector<SpriteChoice* > sprites;
 };
 
 #endif // SPRITETOOLBOX_H

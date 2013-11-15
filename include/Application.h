@@ -17,6 +17,7 @@
 #include <QHBoxLayout>
 #include <QDockWidget>
 #include <windows.h>
+#include <QScrollArea>
 #include "Map/MapEditor.h"
 #include "SpriteToolbox.h"
 
@@ -40,7 +41,7 @@ public:
 
 private:
   /* Map editor pointer */
-  QWidget* sidebar;
+  QScrollArea* sidebar;
   SpriteToolbox* toolbox;
   QDockWidget* dock;
   MapEditor* map_editor;

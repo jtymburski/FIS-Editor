@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
   Application* app = new Application();
   app->show();
 
+  qDebug()<<"here2";
   /* Run QT App */
   int qt_result = qt_app.exec();
   

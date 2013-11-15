@@ -17,10 +17,17 @@
 
 Application::Application(QWidget* parent) : QMainWindow(parent)
 {
+
   toolbox = new SpriteToolbox(this);
-  sidebar = new QWidget(this);
-  sidebar->setMaximumSize(1100,720);
-  sidebar->setMinimumSize(256,256);
+  sidebar = new QScrollArea;
+  sidebar->setBackgroundRole(QPalette::Dark);
+  sidebar->setWidget(toolbox);
+
+  sidebar->setMinimumSize(290,68);
+  sidebar->setMaximumWidth(290);
+
+  toolbox->setMinimumSize(290,68);
+  toolbox->setMaximumWidth(290);
   dock = new QDockWidget("Toolbox");
   dock->setWidget(sidebar);
   map_editor = new MapEditor();
