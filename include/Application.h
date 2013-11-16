@@ -32,70 +32,71 @@ public:
   /* Destructor function */
   ~Application();
 
-  /* Enumerator: Application options to be selected */
-  //enum MenuState{OFF,MAIN,CONTINUE,INOPTIONS,INEXIT,SECRET}; // OLD
-  //enum AppItems{TITLESCREEN = 0,
-  //              GAME        = 1,
-  //              OPTIONS     = 2,
-  //              EXIT        = 3};
-
 private:
-  /* Map editor pointer */
+  /* Scroll area pointer */
   QScrollArea* sidebar;
+
+  /* Toolbox pointer */
   SpriteToolbox* toolbox;
+
+  /* Sidebar dock pointer */
   QDockWidget* dock;
+
+  /* Map View pointer */
   MapEditor* map_editor;
+
+  /* File action pointers */
   QAction *new_action;
   QAction *load_action;
-  QAction *save_action;
-  QAction *quit_action;
-  QAction *saveas_action;
   QAction *recentfiles_action;
+  QAction *save_action;
+  QAction *saveas_action;
+  QAction *quit_action;
+
+  /* Edit action pointers */
   QAction *undo_action;
   QAction *redo_action;
-  QAction *findreplace_action;
+  QAction *cut_action;
   QAction *copy_action;
   QAction *paste_action;
-  QAction *cut_action;
+  QAction *findreplace_action;
   QAction *mapsize_action;
 
-  
-  /*------------------- Constants -----------------------*/
-  //const static short kTICK_DELAY; /* The tick time, in ms */
+  /* The users login name */
+  QString username;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Switches the widget inside the stack (plus appropriate calls needed) */
-  //void switchWidget(int index);
+  /* Sets up the Top Menu */
   void setupTopMenu();
-  QString username;
+
+  /* Sets up the Sidebar */
+  void setupSidebar();
+
+  /* Sets up the Map View */
+  void setupMapView();
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
-  //void closeEvent(QCloseEvent* event);
 
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* The closing signal, to shutdown the app */
-  //void closing();
 
 /*============================================================================
  * SLOTS
  *===========================================================================*/
 public slots:
-  /* Called when the game is closed to return the application back to title */
+  /* Called when the editor is closed */
   void closeEditor();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  /* The function called for closing. Clean-up put here */
-  //void exit();
 };
 
 #endif // APPLICATION_H

@@ -26,15 +26,19 @@ public:
   /* Destructor function */
   ~SpriteToolbox();
 public slots:
+  /* Opens the file selection dialog */
   void openDialog();
 protected:
+  /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
-  //void keyPressEvent(QKeyEvent *);
 private:
+  /* The button that opens the selection dialog */
   QPushButton* directory;
-  QFileDialog* library;
-  QImage* pic;
- // QHBoxLayout* layout;
+
+  /* The selection dialog */
+  QFileDialog* select_files;
+
+  /* The vector for storing sprite choices */
   QVector<SpriteChoice* > sprites;
 };
 

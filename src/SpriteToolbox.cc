@@ -6,22 +6,53 @@
  ******************************************************************************/
 #include "SpriteToolbox.h"
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
+/*
+ * Description: Constructor function - Set up toolbox
+ *
+ * Input: parent widget
+ */
 SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
 {
-  //layout = new QHBoxLayout(this);
+  /* Setup the selection buttons */
   directory = new QPushButton("Select Directory",this);
   directory->show();
+
+  /* Setup the dialog that appears when a button is selected */
+  select_files = new QFileDialog(this,tr("Open Files"),"/home",
+                                 tr("Images (*png *.jpg"));
+  select_files->setFileMode(QFileDialog::ExistingFiles);
+
+  /* Connect the button press to the dialog opening slot */
   connect(directory,SIGNAL(clicked()),this,SLOT(openDialog()));
 }
 
+/*
+ * Description: Destructor function
+ *
+ * Input: none
+ */
 SpriteToolbox::~SpriteToolbox()
 {
 }
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: The paint event for the toolbox, this mainly sets up the
+ *              positions for all of the sprites that have been selected and
+ *              added to the toolbar
+ *
+ * Inputs: Unused
+ */
 void SpriteToolbox::paintEvent(QPaintEvent *)
 {
-  QPainter painter(this);
-
+  /* Sets up the spacing of all the sprites that will appear in the box */
   int spacing = 68;
   for(int i=0, j=0, k=0; i<sprites.size(); i++, k++)
   {
@@ -34,23 +65,32 @@ void SpriteToolbox::paintEvent(QPaintEvent *)
     sprites.at(i)->move(spacing*k,j);
   }
 }
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
 
+/*
+ * Description: Opens the dialog box, adds all of the selected sprites to the
+ *              toolbox.
+ */
 void SpriteToolbox::openDialog()
 {
-  QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Open File"),
-                                               "/home",
-                                               tr("Images (*.png *.jpg)"));
+  /* Creates a temporary list of file paths to all of the selected images */
+  QStringList filenames;
+  if(select_files->exec())
+      filenames = select_files->selectedFiles();
+
+  /* Adds each sprite to the overall vector of sprites */
   if(filenames.size() != 0)
   {
     for(int i=0; i<filenames.size(); i++)
     {
       sprites.push_back(new SpriteChoice(this,filenames.at(i)));
+      /* Resizes the widget to accomodate each new row of sprites */
       if(i%4 == 0)
-      {
         resize(width(),height()+68);
-      }
-      //layout->addWidget(sprites[i]);
     }
+    /* Calls update to setup the view */
     update();
   }
 }
