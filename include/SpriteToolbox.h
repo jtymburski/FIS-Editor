@@ -28,6 +28,12 @@ public:
 public slots:
   /* Opens the file selection dialog */
   void openDialog();
+
+  /* Deselects all sprites except the chosen one */
+  void deselectOthers(int);
+
+  /* Picks a sprite path for map operations */
+  void setSprite(QString);
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
@@ -40,6 +46,13 @@ private:
 
   /* The vector for storing sprite choices */
   QVector<SpriteChoice* > sprites;
+
+  /* Currently selected Sprite path */
+  QString path;
+signals:
+
+  /* Emits to parent to send an image path */
+  void pathOfImage(QString);
 };
 
 #endif // SPRITETOOLBOX_H

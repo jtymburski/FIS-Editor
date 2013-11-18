@@ -85,7 +85,7 @@ void SpriteToolbox::openDialog()
   {
     for(int i=0; i<filenames.size(); i++)
     {
-      sprites.push_back(new SpriteChoice(this,filenames.at(i)));
+      sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
       /* Resizes the widget to accomodate each new row of sprites */
       if(i%4 == 0)
         resize(width(),height()+68);
@@ -93,4 +93,29 @@ void SpriteToolbox::openDialog()
     /* Calls update to setup the view */
     update();
   }
+}
+
+/*
+ * Description: Deselects all sprite choices except the calling sprite choice
+ *
+ * Input: ID number of Sprite Choice
+ */
+void SpriteToolbox::deselectOthers(int id)
+{
+  for(int i=0; i<sprites.size(); i++)
+  {
+    if(i != id)
+      sprites.at(i)->deselect();
+  }
+}
+
+/*
+ * Description: Sets the currently selected sprite path to the chosen path
+ *
+ * Input: The path to the picked sprite
+ */
+void SpriteToolbox::setSprite(QString pick)
+{
+  path = pick;
+  emit pathOfImage(path);
 }

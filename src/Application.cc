@@ -23,9 +23,12 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
   /* Gets the users name in windows only */
   username = getenv("USERNAME");
 
+  current_sprite_choice = "Sup";
+
   /* Calls all setup functions */
   setupSidebar();
   setupMapView();
+  setupLayerBar();
   setupTopMenu();
 }
 
@@ -49,7 +52,7 @@ void Application::setupSidebar()
 {
   /* Sets up a scroll area with the toolbox, sizes everything as needed */
   toolbox = new SpriteToolbox(this);
-  sidebar = new QScrollArea;
+  sidebar = new QScrollArea(this);
   sidebar->setBackgroundRole(QPalette::Dark);
   sidebar->setWidget(toolbox);
   sidebar->setMinimumSize(290,68);
@@ -64,6 +67,9 @@ void Application::setupSidebar()
   dock->setAllowedAreas(Qt::AllDockWidgetAreas);
   dock->setFeatures(QDockWidget::DockWidgetMovable
                     | QDockWidget::DockWidgetFloatable);
+
+  /* Connects sprite picking */
+  connect(toolbox,SIGNAL(pathOfImage(QString)),this,SLOT(setSprite(QString)));
 }
 
 /*
@@ -75,7 +81,7 @@ void Application::setupMapView()
 {
   /* Sets up the main map view widget */
   map_editor = new MapEditor();
-  map_editor->setMinimumSize(512,512);
+  map_editor->setMinimumSize(640,512);
   map_editor->setMaximumSize(1280,720);
   setCentralWidget(map_editor);
 }
@@ -108,7 +114,7 @@ void Application::setupTopMenu()
   file_menu->addAction(quit_action);
 
   /* Connects File menu actions to slots */
-  connect(quit_action,SIGNAL(triggered()), this, SLOT(closeEditor()));
+  connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
 
 
   /* Sets up Edit menu actions*/
@@ -134,16 +140,203 @@ void Application::setupTopMenu()
   edit_menu->addAction(mapsize_action);
 
   /* Connects Edit menu actions to slots */
+
+  /* Sets up View menu actions*/
+  viewalllayers_action = new QAction("&View All Layers",this);
+  viewalllayers_action->setCheckable(true);
+
+  /* Adds the shortcut 'V' to the view all layers action */
+  viewalllayers_action->setShortcut(QKeySequence(Qt::Key_V));
+
+  /* Sets up View menu itself */
+  QMenu* view_menu = menuBar()->addMenu("&View");
+  view_menu->addAction(shown_base_layer_01);
+  view_menu->addAction(shown_base_layer_02);
+  view_menu->addAction(shown_base_layer_03);
+  view_menu->addAction(shown_base_layer_04);
+  view_menu->addAction(shown_base_layer_05);
+  view_menu->addAction(shown_enhancer_layer);
+  view_menu->addAction(shown_item_layer);
+  view_menu->addAction(shown_lower_layer);
+  view_menu->addAction(shown_person_layer);
+  view_menu->addAction(shown_thing_layer);
+  view_menu->addAction(shown_upper_layer_01);
+  view_menu->addAction(shown_upper_layer_02);
+  view_menu->addAction(shown_upper_layer_03);
+  view_menu->addAction(shown_upper_layer_04);
+  view_menu->addAction(shown_upper_layer_05);
+  view_menu->addSeparator();
+  view_menu->addAction(viewalllayers_action);
+
+  /* Connects View menu actions to slots */
+  connect(viewalllayers_action,SIGNAL(toggled(bool)),
+          this,SLOT(showAllLayers(bool)));
 }
+
+/*
+ * Description: Sets up the Layer Bar
+ *
+ * Inputs: none
+ */
+void Application::setupLayerBar()
+{
+  /* Sets up the active layer actions, makes them checkable and adds them to
+     an action group which allows only one to be active at a time */
+  active_layers = new QActionGroup(this);
+  active_layers->setExclusive(true);
+  active_base_layer_01 = new QAction("&Base 1",active_layers);
+  active_base_layer_01->setCheckable(true);
+  active_base_layer_02 = new QAction("&Base 2",active_layers);
+  active_base_layer_02->setCheckable(true);
+  active_base_layer_03 = new QAction("&Base 3",active_layers);
+  active_base_layer_03->setCheckable(true);
+  active_base_layer_04 = new QAction("&Base 4",active_layers);
+  active_base_layer_04->setCheckable(true);
+  active_base_layer_05 = new QAction("&Base 5",active_layers);
+  active_base_layer_05->setCheckable(true);
+  active_enhancer_layer = new QAction("&Enhancer",active_layers);
+  active_enhancer_layer->setCheckable(true);
+  active_item_layer = new QAction("&Item",active_layers);
+  active_item_layer->setCheckable(true);
+  active_lower_layer = new QAction("&Lower",active_layers);
+  active_lower_layer->setCheckable(true);
+  active_person_layer = new QAction("&Person",active_layers);
+  active_person_layer->setCheckable(true);
+  active_thing_layer = new QAction("&Thing",active_layers);
+  active_thing_layer->setCheckable(true);
+  active_upper_layer_01 = new QAction("&Upper 1",active_layers);
+  active_upper_layer_01->setCheckable(true);
+  active_upper_layer_02 = new QAction("&Upper 2",active_layers);
+  active_upper_layer_02->setCheckable(true);
+  active_upper_layer_03 = new QAction("&Upper 3",active_layers);
+  active_upper_layer_03->setCheckable(true);
+  active_upper_layer_04 = new QAction("&Upper 4",active_layers);
+  active_upper_layer_04->setCheckable(true);
+  active_upper_layer_05 = new QAction("&Upper 5",active_layers);
+  active_upper_layer_05->setCheckable(true);
+
+  /* Sets up the side toolbar which shows the current active layer */
+  sidetoolbar = new QToolBar("Tools",this);
+  sidetoolbar->addAction(active_base_layer_01);
+  sidetoolbar->addAction(active_base_layer_02);
+  sidetoolbar->addAction(active_base_layer_03);
+  sidetoolbar->addAction(active_base_layer_04);
+  sidetoolbar->addAction(active_base_layer_05);
+  sidetoolbar->addAction(active_enhancer_layer);
+  sidetoolbar->addAction(active_item_layer);
+  sidetoolbar->addAction(active_lower_layer);
+  sidetoolbar->addAction(active_person_layer);
+  sidetoolbar->addAction(active_thing_layer);
+  sidetoolbar->addAction(active_upper_layer_01);
+  sidetoolbar->addAction(active_upper_layer_02);
+  sidetoolbar->addAction(active_upper_layer_03);
+  sidetoolbar->addAction(active_upper_layer_04);
+  sidetoolbar->addAction(active_upper_layer_05);
+  addToolBar(Qt::RightToolBarArea,sidetoolbar);
+  sidetoolbar->setFloatable(false);
+  sidetoolbar->setMovable(false);
+
+  /* Sets up the shown layer actions, makes them checkable and adds them to
+     an action group which allows multiple to be active at a time */
+  shown_layers = new QActionGroup(this);
+  shown_layers->setExclusive(false);
+  shown_base_layer_01 = new QAction("&Base 1",shown_layers);
+  shown_base_layer_01->setCheckable(true);
+  shown_base_layer_02 = new QAction("&Base 2",shown_layers);
+  shown_base_layer_02->setCheckable(true);
+  shown_base_layer_03 = new QAction("&Base 3",shown_layers);
+  shown_base_layer_03->setCheckable(true);
+  shown_base_layer_04 = new QAction("&Base 4",shown_layers);
+  shown_base_layer_04->setCheckable(true);
+  shown_base_layer_05 = new QAction("&Base 5",shown_layers);
+  shown_base_layer_05->setCheckable(true);
+  shown_enhancer_layer = new QAction("&Enhancer",shown_layers);
+  shown_enhancer_layer->setCheckable(true);
+  shown_item_layer = new QAction("&Item",shown_layers);
+  shown_item_layer->setCheckable(true);
+  shown_lower_layer = new QAction("&Lower",shown_layers);
+  shown_lower_layer->setCheckable(true);
+  shown_person_layer = new QAction("&Person",shown_layers);
+  shown_person_layer->setCheckable(true);
+  shown_thing_layer = new QAction("&Thing",shown_layers);
+  shown_thing_layer->setCheckable(true);
+  shown_upper_layer_01 = new QAction("&Upper 1",shown_layers);
+  shown_upper_layer_01->setCheckable(true);
+  shown_upper_layer_02 = new QAction("&Upper 2",shown_layers);
+  shown_upper_layer_02->setCheckable(true);
+  shown_upper_layer_03 = new QAction("&Upper 3",shown_layers);
+  shown_upper_layer_03->setCheckable(true);
+  shown_upper_layer_04 = new QAction("&Upper 4",shown_layers);
+  shown_upper_layer_04->setCheckable(true);
+  shown_upper_layer_05 = new QAction("&Upper 5",shown_layers);
+  shown_upper_layer_05->setCheckable(true);
+
+  /* Sets up the top toolbar which shows the currently shown layers */
+  toolbar = new QToolBar("Tools",this);
+  toolbar->addAction(shown_base_layer_01);
+  toolbar->addAction(shown_base_layer_02);
+  toolbar->addAction(shown_base_layer_03);
+  toolbar->addAction(shown_base_layer_04);
+  toolbar->addAction(shown_base_layer_05);
+  toolbar->addAction(shown_enhancer_layer);
+  toolbar->addAction(shown_item_layer);
+  toolbar->addAction(shown_lower_layer);
+  toolbar->addAction(shown_person_layer);
+  toolbar->addAction(shown_thing_layer);
+  toolbar->addAction(shown_upper_layer_01);
+  toolbar->addAction(shown_upper_layer_02);
+  toolbar->addAction(shown_upper_layer_03);
+  toolbar->addAction(shown_upper_layer_04);
+  toolbar->addAction(shown_upper_layer_05);
+  addToolBar(Qt::TopToolBarArea,toolbar);
+  toolbar->setFloatable(false);
+  toolbar->setMovable(false);
+}
+
 
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
 
 /*
- * Description: Opens up a creepy close dialog that makes sure you want to exit
+ * Description: Sets all map layers to be visible
  */
-void Application::closeEditor()
+void Application::showAllLayers(bool layers)
+{
+  shown_base_layer_01->setChecked(layers);
+  shown_base_layer_02->setChecked(layers);
+  shown_base_layer_03->setChecked(layers);
+  shown_base_layer_04->setChecked(layers);
+  shown_base_layer_05->setChecked(layers);
+  shown_enhancer_layer->setChecked(layers);
+  shown_item_layer->setChecked(layers);
+  shown_lower_layer->setChecked(layers);
+  shown_person_layer->setChecked(layers);
+  shown_thing_layer->setChecked(layers);
+  shown_upper_layer_01->setChecked(layers);
+  shown_upper_layer_02->setChecked(layers);
+  shown_upper_layer_03->setChecked(layers);
+  shown_upper_layer_04->setChecked(layers);
+  shown_upper_layer_05->setChecked(layers);
+}
+
+void Application::setSprite(QString path)
+{
+  current_sprite_choice = path;
+  map_editor->setPath(current_sprite_choice);
+  map_editor->updateGL();
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: The custom close event for saving changes
+ *
+ * Inputs: The event passed
+ */
+void Application::closeEvent(QCloseEvent *event)
 {
   QString message = "Are you sure you want to do this ";
   message.append(username);
@@ -153,6 +346,7 @@ void Application::closeEditor()
                            message,
                            QMessageBox::Ok | QMessageBox::Cancel,
                            QMessageBox::Ok) == QMessageBox::Ok)
-    close();
+    event->accept();
+  else
+    event->ignore();
 }
-

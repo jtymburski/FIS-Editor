@@ -9,6 +9,7 @@
 #define MAPEDITOR_H
 
 #include <QGLWidget>
+#include <QTabWidget>
 
 class MapEditor : public QGLWidget
 {
@@ -21,9 +22,16 @@ public:
   /* Destructor function */
   ~MapEditor();
 
+  /* Sets the sprite path */
+  void setPath(QString sprite);
+
 protected:
   void paintGL();
 private:
+  /* Map layer tabs */
+  QTabWidget* layer_tabs;
+
+  QString spritepath;
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 };

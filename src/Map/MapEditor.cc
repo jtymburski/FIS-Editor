@@ -17,6 +17,7 @@
 /* Constructor function */
 MapEditor::MapEditor() : QGLWidget()
 {
+  spritepath = "Sup";
 }
 
 /* Destructor function */
@@ -24,8 +25,14 @@ MapEditor::~MapEditor()
 {
 }
 
+void MapEditor::setPath(QString sprite)
+{
+  spritepath = sprite;
+}
+
 void MapEditor::paintGL()
 {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   qglColor(QColor(255,255,255,128));
-  renderText(0,0,0,"Test");
+  renderText(0,0,0,spritepath);
 }

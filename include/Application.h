@@ -10,6 +10,7 @@
 
 #include <QMainWindow>
 #include <QAction>
+#include <QActionGroup>
 #include <QToolBar>
 #include <QMenuBar>
 #include <QMenu>
@@ -18,6 +19,8 @@
 #include <QDockWidget>
 #include <windows.h>
 #include <QScrollArea>
+#include <QTabWidget>
+#include <QToolBar>
 #include "Map/MapEditor.h"
 #include "SpriteToolbox.h"
 
@@ -35,6 +38,10 @@ public:
 private:
   /* Scroll area pointer */
   QScrollArea* sidebar;
+
+  /* Map layer tabs */
+  QToolBar* toolbar;
+  QToolBar* sidetoolbar;
 
   /* Toolbox pointer */
   SpriteToolbox* toolbox;
@@ -62,8 +69,50 @@ private:
   QAction *findreplace_action;
   QAction *mapsize_action;
 
+  /* View action pointers */
+  QAction *viewalllayers_action;
+
+  /* Map Mode Shift Actions (Active Layers) */
+  QActionGroup *active_layers;
+  QAction *active_base_layer_01;
+  QAction *active_base_layer_02;
+  QAction *active_base_layer_03;
+  QAction *active_base_layer_04;
+  QAction *active_base_layer_05;
+  QAction *active_enhancer_layer;
+  QAction *active_item_layer;
+  QAction *active_lower_layer;
+  QAction *active_person_layer;
+  QAction *active_thing_layer;
+  QAction *active_upper_layer_01;
+  QAction *active_upper_layer_02;
+  QAction *active_upper_layer_03;
+  QAction *active_upper_layer_04;
+  QAction *active_upper_layer_05;
+
+  /* Map Mode Shift Actions (Shown Layers) */
+  QActionGroup *shown_layers;
+  QAction *shown_base_layer_01;
+  QAction *shown_base_layer_02;
+  QAction *shown_base_layer_03;
+  QAction *shown_base_layer_04;
+  QAction *shown_base_layer_05;
+  QAction *shown_enhancer_layer;
+  QAction *shown_item_layer;
+  QAction *shown_lower_layer;
+  QAction *shown_person_layer;
+  QAction *shown_thing_layer;
+  QAction *shown_upper_layer_01;
+  QAction *shown_upper_layer_02;
+  QAction *shown_upper_layer_03;
+  QAction *shown_upper_layer_04;
+  QAction *shown_upper_layer_05;
+
   /* The users login name */
   QString username;
+
+  /* The currently selected sprite */
+  QString current_sprite_choice;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -77,11 +126,16 @@ private:
 
   /* Sets up the Map View */
   void setupMapView();
+
+  /* Sets up the Layer Bar */
+  void setupLayerBar();
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
-
+  /* Custom close event */
+  void closeEvent(QCloseEvent *);
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
@@ -91,8 +145,12 @@ signals:
  * SLOTS
  *===========================================================================*/
 public slots:
-  /* Called when the editor is closed */
-  void closeEditor();
+
+  /* Toggles all layers to be on/off */
+  void showAllLayers(bool);
+
+  /* Sets the picked sprite */
+  void setSprite(QString);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
