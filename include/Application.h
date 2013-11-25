@@ -21,8 +21,10 @@
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QToolBar>
+#include <QTabWidget>
+#include <QListWidget>
 #include "Map/MapEditor.h"
-#include "SpriteToolbox.h"
+#include "EditorSpriteToolbox.h"
 
 class Application : public QMainWindow
 {
@@ -36,18 +38,22 @@ public:
   ~Application();
 
 private:
-  /* Scroll area pointer */
-  QScrollArea* sidebar;
-
   /* Map layer tabs */
   QToolBar* toolbar;
-  QToolBar* sidetoolbar;
+  QListWidget* sidetoolbar;
 
   /* Toolbox pointer */
-  SpriteToolbox* toolbox;
+  QTabWidget* tab;
+  SpriteToolbox* images_tab;
+  EditorSpriteToolbox* sprites_tab;
+
+  /* Scroll area pointer */
+  QScrollArea* images_tab_scrollwrapper;
+  QScrollArea* sprites_tab_scrollwrapper;
 
   /* Sidebar dock pointer */
   QDockWidget* dock;
+  QDockWidget* layer_dock;
 
   /* Map View pointer */
   MapEditor* map_editor;

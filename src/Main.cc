@@ -11,7 +11,7 @@
 #include <QDebug>
 
 #include "Application.h"
-#include "Sound.h"
+//#include "Sound.h"
 
 /*============================================================================
  * MAIN FUNCTION
@@ -20,15 +20,14 @@
 int main(int argc, char *argv[])
 {
   /* Setup the sound */
-  Sound::initiateSDL();
-  qDebug() << "[DEBUG] Sound configured: " << Sound::statusSDL();
+//  Sound::initiateSDL();
+//  qDebug() << "[DEBUG] Sound configured: " << Sound::statusSDL();
 
   /* Setup QT */
   QApplication qt_app(argc, argv);
   Application* app = new Application();
   app->show();
 
-  qDebug()<<"here2";
   /* Run QT App */
   int qt_result = qt_app.exec();
   
@@ -37,7 +36,7 @@ int main(int argc, char *argv[])
   delete app;
 	
   /* Clean up SDL */
-  Sound::cleanupSDL();
+//  Sound::cleanupSDL();
 
   return qt_result;
 }

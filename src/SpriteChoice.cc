@@ -23,11 +23,20 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
   setGeometry(0,0,66,66);
   path = p;
   id_number = id;
-  mode = STANDARD;
+  mode = EnumDB::STANDARD;
   pic = new QImage(path);
   pic->load(path);
   connect(this, SIGNAL(chosen(int)),parent,SLOT(deselectOthers(int)));
   connect(this,SIGNAL(pathOfImage(QString)),parent,SLOT(setSprite(QString)));
+  /* Sets up right click menu */
+
+  spriteify_action = new QAction("&Spriteeify",this);
+  rightclick_menu = new QMenu();
+  rightclick_menu->hide();
+  rightclick_menu->addAction(spriteify_action);
+  creation_dialog = new SpriteCreationDialog(this);
+
+  connect(spriteify_action,SIGNAL(triggered()),this,SLOT(makeSprite()));
 }
 
 /*
@@ -58,8 +67,17 @@ void SpriteChoice::loadSprite(QString path)
  */
 void SpriteChoice::deselect()
 {
-  mode = STANDARD;
+  mode = EnumDB::STANDARD;
   update();
+}
+
+EditorSprite* SpriteChoice::makeSprite()
+{
+  EditorSprite* working_sprite = new EditorSprite();
+  working_sprite->setPath(path);
+  creation_dialog->loadWorkingSprite(working_sprite);
+  creation_dialog->show();
+
 }
 
 /*============================================================================
@@ -81,13 +99,13 @@ void SpriteChoice::paintEvent(QPaintEvent *)
   {
     switch(mode)
     {
-      case STANDARD:
+      case EnumDB::STANDARD:
         painter.setPen(Qt::black);
         break;
-      case HOVERED:
+      case EnumDB::HOVERED:
         painter.setPen(Qt::cyan);
         break;
-      case SELECTED:
+      case EnumDB::SELECTED:
         painter.setPen(Qt::green);
         break;
       default:
@@ -108,9 +126,9 @@ void SpriteChoice::paintEvent(QPaintEvent *)
  */
 void SpriteChoice::enterEvent(QEvent *)
 {
-  if(mode != SELECTED)
+  if(mode != EnumDB::SELECTED)
   {
-    mode = HOVERED;
+    mode = EnumDB::HOVERED;
     update();
   }
 }
@@ -122,9 +140,9 @@ void SpriteChoice::enterEvent(QEvent *)
  */
 void SpriteChoice::leaveEvent(QEvent *)
 {
-  if(mode != SELECTED)
+  if(mode != EnumDB::SELECTED)
   {
-    mode = STANDARD;
+    mode = EnumDB::STANDARD;
     update();
   }
 }
@@ -138,14 +156,21 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
 {
   if(event->button() == Qt::LeftButton)
   {
-    if(mode != SELECTED)
+    if(mode != EnumDB::SELECTED)
     {
-      mode = SELECTED;
+      mode = EnumDB::SELECTED;
       emit chosen(id_number);
       emit pathOfImage(path);
     }
     else
-      mode = STANDARD;
+      mode = EnumDB::STANDARD;
+  }
+  else
+  {
+    if(rightclick_menu->isHidden())
+      rightclick_menu->exec(QCursor::pos());
+    else
+      rightclick_menu->hide();
   }
   update();
 }

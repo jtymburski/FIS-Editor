@@ -28,6 +28,7 @@ SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
 
   /* Connect the button press to the dialog opening slot */
   connect(directory,SIGNAL(clicked()),this,SLOT(openDialog()));
+  //connect(this,SIGNAL(makeSprite()),parent,SLOT(makeSprite()));
 }
 
 /*
@@ -84,12 +85,10 @@ void SpriteToolbox::openDialog()
   if(filenames.size() != 0)
   {
     for(int i=0; i<filenames.size(); i++)
-    {
       sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
-      /* Resizes the widget to accomodate each new row of sprites */
-      if(i%4 == 0)
-        resize(width(),height()+68);
-    }
+
+    /* Resizes the widget to accomodate each new row of sprites */
+    resize(width(),68+(qCeil(sprites.size()/4.0)*68));
     /* Calls update to setup the view */
     update();
   }

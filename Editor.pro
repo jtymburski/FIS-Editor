@@ -14,10 +14,11 @@ macx {
 }
 
 win32 {
-  LIBS += -lmingw32 -l SDLmain
+  QMAKE_CXXFLAGS += -std=c++11
+  LIBS += -lmingw32 -lSDL2main
   win32:QMAKE_CXX_FLAGS_WARN_ON += -Wall
 }
-LIBS += -lSDL -lSDL_mixer
+LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
 unix:LIBS += -lGLU
 QT += opengl widgets #phonon network xml, core and gui are default
 #RESOURCES = Resources.qrc
@@ -27,15 +28,26 @@ SOURCES += \
     ./src/Application.cc \
     ./src/Map/MapEditor.cc \
     ./src/SpriteToolbox.cc \
-    ../Project-Qt/src/Sound.cc \
-    src/SpriteChoice.cc
+	../Project/src/Helpers.cc \
+	../Project/src/Frame.cc \
+    ../Project/src/Sprite.cc \
+    src/SpriteChoice.cc \
+    src/EditorSprite.cc \
+    src/EditorSpriteToolbox.cc \
+    src/SpriteCreationDialog.cc
 
 HEADERS += \
     ./include/Application.h \
+    ./include/EnumDB.h \
     ./include/Map/MapEditor.h \
     ./include/SpriteToolbox.h \
-    ../Project-Qt/include/Sound.h \
-    include/SpriteChoice.h
+	../Project/include/Helpers.h \
+	../Project/include/Frame.h \
+    ../Project/include/Sprite.h \
+    include/SpriteChoice.h \
+    include/EditorSprite.h \
+    include/EditorSpriteToolbox.h \
+    include/SpriteCreationDialog.h
 
 INCLUDEPATH += ./include
-INCLUDEPATH += ../Project-Qt/include
+INCLUDEPATH += ../Project/include

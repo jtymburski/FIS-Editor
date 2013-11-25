@@ -13,6 +13,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QVector>
+#include <qmath.h>
 #include <QHBoxLayout>
 #include "SpriteChoice.h"
 

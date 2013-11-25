@@ -12,6 +12,10 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QMenu>
+#include "EditorSprite.h"
+#include "SpriteCreationDialog.h"
+#include "EnumDB.h"
 
 class SpriteChoice : public QWidget
 {
@@ -23,15 +27,16 @@ public:
   /* Destructor function */
   ~SpriteChoice();
 
-  /* Enum for sprite border modes */
-  enum Border {STANDARD, HOVERED, SELECTED };
-
 public slots:
   /* Loads the image with a valid given path */
   void loadSprite(QString path);
 
   /* Deselects the sprite choice manually */
   void deselect();
+
+  /* Attempts to make a sprite from this image, which is passed up to the
+   * main application and added to the sprite menu */
+  EditorSprite* makeSprite();
 
 protected:
   /* Paints the sprite in a bounding box */
@@ -46,14 +51,21 @@ private:
   /* A Pointer to the image stored */
   QImage* pic;
 
+  /* Right click menu for sprite */
+  QMenu* rightclick_menu;
+  QAction *spriteify_action;
+
   /* The view mode for the border */
-  Border mode;
+  EnumDB::Border mode;
 
   /* The path of the image stored */
   QString path;
 
   /* Id number */
   int id_number;
+
+  /* Create a Sprite dialog */
+  SpriteCreationDialog* creation_dialog;
 
 signals:
   /* Emits to parent when selected to deselect all others */
