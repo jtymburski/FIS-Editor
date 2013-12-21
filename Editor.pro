@@ -31,6 +31,7 @@ SOURCES += \
 	../Project/src/Helpers.cc \
 	../Project/src/Frame.cc \
     ../Project/src/Sprite.cc \
+	../Project/src/XmlData.cc \
     src/SpriteChoice.cc \
     src/EditorSprite.cc \
     src/EditorSpriteToolbox.cc \
@@ -38,12 +39,14 @@ SOURCES += \
 
 HEADERS += \
     ./include/Application.h \
-    ./include/EnumDB.h \
+    ./include/EditorEnumDb.h \
     ./include/Map/MapEditor.h \
     ./include/SpriteToolbox.h \
+	../Project/include/EnumDb.h \
 	../Project/include/Helpers.h \
 	../Project/include/Frame.h \
     ../Project/include/Sprite.h \
+	../Project/include/XmlData.h \
     include/SpriteChoice.h \
     include/EditorSprite.h \
     include/EditorSpriteToolbox.h \

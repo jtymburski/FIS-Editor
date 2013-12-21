@@ -15,7 +15,7 @@
 #include <QMenu>
 #include "EditorSprite.h"
 #include "SpriteCreationDialog.h"
-#include "EnumDB.h"
+#include "EditorEnumDb.h"
 
 class SpriteChoice : public QWidget
 {
@@ -56,7 +56,7 @@ private:
   QAction *spriteify_action;
 
   /* The view mode for the border */
-  EnumDB::Border mode;
+  EditorEnumDb::Border mode;
 
   /* The path of the image stored */
   QString path;

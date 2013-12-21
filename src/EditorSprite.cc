@@ -19,7 +19,7 @@
 EditorSprite::EditorSprite()
 {
   sprite = new Sprite();
-  mode = EnumDB::STANDARD;
+  mode = EditorEnumDb::STANDARD;
   path = "";
 }
 
@@ -68,13 +68,13 @@ void EditorSprite::paintEvent(QPaintEvent *)
    * the frame with a one pixel thick black border */
     switch(mode)
     {
-      case EnumDB::STANDARD:
+      case EditorEnumDb::STANDARD:
         painter.setPen(Qt::black);
         break;
-      case EnumDB::HOVERED:
+      case EditorEnumDb::HOVERED:
         painter.setPen(Qt::cyan);
         break;
-      case EnumDB::SELECTED:
+      case EditorEnumDb::SELECTED:
         painter.setPen(Qt::green);
         break;
       default:

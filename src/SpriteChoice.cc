@@ -23,7 +23,7 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
   setGeometry(0,0,66,66);
   path = p;
   id_number = id;
-  mode = EnumDB::STANDARD;
+  mode = EditorEnumDb::STANDARD;
   pic = new QImage(path);
   pic->load(path);
   connect(this, SIGNAL(chosen(int)),parent,SLOT(deselectOthers(int)));
@@ -67,7 +67,7 @@ void SpriteChoice::loadSprite(QString path)
  */
 void SpriteChoice::deselect()
 {
-  mode = EnumDB::STANDARD;
+  mode = EditorEnumDb::STANDARD;
   update();
 }
 
@@ -99,13 +99,13 @@ void SpriteChoice::paintEvent(QPaintEvent *)
   {
     switch(mode)
     {
-      case EnumDB::STANDARD:
+      case EditorEnumDb::STANDARD:
         painter.setPen(Qt::black);
         break;
-      case EnumDB::HOVERED:
+      case EditorEnumDb::HOVERED:
         painter.setPen(Qt::cyan);
         break;
-      case EnumDB::SELECTED:
+      case EditorEnumDb::SELECTED:
         painter.setPen(Qt::green);
         break;
       default:
@@ -126,9 +126,9 @@ void SpriteChoice::paintEvent(QPaintEvent *)
  */
 void SpriteChoice::enterEvent(QEvent *)
 {
-  if(mode != EnumDB::SELECTED)
+  if(mode != EditorEnumDb::SELECTED)
   {
-    mode = EnumDB::HOVERED;
+    mode = EditorEnumDb::HOVERED;
     update();
   }
 }
@@ -140,9 +140,9 @@ void SpriteChoice::enterEvent(QEvent *)
  */
 void SpriteChoice::leaveEvent(QEvent *)
 {
-  if(mode != EnumDB::SELECTED)
+  if(mode != EditorEnumDb::SELECTED)
   {
-    mode = EnumDB::STANDARD;
+    mode = EditorEnumDb::STANDARD;
     update();
   }
 }
@@ -156,14 +156,14 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
 {
   if(event->button() == Qt::LeftButton)
   {
-    if(mode != EnumDB::SELECTED)
+    if(mode != EditorEnumDb::SELECTED)
     {
-      mode = EnumDB::SELECTED;
+      mode = EditorEnumDb::SELECTED;
       emit chosen(id_number);
       emit pathOfImage(path);
     }
     else
-      mode = EnumDB::STANDARD;
+      mode = EditorEnumDb::STANDARD;
   }
   else
   {

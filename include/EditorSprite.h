@@ -9,7 +9,7 @@
 
 #include <QWidget>
 #include <QPainter>
-#include "EnumDB.h"
+#include "EditorEnumDb.h"
 
 class EditorSprite : public QWidget
 {
@@ -36,7 +36,7 @@ protected:
 
 private:
   /* The view mode for the border */
-  EnumDB::Border mode;
+  EditorEnumDb::Border mode;
 
   /* The actual Sprite for in game */
   Sprite* sprite;
