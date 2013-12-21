@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
   QApplication qt_app(argc, argv);
   Application* app = new Application();
   app->show();
-  std::cout << "HERE" << std::endl;
+
   /* Run QT App */
   int qt_result = qt_app.exec();
-  std::cout << "HERE 2" << std::endl;
+
   /* Clean up QT and the game */
   app->hide();
   delete app;
