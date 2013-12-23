@@ -11,6 +11,16 @@
 #include <QPainter>
 #include "EditorEnumDb.h"
 
+/* Struct for frame option storage */
+struct FrameOptions
+{
+  bool vertical_flip;
+  bool horizontal_flip;
+  bool ninetydeg;
+  bool oneeightydeg;
+  bool twoseventydeg;
+};
+
 class EditorSprite : public QWidget
 {
   Q_OBJECT
@@ -28,6 +38,29 @@ public:
   void setPath(QString p);
 
 public slots:
+  /* Sets the sprites animation time */
+  void setAnimationTime(int time);
+
+  /* Sets the sprites color mask */
+  void setColorRed(int red);
+  void setColorBlue(int blue);
+  void setColorGreen(int green);
+
+  /* Sets the sprites direction */
+  void setDirectionForward();
+  void setDirectionReverse();
+
+  /* Sets the sprites opacity */
+  void setOpacity(int opacity);
+
+  /* Sets the sprites rotation */
+  void setRotation(int angle);
+
+  /* Sets the sprites brightness */
+  void setBrightness(int brightness);
+
+  /* Sets the sprites id (Backend) */
+  void setId(int id);
 
 
 protected:
@@ -41,8 +74,15 @@ private:
   /* The actual Sprite for in game */
   Sprite* sprite;
 
-  /* The path to the sprite */
-  QString path;
+  /* The path to the sprite frames */
+  QVector<QString> frame_paths;
+
+  /* The sprite frame images */
+  QVector<QPixmap> frame_images;
+
+  /* Frame option storage */
+  FrameOptions frame_options;
+
 
 signals:
 

@@ -6,6 +6,7 @@
 *              add to the map, these are imported by the user.
 ******************************************************************************/
 #include "EditorSprite.h"
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -20,7 +21,6 @@ EditorSprite::EditorSprite()
 {
   sprite = new Sprite();
   mode = EditorEnumDb::STANDARD;
-  path = "";
 }
 
 /*
@@ -48,8 +48,47 @@ Sprite* EditorSprite::getSprite()
 
 void EditorSprite::setPath(QString p)
 {
-  path = p;
 }
+
+
+void EditorSprite::setBrightness(int brightness)
+{
+  sprite->setBrightness(brightness/100.0);
+}
+
+/* Sets the sprites animation time */
+void EditorSprite::setAnimationTime(int time)
+{}
+
+/* Sets the sprites color mask */
+void EditorSprite::setColorRed(int red)
+{
+  //Set Red
+}
+void EditorSprite::setColorBlue(int blue)
+{
+  //Set Red
+}
+void EditorSprite::setColorGreen(int green)
+{
+  //Set Red
+}
+
+/* Sets the sprites direction */
+void EditorSprite::setDirectionForward(){}
+void EditorSprite::setDirectionReverse(){}
+
+/* Sets the sprites opacity */
+void EditorSprite::setOpacity(int opacity)
+{
+  sprite->setOpacity(opacity);
+}
+
+/* Sets the sprites rotation */
+void EditorSprite::setRotation(int angle){}
+
+/* Sets the sprites id (Backend) */
+void EditorSprite::setId(int id){}
 
 /*============================================================================
  * PROTECTED FUNCTIONS

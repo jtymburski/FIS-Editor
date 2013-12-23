@@ -64,6 +64,9 @@ private:
   /* Id number */
   int id_number;
 
+  /* Next available id */
+  uint16_t next_id;
+
   /* Create a Sprite dialog */
   SpriteCreationDialog* creation_dialog;
 
