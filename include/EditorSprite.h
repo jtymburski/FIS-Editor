@@ -39,7 +39,7 @@ public:
 
 public slots:
   /* Sets the sprites animation time */
-  void setAnimationTime(int time);
+  void setAnimationTime(QString time);
 
   /* Sets the sprites color mask */
   void setColorRed(int red);
@@ -47,6 +47,7 @@ public slots:
   void setColorGreen(int green);
 
   /* Sets the sprites direction */
+  void setDirection(int dir);
   void setDirectionForward();
   void setDirectionReverse();
 
@@ -54,7 +55,7 @@ public slots:
   void setOpacity(int opacity);
 
   /* Sets the sprites rotation */
-  void setRotation(int angle);
+  void setRotation(QString angle);
 
   /* Sets the sprites brightness */
   void setBrightness(int brightness);

@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QSlider>
 #include <QPushButton>
+#include <QComboBox>
 #include "EditorSprite.h"
 
 class SpriteCreationDialog : public QDialog
@@ -18,9 +19,10 @@ public:
   void loadWorkingSprite(EditorSprite*);
 
 signals:
-
+  void sendUpEditorSprite(EditorSprite* sprite);
 public slots:
   void updateWorkingSprite();
+  void destroyWorkingSprite();
 private:
   QSlider* brightness_input;
   QSlider* opacity_input;

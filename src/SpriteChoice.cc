@@ -36,8 +36,15 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
   rightclick_menu->hide();
   rightclick_menu->addAction(spriteify_action);
   creation_dialog = new SpriteCreationDialog(next_id,this);
+  connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
+                                 SIGNAL(sendUpEditorSprite(EditorSprite*)));
 
   connect(spriteify_action,SIGNAL(triggered()),this,SLOT(makeSprite()));
+}
+
+void SpriteChoice::test(EditorSprite *e)
+{
+  qDebug()<<"SPRITE CHOICE";
 }
 
 /*

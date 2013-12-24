@@ -23,13 +23,13 @@ public:
   /* Destructor function */
   ~EditorSpriteToolbox();
 public slots:
-
+  void addEditorSprite(EditorSprite* e);
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
 private:
   /* The vector for storing sprite choices */
-  QVector<EditorSprite* > sprites;
+  QVector<EditorSprite* > editor_sprites;
 
 signals:
 

@@ -5,6 +5,7 @@
  * Description: This class handles the toolbox on the side of the application
  ******************************************************************************/
 #include "EditorSpriteToolbox.h"
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -15,7 +16,8 @@
  *
  * Input: parent widget
  */
-EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent)
+EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) :
+  SpriteToolbox(parent)
 {
 }
 
@@ -42,15 +44,22 @@ EditorSpriteToolbox::~EditorSpriteToolbox()
 void EditorSpriteToolbox::paintEvent(QPaintEvent *)
 {
   /* Sets up the spacing of all the sprites that will appear in the box */
-  int spacing = 68;
-  for(int i=0, j=0, k=0; i<sprites.size(); i++, k++)
-  {
-    sprites.at(i)->show();
-    if(i%4 == 0)
-    {
-      j+=spacing;
-      k=0;
-    }
-    sprites.at(i)->move(spacing*k,j);
-  }
+//  int spacing = 68;
+//  for(int i=0, j=0, k=0; i<editor_sprites.size(); i++, k++)
+//  {
+//    editor_sprites.at(i)->show();
+//    if(i%4 == 0)
+//    {
+//      j+=spacing;
+//      k=0;
+//    }
+//    editor_sprites.at(i)->move(spacing*k,j);
+//  }
+}
+
+void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
+{
+  qDebug()<<e->getSprite()->getBrightness();
+  editor_sprites.push_back(e);
+  editor_sprites.at(0)->update();
 }

@@ -71,6 +71,10 @@ void Application::setupSidebar()
   sprites_tab->setMaximumWidth(290);
 
 
+  connect(images_tab,SIGNAL(sendUpEditorSprite(EditorSprite*)),sprites_tab,
+          SLOT(addEditorSprite(EditorSprite*)));
+
+
   tab = new QTabWidget(this);
   tab->addTab(images_tab_scrollwrapper,"Raw Images");
   tab->addTab(sprites_tab_scrollwrapper,"Sprites");
@@ -347,6 +351,7 @@ void Application::setSprite(QString path)
   map_editor->setPath(current_sprite_choice);
   map_editor->updateGL();
 }
+
 
 /*============================================================================
  * PROTECTED FUNCTIONS

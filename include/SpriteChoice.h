@@ -38,6 +38,8 @@ public slots:
    * main application and added to the sprite menu */
   EditorSprite* makeSprite();
 
+  void test(EditorSprite* e);
+
 protected:
   /* Paints the sprite in a bounding box */
   void paintEvent(QPaintEvent *);
@@ -76,5 +78,6 @@ signals:
 
   /* Emits to parent to send an image path */
   void pathOfImage(QString);
+  void sendUpEditorSprite(EditorSprite* e);
 };
 #endif // SPRITECHOICE_H

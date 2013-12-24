@@ -19,8 +19,10 @@
  */
 EditorSprite::EditorSprite()
 {
+  setGeometry(0,0,66,66);
   sprite = new Sprite();
   mode = EditorEnumDb::STANDARD;
+  update();
 }
 
 /*
@@ -57,8 +59,15 @@ void EditorSprite::setBrightness(int brightness)
 }
 
 /* Sets the sprites animation time */
-void EditorSprite::setAnimationTime(int time)
-{}
+void EditorSprite::setAnimationTime(QString time)
+{
+  int timeint = time.toInt();
+  if(timeint > 65565)
+    timeint = 65565;
+  else if(timeint < 0)
+    timeint = 0;
+  sprite->setAnimationTime(timeint);
+}
 
 /* Sets the sprites color mask */
 void EditorSprite::setColorRed(int red)
@@ -78,6 +87,20 @@ void EditorSprite::setColorGreen(int green)
 void EditorSprite::setDirectionForward(){}
 void EditorSprite::setDirectionReverse(){}
 
+void EditorSprite::setDirection(int dir)
+{
+  if(dir==0)
+  {
+    qDebug()<<"Forward";
+    sprite->setDirectionForward();
+  }
+  else
+  {
+    qDebug()<<"Reverse";
+    sprite->setDirectionReverse();
+  }
+}
+
 /* Sets the sprites opacity */
 void EditorSprite::setOpacity(int opacity)
 {
@@ -85,7 +108,10 @@ void EditorSprite::setOpacity(int opacity)
 }
 
 /* Sets the sprites rotation */
-void EditorSprite::setRotation(int angle){}
+void EditorSprite::setRotation(QString angle)
+{
+  sprite->setRotation(angle.toInt());
+}
 
 /* Sets the sprites id (Backend) */
 void EditorSprite::setId(int id){}
@@ -105,23 +131,23 @@ void EditorSprite::paintEvent(QPaintEvent *)
   QPainter painter(this);
   /* If the path is valid (which it should never not be), draw the result into
    * the frame with a one pixel thick black border */
-    switch(mode)
-    {
-      case EditorEnumDb::STANDARD:
+ //   switch(mode)
+ //   {
+ //     case EditorEnumDb::STANDARD:
+ //       painter.setPen(Qt::black);
+ //       break;
+ //     case EditorEnumDb::HOVERED:
+ //       painter.setPen(Qt::cyan);
+ //       break;
+ //     case EditorEnumDb::SELECTED:
+ //       painter.setPen(Qt::green);
+ //       break;
+ //     default:
         painter.setPen(Qt::black);
-        break;
-      case EditorEnumDb::HOVERED:
-        painter.setPen(Qt::cyan);
-        break;
-      case EditorEnumDb::SELECTED:
-        painter.setPen(Qt::green);
-        break;
-      default:
-        painter.setPen(Qt::black);
-        break;
-    }
+ //       break;
+ //  }
 
     painter.drawRect(0,0,65,65);
-    QRect* bound = new QRect(1,1,64,64);
+    //QRect* bound = new QRect(1,1,64,64);
     //painter.drawImage(*bound,*pic);
 }

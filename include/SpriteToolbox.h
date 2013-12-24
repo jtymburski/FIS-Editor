@@ -16,6 +16,7 @@
 #include <qmath.h>
 #include <QHBoxLayout>
 #include "SpriteChoice.h"
+#include "EditorSprite.h"
 
 class SpriteToolbox : public QWidget
 {
@@ -54,6 +55,8 @@ signals:
 
   /* Emits to parent to send an image path */
   void pathOfImage(QString);
+  /* Sends up the edited sprite */
+  void sendUpEditorSprite(EditorSprite* e);
 };
 
 #endif // SPRITETOOLBOX_H
