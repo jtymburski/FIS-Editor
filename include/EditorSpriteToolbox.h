@@ -10,10 +10,9 @@
 #include <QWidget>
 #include <QPainter>
 #include <QVector>
-#include "SpriteToolbox.h"
 #include "EditorSprite.h"
 
-class EditorSpriteToolbox : public SpriteToolbox
+class EditorSpriteToolbox : public QWidget
 {
   Q_OBJECT
 public:
@@ -30,6 +29,8 @@ protected:
 private:
   /* The vector for storing sprite choices */
   QVector<EditorSprite* > editor_sprites;
+
+  uint16_t nextID;
 
 signals:
 

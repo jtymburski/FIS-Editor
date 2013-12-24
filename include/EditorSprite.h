@@ -37,7 +37,13 @@ public:
   /* Sets the sprite path */
   void setPath(QString p);
 
+  /* Gets the user submitted name of the sprite */
+  QString getName();
+
 public slots:
+  /* Sets the user submitted name */
+  void setName(QString name);
+
   /* Sets the sprites animation time */
   void setAnimationTime(QString time);
 
@@ -72,6 +78,9 @@ private:
   /* The view mode for the border */
   EditorEnumDb::Border mode;
 
+  /* Name */
+  QString name;
+
   /* The actual Sprite for in game */
   Sprite* sprite;
 
@@ -79,7 +88,7 @@ private:
   QVector<QString> frame_paths;
 
   /* The sprite frame images */
-  QVector<QPixmap> frame_images;
+  QVector<QImage> frame_images;
 
   /* Frame option storage */
   FrameOptions frame_options;

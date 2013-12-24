@@ -27,6 +27,7 @@ public:
 
   /* Destructor function */
   ~SpriteToolbox();
+
 public slots:
   /* Opens the file selection dialog */
   void openDialog();
@@ -36,6 +37,7 @@ public slots:
 
   /* Picks a sprite path for map operations */
   void setSprite(QString);
+
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);

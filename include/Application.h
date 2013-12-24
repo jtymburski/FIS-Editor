@@ -25,6 +25,7 @@
 #include <QListWidget>
 #include "Map/MapEditor.h"
 #include "EditorSpriteToolbox.h"
+#include "SpriteToolbox.h"
 
 class Application : public QMainWindow
 {

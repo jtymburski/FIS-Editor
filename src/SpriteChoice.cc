@@ -23,7 +23,6 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
   setGeometry(0,0,66,66);
   path = p;
   id_number = id;
-  next_id = 0;
   mode = EditorEnumDb::STANDARD;
   pic = new QImage(path);
   pic->load(path);
@@ -35,17 +34,14 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
   rightclick_menu = new QMenu();
   rightclick_menu->hide();
   rightclick_menu->addAction(spriteify_action);
-  creation_dialog = new SpriteCreationDialog(next_id,this);
+  creation_dialog = new SpriteCreationDialog(this);
   connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
                                  SIGNAL(sendUpEditorSprite(EditorSprite*)));
 
   connect(spriteify_action,SIGNAL(triggered()),this,SLOT(makeSprite()));
 }
 
-void SpriteChoice::test(EditorSprite *e)
-{
-  qDebug()<<"SPRITE CHOICE";
-}
+
 
 /*
  * Description: Destructor Function
@@ -82,8 +78,7 @@ void SpriteChoice::deselect()
 EditorSprite* SpriteChoice::makeSprite()
 {
   delete creation_dialog;
-  next_id++;
-  creation_dialog = new SpriteCreationDialog(next_id,this);
+  creation_dialog = new SpriteCreationDialog(this);
   creation_dialog->show();
 }
 

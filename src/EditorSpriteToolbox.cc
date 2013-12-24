@@ -16,9 +16,9 @@
  *
  * Input: parent widget
  */
-EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) :
-  SpriteToolbox(parent)
+EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
 {
+  nextID = 1;
 }
 
 /*
@@ -43,23 +43,21 @@ EditorSpriteToolbox::~EditorSpriteToolbox()
  */
 void EditorSpriteToolbox::paintEvent(QPaintEvent *)
 {
+  QPainter painter(this);
   /* Sets up the spacing of all the sprites that will appear in the box */
-//  int spacing = 68;
-//  for(int i=0, j=0, k=0; i<editor_sprites.size(); i++, k++)
-//  {
-//    editor_sprites.at(i)->show();
-//    if(i%4 == 0)
-//    {
-//      j+=spacing;
-//      k=0;
-//    }
-//    editor_sprites.at(i)->move(spacing*k,j);
-//  }
+  for(int i=0; i<editor_sprites.size(); i++)
+  {
+    painter.drawText(4,32+(i*32),QString::number(editor_sprites.at(i)
+                                                 ->getSprite()->getId()));
+    painter.drawText(32,32+(i*32),editor_sprites.at(i)->getName());
+    resize(width(),32+(i*32));
+  }
 }
 
 void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
 {
-  qDebug()<<e->getSprite()->getBrightness();
+  e->getSprite()->setId(nextID);
   editor_sprites.push_back(e);
-  editor_sprites.at(0)->update();
+  nextID++;
+  update();
 }

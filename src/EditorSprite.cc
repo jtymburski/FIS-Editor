@@ -20,6 +20,7 @@
 EditorSprite::EditorSprite()
 {
   setGeometry(0,0,66,66);
+  name = "Default";
   sprite = new Sprite();
   mode = EditorEnumDb::STANDARD;
   update();
@@ -48,8 +49,19 @@ Sprite* EditorSprite::getSprite()
   return sprite;
 }
 
+QString EditorSprite::getName()
+{
+  return name;
+}
+
 void EditorSprite::setPath(QString p)
 {
+  frame_paths.push_back(p);
+}
+
+void EditorSprite::setName(QString n)
+{
+  name = n;
 }
 
 
@@ -143,7 +155,7 @@ void EditorSprite::paintEvent(QPaintEvent *)
  //       painter.setPen(Qt::green);
  //       break;
  //     default:
-        painter.setPen(Qt::black);
+ //       painter.setPen(Qt::black);
  //       break;
  //  }
 

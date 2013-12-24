@@ -1,14 +1,13 @@
 #include "SpriteCreationDialog.h"
 #include <QDebug>
 
-SpriteCreationDialog::SpriteCreationDialog(uint16_t next_id,
-                                           QWidget *parent,
-                                           EditorSprite *working) :
+SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
+                                           EditorSprite *working,
+                                           QString p) :
   QDialog(parent)
 {
-  qDebug()<<next_id;
   working_sprite = working;
-  working_sprite->getSprite()->setId(next_id);
+  working_sprite->setPath(p);
 
   QGridLayout* layout = new QGridLayout();
   layout->setSpacing(2);
@@ -18,6 +17,16 @@ SpriteCreationDialog::SpriteCreationDialog(uint16_t next_id,
   id_label.append(QString::number(working_sprite->getSprite()->getId()));
   QLabel* id_number = new QLabel(id_label);
   layout->addWidget(id_number,0,0);
+
+
+  QLabel* name = new QLabel("Name:");
+  layout->addWidget(name,0,1);
+  QLineEdit* name_input = new QLineEdit(working_sprite->getName());
+  name_input->setInputMask("xxxxxxxxxxxxxxxx");
+  name_input->setFixedWidth(128);
+  connect(name_input,SIGNAL(textChanged(QString)),
+          working_sprite,SLOT(setName(QString)));
+  layout->addWidget(name_input,0,2);
 
   QWidget* frametest = new QWidget();
   frametest->setFixedSize(256,32);
@@ -168,7 +177,6 @@ void SpriteCreationDialog::destroyWorkingSprite()
 void SpriteCreationDialog::updateWorkingSprite()
 {
   emit sendUpEditorSprite(working_sprite);
-  qDebug()<<"CREATION DIALOG";
-  delete working_sprite;
+  //delete working_sprite;
   close();
 }

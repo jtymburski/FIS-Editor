@@ -38,7 +38,6 @@ public slots:
    * main application and added to the sprite menu */
   EditorSprite* makeSprite();
 
-  void test(EditorSprite* e);
 
 protected:
   /* Paints the sprite in a bounding box */
@@ -65,9 +64,6 @@ private:
 
   /* Id number */
   int id_number;
-
-  /* Next available id */
-  uint16_t next_id;
 
   /* Create a Sprite dialog */
   SpriteCreationDialog* creation_dialog;
