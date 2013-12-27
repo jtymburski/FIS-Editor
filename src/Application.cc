@@ -101,10 +101,13 @@ void Application::setupSidebar()
 void Application::setupMapView()
 {
   /* Sets up the main map view widget */
-  map_editor = new MapEditor();
-  map_editor->setMinimumSize(640,512);
-  map_editor->setMaximumSize(1280,720);
-  setCentralWidget(map_editor);
+  map_scroller = new QScrollArea(this);
+  map_editor = new MapEditor(this,10,10);
+  map_editor->show();
+  map_scroller->setWidget(map_editor);
+  map_scroller->setMinimumSize(640,512);
+  map_scroller->setMaximumSize(1280,720);
+  setCentralWidget(map_scroller);
 }
 
 /*
@@ -348,8 +351,6 @@ void Application::showAllLayers(bool layers)
 void Application::setSprite(QString path)
 {
   current_sprite_choice = path;
-  map_editor->setPath(current_sprite_choice);
-  map_editor->updateGL();
 }
 
 

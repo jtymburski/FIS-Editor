@@ -32,10 +32,13 @@ SOURCES += \
 	../Project/src/Frame.cc \
     ../Project/src/Sprite.cc \
 	../Project/src/XmlData.cc \
+	../Project/src/Game/Map/Tile.cc \
     src/SpriteChoice.cc \
     src/EditorSprite.cc \
     src/EditorSpriteToolbox.cc \
-    src/SpriteCreationDialog.cc
+    src/SpriteCreationDialog.cc \
+    src/TileWrapper.cc \
+    ../Project/src/Game/EventHandler.cc
 
 HEADERS += \
     ./include/Application.h \
@@ -47,10 +50,13 @@ HEADERS += \
 	../Project/include/Frame.h \
     ../Project/include/Sprite.h \
 	../Project/include/XmlData.h \
+	../Project/include/Game/Map/Tile.h \
     include/SpriteChoice.h \
     include/EditorSprite.h \
     include/EditorSpriteToolbox.h \
-    include/SpriteCreationDialog.h
+    include/SpriteCreationDialog.h \
+    include/TileWrapper.h \
+    ../Project/include/Game/EventHandler.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

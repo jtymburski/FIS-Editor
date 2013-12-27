@@ -6,7 +6,7 @@
  *              to make changes to the map from.
  ******************************************************************************/
 #include "Map/MapEditor.h"
-
+#include <QDebug>
 /* Constant Implementation - see header file for descriptions */
 //const int Map::kELEMENT_DATA = 0;
 
@@ -15,24 +15,45 @@
  *===========================================================================*/
 
 /* Constructor function */
-MapEditor::MapEditor() : QGLWidget()
+MapEditor::MapEditor(QWidget* parent, int w, int h)
 {
-  spritepath = "Sup";
+  width = w;
+  height = h;
+  setFixedSize(width*64,height*64);
+  for(int i=0; i<width; i++)
+  {
+    QList<TileWrapper*> stack;
+    for(int j=0; j<height; j++)
+      stack.push_back(new TileWrapper(this));
+    tiles.push_back(stack);
+  }
+  for(int i=0; i<width; i++)
+  {
+      for(int j=0; j<height; j++)
+      {
+        tiles[i][j]->move(i*64,j*64);
+        //qDebug()<<i<<","<<j;
+        //tiles[i][j]->update();
+      }
+  }
 }
 
 /* Destructor function */
 MapEditor::~MapEditor()
 {
+  for(int i=0; i<width; i++)
+  {
+    for(int j=0; j<height; j++)
+    {
+      delete tiles[i][j];
+      tiles[i][j] = NULL;
+    }
+  }
 }
 
-void MapEditor::setPath(QString sprite)
-{
-  spritepath = sprite;
-}
 
-void MapEditor::paintGL()
+void MapEditor::paintEvent(QPaintEvent *)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  qglColor(QColor(255,255,255,128));
-  renderText(0,0,0,spritepath);
+  QPainter painter(this);
+
 }

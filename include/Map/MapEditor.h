@@ -8,30 +8,31 @@
 #ifndef MAPEDITOR_H
 #define MAPEDITOR_H
 
-#include <QGLWidget>
 #include <QTabWidget>
+#include <QList>
+#include <QWidget>
+#include "TileWrapper.h"
 
-class MapEditor : public QGLWidget
+class MapEditor : public QWidget
 {
   Q_OBJECT
 
 public:
   /* Constructor function */
-  MapEditor();
+  MapEditor(QWidget* parent = 0,int w = 100, int h = 100);
 
   /* Destructor function */
   ~MapEditor();
 
-  /* Sets the sprite path */
-  void setPath(QString sprite);
-
 protected:
-  void paintGL();
+  void paintEvent(QPaintEvent *);
 private:
   /* Map layer tabs */
   QTabWidget* layer_tabs;
 
-  QString spritepath;
+  QList<QList<TileWrapper*> > tiles;
+  int width;
+  int height;
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 };

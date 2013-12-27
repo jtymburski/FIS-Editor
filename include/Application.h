@@ -57,6 +57,7 @@ private:
   QDockWidget* layer_dock;
 
   /* Map View pointer */
+  QScrollArea* map_scroller;
   MapEditor* map_editor;
 
   /* File action pointers */
