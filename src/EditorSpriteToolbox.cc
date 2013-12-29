@@ -29,12 +29,13 @@ EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
  */
 EditorSpriteToolbox::~EditorSpriteToolbox()
 {
+  //qDebug()<<"Removing Editor Sprite Toolbox";
   for(int i=0; i<editor_sprites.size(); i++)
   {
     delete editor_sprites[i];
     editor_sprites[i] = NULL;
   }
-  delete current;
+  //delete current;
   current = NULL;
 }
 

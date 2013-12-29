@@ -20,6 +20,7 @@ TileWrapper::TileWrapper(QWidget* parent) : QWidget(parent)
   setFixedSize(64,64);
   QPalette pal(palette());
   pal.setColor(backgroundRole(),Qt::black);
+  setAutoFillBackground(true);
   setPalette(pal);
   base = true;
   enhancer = true;
@@ -34,32 +35,39 @@ TileWrapper::TileWrapper(QWidget* parent) : QWidget(parent)
   upper4 = true;
   upper5 = true;
   tile = new Tile();
-  toolbox = new EditorSpriteToolbox();
-  base_layer = new EditorSprite();
-  enhancer_layer = new EditorSprite();
-  lower_layers.push_back(new EditorSprite());
-  lower_layers.push_back(new EditorSprite());
-  lower_layers.push_back(new EditorSprite());
-  lower_layers.push_back(new EditorSprite());
-  lower_layers.push_back(new EditorSprite());
-  upper_layers.push_back(new EditorSprite());
-  upper_layers.push_back(new EditorSprite());
-  upper_layers.push_back(new EditorSprite());
-  upper_layers.push_back(new EditorSprite());
-  upper_layers.push_back(new EditorSprite());
+  toolbox = NULL;
+  base_layer = NULL;
+  enhancer_layer = NULL;
+  lower_layers.push_back(NULL);
+  lower_layers.push_back(NULL);
+  lower_layers.push_back(NULL);
+  lower_layers.push_back(NULL);
+  lower_layers.push_back(NULL);
+  upper_layers.push_back(NULL);
+  upper_layers.push_back(NULL);
+  upper_layers.push_back(NULL);
+  upper_layers.push_back(NULL);
+  upper_layers.push_back(NULL);
 }
 
 TileWrapper::~TileWrapper()
 {
+  /*
+  //qDebug()<<"Removing Tile Wrapper";
   for(int i=0; i<5; i++)
   {
     delete lower_layers[i];
+    //qDebug()<<"    Removing Lower "<<i;
     delete upper_layers[i];
+    //qDebug()<<"    Removing Upper "<<i;
   }
   delete base_layer;
+  //qDebug()<<"    Removing Base";
   delete enhancer_layer;
+  //qDebug()<<"    Removing Enhancer";
   delete tile;
-  delete toolbox;
+  //qDebug()<<"    Removing Tile";
+  */
   for(int i=0; i<5; i++)
   {
     lower_layers[i]=NULL;
@@ -79,13 +87,12 @@ void TileWrapper::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
   /* Draw Base */
-
   QRect bound(0,0,64,64);
-  painter.setPen(QColor(255,255,255,128));
-  //painter.setBrush(QColor(0,0,0,255));
-  painter.drawRect(1,1,63,63);
-  if(base)
+  if(base && base_layer != NULL)
     painter.drawImage(bound,QImage(base_layer->getPath(0)));
+
+  painter.setPen(QColor(255,255,255,128));
+  painter.drawRect(1,1,62,62);
 
 }
 

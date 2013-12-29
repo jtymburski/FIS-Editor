@@ -37,6 +37,7 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
  */
 Application::~Application()
 {
+  //qDebug()<<"Removing Application";
   delete map_editor;
   delete images_tab;
   delete sprites_tab;
@@ -108,7 +109,7 @@ void Application::setupMapView()
 {
   /* Sets up the main map view widget */
   map_scroller = new QScrollArea(this);
-  map_editor = new MapEditor(sprites_tab,this,10,10);
+  map_editor = new MapEditor(sprites_tab,this,50,50);
   map_editor->show();
   map_scroller->setWidget(map_editor);
   map_scroller->setMinimumSize(640,512);

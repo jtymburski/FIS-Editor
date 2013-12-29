@@ -54,6 +54,7 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
 /* Destructor function */
 MapEditor::~MapEditor()
 {
+  //qDebug()<<"Removing MapEditor";
   for(int i=0; i<width; i++)
   {
     for(int j=0; j<height; j++)

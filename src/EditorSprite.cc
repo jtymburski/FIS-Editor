@@ -33,6 +33,7 @@ EditorSprite::EditorSprite(QString img_path)
  */
 EditorSprite::~EditorSprite()
 {
+  //qDebug()<<"Removing EditorSprite - "<<name;
   delete sprite;
   sprite = NULL;
 }

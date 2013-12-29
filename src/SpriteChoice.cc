@@ -48,6 +48,7 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
  */
 SpriteChoice::~SpriteChoice()
 {
+  //qDebug()<<"Removing Sprite Choice";
   delete creation_dialog;
   creation_dialog = NULL;
 }
