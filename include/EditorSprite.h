@@ -26,7 +26,7 @@ class EditorSprite : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSprite();
+  EditorSprite(QString img_path = " ");
 
   /* Destructor function */
   ~EditorSprite();
@@ -35,7 +35,16 @@ public:
   Sprite* getSprite();
 
   /* Sets the sprite path */
-  void setPath(QString p);
+  void setPath(QString path);
+
+  /* Sets the image path */
+  void setImage(QImage img);
+
+  /* Gets the sprite path */
+  QString getPath(int pos);
+
+  /* Gets the image path */
+  QImage getImage(int pos);
 
   /* Gets the user submitted name of the sprite */
   QString getName();

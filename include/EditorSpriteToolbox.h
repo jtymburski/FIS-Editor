@@ -23,6 +23,8 @@ public:
   ~EditorSpriteToolbox();
 public slots:
   void addEditorSprite(EditorSprite* e);
+  EditorSprite* getCurrent();
+
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
@@ -31,6 +33,7 @@ private:
   QVector<EditorSprite* > editor_sprites;
 
   uint16_t nextID;
+  EditorSprite* current;
 
 signals:
 

@@ -19,14 +19,22 @@ class MapEditor : public QWidget
 
 public:
   /* Constructor function */
-  MapEditor(QWidget* parent = 0,int w = 100, int h = 100);
+  MapEditor(EditorSpriteToolbox* toolbox = 0,
+            QWidget* parent = 0,int w = 100, int h = 100);
 
   /* Destructor function */
   ~MapEditor();
 
+public slots:
+  void toggleBase(bool);
+
+
 protected:
   void paintEvent(QPaintEvent *);
 private:
+  bool base,enhancer;
+  bool lower1,lower2,lower3,lower4,lower5;
+  bool upper1,upper2,upper3,upper4,upper5;
   /* Map layer tabs */
   QTabWidget* layer_tabs;
 

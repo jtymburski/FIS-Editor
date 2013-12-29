@@ -27,8 +27,8 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
 
   /* Calls all setup functions */
   setupSidebar();
-  setupMapView();
   setupLayerBar();
+  setupMapView();
   setupTopMenu();
 }
 
@@ -37,6 +37,12 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
  */
 Application::~Application()
 {
+  delete map_editor;
+  delete images_tab;
+  delete sprites_tab;
+  map_editor = NULL;
+  images_tab = NULL;
+  sprites_tab = NULL;
 }
 
 /*============================================================================
@@ -102,11 +108,13 @@ void Application::setupMapView()
 {
   /* Sets up the main map view widget */
   map_scroller = new QScrollArea(this);
-  map_editor = new MapEditor(this,10,10);
+  map_editor = new MapEditor(sprites_tab,this,10,10);
   map_editor->show();
   map_scroller->setWidget(map_editor);
   map_scroller->setMinimumSize(640,512);
   map_scroller->setMaximumSize(1280,720);
+  connect(shown_lower_layer,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleBase(bool)));
   setCentralWidget(map_scroller);
 }
 

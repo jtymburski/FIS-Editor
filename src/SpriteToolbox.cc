@@ -40,6 +40,11 @@ SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
  */
 SpriteToolbox::~SpriteToolbox()
 {
+  for(int i=0; i<sprites.size(); i++)
+  {
+    delete sprites[i];
+    sprites[i] = NULL;
+  }
 }
 
 /*============================================================================

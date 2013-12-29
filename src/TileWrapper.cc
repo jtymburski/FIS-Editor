@@ -21,7 +21,20 @@ TileWrapper::TileWrapper(QWidget* parent) : QWidget(parent)
   QPalette pal(palette());
   pal.setColor(backgroundRole(),Qt::black);
   setPalette(pal);
+  base = true;
+  enhancer = true;
+  lower1 = true;
+  lower2 = true;
+  lower3 = true;
+  lower4 = true;
+  lower5 = true;
+  upper1 = true;
+  upper2 = true;
+  upper3 = true;
+  upper4 = true;
+  upper5 = true;
   tile = new Tile();
+  toolbox = new EditorSpriteToolbox();
   base_layer = new EditorSprite();
   enhancer_layer = new EditorSprite();
   lower_layers.push_back(new EditorSprite());
@@ -46,6 +59,7 @@ TileWrapper::~TileWrapper()
   delete base_layer;
   delete enhancer_layer;
   delete tile;
+  delete toolbox;
   for(int i=0; i<5; i++)
   {
     lower_layers[i]=NULL;
@@ -54,6 +68,11 @@ TileWrapper::~TileWrapper()
   base_layer = NULL;
   enhancer_layer = NULL;
   tile = NULL;
+  toolbox = NULL;
+}
+void TileWrapper::setBase(bool toggle)
+{
+  base = toggle;
 }
 
 void TileWrapper::paintEvent(QPaintEvent *)
@@ -61,9 +80,24 @@ void TileWrapper::paintEvent(QPaintEvent *)
   QPainter painter(this);
   /* Draw Base */
 
+  QRect bound(0,0,64,64);
   painter.setPen(QColor(255,255,255,128));
-  painter.setBrush(QColor(0,0,0,255));
+  //painter.setBrush(QColor(0,0,0,255));
   painter.drawRect(1,1,63,63);
+  if(base)
+    painter.drawImage(bound,QImage(base_layer->getPath(0)));
+
+}
+
+void TileWrapper::mousePressEvent(QMouseEvent *)
+{
+  base_layer = toolbox->getCurrent();
+  update();
+}
+
+void TileWrapper::setToolbox(EditorSpriteToolbox *tool)
+{
+  toolbox = tool;
 }
 
 void TileWrapper::editBase(EditorSprite *selection)

@@ -48,6 +48,8 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
  */
 SpriteChoice::~SpriteChoice()
 {
+  delete creation_dialog;
+  creation_dialog = NULL;
 }
 
 /*============================================================================
@@ -78,7 +80,7 @@ void SpriteChoice::deselect()
 EditorSprite* SpriteChoice::makeSprite()
 {
   delete creation_dialog;
-  creation_dialog = new SpriteCreationDialog(this);
+  creation_dialog = new SpriteCreationDialog(this,new EditorSprite(path),path);
   creation_dialog->show();
 }
 

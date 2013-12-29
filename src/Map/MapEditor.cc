@@ -15,10 +15,22 @@
  *===========================================================================*/
 
 /* Constructor function */
-MapEditor::MapEditor(QWidget* parent, int w, int h)
+MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
 {
   width = w;
   height = h;
+  base = true;
+  enhancer = true;
+  lower1 = true;
+  lower2 = true;
+  lower3 = true;
+  lower4 = true;
+  lower5 = true;
+  upper1 = true;
+  upper2 = true;
+  upper3 = true;
+  upper4 = true;
+  upper5 = true;
   setFixedSize(width*64,height*64);
   for(int i=0; i<width; i++)
   {
@@ -32,6 +44,7 @@ MapEditor::MapEditor(QWidget* parent, int w, int h)
       for(int j=0; j<height; j++)
       {
         tiles[i][j]->move(i*64,j*64);
+        tiles[i][j]->setToolbox(tool);
         //qDebug()<<i<<","<<j;
         //tiles[i][j]->update();
       }
@@ -51,9 +64,21 @@ MapEditor::~MapEditor()
   }
 }
 
+void MapEditor::toggleBase(bool toggle)
+{
+  for(int i=0; i<tiles.size(); i++)
+  {
+    for(int j=0; j<tiles[i].size(); j++)
+    {
+      tiles[i][j]->setBase(toggle);
+      tiles[i][j]->update();
+    }
+  }
+}
 
 void MapEditor::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
 
 }
+

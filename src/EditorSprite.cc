@@ -17,12 +17,14 @@
  *
  * Input: File path
  */
-EditorSprite::EditorSprite()
+EditorSprite::EditorSprite(QString img_path)
 {
   setGeometry(0,0,66,66);
   name = "Default";
   sprite = new Sprite();
   mode = EditorEnumDb::STANDARD;
+  setPath(img_path);
+  setImage(QImage(img_path));
   update();
 }
 
@@ -31,6 +33,8 @@ EditorSprite::EditorSprite()
  */
 EditorSprite::~EditorSprite()
 {
+  delete sprite;
+  sprite = NULL;
 }
 
 
@@ -57,6 +61,21 @@ QString EditorSprite::getName()
 void EditorSprite::setPath(QString p)
 {
   frame_paths.push_back(p);
+}
+
+void EditorSprite::setImage(QImage img)
+{
+  frame_images.push_back(img);
+}
+
+QString EditorSprite::getPath(int pos)
+{
+  return frame_paths[pos];
+}
+
+QImage EditorSprite::getImage(int pos)
+{
+  return frame_images.last();
 }
 
 void EditorSprite::setName(QString n)

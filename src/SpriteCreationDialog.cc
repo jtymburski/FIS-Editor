@@ -8,6 +8,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 {
   working_sprite = working;
   working_sprite->setPath(p);
+  working_sprite->setImage(QImage(p));
 
   QGridLayout* layout = new QGridLayout();
   layout->setSpacing(2);
