@@ -9,11 +9,12 @@
 #define MAPEDITOR_H
 
 #include <QTabWidget>
+#include <QGraphicsScene>
 #include <QList>
 #include <QWidget>
 #include "TileWrapper.h"
 
-class MapEditor : public QWidget
+class MapEditor : public QGraphicsScene
 {
   Q_OBJECT
 
@@ -27,7 +28,19 @@ public:
 
 public slots:
   void toggleBase(bool);
-
+  void toggleEnhancer(bool);
+  void toggleLower1(bool);
+  void toggleLower2(bool);
+  void toggleLower3(bool);
+  void toggleLower4(bool);
+  void toggleLower5(bool);
+  void toggleUpper1(bool);
+  void toggleUpper2(bool);
+  void toggleUpper3(bool);
+  void toggleUpper4(bool);
+  void toggleUpper5(bool);
+  void toggleGrid(bool);
+  void setEditingLayer(EditorEnumDb::Layer);
 
 protected:
   void paintEvent(QPaintEvent *);

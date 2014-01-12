@@ -9,40 +9,64 @@
 
 #include <QWidget>
 #include <QPainter>
+#include <QGraphicsItem>
 #include <QList>
+#include <QGraphicsSceneHoverEvent>
 #include "EditorSpriteToolbox.h"
+#include "EditorEnumDb.h"
 #include "Game/Map/Tile.h"
 
-class TileWrapper : public QWidget
+class TileWrapper : public QGraphicsItem
 {
-  Q_OBJECT
+  //Q_OBJECT
 public:
   /* Constructor Function */
-  TileWrapper(QWidget* parent = 0);
+  TileWrapper(int x = 0, int y = 0, int z = 0);
 
   /* Destructor Function */
   ~TileWrapper();
-public slots:
+
+  QRectF boundingRect() const;
+
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+             QWidget *widget);
+
+public:
   void setBase(bool);
+  void setEnhancer(bool);
+  void setLower1(bool);
+  void setLower2(bool);
+  void setLower3(bool);
+  void setLower4(bool);
+  void setLower5(bool);
+  void setUpper1(bool);
+  void setUpper2(bool);
+  void setUpper3(bool);
+  void setUpper4(bool);
+  void setUpper5(bool);
+  void setGrid(bool);
   void setToolbox(EditorSpriteToolbox* tool);
   void editBase(EditorSprite* selection);
   void editEnhancer(EditorSprite* selection);
   void editLower(EditorSprite* selection, int position = 0);
   void editUpper(EditorSprite* selection, int position = 0);
+  EditorEnumDb::Layer active_layer;
 protected:
-  void paintEvent(QPaintEvent *);
-  void mousePressEvent(QMouseEvent *);
+  void mousePressEvent(QGraphicsSceneMouseEvent *);
+  void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
 private:
   bool base,enhancer;
   bool lower1,lower2,lower3,lower4,lower5;
   bool upper1,upper2,upper3,upper4,upper5;
+  bool grid;
   Tile* tile;
   EditorSpriteToolbox* toolbox;
   EditorSprite* base_layer;
   EditorSprite* enhancer_layer;
   QList<EditorSprite*> lower_layers;
   QList<EditorSprite*> upper_layers;
-signals:
+  int xpos, ypos, zpos;
+//signals:
 };
 
 #endif // TILEWRAPPER_H

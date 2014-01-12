@@ -18,7 +18,13 @@
  */
 EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
 {
+  //setFixedSize(256,720);
   current = new EditorSprite();
+  editor_sprite_list = new QListWidget(this);
+  editor_sprite_list->show();
+  editor_sprite_list->setFixedSize(288,640);
+  connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
+          this,SLOT(setCurrent(int)));
   nextID = 1;
 }
 
@@ -52,28 +58,34 @@ EditorSpriteToolbox::~EditorSpriteToolbox()
  */
 void EditorSpriteToolbox::paintEvent(QPaintEvent *)
 {
-  QPainter painter(this);
+ // QPainter painter(this);
   /* Sets up the spacing of all the sprites that will appear in the box */
-  for(int i=0; i<editor_sprites.size(); i++)
-  {
-    painter.drawText(4,32+(i*32),QString::number(editor_sprites.at(i)
-                                                 ->getSprite()->getId()));
-    painter.drawImage(32,32+(i*32),editor_sprites.at(i)->getImage(0));
-    painter.drawText(32,32+(i*32),editor_sprites.at(i)->getName());
-    resize(width(),32+(i*32));
-  }
+  //for(int i=0; i<editor_sprites.size(); i++)
+  //{
+  // painter.drawText(4,32+(i*32),QString::number(editor_sprites.at(i)
+  //                                               ->getSprite()->getId()));
+  //  painter.drawImage(32,32+(i*32),editor_sprites.at(i)->getImage(0));
+  //  painter.drawText(32,32+(i*32),editor_sprites.at(i)->getName());
+  //  resize(width(),32+(i*32));
+  //}
+
 }
 
 void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
 {
   e->getSprite()->setId(nextID);
   editor_sprites.push_back(e);
-  current=e;
   nextID++;
+  editor_sprite_list->addItem(e->getName());
   update();
 }
 
 EditorSprite* EditorSpriteToolbox::getCurrent()
 {
   return current;
+}
+
+void EditorSpriteToolbox::setCurrent(int index)
+{
+  current = editor_sprites[index];
 }

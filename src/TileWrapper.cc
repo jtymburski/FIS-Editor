@@ -15,13 +15,19 @@
  *
  * Input: File path
  */
-TileWrapper::TileWrapper(QWidget* parent) : QWidget(parent)
+TileWrapper::TileWrapper(int x, int y, int z)
 {
-  setFixedSize(64,64);
-  QPalette pal(palette());
-  pal.setColor(backgroundRole(),Qt::black);
-  setAutoFillBackground(true);
-  setPalette(pal);
+  xpos = x;
+  ypos = y;
+  zpos = z;
+  active_layer = EditorEnumDb::BASE;
+  setAcceptHoverEvents(true);
+  //setFixedSize(64,64);
+  //setUpdatesEnabled(false);
+  //QPalette pal(palette());
+  //pal.setColor(backgroundRole(),Qt::black);
+  //setAutoFillBackground(true);
+  //setPalette(pal);
   base = true;
   enhancer = true;
   lower1 = true;
@@ -34,6 +40,7 @@ TileWrapper::TileWrapper(QWidget* parent) : QWidget(parent)
   upper3 = true;
   upper4 = true;
   upper5 = true;
+  grid = true;
   tile = new Tile();
   toolbox = NULL;
   base_layer = NULL;
@@ -82,24 +89,186 @@ void TileWrapper::setBase(bool toggle)
 {
   base = toggle;
 }
-
-void TileWrapper::paintEvent(QPaintEvent *)
+void TileWrapper::setEnhancer(bool toggle)
 {
-  QPainter painter(this);
-  /* Draw Base */
-  QRect bound(0,0,64,64);
-  if(base && base_layer != NULL)
-    painter.drawImage(bound,QImage(base_layer->getPath(0)));
-
-  painter.setPen(QColor(255,255,255,128));
-  painter.drawRect(1,1,62,62);
-
+  enhancer = toggle;
+}
+void TileWrapper::setLower1(bool toggle)
+{
+  lower1 = toggle;
+}
+void TileWrapper::setLower2(bool toggle)
+{
+  lower2 = toggle;
+}
+void TileWrapper::setLower3(bool toggle)
+{
+  lower3 = toggle;
+}
+void TileWrapper::setLower4(bool toggle)
+{
+  lower4 = toggle;
+}
+void TileWrapper::setLower5(bool toggle)
+{
+  lower5 = toggle;
+}
+void TileWrapper::setUpper1(bool toggle)
+{
+  upper1 = toggle;
+}
+void TileWrapper::setUpper2(bool toggle)
+{
+  upper2 = toggle;
+}
+void TileWrapper::setUpper3(bool toggle)
+{
+  upper3 = toggle;
+}
+void TileWrapper::setUpper4(bool toggle)
+{
+  upper4 = toggle;
+}
+void TileWrapper::setUpper5(bool toggle)
+{
+  upper5 = toggle;
+}
+void TileWrapper::setGrid(bool toggle)
+{
+  grid = toggle;
 }
 
-void TileWrapper::mousePressEvent(QMouseEvent *)
+void TileWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+           QWidget *widget)
 {
-  base_layer = toolbox->getCurrent();
+  /* Draw Base */
+  QRect bound(xpos*64,ypos*64,64,64);
+  if(base && base_layer != NULL)
+    painter->drawImage(bound,QImage(base_layer->getPath(0)));
+  if(enhancer && enhancer_layer !=NULL)
+    painter->drawImage(bound,QImage(enhancer_layer->getPath(0)));
+  if(lower1 && lower_layers[0] !=NULL)
+    painter->drawImage(bound,QImage(lower_layers[0]->getPath(0)));
+  if(lower2 && lower_layers[1] !=NULL)
+    painter->drawImage(bound,QImage(lower_layers[1]->getPath(0)));
+  if(lower3 && lower_layers[2] !=NULL)
+    painter->drawImage(bound,QImage(lower_layers[2]->getPath(0)));
+  if(lower4 && lower_layers[3] !=NULL)
+    painter->drawImage(bound,QImage(lower_layers[3]->getPath(0)));
+  if(lower5 && lower_layers[4] !=NULL)
+    painter->drawImage(bound,QImage(lower_layers[4]->getPath(0)));
+  if(upper1 && upper_layers[0] !=NULL)
+    painter->drawImage(bound,QImage(upper_layers[0]->getPath(0)));
+  if(upper2 && upper_layers[1] !=NULL)
+    painter->drawImage(bound,QImage(upper_layers[1]->getPath(0)));
+  if(upper3 && upper_layers[2] !=NULL)
+    painter->drawImage(bound,QImage(upper_layers[2]->getPath(0)));
+  if(upper4 && upper_layers[3] !=NULL)
+    painter->drawImage(bound,QImage(upper_layers[3]->getPath(0)));
+  if(upper5 && upper_layers[4] !=NULL)
+    painter->drawImage(bound,QImage(upper_layers[4]->getPath(0)));
+  if(grid)
+  {
+    painter->setPen(QColor(255,255,255,128));
+    painter->drawRect(1+(xpos*64),1+(ypos*64),62,62);
+  }
+}
+QRectF TileWrapper::boundingRect() const
+{
+  return QRectF(xpos*64,ypos*64,64,64);
+}
+void TileWrapper::mousePressEvent(QGraphicsSceneMouseEvent *)
+{
+  switch(active_layer)
+  {
+    case EditorEnumDb::BASE:
+      base_layer = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::ENHANCER:
+      enhancer_layer = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::LOWER1:
+      lower_layers[0] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::LOWER2:
+      lower_layers[1] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::LOWER3:
+      lower_layers[2] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::LOWER4:
+      lower_layers[3] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::LOWER5:
+      lower_layers[4] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::UPPER1:
+      upper_layers[0] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::UPPER2:
+      upper_layers[1] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::UPPER3:
+      upper_layers[2] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::UPPER4:
+      upper_layers[3] = toolbox->getCurrent();
+      break;
+    case EditorEnumDb::UPPER5:
+      upper_layers[4] = toolbox->getCurrent();
+      break;
+    default:
+      break;
+  }
   update();
+}
+void TileWrapper::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+  if(event->modifiers() & Qt::ControlModifier)
+  {
+    switch(active_layer)
+    {
+      case EditorEnumDb::BASE:
+        base_layer = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::ENHANCER:
+        enhancer_layer = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::LOWER1:
+        lower_layers[0] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::LOWER2:
+        lower_layers[1] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::LOWER3:
+        lower_layers[2] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::LOWER4:
+        lower_layers[3] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::LOWER5:
+        lower_layers[4] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::UPPER1:
+        upper_layers[0] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::UPPER2:
+        upper_layers[1] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::UPPER3:
+        upper_layers[2] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::UPPER4:
+        upper_layers[3] = toolbox->getCurrent();
+        break;
+      case EditorEnumDb::UPPER5:
+        upper_layers[4] = toolbox->getCurrent();
+        break;
+      default:
+        break;
+    }
+    update();
+  }
 }
 
 void TileWrapper::setToolbox(EditorSpriteToolbox *tool)

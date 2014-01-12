@@ -22,6 +22,7 @@
 #include <QTabWidget>
 #include <QToolBar>
 #include <QTabWidget>
+#include <QGraphicsView>
 #include <QListWidget>
 #include "Map/MapEditor.h"
 #include "EditorSpriteToolbox.h"
@@ -57,7 +58,7 @@ private:
   QDockWidget* layer_dock;
 
   /* Map View pointer */
-  QScrollArea* map_scroller;
+  QGraphicsView* map_scroller;
   MapEditor* map_editor;
 
   /* File action pointers */
@@ -81,33 +82,32 @@ private:
   QAction *viewalllayers_action;
 
   /* Map Mode Shift Actions (Active Layers) */
-  QActionGroup *active_layers;
-  QAction *active_base_layer_01;
-  QAction *active_base_layer_02;
-  QAction *active_base_layer_03;
-  QAction *active_base_layer_04;
-  QAction *active_base_layer_05;
-  QAction *active_enhancer_layer;
-  QAction *active_item_layer;
-  QAction *active_lower_layer;
-  QAction *active_person_layer;
-  QAction *active_thing_layer;
-  QAction *active_upper_layer_01;
-  QAction *active_upper_layer_02;
-  QAction *active_upper_layer_03;
-  QAction *active_upper_layer_04;
-  QAction *active_upper_layer_05;
+  QListWidgetItem *active_lower_layer_01;
+  QListWidgetItem *active_lower_layer_02;
+  QListWidgetItem *active_lower_layer_03;
+  QListWidgetItem *active_lower_layer_04;
+  QListWidgetItem *active_lower_layer_05;
+  QListWidgetItem *active_enhancer_layer;
+  QListWidgetItem *active_item_layer;
+  QListWidgetItem *active_base_layer;
+  QListWidgetItem *active_person_layer;
+  QListWidgetItem *active_thing_layer;
+  QListWidgetItem *active_upper_layer_01;
+  QListWidgetItem *active_upper_layer_02;
+  QListWidgetItem *active_upper_layer_03;
+  QListWidgetItem *active_upper_layer_04;
+  QListWidgetItem *active_upper_layer_05;
 
   /* Map Mode Shift Actions (Shown Layers) */
   QActionGroup *shown_layers;
-  QAction *shown_base_layer_01;
-  QAction *shown_base_layer_02;
-  QAction *shown_base_layer_03;
-  QAction *shown_base_layer_04;
-  QAction *shown_base_layer_05;
+  QAction *shown_lower_layer_01;
+  QAction *shown_lower_layer_02;
+  QAction *shown_lower_layer_03;
+  QAction *shown_lower_layer_04;
+  QAction *shown_lower_layer_05;
   QAction *shown_enhancer_layer;
   QAction *shown_item_layer;
-  QAction *shown_lower_layer;
+  QAction *shown_base_layer;
   QAction *shown_person_layer;
   QAction *shown_thing_layer;
   QAction *shown_upper_layer_01;
@@ -115,6 +115,7 @@ private:
   QAction *shown_upper_layer_03;
   QAction *shown_upper_layer_04;
   QAction *shown_upper_layer_05;
+  QAction *shown_grid;
 
   /* The users login name */
   QString username;
@@ -160,6 +161,9 @@ public slots:
 
   /* Sets the picked sprite */
   void setSprite(QString);
+
+  /* Sets the Active Layer on the Map */
+  void setActiveLayer(QListWidgetItem* layer);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

@@ -62,21 +62,14 @@ void Application::setupSidebar()
   images_tab_scrollwrapper = new QScrollArea(this);
   images_tab_scrollwrapper->setBackgroundRole(QPalette::Dark);
   images_tab_scrollwrapper->setWidget(images_tab);
-  images_tab_scrollwrapper->setMinimumSize(290,68);
-  images_tab_scrollwrapper->setMaximumWidth(290);
-  images_tab->setMinimumSize(290,68);
-  images_tab->setMaximumWidth(290);
+  images_tab_scrollwrapper->setMinimumSize(288,68);
+  images_tab_scrollwrapper->setMaximumWidth(288);
+  images_tab->setMinimumSize(288,68);
+  images_tab->setMaximumWidth(288);
 
   /* Sets up a scroll area with the sprites tab */
   sprites_tab = new EditorSpriteToolbox(this);
-  sprites_tab_scrollwrapper = new QScrollArea(this);
-  sprites_tab_scrollwrapper->setBackgroundRole(QPalette::Dark);
-  sprites_tab_scrollwrapper->setWidget(sprites_tab);
-  sprites_tab_scrollwrapper->setMinimumSize(290,68);
-  sprites_tab_scrollwrapper->setMaximumWidth(290);
-  sprites_tab->setMinimumSize(290,68);
-  sprites_tab->setMaximumWidth(290);
-
+  sprites_tab->setFixedSize(288,640);
 
   connect(images_tab,SIGNAL(sendUpEditorSprite(EditorSprite*)),sprites_tab,
           SLOT(addEditorSprite(EditorSprite*)));
@@ -84,7 +77,7 @@ void Application::setupSidebar()
 
   tab = new QTabWidget(this);
   tab->addTab(images_tab_scrollwrapper,"Raw Images");
-  tab->addTab(sprites_tab_scrollwrapper,"Sprites");
+  tab->addTab(sprites_tab,"Sprites");
   //tab->setMinimumSize(290,68);
   //tab->setMaximumWidth(290);
 
@@ -108,14 +101,38 @@ void Application::setupSidebar()
 void Application::setupMapView()
 {
   /* Sets up the main map view widget */
-  map_scroller = new QScrollArea(this);
-  map_editor = new MapEditor(sprites_tab,this,50,50);
-  map_editor->show();
-  map_scroller->setWidget(map_editor);
+  map_editor = new MapEditor(sprites_tab,this,100,100);
+  map_scroller = new QGraphicsView(map_editor,this);
+  map_scroller->ensureVisible(0,0,1,1);
+  map_scroller->show();
   map_scroller->setMinimumSize(640,512);
-  map_scroller->setMaximumSize(1280,720);
-  connect(shown_lower_layer,SIGNAL(toggled(bool)),
+  //map_scroller->setMaximumSize(1280,720);
+  connect(shown_base_layer,SIGNAL(toggled(bool)),
           map_editor,SLOT(toggleBase(bool)));
+  connect(shown_enhancer_layer,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleEnhancer(bool)));
+  connect(shown_lower_layer_01,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleLower1(bool)));
+  connect(shown_lower_layer_02,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleLower2(bool)));
+  connect(shown_lower_layer_03,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleLower3(bool)));
+  connect(shown_lower_layer_04,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleLower4(bool)));
+  connect(shown_lower_layer_05,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleLower5(bool)));
+  connect(shown_upper_layer_01,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleUpper1(bool)));
+  connect(shown_upper_layer_02,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleUpper2(bool)));
+  connect(shown_upper_layer_03,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleUpper3(bool)));
+  connect(shown_upper_layer_04,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleUpper4(bool)));
+  connect(shown_upper_layer_05,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleUpper5(bool)));
+  connect(shown_grid,SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleGrid(bool)));
   setCentralWidget(map_scroller);
 }
 
@@ -183,14 +200,14 @@ void Application::setupTopMenu()
 
   /* Sets up View menu itself */
   QMenu* view_menu = menuBar()->addMenu("&View");
-  view_menu->addAction(shown_base_layer_01);
-  view_menu->addAction(shown_base_layer_02);
-  view_menu->addAction(shown_base_layer_03);
-  view_menu->addAction(shown_base_layer_04);
-  view_menu->addAction(shown_base_layer_05);
+  view_menu->addAction(shown_lower_layer_01);
+  view_menu->addAction(shown_lower_layer_02);
+  view_menu->addAction(shown_lower_layer_03);
+  view_menu->addAction(shown_lower_layer_04);
+  view_menu->addAction(shown_lower_layer_05);
   view_menu->addAction(shown_enhancer_layer);
   view_menu->addAction(shown_item_layer);
-  view_menu->addAction(shown_lower_layer);
+  view_menu->addAction(shown_base_layer);
   view_menu->addAction(shown_person_layer);
   view_menu->addAction(shown_thing_layer);
   view_menu->addAction(shown_upper_layer_01);
@@ -200,6 +217,7 @@ void Application::setupTopMenu()
   view_menu->addAction(shown_upper_layer_05);
   view_menu->addSeparator();
   view_menu->addAction(viewalllayers_action);
+  view_menu->addAction(shown_grid);
 
   /* Connects View menu actions to slots */
   connect(viewalllayers_action,SIGNAL(toggled(bool)),
@@ -215,56 +233,42 @@ void Application::setupLayerBar()
 {
   /* Sets up the active layer actions, makes them checkable and adds them to
      an action group which allows only one to be active at a time */
-  active_layers = new QActionGroup(this);
-  active_layers->setExclusive(true);
-  active_base_layer_01 = new QAction("Base 1",active_layers);
-  active_base_layer_01->setCheckable(true);
-  active_base_layer_02 = new QAction("Base 2",active_layers);
-  active_base_layer_02->setCheckable(true);
-  active_base_layer_03 = new QAction("Base 3",active_layers);
-  active_base_layer_03->setCheckable(true);
-  active_base_layer_04 = new QAction("Base 4",active_layers);
-  active_base_layer_04->setCheckable(true);
-  active_base_layer_05 = new QAction("Base 5",active_layers);
-  active_base_layer_05->setCheckable(true);
-  active_enhancer_layer = new QAction("Enhancer",active_layers);
-  active_enhancer_layer->setCheckable(true);
-  active_item_layer = new QAction("Item",active_layers);
-  active_item_layer->setCheckable(true);
-  active_lower_layer = new QAction("Lower",active_layers);
-  active_lower_layer->setCheckable(true);
-  active_person_layer = new QAction("Person",active_layers);
-  active_person_layer->setCheckable(true);
-  active_thing_layer = new QAction("Thing",active_layers);
-  active_thing_layer->setCheckable(true);
-  active_upper_layer_01 = new QAction("Upper 1",active_layers);
-  active_upper_layer_01->setCheckable(true);
-  active_upper_layer_02 = new QAction("Upper 2",active_layers);
-  active_upper_layer_02->setCheckable(true);
-  active_upper_layer_03 = new QAction("Upper 3",active_layers);
-  active_upper_layer_03->setCheckable(true);
-  active_upper_layer_04 = new QAction("Upper 4",active_layers);
-  active_upper_layer_04->setCheckable(true);
-  active_upper_layer_05 = new QAction("Upper 5",active_layers);
-  active_upper_layer_05->setCheckable(true);
+
+  active_lower_layer_01 = new QListWidgetItem("Lower 1");
+  active_lower_layer_02 = new QListWidgetItem("Lower 2");
+  active_lower_layer_03 = new QListWidgetItem("Lower 3");
+  active_lower_layer_04 = new QListWidgetItem("Lower 4");
+  active_lower_layer_05 = new QListWidgetItem("Lower 5");
+  active_enhancer_layer = new QListWidgetItem("Enhancer");
+  active_item_layer = new QListWidgetItem("Item");
+  active_base_layer = new QListWidgetItem("Base");
+  active_person_layer = new QListWidgetItem("Person");
+  active_thing_layer = new QListWidgetItem("Thing");
+  active_upper_layer_01 = new QListWidgetItem("Upper 1");
+  active_upper_layer_02 = new QListWidgetItem("Upper 2");
+  active_upper_layer_03 = new QListWidgetItem("Upper 3");
+  active_upper_layer_04 = new QListWidgetItem("Upper 4");
+  active_upper_layer_05 = new QListWidgetItem("Upper 5");
 
   /* Sets up the side toolbar which shows the current active layer */
   sidetoolbar = new QListWidget(this);
-  sidetoolbar->addItem(active_base_layer_01->text());
-  sidetoolbar->addItem(active_base_layer_02->text());
-  sidetoolbar->addItem(active_base_layer_03->text());
-  sidetoolbar->addItem(active_base_layer_04->text());
-  sidetoolbar->addItem(active_base_layer_05->text());
-  sidetoolbar->addItem(active_enhancer_layer->text());
-  sidetoolbar->addItem(active_item_layer->text());
-  sidetoolbar->addItem(active_lower_layer->text());
-  sidetoolbar->addItem(active_person_layer->text());
-  sidetoolbar->addItem(active_thing_layer->text());
-  sidetoolbar->addItem(active_upper_layer_01->text());
-  sidetoolbar->addItem(active_upper_layer_02->text());
-  sidetoolbar->addItem(active_upper_layer_03->text());
-  sidetoolbar->addItem(active_upper_layer_04->text());
-  sidetoolbar->addItem(active_upper_layer_05->text());
+  sidetoolbar->addItem(active_lower_layer_01);
+  sidetoolbar->addItem(active_lower_layer_02);
+  sidetoolbar->addItem(active_lower_layer_03);
+  sidetoolbar->addItem(active_lower_layer_04);
+  sidetoolbar->addItem(active_lower_layer_05);
+  sidetoolbar->addItem(active_enhancer_layer);
+  sidetoolbar->addItem(active_item_layer);
+  sidetoolbar->addItem(active_base_layer);
+  sidetoolbar->addItem(active_person_layer);
+  sidetoolbar->addItem(active_thing_layer);
+  sidetoolbar->addItem(active_upper_layer_01);
+  sidetoolbar->addItem(active_upper_layer_02);
+  sidetoolbar->addItem(active_upper_layer_03);
+  sidetoolbar->addItem(active_upper_layer_04);
+  sidetoolbar->addItem(active_upper_layer_05);
+  connect(sidetoolbar,SIGNAL(itemClicked(QListWidgetItem*)),
+          this,SLOT(setActiveLayer(QListWidgetItem*)));
 
   /* Sets up the active layer dock */
   layer_dock = new QDockWidget("Active Layer");
@@ -277,22 +281,22 @@ void Application::setupLayerBar()
      an action group which allows multiple to be active at a time */
   shown_layers = new QActionGroup(this);
   shown_layers->setExclusive(false);
-  shown_base_layer_01 = new QAction("&Base 1",shown_layers);
-  shown_base_layer_01->setCheckable(true);
-  shown_base_layer_02 = new QAction("&Base 2",shown_layers);
-  shown_base_layer_02->setCheckable(true);
-  shown_base_layer_03 = new QAction("&Base 3",shown_layers);
-  shown_base_layer_03->setCheckable(true);
-  shown_base_layer_04 = new QAction("&Base 4",shown_layers);
-  shown_base_layer_04->setCheckable(true);
-  shown_base_layer_05 = new QAction("&Base 5",shown_layers);
-  shown_base_layer_05->setCheckable(true);
+  shown_lower_layer_01 = new QAction("&Lower 1",shown_layers);
+  shown_lower_layer_01->setCheckable(true);
+  shown_lower_layer_02 = new QAction("&Lower 2",shown_layers);
+  shown_lower_layer_02->setCheckable(true);
+  shown_lower_layer_03 = new QAction("&Lower 3",shown_layers);
+  shown_lower_layer_03->setCheckable(true);
+  shown_lower_layer_04 = new QAction("&Lower 4",shown_layers);
+  shown_lower_layer_04->setCheckable(true);
+  shown_lower_layer_05 = new QAction("&Lower 5",shown_layers);
+  shown_lower_layer_05->setCheckable(true);
   shown_enhancer_layer = new QAction("&Enhancer",shown_layers);
   shown_enhancer_layer->setCheckable(true);
   shown_item_layer = new QAction("&Item",shown_layers);
   shown_item_layer->setCheckable(true);
-  shown_lower_layer = new QAction("&Lower",shown_layers);
-  shown_lower_layer->setCheckable(true);
+  shown_base_layer = new QAction("&Base",shown_layers);
+  shown_base_layer->setCheckable(true);
   shown_person_layer = new QAction("&Person",shown_layers);
   shown_person_layer->setCheckable(true);
   shown_thing_layer = new QAction("&Thing",shown_layers);
@@ -307,17 +311,20 @@ void Application::setupLayerBar()
   shown_upper_layer_04->setCheckable(true);
   shown_upper_layer_05 = new QAction("&Upper 5",shown_layers);
   shown_upper_layer_05->setCheckable(true);
+  shown_grid = new QAction("&Grid",shown_layers);
+  shown_grid->setCheckable(true);
+  showAllLayers(true);
 
   /* Sets up the top toolbar which shows the currently shown layers */
   toolbar = new QToolBar("Tools",this);
-  toolbar->addAction(shown_base_layer_01);
-  toolbar->addAction(shown_base_layer_02);
-  toolbar->addAction(shown_base_layer_03);
-  toolbar->addAction(shown_base_layer_04);
-  toolbar->addAction(shown_base_layer_05);
+  toolbar->addAction(shown_lower_layer_01);
+  toolbar->addAction(shown_lower_layer_02);
+  toolbar->addAction(shown_lower_layer_03);
+  toolbar->addAction(shown_lower_layer_04);
+  toolbar->addAction(shown_lower_layer_05);
   toolbar->addAction(shown_enhancer_layer);
   toolbar->addAction(shown_item_layer);
-  toolbar->addAction(shown_lower_layer);
+  toolbar->addAction(shown_base_layer);
   toolbar->addAction(shown_person_layer);
   toolbar->addAction(shown_thing_layer);
   toolbar->addAction(shown_upper_layer_01);
@@ -325,6 +332,7 @@ void Application::setupLayerBar()
   toolbar->addAction(shown_upper_layer_03);
   toolbar->addAction(shown_upper_layer_04);
   toolbar->addAction(shown_upper_layer_05);
+  toolbar->addAction(shown_grid);
   addToolBar(Qt::TopToolBarArea,toolbar);
   toolbar->setFloatable(false);
   toolbar->setMovable(false);
@@ -340,14 +348,14 @@ void Application::setupLayerBar()
  */
 void Application::showAllLayers(bool layers)
 {
-  shown_base_layer_01->setChecked(layers);
-  shown_base_layer_02->setChecked(layers);
-  shown_base_layer_03->setChecked(layers);
-  shown_base_layer_04->setChecked(layers);
-  shown_base_layer_05->setChecked(layers);
+  shown_lower_layer_01->setChecked(layers);
+  shown_lower_layer_02->setChecked(layers);
+  shown_lower_layer_03->setChecked(layers);
+  shown_lower_layer_04->setChecked(layers);
+  shown_lower_layer_05->setChecked(layers);
   shown_enhancer_layer->setChecked(layers);
   shown_item_layer->setChecked(layers);
-  shown_lower_layer->setChecked(layers);
+  shown_base_layer->setChecked(layers);
   shown_person_layer->setChecked(layers);
   shown_thing_layer->setChecked(layers);
   shown_upper_layer_01->setChecked(layers);
@@ -355,6 +363,7 @@ void Application::showAllLayers(bool layers)
   shown_upper_layer_03->setChecked(layers);
   shown_upper_layer_04->setChecked(layers);
   shown_upper_layer_05->setChecked(layers);
+  shown_grid->setChecked(layers);
 }
 
 void Application::setSprite(QString path)
@@ -362,6 +371,58 @@ void Application::setSprite(QString path)
   current_sprite_choice = path;
 }
 
+void Application::setActiveLayer(QListWidgetItem *layer)
+{
+  if(layer->text()== "Base")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::BASE);
+  }
+  else if(layer->text()== "Enhancer")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::ENHANCER);
+  }
+  else if(layer->text()== "Lower 1")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::LOWER1);
+  }
+  else if(layer->text()== "Lower 2")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::LOWER2);
+  }
+  else if(layer->text()== "Lower 3")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::LOWER3);
+  }
+  else if(layer->text()== "Lower 4")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::LOWER4);
+  }
+  else if(layer->text()== "Lower 5")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::LOWER5);
+  }
+  else if(layer->text()== "Upper 1")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::UPPER1);
+  }
+  else if(layer->text()== "Upper 2")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::UPPER2);
+  }
+  else if(layer->text()== "Upper 3")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::UPPER3);
+  }
+  else if(layer->text()== "Upper 4")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::UPPER4);
+  }
+  else if(layer->text()== "Upper 5")
+  {
+    map_editor->setEditingLayer(EditorEnumDb::UPPER5);
+  }
+
+}
 
 /*============================================================================
  * PROTECTED FUNCTIONS

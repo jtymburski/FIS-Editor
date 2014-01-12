@@ -10,6 +10,9 @@
 #include <QWidget>
 #include <QPainter>
 #include <QVector>
+#include <QVBoxLayout>
+#include <QListWidget>
+#include <QScrollArea>
 #include "EditorSprite.h"
 
 class EditorSpriteToolbox : public QWidget
@@ -24,6 +27,7 @@ public:
 public slots:
   void addEditorSprite(EditorSprite* e);
   EditorSprite* getCurrent();
+  void setCurrent(int);
 
 protected:
   /* Sets up the painting of all selected files */
@@ -34,6 +38,9 @@ private:
 
   uint16_t nextID;
   EditorSprite* current;
+  QScrollArea* editor_sprite_list_scrollbar;
+  QListWidget* editor_sprite_list;
+
 
 signals:
 
