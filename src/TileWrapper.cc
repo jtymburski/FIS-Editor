@@ -11,9 +11,9 @@
  *===========================================================================*/
 
 /*
- * Description: Constructor function - Requires a path
+ * Description: Constructor function
  *
- * Input: File path
+ * Input: x/y coordinates on the map grid and a z depth
  */
 TileWrapper::TileWrapper(int x, int y, int z)
 {
@@ -22,12 +22,6 @@ TileWrapper::TileWrapper(int x, int y, int z)
   zpos = z;
   active_layer = EditorEnumDb::BASE;
   setAcceptHoverEvents(true);
-  //setFixedSize(64,64);
-  //setUpdatesEnabled(false);
-  //QPalette pal(palette());
-  //pal.setColor(backgroundRole(),Qt::black);
-  //setAutoFillBackground(true);
-  //setPalette(pal);
   base = true;
   enhancer = true;
   lower1 = true;
@@ -57,24 +51,11 @@ TileWrapper::TileWrapper(int x, int y, int z)
   upper_layers.push_back(NULL);
 }
 
+/*
+ * Description: Destructor function
+ */
 TileWrapper::~TileWrapper()
 {
-  /*
-  //qDebug()<<"Removing Tile Wrapper";
-  for(int i=0; i<5; i++)
-  {
-    delete lower_layers[i];
-    //qDebug()<<"    Removing Lower "<<i;
-    delete upper_layers[i];
-    //qDebug()<<"    Removing Upper "<<i;
-  }
-  delete base_layer;
-  //qDebug()<<"    Removing Base";
-  delete enhancer_layer;
-  //qDebug()<<"    Removing Enhancer";
-  delete tile;
-  //qDebug()<<"    Removing Tile";
-  */
   for(int i=0; i<5; i++)
   {
     lower_layers[i]=NULL;
@@ -85,63 +66,146 @@ TileWrapper::~TileWrapper()
   tile = NULL;
   toolbox = NULL;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setBase(bool toggle)
 {
   base = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setEnhancer(bool toggle)
 {
   enhancer = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setLower1(bool toggle)
 {
   lower1 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setLower2(bool toggle)
 {
   lower2 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setLower3(bool toggle)
 {
   lower3 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setLower4(bool toggle)
 {
   lower4 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setLower5(bool toggle)
 {
   lower5 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setUpper1(bool toggle)
 {
   upper1 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setUpper2(bool toggle)
 {
   upper2 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setUpper3(bool toggle)
 {
   upper3 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setUpper4(bool toggle)
 {
   upper4 = toggle;
 }
+
+/*
+ * Description: Sets the layer visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setUpper5(bool toggle)
 {
   upper5 = toggle;
 }
+
+/*
+ * Description: Sets the grid visibility
+ *
+ * Input: Visibility toggle
+ */
 void TileWrapper::setGrid(bool toggle)
 {
   grid = toggle;
 }
 
+
+/*
+ * Description: Paints the tile
+ *
+ * Input: Required fields, mostly unused
+ */
 void TileWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
            QWidget *widget)
 {
-  /* Draw Base */
   QRect bound(xpos*64,ypos*64,64,64);
   if(base && base_layer != NULL)
     painter->drawImage(bound,QImage(base_layer->getPath(0)));
@@ -173,10 +237,20 @@ void TileWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->drawRect(1+(xpos*64),1+(ypos*64),62,62);
   }
 }
+
+/*
+ * Description: Returns the bounding rectangle (Needed by API)
+ */
 QRectF TileWrapper::boundingRect() const
 {
   return QRectF(xpos*64,ypos*64,64,64);
 }
+
+/*
+ * Description: Mouse press event which handles placement of sprites on layers
+ *
+ * Input: Mouse event
+ */
 void TileWrapper::mousePressEvent(QGraphicsSceneMouseEvent *)
 {
   switch(active_layer)
@@ -222,8 +296,15 @@ void TileWrapper::mousePressEvent(QGraphicsSceneMouseEvent *)
   }
   update();
 }
+
+/*
+ * Description: Mouse hover event which handles placement of sprites on layers
+ *
+ * Input: Hover event
+ */
 void TileWrapper::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+  /* Only do if CTRL is held */
   if(event->modifiers() & Qt::ControlModifier)
   {
     switch(active_layer)
@@ -271,6 +352,11 @@ void TileWrapper::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
   }
 }
 
+/*
+ * Description: Sets the toolbox pointer
+ *
+ * Input: Editor Sprite Toolbox
+ */
 void TileWrapper::setToolbox(EditorSpriteToolbox *tool)
 {
   toolbox = tool;

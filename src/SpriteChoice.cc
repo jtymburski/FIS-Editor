@@ -15,7 +15,7 @@
 /*
  * Description: Constructor function - Requires a path
  *
- * Input: File path
+ * Input: Parent, file path, id
  */
 SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
 {
@@ -78,6 +78,11 @@ void SpriteChoice::deselect()
   update();
 }
 
+/*
+ * Description: Removes the old creation dialog, and creates a new one
+ *
+ * Outputs: The Editor Sprite (Unused currently)
+ */
 EditorSprite* SpriteChoice::makeSprite()
 {
   delete creation_dialog;

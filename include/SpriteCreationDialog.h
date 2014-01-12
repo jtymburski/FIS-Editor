@@ -18,22 +18,30 @@ public:
   SpriteCreationDialog(QWidget *parent = 0,
                        EditorSprite *working = new EditorSprite(),
                        QString path = "");
-
-
-  void loadWorkingSprite(EditorSprite*);
-
-signals:
-  void sendUpEditorSprite(EditorSprite* sprite);
-public slots:
-  void updateWorkingSprite();
-  void destroyWorkingSprite();
 private:
+  /* Sliders that correspond to the various parameters of the sprite */
   QSlider* brightness_input;
   QSlider* opacity_input;
   QSlider* red_input;
   QSlider* blue_input;
   QSlider* green_input;
+
+  /* The current sprite that is being altered/created by the dialog */
   EditorSprite *working_sprite;
+
+signals:
+  /* Sends up the Editor Sprite */
+  void sendUpEditorSprite(EditorSprite* sprite);
+
+public slots:
+  /* Loads the given working Editor Sprite */
+  void loadWorkingSprite(EditorSprite*);
+
+  /* Updates the current working sprite */
+  void updateWorkingSprite();
+
+  /* destroys the current working sprite */
+  void destroyWorkingSprite();
 
 };
 

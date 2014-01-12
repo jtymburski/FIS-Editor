@@ -28,9 +28,6 @@ SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
 
   /* Connect the button press to the dialog opening slot */
   connect(directory,SIGNAL(clicked()),this,SLOT(openDialog()));
-  //connect(this,SIGNAL(makeSprite()),parent,SLOT(makeSprite()));
-  //connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),
-  //        parent,SIGNAL(sendUpEditorSprite(EditorSprite*)));
 }
 
 /*

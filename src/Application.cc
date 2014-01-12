@@ -366,11 +366,21 @@ void Application::showAllLayers(bool layers)
   shown_grid->setChecked(layers);
 }
 
+/*
+ * Description: Sets the current image choice to be the given path
+ *
+ * Inputs: Path
+ */
 void Application::setSprite(QString path)
 {
   current_sprite_choice = path;
 }
 
+/*
+ * Description: Sets the active layer
+ *
+ * Inputs: List item that is sent to the map editor as an enum value
+ */
 void Application::setActiveLayer(QListWidgetItem *layer)
 {
   if(layer->text()== "Base")

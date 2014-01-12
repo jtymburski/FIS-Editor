@@ -25,13 +25,19 @@ public:
   /* Destructor function */
   ~EditorSpriteToolbox();
 public slots:
+  /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);
+
+  /* Returns the currently selected Editor Sprite */
   EditorSprite* getCurrent();
+
+  /* Sets the current Editor Sprite to the given index */
   void setCurrent(int);
 
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
+
 private:
   /* The vector for storing sprite choices */
   QVector<EditorSprite* > editor_sprites;
@@ -44,7 +50,6 @@ private:
 
   /* The list widget that contains all the sprite names */
   QListWidget* editor_sprite_list;
-
 
 signals:
 

@@ -1,25 +1,36 @@
 #include "SpriteCreationDialog.h"
 #include <QDebug>
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
+/*
+ * Description: Constructor function
+ *
+ * Input: Parent, editor sprite to work on, image path
+ */
 SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
-                                           EditorSprite *working,
-                                           QString p) :
-  QDialog(parent)
+                                           EditorSprite *working,QString p)
+                                           : QDialog(parent)
 {
+  /* Sets the working sprite and appropriate paths */
   working_sprite = working;
   working_sprite->setPath(p);
   working_sprite->setImage(QImage(p));
 
+  /* Sets up a grid layout for the sliders and such */
   QGridLayout* layout = new QGridLayout();
   layout->setSpacing(2);
   layout->setAlignment(Qt::AlignRight);
 
+  /* ID display */
   QString id_label("ID: ");
   id_label.append(QString::number(working_sprite->getSprite()->getId()));
   QLabel* id_number = new QLabel(id_label);
   layout->addWidget(id_number,0,0);
 
-
+  /* Name input */
   QLabel* name = new QLabel("Name:");
   layout->addWidget(name,0,1);
   QLineEdit* name_input = new QLineEdit(working_sprite->getName());
@@ -29,11 +40,14 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           working_sprite,SLOT(setName(QString)));
   layout->addWidget(name_input,0,2);
 
+  /* Frame Display */
+  // TODO: Make this do something
   QWidget* frametest = new QWidget();
   frametest->setFixedSize(256,32);
   frametest->setBackgroundRole(QPalette::Base);
   layout->addWidget(frametest,1,1);
 
+  /* Brightness input */
   QLabel* brightness_label = new QLabel("Brightness");
   layout->addWidget(brightness_label,2,0);
   brightness_input = new QSlider(Qt::Horizontal);
@@ -50,6 +64,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           brightness,SLOT(setNum(int)));
   layout->addWidget(brightness,2,2);
 
+  /* Opacity input */
   QLabel* opacity_label = new QLabel("Opacity");
   layout->addWidget(opacity_label,3,0);
   opacity_input = new QSlider(Qt::Horizontal);
@@ -65,6 +80,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           opacity,SLOT(setNum(int)));
   layout->addWidget(opacity,3,2);
 
+  /* Red input */
   QLabel* red_label = new QLabel("Red Balance");
   layout->addWidget(red_label,4,0);
   red_input = new QSlider(Qt::Horizontal);
@@ -80,6 +96,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           red,SLOT(setNum(int)));
   layout->addWidget(red,4,2);
 
+  /* Blue input */
   QLabel* blue_label = new QLabel("Blue Balance");
   layout->addWidget(blue_label,5,0);
   blue_input = new QSlider(Qt::Horizontal);
@@ -95,6 +112,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           blue,SLOT(setNum(int)));
   layout->addWidget(blue,5,2);
 
+  /* Green input */
   QLabel* green_label = new QLabel("Green Balance");
   layout->addWidget(green_label,6,0);
   green_input = new QSlider(Qt::Horizontal);
@@ -110,6 +128,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           green,SLOT(setNum(int)));
   layout->addWidget(green,6,2);
 
+  /* Animation time input */
   QLabel* time_label = new QLabel("Animation Time:");
   layout->addWidget(time_label,7,0);
   QLineEdit* time_input = new QLineEdit(QString::number(
@@ -121,6 +140,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           working_sprite,SLOT(setAnimationTime(QString)));
   layout->addWidget(time_input,7,1);
 
+  /* Directional input */
   QLabel* direction_label = new QLabel("Direction:");
   layout->addWidget(direction_label,8,0);
   QComboBox* direction_input = new QComboBox();
@@ -134,6 +154,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           working_sprite,SLOT(setDirection(int)));
   layout->addWidget(direction_input,8,1);
 
+  /* Rotation input */
   QLabel* rotation_label = new QLabel("Rotation:");
   layout->addWidget(rotation_label,9,0);
   QLineEdit* rotation_input = new QLineEdit(QString::number(
@@ -145,11 +166,13 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           working_sprite,SLOT(setRotation(QString)));
   layout->addWidget(rotation_input,9,1);
 
+  /* Ok button */
   QPushButton* ok = new QPushButton("Ok",this);
   ok->setFixedWidth(64);
   layout->addWidget(ok,10,0);
   connect(ok,SIGNAL(clicked()),this,SLOT(updateWorkingSprite()));
 
+  /* Cancel button */
   QPushButton* cancel = new QPushButton("Cancel",this);
   cancel->setFixedWidth(64);
   layout->addWidget(cancel,10,1);
@@ -157,24 +180,32 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 
   setLayout(layout);
 
-
   connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
           SIGNAL(sendUpEditorSprite(EditorSprite*)));
-
-
 }
 
+/*
+ * Description: Loads a working sprite
+ *
+ * Input: Editor sprite
+ */
 void SpriteCreationDialog::loadWorkingSprite(EditorSprite *s)
 {
   working_sprite = s;
 }
 
+/*
+ * Description: Destroys the working sprite
+ */
 void SpriteCreationDialog::destroyWorkingSprite()
 {
   delete working_sprite;
   close();
 }
 
+/*
+ * Description: Emits the sprite with the new changes and closes the dialog
+ */
 void SpriteCreationDialog::updateWorkingSprite()
 {
   emit sendUpEditorSprite(working_sprite);

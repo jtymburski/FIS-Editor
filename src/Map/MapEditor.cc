@@ -14,10 +14,18 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor function */
+/*
+ * Description: Constructor function
+ *
+ * Input: a pointer to the Editor Sprite Toolbox,
+ *        the parent widget, and the dimensions of the map
+ */
 MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
 {
+  /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
+
+  /* Sets the width and height, and all of the layers to be visible */
   width = w;
   height = h;
   base = true;
@@ -32,8 +40,11 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
   upper3 = true;
   upper4 = true;
   upper5 = true;
+
+  /* Sets the size of the map scene */
   setSceneRect(0,0,width*64,height*64);
 
+  /* Sets up a blank canvas of tiles on the map */
   for(int i=0; i<width; i++)
   {
     QList<TileWrapper*> stack;
@@ -41,6 +52,7 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
       stack.push_back(new TileWrapper(i,j));
     tiles.push_back(stack);
   }
+  /* Adds each tile to the map view and sets its toolbox pointer */
   for(int i=0; i<width; i++)
   {
       for(int j=0; j<height; j++)
@@ -51,10 +63,11 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
   }
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 MapEditor::~MapEditor()
 {
-  //qDebug()<<"Removing MapEditor";
   for(int i=0; i<width; i++)
   {
     for(int j=0; j<height; j++)
@@ -65,6 +78,11 @@ MapEditor::~MapEditor()
   }
 }
 
+/*
+ * Description: Toggles the base layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleBase(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -76,6 +94,12 @@ void MapEditor::toggleBase(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the enhancer layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleEnhancer(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -87,6 +111,12 @@ void MapEditor::toggleEnhancer(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the lower layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleLower1(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -98,6 +128,12 @@ void MapEditor::toggleLower1(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the lower layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleLower2(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -109,6 +145,12 @@ void MapEditor::toggleLower2(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the lower layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleLower3(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -120,6 +162,12 @@ void MapEditor::toggleLower3(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the lower layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleLower4(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -131,6 +179,12 @@ void MapEditor::toggleLower4(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the lower layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleLower5(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -142,6 +196,12 @@ void MapEditor::toggleLower5(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the upper layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleUpper1(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -153,6 +213,12 @@ void MapEditor::toggleUpper1(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the upper layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleUpper2(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -164,6 +230,12 @@ void MapEditor::toggleUpper2(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the upper layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleUpper3(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -175,6 +247,12 @@ void MapEditor::toggleUpper3(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the upper layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleUpper4(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -186,6 +264,12 @@ void MapEditor::toggleUpper4(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the upper layers for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleUpper5(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -197,6 +281,12 @@ void MapEditor::toggleUpper5(bool toggle)
     }
   }
 }
+
+/*
+ * Description: Toggles the grid for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
 void MapEditor::toggleGrid(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -209,6 +299,12 @@ void MapEditor::toggleGrid(bool toggle)
   }
 }
 
+
+/*
+ * Description: Sets the layer that is currently being edited for each tile
+ *
+ * Inputs: Layer choice
+ */
 void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
 {
   for(int i=0; i<tiles.size(); i++)
@@ -221,9 +317,6 @@ void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
 }
 
 void MapEditor::paintEvent(QPaintEvent *)
-{
- // QPainter painter(this);
-
-}
+{}
 
 
