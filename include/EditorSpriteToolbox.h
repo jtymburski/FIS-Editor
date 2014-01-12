@@ -36,9 +36,13 @@ private:
   /* The vector for storing sprite choices */
   QVector<EditorSprite* > editor_sprites;
 
+  /* The next available ID */
   uint16_t nextID;
+
+  /* The current Sprite selected in the toolbox */
   EditorSprite* current;
-  QScrollArea* editor_sprite_list_scrollbar;
+
+  /* The list widget that contains all the sprite names */
   QListWidget* editor_sprite_list;
 
 

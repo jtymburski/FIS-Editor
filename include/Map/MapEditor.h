@@ -27,6 +27,7 @@ public:
   ~MapEditor();
 
 public slots:
+  /* Functions to toggle each layer to be shown */
   void toggleBase(bool);
   void toggleEnhancer(bool);
   void toggleLower1(bool);
@@ -39,19 +40,28 @@ public slots:
   void toggleUpper3(bool);
   void toggleUpper4(bool);
   void toggleUpper5(bool);
+
+  /* Function to toggle the grid */
   void toggleGrid(bool);
+
+  /* Function to set the current layer for editing */
   void setEditingLayer(EditorEnumDb::Layer);
 
 protected:
   void paintEvent(QPaintEvent *);
 private:
+  /* Boolean values for determining which layers are shown */
   bool base,enhancer;
   bool lower1,lower2,lower3,lower4,lower5;
   bool upper1,upper2,upper3,upper4,upper5;
+
   /* Map layer tabs */
   QTabWidget* layer_tabs;
 
+  /* The list of tiles */
   QList<QList<TileWrapper*> > tiles;
+
+  /* Dimensions of the map */
   int width;
   int height;
   /*------------------- Constants -----------------------*/

@@ -74,6 +74,8 @@ signals:
 
   /* Emits to parent to send an image path */
   void pathOfImage(QString);
+
+  /* Passes up the created Editor Sprite */
   void sendUpEditorSprite(EditorSprite* e);
 };
 #endif // SPRITECHOICE_H

@@ -14,9 +14,12 @@ class SpriteCreationDialog : public QDialog
 {
   Q_OBJECT
 public:
+  /* Constructor function */
   SpriteCreationDialog(QWidget *parent = 0,
                        EditorSprite *working = new EditorSprite(),
                        QString path = "");
+
+
   void loadWorkingSprite(EditorSprite*);
 
 signals:
