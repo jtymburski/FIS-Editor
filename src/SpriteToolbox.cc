@@ -22,7 +22,8 @@ SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
   directory->show();
 
   /* Setup the dialog that appears when a button is selected */
-  select_files = new QFileDialog(this,tr("Open Files"),"/home",
+  select_files = new QFileDialog(this,tr("Open Files"),
+                                 QDir::current().absolutePath(),
                                  tr("Images (*png *.jpg"));
   select_files->setFileMode(QFileDialog::ExistingFiles);
 
