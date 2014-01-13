@@ -24,7 +24,9 @@
 #include <QTabWidget>
 #include <QGraphicsView>
 #include <QListWidget>
+#include <QTreeView>
 #include "Map/MapEditor.h"
+#include "ImageSelectionModule.h"
 #include "EditorSpriteToolbox.h"
 #include "SpriteToolbox.h"
 
@@ -46,11 +48,10 @@ private:
 
   /* Toolbox pointer */
   QTabWidget* tab;
-  SpriteToolbox* images_tab;
+  ImageSelectionModule* images_tab;
   EditorSpriteToolbox* sprites_tab;
 
   /* Scroll area pointer */
-  QScrollArea* images_tab_scrollwrapper;
   QScrollArea* sprites_tab_scrollwrapper;
 
   /* Sidebar dock pointer */

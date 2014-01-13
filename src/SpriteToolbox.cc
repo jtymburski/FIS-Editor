@@ -15,17 +15,21 @@
  *
  * Input: parent widget
  */
-SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
+SpriteToolbox::SpriteToolbox(QWidget *parent, QFileSystemModel* module)
+  : QWidget(parent)
 {
+  /* Sets up the directory module */
+  directory_module = module;
+
   /* Setup the selection buttons */
   directory = new QPushButton("Select Directory",this);
-  directory->show();
+  directory->hide();
 
   /* Sets up the string path to the sprites folder */
   QString sprites_dir;
   sprites_dir.append(QDir::current().absolutePath());
   sprites_dir.chop(7);
-  sprites_dir.append("/Project/sprites");
+  sprites_dir.append("/Project/sprites/Map");
 
   /* Setup the dialog that appears when a button is selected */
   select_files = new QFileDialog(this,tr("Select A Directory To View"),
@@ -72,7 +76,7 @@ void SpriteToolbox::paintEvent(QPaintEvent *)
   for(int i=0, j=0, k=0; i<sprites.size(); i++, k++)
   {
     sprites.at(i)->show();
-    if(i%4 == 0)
+    if(i%4 == 0 && i!=0)
     {
       j+=spacing;
       k=0;
@@ -137,7 +141,50 @@ void SpriteToolbox::openDialog()
   }
 }
 
+/*
+ * Description: Opens the dialog box, adds all of the selected sprites to the
+ *              toolbox.
+ */
+void SpriteToolbox::switchDirectory(QModelIndex index)
+{
+  QString path = directory_module->filePath(index);
 
+  /* Creates a temporary list of file paths to all of the selected images */
+  QStringList filenames;
+
+  /* Temporary list of detailed file info (For total path) */
+  QFileInfoList fileinfolist;
+
+  /* String list for file type filtering */
+  QStringList filters;
+  filters << "*.png";
+
+  /* Opens the dialog, and stores info for all png's in the chosen directory */
+  fileinfolist = QDir(path).entryInfoList(filters);
+  filenames.clear();
+  for(int i=0; i<sprites.size();i++)
+    delete sprites[i];
+  sprites.resize(0);
+
+  /* Stores the file paths */
+  for(int i=0; i<fileinfolist.size(); i++)
+    filenames.push_back(fileinfolist[i].absoluteFilePath());
+
+  fileinfolist.clear();
+
+
+  /* Adds each sprite to the overall vector of sprites */
+  if(filenames.size() != 0)
+  {
+    for(int i=0; i<filenames.size(); i++)
+      sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
+
+    /* Resizes the widget to accomodate each new row of sprites */
+    resize(width(),68+(qCeil(sprites.size()/4.0)*68));
+    /* Calls update to setup the view */
+    update();
+  }
+}
 
 /*
  * Description: Deselects all sprite choices except the calling sprite choice

@@ -16,6 +16,7 @@
 #include <qmath.h>
 #include <QHBoxLayout>
 #include <QDir>
+#include <QFileSystemModel>
 #include "SpriteChoice.h"
 #include "EditorSprite.h"
 
@@ -24,7 +25,7 @@ class SpriteToolbox : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteToolbox(QWidget* parent = 0);
+  SpriteToolbox(QWidget* parent = 0, QFileSystemModel* module = 0);
 
   /* Destructor function */
   ~SpriteToolbox();
@@ -32,6 +33,9 @@ public:
 public slots:
   /* Opens the file selection dialog */
   void openDialog();
+
+  /* Inputs the files from the given directory */
+  void switchDirectory(QModelIndex);
 
   /* Deselects all sprites except the chosen one */
   void deselectOthers(int);
@@ -54,6 +58,9 @@ private:
 
   /* Currently selected Sprite path */
   QString path;
+
+  /* Pointer to the directory selection dialog */
+  QFileSystemModel* directory_module;
 signals:
 
   /* Emits to parent to send an image path */

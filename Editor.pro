@@ -38,7 +38,8 @@ SOURCES += \
     src/EditorSpriteToolbox.cc \
     src/SpriteCreationDialog.cc \
     src/TileWrapper.cc \
-    ../Project/src/Game/EventHandler.cc
+    ../Project/src/Game/EventHandler.cc \
+    src/ImageSelectionModule.cc
 
 HEADERS += \
     ./include/Application.h \
@@ -56,7 +57,8 @@ HEADERS += \
     include/EditorSpriteToolbox.h \
     include/SpriteCreationDialog.h \
     include/TileWrapper.h \
-    ../Project/include/Game/EventHandler.h
+    ../Project/include/Game/EventHandler.h \
+    include/ImageSelectionModule.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

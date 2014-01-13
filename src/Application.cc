@@ -58,25 +58,19 @@ Application::~Application()
 void Application::setupSidebar()
 {
   /* Sets up a scroll area with the images tab */
-  images_tab = new SpriteToolbox(this);
-  images_tab_scrollwrapper = new QScrollArea(this);
-  images_tab_scrollwrapper->setBackgroundRole(QPalette::Dark);
-  images_tab_scrollwrapper->setWidget(images_tab);
-  images_tab_scrollwrapper->setMinimumSize(288,68);
-  images_tab_scrollwrapper->setMaximumWidth(288);
-  images_tab->setMinimumSize(288,68);
-  images_tab->setMaximumWidth(288);
+  images_tab = new ImageSelectionModule(this);
+  //images_tab->setFixedSize(288,640);
 
   /* Sets up a scroll area with the sprites tab */
   sprites_tab = new EditorSpriteToolbox(this);
-  sprites_tab->setFixedSize(288,640);
+  sprites_tab->setFixedSize(288,600);
 
-  connect(images_tab,SIGNAL(sendUpEditorSprite(EditorSprite*)),sprites_tab,
-          SLOT(addEditorSprite(EditorSprite*)));
+  connect(images_tab->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
+          sprites_tab,SLOT(addEditorSprite(EditorSprite*)));
 
 
   tab = new QTabWidget(this);
-  tab->addTab(images_tab_scrollwrapper,"Raw Images");
+  tab->addTab(images_tab,"Raw Images");
   tab->addTab(sprites_tab,"Sprites");
   //tab->setMinimumSize(290,68);
   //tab->setMaximumWidth(290);
@@ -89,7 +83,7 @@ void Application::setupSidebar()
                     | QDockWidget::DockWidgetFloatable);
 
   /* Connects sprite picking */
-  connect(images_tab,SIGNAL(pathOfImage(QString)),this,
+  connect(images_tab->getToolbox(),SIGNAL(pathOfImage(QString)),this,
           SLOT(setSprite(QString)));
 }
 
