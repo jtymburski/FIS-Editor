@@ -21,11 +21,19 @@ SpriteToolbox::SpriteToolbox(QWidget *parent) : QWidget(parent)
   directory = new QPushButton("Select Directory",this);
   directory->show();
 
+  /* Sets up the string path to the sprites folder */
+  QString sprites_dir;
+  sprites_dir.append(QDir::current().absolutePath());
+  sprites_dir.chop(7);
+  sprites_dir.append("/Project/sprites");
+
   /* Setup the dialog that appears when a button is selected */
-  select_files = new QFileDialog(this,tr("Open Files"),
-                                 QDir::current().absolutePath(),
-                                 tr("Images (*png *.jpg"));
-  select_files->setFileMode(QFileDialog::ExistingFiles);
+  select_files = new QFileDialog(this,tr("Select A Directory To View"),
+                                 sprites_dir);
+  select_files->setFileMode(QFileDialog::DirectoryOnly);
+  select_files->setOption(QFileDialog::ShowDirsOnly,true);
+  //select_files->setViewMode(QFileDialog::Detail);
+  //select_files->setFileMode(QFileDialog::ExistingFiles);
 
   /* Connect the button press to the dialog opening slot */
   connect(directory,SIGNAL(clicked()),this,SLOT(openDialog()));
@@ -84,10 +92,39 @@ void SpriteToolbox::openDialog()
 {
   /* Creates a temporary list of file paths to all of the selected images */
   QStringList filenames;
+
+  /* Temporary list of detailed file info (For total path) */
+  QFileInfoList fileinfolist;
+
+  /* String list for file type filtering */
+  QStringList filters;
+  filters << "*.png";
+
+  /* Opens the dialog, and stores info for all png's in the chosen directory */
   if(select_files->exec())
-      filenames = select_files->selectedFiles();
+  {
+    QString totalpath;
+    totalpath.append(select_files->selectedFiles().at(0));
+    fileinfolist = QDir(totalpath).entryInfoList(filters);
+    filenames.clear();
+    for(int i=0; i<sprites.size();i++)
+      delete sprites[i];
+    sprites.resize(0);
+  }
+
+  /* Stores the file paths */
+  for(int i=0; i<fileinfolist.size(); i++)
+    filenames.push_back(fileinfolist[i].absoluteFilePath());
+
+  for(int i=0; i<filenames.size(); i++)
+  {
+    qDebug()<<filenames[i]<<endl;
+  }
+  fileinfolist.clear();
+
 
   /* Adds each sprite to the overall vector of sprites */
+
   if(filenames.size() != 0)
   {
     for(int i=0; i<filenames.size(); i++)
@@ -99,6 +136,8 @@ void SpriteToolbox::openDialog()
     update();
   }
 }
+
+
 
 /*
  * Description: Deselects all sprite choices except the calling sprite choice

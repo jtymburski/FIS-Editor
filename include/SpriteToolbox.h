@@ -15,6 +15,7 @@
 #include <QVector>
 #include <qmath.h>
 #include <QHBoxLayout>
+#include <QDir>
 #include "SpriteChoice.h"
 #include "EditorSprite.h"
 
