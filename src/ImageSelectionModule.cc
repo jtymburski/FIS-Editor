@@ -46,9 +46,8 @@ ImageSelectionModule::ImageSelectionModule(QWidget *parent) : QWidget(parent)
   image_viewer->setMaximumWidth(286);
 
   /* Connects clicking of directories to a change in the image viewer */
-  connect(directory_tree,SIGNAL(clicked(QModelIndex)),
-          image_viewer,SLOT(switchDirectory(QModelIndex)));
-  connect(directory_tree,SIGNAL(expanded(QModelIndex)),
+  connect(directory_tree->selectionModel(),
+          SIGNAL(currentChanged(QModelIndex,QModelIndex)),
           image_viewer,SLOT(switchDirectory(QModelIndex)));
 
   layout->addWidget(directory_tree);

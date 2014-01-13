@@ -179,11 +179,12 @@ void SpriteToolbox::switchDirectory(QModelIndex index)
     for(int i=0; i<filenames.size(); i++)
       sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
 
-    /* Resizes the widget to accomodate each new row of sprites */
-    resize(width(),68+(qCeil(sprites.size()/4.0)*68));
     /* Calls update to setup the view */
     update();
   }
+
+  /* Resizes the widget to accomodate each new row of sprites */
+  resize(width(),68+(qCeil(sprites.size()/4.0)*68));
 }
 
 /*
