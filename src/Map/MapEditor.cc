@@ -7,6 +7,7 @@
  ******************************************************************************/
 #include "Map/MapEditor.h"
 #include <QDebug>
+#include <QGraphicsView>
 /* Constant Implementation - see header file for descriptions */
 //const int Map::kELEMENT_DATA = 0;
 
@@ -318,5 +319,30 @@ void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
 
 void MapEditor::paintEvent(QPaintEvent *)
 {}
+
+void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+  if(event->buttons() & Qt::LeftButton)
+  {
+    TileWrapper* current =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(event->scenePos(),QTransform()));
+    if(current != NULL)
+      current->place();
+  }
+}
+
+void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+  if(event->buttons() & Qt::LeftButton)
+  {
+    TileWrapper* current =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(event->scenePos(),QTransform()));
+    if(current != NULL)
+      current->place();
+  }
+}
+
 
 

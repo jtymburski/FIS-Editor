@@ -26,6 +26,8 @@ public:
   /* Destructor Function */
   ~TileWrapper();
 
+  enum ItemType { Type_TileWrapper = UserType+1};
+  int type() const { return Type_TileWrapper; }
 public:
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
@@ -33,6 +35,8 @@ public:
   /* Painting function for Tile Wrapper */
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget);
+
+  void place();
 
 public:
   /* Sets the various layer visibilities */
@@ -64,9 +68,6 @@ public:
   /* Variable for the currently active layer */
   EditorEnumDb::Layer active_layer;
 protected:
-  /* Mouse press and enter events for placement of sprites onto tile layers */
-  void mousePressEvent(QGraphicsSceneMouseEvent *);
-  void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
 private:
   /* Toggling visibility variables */
   bool base,enhancer;

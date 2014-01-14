@@ -48,7 +48,11 @@ public slots:
   void setEditingLayer(EditorEnumDb::Layer);
 
 protected:
+  /* Paint event */
   void paintEvent(QPaintEvent *);
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+
 private:
   /* Boolean values for determining which layers are shown */
   bool base,enhancer;

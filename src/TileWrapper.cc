@@ -246,12 +246,7 @@ QRectF TileWrapper::boundingRect() const
   return QRectF(xpos*64,ypos*64,64,64);
 }
 
-/*
- * Description: Mouse press event which handles placement of sprites on layers
- *
- * Input: Mouse event
- */
-void TileWrapper::mousePressEvent(QGraphicsSceneMouseEvent *)
+void TileWrapper::place()
 {
   switch(active_layer)
   {
@@ -295,61 +290,6 @@ void TileWrapper::mousePressEvent(QGraphicsSceneMouseEvent *)
       break;
   }
   update();
-}
-
-/*
- * Description: Mouse hover event which handles placement of sprites on layers
- *
- * Input: Hover event
- */
-void TileWrapper::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-  /* Only do if CTRL is held */
-  if(event->modifiers() & Qt::ControlModifier)
-  {
-    switch(active_layer)
-    {
-      case EditorEnumDb::BASE:
-        base_layer = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::ENHANCER:
-        enhancer_layer = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::LOWER1:
-        lower_layers[0] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::LOWER2:
-        lower_layers[1] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::LOWER3:
-        lower_layers[2] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::LOWER4:
-        lower_layers[3] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::LOWER5:
-        lower_layers[4] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::UPPER1:
-        upper_layers[0] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::UPPER2:
-        upper_layers[1] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::UPPER3:
-        upper_layers[2] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::UPPER4:
-        upper_layers[3] = toolbox->getCurrent();
-        break;
-      case EditorEnumDb::UPPER5:
-        upper_layers[4] = toolbox->getCurrent();
-        break;
-      default:
-        break;
-    }
-    update();
-  }
 }
 
 /*
