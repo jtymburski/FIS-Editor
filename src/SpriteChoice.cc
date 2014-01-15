@@ -185,4 +185,16 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
   update();
 }
 
-
+void SpriteChoice::mouseDoubleClickEvent(QMouseEvent *event)
+{
+  if(event->button() == Qt::LeftButton)
+  {
+    EditorSprite* autosprite = new EditorSprite(path);
+    int pathtoimage = path.lastIndexOf('/');
+    qDebug()<<pathtoimage;
+    QString filename = path.remove(0,pathtoimage+1);
+    filename.chop(4);
+    autosprite->setName(filename);
+    emit sendUpEditorSprite(autosprite);
+  }
+}

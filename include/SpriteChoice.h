@@ -47,6 +47,7 @@ protected:
   void enterEvent(QEvent *);
   void leaveEvent(QEvent *);
   void mousePressEvent(QMouseEvent *);
+  void mouseDoubleClickEvent(QMouseEvent *);
 
 private:
   /* A Pointer to the image stored */
