@@ -65,6 +65,10 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
   painter.drawRect(border);
   painter.setFont(QFont("helvetica",14,QFont::Bold));
   painter.drawText(80,536,current->getName());
+  painter.setFont(QFont("arial",8));
+  QString framecount = "Framecount : ";
+  painter.drawText(85,554,framecount.append(QString::
+                                            number(current->frameCount())));
 }
 
 /*

@@ -11,13 +11,17 @@
  * Input: Parent, editor sprite to work on, image path
  */
 SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
-                                           EditorSprite *working,QString p)
+                                           EditorSprite *working,QString p,
+                                           int subsequent)
                                            : QDialog(parent)
 {
   /* Sets the working sprite and appropriate paths */
   working_sprite = working;
-  working_sprite->setPath(p);
-  working_sprite->setImage(QImage(p));
+  for(int i=0; i<subsequent; i++)
+  {
+    working_sprite->setPath(p);
+    working_sprite->setImage(QImage(p));
+  }
 
   /* Sets up a grid layout for the sliders and such */
   QGridLayout* layout = new QGridLayout();

@@ -49,6 +49,9 @@ public:
   /* Gets the user submitted name of the sprite */
   QString getName();
 
+  /* Gets the current number of frames */
+  int frameCount();
+
 public slots:
   /* Sets the user submitted name */
   void setName(QString name);

@@ -17,7 +17,7 @@ public:
   /* Constructor function */
   SpriteCreationDialog(QWidget *parent = 0,
                        EditorSprite *working = new EditorSprite(),
-                       QString path = "");
+                       QString path = "", int subsequent = 0);
 private:
   /* Sliders that correspond to the various parameters of the sprite */
   QSlider* brightness_input;

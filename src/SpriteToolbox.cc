@@ -172,12 +172,29 @@ void SpriteToolbox::switchDirectory(QModelIndex index)
 
   fileinfolist.clear();
 
-
   /* Adds each sprite to the overall vector of sprites */
   if(filenames.size() != 0)
   {
+    QStringList chopped_names;
+    for(int i=0; i<filenames.size();i++)
+    {
+      int pathto = filenames[i].lastIndexOf('_');
+      QString temp = filenames[i];
+      temp.chop(temp.size()-(pathto+2));
+      chopped_names.push_back(temp);
+    }
     for(int i=0; i<filenames.size(); i++)
-      sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
+    {
+      int samecount = 0;
+      for(int j = i+1; j<chopped_names.size()-1; j++)
+      {
+        if(chopped_names[i] == chopped_names[j])
+          samecount++;
+      }
+
+      sprites.push_back(new SpriteChoice(this,filenames.at(i),
+                                         sprites.size(),samecount));
+    }
 
     /* Calls update to setup the view */
     update();

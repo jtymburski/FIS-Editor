@@ -17,8 +17,10 @@
  *
  * Input: Parent, file path, id
  */
-SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id) : QWidget(parent)
+SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id, int f)
+  : QWidget(parent)
 {
+  followers = f;
   /* Sets up size of the boundary and loads the given image into memory */
   setGeometry(0,0,66,66);
   path = p;
@@ -86,7 +88,8 @@ void SpriteChoice::deselect()
 EditorSprite* SpriteChoice::makeSprite()
 {
   delete creation_dialog;
-  creation_dialog = new SpriteCreationDialog(this,new EditorSprite(path),path);
+  creation_dialog =
+      new SpriteCreationDialog(this,new EditorSprite(path),path,followers);
   creation_dialog->show();
 }
 
@@ -175,6 +178,10 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
     else
       mode = EditorEnumDb::STANDARD;
   }
+  else if(event->button() == Qt::MiddleButton)
+  {
+      qDebug()<<followers;
+  }
   else
   {
     if(rightclick_menu->isHidden())
@@ -185,15 +192,24 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
   update();
 }
 
+/*
+ * Description: The mouse double click event for auto sprite creation
+ *
+ * Inputs: Mouse event
+ */
+
 void SpriteChoice::mouseDoubleClickEvent(QMouseEvent *event)
 {
   if(event->button() == Qt::LeftButton)
   {
     EditorSprite* autosprite = new EditorSprite(path);
+    /* Get size of non name path */
     int pathtoimage = path.lastIndexOf('/');
-    qDebug()<<pathtoimage;
+    /* Remove non name path */
     QString filename = path.remove(0,pathtoimage+1);
+    /* Be rid of the extention (Always .png) */
     filename.chop(4);
+    /* Set the name for the sprite and send it to the Editor Sprite toolbox */
     autosprite->setName(filename);
     emit sendUpEditorSprite(autosprite);
   }

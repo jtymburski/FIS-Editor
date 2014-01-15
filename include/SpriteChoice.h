@@ -22,7 +22,8 @@ class SpriteChoice : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteChoice(QWidget* parent = 0, QString path = 0, int id = 0);
+  SpriteChoice(QWidget* parent = 0, QString path = 0,
+               int id = 0, int followers = 0);
 
   /* Destructor function */
   ~SpriteChoice();
@@ -43,13 +44,16 @@ protected:
   /* Paints the sprite in a bounding box */
   void paintEvent(QPaintEvent *);
 
-  /* Mouse Enter, Leave and click events */
+  /* Mouse Enter, Leave and Click events */
   void enterEvent(QEvent *);
   void leaveEvent(QEvent *);
   void mousePressEvent(QMouseEvent *);
   void mouseDoubleClickEvent(QMouseEvent *);
 
 private:
+  /* The number of same images that trail this one */
+  int followers;
+
   /* A Pointer to the image stored */
   QImage* pic;
 

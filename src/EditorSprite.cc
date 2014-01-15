@@ -109,6 +109,17 @@ QImage EditorSprite::getImage(int pos)
 }
 
 /*
+ * Description: Gets the frame count
+ *
+ * Output: The frame count
+ */
+int EditorSprite::frameCount()
+{
+  // TODO: Set this properly after the frame framework is in place
+  return frame_images.size();
+}
+
+/*
  * Description: Sets the Editor Sprites name
  *
  * Input: Name
