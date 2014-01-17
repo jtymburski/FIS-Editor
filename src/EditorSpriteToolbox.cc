@@ -72,6 +72,33 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
 }
 
 /*
+ * Description: The mouse double click event brings up a display that contains
+ * all of the frames in the current sprite selected, right now this was just for
+ * debugging reasons, however it may have a use later on
+ *
+ * Inputs: Mouse event
+ */
+void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
+{
+  if(e->button() & Qt::LeftButton)
+  {
+    frames = new QDialog(this);
+    QHBoxLayout* framelayout = new QHBoxLayout(frames);
+    QVector<QLabel*> labels;
+    for(int i=0; i<current->frameCount(); i++)
+    {
+      labels.push_back(new QLabel());
+      labels.last()->setPixmap(QPixmap(current->getPath(i)));
+      framelayout->addWidget(labels.last());
+    }
+    frames->setLayout(framelayout);
+    frames->setModal(false);
+    frames->setWindowTitle(current->getName());
+    frames->exec();
+  }
+}
+
+/*
  * Description: Adds an editor sprite to the toolbox
  *
  * Inputs: The editor sprite to add

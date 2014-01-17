@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/Icons">
+        <file>Resources/fbs_icon.ico</file>
+        <file>Resources/fbs_logo_transparent.png</file>
+        <file>Resources/fbs_logo_watermark.png</file>
+    </qresource>
+</RCC>

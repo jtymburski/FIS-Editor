@@ -26,6 +26,8 @@ Application::Application(QWidget* parent) : QMainWindow(parent)
   current_sprite_choice = "Sup";
 
   /* Calls all setup functions */
+  setWindowTitle("Univursa Designer");
+  setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
   setupSidebar();
   setupLayerBar();
   setupMapView();

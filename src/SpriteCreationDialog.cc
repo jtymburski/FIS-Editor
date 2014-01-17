@@ -17,10 +17,19 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 {
   /* Sets the working sprite and appropriate paths */
   working_sprite = working;
+
+  /* Sets the subsequent frames of the sequence (The first is set on
+   *construction, thus we start adding the frames at i+1) */
+  QString frame_temp = p;
   for(int i=0; i<subsequent; i++)
   {
-    working_sprite->setPath(p);
-    working_sprite->setImage(QImage(p));
+    frame_temp.chop(6);
+    if(i+1<=9)
+      frame_temp.append('0');
+    frame_temp.append(QString::number(i+1));
+    frame_temp.append(".png");
+    working_sprite->setPath(frame_temp);
+    working_sprite->setImage(QImage(frame_temp));
   }
 
   /* Sets up a grid layout for the sliders and such */

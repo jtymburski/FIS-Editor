@@ -13,6 +13,9 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QScrollArea>
+#include <QMouseEvent>
+#include <QDialog>
+#include <QLabel>
 #include "EditorSprite.h"
 
 class EditorSpriteToolbox : public QWidget
@@ -38,6 +41,9 @@ protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
 
+  /* Views Frames */
+  void mouseDoubleClickEvent(QMouseEvent *e);
+
 private:
   /* The vector for storing sprite choices */
   QVector<EditorSprite* > editor_sprites;
@@ -50,6 +56,9 @@ private:
 
   /* The list widget that contains all the sprite names */
   QListWidget* editor_sprite_list;
+
+  /* A widget for showing the current selected sprite frame sequence */
+  QDialog* frames;
 
 signals:
 
