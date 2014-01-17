@@ -17,6 +17,7 @@
 #include <QDialog>
 #include <QLabel>
 #include "EditorSprite.h"
+#include "SpriteCreationDialog.h"
 
 class EditorSpriteToolbox : public QWidget
 {
@@ -36,6 +37,9 @@ public slots:
 
   /* Sets the current Editor Sprite to the given index */
   void setCurrent(int);
+
+  /* Updates the sprite list */
+  void refreshList();
 
 protected:
   /* Sets up the painting of all selected files */
@@ -60,7 +64,12 @@ private:
   /* A widget for showing the current selected sprite frame sequence */
   QDialog* frames;
 
+  SpriteCreationDialog* edit_sprite;
+
 signals:
+
+  /* Sends up the Editor Sprite */
+  void sendUpEditorSprite(EditorSprite* sprite);
 
 };
 #endif // EDITORSPRITETOOLBOX_H

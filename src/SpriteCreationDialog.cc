@@ -12,24 +12,29 @@
  */
 SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
                                            EditorSprite *working,QString p,
-                                           int subsequent)
+                                           int subsequent, bool creation)
                                            : QDialog(parent)
 {
   /* Sets the working sprite and appropriate paths */
   working_sprite = working;
+  creation_mode = creation;
 
-  /* Sets the subsequent frames of the sequence (The first is set on
-   *construction, thus we start adding the frames at i+1) */
-  QString frame_temp = p;
-  for(int i=0; i<subsequent; i++)
+
+  if(creation_mode)
   {
-    frame_temp.chop(6);
-    if(i+1<=9)
-      frame_temp.append('0');
-    frame_temp.append(QString::number(i+1));
-    frame_temp.append(".png");
-    working_sprite->setPath(frame_temp);
-    working_sprite->setImage(QImage(frame_temp));
+    /* Sets the subsequent frames of the sequence (The first is set on
+     * construction, thus we start adding the frames at i+1) */
+    QString frame_temp = p;
+    for(int i=0; i<subsequent; i++)
+    {
+      frame_temp.chop(6);
+      if(i+1<=9)
+        frame_temp.append('0');
+      frame_temp.append(QString::number(i+1));
+      frame_temp.append(".png");
+      working_sprite->setPath(frame_temp);
+      working_sprite->setImage(QImage(frame_temp));
+    }
   }
 
   /* Sets up a grid layout for the sliders and such */
@@ -46,6 +51,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   /* Name input */
   QLabel* name = new QLabel("Name:");
   layout->addWidget(name,0,1);
+  name_backup = working_sprite->getName();
   QLineEdit* name_input = new QLineEdit(working_sprite->getName());
   name_input->setInputMask("xxxxxxxxxxxxxxxx");
   name_input->setFixedWidth(128);
@@ -67,6 +73,8 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   brightness_input->setTickInterval(1);
   brightness_input->setMinimum(0);
   brightness_input->setMaximum(200);
+  brightness_backup = static_cast<int>(working_sprite->getSprite()->
+                                       getBrightness()*100);
   brightness_input->setSliderPosition(
         static_cast<int>(working_sprite->getSprite()->getBrightness()*100));
   connect(brightness_input,SIGNAL(valueChanged(int)),
@@ -84,6 +92,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   opacity_input->setTickInterval(1);
   opacity_input->setMinimum(0);
   opacity_input->setMaximum(255);
+  opacity_backup = working_sprite->getSprite()->getOpacity();
   opacity_input->setSliderPosition(working_sprite->getSprite()->getOpacity());
   connect(opacity_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setOpacity(int)));
@@ -100,6 +109,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   red_input->setTickInterval(1);
   red_input->setMinimum(0);
   red_input->setMaximum(255);
+  red_backup = working_sprite->getSprite()->getColorRed();
   red_input->setSliderPosition(working_sprite->getSprite()->getColorRed());
   connect(red_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorRed(int)));
@@ -116,6 +126,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   blue_input->setTickInterval(1);
   blue_input->setMinimum(0);
   blue_input->setMaximum(255);
+  blue_backup = working_sprite->getSprite()->getColorBlue();
   blue_input->setSliderPosition(working_sprite->getSprite()->getColorBlue());
   connect(blue_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorBlue(int)));
@@ -132,6 +143,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   green_input->setTickInterval(1);
   green_input->setMinimum(0);
   green_input->setMaximum(255);
+  green_backup = working_sprite->getSprite()->getColorGreen();
   green_input->setSliderPosition(working_sprite->getSprite()->getColorGreen());
   connect(green_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorGreen(int)));
@@ -144,9 +156,10 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   /* Animation time input */
   QLabel* time_label = new QLabel("Animation Time:");
   layout->addWidget(time_label,7,0);
-  QLineEdit* time_input = new QLineEdit(QString::number(
-                                          working_sprite->getSprite()->
-                                          getAnimationTime()));
+  time_backup =QString::number(working_sprite->getSprite()->getAnimationTime());
+  QLineEdit* time_input = new QLineEdit(QString::number(working_sprite->
+                                                        getSprite()->
+                                                        getAnimationTime()));
   time_input->setInputMask("99999");
   time_input->setFixedWidth(48);
   connect(time_input,SIGNAL(textChanged(QString)),
@@ -159,6 +172,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   QComboBox* direction_input = new QComboBox();
   direction_input->addItem("Forward");
   direction_input->addItem("Reverse");
+  direction_backup = !working_sprite->getSprite()->isDirectionForward();
   if(working_sprite->getSprite()->isDirectionForward())
     direction_input->setCurrentIndex(0);
   else
@@ -170,9 +184,10 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   /* Rotation input */
   QLabel* rotation_label = new QLabel("Rotation:");
   layout->addWidget(rotation_label,9,0);
-  QLineEdit* rotation_input = new QLineEdit(QString::number(
-                                          working_sprite->getSprite()->
-                                          getRotation()));
+  rotation_backup = QString::number(working_sprite->getSprite()->getRotation());
+  QLineEdit* rotation_input = new QLineEdit(QString::number(working_sprite->
+                                                            getSprite()->
+                                                            getRotation()));
   rotation_input->setInputMask("999");
   rotation_input->setFixedWidth(48);
   connect(rotation_input,SIGNAL(textChanged(QString)),
@@ -193,8 +208,11 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 
   setLayout(layout);
 
-  connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
-          SIGNAL(sendUpEditorSprite(EditorSprite*)));
+  if(creation_mode)
+  {
+    connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
+            SIGNAL(sendUpEditorSprite(EditorSprite*)));
+  }
 }
 
 /*
@@ -212,7 +230,20 @@ void SpriteCreationDialog::loadWorkingSprite(EditorSprite *s)
  */
 void SpriteCreationDialog::destroyWorkingSprite()
 {
-  delete working_sprite;
+  if(creation_mode)
+    delete working_sprite;
+  else
+  {
+    working_sprite->setName(name_backup);
+    working_sprite->setBrightness(brightness_backup);
+    working_sprite->setOpacity(opacity_backup);
+    working_sprite->setColorRed(red_backup);
+    working_sprite->setColorBlue(blue_backup);
+    working_sprite->setColorGreen(green_backup);
+    working_sprite->setAnimationTime(time_backup);
+    working_sprite->setDirection(direction_backup);
+    working_sprite->setRotation(rotation_backup);
+  }
   close();
 }
 
@@ -221,7 +252,12 @@ void SpriteCreationDialog::destroyWorkingSprite()
  */
 void SpriteCreationDialog::updateWorkingSprite()
 {
-  emit sendUpEditorSprite(working_sprite);
+  if(creation_mode)
+    emit sendUpEditorSprite(working_sprite);
+  else
+  {
+    emit ok();
+  }
   //delete working_sprite;
   close();
 }

@@ -19,6 +19,7 @@
 EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
 {
   current = new EditorSprite();
+  edit_sprite = new SpriteCreationDialog(this);
   editor_sprite_list = new QListWidget(this);
   editor_sprite_list->show();
   editor_sprite_list->setFixedSize(288,512);
@@ -35,6 +36,7 @@ EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
 EditorSpriteToolbox::~EditorSpriteToolbox()
 {
   //qDebug()<<"Removing Editor Sprite Toolbox";
+  delete edit_sprite;
   for(int i=0; i<editor_sprites.size(); i++)
   {
     delete editor_sprites[i];
@@ -96,6 +98,15 @@ void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
     frames->setWindowTitle(current->getName());
     frames->exec();
   }
+  else if(e->button() & Qt::RightButton)
+  {
+      edit_sprite = new SpriteCreationDialog(this,current,
+                                             current->getPath(0),
+                                             0,false);
+
+      connect(edit_sprite,SIGNAL(ok()),this,SLOT(refreshList()));
+      edit_sprite->show();
+  }
 }
 
 /*
@@ -118,6 +129,17 @@ void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
   editor_sprite_list->addItem(e->getName());
   update();
 }
+
+/* Description: Refreshes the Editor Sprite list
+ *
+ */
+void EditorSpriteToolbox::refreshList()
+{
+  for(int i=0; i<editor_sprites.size(); i++)
+    editor_sprite_list->item(i)->setText(editor_sprites[i]->getName());
+  update();
+}
+
 
 /*
  * Description: Gets the current editor sprite

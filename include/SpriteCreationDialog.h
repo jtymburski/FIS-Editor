@@ -17,7 +17,8 @@ public:
   /* Constructor function */
   SpriteCreationDialog(QWidget *parent = 0,
                        EditorSprite *working = new EditorSprite(),
-                       QString path = "", int subsequent = 0);
+                       QString path = "", int subsequent = 0,
+                       bool creation = true);
 private:
   /* Sliders that correspond to the various parameters of the sprite */
   QSlider* brightness_input;
@@ -29,10 +30,22 @@ private:
   /* The current sprite that is being altered/created by the dialog */
   EditorSprite *working_sprite;
 
+  bool creation_mode;
+
+  QString name_backup;
+  int brightness_backup;
+  int opacity_backup;
+  int red_backup,blue_backup,green_backup;
+  QString time_backup;
+  bool direction_backup;
+  QString rotation_backup;
+
+
 signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
+  void ok();
 public slots:
   /* Loads the given working Editor Sprite */
   void loadWorkingSprite(EditorSprite*);
