@@ -211,32 +211,87 @@ void TileWrapper::paint(QPainter *painter,
   if(base && base_layer != NULL)
   {
     QPixmap base_image(base_layer->getPath(0));
-    QTransform temp;
-    QTransform transformation = temp.rotate(base_layer->getQuickRotation());
-    painter->drawPixmap(bound,base_image.transformed(transformation));
+    QTransform temp1;
+    QTransform transformation1 = temp1.rotate(base_layer->getQuickRotation());
+    painter->drawPixmap(bound,base_image.transformed(transformation1));
   }
   if(enhancer && enhancer_layer !=NULL)
-    painter->drawImage(bound,QImage(enhancer_layer->getPath(0)));
+  {
+    QPixmap enhancer_image(enhancer_layer->getPath(0));
+    QTransform temp2;
+    QTransform transformation2 = temp2.rotate(enhancer_layer->getQuickRotation());
+    painter->drawPixmap(bound,enhancer_image.transformed(transformation2));
+  }
   if(lower1 && lower_layers[0] !=NULL)
-    painter->drawImage(bound,QImage(lower_layers[0]->getPath(0)));
+  {
+    QPixmap lower_image(lower_layers[0]->getPath(0));
+    QTransform temp3;
+    QTransform transformation3 = temp3.rotate(lower_layers[0]->getQuickRotation());
+    painter->drawPixmap(bound,lower_image.transformed(transformation3));
+  }
   if(lower2 && lower_layers[1] !=NULL)
-    painter->drawImage(bound,QImage(lower_layers[1]->getPath(0)));
+  {
+    QPixmap lower_image(lower_layers[1]->getPath(0));
+    QTransform temp4;
+    QTransform transformation4 = temp4.rotate(lower_layers[1]->getQuickRotation());
+    painter->drawPixmap(bound,lower_image.transformed(transformation4));
+  }
   if(lower3 && lower_layers[2] !=NULL)
-    painter->drawImage(bound,QImage(lower_layers[2]->getPath(0)));
+  {
+    QPixmap lower_image(lower_layers[2]->getPath(0));
+    QTransform temp5;
+    QTransform transformation5 = temp5.rotate(lower_layers[2]->getQuickRotation());
+    painter->drawPixmap(bound,lower_image.transformed(transformation5));
+  }
   if(lower4 && lower_layers[3] !=NULL)
-    painter->drawImage(bound,QImage(lower_layers[3]->getPath(0)));
+  {
+    QPixmap lower_image(lower_layers[3]->getPath(0));
+    QTransform temp6;
+    QTransform transformation6 = temp6.rotate(lower_layers[3]->getQuickRotation());
+    painter->drawPixmap(bound,lower_image.transformed(transformation6));
+  }
   if(lower5 && lower_layers[4] !=NULL)
-    painter->drawImage(bound,QImage(lower_layers[4]->getPath(0)));
+  {
+    QPixmap lower_image(lower_layers[4]->getPath(0));
+    QTransform temp7;
+    QTransform transformation7 = temp7.rotate(lower_layers[4]->getQuickRotation());
+    painter->drawPixmap(bound,lower_image.transformed(transformation7));
+  }
   if(upper1 && upper_layers[0] !=NULL)
-    painter->drawImage(bound,QImage(upper_layers[0]->getPath(0)));
+  {
+    QPixmap upper_image(upper_layers[0]->getPath(0));
+    QTransform temp8;
+    QTransform transformation8 = temp8.rotate(upper_layers[0]->getQuickRotation());
+    painter->drawPixmap(bound,upper_image.transformed(transformation8));
+  }
   if(upper2 && upper_layers[1] !=NULL)
-    painter->drawImage(bound,QImage(upper_layers[1]->getPath(0)));
+  {
+    QPixmap upper_image(upper_layers[1]->getPath(0));
+    QTransform temp9;
+    QTransform transformation9 = temp9.rotate(upper_layers[1]->getQuickRotation());
+    painter->drawPixmap(bound,upper_image.transformed(transformation9));
+  }
   if(upper3 && upper_layers[2] !=NULL)
-    painter->drawImage(bound,QImage(upper_layers[2]->getPath(0)));
+  {
+    QPixmap upper_image(upper_layers[2]->getPath(0));
+    QTransform temp10;
+    QTransform transformation10 = temp10.rotate(upper_layers[2]->getQuickRotation());
+    painter->drawPixmap(bound,upper_image.transformed(transformation10));
+  }
   if(upper4 && upper_layers[3] !=NULL)
-    painter->drawImage(bound,QImage(upper_layers[3]->getPath(0)));
+  {
+    QPixmap upper_image(upper_layers[3]->getPath(0));
+    QTransform temp11;
+    QTransform transformation11 = temp11.rotate(upper_layers[3]->getQuickRotation());
+    painter->drawPixmap(bound,upper_image.transformed(transformation11));
+  }
   if(upper5 && upper_layers[4] !=NULL)
-    painter->drawImage(bound,QImage(upper_layers[4]->getPath(0)));
+  {
+    QPixmap upper_image(upper_layers[4]->getPath(0));
+    QTransform temp12;
+    QTransform transformation12 = temp12.rotate(upper_layers[4]->getQuickRotation());
+    painter->drawPixmap(bound,upper_image.transformed(transformation12));
+  }
   if(grid)
   {
     if(grid_color)
