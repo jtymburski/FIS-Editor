@@ -59,7 +59,7 @@ private:
 
   /* Right click menu for sprite */
   QMenu* rightclick_menu;
-  QAction *spriteify_action;
+  QAction* spriteify_action;
 
   /* The view mode for the border */
   EditorEnumDb::Border mode;

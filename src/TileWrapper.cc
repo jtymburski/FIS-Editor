@@ -17,6 +17,7 @@
  */
 TileWrapper::TileWrapper(int x, int y, int z)
 {
+  grid_color = false;
   xpos = x;
   ypos = y;
   zpos = z;
@@ -203,12 +204,17 @@ void TileWrapper::setGrid(bool toggle)
  *
  * Input: Required fields, mostly unused
  */
-void TileWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-           QWidget *widget)
+void TileWrapper::paint(QPainter *painter,
+                        const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
   QRect bound(xpos*64,ypos*64,64,64);
   if(base && base_layer != NULL)
-    painter->drawImage(bound,QImage(base_layer->getPath(0)));
+  {
+    QPixmap base_image(base_layer->getPath(0));
+    QTransform temp;
+    QTransform transformation = temp.rotate(base_layer->getQuickRotation());
+    painter->drawPixmap(bound,base_image.transformed(transformation));
+  }
   if(enhancer && enhancer_layer !=NULL)
     painter->drawImage(bound,QImage(enhancer_layer->getPath(0)));
   if(lower1 && lower_layers[0] !=NULL)
@@ -233,7 +239,11 @@ void TileWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->drawImage(bound,QImage(upper_layers[4]->getPath(0)));
   if(grid)
   {
-    painter->setPen(QColor(255,255,255,128));
+    if(grid_color)
+      painter->setPen(QColor(0,255,100,255));
+    else
+      painter->setPen(QColor(255,255,255,128));
+
     painter->drawRect(1+(xpos*64),1+(ypos*64),62,62);
   }
 }
@@ -246,6 +256,9 @@ QRectF TileWrapper::boundingRect() const
   return QRectF(xpos*64,ypos*64,64,64);
 }
 
+/*
+ * Description: Places the currently selected sprite onto the active map layer
+ */
 void TileWrapper::place()
 {
   switch(active_layer)
@@ -293,6 +306,55 @@ void TileWrapper::place()
 }
 
 /*
+ * Description: Removes the currently selected sprite onto the active map layer
+ */
+void TileWrapper::unplace()
+{
+  switch(active_layer)
+  {
+    case EditorEnumDb::BASE:
+      base_layer = NULL;
+      break;
+    case EditorEnumDb::ENHANCER:
+      enhancer_layer = NULL;
+      break;
+    case EditorEnumDb::LOWER1:
+      lower_layers[0] = NULL;
+      break;
+    case EditorEnumDb::LOWER2:
+      lower_layers[1] = NULL;
+      break;
+    case EditorEnumDb::LOWER3:
+      lower_layers[2] = NULL;
+      break;
+    case EditorEnumDb::LOWER4:
+      lower_layers[3] = NULL;
+      break;
+    case EditorEnumDb::LOWER5:
+      lower_layers[4] = NULL;
+      break;
+    case EditorEnumDb::UPPER1:
+      upper_layers[0] = NULL;
+      break;
+    case EditorEnumDb::UPPER2:
+      upper_layers[1] = NULL;
+      break;
+    case EditorEnumDb::UPPER3:
+      upper_layers[2] = NULL;
+      break;
+    case EditorEnumDb::UPPER4:
+      upper_layers[3] = NULL;
+      break;
+    case EditorEnumDb::UPPER5:
+      upper_layers[4] = NULL;
+      break;
+    default:
+      break;
+  }
+  update();
+}
+
+/*
  * Description: Sets the toolbox pointer
  *
  * Input: Editor Sprite Toolbox
@@ -300,6 +362,17 @@ void TileWrapper::place()
 void TileWrapper::setToolbox(EditorSpriteToolbox *tool)
 {
   toolbox = tool;
+}
+
+/*
+ * Description: Sets the grid color
+ *
+ * Input: Color input (true: Selected, false: Unselected)
+ */
+void TileWrapper::setGridColor(bool color)
+{
+  grid_color = color;
+  update();
 }
 
 void TileWrapper::editBase(EditorSprite *selection)
@@ -312,6 +385,4 @@ void TileWrapper::editLower(EditorSprite *selection, int position)
 
 void TileWrapper::editUpper(EditorSprite *selection, int position)
 {}
-
-
 

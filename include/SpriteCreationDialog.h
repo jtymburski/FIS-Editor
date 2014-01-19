@@ -5,7 +5,9 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QCheckBox>
 #include <QSlider>
+#include <QAction>
 #include <QPushButton>
 #include <QComboBox>
 #include "EditorSprite.h"
@@ -26,6 +28,10 @@ private:
   QSlider* red_input;
   QSlider* blue_input;
   QSlider* green_input;
+  QCheckBox* rotate0;
+  QCheckBox* rotate90;
+  QCheckBox* rotate180;
+  QCheckBox* rotate270;
 
   /* The current sprite that is being altered/created by the dialog */
   EditorSprite *working_sprite;
@@ -39,6 +45,11 @@ private:
   QString time_backup;
   bool direction_backup;
   QString rotation_backup;
+
+  bool rotate0_backup;
+  bool rotate90_backup;
+  bool rotate180_backup;
+  bool rotate270_backup;
 
 
 signals:

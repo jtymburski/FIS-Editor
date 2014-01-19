@@ -63,7 +63,9 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
   QRect bound(12,520,64,64);
   QRect border(11,519,66,66);
   painter.setPen(QPen(QBrush(Qt::black),2));
-  painter.drawImage(bound,current->getImage(0));
+  QTransform temp;
+  QTransform transformation = temp.rotate(current->getQuickRotation());
+  painter.drawImage(bound,current->getImage(0).transformed(transformation));
   painter.drawRect(border);
   painter.setFont(QFont("helvetica",14,QFont::Bold));
   painter.drawText(80,536,current->getName());
@@ -127,6 +129,7 @@ void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
 
   /* Adds the item to the visible list */
   editor_sprite_list->addItem(e->getName());
+  editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
   update();
 }
 

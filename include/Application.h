@@ -24,11 +24,13 @@
 #include <QTabWidget>
 #include <QGraphicsView>
 #include <QListWidget>
+#include <QStatusBar>
 #include <QTreeView>
 #include "Map/MapEditor.h"
 #include "ImageSelectionModule.h"
 #include "EditorSpriteToolbox.h"
 #include "SpriteToolbox.h"
+#include "SizeSelector.h"
 
 class Application : public QMainWindow
 {
@@ -36,7 +38,7 @@ class Application : public QMainWindow
 
 public:
   /* Constructor function */
-  Application(QWidget* parent = 0);
+  Application(QWidget* parent = 0, int xsize = 100, int ysize = 100);
 
   /* Destructor function */
   ~Application();
@@ -82,6 +84,11 @@ private:
   /* View action pointers */
   QAction *viewalllayers_action;
 
+  /* Cursor action pointers */
+  QActionGroup *cursor_group;
+  QAction *erasermode_action;
+  QAction *basicmode_action;
+
   /* Map Mode Shift Actions (Active Layers) */
   QListWidgetItem *active_lower_layer_01;
   QListWidgetItem *active_lower_layer_02;
@@ -124,6 +131,19 @@ private:
   /* The currently selected sprite */
   QString current_sprite_choice;
 
+  /* Map size for initial creation */
+  int x_size;
+  int y_size;
+
+  /* Initial Map Creation */
+  SizeSelector* mapsizedialog;
+
+  /* Curosr Mode */
+  EditorEnumDb::CursorMode cursor_mode;
+
+  /* Map Data Bar */
+  QStatusBar* map_data;
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
@@ -133,9 +153,6 @@ private:
 
   /* Sets up the Sidebar */
   void setupSidebar();
-
-  /* Sets up the Map View */
-  void setupMapView();
 
   /* Sets up the Layer Bar */
   void setupLayerBar();
@@ -163,9 +180,20 @@ public slots:
   /* Sets the picked sprite */
   void setSprite(QString);
 
+  /* Sets up the Map View */
+  void setupMapView(int x = 0, int y = 0);
+
   /* Sets the Active Layer on the Map */
   void setActiveLayer(QListWidgetItem* layer);
 
+  /* Sets to Eraser Mode */
+  void setBasicCursor();
+
+  /* Sets to Basic Mode */
+  void setEraserCursor();
+
+  /* Sets the status bar to have the current tile hovered over */
+  void setCurrentTile(int,int);
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

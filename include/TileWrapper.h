@@ -10,6 +10,8 @@
 #include <QWidget>
 #include <QPainter>
 #include <QGraphicsItem>
+#include <QMenu>
+#include <QAction>
 #include <QList>
 #include <QGraphicsSceneHoverEvent>
 #include "EditorSpriteToolbox.h"
@@ -36,9 +38,7 @@ public:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget);
 
-  void place();
-
-public:
+public slots:
   /* Sets the various layer visibilities */
   void setBase(bool);
   void setEnhancer(bool);
@@ -55,6 +55,7 @@ public:
 
   /* Sets the grid visibility */
   void setGrid(bool);
+  void setGridColor(bool);
 
   /* Sets the toolbox that the tile gets the current Editor Sprite from */
   void setToolbox(EditorSpriteToolbox* tool);
@@ -64,6 +65,13 @@ public:
   void editEnhancer(EditorSprite* selection);
   void editLower(EditorSprite* selection, int position = 0);
   void editUpper(EditorSprite* selection, int position = 0);
+
+  /* Function to place a current sprite on the maps active layer */
+  void place();
+
+  /* Function for removing a sprite from the maps active layer */
+  void unplace();
+
 
   /* Variable for the currently active layer */
   EditorEnumDb::Layer active_layer;
@@ -89,6 +97,9 @@ private:
 
   /* Positions and depths for the tiles on the map grid */
   int xpos, ypos, zpos;
+
+  /* Grid color toggle */
+  bool grid_color;
 };
 
 #endif // TILEWRAPPER_H

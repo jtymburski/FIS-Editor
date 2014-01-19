@@ -194,6 +194,55 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
           working_sprite,SLOT(setRotation(QString)));
   layout->addWidget(rotation_input,9,1);
 
+  /* Sets up quick rotation for frames */
+  QVBoxLayout* rotation_layout = new QVBoxLayout();
+
+  rotate0 = new QCheckBox("0",this);
+  if(working_sprite->getQuickRotation() == 0)
+  {
+    rotate0_backup = true;
+    rotate0->setChecked(true);
+  }
+  rotate0->setAutoExclusive(true);
+
+  rotate90 = new QCheckBox("90",this);
+  if(working_sprite->getQuickRotation() == 90)
+  {
+    rotate90_backup = true;
+    rotate90->setChecked(true);
+  }
+  rotate90->setAutoExclusive(true);
+
+  rotate180 = new QCheckBox("180",this);
+  if(working_sprite->getQuickRotation() == 180)
+  {
+    rotate180_backup = true;
+    rotate180->setChecked(true);
+  }
+  rotate180->setAutoExclusive(true);
+
+  rotate270 = new QCheckBox("270",this);
+  if(working_sprite->getQuickRotation() == 270)
+  {
+    rotate270_backup = true;
+    rotate270->setChecked(true);
+  }
+  rotate270->setAutoExclusive(true);
+
+  /* Connects to the appropriate setting functions */
+  connect(rotate0,SIGNAL(clicked()),working_sprite,SLOT(set0()));
+  connect(rotate90,SIGNAL(clicked()),working_sprite,SLOT(set90()));
+  connect(rotate180,SIGNAL(clicked()),working_sprite,SLOT(set180()));
+  connect(rotate270,SIGNAL(clicked()),working_sprite,SLOT(set270()));
+
+  rotation_layout->addWidget(rotate0);
+  rotation_layout->addWidget(rotate90);
+  rotation_layout->addWidget(rotate180);
+  rotation_layout->addWidget(rotate270);
+
+  /* Add a the rotation layout that spans 4 rows */
+  layout->addLayout(rotation_layout,9,2,4,1);
+
   /* Ok button */
   QPushButton* ok = new QPushButton("Ok",this);
   ok->setFixedWidth(64);
@@ -243,6 +292,14 @@ void SpriteCreationDialog::destroyWorkingSprite()
     working_sprite->setAnimationTime(time_backup);
     working_sprite->setDirection(direction_backup);
     working_sprite->setRotation(rotation_backup);
+    if(rotate0_backup)
+      working_sprite->set0();
+    if(rotate90_backup)
+      working_sprite->set90();
+    if(rotate180_backup)
+      working_sprite->set180();
+    if(rotate270_backup)
+      working_sprite->set270();
   }
   close();
 }

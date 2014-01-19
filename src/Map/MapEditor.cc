@@ -23,8 +23,16 @@
  */
 MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
 {
+
+  remove_action = new QAction("&Remove Active Layer",0);
+  rightclick_menu = new QMenu();
+  rightclick_menu->hide();
+  rightclick_menu->addAction(remove_action);
+  connect(remove_action,SIGNAL(triggered()),this,SLOT(removeCurrent()));
+
   /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
+  setCursorMode(EditorEnumDb::BASIC);
 
   /* Sets the width and height, and all of the layers to be visible */
   width = w;
@@ -317,32 +325,127 @@ void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
   }
 }
 
+/*
+ * Description: Mouse Move Event (Handles all individual tile events, including
+ *              hovering box color changes, and placement while the mouse
+ *              button is pressed.)
+ *
+ * Inputs: Mouse Event
+ */
+void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(event->scenePos(),QTransform()));
+  for(int i=0; i<tiles.size(); i++)
+  {
+    for(int j=0; j<tiles[i].size(); j++)
+      tiles[i][j]->setGridColor(false);
+  }
+  if(current != NULL)
+    emit sendCurrentPosition((current->boundingRect().x()/64),
+                             (current->boundingRect().y()/64));
+  else
+    emit sendCurrentPosition(-1,-1);
+  if(current != NULL)
+    current->setGridColor(true);
+  if(event->buttons() == Qt::LeftButton)
+  {
+    switch(cursormode)
+    {
+      case EditorEnumDb::BASIC:
+        if(current != NULL)
+          current->place();
+        break;
+      case EditorEnumDb::ERASER:
+        if(current != NULL)
+          current->unplace();
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+/*
+ * Description: Mouse Press event, handles placement of the selected tile
+ *              onto the map
+ *
+ * Inputs: Mouse Event
+ */
+void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+  current_position = event->scenePos();
+  if(event->buttons() & Qt::LeftButton)
+  {
+    TileWrapper* current =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(current_position,QTransform()));
+    switch(cursormode)
+    {
+      case EditorEnumDb::BASIC:
+        if(current != NULL)
+          current->place();
+        break;
+      case EditorEnumDb::ERASER:
+        if(current != NULL)
+          current->unplace();
+        break;
+      default:
+        break;
+    }
+  }
+  else
+  {
+    if(rightclick_menu->isHidden())
+      rightclick_menu->exec(QCursor::pos());
+    else
+      rightclick_menu->hide();
+  }
+}
+
+
 void MapEditor::paintEvent(QPaintEvent *)
 {}
 
-void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+/*
+ * Description: Removes the currently active layers sprite
+ */
+void MapEditor::removeCurrent()
 {
-  if(event->buttons() & Qt::LeftButton)
-  {
-    TileWrapper* current =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(event->scenePos(),QTransform()));
-    if(current != NULL)
-      current->place();
-  }
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+    current->unplace();
 }
 
-void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
+/*
+ * Description: Sets the cursor mode
+ *
+ * Input: Cursor mode
+ */
+void MapEditor::setCursorMode(EditorEnumDb::CursorMode mode)
 {
-  if(event->buttons() & Qt::LeftButton)
-  {
-    TileWrapper* current =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(event->scenePos(),QTransform()));
-    if(current != NULL)
-      current->place();
-  }
+  cursormode = mode;
 }
 
+/*
+ * Description: Gets the width
+ *
+ * Output: Width
+ */
+int MapEditor::getMapWidth()
+{
+  return width;
+}
 
-
+/*
+ * Description: Gets the height
+ *
+ * Output: Height
+ */
+int MapEditor::getMapHeight()
+{
+  return height;
+}

@@ -20,6 +20,9 @@
 EditorSprite::EditorSprite(QString img_path)
 {
   setGeometry(0,0,66,66);
+  flipped90 = false;
+  flipped180 = false;
+  flipped270 = false;
   name = "Default";
   sprite = new Sprite();
   mode = EditorEnumDb::STANDARD;
@@ -162,6 +165,7 @@ void EditorSprite::setAnimationTime(QString time)
 void EditorSprite::setColorRed(int red)
 {
   //Set Red
+  sprite->setColorRed(red);
 }
 
 /*
@@ -171,7 +175,8 @@ void EditorSprite::setColorRed(int red)
  */
 void EditorSprite::setColorBlue(int blue)
 {
-  //Set Red
+  //Set Blue
+  sprite->setColorBlue(blue);
 }
 
 /*
@@ -182,6 +187,7 @@ void EditorSprite::setColorBlue(int blue)
 void EditorSprite::setColorGreen(int green)
 {
   //Set Red
+  sprite->setColorGreen(green);
 }
 
 /*
@@ -241,6 +247,67 @@ void EditorSprite::setRotation(QString angle)
  * Input: ID value
  */
 void EditorSprite::setId(int id){}
+
+
+/*
+ * Description: Sets the sprites rotation
+ */
+void EditorSprite::set0()
+{
+  flipped0 = true;
+  flipped90 = false;
+  flipped180 = false;
+  flipped270 = false;
+}
+
+/*
+ * Description: Sets the sprites rotation
+ */
+void EditorSprite::set90()
+{
+  flipped0 = false;
+  flipped90 = true;
+  flipped180 = false;
+  flipped270 = false;
+}
+
+/*
+ * Description: Sets the sprites rotation
+ */
+void EditorSprite::set180()
+{
+  flipped0 = false;
+  flipped90 = false;
+  flipped180 = true;
+  flipped270 = false;
+}
+
+/*
+ * Description: Sets the sprites rotation
+ */
+void EditorSprite::set270()
+{
+  flipped0 = false;
+  flipped90 = false;
+  flipped180 = false;
+  flipped270 = true;
+}
+
+/*
+ * Description: gets the sprites rotation
+ */
+int EditorSprite::getQuickRotation()
+{
+  if(flipped90)
+    return 90;
+  else if(flipped180)
+    return 180;
+  else if(flipped270)
+    return 270;
+  else
+    return 0;
+
+}
 
 /*============================================================================
  * PROTECTED FUNCTIONS

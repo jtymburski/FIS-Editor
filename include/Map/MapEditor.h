@@ -47,6 +47,20 @@ public slots:
   /* Function to set the current layer for editing */
   void setEditingLayer(EditorEnumDb::Layer);
 
+  /* removes the current sprite from the active layer */
+  void removeCurrent();
+
+  /* Sets the cursor mode */
+  void setCursorMode(EditorEnumDb::CursorMode mode);
+
+  /* Returns the width and height */
+  int getMapWidth();
+  int getMapHeight();
+
+signals:
+  /* Sends the tile position to the map status bar */
+  void sendCurrentPosition(int,int);
+
 protected:
   /* Paint event */
   void paintEvent(QPaintEvent *);
@@ -59,6 +73,10 @@ private:
   bool lower1,lower2,lower3,lower4,lower5;
   bool upper1,upper2,upper3,upper4,upper5;
 
+  /* Right click menu */
+  QMenu* rightclick_menu;
+  QAction* remove_action;
+
   /* Map layer tabs */
   QTabWidget* layer_tabs;
 
@@ -68,6 +86,12 @@ private:
   /* Dimensions of the map */
   int width;
   int height;
+
+  /* Cursor type */
+  EditorEnumDb::CursorMode cursormode;
+
+  /* Position of current (Only used for removeCurrent() */
+  QPointF current_position;
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 };

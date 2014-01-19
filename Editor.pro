@@ -39,7 +39,8 @@ SOURCES += \
     src/SpriteCreationDialog.cc \
     src/TileWrapper.cc \
     ../Project/src/Game/EventHandler.cc \
-    src/ImageSelectionModule.cc
+    src/ImageSelectionModule.cc \
+    src/SizeSelector.cc
 
 HEADERS += \
     ./include/Application.h \
@@ -58,7 +59,8 @@ HEADERS += \
     include/SpriteCreationDialog.h \
     include/TileWrapper.h \
     ../Project/include/Game/EventHandler.h \
-    include/ImageSelectionModule.h
+    include/ImageSelectionModule.h \
+    include/SizeSelector.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

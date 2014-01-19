@@ -81,6 +81,20 @@ public slots:
   /* Sets the sprites id (Backend) */
   void setId(int id);
 
+  /* Sets all of the sprites frames to 90 deg rotation */
+  void set90();
+
+  /* Sets all of the sprites frames to 180 deg rotation */
+  void set180();
+
+  /* Sets all of the sprites frames to 270 deg rotation */
+  void set270();
+
+  /* Sets all of the sprites frames to 270 deg rotation */
+  void set0();
+
+  /* Gets all of the sprites frames rotations */
+  int getQuickRotation();
 
 protected:
   /* Painting event */
@@ -104,6 +118,12 @@ private:
 
   /* Frame option storage */
   FrameOptions frame_options;
+
+  /* Quick flip storage */
+  bool flipped0;
+  bool flipped90;
+  bool flipped180;
+  bool flipped270;
 
 
 signals:
