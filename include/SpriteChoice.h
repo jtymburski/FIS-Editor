@@ -73,6 +73,7 @@ private:
   /* Create a Sprite dialog */
   SpriteCreationDialog* creation_dialog;
 
+
 signals:
   /* Emits to parent when selected to deselect all others */
   void chosen(int);

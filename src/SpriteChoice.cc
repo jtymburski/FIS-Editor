@@ -206,7 +206,8 @@ void SpriteChoice::mouseDoubleClickEvent(QMouseEvent *event)
     /* Get size of non name path */
     int pathtoimage = path.lastIndexOf('/');
     /* Remove non name path */
-    QString filename = path.remove(0,pathtoimage+1);
+    QString filename = path;
+    filename = filename.remove(0,pathtoimage+1);
     /* Be rid of the extention (Always .png) */
     filename.chop(4);
     /* Set the name for the sprite and send it to the Editor Sprite toolbox */
