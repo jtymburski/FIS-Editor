@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QVector>
+#include <QMenu>
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QScrollArea>
@@ -17,6 +18,7 @@
 #include <QDialog>
 #include <QLabel>
 #include "EditorSprite.h"
+#include "EditorSpriteList.h"
 #include "SpriteCreationDialog.h"
 
 class EditorSpriteToolbox : public QWidget
@@ -59,7 +61,7 @@ private:
   EditorSprite* current;
 
   /* The list widget that contains all the sprite names */
-  QListWidget* editor_sprite_list;
+  EditorSpriteList* editor_sprite_list;
 
   /* A widget for showing the current selected sprite frame sequence */
   QDialog* frames;

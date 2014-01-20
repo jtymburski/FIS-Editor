@@ -74,6 +74,9 @@ QString EditorSprite::getName()
 void EditorSprite::setPath(QString p)
 {
   frame_paths.push_back(p);
+  frame_angles.push_back(0);
+  frame_hflip.push_back(false);
+  frame_vflip.push_back(false);
 }
 
 /*
@@ -122,6 +125,64 @@ int EditorSprite::frameCount()
   return frame_images.size();
 }
 
+/*
+ * Description: Gets the frame horizonal flip
+ *
+ * Output: The frame horizonal flip
+ */
+bool EditorSprite::getHorizontalFlip(int frame_num)
+{
+  return frame_hflip[frame_num];
+}
+
+/*
+ * Description: Gets the frame vertical flip
+ *
+ * Output: The frame vertical flip
+ */
+bool EditorSprite::getVerticalFlip(int frame_num)
+{
+  return frame_vflip[frame_num];
+}
+
+/*
+ * Description: Gets the frame angle
+ *
+ * Output: The frames angle
+ */
+int EditorSprite::getFrameAngle(int frame_num)
+{
+  return frame_angles[frame_num];
+}
+/*
+ * Description: Sets the frame horizonal flip
+ *
+ * Input: Frame number and flip
+ */
+void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
+{
+  frame_hflip[frame_num] = flip;
+}
+
+/*
+ * Description: Sets the frame vertical flip
+ *
+ * Input: Frame number and flip
+ */
+void EditorSprite::setVerticalFlip(int frame_num, bool flip)
+{
+  frame_vflip[frame_num] = flip;
+}
+
+/*
+ * Description: Sets the frame angle
+ *
+ * Input: Frame number and angle
+ */
+void EditorSprite::setFrameAngle(int frame_num, int angle)
+{
+  frame_angles[frame_num] = angle;
+}
 /*
  * Description: Sets the Editor Sprites name
  *
@@ -209,15 +270,9 @@ void EditorSprite::setDirectionReverse(){}
 void EditorSprite::setDirection(int dir)
 {
   if(dir==0)
-  {
-    qDebug()<<"Forward";
     sprite->setDirectionForward();
-  }
   else
-  {
-    qDebug()<<"Reverse";
     sprite->setDirectionReverse();
-  }
 }
 
 /*

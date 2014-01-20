@@ -20,11 +20,12 @@ EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
 {
   current = new EditorSprite();
   edit_sprite = new SpriteCreationDialog(this);
-  editor_sprite_list = new QListWidget(this);
+  editor_sprite_list = new EditorSpriteList(this);
   editor_sprite_list->show();
   editor_sprite_list->setFixedSize(288,512);
   connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
           this,SLOT(setCurrent(int)));
+  connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
   nextID = 1;
 }
 
@@ -84,23 +85,8 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
  */
 void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
 {
-  if(e->button() & Qt::LeftButton)
-  {
-    frames = new QDialog(this);
-    QHBoxLayout* framelayout = new QHBoxLayout(frames);
-    QVector<QLabel*> labels;
-    for(int i=0; i<current->frameCount(); i++)
-    {
-      labels.push_back(new QLabel());
-      labels.last()->setPixmap(QPixmap(current->getPath(i)));
-      framelayout->addWidget(labels.last());
-    }
-    frames->setLayout(framelayout);
-    frames->setModal(false);
-    frames->setWindowTitle(current->getName());
-    frames->exec();
-  }
-  else if(e->button() & Qt::RightButton)
+
+  if(e->button() & Qt::RightButton)
   {
       edit_sprite = new SpriteCreationDialog(this,current,
                                              current->getPath(0),
@@ -110,6 +96,7 @@ void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
       edit_sprite->show();
   }
 }
+
 
 /*
  * Description: Adds an editor sprite to the toolbox
@@ -130,6 +117,7 @@ void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
   /* Adds the item to the visible list */
   editor_sprite_list->addItem(e->getName());
   editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
+  editor_sprite_list->setCurrentSprite(e);
   update();
 }
 
@@ -162,5 +150,6 @@ EditorSprite* EditorSpriteToolbox::getCurrent()
 void EditorSpriteToolbox::setCurrent(int index)
 {
   current = editor_sprites[index];
+  editor_sprite_list->setCurrentSprite(current);
   update();
 }

@@ -48,6 +48,10 @@ private:
   QToolBar* toolbar;
   QListWidget* sidetoolbar;
 
+  /* Brush and Menu Tabs */
+  QToolBar* brushbar;
+  QToolBar* menubar;
+
   /* Toolbox pointer */
   QTabWidget* tab;
   ImageSelectionModule* images_tab;

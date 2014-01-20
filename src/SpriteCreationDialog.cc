@@ -19,7 +19,6 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   working_sprite = working;
   creation_mode = creation;
 
-
   if(creation_mode)
   {
     /* Sets the subsequent frames of the sequence (The first is set on
@@ -60,11 +59,13 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   layout->addWidget(name_input,0,2);
 
   /* Frame Display */
-  // TODO: Make this do something
-  QWidget* frametest = new QWidget();
-  frametest->setFixedSize(256,32);
-  frametest->setBackgroundRole(QPalette::Base);
-  layout->addWidget(frametest,1,1);
+  frame_scrollwrapper = new QScrollArea();
+  framemanipulator = new FrameManipulator(this,working_sprite);
+  frame_scrollwrapper->setWidget(framemanipulator);
+  frame_scrollwrapper->setBaseSize(360,128);
+  frame_scrollwrapper->setFixedHeight(112);
+  frame_scrollwrapper->setBackgroundRole(QPalette::Base);
+  layout->addWidget(frame_scrollwrapper,1,0,1,3);
 
   /* Brightness input */
   QLabel* brightness_label = new QLabel("Brightness");
@@ -201,6 +202,9 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   if(working_sprite->getQuickRotation() == 0)
   {
     rotate0_backup = true;
+    rotate90_backup = false;
+    rotate180_backup = false;
+    rotate270_backup = false;
     rotate0->setChecked(true);
   }
   rotate0->setAutoExclusive(true);
@@ -208,7 +212,10 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   rotate90 = new QCheckBox("90",this);
   if(working_sprite->getQuickRotation() == 90)
   {
+    rotate0_backup = false;
     rotate90_backup = true;
+    rotate180_backup = false;
+    rotate270_backup = false;
     rotate90->setChecked(true);
   }
   rotate90->setAutoExclusive(true);
@@ -216,7 +223,10 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   rotate180 = new QCheckBox("180",this);
   if(working_sprite->getQuickRotation() == 180)
   {
+    rotate0_backup = false;
+    rotate90_backup = false;
     rotate180_backup = true;
+    rotate270_backup = false;
     rotate180->setChecked(true);
   }
   rotate180->setAutoExclusive(true);
@@ -224,6 +234,9 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
   rotate270 = new QCheckBox("270",this);
   if(working_sprite->getQuickRotation() == 270)
   {
+    rotate0_backup = false;
+    rotate90_backup = false;
+    rotate180_backup = false;
     rotate270_backup = true;
     rotate270->setChecked(true);
   }
@@ -294,11 +307,11 @@ void SpriteCreationDialog::destroyWorkingSprite()
     working_sprite->setRotation(rotation_backup);
     if(rotate0_backup)
       working_sprite->set0();
-    if(rotate90_backup)
+    else if(rotate90_backup)
       working_sprite->set90();
-    if(rotate180_backup)
+    else if(rotate180_backup)
       working_sprite->set180();
-    if(rotate270_backup)
+    else if(rotate270_backup)
       working_sprite->set270();
   }
   close();

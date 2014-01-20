@@ -3,5 +3,19 @@
         <file>Resources/fbs_icon.ico</file>
         <file>Resources/fbs_logo_transparent.png</file>
         <file>Resources/fbs_logo_watermark.png</file>
+        <file>Resources/copy-icon.png</file>
+        <file>Resources/cut-icon.png</file>
+        <file>Resources/eraser-icon.png</file>
+        <file>Resources/load-icon.png</file>
+        <file>Resources/new-icon.png</file>
+        <file>Resources/paste-icon.png</file>
+        <file>Resources/saveas-icon.png</file>
+        <file>Resources/save-icon.png</file>
+        <file>Resources/undo-icon.png</file>
+        <file>Resources/pencil-icon.png</file>
+        <file>Resources/redo-icon.png</file>
+        <file>Resources/end.png</file>
+        <file>Resources/midpoint.png</file>
+        <file>Resources/start.png</file>
     </qresource>
 </RCC>

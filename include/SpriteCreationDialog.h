@@ -8,8 +8,10 @@
 #include <QCheckBox>
 #include <QSlider>
 #include <QAction>
+#include <QScrollArea>
 #include <QPushButton>
 #include <QComboBox>
+#include "FrameManipulator.h"
 #include "EditorSprite.h"
 
 class SpriteCreationDialog : public QDialog
@@ -32,6 +34,8 @@ private:
   QCheckBox* rotate90;
   QCheckBox* rotate180;
   QCheckBox* rotate270;
+  FrameManipulator* framemanipulator;
+  QScrollArea* frame_scrollwrapper;
 
   /* The current sprite that is being altered/created by the dialog */
   EditorSprite *working_sprite;

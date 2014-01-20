@@ -52,6 +52,13 @@ public:
   /* Gets the current number of frames */
   int frameCount();
 
+  /* Gets the frames horizontal and vertical flip of a given frame */
+  bool getHorizontalFlip(int);
+  bool getVerticalFlip(int);
+
+  /* Sets the frame angle of a given frame */
+  int getFrameAngle(int frame_num);
+
 public slots:
   /* Sets the user submitted name */
   void setName(QString name);
@@ -80,6 +87,13 @@ public slots:
 
   /* Sets the sprites id (Backend) */
   void setId(int id);
+
+  /* Sets the frames horizontal and vertical flip of a given frame */
+  void setHorizontalFlip(int,bool);
+  void setVerticalFlip(int,bool);
+
+  /* Sets the frame angle of a given frame */
+  void setFrameAngle(int frame_num,int angle);
 
   /* Sets all of the sprites frames to 90 deg rotation */
   void set90();
@@ -115,6 +129,15 @@ private:
 
   /* The sprite frame images */
   QVector<QImage> frame_images;
+
+  /* The frame angles */
+  QVector<int> frame_angles;
+
+  /* The frame horizontal flips */
+  QVector<bool> frame_hflip;
+
+  /* The frame vertical flips */
+  QVector<bool> frame_vflip;
 
   /* Frame option storage */
   FrameOptions frame_options;

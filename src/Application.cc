@@ -17,7 +17,8 @@
  *
  * Input: Parent Widget
  */
-Application::Application(QWidget* parent, int xsize, int ysize) : QMainWindow(parent)
+Application::Application(QWidget* parent, int xsize, int ysize) :
+  QMainWindow(parent)
 {
 
   /* Gets the users name in windows only */
@@ -101,7 +102,7 @@ void Application::setupMapView(int x, int y)
 {
   delete map_editor;
   /* Sets up the main map view widget */
-  map_editor = new MapEditor(sprites_tab,this,x,y);
+  map_editor = new MapEditor(sprites_tab,this,x,y,cursor_mode);
   map_scroller = new QGraphicsView(map_editor,this);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
@@ -155,11 +156,14 @@ void Application::setupTopMenu()
 
   /* Sets up the File menu actions */
   new_action = new QAction("&New",this);
-  new_action->setIcon(QIcon("icons/arcadius.png"));
+  new_action->setIcon(QIcon(":/Icons/Resources/new-icon.png"));
   load_action = new QAction("&Load",this);
+  load_action->setIcon(QIcon(":/Icons/Resources/load-icon.png"));
   recentfiles_action = new QAction("&Recent Files",this);
   save_action = new QAction("&Save",this);
+  save_action->setIcon(QIcon(":/Icons/Resources/save-icon.png"));
   saveas_action = new QAction("&Save As",this);
+  saveas_action->setIcon(QIcon(":/Icons/Resources/saveas-icon.png"));
   quit_action = new QAction("&Quit",this);
 
   /* Sets up file menu itself */
@@ -173,6 +177,7 @@ void Application::setupTopMenu()
   file_menu->addSeparator();
   file_menu->addAction(quit_action);
 
+
   /* Connects File menu actions to slots */
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
   connect(new_action,SIGNAL(triggered()),mapsizedialog,SLOT(show()));
@@ -182,10 +187,15 @@ void Application::setupTopMenu()
 
   /* Sets up Edit menu actions*/
   undo_action = new QAction("&Undo",this);
+  undo_action->setIcon(QIcon(":/Icons/Resources/undo-icon.png"));
   redo_action = new QAction("&Redo",this);
+  redo_action->setIcon(QIcon(":/Icons/Resources/redo-icon.png"));
   cut_action = new QAction("&Cut",this);
+  cut_action->setIcon(QIcon(":/Icons/Resources/cut-icon.png"));
   copy_action = new QAction("&Copy",this);
+  copy_action->setIcon(QIcon(":/Icons/Resources/copy-icon.png"));
   paste_action = new QAction("&Paste",this);
+  paste_action->setIcon(QIcon(":/Icons/Resources/paste-icon.png"));
   findreplace_action = new QAction("&Find/Replace",this);
   mapsize_action = new QAction("&Map Size",this);
 
@@ -242,12 +252,38 @@ void Application::setupTopMenu()
   basicmode_action = new QAction("&Basic",cursor_group);
   basicmode_action->setCheckable(true);
   basicmode_action->setChecked(true);
+  basicmode_action->setIcon(QIcon(":/Icons/Resources/pencil-icon.png"));
   erasermode_action = new QAction("&Eraser",cursor_group);
   erasermode_action->setCheckable(true);
+  erasermode_action->setIcon(QIcon(":/Icons/Resources/eraser-icon.png"));
   QMenu* cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
+
+  /* Sets up the menu toolbars */
+  menubar = new QToolBar("Menus",this);
+  menubar->addAction(new_action);
+  menubar->addAction(load_action);
+  menubar->addAction(save_action);
+  menubar->addAction(saveas_action);
+  menubar->addSeparator();
+  menubar->addAction(undo_action);
+  menubar->addAction(redo_action);
+  menubar->addAction(cut_action);
+  menubar->addAction(copy_action);
+  menubar->addAction(paste_action);
+  addToolBar(Qt::TopToolBarArea,menubar);
+  menubar->setFloatable(false);
+  menubar->setMovable(false);
+
+  /* Sets up the brushes toolbar */
+  brushbar = new QToolBar("Brushes",this);
+  brushbar->addAction(basicmode_action);
+  brushbar->addAction(erasermode_action);
+  addToolBar(Qt::TopToolBarArea,brushbar);
   cursor_menu->addAction(basicmode_action);
   cursor_menu->addAction(erasermode_action);
+  brushbar->setFloatable(false);
+  brushbar->setMovable(false);
 
   connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setBasicCursor()));
   connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setEraserCursor()));
@@ -471,6 +507,7 @@ void Application::setActiveLayer(QListWidgetItem *layer)
 void Application::setBasicCursor()
 {
   erasermode_action->setChecked(false);
+  cursor_mode = EditorEnumDb::ERASER;
   map_editor->setCursorMode(EditorEnumDb::BASIC);
 }
 
@@ -480,6 +517,7 @@ void Application::setBasicCursor()
 void Application::setEraserCursor()
 {
   basicmode_action->setChecked(false);
+  cursor_mode = EditorEnumDb::ERASER;
   map_editor->setCursorMode(EditorEnumDb::ERASER);
 }
 

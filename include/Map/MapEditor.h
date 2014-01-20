@@ -21,7 +21,8 @@ class MapEditor : public QGraphicsScene
 public:
   /* Constructor function */
   MapEditor(EditorSpriteToolbox* toolbox = 0,
-            QWidget* parent = 0,int w = 100, int h = 100);
+            QWidget* parent = 0,int w = 100,
+            int h = 100, EditorEnumDb::CursorMode cursor = EditorEnumDb::BASIC);
 
   /* Destructor function */
   ~MapEditor();

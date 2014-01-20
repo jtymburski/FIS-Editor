@@ -21,7 +21,8 @@
  * Input: a pointer to the Editor Sprite Toolbox,
  *        the parent widget, and the dimensions of the map
  */
-MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
+MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
+                     int w, int h, EditorEnumDb::CursorMode cursor)
 {
 
   remove_action = new QAction("&Remove Active Layer",0);
@@ -32,7 +33,7 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent, int w, int h)
 
   /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
-  setCursorMode(EditorEnumDb::BASIC);
+  setCursorMode(cursor);
 
   /* Sets the width and height, and all of the layers to be visible */
   width = w;

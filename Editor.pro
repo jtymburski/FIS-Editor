@@ -40,7 +40,10 @@ SOURCES += \
     src/TileWrapper.cc \
     ../Project/src/Game/EventHandler.cc \
     src/ImageSelectionModule.cc \
-    src/SizeSelector.cc
+    src/SizeSelector.cc \
+    src/EditorSpriteList.cc \
+    src/FrameManipulator.cc \
+    src/FrameManipulationDialog.cc
 
 HEADERS += \
     ./include/Application.h \
@@ -60,7 +63,10 @@ HEADERS += \
     include/TileWrapper.h \
     ../Project/include/Game/EventHandler.h \
     include/ImageSelectionModule.h \
-    include/SizeSelector.h
+    include/SizeSelector.h \
+    include/EditorSpriteList.h \
+    include/FrameManipulator.h \
+    include/FrameManipulationDialog.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
