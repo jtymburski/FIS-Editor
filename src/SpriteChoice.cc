@@ -83,9 +83,8 @@ void SpriteChoice::deselect()
 /*
  * Description: Removes the old creation dialog, and creates a new one
  *
- * Outputs: The Editor Sprite (Unused currently)
  */
-EditorSprite* SpriteChoice::makeSprite()
+void SpriteChoice::makeSprite()
 {
   delete creation_dialog;
   creation_dialog =

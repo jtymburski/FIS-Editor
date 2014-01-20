@@ -108,7 +108,7 @@ QString EditorSprite::getPath(int pos)
  *
  * Output: The frames image
  */
-QImage EditorSprite::getImage(int pos)
+QImage EditorSprite::getImage(int)
 {
   // TODO: Set this properly after the frame framework is in place
   return frame_images.last();
@@ -301,7 +301,7 @@ void EditorSprite::setRotation(QString angle)
  *
  * Input: ID value
  */
-void EditorSprite::setId(int id){}
+void EditorSprite::setId(int){}
 
 
 /*

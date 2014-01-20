@@ -44,7 +44,7 @@ public:
   QString getPath(int pos);
 
   /* Gets the image path */
-  QImage getImage(int pos);
+  QImage getImage(int);
 
   /* Gets the user submitted name of the sprite */
   QString getName();
@@ -86,7 +86,7 @@ public slots:
   void setBrightness(int brightness);
 
   /* Sets the sprites id (Backend) */
-  void setId(int id);
+  void setId(int);
 
   /* Sets the frames horizontal and vertical flip of a given frame */
   void setHorizontalFlip(int,bool);

@@ -37,7 +37,7 @@ public slots:
 
   /* Attempts to make a sprite from this image, which is passed up to the
    * main application and added to the sprite menu */
-  EditorSprite* makeSprite();
+  void makeSprite();
 
 
 protected:

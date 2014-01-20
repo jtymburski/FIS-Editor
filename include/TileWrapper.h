@@ -35,8 +35,8 @@ public:
   QRectF boundingRect() const;
 
   /* Painting function for Tile Wrapper */
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-             QWidget *widget);
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *,
+             QWidget *);
 
 public slots:
   /* Sets the various layer visibilities */
@@ -61,10 +61,10 @@ public slots:
   void setToolbox(EditorSpriteToolbox* tool);
 
   /* Edits the various layers */
-  void editBase(EditorSprite* selection);
-  void editEnhancer(EditorSprite* selection);
-  void editLower(EditorSprite* selection, int position = 0);
-  void editUpper(EditorSprite* selection, int position = 0);
+  void editBase(EditorSprite*);
+  void editEnhancer(EditorSprite*);
+  void editLower(EditorSprite*, int);
+  void editUpper(EditorSprite*, int);
 
   /* Function to place a current sprite on the maps active layer */
   void place();

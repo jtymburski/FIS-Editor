@@ -23,6 +23,7 @@
  */
 MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
                      int w, int h, EditorEnumDb::CursorMode cursor)
+  : QGraphicsScene(parent)
 {
 
   remove_action = new QAction("&Remove Active Layer",0);

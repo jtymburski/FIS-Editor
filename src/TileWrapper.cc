@@ -205,7 +205,7 @@ void TileWrapper::setGrid(bool toggle)
  * Input: Required fields, mostly unused
  */
 void TileWrapper::paint(QPainter *painter,
-                        const QStyleOptionGraphicsItem *option, QWidget *widget)
+                        const QStyleOptionGraphicsItem*, QWidget*)
 {
   QRect bound(xpos*64,ypos*64,64,64);
   if(base && base_layer != NULL)
@@ -441,14 +441,14 @@ void TileWrapper::setGridColor(bool color)
   update();
 }
 
-void TileWrapper::editBase(EditorSprite *selection)
+void TileWrapper::editBase(EditorSprite *)
 {}
-void TileWrapper::editEnhancer(EditorSprite *selection)
-{}
-
-void TileWrapper::editLower(EditorSprite *selection, int position)
+void TileWrapper::editEnhancer(EditorSprite *)
 {}
 
-void TileWrapper::editUpper(EditorSprite *selection, int position)
+void TileWrapper::editLower(EditorSprite *, int)
+{}
+
+void TileWrapper::editUpper(EditorSprite *, int)
 {}
 
