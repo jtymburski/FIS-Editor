@@ -59,12 +59,11 @@ FrameManipulationDialog::FrameManipulationDialog(QWidget *parent,
           this,SLOT(setAngle(QString)));
 
   ok = new QPushButton("Ok",this);
+  connect(ok,SIGNAL(pressed()),this,SIGNAL(finishedSave()));
   connect(ok,SIGNAL(pressed()),this,SLOT(close()));
 
   cancel = new QPushButton("Cancel",this);
   connect(cancel,SIGNAL(pressed()),this,SLOT(closeNoSave()));
-  select_file = new QPushButton("Replace File",this);
-  layout->addWidget(select_file);
   layout->addWidget(angleinput);
   layout->addWidget(horizontal_flip);
   layout->addWidget(vertical_flip);
@@ -74,26 +73,46 @@ FrameManipulationDialog::FrameManipulationDialog(QWidget *parent,
 
 }
 
+/*
+ * Description: Destructor Function
+ */
 FrameManipulationDialog::~FrameManipulationDialog()
 {
-
 }
 
+/*
+ * Description: Sets the horizontal flip
+ *
+ * Input: Flip toggle
+ */
 void FrameManipulationDialog::setHorizontalFlip(bool toggle)
 {
   sprite->setHorizontalFlip(framenumber,toggle);
 }
 
+/*
+ * Description: Sets the vertical flip
+ *
+ * Input: Flip toggle
+ */
 void FrameManipulationDialog::setVerticalFlip(bool toggle)
 {
   sprite->setVerticalFlip(framenumber,toggle);
 }
 
+/*
+ * Description: Sets the angle
+ *
+ * Input: Angle string
+ */
 void FrameManipulationDialog::setAngle(QString angle)
 {
   sprite->setFrameAngle(framenumber,angle.toInt());
 }
 
+/*
+ * Description: Closes the dialog and reverts all of the input values
+ */
 void FrameManipulationDialog::closeNoSave()
 {
   sprite->setHorizontalFlip(framenumber,horizontal_backup);

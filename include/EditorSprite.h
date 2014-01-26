@@ -60,6 +60,12 @@ public:
   int getFrameAngle(int frame_num);
 
 public slots:
+  /* Adds a frame to the top of the sequence */
+  void addHead(QString name);
+
+  /* Adds a frame to the top of the sequence */
+  void addMidpoint(QString name, int before, int after);
+
   /* Sets the user submitted name */
   void setName(QString name);
 

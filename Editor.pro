@@ -43,7 +43,8 @@ SOURCES += \
     src/SizeSelector.cc \
     src/EditorSpriteList.cc \
     src/FrameManipulator.cc \
-    src/FrameManipulationDialog.cc
+    src/FrameManipulationDialog.cc \
+    src/Manipulabel.cc
 
 HEADERS += \
     ./include/Application.h \
@@ -66,7 +67,8 @@ HEADERS += \
     include/SizeSelector.h \
     include/EditorSpriteList.h \
     include/FrameManipulator.h \
-    include/FrameManipulationDialog.h
+    include/FrameManipulationDialog.h \
+    include/Manipulabel.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

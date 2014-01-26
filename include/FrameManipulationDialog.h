@@ -27,21 +27,42 @@ public:
   /* Destructor Function */
   ~FrameManipulationDialog();
 public slots:
+
   /* Sets the horizontal flip for the given frame */
   void setHorizontalFlip(bool);
+
+  /* Sets the vertical flip for the given frame */
   void setVerticalFlip(bool);
+
+  /* Sets the angle for the given frame */
   void setAngle(QString);
+
+  /* Closes with no saving */
   void closeNoSave();
+
+signals:
+  /* Signal for finishing and saving the changes to the sequence */
+  void finishedSave();
 protected:
 private:
-  /* Ok button */
+  /* The sprite being edited */
   EditorSprite* sprite;
+
+  /* Ok button */
   QPushButton* ok;
+
+  /* Cancel button */
   QPushButton* cancel;
+
+  /* File selection button (For changing) */
   QPushButton* select_file;
+
+  /* Backups (For Cancellation) */
   bool horizontal_backup;
   bool vertical_backup;
   int angle_backup;
+
+  /* Frame number */
   int framenumber;
 };
 

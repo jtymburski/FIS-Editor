@@ -80,6 +80,31 @@ void EditorSprite::setPath(QString p)
 }
 
 /*
+ * Description: Sets the frame head
+ *
+ * Input: The path
+ */
+void EditorSprite::addHead(QString name)
+{
+  frame_paths.push_front(name);
+  frame_angles.push_front(0);
+  frame_hflip.push_front(false);
+  frame_vflip.push_front(false);
+}
+
+/*
+ * Description: Adds a frame in the given position
+ *
+ * Input: The path, and before and after elements
+ */
+void EditorSprite::addMidpoint(QString name, int before, int after)
+{
+  frame_paths.insert(after,name);
+  frame_angles.insert(after,0);
+  frame_hflip.insert(after,false);
+  frame_vflip.insert(after,false);
+}
+/*
  * Description: Sets the frame image
  *
  * Input: The frame image
@@ -122,7 +147,7 @@ QImage EditorSprite::getImage(int)
 int EditorSprite::frameCount()
 {
   // TODO: Set this properly after the frame framework is in place
-  return frame_images.size();
+  return frame_paths.size();
 }
 
 /*

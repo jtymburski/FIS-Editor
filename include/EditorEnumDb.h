@@ -22,5 +22,8 @@ public:
                     LOWER5,UPPER1,UPPER2,UPPER3,UPPER4,UPPER5};
   /* Enum for cursor mode */
   enum CursorMode {BASIC,ERASER};
+
+  /* Enum for type of Manipulabel */
+  enum ManipulabelType {FRAME,HEAD,TAIL,MIDPOINT};
 };
 #endif // EDITORENUMDB_H
