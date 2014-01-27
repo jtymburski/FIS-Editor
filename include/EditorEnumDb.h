@@ -24,6 +24,6 @@ public:
   enum CursorMode {BASIC,ERASER};
 
   /* Enum for type of Manipulabel */
-  enum ManipulabelType {FRAME,HEAD,TAIL,MIDPOINT};
+  enum ManipulabelType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
 };
 #endif // EDITORENUMDB_H

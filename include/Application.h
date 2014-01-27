@@ -10,6 +10,7 @@
 
 #include <QMainWindow>
 #include <QAction>
+#include <QApplication>
 #include <QActionGroup>
 #include <QToolBar>
 #include <QMenuBar>
@@ -26,6 +27,7 @@
 #include <QListWidget>
 #include <QStatusBar>
 #include <QTreeView>
+#include <QDesktopWidget>
 #include "Map/MapEditor.h"
 #include "ImageSelectionModule.h"
 #include "EditorSpriteToolbox.h"

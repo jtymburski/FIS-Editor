@@ -244,9 +244,16 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 
   /* Connects to the appropriate setting functions */
   connect(rotate0,SIGNAL(clicked()),working_sprite,SLOT(set0()));
+  connect(rotate0,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+
   connect(rotate90,SIGNAL(clicked()),working_sprite,SLOT(set90()));
+  connect(rotate90,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+
   connect(rotate180,SIGNAL(clicked()),working_sprite,SLOT(set180()));
+  connect(rotate180,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+
   connect(rotate270,SIGNAL(clicked()),working_sprite,SLOT(set270()));
+  connect(rotate270,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
 
   rotation_layout->addWidget(rotate0);
   rotation_layout->addWidget(rotate90);

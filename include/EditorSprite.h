@@ -66,8 +66,14 @@ public slots:
   /* Adds a frame to the top of the sequence */
   void addMidpoint(QString name, int before, int after);
 
+  /* Deletes a frame from the sequence */
+  void deleteFrame(int);
+
   /* Sets the user submitted name */
   void setName(QString name);
+
+  /* Sets the frame path at the given position */
+  void setFramePath(int,QString);
 
   /* Sets the sprites animation time */
   void setAnimationTime(QString time);

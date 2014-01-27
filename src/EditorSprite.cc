@@ -338,6 +338,8 @@ void EditorSprite::set0()
   flipped90 = false;
   flipped180 = false;
   flipped270 = false;
+  for(int i=0; i<frameCount(); i++)
+    setFrameAngle(i,0);
 }
 
 /*
@@ -349,6 +351,8 @@ void EditorSprite::set90()
   flipped90 = true;
   flipped180 = false;
   flipped270 = false;
+  for(int i=0; i<frameCount(); i++)
+    setFrameAngle(i,90);
 }
 
 /*
@@ -360,6 +364,8 @@ void EditorSprite::set180()
   flipped90 = false;
   flipped180 = true;
   flipped270 = false;
+  for(int i=0; i<frameCount(); i++)
+    setFrameAngle(i,180);
 }
 
 /*
@@ -371,6 +377,31 @@ void EditorSprite::set270()
   flipped90 = false;
   flipped180 = false;
   flipped270 = true;
+  for(int i=0; i<frameCount(); i++)
+    setFrameAngle(i,270);
+}
+
+/*
+ * Description : Sets the frame path at the given position
+ *
+ * Input: Frame position, path
+ */
+void EditorSprite::setFramePath(int pos, QString newpath)
+{
+  frame_paths[pos] = newpath;
+}
+
+/*
+ * Description : Deletes the frame from the sequence
+ *
+ * Input: Position
+ */
+void EditorSprite::deleteFrame(int pos)
+{
+  frame_paths.remove(pos);
+  frame_angles.remove(pos);
+  frame_hflip.remove(pos);
+  frame_vflip.remove(pos);
 }
 
 /*

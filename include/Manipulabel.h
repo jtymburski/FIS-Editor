@@ -12,8 +12,8 @@
 #include <QWidget>
 #include <QPainter>
 #include <QFileDialog>
-#include "FrameManipulationDialog.h"
 #include "EditorEnumDb.h"
+#include "EditorSprite.h"
 
 class Manipulabel : public QWidget
 {
@@ -23,7 +23,8 @@ public:
   Manipulabel(QWidget* parent = 0,
               EditorEnumDb::ManipulabelType type = EditorEnumDb::FRAME,
       QPixmap* frame_image = 0,int position = 0, int before = 0, int after = 0,
-              QString framedir = QDir::current().absolutePath());
+              QString framedir = QDir::current().absolutePath(),
+              EditorSprite* current = 0);
 
   /* Destructor function */
   ~Manipulabel();
@@ -32,6 +33,8 @@ public:
   void setFlips(bool horizontal, bool vertical);
   void setHFlip(bool horizontal);
   void setVFlip(bool vertical);
+  void setAngle(int angle);
+  void reloadFrame();
 protected:
   /* Mouse press event */
   void mouseDoubleClickEvent(QMouseEvent *event);
@@ -56,8 +59,8 @@ private:
   /* Label type */
   EditorEnumDb::ManipulabelType t;
 
-  /* The Manipulation Dialog */
-  FrameManipulationDialog* manipulator;
+  /* Editor sprite pointer */
+  EditorSprite* currentsprite;
 
   /* Position Before After and Current */
   int pos,bef,aft;

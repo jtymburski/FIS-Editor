@@ -65,7 +65,8 @@ void FrameManipulator::addFrames()
 
     framelabels.push_back(new Manipulabel(this,EditorEnumDb::FRAME,
                              new QPixmap(currentsprite->getPath(i)),
-                                          i,0,0,currentsprite->getPath(0)));
+                                          i,0,0,currentsprite->getPath(0),
+                                          currentsprite));
     framelabels.last()->setHFlip(currentsprite->getHorizontalFlip(i));
     framelabels.last()->setVFlip(currentsprite->getVerticalFlip(i));
     boxwidth += 64;

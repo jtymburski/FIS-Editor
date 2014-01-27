@@ -13,7 +13,9 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QDebug>
+#include <QMessageBox>
 #include "EditorSprite.h"
+#include "Manipulabel.h"
 
 class FrameManipulationDialog : public QDialog
 {
@@ -35,16 +37,31 @@ public slots:
   void setVerticalFlip(bool);
 
   /* Sets the angle for the given frame */
-  void setAngle(QString);
+  void set0();
+  void set90();
+  void set180();
+  void set270();
 
   /* Closes with no saving */
   void closeNoSave();
 
+  /* Opens a dialog for frame replacement */
+  void replaceFrame();
+
+  /* Deletes the current frame */
+  void deleteFrame();
 signals:
   /* Signal for finishing and saving the changes to the sequence */
   void finishedSave();
 protected:
 private:
+
+  Manipulabel* framelabel;
+  QCheckBox* rotate0;
+  QCheckBox* rotate90;
+  QCheckBox* rotate180;
+  QCheckBox* rotate270;
+
   /* The sprite being edited */
   EditorSprite* sprite;
 
@@ -60,7 +77,10 @@ private:
   /* Backups (For Cancellation) */
   bool horizontal_backup;
   bool vertical_backup;
-  int angle_backup;
+  bool rotate0_backup;
+  bool rotate90_backup;
+  bool rotate180_backup;
+  bool rotate270_backup;
 
   /* Frame number */
   int framenumber;

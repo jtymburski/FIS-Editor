@@ -35,6 +35,8 @@ Application::Application(QWidget* parent, int xsize, int ysize) :
   setupLayerBar();
   setupMapView();
   setupTopMenu();
+  setGeometry(QApplication::desktop()->availableGeometry());
+  showMaximized();
 }
 
 /*

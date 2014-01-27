@@ -19,9 +19,11 @@
 
 Manipulabel::Manipulabel(QWidget *parent,EditorEnumDb::ManipulabelType type,
                          QPixmap* frame_image,
-                         int position, int before, int after, QString framedir)
+                         int position, int before, int after, QString framedir,
+                         EditorSprite* current)
   : QWidget(parent)
 {
+  currentsprite = current;
   t = type;
   framepath = framedir;
   pos = position;
@@ -36,6 +38,12 @@ Manipulabel::Manipulabel(QWidget *parent,EditorEnumDb::ManipulabelType type,
     setFixedSize(64,64);
     frame = frame_image;
     connect(this,SIGNAL(editFrame(int)),parent,SLOT(editFrame(int)));
+  }
+  /* If the type is viewonly, set the size and do not make connections */
+  else if(t == EditorEnumDb::VIEWONLY)
+  {
+    setFixedSize(64,64);
+    frame = frame_image;
   }
   /* If the type is anything else, the size is 32x32 and the appropriate
    * frame addition is triggered */
@@ -116,6 +124,11 @@ void Manipulabel::paintEvent(QPaintEvent *)
     // Write back to the matrix
     transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
   }
+  if(t == EditorEnumDb::FRAME || t == EditorEnumDb::VIEWONLY)
+  {
+    QTransform trans = transform;
+    transform = trans.rotate(currentsprite->getFrameAngle(pos));
+  }
   painter.drawPixmap(0,0,width(),height(),temp.transformed(transform));
 }
 
@@ -153,6 +166,7 @@ void Manipulabel::mouseDoubleClickEvent(QMouseEvent *event)
                                     framepath,tr("Image Files (*.png)"));
         emit addTail(path);
         break;
+      case EditorEnumDb::VIEWONLY:
       default:
         break;
     }
@@ -191,5 +205,15 @@ void Manipulabel::setHFlip(bool horizontal)
 void Manipulabel::setVFlip(bool vertical)
 {
   verflip = vertical;
+  update();
+}
+
+/*
+ * Description: Reloads the frame image
+ */
+void Manipulabel::reloadFrame()
+{
+  frame = new QPixmap(currentsprite->getPath(pos));
+  framepath = currentsprite->getPath(pos);
   update();
 }
