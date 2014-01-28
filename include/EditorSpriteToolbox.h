@@ -43,6 +43,9 @@ public slots:
   /* Updates the sprite list */
   void refreshList();
 
+  /* Returns a transformed image */
+  QPixmap transformPixmap(EditorSprite*,int pos = 0);
+
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);

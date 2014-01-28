@@ -72,7 +72,8 @@ public slots:
   /* Function for removing a sprite from the maps active layer */
   void unplace();
 
-
+  /* Transforms the image and returns it */
+  QPixmap transformPixmap(EditorSprite* pic,int pos = 0);
   /* Variable for the currently active layer */
   EditorEnumDb::Layer active_layer;
 protected:

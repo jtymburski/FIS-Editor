@@ -47,9 +47,77 @@ EditorSpriteToolbox::~EditorSpriteToolbox()
   current = NULL;
 }
 
+
+/*
+ * Description: Transforms the given frame from the given sprite
+ *
+ * Input: Editor sprite and position (Default is zero)
+ *
+ * Output: Returns the transformed pixmap
+ */
+QPixmap EditorSpriteToolbox::transformPixmap(EditorSprite* pic, int pos)
+{
+  QTransform transform;
+
+  if(pic->getHorizontalFlip(pos))
+  {
+    qreal m11 = transform.m11();    // Horizontal scaling
+    qreal m12 = transform.m12();    // Vertical shearing
+    qreal m13 = transform.m13();    // Horizontal Projection
+    qreal m21 = transform.m21();    // Horizontal shearing
+    qreal m22 = transform.m22();    // vertical scaling
+    qreal m23 = transform.m23();    // Vertical Projection
+    qreal m31 = transform.m31();    // Horizontal Position (DX)
+    qreal m32 = transform.m32();    // Vertical Position (DY)
+    qreal m33 = transform.m33();    // Addtional Projection Factor
+
+    qreal scale = m11;
+
+    m11 = -m11;
+
+    // Re-position back to origin
+    if(m31 > 0)
+      m31 = 0;
+    else
+      m31 = (64 * scale);
+
+    // Write back to the matrix
+    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
+  }
+  if(pic->getVerticalFlip(pos))
+  {
+    qreal m11 = transform.m11();    // Horizontal scaling
+    qreal m12 = transform.m12();    // Vertical shearing
+    qreal m13 = transform.m13();    // Horizontal Projection
+    qreal m21 = transform.m21();    // Horizontal shearing
+    qreal m22 = transform.m22();    // vertical scaling
+    qreal m23 = transform.m23();    // Vertical Projection
+    qreal m31 = transform.m31();    // Horizontal Position (DX)
+    qreal m32 = transform.m32();    // Vertical Position (DY)
+    qreal m33 = transform.m33();    // Addtional Projection Factor
+
+    qreal scale = m22;
+    m22 = -m22;
+
+    // Re-position back to origin
+    if(m32 > 0)
+      m32 = 0;
+    else
+      m32 = (64 * scale);
+
+    // Write back to the matrix
+    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
+  }
+  QTransform trans = transform;
+  transform = trans.rotate(pic->getFrameAngle(pos));
+  QPixmap returnimage(pic->getPath(pos));
+  return returnimage.transformed(transform);
+}
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
+
 
 /*
  * Description: The paint event for the toolbox, this mainly sets up the
@@ -64,9 +132,7 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
   QRect bound(12,520,64,64);
   QRect border(11,519,66,66);
   painter.setPen(QPen(QBrush(Qt::black),2));
-  QTransform temp;
-  QTransform transformation = temp.rotate(current->getQuickRotation());
-  painter.drawImage(bound,current->getImage(0).transformed(transformation));
+  painter.drawPixmap(bound,transformPixmap(current));
   painter.drawRect(border);
   painter.setFont(QFont("helvetica",14,QFont::Bold));
   painter.drawText(80,536,current->getName());
