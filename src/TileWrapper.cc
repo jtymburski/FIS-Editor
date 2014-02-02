@@ -38,6 +38,7 @@ TileWrapper::TileWrapper(int x, int y, int z)
   grid = true;
   pass = false;
   tile = new Tile();
+  tile->setStatus(Tile::ACTIVE);
   toolbox = NULL;
   base_layer = NULL;
   enhancer_layer = NULL;
@@ -424,25 +425,26 @@ void TileWrapper::paint(QPainter *painter,
       QPointF((xpos*64)+4,(ypos*64)+60),
       QPointF((xpos*64)+0,(ypos*64)+64)
     };
-    if(gameTile()->getBasePassability(Direction::NORTH))
+    qDebug() << gameTile()->getBasePassability(Direction::NORTH) << " " << gameTile()->getLowerPassability(Direction::NORTH);
+    if(gameTile()->getPassabilityExiting(Direction::NORTH))
       painter->setBrush(QColor(0,255,0,128));
     else
       painter->setBrush(QColor(255,0,0,128));
     painter->drawPolygon(Npoints,4);
 
-    if(gameTile()->getBasePassability(Direction::EAST))
+    if(gameTile()->getPassabilityExiting(Direction::EAST))
       painter->setBrush(QColor(0,255,0,128));
     else
       painter->setBrush(QColor(255,0,0,128));
     painter->drawPolygon(Epoints,4);
 
-    if(gameTile()->getBasePassability(Direction::SOUTH))
+    if(gameTile()->getPassabilityExiting(Direction::SOUTH))
       painter->setBrush(QColor(0,255,0,128));
     else
       painter->setBrush(QColor(255,0,0,128));
     painter->drawPolygon(Spoints,4);
 
-    if(gameTile()->getBasePassability(Direction::WEST))
+    if(gameTile()->getPassabilityExiting(Direction::WEST))
       painter->setBrush(QColor(0,255,0,128));
     else
       painter->setBrush(QColor(255,0,0,128));

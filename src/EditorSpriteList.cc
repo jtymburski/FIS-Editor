@@ -62,6 +62,22 @@ void EditorSpriteList::mousePressEvent(QMouseEvent *event)
   }
 }
 
+
+/*
+ * Description: The mouse event for double clicking
+ *
+ * Inputs: Mouse event
+ */
+void EditorSpriteList::mouseDoubleClickEvent(QMouseEvent *event)
+{
+  QListWidget::mouseDoubleClickEvent(event);
+  if(event->buttons() & Qt::LeftButton)
+  {
+    QListWidgetItem* current = itemAt(event->pos());
+    if(current != NULL)
+      editSprite();
+  }
+}
 void EditorSpriteList::viewFrameSequence()
 {
   QDialog* frames = new QDialog(this);

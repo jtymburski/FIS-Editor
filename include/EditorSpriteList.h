@@ -40,6 +40,8 @@ public slots:
 protected:
   /* Right click menu */
   void mousePressEvent(QMouseEvent *event);
+  /* Double click */
+  void mouseDoubleClickEvent(QMouseEvent *event);
 private:
   /* Right click menu */
   QMenu* rightclick_menu;
