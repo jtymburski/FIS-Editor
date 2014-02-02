@@ -136,6 +136,8 @@ void Application::setupMapView(int x, int y)
           map_editor,SLOT(toggleUpper5(bool)));
   connect(shown_grid,SIGNAL(toggled(bool)),
           map_editor,SLOT(toggleGrid(bool)));
+  connect(shown_pass,SIGNAL(toggled(bool)),
+          map_editor,SLOT(togglePass(bool)));
   setCentralWidget(map_scroller);
 
   /* Sets up the map status bar */
@@ -241,8 +243,10 @@ void Application::setupTopMenu()
   view_menu->addAction(shown_upper_layer_04);
   view_menu->addAction(shown_upper_layer_05);
   view_menu->addSeparator();
-  view_menu->addAction(viewalllayers_action);
   view_menu->addAction(shown_grid);
+  view_menu->addAction(shown_pass);
+  view_menu->addSeparator();
+  view_menu->addAction(viewalllayers_action);
 
   /* Connects View menu actions to slots */
   connect(viewalllayers_action,SIGNAL(toggled(bool)),
@@ -258,6 +262,10 @@ void Application::setupTopMenu()
   erasermode_action = new QAction("&Eraser",cursor_group);
   erasermode_action->setCheckable(true);
   erasermode_action->setIcon(QIcon(":/Icons/Resources/eraser-icon.png"));
+  blockplacemode_action = new QAction("&Block Place",cursor_group);
+  blockplacemode_action->setCheckable(true);
+  blockplacemode_action->setIcon(QIcon(":/Icons/Resources/rect-icon.png"));
+
   QMenu* cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
 
@@ -281,14 +289,18 @@ void Application::setupTopMenu()
   brushbar = new QToolBar("Brushes",this);
   brushbar->addAction(basicmode_action);
   brushbar->addAction(erasermode_action);
+  brushbar->addAction(blockplacemode_action);
   addToolBar(Qt::TopToolBarArea,brushbar);
   cursor_menu->addAction(basicmode_action);
   cursor_menu->addAction(erasermode_action);
+  cursor_menu->addAction(blockplacemode_action);
   brushbar->setFloatable(false);
   brushbar->setMovable(false);
 
   connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setBasicCursor()));
   connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setEraserCursor()));
+  connect(blockplacemode_action,SIGNAL(triggered()),
+          this,SLOT(setBlockCursor()));
 }
 
 /*
@@ -382,6 +394,8 @@ void Application::setupLayerBar()
   shown_upper_layer_05->setCheckable(true);
   shown_grid = new QAction("&Grid",shown_layers);
   shown_grid->setCheckable(true);
+  shown_pass = new QAction("&Passibility",shown_layers);
+  shown_pass->setCheckable(true);
   showAllLayers(true);
 
   /* Sets up the top toolbar which shows the currently shown layers */
@@ -401,6 +415,8 @@ void Application::setupLayerBar()
   toolbar->addAction(shown_upper_layer_03);
   toolbar->addAction(shown_upper_layer_04);
   toolbar->addAction(shown_upper_layer_05);
+  toolbar->addSeparator();
+  toolbar->addAction(shown_pass);
   toolbar->addAction(shown_grid);
   addToolBar(Qt::TopToolBarArea,toolbar);
   toolbar->setFloatable(false);
@@ -509,7 +525,8 @@ void Application::setActiveLayer(QListWidgetItem *layer)
 void Application::setBasicCursor()
 {
   erasermode_action->setChecked(false);
-  cursor_mode = EditorEnumDb::ERASER;
+  blockplacemode_action->setChecked(false);
+  cursor_mode = EditorEnumDb::BASIC;
   map_editor->setCursorMode(EditorEnumDb::BASIC);
 }
 
@@ -519,10 +536,21 @@ void Application::setBasicCursor()
 void Application::setEraserCursor()
 {
   basicmode_action->setChecked(false);
+  blockplacemode_action->setChecked(false);
   cursor_mode = EditorEnumDb::ERASER;
   map_editor->setCursorMode(EditorEnumDb::ERASER);
 }
 
+/*
+ * Description: Sets to block place cursor mode
+ */
+void Application::setBlockCursor()
+{
+  basicmode_action->setChecked(false);
+  erasermode_action->setChecked(false);
+  cursor_mode = EditorEnumDb::BLOCKPLACE;
+  map_editor->setCursorMode(EditorEnumDb::BLOCKPLACE);
+}
 /*
  * Description: Sets the position into the status bar
  *

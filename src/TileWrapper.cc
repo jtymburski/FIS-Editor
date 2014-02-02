@@ -36,6 +36,7 @@ TileWrapper::TileWrapper(int x, int y, int z)
   upper4 = true;
   upper5 = true;
   grid = true;
+  pass = false;
   tile = new Tile();
   toolbox = NULL;
   base_layer = NULL;
@@ -196,6 +197,25 @@ void TileWrapper::setUpper5(bool toggle)
 void TileWrapper::setGrid(bool toggle)
 {
   grid = toggle;
+}
+
+/*
+ * Description: Sets the grid visibility
+ *
+ * Input: Visibility toggle
+ */
+void TileWrapper::setPass(bool toggle)
+{
+  pass = toggle;
+}
+/*
+ * Description : Gets the game tile
+ *
+ * Output: Tile pointer
+ */
+Tile* TileWrapper::gameTile()
+{
+  return tile;
 }
 
 /*
@@ -373,6 +393,61 @@ void TileWrapper::paint(QPainter *painter,
 
     painter->drawRect(1+(xpos*64),1+(ypos*64),62,62);
   }
+  if(pass)
+  {
+    painter->setPen(QColor(0,0,0,0));
+    QPointF Npoints[4] =
+    {
+      QPointF((xpos*64)+0,(ypos*64)+0),
+      QPointF((xpos*64)+4,(ypos*64)+4),
+      QPointF((xpos*64)+60,(ypos*64)+4),
+      QPointF((xpos*64)+64,(ypos*64)+0)
+    };
+    QPointF Epoints[4] =
+    {
+      QPointF((xpos*64)+64,(ypos*64)+0),
+      QPointF((xpos*64)+60,(ypos*64)+4),
+      QPointF((xpos*64)+60,(ypos*64)+60),
+      QPointF((xpos*64)+64,(ypos*64)+64)
+    };
+    QPointF Spoints[4] =
+    {
+      QPointF((xpos*64)+0,(ypos*64)+64),
+      QPointF((xpos*64)+4,(ypos*64)+60),
+      QPointF((xpos*64)+60,(ypos*64)+60),
+      QPointF((xpos*64)+64,(ypos*64)+64)
+    };
+    QPointF Wpoints[4] =
+    {
+      QPointF((xpos*64)+0,(ypos*64)+0),
+      QPointF((xpos*64)+4,(ypos*64)+4),
+      QPointF((xpos*64)+4,(ypos*64)+60),
+      QPointF((xpos*64)+0,(ypos*64)+64)
+    };
+    if(gameTile()->getBasePassability(Direction::NORTH))
+      painter->setBrush(QColor(0,255,0,128));
+    else
+      painter->setBrush(QColor(255,0,0,128));
+    painter->drawPolygon(Npoints,4);
+
+    if(gameTile()->getBasePassability(Direction::EAST))
+      painter->setBrush(QColor(0,255,0,128));
+    else
+      painter->setBrush(QColor(255,0,0,128));
+    painter->drawPolygon(Epoints,4);
+
+    if(gameTile()->getBasePassability(Direction::SOUTH))
+      painter->setBrush(QColor(0,255,0,128));
+    else
+      painter->setBrush(QColor(255,0,0,128));
+    painter->drawPolygon(Spoints,4);
+
+    if(gameTile()->getBasePassability(Direction::WEST))
+      painter->setBrush(QColor(0,255,0,128));
+    else
+      painter->setBrush(QColor(255,0,0,128));
+    painter->drawPolygon(Wpoints,4);
+  }
 }
 
 /*
@@ -392,39 +467,51 @@ void TileWrapper::place()
   {
     case EditorEnumDb::BASE:
       base_layer = toolbox->getCurrent();
+      tile->setBase(base_layer->getSprite());
       break;
     case EditorEnumDb::ENHANCER:
       enhancer_layer = toolbox->getCurrent();
+      tile->setEnhancer(enhancer_layer->getSprite());
       break;
     case EditorEnumDb::LOWER1:
       lower_layers[0] = toolbox->getCurrent();
+      tile->insertLower(lower_layers[0]->getSprite(),0);
       break;
     case EditorEnumDb::LOWER2:
       lower_layers[1] = toolbox->getCurrent();
+      tile->insertLower(lower_layers[1]->getSprite(),1);
       break;
     case EditorEnumDb::LOWER3:
       lower_layers[2] = toolbox->getCurrent();
+      tile->insertLower(lower_layers[2]->getSprite(),2);
       break;
     case EditorEnumDb::LOWER4:
       lower_layers[3] = toolbox->getCurrent();
+      tile->insertLower(lower_layers[3]->getSprite(),3);
       break;
     case EditorEnumDb::LOWER5:
       lower_layers[4] = toolbox->getCurrent();
+      tile->insertLower(lower_layers[4]->getSprite(),4);
       break;
     case EditorEnumDb::UPPER1:
       upper_layers[0] = toolbox->getCurrent();
+      tile->insertUpper(upper_layers[0]->getSprite(),0);
       break;
     case EditorEnumDb::UPPER2:
       upper_layers[1] = toolbox->getCurrent();
+      tile->insertUpper(upper_layers[1]->getSprite(),1);
       break;
     case EditorEnumDb::UPPER3:
       upper_layers[2] = toolbox->getCurrent();
+      tile->insertUpper(upper_layers[2]->getSprite(),2);
       break;
     case EditorEnumDb::UPPER4:
       upper_layers[3] = toolbox->getCurrent();
+      tile->insertUpper(upper_layers[3]->getSprite(),3);
       break;
     case EditorEnumDb::UPPER5:
       upper_layers[4] = toolbox->getCurrent();
+      tile->insertUpper(upper_layers[4]->getSprite(),4);
       break;
     default:
       break;
@@ -441,39 +528,51 @@ void TileWrapper::unplace()
   {
     case EditorEnumDb::BASE:
       base_layer = NULL;
+      tile->unsetBase();
       break;
     case EditorEnumDb::ENHANCER:
       enhancer_layer = NULL;
+      tile->unsetEnhancer();
       break;
     case EditorEnumDb::LOWER1:
       lower_layers[0] = NULL;
+      tile->unsetLower(0);
       break;
     case EditorEnumDb::LOWER2:
       lower_layers[1] = NULL;
+      tile->unsetLower(1);
       break;
     case EditorEnumDb::LOWER3:
       lower_layers[2] = NULL;
+      tile->unsetLower(2);
       break;
     case EditorEnumDb::LOWER4:
       lower_layers[3] = NULL;
+      tile->unsetLower(3);
       break;
     case EditorEnumDb::LOWER5:
       lower_layers[4] = NULL;
+      tile->unsetLower(4);
       break;
     case EditorEnumDb::UPPER1:
       upper_layers[0] = NULL;
+      tile->unsetUpper(0);
       break;
     case EditorEnumDb::UPPER2:
       upper_layers[1] = NULL;
+      tile->unsetUpper(1);
       break;
     case EditorEnumDb::UPPER3:
       upper_layers[2] = NULL;
+      tile->unsetUpper(2);
       break;
     case EditorEnumDb::UPPER4:
       upper_layers[3] = NULL;
+      tile->unsetUpper(3);
       break;
     case EditorEnumDb::UPPER5:
       upper_layers[4] = NULL;
+      tile->unsetUpper(4);
       break;
     default:
       break;

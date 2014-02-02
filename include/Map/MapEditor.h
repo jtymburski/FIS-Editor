@@ -11,7 +11,9 @@
 #include <QTabWidget>
 #include <QGraphicsScene>
 #include <QList>
+#include <QRect>
 #include <QWidget>
+#include "EnumDb.h"
 #include "TileWrapper.h"
 
 class MapEditor : public QGraphicsScene
@@ -44,12 +46,18 @@ public slots:
 
   /* Function to toggle the grid */
   void toggleGrid(bool);
+  void togglePass(bool);
 
   /* Function to set the current layer for editing */
   void setEditingLayer(EditorEnumDb::Layer);
 
   /* removes the current sprite from the active layer */
   void removeCurrent();
+  void setNPassCurrent(bool);
+  void setEPassCurrent(bool);
+  void setSPassCurrent(bool);
+  void setWPassCurrent(bool);
+  void setAPassCurrent(bool);
 
   /* Sets the cursor mode */
   void setCursorMode(EditorEnumDb::CursorMode mode);
@@ -66,6 +74,7 @@ protected:
   /* Paint event */
   void paintEvent(QPaintEvent *);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
   void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
 private:
@@ -77,6 +86,11 @@ private:
   /* Right click menu */
   QMenu* rightclick_menu;
   QAction* remove_action;
+  QAction* setNpass_action;
+  QAction* setEpass_action;
+  QAction* setSpass_action;
+  QAction* setWpass_action;
+  QAction* setApass_action;
 
   /* Map layer tabs */
   QTabWidget* layer_tabs;
@@ -84,9 +98,17 @@ private:
   /* The list of tiles */
   QList<QList<TileWrapper*> > tiles;
 
+  /* Rubber Band */
+  QRubberBand* highlight;
+  QPoint origin;
+
   /* Dimensions of the map */
   int width;
   int height;
+
+  /* Block Select Startpoint */
+  int blockx, blocky;
+  bool blockmodepress;
 
   /* Cursor type */
   EditorEnumDb::CursorMode cursormode;

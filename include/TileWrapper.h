@@ -53,8 +53,12 @@ public slots:
   void setUpper4(bool);
   void setUpper5(bool);
 
+  /* Gets the tile for editing */
+  Tile* gameTile();
+
   /* Sets the grid visibility */
   void setGrid(bool);
+  void setPass(bool);
   void setGridColor(bool);
 
   /* Sets the toolbox that the tile gets the current Editor Sprite from */
@@ -82,7 +86,7 @@ private:
   bool base,enhancer;
   bool lower1,lower2,lower3,lower4,lower5;
   bool upper1,upper2,upper3,upper4,upper5;
-  bool grid;
+  bool grid,pass;
 
   /* The Tile that will be placed into Univursa.exe */
   Tile* tile;

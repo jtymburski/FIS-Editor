@@ -94,6 +94,7 @@ private:
   QActionGroup *cursor_group;
   QAction *erasermode_action;
   QAction *basicmode_action;
+  QAction *blockplacemode_action;
 
   /* Map Mode Shift Actions (Active Layers) */
   QListWidgetItem *active_lower_layer_01;
@@ -130,6 +131,7 @@ private:
   QAction *shown_upper_layer_04;
   QAction *shown_upper_layer_05;
   QAction *shown_grid;
+  QAction *shown_pass;
 
   /* The users login name */
   QString username;
@@ -197,6 +199,9 @@ public slots:
 
   /* Sets to Basic Mode */
   void setEraserCursor();
+
+  /* Sets to Block Mode */
+  void setBlockCursor();
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);

@@ -27,10 +27,39 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
 {
 
   remove_action = new QAction("&Remove Active Layer",0);
+  setNpass_action = new QAction("&North Passibility",0);
+  setEpass_action = new QAction("&East Passibility",0);
+  setSpass_action = new QAction("&South Passibility",0);
+  setWpass_action = new QAction("&West Passibility",0);
+  setApass_action = new QAction("&All Passibility",0);
+  setNpass_action->setCheckable(true);
+  setEpass_action->setCheckable(true);
+  setSpass_action->setCheckable(true);
+  setWpass_action->setCheckable(true);
+  setApass_action->setCheckable(true);
+
   rightclick_menu = new QMenu();
   rightclick_menu->hide();
   rightclick_menu->addAction(remove_action);
+  rightclick_menu->addSeparator();
+  rightclick_menu->addAction(setNpass_action);
+  rightclick_menu->addAction(setEpass_action);
+  rightclick_menu->addAction(setSpass_action);
+  rightclick_menu->addAction(setWpass_action);
+  rightclick_menu->addSeparator();
+  rightclick_menu->addAction(setApass_action);
   connect(remove_action,SIGNAL(triggered()),this,SLOT(removeCurrent()));
+
+  connect(setNpass_action,SIGNAL(triggered(bool)),
+          this,SLOT(setNPassCurrent(bool)));
+  connect(setEpass_action,SIGNAL(triggered(bool)),
+          this,SLOT(setEPassCurrent(bool)));
+  connect(setSpass_action,SIGNAL(triggered(bool)),
+          this,SLOT(setSPassCurrent(bool)));
+  connect(setWpass_action,SIGNAL(triggered(bool)),
+          this,SLOT(setWPassCurrent(bool)));
+  connect(setApass_action,SIGNAL(triggered(bool)),
+          this,SLOT(setAPassCurrent(bool)));
 
   /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
@@ -39,6 +68,9 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
   /* Sets the width and height, and all of the layers to be visible */
   width = w;
   height = h;
+  blockx = 0;
+  blocky = 0;
+  blockmodepress = false;
   base = true;
   enhancer = true;
   lower1 = true;
@@ -51,6 +83,8 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
   upper3 = true;
   upper4 = true;
   upper5 = true;
+
+  highlight = new QRubberBand(QRubberBand::Rectangle,0);
 
   /* Sets the size of the map scene */
   setSceneRect(0,0,width*64,height*64);
@@ -310,6 +344,22 @@ void MapEditor::toggleGrid(bool toggle)
   }
 }
 
+/*
+ * Description: Toggles the passibility view for each tile
+ *
+ * Inputs: Visiblity boolean
+ */
+void MapEditor::togglePass(bool toggle)
+{
+  for(int i=0; i<tiles.size(); i++)
+  {
+    for(int j=0; j<tiles[i].size(); j++)
+    {
+      tiles[i][j]->setPass(toggle);
+      tiles[i][j]->update();
+    }
+  }
+}
 
 /*
  * Description: Sets the layer that is currently being edited for each tile
@@ -363,6 +413,13 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         if(current != NULL)
           current->unplace();
         break;
+      case EditorEnumDb::BLOCKPLACE:
+        if(blockmodepress)
+          highlight->setGeometry(QRect(origin.x(),origin.y(),
+                                       QCursor::pos().x()-origin.x(),
+                                       QCursor::pos().y()-origin.y())
+                                 .normalized());
+        break;
       default:
         break;
     }
@@ -378,11 +435,12 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
   current_position = event->scenePos();
+  origin = QCursor::pos();
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
   if(event->buttons() & Qt::LeftButton)
   {
-    TileWrapper* current =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(current_position,QTransform()));
     switch(cursormode)
     {
       case EditorEnumDb::BASIC:
@@ -393,6 +451,16 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
         if(current != NULL)
           current->unplace();
         break;
+      case EditorEnumDb::BLOCKPLACE:
+        if(current != NULL)
+        {
+          blockmodepress = true;
+          blockx = current->boundingRect().x()/64;
+          blocky = current->boundingRect().y()/64;
+          highlight->setGeometry(QRect(origin.x(),origin.y(),0,0));
+          highlight->show();
+        }
+        break;
       default:
         break;
     }
@@ -400,12 +468,81 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
   else
   {
     if(rightclick_menu->isHidden())
+    {
+      setNpass_action->setChecked(
+            current->gameTile()->getBasePassability(Direction::NORTH));
+      setEpass_action->setChecked(
+            current->gameTile()->getBasePassability(Direction::EAST));
+      setSpass_action->setChecked(
+            current->gameTile()->getBasePassability(Direction::SOUTH));
+      setWpass_action->setChecked(
+            current->gameTile()->getBasePassability(Direction::WEST));
+      if(current->gameTile()->getBasePassability(Direction::NORTH) &&
+         current->gameTile()->getBasePassability(Direction::EAST) &&
+         current->gameTile()->getBasePassability(Direction::SOUTH) &&
+         current->gameTile()->getBasePassability(Direction::WEST))
+        setApass_action->setChecked(true);
+      else
+        setApass_action->setChecked(false);
       rightclick_menu->exec(QCursor::pos());
+    }
     else
       rightclick_menu->hide();
   }
 }
 
+void MapEditor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(event->scenePos(),QTransform()));
+
+  if(cursormode == EditorEnumDb::BLOCKPLACE)
+  {
+    highlight->hide();
+    int currentx = current->boundingRect().x()/64;
+    int currenty = current->boundingRect().y()/64;
+    if(blockx <= currentx && blocky <= currenty)
+    {
+      qDebug()<<"right,down";
+      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      {
+        for(int j=0; j<abs(currenty-blocky)+1; j++)
+          tiles[i+blockx][j+blocky]->place();
+      }
+    }
+    else if(blockx <= currentx && blocky > currenty)
+    {
+      qDebug()<<"right,up";
+      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      {
+        for(int j=0; j<abs(currenty-blocky)+1; j++)
+          tiles[i+blockx][j+currenty]->place();
+      }
+    }
+    else if(blockx > currentx && blocky <= currenty)
+    {
+      qDebug()<<"left,down";
+      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      {
+        for(int j=0; j<abs(currenty-blocky)+1; j++)
+          tiles[i+currentx][j+blocky]->place();
+      }
+    }
+    else if(blockx > currentx && blocky > currenty)
+    {
+      qDebug()<<"left,up";
+      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      {
+        for(int j=0; j<abs(currenty-blocky)+1; j++)
+          tiles[i+currentx][j+currenty]->place();
+      }
+    }
+  }
+  blockx = 0;
+  blocky = 0;
+  blockmodepress = false;
+}
 
 void MapEditor::paintEvent(QPaintEvent *)
 {}
@@ -450,4 +587,92 @@ int MapEditor::getMapWidth()
 int MapEditor::getMapHeight()
 {
   return height;
+}
+
+/*
+ * Description : Sets passibility
+ *
+ * Input : toggle
+ */
+void MapEditor::setNPassCurrent(bool toggle)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+  {
+    current->gameTile()->setBasePassability(Direction::NORTH,toggle);
+    current->update();
+  }
+}
+
+/*
+ * Description : Sets passibility
+ *
+ * Input : toggle
+ */
+void MapEditor::setEPassCurrent(bool toggle)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+  {
+    current->gameTile()->setBasePassability(Direction::EAST,toggle);
+    current->update();
+  }
+}
+
+/*
+ * Description : Sets passibility
+ *
+ * Input : toggle
+ */
+void MapEditor::setSPassCurrent(bool toggle)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+  {
+    current->gameTile()->setBasePassability(Direction::SOUTH,toggle);
+    current->update();
+  }
+}
+
+/*
+ * Description : Sets passibility
+ *
+ * Input : toggle
+ */
+void MapEditor::setWPassCurrent(bool toggle)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+  {
+    current->gameTile()->setBasePassability(Direction::WEST,toggle);
+    current->update();
+  }
+}
+
+/*
+ * Description : Sets passibility
+ *
+ * Input : toggle
+ */
+void MapEditor::setAPassCurrent(bool toggle)
+{
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+  if(current != NULL)
+  {
+    current->gameTile()->setBasePassability(Direction::NORTH,toggle);
+    current->gameTile()->setBasePassability(Direction::EAST,toggle);
+    current->gameTile()->setBasePassability(Direction::SOUTH,toggle);
+    current->gameTile()->setBasePassability(Direction::WEST,toggle);
+    current->update();
+  }
 }
