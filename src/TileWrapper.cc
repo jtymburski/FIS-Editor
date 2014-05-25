@@ -218,6 +218,7 @@ Tile* TileWrapper::gameTile()
 {
   return tile;
 }
+
 /*
  * Description : Gets the active layer path
  *
@@ -268,6 +269,17 @@ QString TileWrapper::getActivePath()
   }
   return "";
 }
+
+/*
+ * Description : Gets the toolbox current path
+ *
+ * Output: Path
+ */
+QString TileWrapper::getToolPath()
+{
+  return toolbox->getCurrent()->getPath(0);
+}
+
 /*
  * Description: Transforms the given frame from the given sprite
  *

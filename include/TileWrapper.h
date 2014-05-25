@@ -78,6 +78,7 @@ public slots:
 
   /* Gets the current active layer path */
   QString getActivePath();
+  QString getToolPath();
 
   /* Transforms the image and returns it */
   QPixmap transformPixmap(EditorSprite* pic,int pos = 0);

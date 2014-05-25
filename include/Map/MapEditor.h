@@ -67,7 +67,7 @@ public slots:
   int getMapHeight();
 
   /* Recursively fills areas with tiles */
-  void recursiveFill(int x, int y);
+  void recursiveFill(int x, int y, QString target, QString replace);
 
 signals:
   /* Sends the tile position to the map status bar */

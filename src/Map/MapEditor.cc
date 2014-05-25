@@ -427,55 +427,61 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
-void MapEditor::recursiveFill(int x, int y)
+void MapEditor::recursiveFill(int x, int y, QString target, QString replace)
 {
+  qDebug()<<x<<","<<y<<","<<target<<","<<replace;
   current_position.setX(x);
   current_position.setY(y);
-  up_position.setX(current_position.x()+1);
-  up_position.setY(current_position.y());
+  up_position.setX(current_position.x());
+  up_position.setY(current_position.y()+64);
   down_position.setX(current_position.x());
-  down_position.setY(current_position.y()-1);
-  left_position.setX(current_position.x()-1);
+  down_position.setY(current_position.y()-64);
+  left_position.setX(current_position.x()-64);
   left_position.setY(current_position.y());
-  right_position.setX(current_position.x()+1);
+  right_position.setX(current_position.x()+64);
   right_position.setY(current_position.y());
   TileWrapper* current =
       qgraphicsitem_cast<TileWrapper*>
       (itemAt(current_position,QTransform()));
 
-  if(right_position.x() <= width)
+  if(current->getActivePath() == target)
   {
-    TileWrapper* right =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(right_position,QTransform()));
-    if(right->getActivePath() == current->getActivePath())
-      recursiveFill(right->boundingRect().x()/64,right->boundingRect().y()/64);
+    current->place();
+    if(right_position.x() < width*64)
+    {
+      TileWrapper* right =
+          qgraphicsitem_cast<TileWrapper*>
+          (itemAt(right_position,QTransform()));
+          recursiveFill(right_position.x(),
+                        right_position.y(),
+                        target,replace);
+    }
+    /*if(left_position.x() >= 0)
+    {
+      TileWrapper* left =
+          qgraphicsitem_cast<TileWrapper*>
+          (itemAt(left_position,QTransform()));
+          recursiveFill(left->boundingRect().x()/64,left->boundingRect().y()/64,
+                      target,replace);
+    }
+    if(up_position.y() >= 0)
+    {
+      TileWrapper* upper =
+          qgraphicsitem_cast<TileWrapper*>
+          (itemAt(up_position,QTransform()));
+          recursiveFill(upper->boundingRect().x()/64,
+                        upper->boundingRect().y()/64,
+                        target,replace);
+    }
+    if(down_position.y() <= height)
+    {
+      TileWrapper* down =
+          qgraphicsitem_cast<TileWrapper*>
+          (itemAt(down_position,QTransform()));
+          recursiveFill(down->boundingRect().x()/64,down->boundingRect().y()/64,
+                      target,replace);
+    } */
   }
-  if(left_position.x() >= 0)
-  {
-    TileWrapper* left =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(left_position,QTransform()));
-    if(left->getActivePath() == current->getActivePath())
-      recursiveFill(left->boundingRect().x()/64,left->boundingRect().y()/64);
-  }
-  if(up_position.y() >= 0)
-  {
-    TileWrapper* upper =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(up_position,QTransform()));
-    if(upper->getActivePath() == current->getActivePath())
-      recursiveFill(upper->boundingRect().x()/64,upper->boundingRect().y()/64);
-  }
-  if(down_position.y() <= height)
-  {
-    TileWrapper* down =
-        qgraphicsitem_cast<TileWrapper*>
-        (itemAt(down_position,QTransform()));
-    if(down->getActivePath() == current->getActivePath())
-      recursiveFill(down->boundingRect().x()/64,down->boundingRect().y()/64);
-  }
-  current->place();
 }
 
 /*
@@ -516,8 +522,9 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
       case EditorEnumDb::FILL:
         if(current != NULL)
         {
-          current->place();
-          recursiveFill(current_position.x(), current_position.y());
+            recursiveFill(current->boundingRect().x()/64,
+                          current->boundingRect().y()/64,
+                          current->getActivePath(),current->getToolPath());
         }
         break;
       default:
@@ -565,79 +572,106 @@ void MapEditor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
       qgraphicsitem_cast<TileWrapper*>
       (itemAt(event->scenePos(),QTransform()));
 
-  if(cursormode == EditorEnumDb::BLOCKPLACE)
+  highlight->hide();
+  if(current != NULL)
   {
-    highlight->hide();
-    int currentx = current->boundingRect().x()/64;
-    int currenty = current->boundingRect().y()/64;
+    if(cursormode == EditorEnumDb::BLOCKPLACE)
+    {
+      int currentx = current->boundingRect().x()/64;
+      int currenty = current->boundingRect().y()/64;
 
-    if(!eraseblock)
-    {
-      if(blockx <= currentx && blocky <= currenty)
+      if(!eraseblock)
       {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        if(blockx <= currentx && blocky <= currenty)
         {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+blockx][j+blocky]->place();
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+blockx <= width && j+blocky <= height)
+                tiles[i+blockx][j+blocky]->place();
+            }
+          }
+        }
+        else if(blockx <= currentx && blocky > currenty)
+        {
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+blockx <= width && j+currenty <= height)
+                tiles[i+blockx][j+currenty]->place();
+            }
+          }
+        }
+        else if(blockx > currentx && blocky <= currenty)
+        {
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+currentx <= width && j+blocky <= height)
+                tiles[i+currentx][j+blocky]->place();
+            }
+          }
+        }
+        else if(blockx > currentx && blocky > currenty)
+        {
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+currentx <= width && j+currenty <= height)
+                tiles[i+currentx][j+currenty]->place();
+            }
+          }
         }
       }
-      else if(blockx <= currentx && blocky > currenty)
+      else
       {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        if(blockx <= currentx && blocky <= currenty)
         {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+blockx][j+currenty]->place();
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+blockx <= width && j+blocky <= height)
+                tiles[i+blockx][j+blocky]->unplace();
+            }
+          }
         }
-      }
-      else if(blockx > currentx && blocky <= currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        else if(blockx <= currentx && blocky > currenty)
         {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+currentx][j+blocky]->place();
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+blockx <= width && j+currenty <= height)
+                tiles[i+blockx][j+currenty]->unplace();
+            }
+          }
         }
-      }
-      else if(blockx > currentx && blocky > currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        else if(blockx > currentx && blocky <= currenty)
         {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+currentx][j+currenty]->place();
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+currentx <= width && j+blocky <= height)
+                tiles[i+currentx][j+blocky]->unplace();
+            }
+          }
         }
-      }
-    }
-    else
-    {
-      if(blockx <= currentx && blocky <= currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        else if(blockx > currentx && blocky > currenty)
         {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+blockx][j+blocky]->unplace();
-        }
-      }
-      else if(blockx <= currentx && blocky > currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
-        {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+blockx][j+currenty]->unplace();
-        }
-      }
-      else if(blockx > currentx && blocky <= currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
-        {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+currentx][j+blocky]->unplace();
-        }
-      }
-      else if(blockx > currentx && blocky > currenty)
-      {
-        for(int i=0; i<abs(currentx-blockx)+1; i++)
-        {
-          for(int j=0; j<abs(currenty-blocky)+1; j++)
-            tiles[i+currentx][j+currenty]->unplace();
+          for(int i=0; i<abs(currentx-blockx)+1; i++)
+          {
+            for(int j=0; j<abs(currenty-blocky)+1; j++)
+            {
+              if(i+currentx <= width && j+currenty <= height)
+                tiles[i+currentx][j+currenty]->unplace();
+            }
+          }
         }
       }
     }
