@@ -109,6 +109,7 @@ private:
   /* Block Select Startpoint */
   int blockx, blocky;
   bool blockmodepress;
+  bool eraseblock;
 
   /* Cursor type */
   EditorEnumDb::CursorMode cursormode;

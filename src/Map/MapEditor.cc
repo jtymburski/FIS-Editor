@@ -71,6 +71,7 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
   blockx = 0;
   blocky = 0;
   blockmodepress = false;
+  eraseblock = false;
   base = true;
   enhancer = true;
   lower1 = true;
@@ -401,7 +402,7 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     emit sendCurrentPosition(-1,-1);
   if(current != NULL)
     current->setGridColor(true);
-  if(event->buttons() == Qt::LeftButton)
+  if(event->buttons() == Qt::LeftButton || event->buttons() == Qt::RightButton)
   {
     switch(cursormode)
     {
@@ -467,7 +468,16 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
   }
   else
   {
-    if(rightclick_menu->isHidden())
+    if(cursormode == EditorEnumDb::BLOCKPLACE)
+    {
+      blockmodepress = true;
+      eraseblock = true;
+      blockx = current->boundingRect().x()/64;
+      blocky = current->boundingRect().y()/64;
+      highlight->setGeometry(QRect(origin.x(),origin.y(),0,0));
+      highlight->show();
+    }
+    else if(rightclick_menu->isHidden())
     {
       setNpass_action->setChecked(
             current->gameTile()->getBasePassability(Direction::NORTH));
@@ -502,46 +512,82 @@ void MapEditor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     highlight->hide();
     int currentx = current->boundingRect().x()/64;
     int currenty = current->boundingRect().y()/64;
-    if(blockx <= currentx && blocky <= currenty)
+
+    if(!eraseblock)
     {
-      qDebug()<<"right,down";
-      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      if(blockx <= currentx && blocky <= currenty)
       {
-        for(int j=0; j<abs(currenty-blocky)+1; j++)
-          tiles[i+blockx][j+blocky]->place();
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+blockx][j+blocky]->place();
+        }
+      }
+      else if(blockx <= currentx && blocky > currenty)
+      {
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+blockx][j+currenty]->place();
+        }
+      }
+      else if(blockx > currentx && blocky <= currenty)
+      {
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+currentx][j+blocky]->place();
+        }
+      }
+      else if(blockx > currentx && blocky > currenty)
+      {
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+currentx][j+currenty]->place();
+        }
       }
     }
-    else if(blockx <= currentx && blocky > currenty)
+    else
     {
-      qDebug()<<"right,up";
-      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      if(blockx <= currentx && blocky <= currenty)
       {
-        for(int j=0; j<abs(currenty-blocky)+1; j++)
-          tiles[i+blockx][j+currenty]->place();
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+blockx][j+blocky]->unplace();
+        }
       }
-    }
-    else if(blockx > currentx && blocky <= currenty)
-    {
-      qDebug()<<"left,down";
-      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      else if(blockx <= currentx && blocky > currenty)
       {
-        for(int j=0; j<abs(currenty-blocky)+1; j++)
-          tiles[i+currentx][j+blocky]->place();
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+blockx][j+currenty]->unplace();
+        }
       }
-    }
-    else if(blockx > currentx && blocky > currenty)
-    {
-      qDebug()<<"left,up";
-      for(int i=0; i<abs(currentx-blockx)+1; i++)
+      else if(blockx > currentx && blocky <= currenty)
       {
-        for(int j=0; j<abs(currenty-blocky)+1; j++)
-          tiles[i+currentx][j+currenty]->place();
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+currentx][j+blocky]->unplace();
+        }
+      }
+      else if(blockx > currentx && blocky > currenty)
+      {
+        for(int i=0; i<abs(currentx-blockx)+1; i++)
+        {
+          for(int j=0; j<abs(currenty-blocky)+1; j++)
+            tiles[i+currentx][j+currenty]->unplace();
+        }
       }
     }
   }
   blockx = 0;
   blocky = 0;
   blockmodepress = false;
+  eraseblock = false;
 }
 
 void MapEditor::paintEvent(QPaintEvent *)
