@@ -18,5 +18,6 @@
         <file>Resources/midpoint.png</file>
         <file>Resources/start.png</file>
         <file>Resources/rect-icon.png</file>
+        <file>Resources/flood-icon.png</file>
     </qresource>
 </RCC>

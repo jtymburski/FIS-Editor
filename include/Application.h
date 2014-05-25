@@ -95,6 +95,7 @@ private:
   QAction *erasermode_action;
   QAction *basicmode_action;
   QAction *blockplacemode_action;
+  QAction *fill_action;
 
   /* Map Mode Shift Actions (Active Layers) */
   QListWidgetItem *active_lower_layer_01;
@@ -202,6 +203,9 @@ public slots:
 
   /* Sets to Block Mode */
   void setBlockCursor();
+
+  /* Sets to Fill Mode */
+  void setFillCursor();
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);

@@ -427,6 +427,57 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
+void MapEditor::recursiveFill(int x, int y)
+{
+  current_position.setX(x);
+  current_position.setY(y);
+  up_position.setX(current_position.x()+1);
+  up_position.setY(current_position.y());
+  down_position.setX(current_position.x());
+  down_position.setY(current_position.y()-1);
+  left_position.setX(current_position.x()-1);
+  left_position.setY(current_position.y());
+  right_position.setX(current_position.x()+1);
+  right_position.setY(current_position.y());
+  TileWrapper* current =
+      qgraphicsitem_cast<TileWrapper*>
+      (itemAt(current_position,QTransform()));
+
+  if(right_position.x() <= width)
+  {
+    TileWrapper* right =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(right_position,QTransform()));
+    if(right->getActivePath() == current->getActivePath())
+      recursiveFill(right->boundingRect().x()/64,right->boundingRect().y()/64);
+  }
+  if(left_position.x() >= 0)
+  {
+    TileWrapper* left =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(left_position,QTransform()));
+    if(left->getActivePath() == current->getActivePath())
+      recursiveFill(left->boundingRect().x()/64,left->boundingRect().y()/64);
+  }
+  if(up_position.y() >= 0)
+  {
+    TileWrapper* upper =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(up_position,QTransform()));
+    if(upper->getActivePath() == current->getActivePath())
+      recursiveFill(upper->boundingRect().x()/64,upper->boundingRect().y()/64);
+  }
+  if(down_position.y() <= height)
+  {
+    TileWrapper* down =
+        qgraphicsitem_cast<TileWrapper*>
+        (itemAt(down_position,QTransform()));
+    if(down->getActivePath() == current->getActivePath())
+      recursiveFill(down->boundingRect().x()/64,down->boundingRect().y()/64);
+  }
+  current->place();
+}
+
 /*
  * Description: Mouse Press event, handles placement of the selected tile
  *              onto the map
@@ -460,6 +511,13 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
           blocky = current->boundingRect().y()/64;
           highlight->setGeometry(QRect(origin.x(),origin.y(),0,0));
           highlight->show();
+        }
+        break;
+      case EditorEnumDb::FILL:
+        if(current != NULL)
+        {
+          current->place();
+          recursiveFill(current_position.x(), current_position.y());
         }
         break;
       default:

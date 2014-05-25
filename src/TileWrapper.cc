@@ -218,7 +218,56 @@ Tile* TileWrapper::gameTile()
 {
   return tile;
 }
-
+/*
+ * Description : Gets the active layer path
+ *
+ * Output: Path
+ */
+QString TileWrapper::getActivePath()
+{
+  switch(active_layer)
+  {
+    case EditorEnumDb::BASE:
+      return base_layer->getPath(0);
+      break;
+    case EditorEnumDb::ENHANCER:
+      return enhancer_layer->getPath(0);
+      break;
+    case EditorEnumDb::LOWER1:
+      return lower_layers[0]->getPath(0);
+      break;
+    case EditorEnumDb::LOWER2:
+      return lower_layers[1]->getPath(0);
+      break;
+    case EditorEnumDb::LOWER3:
+      return lower_layers[2]->getPath(0);
+      break;
+    case EditorEnumDb::LOWER4:
+      return lower_layers[3]->getPath(0);
+      break;
+    case EditorEnumDb::LOWER5:
+      return lower_layers[4]->getPath(0);
+      break;
+    case EditorEnumDb::UPPER1:
+      return upper_layers[0]->getPath(0);
+      break;
+    case EditorEnumDb::UPPER2:
+      return upper_layers[1]->getPath(0);
+      break;
+    case EditorEnumDb::UPPER3:
+      return upper_layers[2]->getPath(0);
+      break;
+    case EditorEnumDb::UPPER4:
+      return upper_layers[3]->getPath(0);
+      break;
+    case EditorEnumDb::UPPER5:
+      return upper_layers[4]->getPath(0);
+      break;
+    default:
+      break;
+  }
+  return "";
+}
 /*
  * Description: Transforms the given frame from the given sprite
  *

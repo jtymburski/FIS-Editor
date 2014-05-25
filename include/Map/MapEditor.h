@@ -66,6 +66,9 @@ public slots:
   int getMapWidth();
   int getMapHeight();
 
+  /* Recursively fills areas with tiles */
+  void recursiveFill(int x, int y);
+
 signals:
   /* Sends the tile position to the map status bar */
   void sendCurrentPosition(int,int);
@@ -116,6 +119,10 @@ private:
 
   /* Position of current (Only used for removeCurrent() */
   QPointF current_position;
+  QPointF up_position;
+  QPointF down_position;
+  QPointF left_position;
+  QPointF right_position;
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 };

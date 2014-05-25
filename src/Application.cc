@@ -265,6 +265,9 @@ void Application::setupTopMenu()
   blockplacemode_action = new QAction("&Block Place",cursor_group);
   blockplacemode_action->setCheckable(true);
   blockplacemode_action->setIcon(QIcon(":/Icons/Resources/rect-icon.png"));
+  fill_action = new QAction("&Fill",cursor_group);
+  fill_action->setCheckable(true);
+  fill_action->setIcon(QIcon(":/Icons/Resources/flood-icon.png"));
 
   QMenu* cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
@@ -290,10 +293,12 @@ void Application::setupTopMenu()
   brushbar->addAction(basicmode_action);
   brushbar->addAction(erasermode_action);
   brushbar->addAction(blockplacemode_action);
+  brushbar->addAction(fill_action);
   addToolBar(Qt::TopToolBarArea,brushbar);
   cursor_menu->addAction(basicmode_action);
   cursor_menu->addAction(erasermode_action);
   cursor_menu->addAction(blockplacemode_action);
+  cursor_menu->addAction(fill_action);
   brushbar->setFloatable(false);
   brushbar->setMovable(false);
 
@@ -301,6 +306,7 @@ void Application::setupTopMenu()
   connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setEraserCursor()));
   connect(blockplacemode_action,SIGNAL(triggered()),
           this,SLOT(setBlockCursor()));
+  connect(fill_action,SIGNAL(triggered()),this,SLOT(setFillCursor()));
 }
 
 /*
@@ -526,6 +532,7 @@ void Application::setBasicCursor()
 {
   erasermode_action->setChecked(false);
   blockplacemode_action->setChecked(false);
+  fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::BASIC;
   map_editor->setCursorMode(EditorEnumDb::BASIC);
 }
@@ -537,6 +544,7 @@ void Application::setEraserCursor()
 {
   basicmode_action->setChecked(false);
   blockplacemode_action->setChecked(false);
+  fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::ERASER;
   map_editor->setCursorMode(EditorEnumDb::ERASER);
 }
@@ -548,9 +556,24 @@ void Application::setBlockCursor()
 {
   basicmode_action->setChecked(false);
   erasermode_action->setChecked(false);
+  fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::BLOCKPLACE;
   map_editor->setCursorMode(EditorEnumDb::BLOCKPLACE);
 }
+
+
+/*
+ * Description: Sets to fill cursor mode
+ */
+void Application::setFillCursor()
+{
+  basicmode_action->setChecked(false);
+  blockplacemode_action->setChecked(false);
+  erasermode_action->setChecked(false);
+  cursor_mode = EditorEnumDb::FILL;
+  map_editor->setCursorMode(EditorEnumDb::FILL);
+}
+
 /*
  * Description: Sets the position into the status bar
  *
