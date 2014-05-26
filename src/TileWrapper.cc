@@ -226,7 +226,6 @@ Tile* TileWrapper::gameTile()
  */
 int TileWrapper::getActivePath()
 {
-  qDebug()<<"Obtaining active path";
   switch(active_layer)
   {
     case EditorEnumDb::BASE:
@@ -290,7 +289,6 @@ int TileWrapper::getActivePath()
  */
 int TileWrapper::getToolPath()
 {
-  qDebug()<<"Obtaining tool path";
   return toolbox->getCurrent()->getSprite()->getId();
 }
 

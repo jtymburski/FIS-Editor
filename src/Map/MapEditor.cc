@@ -427,6 +427,13 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
+/*
+ * Description: Recursively fills all of the similar adjoining tiles with the
+ *              selected sprite
+ *
+ * Inputs: x and y positions for the tile, and target(the tile's ID)
+ *         and replacement (New sprite) id numbers
+ */
 void MapEditor::recursiveFill(int x, int y, int target, int replace)
 {
   if(target != replace)
