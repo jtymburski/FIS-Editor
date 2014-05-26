@@ -427,60 +427,19 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
-void MapEditor::recursiveFill(int x, int y, QString target, QString replace)
+void MapEditor::recursiveFill(int x, int y, int target, int replace)
 {
-  qDebug()<<x<<","<<y<<","<<target<<","<<replace;
-  current_position.setX(x);
-  current_position.setY(y);
-  up_position.setX(current_position.x());
-  up_position.setY(current_position.y()+64);
-  down_position.setX(current_position.x());
-  down_position.setY(current_position.y()-64);
-  left_position.setX(current_position.x()-64);
-  left_position.setY(current_position.y());
-  right_position.setX(current_position.x()+64);
-  right_position.setY(current_position.y());
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
-      (itemAt(current_position,QTransform()));
-
-  if(current->getActivePath() == target)
+  if(target != replace)
   {
-    current->place();
-    if(right_position.x() < width*64)
-    {
-      TileWrapper* right =
-          qgraphicsitem_cast<TileWrapper*>
-          (itemAt(right_position,QTransform()));
-          recursiveFill(right_position.x(),
-                        right_position.y(),
-                        target,replace);
-    }
-    /*if(left_position.x() >= 0)
-    {
-      TileWrapper* left =
-          qgraphicsitem_cast<TileWrapper*>
-          (itemAt(left_position,QTransform()));
-          recursiveFill(left->boundingRect().x()/64,left->boundingRect().y()/64,
-                      target,replace);
-    }
-    if(up_position.y() >= 0)
-    {
-      TileWrapper* upper =
-          qgraphicsitem_cast<TileWrapper*>
-          (itemAt(up_position,QTransform()));
-          recursiveFill(upper->boundingRect().x()/64,
-                        upper->boundingRect().y()/64,
-                        target,replace);
-    }
-    if(down_position.y() <= height)
-    {
-      TileWrapper* down =
-          qgraphicsitem_cast<TileWrapper*>
-          (itemAt(down_position,QTransform()));
-          recursiveFill(down->boundingRect().x()/64,down->boundingRect().y()/64,
-                      target,replace);
-    } */
+    tiles[x][y]->place();
+    if(x < width-1 && tiles[x+1][y]->getActivePath() == target)
+      recursiveFill(x+1,y,target,replace);
+    if(x > 0 && tiles[x-1][y]->getActivePath() == target)
+      recursiveFill(x-1,y,target,replace);
+    if(y < height-1 && tiles[x][y+1]->getActivePath() == target)
+      recursiveFill(x,y+1,target,replace);
+    if(y > 0 && tiles[x][y-1]->getActivePath() == target)
+      recursiveFill(x,y-1,target,replace);
   }
 }
 
@@ -522,9 +481,10 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
       case EditorEnumDb::FILL:
         if(current != NULL)
         {
-            recursiveFill(current->boundingRect().x()/64,
-                          current->boundingRect().y()/64,
-                          current->getActivePath(),current->getToolPath());
+            recursiveFill(current_position.x()/64,
+                          current_position.y()/64,
+                          current->getActivePath(),
+                          current->getToolPath());
         }
         break;
       default:

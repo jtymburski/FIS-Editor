@@ -224,50 +224,63 @@ Tile* TileWrapper::gameTile()
  *
  * Output: Path
  */
-QString TileWrapper::getActivePath()
+int TileWrapper::getActivePath()
 {
+  qDebug()<<"Obtaining active path";
   switch(active_layer)
   {
     case EditorEnumDb::BASE:
-      return base_layer->getPath(0);
+      if(base_layer != NULL)
+        return base_layer->getSprite()->getId();
       break;
     case EditorEnumDb::ENHANCER:
-      return enhancer_layer->getPath(0);
+      if(enhancer_layer != NULL)
+        return enhancer_layer->getSprite()->getId();
       break;
     case EditorEnumDb::LOWER1:
-      return lower_layers[0]->getPath(0);
+      if(lower_layers[0] != NULL)
+        return lower_layers[0]->getSprite()->getId();
       break;
     case EditorEnumDb::LOWER2:
-      return lower_layers[1]->getPath(0);
+      if(lower_layers[1] != NULL)
+        return lower_layers[1]->getSprite()->getId();
       break;
     case EditorEnumDb::LOWER3:
-      return lower_layers[2]->getPath(0);
+      if(lower_layers[2] != NULL)
+        return lower_layers[2]->getSprite()->getId();
       break;
     case EditorEnumDb::LOWER4:
-      return lower_layers[3]->getPath(0);
+      if(lower_layers[3] != NULL)
+        return lower_layers[3]->getSprite()->getId();
       break;
     case EditorEnumDb::LOWER5:
-      return lower_layers[4]->getPath(0);
+      if(lower_layers[4] != NULL)
+        return lower_layers[4]->getSprite()->getId();
       break;
     case EditorEnumDb::UPPER1:
-      return upper_layers[0]->getPath(0);
+      if(upper_layers[0] != NULL)
+        return upper_layers[0]->getSprite()->getId();
       break;
     case EditorEnumDb::UPPER2:
-      return upper_layers[1]->getPath(0);
+      if(upper_layers[1] != NULL)
+        return upper_layers[1]->getSprite()->getId();
       break;
     case EditorEnumDb::UPPER3:
-      return upper_layers[2]->getPath(0);
+      if(upper_layers[2] != NULL)
+        return upper_layers[2]->getSprite()->getId();
       break;
     case EditorEnumDb::UPPER4:
-      return upper_layers[3]->getPath(0);
+      if(upper_layers[3] != NULL)
+        return upper_layers[3]->getSprite()->getId();
       break;
     case EditorEnumDb::UPPER5:
-      return upper_layers[4]->getPath(0);
+      if(upper_layers[4] != NULL)
+        return upper_layers[4]->getSprite()->getId();
       break;
     default:
       break;
   }
-  return "";
+  return -1;
 }
 
 /*
@@ -275,9 +288,10 @@ QString TileWrapper::getActivePath()
  *
  * Output: Path
  */
-QString TileWrapper::getToolPath()
+int TileWrapper::getToolPath()
 {
-  return toolbox->getCurrent()->getPath(0);
+  qDebug()<<"Obtaining tool path";
+  return toolbox->getCurrent()->getSprite()->getId();
 }
 
 /*

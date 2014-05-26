@@ -77,8 +77,8 @@ public slots:
   void unplace();
 
   /* Gets the current active layer path */
-  QString getActivePath();
-  QString getToolPath();
+  int getActivePath();
+  int getToolPath();
 
   /* Transforms the image and returns it */
   QPixmap transformPixmap(EditorSprite* pic,int pos = 0);
