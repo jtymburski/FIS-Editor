@@ -38,6 +38,7 @@ Application::Application(QWidget* parent, int xsize, int ysize) :
   setupTopMenu();
   setGeometry(QApplication::desktop()->availableGeometry());
   showMaximized();
+  setBasicCursor();
 }
 
 /*

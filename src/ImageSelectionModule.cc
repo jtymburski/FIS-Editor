@@ -24,8 +24,7 @@ ImageSelectionModule::ImageSelectionModule(QWidget *parent) : QWidget(parent)
   QFileSystemModel *model = new QFileSystemModel(this);
   QString sprites_dir;
   sprites_dir.append(QDir::current().absolutePath());
-  sprites_dir.chop(7);
-  sprites_dir.append("/Project/sprites/Map");
+  sprites_dir = sprites_dir.left(sprites_dir.indexOf("Univursa") + 9) + "Project/sprites/Map";
   model->setRootPath(sprites_dir);
   model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
   directory_tree = new QTreeView(this);
