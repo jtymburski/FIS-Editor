@@ -27,6 +27,7 @@ Application::Application(QWidget* parent, int xsize, int ysize) :
   y_size = ysize;
 
   current_sprite_choice = "Sup";
+  map_editor = NULL;
 
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
@@ -102,7 +103,6 @@ void Application::setupSidebar()
  */
 void Application::setupMapView(int x, int y)
 {
-  delete map_editor;
   /* Sets up the main map view widget */
   map_editor = new MapEditor(sprites_tab,this,x,y,cursor_mode);
   map_scroller = new QGraphicsView(map_editor,this);

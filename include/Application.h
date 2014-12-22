@@ -18,7 +18,9 @@
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QDockWidget>
-#include <windows.h>
+#ifdef _WIN32
+//#include <windows.h>
+#endif
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QToolBar>

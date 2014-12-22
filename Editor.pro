@@ -6,33 +6,38 @@
 TARGET = UnivursaEditor
 TEMPLATE = app
 
-CONFIG += qt
-CONFIG += console
-DESTDIR = ./bin
+CONFIG += qt console
+
+unix {
+  LIBS += -lGLU
+  LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
+}
 macx {
-  INCLUDEPATH += "/Library/Frameworks/SDL.framework/Headers/"
+  INCLUDEPATH = "/usr/include"
+  QMAKE_LFLAGS += -F/Library/Frameworks
+  LIBS += -framework SDL2 -framework SDL2_image -framework SDL2_mixer -framework SDL2_ttf
+  LIBS -= -lGLU
+  LIBS -= -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf 
+}
+win32 {
+  LIBS += -lmingw32 -lSDL2main
+  LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
 }
 
-win32 {
-  QMAKE_CXXFLAGS += -std=c++11
-  LIBS += -lmingw32 -lSDL2main
-  win32:QMAKE_CXX_FLAGS_WARN_ON += -Wall
-}
-LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
-unix:LIBS += -lGLU
+QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXX_FLAGS_WARN_ON += -Wall
 QT += opengl widgets #phonon network xml, core and gui are default
-#RESOURCES = Resources.qrc
 
 SOURCES += \
     ./src/Main.cc \
     ./src/Application.cc \
     ./src/Map/MapEditor.cc \
     ./src/SpriteToolbox.cc \
-	../Project/src/Helpers.cc \
-	../Project/src/Frame.cc \
+    ../Project/src/Helpers.cc \
+    ../Project/src/Frame.cc \
     ../Project/src/Sprite.cc \
-	../Project/src/XmlData.cc \
-	../Project/src/Game/Map/Tile.cc \
+    ../Project/src/XmlData.cc \
+    ../Project/src/Game/Map/Tile.cc \
     src/SpriteChoice.cc \
     src/EditorSprite.cc \
     src/EditorSpriteToolbox.cc \
@@ -51,12 +56,12 @@ HEADERS += \
     ./include/EditorEnumDb.h \
     ./include/Map/MapEditor.h \
     ./include/SpriteToolbox.h \
-	../Project/include/EnumDb.h \
-	../Project/include/Helpers.h \
-	../Project/include/Frame.h \
+    ../Project/include/EnumDb.h \
+    ../Project/include/Helpers.h \
+    ../Project/include/Frame.h \
     ../Project/include/Sprite.h \
-	../Project/include/XmlData.h \
-	../Project/include/Game/Map/Tile.h \
+    ../Project/include/XmlData.h \
+    ../Project/include/Game/Map/Tile.h \
     include/SpriteChoice.h \
     include/EditorSprite.h \
     include/EditorSpriteToolbox.h \
