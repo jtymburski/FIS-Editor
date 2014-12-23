@@ -148,7 +148,7 @@ private:
   /* Initial Map Creation */
   QDialog* mapsize_dialog;
 
-  /* Curosr Mode */
+  /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;
 
   /* Map Data Bar */

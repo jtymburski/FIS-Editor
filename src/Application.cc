@@ -147,7 +147,6 @@ void Application::setupMapView(int x, int y)
           this,SLOT(setCurrentTile(int,int)));
 
   setStatusBar(map_data);
-
 }
 
 /*

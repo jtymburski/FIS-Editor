@@ -48,7 +48,9 @@ SOURCES += \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
-    src/Dialog/FrameDialog.cc
+    src/Dialog/FrameDialog.cc \
+    src/View/GameView.cc \
+    src/View/MapView.cc
 
 HEADERS += \
     include/Application.h \
@@ -71,7 +73,9 @@ HEADERS += \
     include/Dialog/SpriteDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
-    include/Dialog/FrameDialog.h
+    include/Dialog/FrameDialog.h \
+    include/View/GameView.h \
+    include/View/MapView.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
