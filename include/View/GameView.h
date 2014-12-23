@@ -9,6 +9,7 @@
 #define GAMEVIEW_H
 
 #include <QWidget>
+#include "View/MapView.h"
 
 class GameView : public QWidget
 {
@@ -23,6 +24,13 @@ public:
 private:
   /* The number of same images that trail this one */
 //  int followers;
+  MapView* map_view;
+  //TODO : Delete the following temporary widgets
+  QWidget* person_view;
+  QWidget* party_view;
+  QWidget* item_view;
+
+  EditorEnumDb::ViewMode mode;
 
 protected:
   /* Paints the sprite in a bounding box */
@@ -31,6 +39,12 @@ protected:
 public slots:
   /* Loads the image with a valid given path */
 //  void loadSprite(QString path);
+
+  /* Returns the MapView */
+  MapView* getMapView();
+
+  /* Sets The View Mode */
+  void setViewMode(EditorEnumDb::ViewMode);
 
 signals:
   /* Emits to parent when selected to deselect all others */

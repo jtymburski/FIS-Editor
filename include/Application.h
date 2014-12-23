@@ -30,7 +30,8 @@
 #include <QStatusBar>
 #include <QTreeView>
 #include <QDesktopWidget>
-#include "View/MapRender.h"
+#include "View/MapView.h"
+#include "View/GameView.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
 #include "View/RawImageList.h"
@@ -41,35 +42,19 @@ class Application : public QMainWindow
 
 public:
   /* Constructor function */
-  Application(QWidget* parent = 0, int xsize = 100, int ysize = 100);
+  Application(QWidget* parent = 0);
 
   /* Destructor function */
   ~Application();
 
 private:
-  /* Map layer tabs */
-  QToolBar* toolbar;
-  QListWidget* sidetoolbar;
+  /* Game View */
+  GameView* game_view;
 
   /* Brush and Menu Tabs */
   QToolBar* brushbar;
   QToolBar* menubar;
-
-  /* Toolbox pointer */
-  QTabWidget* tab;
-  RawImageView* images_tab;
-  SpriteView* sprites_tab;
-
-  /* Scroll area pointer */
-  QScrollArea* sprites_tab_scrollwrapper;
-
-  /* Sidebar dock pointer */
-  QDockWidget* dock;
-  QDockWidget* layer_dock;
-
-  /* Map View pointer */
-  QGraphicsView* map_scroller;
-  MapRender* map_editor;
+  QToolBar* viewbar;
 
   /* File action pointers */
   QAction *new_action;
@@ -98,48 +83,15 @@ private:
   QAction *blockplacemode_action;
   QAction *fill_action;
 
-  /* Map Mode Shift Actions (Active Layers) */
-  QListWidgetItem *active_lower_layer_01;
-  QListWidgetItem *active_lower_layer_02;
-  QListWidgetItem *active_lower_layer_03;
-  QListWidgetItem *active_lower_layer_04;
-  QListWidgetItem *active_lower_layer_05;
-  QListWidgetItem *active_enhancer_layer;
-  QListWidgetItem *active_item_layer;
-  QListWidgetItem *active_base_layer;
-  QListWidgetItem *active_person_layer;
-  QListWidgetItem *active_thing_layer;
-  QListWidgetItem *active_upper_layer_01;
-  QListWidgetItem *active_upper_layer_02;
-  QListWidgetItem *active_upper_layer_03;
-  QListWidgetItem *active_upper_layer_04;
-  QListWidgetItem *active_upper_layer_05;
-
-  /* Map Mode Shift Actions (Shown Layers) */
-  QActionGroup *shown_layers;
-  QAction *shown_lower_layer_01;
-  QAction *shown_lower_layer_02;
-  QAction *shown_lower_layer_03;
-  QAction *shown_lower_layer_04;
-  QAction *shown_lower_layer_05;
-  QAction *shown_enhancer_layer;
-  QAction *shown_item_layer;
-  QAction *shown_base_layer;
-  QAction *shown_person_layer;
-  QAction *shown_thing_layer;
-  QAction *shown_upper_layer_01;
-  QAction *shown_upper_layer_02;
-  QAction *shown_upper_layer_03;
-  QAction *shown_upper_layer_04;
-  QAction *shown_upper_layer_05;
-  QAction *shown_grid;
-  QAction *shown_pass;
+  /* Mode Action pointers */
+  QActionGroup *gameview_group;
+  QAction *mapview_action;
+  QAction *person_action;
+  QAction *party_action;
+  QAction *item_action;
 
   /* The users login name */
   QString username;
-
-  /* The currently selected sprite */
-  QString current_sprite_choice;
 
   /* Map size for initial creation */
   int x_size;
@@ -151,21 +103,12 @@ private:
   /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;
 
-  /* Map Data Bar */
-  QStatusBar* map_data;
-
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
   /* Sets up the Top Menu */
   void setupTopMenu();
-
-  /* Sets up the Sidebar */
-  void setupSidebar();
-
-  /* Sets up the Layer Bar */
-  void setupLayerBar();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -177,25 +120,13 @@ protected:
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
-signals:
-  void sendUpEditorSprite(EditorSprite* e);
-
+//signals:
 /*============================================================================
  * SLOTS
  *===========================================================================*/
 public slots:
-  /* Toggles all layers to be on/off */
-  void showAllLayers(bool);
-
-  /* Sets the picked sprite */
-  void setSprite(QString);
-
-  /* Sets up the Map View */
+  /* Sets up a map */
   void setupMap();
-  void setupMapView(int x = 0, int y = 0);
-
-  /* Sets the Active Layer on the Map */
-  void setActiveLayer(QListWidgetItem* layer);
 
   /* Sets to Eraser Mode */
   void setBasicCursor();
@@ -209,8 +140,17 @@ public slots:
   /* Sets to Fill Mode */
   void setFillCursor();
 
-  /* Sets the status bar to have the current tile hovered over */
-  void setCurrentTile(int,int);
+  /* Sets To Map View */
+  void setMapView();
+
+  /* Sets To Person View */
+  void setPersonView();
+
+  /* Sets To Party View */
+  void setPartyView();
+
+  /* Sets To Item View */
+  void setItemView();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

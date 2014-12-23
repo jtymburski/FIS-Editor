@@ -25,5 +25,8 @@ public:
 
   /* Enum for type of FrameView */
   enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
+
+  /* Enum For View Mode */
+  enum ViewMode {MAPVIEW,PERSONVIEW,PARTYVIEW,ITEMVIEW };
 };
 #endif // EDITORENUMDB_H
