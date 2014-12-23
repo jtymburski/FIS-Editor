@@ -67,11 +67,11 @@ Application::~Application()
 void Application::setupSidebar()
 {
   /* Sets up a scroll area with the images tab */
-  images_tab = new ImageSelectionModule(this);
+  images_tab = new RawImageView(this);
   //images_tab->setFixedSize(288,640);
 
   /* Sets up a scroll area with the sprites tab */
-  sprites_tab = new EditorSpriteToolbox(this);
+  sprites_tab = new SpriteView(this);
   sprites_tab->setFixedSize(288,600);
 
   connect(images_tab->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
@@ -105,7 +105,7 @@ void Application::setupSidebar()
 void Application::setupMapView(int x, int y)
 {
   /* Sets up the main map view widget */
-  map_editor = new MapEditor(sprites_tab,this,x,y,cursor_mode);
+  map_editor = new MapRender(sprites_tab,this,x,y,cursor_mode);
   map_scroller = new QGraphicsView(map_editor,this);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
@@ -157,7 +157,19 @@ void Application::setupMapView(int x, int y)
  */
 void Application::setupTopMenu()
 {
-  mapsizedialog = new SizeSelector(this);
+  /* Sets up map size dialog */
+  mapsize_dialog = new QDialog(this);
+  QGridLayout* layout = new QGridLayout(mapsize_dialog);
+  layout->addWidget(new QLabel("Choose Initial Map Size"),0,0);
+  layout->addWidget(new QLabel("X:"),1,0);
+  QLineEdit* sizexedit = new QLineEdit("100",this);
+  layout->addWidget(sizexedit,1,1);
+  layout->addWidget(new QLabel("Y:"),2,0);
+  QLineEdit* sizeyedit = new QLineEdit("100",this);
+  layout->addWidget(sizeyedit,2,1);
+  QPushButton* ok = new QPushButton("&Create Map",this);
+  layout->addWidget(ok,3,0);
+  connect(ok,SIGNAL(clicked()),this,SLOT(setupMap()));
 
   /* Sets up the File menu actions */
   new_action = new QAction("&New",this);
@@ -185,9 +197,9 @@ void Application::setupTopMenu()
 
   /* Connects File menu actions to slots */
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
-  connect(new_action,SIGNAL(triggered()),mapsizedialog,SLOT(show()));
-  connect(mapsizedialog,SIGNAL(createNewMap(int,int)),
-          this,SLOT(setupMapView(int,int)));
+  connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
+//  connect(mapsize_dialog,SIGNAL(createNewMap(int,int)),
+//          this,SLOT(setupMapView(int,int)));
 
 
   /* Sets up Edit menu actions*/
@@ -602,6 +614,26 @@ void Application::setCurrentTile(int x, int y)
   map_data->showMessage(mapsize);
 }
 
+/*
+ * Description: Sets up the map based on the popup with the size
+ *
+ * Inputs: none
+ * Output: none
+ */
+void Application::setupMap()
+{
+  if(mapsize_dialog != NULL)
+  {
+    QLayout* layout = mapsize_dialog->layout();
+    QString x_line = ((QLineEdit*)((QGridLayout*)layout)->itemAtPosition(1,1)
+                                                        ->widget())->text();
+    QString y_line = ((QLineEdit*)((QGridLayout*)layout)->itemAtPosition(2,1)
+                                                        ->widget())->text();
+
+    setupMapView(x_line.toInt(), y_line.toInt());
+    mapsize_dialog->close();
+  }
+}
 
 /*============================================================================
  * PROTECTED FUNCTIONS

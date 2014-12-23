@@ -29,51 +29,49 @@ QMAKE_CXX_FLAGS_WARN_ON += -Wall
 QT += opengl widgets #phonon network xml, core and gui are default
 
 SOURCES += \
-    ./src/Main.cc \
-    ./src/Application.cc \
-    ./src/Map/MapEditor.cc \
-    ./src/SpriteToolbox.cc \
+    src/Main.cc \
+    src/Application.cc \
+    src/View/MapRender.cc \
     ../Project/src/Helpers.cc \
     ../Project/src/Frame.cc \
     ../Project/src/Sprite.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/Map/Tile.cc \
-    src/SpriteChoice.cc \
-    src/EditorSprite.cc \
-    src/EditorSpriteToolbox.cc \
-    src/SpriteCreationDialog.cc \
-    src/TileWrapper.cc \
+    src/Database/EditorSprite.cc \
     ../Project/src/Game/EventHandler.cc \
-    src/ImageSelectionModule.cc \
-    src/SizeSelector.cc \
-    src/EditorSpriteList.cc \
-    src/FrameManipulator.cc \
-    src/FrameManipulationDialog.cc \
-    src/Manipulabel.cc
+    src/View/EditorSpriteList.cc \
+    src/View/RawImageView.cc \
+    src/View/RawImageList.cc \
+    src/View/RawImage.cc \
+    src/View/SpriteView.cc \
+    src/View/TileRender.cc \
+    src/Dialog/SpriteDialog.cc \
+    src/Dialog/FrameList.cc \
+    src/Dialog/FrameView.cc \
+    src/Dialog/FrameDialog.cc
 
 HEADERS += \
-    ./include/Application.h \
-    ./include/EditorEnumDb.h \
-    ./include/Map/MapEditor.h \
-    ./include/SpriteToolbox.h \
+    include/Application.h \
+    include/EditorEnumDb.h \
+    include/View/MapRender.h \
     ../Project/include/EnumDb.h \
     ../Project/include/Helpers.h \
     ../Project/include/Frame.h \
     ../Project/include/Sprite.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/Map/Tile.h \
-    include/SpriteChoice.h \
-    include/EditorSprite.h \
-    include/EditorSpriteToolbox.h \
-    include/SpriteCreationDialog.h \
-    include/TileWrapper.h \
+    include/Database/EditorSprite.h \
     ../Project/include/Game/EventHandler.h \
-    include/ImageSelectionModule.h \
-    include/SizeSelector.h \
-    include/EditorSpriteList.h \
-    include/FrameManipulator.h \
-    include/FrameManipulationDialog.h \
-    include/Manipulabel.h
+    include/View/EditorSpriteList.h \
+    include/View/RawImageView.h \
+    include/View/RawImageList.h \
+    include/View/RawImage.h \
+    include/View/SpriteView.h \
+    include/View/TileRender.h \
+    include/Dialog/SpriteDialog.h \
+    include/Dialog/FrameList.h \
+    include/Dialog/FrameView.h \
+    include/Dialog/FrameDialog.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

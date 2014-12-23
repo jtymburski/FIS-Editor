@@ -4,8 +4,8 @@
  * Inheritance: QWidget
  * Description: The side toolbar that gives access to sprites.
  ******************************************************************************/
-#ifndef EDITORSPRITETOOLBOX_H
-#define EDITORSPRITETOOLBOX_H
+#ifndef SpriteView_H
+#define SpriteView_H
 
 #include <QWidget>
 #include <QPainter>
@@ -17,19 +17,19 @@
 #include <QMouseEvent>
 #include <QDialog>
 #include <QLabel>
-#include "EditorSprite.h"
-#include "EditorSpriteList.h"
-#include "SpriteCreationDialog.h"
+#include "Database/EditorSprite.h"
+#include "View/EditorSpriteList.h"
+#include "Dialog/SpriteDialog.h"
 
-class EditorSpriteToolbox : public QWidget
+class SpriteView : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSpriteToolbox(QWidget* parent = 0);
+  SpriteView(QWidget* parent = 0);
 
   /* Destructor function */
-  ~EditorSpriteToolbox();
+  ~SpriteView();
 public slots:
   /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);
@@ -69,7 +69,7 @@ private:
   /* A widget for showing the current selected sprite frame sequence */
   QDialog* frames;
 
-  SpriteCreationDialog* edit_sprite;
+  SpriteDialog* edit_sprite;
 
 signals:
 
@@ -77,4 +77,4 @@ signals:
   void sendUpEditorSprite(EditorSprite* sprite);
 
 };
-#endif // EDITORSPRITETOOLBOX_H
+#endif // SpriteView_H

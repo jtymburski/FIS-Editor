@@ -1,5 +1,5 @@
-#ifndef SPRITECREATIONDIALOG_H
-#define SPRITECREATIONDIALOG_H
+#ifndef SPRITEDIALOG_H
+#define SPRITEDIALOG_H
 
 #include <QDialog>
 #include <QLabel>
@@ -11,15 +11,15 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QComboBox>
-#include "FrameManipulator.h"
-#include "EditorSprite.h"
+#include "Dialog/FrameList.h"
+#include "Database/EditorSprite.h"
 
-class SpriteCreationDialog : public QDialog
+class SpriteDialog : public QDialog
 {
   Q_OBJECT
 public:
   /* Constructor function */
-  SpriteCreationDialog(QWidget *parent = 0,
+  SpriteDialog(QWidget *parent = 0,
                        EditorSprite *working = new EditorSprite(),
                        QString path = "", int subsequent = 0,
                        bool creation = true);
@@ -34,7 +34,7 @@ private:
   QCheckBox* rotate90;
   QCheckBox* rotate180;
   QCheckBox* rotate270;
-  FrameManipulator* framemanipulator;
+  FrameList* frame_list;
   QScrollArea* frame_scrollwrapper;
 
   /* The current sprite that is being altered/created by the dialog */
@@ -73,4 +73,4 @@ public slots:
 
 };
 
-#endif // SPRITECREATIONDIALOG_H
+#endif // SPRITEDIALOG_H

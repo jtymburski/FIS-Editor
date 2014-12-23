@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: Manipulabel
+ * Class Name: FrameView
  * Date Created: January 22, 2014
  * Inheritance: QWidget
  * Description: The frame and arrow images in the Frame Manipulator
  ******************************************************************************/
-#include "Manipulabel.h"
+#include "Dialog/FrameView.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -17,7 +17,7 @@
  *        and frame direction
  */
 
-Manipulabel::Manipulabel(QWidget *parent,EditorEnumDb::ManipulabelType type,
+FrameView::FrameView(QWidget *parent,EditorEnumDb::FrameViewType type,
                          QPixmap* frame_image,
                          int position, int before, int after, QString framedir,
                          EditorSprite* current)
@@ -61,7 +61,7 @@ Manipulabel::Manipulabel(QWidget *parent,EditorEnumDb::ManipulabelType type,
 /*
  * Description: Destructor function
  */
-Manipulabel::~Manipulabel()
+FrameView::~FrameView()
 {
 }
 
@@ -69,7 +69,7 @@ Manipulabel::~Manipulabel()
 /*
  * Description: Paints the label with transformations
  */
-void Manipulabel::paintEvent(QPaintEvent *)
+void FrameView::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
   QPixmap temp = *frame;
@@ -138,7 +138,7 @@ void Manipulabel::paintEvent(QPaintEvent *)
  *
  * Input : Event
  */
-void Manipulabel::mouseDoubleClickEvent(QMouseEvent *event)
+void FrameView::mouseDoubleClickEvent(QMouseEvent *event)
 {
   if(event->buttons() & Qt::LeftButton)
   {
@@ -179,7 +179,7 @@ void Manipulabel::mouseDoubleClickEvent(QMouseEvent *event)
  *
  * Input: Flip toggles
  */
-void Manipulabel::setFlips(bool horizontal, bool vertical)
+void FrameView::setFlips(bool horizontal, bool vertical)
 {
   horflip = horizontal;
   verflip = vertical;
@@ -191,7 +191,7 @@ void Manipulabel::setFlips(bool horizontal, bool vertical)
  *
  * Input: Flip toggle
  */
-void Manipulabel::setHFlip(bool horizontal)
+void FrameView::setHFlip(bool horizontal)
 {
   horflip = horizontal;
   update();
@@ -202,7 +202,7 @@ void Manipulabel::setHFlip(bool horizontal)
  *
  * Input: Flip toggle
  */
-void Manipulabel::setVFlip(bool vertical)
+void FrameView::setVFlip(bool vertical)
 {
   verflip = vertical;
   update();
@@ -211,7 +211,7 @@ void Manipulabel::setVFlip(bool vertical)
 /*
  * Description: Reloads the frame image
  */
-void Manipulabel::reloadFrame()
+void FrameView::reloadFrame()
 {
   frame = new QPixmap(currentsprite->getPath(pos));
   framepath = currentsprite->getPath(pos);

@@ -19,7 +19,7 @@
 #include <QHBoxLayout>
 #include <QDockWidget>
 #ifdef _WIN32
-//#include <windows.h>
+#include <windows.h>
 #endif
 #include <QScrollArea>
 #include <QTabWidget>
@@ -30,11 +30,10 @@
 #include <QStatusBar>
 #include <QTreeView>
 #include <QDesktopWidget>
-#include "Map/MapEditor.h"
-#include "ImageSelectionModule.h"
-#include "EditorSpriteToolbox.h"
-#include "SpriteToolbox.h"
-#include "SizeSelector.h"
+#include "View/MapRender.h"
+#include "View/RawImageView.h"
+#include "View/SpriteView.h"
+#include "View/RawImageList.h"
 
 class Application : public QMainWindow
 {
@@ -58,8 +57,8 @@ private:
 
   /* Toolbox pointer */
   QTabWidget* tab;
-  ImageSelectionModule* images_tab;
-  EditorSpriteToolbox* sprites_tab;
+  RawImageView* images_tab;
+  SpriteView* sprites_tab;
 
   /* Scroll area pointer */
   QScrollArea* sprites_tab_scrollwrapper;
@@ -70,7 +69,7 @@ private:
 
   /* Map View pointer */
   QGraphicsView* map_scroller;
-  MapEditor* map_editor;
+  MapRender* map_editor;
 
   /* File action pointers */
   QAction *new_action;
@@ -147,7 +146,7 @@ private:
   int y_size;
 
   /* Initial Map Creation */
-  SizeSelector* mapsizedialog;
+  QDialog* mapsize_dialog;
 
   /* Curosr Mode */
   EditorEnumDb::CursorMode cursor_mode;
@@ -174,17 +173,17 @@ private:
 protected:
   /* Custom close event */
   void closeEvent(QCloseEvent *);
+
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
-
   void sendUpEditorSprite(EditorSprite* e);
+
 /*============================================================================
  * SLOTS
  *===========================================================================*/
 public slots:
-
   /* Toggles all layers to be on/off */
   void showAllLayers(bool);
 
@@ -192,6 +191,7 @@ public slots:
   void setSprite(QString);
 
   /* Sets up the Map View */
+  void setupMap();
   void setupMapView(int x = 0, int y = 0);
 
   /* Sets the Active Layer on the Map */
@@ -211,6 +211,7 @@ public slots:
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

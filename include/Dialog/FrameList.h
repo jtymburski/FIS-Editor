@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: FrameManipulator
+ * Class Name: FrameList
  * Date Created: January 19, 2014
  * Inheritance: QWidget
  * Description: The frame implement in the sprite creation dialog
  ******************************************************************************/
-#ifndef FRAMEMANIPULATOR_H
-#define FRAMEMANIPULATOR_H
+#ifndef FRAMELIST_H
+#define FRAMELIST_H
 
 #include <QPixmap>
 #include <QVector>
@@ -13,19 +13,19 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QMouseEvent>
-#include "FrameManipulationDialog.h"
-#include "EditorSprite.h"
-#include "Manipulabel.h"
+#include "Dialog/FrameDialog.h"
+#include "Database/EditorSprite.h"
+#include "Dialog/FrameView.h"
 
-class FrameManipulator : public QWidget
+class FrameList : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameManipulator(QWidget* parent = 0, EditorSprite* c = 0);
+  FrameList(QWidget* parent = 0, EditorSprite* c = 0);
 
   /* Destructor Function */
-  ~FrameManipulator();
+  ~FrameList();
 
 
 public slots:
@@ -44,22 +44,22 @@ protected:
 private:
   /* Sprite whose frames are in the dialog */
   EditorSprite* currentsprite;
-  FrameManipulationDialog* manipulator;
+  FrameDialog* manipulator;
 
   /* Vector of frame images */
-  QVector<Manipulabel*> framelabels;
+  QVector<FrameView*> framelabels;
 
   /* Vector of midpoint arrows */
-  QVector<Manipulabel*> arrowlabels;
+  QVector<FrameView*> arrowlabels;
 
   /* Head label */
-  Manipulabel* startlabel;
+  FrameView* startlabel;
 
   /* Tail label */
-  Manipulabel* endlabel;
+  FrameView* endlabel;
 
   /* Layout */
   QHBoxLayout* layout;
 };
 
-#endif // FRAMEMANIPULATOR_H
+#endif // FRAMELIST_H

@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: Manipulabel
+ * Class Name: FrameView
  * Date Created: January 22, 2014
  * Inheritance: QWidget
  * Description: The frame and arrow images in the Frame Manipulator
  ******************************************************************************/
-#ifndef MANIPULABEL_H
-#define MANIPULABEL_H
+#ifndef FrameView_H
+#define FrameView_H
 
 #include <QMouseEvent>
 #include <QPixmap>
@@ -13,21 +13,21 @@
 #include <QPainter>
 #include <QFileDialog>
 #include "EditorEnumDb.h"
-#include "EditorSprite.h"
+#include "Database/EditorSprite.h"
 
-class Manipulabel : public QWidget
+class FrameView : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor function */
-  Manipulabel(QWidget* parent = 0,
-              EditorEnumDb::ManipulabelType type = EditorEnumDb::FRAME,
+  FrameView(QWidget* parent = 0,
+              EditorEnumDb::FrameViewType type = EditorEnumDb::FRAME,
       QPixmap* frame_image = 0,int position = 0, int before = 0, int after = 0,
               QString framedir = QDir::current().absolutePath(),
               EditorSprite* current = 0);
 
   /* Destructor function */
-  ~Manipulabel();
+  ~FrameView();
 
   /* Flip setting */
   void setFlips(bool horizontal, bool vertical);
@@ -57,7 +57,7 @@ signals:
 
 private:
   /* Label type */
-  EditorEnumDb::ManipulabelType t;
+  EditorEnumDb::FrameViewType t;
 
   /* Editor sprite pointer */
   EditorSprite* currentsprite;
@@ -75,4 +75,4 @@ private:
   QString framepath;
 };
 
-#endif // MANIPULABEL_H
+#endif // FrameView_H

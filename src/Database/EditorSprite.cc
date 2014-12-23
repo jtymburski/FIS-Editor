@@ -5,7 +5,7 @@
 * Description: This class is a toolbox view of each sprite that the user can
 *              add to the map, these are imported by the user.
 ******************************************************************************/
-#include "EditorSprite.h"
+#include "Database/EditorSprite.h"
 #include <QDebug>
 
 /*============================================================================

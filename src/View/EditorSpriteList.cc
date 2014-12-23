@@ -4,8 +4,7 @@
  * Inheritance: QListWidget
  * Description: The list of editor sprites
  ******************************************************************************/
-
-#include "EditorSpriteList.h"
+#include "View/EditorSpriteList.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -101,7 +100,7 @@ void EditorSpriteList::viewFrameSequence()
 
 void EditorSpriteList::editSprite()
 {
-  spriteeditordialog = new SpriteCreationDialog(this,currentsprite,
+  spriteeditordialog = new SpriteDialog(this,currentsprite,
                                          currentsprite->getPath(0),
                                          0,false);
   connect(spriteeditordialog,SIGNAL(ok()),this,SIGNAL(updateSprites()));

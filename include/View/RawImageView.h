@@ -1,30 +1,30 @@
 /*******************************************************************************
- * Class Name: ImageSelectionModule
+ * Class Name: RawImageView
  * Date Created: January 12, 2014
  * Inheritance: QWidget
- * Description: A widget that contains both the SpriteToolbox and a QTreeView
+ * Description: A widget that contains both the RawImageList and a QTreeView
  ******************************************************************************/
-#ifndef IMAGESELECTIONMODULE_H
-#define IMAGESELECTIONMODULE_H
+#ifndef RAWIMAGEVIEW_H
+#define RAWIMAGEVIEW_H
 
 #include <QTreeView>
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QFileSystemModel>
-#include "SpriteToolbox.h"
+#include "View/RawImageList.h"
 
-class ImageSelectionModule : public QWidget
+class RawImageView : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  ImageSelectionModule(QWidget* parent = 0);
+  RawImageView(QWidget* parent = 0);
 
   /* Destructor function */
-  ~ImageSelectionModule();
+  ~RawImageView();
 
   /* Gets the Toolbox */
-  SpriteToolbox* getToolbox();
+  RawImageList* getToolbox();
 public slots:
 
 protected:
@@ -36,7 +36,7 @@ private:
   QScrollArea* images_tab_scrollwrapper;
 
   /* The Sprite Toolbox */
-  SpriteToolbox* image_viewer;
+  RawImageList* image_viewer;
 
   /* The Directory view */
   QTreeView* directory_tree;
@@ -45,4 +45,4 @@ signals:
 
 };
 
-#endif // IMAGESELECTIONMODULE_H
+#endif // RAWIMAGEVIEW_H

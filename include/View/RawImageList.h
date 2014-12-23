@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: SpriteToolbox
+ * Class Name: RawImageList
  * Date Created: November 14, 2013
  * Inheritance: QWidget
  * Description: The side toolbar that gives access to sprites.
  ******************************************************************************/
-#ifndef SPRITETOOLBOX_H
-#define SPRITETOOLBOX_H
+#ifndef RAWIMAGELIST_H
+#define RAWIMAGELIST_H
 
 #include <QWidget>
 #include <QPushButton>
@@ -17,18 +17,18 @@
 #include <QHBoxLayout>
 #include <QDir>
 #include <QFileSystemModel>
-#include "SpriteChoice.h"
-#include "EditorSprite.h"
+#include "View/RawImage.h"
+#include "Database/EditorSprite.h"
 
-class SpriteToolbox : public QWidget
+class RawImageList : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteToolbox(QWidget* parent = 0, QFileSystemModel* module = 0);
+  RawImageList(QWidget* parent = 0, QFileSystemModel* module = 0);
 
   /* Destructor function */
-  ~SpriteToolbox();
+  ~RawImageList();
 
 public slots:
   /* Opens the file selection dialog */
@@ -54,7 +54,7 @@ private:
   QFileDialog* select_files;
 
   /* The vector for storing sprite choices */
-  QVector<SpriteChoice* > sprites;
+  QVector<RawImage* > sprites;
 
   /* Currently selected Sprite path */
   QString path;
@@ -69,4 +69,4 @@ signals:
   void sendUpEditorSprite(EditorSprite* e);
 };
 
-#endif // SPRITETOOLBOX_H
+#endif // RAWIMAGELIST_H

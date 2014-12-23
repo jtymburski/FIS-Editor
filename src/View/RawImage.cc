@@ -1,12 +1,12 @@
 /******************************************************************************
-* Class Name: SpriteChoice
+* Class Name: RawImage
 * Date Created: Nov 16, 2013
 * Inheritance: QWidget
 * Description: This class is a toolbox view of each sprite that the user can
 *              add to the map, these are imported by the user.
 
 ******************************************************************************/
-#include "SpriteChoice.h"
+#include "View/RawImage.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -17,7 +17,7 @@
  *
  * Input: Parent, file path, id
  */
-SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id, int f)
+RawImage::RawImage(QWidget *parent, QString p, int id, int f)
   : QWidget(parent)
 {
   followers = f;
@@ -36,7 +36,7 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id, int f)
   rightclick_menu = new QMenu();
   rightclick_menu->hide();
   rightclick_menu->addAction(spriteify_action);
-  creation_dialog = new SpriteCreationDialog(this);
+  creation_dialog = new SpriteDialog(this);
   connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
                                  SIGNAL(sendUpEditorSprite(EditorSprite*)));
 
@@ -48,7 +48,7 @@ SpriteChoice::SpriteChoice(QWidget *parent, QString p, int id, int f)
 /*
  * Description: Destructor Function
  */
-SpriteChoice::~SpriteChoice()
+RawImage::~RawImage()
 {
   //qDebug()<<"Removing Sprite Choice";
   delete creation_dialog;
@@ -64,7 +64,7 @@ SpriteChoice::~SpriteChoice()
  *
  * Inputs: File path
  */
-void SpriteChoice::loadSprite(QString path)
+void RawImage::loadSprite(QString path)
 {
   pic->load(path);
   update();
@@ -74,7 +74,7 @@ void SpriteChoice::loadSprite(QString path)
 /*
  * Description: Deselects this sprite choice
  */
-void SpriteChoice::deselect()
+void RawImage::deselect()
 {
   mode = EditorEnumDb::STANDARD;
   update();
@@ -84,11 +84,11 @@ void SpriteChoice::deselect()
  * Description: Removes the old creation dialog, and creates a new one
  *
  */
-void SpriteChoice::makeSprite()
+void RawImage::makeSprite()
 {
   delete creation_dialog;
   creation_dialog =
-      new SpriteCreationDialog(this,new EditorSprite(path),path,followers);
+      new SpriteDialog(this,new EditorSprite(path),path,followers);
   creation_dialog->show();
 }
 
@@ -102,7 +102,7 @@ void SpriteChoice::makeSprite()
  *
  * Inputs: Unused
  */
-void SpriteChoice::paintEvent(QPaintEvent *)
+void RawImage::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
   /* If the path is valid (which it should never not be), draw the result into
@@ -136,7 +136,7 @@ void SpriteChoice::paintEvent(QPaintEvent *)
  *
  * Inputs: Unused
  */
-void SpriteChoice::enterEvent(QEvent *)
+void RawImage::enterEvent(QEvent *)
 {
   if(mode != EditorEnumDb::SELECTED)
   {
@@ -150,7 +150,7 @@ void SpriteChoice::enterEvent(QEvent *)
  *
  * Inputs: Unused
  */
-void SpriteChoice::leaveEvent(QEvent *)
+void RawImage::leaveEvent(QEvent *)
 {
   if(mode != EditorEnumDb::SELECTED)
   {
@@ -164,7 +164,7 @@ void SpriteChoice::leaveEvent(QEvent *)
  *
  * Inputs: Unused
  */
-void SpriteChoice::mousePressEvent(QMouseEvent *event)
+void RawImage::mousePressEvent(QMouseEvent *event)
 {
   if(event->button() == Qt::LeftButton)
   {
@@ -197,7 +197,7 @@ void SpriteChoice::mousePressEvent(QMouseEvent *event)
  * Inputs: Mouse event
  */
 
-void SpriteChoice::mouseDoubleClickEvent(QMouseEvent *event)
+void RawImage::mouseDoubleClickEvent(QMouseEvent *event)
 {
   if(event->button() == Qt::LeftButton)
   {

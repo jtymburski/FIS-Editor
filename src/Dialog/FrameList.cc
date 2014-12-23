@@ -1,11 +1,10 @@
 /*******************************************************************************
- * Class Name: FrameManipulator
+ * Class Name: FrameList
  * Date Created: January 19, 2014
  * Inheritance: QWidget
  * Description: The frame implement in the sprite creation dialog
  ******************************************************************************/
-
-#include "FrameManipulator.h"
+#include "Dialog/FrameList.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -16,11 +15,11 @@
  *
  * Input: parent widget, current sprite
  */
-FrameManipulator::FrameManipulator(QWidget *parent, EditorSprite *c)
+FrameList::FrameList(QWidget *parent, EditorSprite *c)
   : QWidget(parent)
 {
   currentsprite = c;
-  manipulator = new FrameManipulationDialog(this,currentsprite,0);
+  manipulator = new FrameDialog(this,currentsprite,0);
   manipulator->setModal(true);
   manipulator->hide();
   connect(manipulator,SIGNAL(finishedSave()),this,SLOT(addFrames()));
@@ -32,14 +31,14 @@ FrameManipulator::FrameManipulator(QWidget *parent, EditorSprite *c)
 /*
  * Description: Destructor Function
  */
-FrameManipulator::~FrameManipulator()
+FrameList::~FrameList()
 {
 }
 
 /*
  * Description: Recreates the frame dialog with the current sequence
  */
-void FrameManipulator::addFrames()
+void FrameList::addFrames()
 {
   int boxwidth = 0;
   for(int i=0; i<layout->count(); i++)
@@ -48,10 +47,10 @@ void FrameManipulator::addFrames()
   }
   delete QWidget::layout();
 
-  startlabel = new Manipulabel(this,EditorEnumDb::HEAD,
+  startlabel = new FrameView(this,EditorEnumDb::HEAD,
                                new QPixmap(":/Icons/Resources/start.png"),0,0,0,
                                currentsprite->getPath(0));
-  endlabel = new Manipulabel(this,EditorEnumDb::TAIL,
+  endlabel = new FrameView(this,EditorEnumDb::TAIL,
                              new QPixmap(":/Icons/Resources/end.png"),0,0,0,
                              currentsprite->getPath(0));
 
@@ -63,7 +62,7 @@ void FrameManipulator::addFrames()
   for(int i=0; i<currentsprite->frameCount(); i++)
   {
 
-    framelabels.push_back(new Manipulabel(this,EditorEnumDb::FRAME,
+    framelabels.push_back(new FrameView(this,EditorEnumDb::FRAME,
                              new QPixmap(currentsprite->getPath(i)),
                                           i,0,0,currentsprite->getPath(0),
                                           currentsprite));
@@ -74,7 +73,7 @@ void FrameManipulator::addFrames()
 
     if(i != currentsprite->frameCount()-1)
     {
-      arrowlabels.push_back(new Manipulabel(this,EditorEnumDb::MIDPOINT,
+      arrowlabels.push_back(new FrameView(this,EditorEnumDb::MIDPOINT,
                              new QPixmap(":/Icons/Resources/midpoint.png"),
                               0,i,i+1,currentsprite->getPath(0)));
       boxwidth += 32;
@@ -93,10 +92,10 @@ void FrameManipulator::addFrames()
  *
  * Input: Frame position
  */
-void FrameManipulator::editFrame(int x)
+void FrameList::editFrame(int x)
 {
   delete manipulator;
-  manipulator = new FrameManipulationDialog(this,currentsprite,x);
+  manipulator = new FrameDialog(this,currentsprite,x);
   connect(manipulator,SIGNAL(finishedSave()),this,SLOT(addFrames()));
   manipulator->exec();
 }
@@ -106,7 +105,7 @@ void FrameManipulator::editFrame(int x)
  *
  * Input: Frame path
  */
-void FrameManipulator::addHead(QString x)
+void FrameList::addHead(QString x)
 {
   currentsprite->addHead(x);
   addFrames();
@@ -117,7 +116,7 @@ void FrameManipulator::addHead(QString x)
  *
  * Input: Frame path
  */
-void FrameManipulator::addTail(QString x)
+void FrameList::addTail(QString x)
 {
   currentsprite->setPath(x);
   addFrames();
@@ -128,7 +127,7 @@ void FrameManipulator::addTail(QString x)
  *
  * Input: Frame path, before and after positions
  */
-void FrameManipulator::addMidpoint(QString x, int before, int after)
+void FrameList::addMidpoint(QString x, int before, int after)
 {
   currentsprite->addMidpoint(x,before,after);
   addFrames();

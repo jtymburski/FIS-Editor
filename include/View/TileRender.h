@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: TileWrapper
+ * Class Name: TileRender
  * Date Created: December 26, 2013
  * Inheritance: QWidget
  * Description: A tile representation on the mapeditor
  ******************************************************************************/
-#ifndef TILEWRAPPER_H
-#define TILEWRAPPER_H
+#ifndef TILERENDER_H
+#define TILERENDER_H
 
 #include <QWidget>
 #include <QPainter>
@@ -14,22 +14,22 @@
 #include <QAction>
 #include <QList>
 #include <QGraphicsSceneHoverEvent>
-#include "EditorSpriteToolbox.h"
+#include "View/SpriteView.h"
 #include "EditorEnumDb.h"
 #include "Game/Map/Tile.h"
 
-class TileWrapper : public QGraphicsItem
+class TileRender : public QGraphicsItem
 {
   //Q_OBJECT
 public:
   /* Constructor Function */
-  TileWrapper(int x = 0, int y = 0, int z = 0);
+  TileRender(int x = 0, int y = 0, int z = 0);
 
   /* Destructor Function */
-  ~TileWrapper();
+  ~TileRender();
 
-  enum ItemType { Type_TileWrapper = UserType+1};
-  int type() const { return Type_TileWrapper; }
+  enum ItemType { Type_TileRender = UserType+1};
+  int type() const { return Type_TileRender; }
 public:
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
@@ -62,7 +62,7 @@ public slots:
   void setGridColor(bool);
 
   /* Sets the toolbox that the tile gets the current Editor Sprite from */
-  void setToolbox(EditorSpriteToolbox* tool);
+  void setToolbox(SpriteView* tool);
 
   /* Edits the various layers */
   void editBase(EditorSprite*);
@@ -96,7 +96,7 @@ private:
   Tile* tile;
 
   /* A Pointer to a toolbox containing the current Editor Sprite */
-  EditorSpriteToolbox* toolbox;
+  SpriteView* toolbox;
 
   /*Editor Sprite layers */
   EditorSprite* base_layer;
@@ -111,4 +111,4 @@ private:
   bool grid_color;
 };
 
-#endif // TILEWRAPPER_H
+#endif // TILERENDER_H

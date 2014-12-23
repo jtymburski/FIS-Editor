@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: TileWrapper
+ * Class Name: TileRender
  * Date Created: December 26, 2013
  * Inheritance: QWidget
  * Description: A tile representation on the mapeditor
  ******************************************************************************/
-#include "TileWrapper.h"
+#include "View/TileRender.h"
 #include <QDebug>
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -15,7 +15,7 @@
  *
  * Input: x/y coordinates on the map grid and a z depth
  */
-TileWrapper::TileWrapper(int x, int y, int z)
+TileRender::TileRender(int x, int y, int z)
 {
   grid_color = false;
   xpos = x;
@@ -57,7 +57,7 @@ TileWrapper::TileWrapper(int x, int y, int z)
 /*
  * Description: Destructor function
  */
-TileWrapper::~TileWrapper()
+TileRender::~TileRender()
 {
   for(int i=0; i<5; i++)
   {
@@ -75,7 +75,7 @@ TileWrapper::~TileWrapper()
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setBase(bool toggle)
+void TileRender::setBase(bool toggle)
 {
   base = toggle;
 }
@@ -85,7 +85,7 @@ void TileWrapper::setBase(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setEnhancer(bool toggle)
+void TileRender::setEnhancer(bool toggle)
 {
   enhancer = toggle;
 }
@@ -95,7 +95,7 @@ void TileWrapper::setEnhancer(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setLower1(bool toggle)
+void TileRender::setLower1(bool toggle)
 {
   lower1 = toggle;
 }
@@ -105,7 +105,7 @@ void TileWrapper::setLower1(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setLower2(bool toggle)
+void TileRender::setLower2(bool toggle)
 {
   lower2 = toggle;
 }
@@ -115,7 +115,7 @@ void TileWrapper::setLower2(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setLower3(bool toggle)
+void TileRender::setLower3(bool toggle)
 {
   lower3 = toggle;
 }
@@ -125,7 +125,7 @@ void TileWrapper::setLower3(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setLower4(bool toggle)
+void TileRender::setLower4(bool toggle)
 {
   lower4 = toggle;
 }
@@ -135,7 +135,7 @@ void TileWrapper::setLower4(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setLower5(bool toggle)
+void TileRender::setLower5(bool toggle)
 {
   lower5 = toggle;
 }
@@ -145,7 +145,7 @@ void TileWrapper::setLower5(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setUpper1(bool toggle)
+void TileRender::setUpper1(bool toggle)
 {
   upper1 = toggle;
 }
@@ -155,7 +155,7 @@ void TileWrapper::setUpper1(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setUpper2(bool toggle)
+void TileRender::setUpper2(bool toggle)
 {
   upper2 = toggle;
 }
@@ -165,7 +165,7 @@ void TileWrapper::setUpper2(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setUpper3(bool toggle)
+void TileRender::setUpper3(bool toggle)
 {
   upper3 = toggle;
 }
@@ -175,7 +175,7 @@ void TileWrapper::setUpper3(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setUpper4(bool toggle)
+void TileRender::setUpper4(bool toggle)
 {
   upper4 = toggle;
 }
@@ -185,7 +185,7 @@ void TileWrapper::setUpper4(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setUpper5(bool toggle)
+void TileRender::setUpper5(bool toggle)
 {
   upper5 = toggle;
 }
@@ -195,7 +195,7 @@ void TileWrapper::setUpper5(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setGrid(bool toggle)
+void TileRender::setGrid(bool toggle)
 {
   grid = toggle;
 }
@@ -205,7 +205,7 @@ void TileWrapper::setGrid(bool toggle)
  *
  * Input: Visibility toggle
  */
-void TileWrapper::setPass(bool toggle)
+void TileRender::setPass(bool toggle)
 {
   pass = toggle;
 }
@@ -214,7 +214,7 @@ void TileWrapper::setPass(bool toggle)
  *
  * Output: Tile pointer
  */
-Tile* TileWrapper::gameTile()
+Tile* TileRender::gameTile()
 {
   return tile;
 }
@@ -224,7 +224,7 @@ Tile* TileWrapper::gameTile()
  *
  * Output: Path
  */
-int TileWrapper::getActivePath()
+int TileRender::getActivePath()
 {
   switch(active_layer)
   {
@@ -287,7 +287,7 @@ int TileWrapper::getActivePath()
  *
  * Output: Path
  */
-int TileWrapper::getToolPath()
+int TileRender::getToolPath()
 {
   return toolbox->getCurrent()->getSprite()->getId();
 }
@@ -299,7 +299,7 @@ int TileWrapper::getToolPath()
  *
  * Output: Returns the transformed pixmap
  */
-QPixmap TileWrapper::transformPixmap(EditorSprite* pic, int pos)
+QPixmap TileRender::transformPixmap(EditorSprite* pic, int pos)
 {
   QTransform transform;
 
@@ -363,7 +363,7 @@ QPixmap TileWrapper::transformPixmap(EditorSprite* pic, int pos)
  *
  * Input: Required fields, mostly unused
  */
-void TileWrapper::paint(QPainter *painter,
+void TileRender::paint(QPainter *painter,
                         const QStyleOptionGraphicsItem*, QWidget*)
 {
   QRect bound(xpos*64,ypos*64,64,64);
@@ -528,7 +528,7 @@ void TileWrapper::paint(QPainter *painter,
 /*
  * Description: Returns the bounding rectangle (Needed by API)
  */
-QRectF TileWrapper::boundingRect() const
+QRectF TileRender::boundingRect() const
 {
   return QRectF(xpos*64,ypos*64,64,64);
 }
@@ -536,7 +536,7 @@ QRectF TileWrapper::boundingRect() const
 /*
  * Description: Places the currently selected sprite onto the active map layer
  */
-void TileWrapper::place()
+void TileRender::place()
 {
   switch(active_layer)
   {
@@ -597,7 +597,7 @@ void TileWrapper::place()
 /*
  * Description: Removes the currently selected sprite onto the active map layer
  */
-void TileWrapper::unplace()
+void TileRender::unplace()
 {
   switch(active_layer)
   {
@@ -660,7 +660,7 @@ void TileWrapper::unplace()
  *
  * Input: Editor Sprite Toolbox
  */
-void TileWrapper::setToolbox(EditorSpriteToolbox *tool)
+void TileRender::setToolbox(SpriteView *tool)
 {
   toolbox = tool;
 }
@@ -670,20 +670,20 @@ void TileWrapper::setToolbox(EditorSpriteToolbox *tool)
  *
  * Input: Color input (true: Selected, false: Unselected)
  */
-void TileWrapper::setGridColor(bool color)
+void TileRender::setGridColor(bool color)
 {
   grid_color = color;
   update();
 }
 
-void TileWrapper::editBase(EditorSprite *)
+void TileRender::editBase(EditorSprite *)
 {}
-void TileWrapper::editEnhancer(EditorSprite *)
-{}
-
-void TileWrapper::editLower(EditorSprite *, int)
+void TileRender::editEnhancer(EditorSprite *)
 {}
 
-void TileWrapper::editUpper(EditorSprite *, int)
+void TileRender::editLower(EditorSprite *, int)
+{}
+
+void TileRender::editUpper(EditorSprite *, int)
 {}
 

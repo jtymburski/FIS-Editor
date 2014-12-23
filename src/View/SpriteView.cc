@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: EditorSpriteToolbox
+ * Class Name: SpriteView
  * Date Created: November 24, 2013
  * Inheritance: QWidget
  * Description: This class handles the toolbox on the side of the application
  ******************************************************************************/
-#include "EditorSpriteToolbox.h"
+#include "View/SpriteView.h"
 #include <QDebug>
 
 /*============================================================================
@@ -16,10 +16,10 @@
  *
  * Input: parent widget
  */
-EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
+SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 {
   current = new EditorSprite();
-  edit_sprite = new SpriteCreationDialog(this);
+  edit_sprite = new SpriteDialog(this);
   editor_sprite_list = new EditorSpriteList(this);
   editor_sprite_list->show();
   editor_sprite_list->setFixedSize(288,512);
@@ -34,7 +34,7 @@ EditorSpriteToolbox::EditorSpriteToolbox(QWidget *parent) : QWidget(parent)
  *
  * Input: none
  */
-EditorSpriteToolbox::~EditorSpriteToolbox()
+SpriteView::~SpriteView()
 {
   //qDebug()<<"Removing Editor Sprite Toolbox";
   delete edit_sprite;
@@ -55,7 +55,7 @@ EditorSpriteToolbox::~EditorSpriteToolbox()
  *
  * Output: Returns the transformed pixmap
  */
-QPixmap EditorSpriteToolbox::transformPixmap(EditorSprite* pic, int pos)
+QPixmap SpriteView::transformPixmap(EditorSprite* pic, int pos)
 {
   QTransform transform;
 
@@ -126,7 +126,7 @@ QPixmap EditorSpriteToolbox::transformPixmap(EditorSprite* pic, int pos)
  *
  * Inputs: Unused
  */
-void EditorSpriteToolbox::paintEvent(QPaintEvent *)
+void SpriteView::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
   QRect bound(12,520,64,64);
@@ -149,12 +149,12 @@ void EditorSpriteToolbox::paintEvent(QPaintEvent *)
  *
  * Inputs: Mouse event
  */
-void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
+void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 {
 
   if(e->button() & Qt::RightButton)
   {
-      edit_sprite = new SpriteCreationDialog(this,current,
+      edit_sprite = new SpriteDialog(this,current,
                                              current->getPath(0),
                                              0,false);
 
@@ -169,7 +169,7 @@ void EditorSpriteToolbox::mouseDoubleClickEvent(QMouseEvent *e)
  *
  * Inputs: The editor sprite to add
  */
-void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
+void SpriteView::addEditorSprite(EditorSprite *e)
 {
   /* Sets the id */
   e->getSprite()->setId(nextID);
@@ -190,7 +190,7 @@ void EditorSpriteToolbox::addEditorSprite(EditorSprite *e)
 /* Description: Refreshes the Editor Sprite list
  *
  */
-void EditorSpriteToolbox::refreshList()
+void SpriteView::refreshList()
 {
   for(int i=0; i<editor_sprites.size(); i++)
     editor_sprite_list->item(i)->setText(editor_sprites[i]->getName());
@@ -203,7 +203,7 @@ void EditorSpriteToolbox::refreshList()
  *
  * Output: The current editor sprite
  */
-EditorSprite* EditorSpriteToolbox::getCurrent()
+EditorSprite* SpriteView::getCurrent()
 {
   return current;
 }
@@ -213,7 +213,7 @@ EditorSprite* EditorSpriteToolbox::getCurrent()
  *
  * Inputs: Index
  */
-void EditorSpriteToolbox::setCurrent(int index)
+void SpriteView::setCurrent(int index)
 {
   current = editor_sprites[index];
   editor_sprite_list->setCurrentSprite(current);

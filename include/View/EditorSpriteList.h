@@ -15,8 +15,8 @@
 #include <QLabel>
 #include <QDebug>
 #include <QMenu>
-#include "EditorSprite.h"
-#include "SpriteCreationDialog.h"
+#include "Database/EditorSprite.h"
+#include "Dialog/SpriteDialog.h"
 
 class EditorSpriteList : public QListWidget
 {
@@ -50,7 +50,7 @@ private:
   EditorSprite* currentsprite;
 
   /* Sprite Creation dialog */
-  SpriteCreationDialog* spriteeditordialog;
+  SpriteDialog* spriteeditordialog;
 
 signals:
   /* Updates the current sprite after editing it */

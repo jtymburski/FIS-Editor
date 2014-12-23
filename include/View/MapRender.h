@@ -1,33 +1,35 @@
 /*******************************************************************************
- * Class Name: MapEditor
+ * Class Name: MapRender
  * Date Created: November 11, 2013
  * Inheritance: QGLWidget
  * Description: The map editor widget that gives a snapshot view of the window
  *              to make changes to the map from.
  ******************************************************************************/
-#ifndef MAPEDITOR_H
-#define MAPEDITOR_H
+#ifndef MAPRENDER_H
+#define MAPRENDER_H
 
+#include <QDebug>
+#include <QGraphicsView>
 #include <QTabWidget>
 #include <QGraphicsScene>
 #include <QList>
 #include <QRect>
 #include <QWidget>
 #include "EnumDb.h"
-#include "TileWrapper.h"
+#include "View/TileRender.h"
 
-class MapEditor : public QGraphicsScene
+class MapRender : public QGraphicsScene
 {
   Q_OBJECT
 
 public:
   /* Constructor function */
-  MapEditor(EditorSpriteToolbox* toolbox = 0,
+  MapRender(SpriteView* toolbox = 0,
             QWidget* parent = 0,int w = 100,
             int h = 100, EditorEnumDb::CursorMode cursor = EditorEnumDb::BASIC);
 
   /* Destructor function */
-  ~MapEditor();
+  ~MapRender();
 
 public slots:
   /* Functions to toggle each layer to be shown */
@@ -99,7 +101,7 @@ private:
   QTabWidget* layer_tabs;
 
   /* The list of tiles */
-  QList<QList<TileWrapper*> > tiles;
+  QList<QList<TileRender*> > tiles;
 
   /* Rubber Band */
   QRubberBand* highlight;
@@ -127,4 +129,4 @@ private:
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 };
 
-#endif // MAPEDITOR_H
+#endif // MAPRENDER_H

@@ -1,13 +1,12 @@
 /*******************************************************************************
- * Class Name: MapEditor
+ * Class Name: MapRender
  * Date Created: November 11, 2013
  * Inheritance: QGLWidget
  * Description: The map editor widget that gives a snapshot view of the window
  *              to make changes to the map from.
  ******************************************************************************/
-#include "Map/MapEditor.h"
-#include <QDebug>
-#include <QGraphicsView>
+#include "View/MapRender.h"
+
 /* Constant Implementation - see header file for descriptions */
 //const int Map::kELEMENT_DATA = 0;
 
@@ -21,7 +20,7 @@
  * Input: a pointer to the Editor Sprite Toolbox,
  *        the parent widget, and the dimensions of the map
  */
-MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
+MapRender::MapRender(SpriteView* tool, QWidget* parent,
                      int w, int h, EditorEnumDb::CursorMode cursor)
   : QGraphicsScene(parent)
 {
@@ -93,9 +92,9 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
   /* Sets up a blank canvas of tiles on the map */
   for(int i=0; i<width; i++)
   {
-    QList<TileWrapper*> stack;
+    QList<TileRender*> stack;
     for(int j=0; j<height; j++)
-      stack.push_back(new TileWrapper(i,j));
+      stack.push_back(new TileRender(i,j));
     tiles.push_back(stack);
   }
   /* Adds each tile to the map view and sets its toolbox pointer */
@@ -112,7 +111,7 @@ MapEditor::MapEditor(EditorSpriteToolbox* tool, QWidget* parent,
 /*
  * Description: Destructor function
  */
-MapEditor::~MapEditor()
+MapRender::~MapRender()
 {
   for(int i=0; i<width; i++)
   {
@@ -129,7 +128,7 @@ MapEditor::~MapEditor()
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleBase(bool toggle)
+void MapRender::toggleBase(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -146,7 +145,7 @@ void MapEditor::toggleBase(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleEnhancer(bool toggle)
+void MapRender::toggleEnhancer(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -163,7 +162,7 @@ void MapEditor::toggleEnhancer(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleLower1(bool toggle)
+void MapRender::toggleLower1(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -180,7 +179,7 @@ void MapEditor::toggleLower1(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleLower2(bool toggle)
+void MapRender::toggleLower2(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -197,7 +196,7 @@ void MapEditor::toggleLower2(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleLower3(bool toggle)
+void MapRender::toggleLower3(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -214,7 +213,7 @@ void MapEditor::toggleLower3(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleLower4(bool toggle)
+void MapRender::toggleLower4(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -231,7 +230,7 @@ void MapEditor::toggleLower4(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleLower5(bool toggle)
+void MapRender::toggleLower5(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -248,7 +247,7 @@ void MapEditor::toggleLower5(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleUpper1(bool toggle)
+void MapRender::toggleUpper1(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -265,7 +264,7 @@ void MapEditor::toggleUpper1(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleUpper2(bool toggle)
+void MapRender::toggleUpper2(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -282,7 +281,7 @@ void MapEditor::toggleUpper2(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleUpper3(bool toggle)
+void MapRender::toggleUpper3(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -299,7 +298,7 @@ void MapEditor::toggleUpper3(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleUpper4(bool toggle)
+void MapRender::toggleUpper4(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -316,7 +315,7 @@ void MapEditor::toggleUpper4(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleUpper5(bool toggle)
+void MapRender::toggleUpper5(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -333,7 +332,7 @@ void MapEditor::toggleUpper5(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::toggleGrid(bool toggle)
+void MapRender::toggleGrid(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -350,7 +349,7 @@ void MapEditor::toggleGrid(bool toggle)
  *
  * Inputs: Visiblity boolean
  */
-void MapEditor::togglePass(bool toggle)
+void MapRender::togglePass(bool toggle)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -367,7 +366,7 @@ void MapEditor::togglePass(bool toggle)
  *
  * Inputs: Layer choice
  */
-void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
+void MapRender::setEditingLayer(EditorEnumDb::Layer active)
 {
   for(int i=0; i<tiles.size(); i++)
   {
@@ -385,10 +384,10 @@ void MapEditor::setEditingLayer(EditorEnumDb::Layer active)
  *
  * Inputs: Mouse Event
  */
-void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(event->scenePos(),QTransform()));
   for(int i=0; i<tiles.size(); i++)
   {
@@ -434,7 +433,7 @@ void MapEditor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
  * Inputs: x and y positions for the tile, and target(the tile's ID)
  *         and replacement (New sprite) id numbers
  */
-void MapEditor::recursiveFill(int x, int y, int target, int replace)
+void MapRender::recursiveFill(int x, int y, int target, int replace)
 {
   if(target != replace)
   {
@@ -456,12 +455,12 @@ void MapEditor::recursiveFill(int x, int y, int target, int replace)
  *
  * Inputs: Mouse Event
  */
-void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
   current_position = event->scenePos();
   origin = QCursor::pos();
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(event->buttons() & Qt::LeftButton)
   {
@@ -533,10 +532,10 @@ void MapEditor::mousePressEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
-void MapEditor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(event->scenePos(),QTransform()));
 
   highlight->hide();
@@ -649,16 +648,16 @@ void MapEditor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   eraseblock = false;
 }
 
-void MapEditor::paintEvent(QPaintEvent *)
+void MapRender::paintEvent(QPaintEvent *)
 {}
 
 /*
  * Description: Removes the currently active layers sprite
  */
-void MapEditor::removeCurrent()
+void MapRender::removeCurrent()
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
     current->unplace();
@@ -669,7 +668,7 @@ void MapEditor::removeCurrent()
  *
  * Input: Cursor mode
  */
-void MapEditor::setCursorMode(EditorEnumDb::CursorMode mode)
+void MapRender::setCursorMode(EditorEnumDb::CursorMode mode)
 {
   cursormode = mode;
 }
@@ -679,7 +678,7 @@ void MapEditor::setCursorMode(EditorEnumDb::CursorMode mode)
  *
  * Output: Width
  */
-int MapEditor::getMapWidth()
+int MapRender::getMapWidth()
 {
   return width;
 }
@@ -689,7 +688,7 @@ int MapEditor::getMapWidth()
  *
  * Output: Height
  */
-int MapEditor::getMapHeight()
+int MapRender::getMapHeight()
 {
   return height;
 }
@@ -699,10 +698,10 @@ int MapEditor::getMapHeight()
  *
  * Input : toggle
  */
-void MapEditor::setNPassCurrent(bool toggle)
+void MapRender::setNPassCurrent(bool toggle)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
   {
@@ -716,10 +715,10 @@ void MapEditor::setNPassCurrent(bool toggle)
  *
  * Input : toggle
  */
-void MapEditor::setEPassCurrent(bool toggle)
+void MapRender::setEPassCurrent(bool toggle)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
   {
@@ -733,10 +732,10 @@ void MapEditor::setEPassCurrent(bool toggle)
  *
  * Input : toggle
  */
-void MapEditor::setSPassCurrent(bool toggle)
+void MapRender::setSPassCurrent(bool toggle)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
   {
@@ -750,10 +749,10 @@ void MapEditor::setSPassCurrent(bool toggle)
  *
  * Input : toggle
  */
-void MapEditor::setWPassCurrent(bool toggle)
+void MapRender::setWPassCurrent(bool toggle)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
   {
@@ -767,10 +766,10 @@ void MapEditor::setWPassCurrent(bool toggle)
  *
  * Input : toggle
  */
-void MapEditor::setAPassCurrent(bool toggle)
+void MapRender::setAPassCurrent(bool toggle)
 {
-  TileWrapper* current =
-      qgraphicsitem_cast<TileWrapper*>
+  TileRender* current =
+      qgraphicsitem_cast<TileRender*>
       (itemAt(current_position,QTransform()));
   if(current != NULL)
   {

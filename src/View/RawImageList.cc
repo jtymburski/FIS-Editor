@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: SpriteToolbox
+ * Class Name: RawImageList
  * Date Created: November 14, 2013
  * Inheritance: QWidget
  * Description: This class handles the toolbox on the side of the application
  ******************************************************************************/
-#include "SpriteToolbox.h"
+#include "View/RawImageList.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -15,7 +15,7 @@
  *
  * Input: parent widget
  */
-SpriteToolbox::SpriteToolbox(QWidget *parent, QFileSystemModel* module)
+RawImageList::RawImageList(QWidget *parent, QFileSystemModel* module)
   : QWidget(parent)
 {
   /* Sets up the directory module */
@@ -48,7 +48,7 @@ SpriteToolbox::SpriteToolbox(QWidget *parent, QFileSystemModel* module)
  *
  * Input: none
  */
-SpriteToolbox::~SpriteToolbox()
+RawImageList::~RawImageList()
 {
   //qDebug()<<"Removing Sprite Toolbox";
   for(int i=0; i<sprites.size(); i++)
@@ -69,7 +69,7 @@ SpriteToolbox::~SpriteToolbox()
  *
  * Inputs: Unused
  */
-void SpriteToolbox::paintEvent(QPaintEvent *)
+void RawImageList::paintEvent(QPaintEvent *)
 {
   /* Sets up the spacing of all the sprites that will appear in the box */
   int spacing = 68;
@@ -92,7 +92,7 @@ void SpriteToolbox::paintEvent(QPaintEvent *)
  * Description: Opens the dialog box, adds all of the selected sprites to the
  *              toolbox.
  */
-void SpriteToolbox::openDialog()
+void RawImageList::openDialog()
 {
   /* Creates a temporary list of file paths to all of the selected images */
   QStringList filenames;
@@ -132,7 +132,7 @@ void SpriteToolbox::openDialog()
   if(filenames.size() != 0)
   {
     for(int i=0; i<filenames.size(); i++)
-      sprites.push_back(new SpriteChoice(this,filenames.at(i),sprites.size()));
+      sprites.push_back(new RawImage(this,filenames.at(i),sprites.size()));
 
     /* Resizes the widget to accomodate each new row of sprites */
     resize(width(),68+(qCeil(sprites.size()/4.0)*68));
@@ -145,7 +145,7 @@ void SpriteToolbox::openDialog()
  * Description: Opens the dialog box, adds all of the selected sprites to the
  *              toolbox.
  */
-void SpriteToolbox::switchDirectory(QModelIndex index)
+void RawImageList::switchDirectory(QModelIndex index)
 {
   QString path = directory_module->filePath(index);
 
@@ -192,7 +192,7 @@ void SpriteToolbox::switchDirectory(QModelIndex index)
           samecount++;
       }
 
-      sprites.push_back(new SpriteChoice(this,filenames.at(i),
+      sprites.push_back(new RawImage(this,filenames.at(i),
                                          sprites.size(),samecount));
     }
 
@@ -209,7 +209,7 @@ void SpriteToolbox::switchDirectory(QModelIndex index)
  *
  * Input: ID number of Sprite Choice
  */
-void SpriteToolbox::deselectOthers(int id)
+void RawImageList::deselectOthers(int id)
 {
   for(int i=0; i<sprites.size(); i++)
   {
@@ -223,7 +223,7 @@ void SpriteToolbox::deselectOthers(int id)
  *
  * Input: The path to the picked sprite
  */
-void SpriteToolbox::setSprite(QString pick)
+void RawImageList::setSprite(QString pick)
 {
   path = pick;
   emit pathOfImage(path);

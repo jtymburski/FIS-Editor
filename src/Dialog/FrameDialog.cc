@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: FrameManipulationDialog
+ * Class Name: FrameDialog
  * Date Created: January 19, 2014
  * Inheritance: QWidget
  * Description: The frame dialog in the sprite creation dialog
  ******************************************************************************/
-#include "FrameManipulationDialog.h"
+#include "Dialog/FrameDialog.h"
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -15,14 +15,14 @@
  *
  * Input: Parent, editor sprite to work on, image path
  */
-FrameManipulationDialog::FrameManipulationDialog(QWidget *parent,
+FrameDialog::FrameDialog(QWidget *parent,
                                                  EditorSprite* s, int framenum)
   : QDialog(parent)
 {
   setFixedSize(256,256);
   framenumber = framenum;
   sprite = s;
-  framelabel = new Manipulabel(0,EditorEnumDb::VIEWONLY,
+  framelabel = new FrameView(0,EditorEnumDb::VIEWONLY,
                                new QPixmap(s->getPath(framenumber)),
                                framenumber,0,0,QDir::current().absolutePath(),
                                s);
@@ -162,7 +162,7 @@ FrameManipulationDialog::FrameManipulationDialog(QWidget *parent,
 /*
  * Description: Destructor Function
  */
-FrameManipulationDialog::~FrameManipulationDialog()
+FrameDialog::~FrameDialog()
 {
 }
 
@@ -171,7 +171,7 @@ FrameManipulationDialog::~FrameManipulationDialog()
  *
  * Input: Flip toggle
  */
-void FrameManipulationDialog::setHorizontalFlip(bool toggle)
+void FrameDialog::setHorizontalFlip(bool toggle)
 {
   sprite->setHorizontalFlip(framenumber,toggle);
   framelabel->setHFlip(toggle);
@@ -182,7 +182,7 @@ void FrameManipulationDialog::setHorizontalFlip(bool toggle)
  *
  * Input: Flip toggle
  */
-void FrameManipulationDialog::setVerticalFlip(bool toggle)
+void FrameDialog::setVerticalFlip(bool toggle)
 {
   sprite->setVerticalFlip(framenumber,toggle);
   framelabel->setVFlip(toggle);
@@ -193,22 +193,22 @@ void FrameManipulationDialog::setVerticalFlip(bool toggle)
  *
  * Input: Angle string
  */
-void FrameManipulationDialog::set0()
+void FrameDialog::set0()
 {
   sprite->setFrameAngle(framenumber,0);
   framelabel->update();
 }
-void FrameManipulationDialog::set90()
+void FrameDialog::set90()
 {
   sprite->setFrameAngle(framenumber,90);
   framelabel->update();
 }
-void FrameManipulationDialog::set180()
+void FrameDialog::set180()
 {
   sprite->setFrameAngle(framenumber,180);
   framelabel->update();
 }
-void FrameManipulationDialog::set270()
+void FrameDialog::set270()
 {
   sprite->setFrameAngle(framenumber,270);
   framelabel->update();
@@ -217,7 +217,7 @@ void FrameManipulationDialog::set270()
 /*
  * Description: Closes the dialog and reverts all of the input values
  */
-void FrameManipulationDialog::closeNoSave()
+void FrameDialog::closeNoSave()
 {
   sprite->setHorizontalFlip(framenumber,horizontal_backup);
   sprite->setVerticalFlip(framenumber,vertical_backup);
@@ -235,7 +235,7 @@ void FrameManipulationDialog::closeNoSave()
 /*
  * Description : Replaces the current frame with a new path
  */
-void FrameManipulationDialog::replaceFrame()
+void FrameDialog::replaceFrame()
 {
   QString filename = QFileDialog::getOpenFileName(this,
                                    tr("Select A Frame To Replace This"),
@@ -248,7 +248,7 @@ void FrameManipulationDialog::replaceFrame()
 /*
  * Description : Deletes this current frame from the sequence
  */
-void FrameManipulationDialog::deleteFrame()
+void FrameDialog::deleteFrame()
 {
   QMessageBox::StandardButton ret;
   ret = QMessageBox::warning(this, tr("Application"),

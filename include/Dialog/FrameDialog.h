@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: FrameManipulationDialog
+ * Class Name: FrameDialog
  * Date Created: January 19, 2014
  * Inheritance: QWidget
  * Description: The frame dialog in the sprite creation dialog
  ******************************************************************************/
-#ifndef FRAMEMANIPULATIONDIALOG_H
-#define FRAMEMANIPULATIONDIALOG_H
+#ifndef FRAMEDIALOG_H
+#define FRAMEDIALOG_H
 
 #include <QDialog>
 #include <QPushButton>
@@ -14,20 +14,20 @@
 #include <QLineEdit>
 #include <QDebug>
 #include <QMessageBox>
-#include "EditorSprite.h"
-#include "Manipulabel.h"
+#include "Database/EditorSprite.h"
+#include "Dialog/FrameView.h"
 
-class FrameManipulationDialog : public QDialog
+class FrameDialog : public QDialog
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameManipulationDialog(QWidget* parent = 0,
+  FrameDialog(QWidget* parent = 0,
                           EditorSprite* s = 0,
                           int framenum = 0);
 
   /* Destructor Function */
-  ~FrameManipulationDialog();
+  ~FrameDialog();
 public slots:
 
   /* Sets the horizontal flip for the given frame */
@@ -56,7 +56,7 @@ signals:
 protected:
 private:
 
-  Manipulabel* framelabel;
+  FrameView* framelabel;
   QCheckBox* rotate0;
   QCheckBox* rotate90;
   QCheckBox* rotate180;
@@ -86,4 +86,4 @@ private:
   int framenumber;
 };
 
-#endif // FRAMEMANIPULATIONDIALOG_H
+#endif // FRAMEDIALOG_H

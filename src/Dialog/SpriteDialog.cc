@@ -1,4 +1,4 @@
-#include "SpriteCreationDialog.h"
+#include "Dialog/SpriteDialog.h"
 #include <QDebug>
 
 /*============================================================================
@@ -10,7 +10,7 @@
  *
  * Input: Parent, editor sprite to work on, image path
  */
-SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
+SpriteDialog::SpriteDialog(QWidget *parent,
                                            EditorSprite *working,QString p,
                                            int subsequent, bool creation)
                                            : QDialog(parent)
@@ -60,8 +60,8 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 
   /* Frame Display */
   frame_scrollwrapper = new QScrollArea();
-  framemanipulator = new FrameManipulator(this,working_sprite);
-  frame_scrollwrapper->setWidget(framemanipulator);
+  frame_list = new FrameList(this,working_sprite);
+  frame_scrollwrapper->setWidget(frame_list);
   frame_scrollwrapper->setBaseSize(360,128);
   frame_scrollwrapper->setFixedHeight(112);
   frame_scrollwrapper->setBackgroundRole(QPalette::Base);
@@ -244,16 +244,16 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
 
   /* Connects to the appropriate setting functions */
   connect(rotate0,SIGNAL(clicked()),working_sprite,SLOT(set0()));
-  connect(rotate0,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+  connect(rotate0,SIGNAL(clicked()),frame_list,SLOT(addFrames()));
 
   connect(rotate90,SIGNAL(clicked()),working_sprite,SLOT(set90()));
-  connect(rotate90,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+  connect(rotate90,SIGNAL(clicked()),frame_list,SLOT(addFrames()));
 
   connect(rotate180,SIGNAL(clicked()),working_sprite,SLOT(set180()));
-  connect(rotate180,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+  connect(rotate180,SIGNAL(clicked()),frame_list,SLOT(addFrames()));
 
   connect(rotate270,SIGNAL(clicked()),working_sprite,SLOT(set270()));
-  connect(rotate270,SIGNAL(clicked()),framemanipulator,SLOT(addFrames()));
+  connect(rotate270,SIGNAL(clicked()),frame_list,SLOT(addFrames()));
 
   rotation_layout->addWidget(rotate0);
   rotation_layout->addWidget(rotate90);
@@ -289,7 +289,7 @@ SpriteCreationDialog::SpriteCreationDialog(QWidget *parent,
  *
  * Input: Editor sprite
  */
-void SpriteCreationDialog::loadWorkingSprite(EditorSprite *s)
+void SpriteDialog::loadWorkingSprite(EditorSprite *s)
 {
   working_sprite = s;
 }
@@ -297,7 +297,7 @@ void SpriteCreationDialog::loadWorkingSprite(EditorSprite *s)
 /*
  * Description: Destroys the working sprite
  */
-void SpriteCreationDialog::destroyWorkingSprite()
+void SpriteDialog::destroyWorkingSprite()
 {
   if(creation_mode)
     delete working_sprite;
@@ -327,7 +327,7 @@ void SpriteCreationDialog::destroyWorkingSprite()
 /*
  * Description: Emits the sprite with the new changes and closes the dialog
  */
-void SpriteCreationDialog::updateWorkingSprite()
+void SpriteDialog::updateWorkingSprite()
 {
   if(creation_mode)
     emit sendUpEditorSprite(working_sprite);

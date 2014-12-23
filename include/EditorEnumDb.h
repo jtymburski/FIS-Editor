@@ -23,7 +23,7 @@ public:
   /* Enum for cursor mode */
   enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL};
 
-  /* Enum for type of Manipulabel */
-  enum ManipulabelType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
+  /* Enum for type of FrameView */
+  enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
 };
 #endif // EDITORENUMDB_H

@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Class Name: ImageSelectionModule
+ * Class Name: RawImageView
  * Date Created: January 12, 2014
  * Inheritance: QWidget
- * Description: A widget that contains both the SpriteToolbox and a QTreeView
+ * Description: A widget that contains both the RawImageList and a QTreeView
  ******************************************************************************/
-#include "ImageSelectionModule.h"
+#include "View/RawImageView.h"
 #include <QDebug>
 
 /*============================================================================
@@ -16,7 +16,7 @@
  *
  * Input: parent widget
  */
-ImageSelectionModule::ImageSelectionModule(QWidget *parent) : QWidget(parent)
+RawImageView::RawImageView(QWidget *parent) : QWidget(parent)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
 
@@ -35,7 +35,7 @@ ImageSelectionModule::ImageSelectionModule(QWidget *parent) : QWidget(parent)
   directory_tree->setRootIndex(model->index(sprites_dir));
 
   /* Sets up a scroll area with the toolbox module */
-  image_viewer = new SpriteToolbox(this,model);
+  image_viewer = new RawImageList(this,model);
   images_tab_scrollwrapper = new QScrollArea(this);
   images_tab_scrollwrapper->setBackgroundRole(QPalette::Dark);
   images_tab_scrollwrapper->setWidget(image_viewer);
@@ -59,7 +59,7 @@ ImageSelectionModule::ImageSelectionModule(QWidget *parent) : QWidget(parent)
  *
  * Input: none
  */
-ImageSelectionModule::~ImageSelectionModule()
+RawImageView::~RawImageView()
 {
 }
 
@@ -74,16 +74,16 @@ ImageSelectionModule::~ImageSelectionModule()
  *
  * Inputs: Unused
  */
-void ImageSelectionModule::paintEvent(QPaintEvent *)
+void RawImageView::paintEvent(QPaintEvent *)
 {
 }
 
 /* Description : Returns the Sprite Toolbox
  *
- * Output: SpriteToolbox
+ * Output: RawImageList
  */
 
-SpriteToolbox* ImageSelectionModule::getToolbox()
+RawImageList* RawImageView::getToolbox()
 {
   return image_viewer;
 }

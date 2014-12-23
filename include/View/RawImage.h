@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: SpriteChoice
+ * Class Name: RawImage
  * Date Created: November 11, 2013
  * Inheritance: QWidget
  * Description: A sprite representation that appears in the toolbox
  ******************************************************************************/
-#ifndef SPRITECHOICE_H
-#define SPRITECHOICE_H
+#ifndef RAWIMAGE_H
+#define RAWIMAGE_H
 
 #include <QImage>
 #include <QWidget>
@@ -13,20 +13,20 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QMenu>
-#include "EditorSprite.h"
-#include "SpriteCreationDialog.h"
+#include "Database/EditorSprite.h"
+#include "Dialog/SpriteDialog.h"
 #include "EditorEnumDb.h"
 
-class SpriteChoice : public QWidget
+class RawImage : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteChoice(QWidget* parent = 0, QString path = 0,
+  RawImage(QWidget* parent = 0, QString path = 0,
                int id = 0, int followers = 0);
 
   /* Destructor function */
-  ~SpriteChoice();
+  ~RawImage();
 
 public slots:
   /* Loads the image with a valid given path */
@@ -71,7 +71,7 @@ private:
   int id_number;
 
   /* Create a Sprite dialog */
-  SpriteCreationDialog* creation_dialog;
+  SpriteDialog* creation_dialog;
 
 
 signals:
@@ -84,4 +84,4 @@ signals:
   /* Passes up the created Editor Sprite */
   void sendUpEditorSprite(EditorSprite* e);
 };
-#endif // SPRITECHOICE_H
+#endif // RAWIMAGE_H
