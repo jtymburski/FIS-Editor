@@ -186,7 +186,7 @@ void RawImageList::switchDirectory(QModelIndex index)
     for(int i=0; i<filenames.size(); i++)
     {
       int samecount = 0;
-      for(int j = i+1; j<chopped_names.size()-1; j++)
+      for(int j = i+1; j<chopped_names.size(); j++)
       {
         if(chopped_names[i] == chopped_names[j])
           samecount++;
