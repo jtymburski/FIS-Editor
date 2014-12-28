@@ -1,0 +1,4 @@
+#ifndef EDITORTHING_H
+#define EDITORTHING_H
+
+#endif // EDITORTHING_H

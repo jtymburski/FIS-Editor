@@ -26,6 +26,29 @@ Application::Application(QWidget* parent) :
   x_size = 100;
   y_size = 100;
 
+  game_database = new GameDatabase();
+  QDockWidget* game_db_dock = new QDockWidget();
+  game_db_dock->setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
+  game_db_dock->setWidget(game_database);
+  addDockWidget(Qt::LeftDockWidgetArea,game_db_dock);
+  game_db_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  game_db_dock->setAllowedAreas(Qt::LeftDockWidgetArea);
+  QPushButton* dock_button =
+      new QPushButton(QIcon(":/Icons/Resources/fbs_icon.ico"),"");
+  connect(dock_button,SIGNAL(pressed()),game_database,SLOT(resize()));
+  game_db_dock->setTitleBarWidget(dock_button);
+  connect(game_database, SIGNAL(changeMode(EditorEnumDb::ViewMode)),
+          this, SLOT(setView(EditorEnumDb::ViewMode)));
+
+  connect(game_database, SIGNAL(changeMap(QPair<QString,EditorMap*>*)),
+          this, SLOT(setMap(QPair<QString,EditorMap*>*)));
+  connect(game_database, SIGNAL(changePerson(QPair<QString,EditorPerson*>*)),
+          this, SLOT(setPerson(QPair<QString,EditorPerson*>*)));
+  connect(game_database, SIGNAL(changeParty(QPair<QString,EditorParty*>*)),
+          this, SLOT(setParty(QPair<QString,EditorParty*>*)));
+  connect(game_database, SIGNAL(changeItem(QPair<QString,EditorItem*>*)),
+          this, SLOT(setItem(QPair<QString,EditorItem*>*)));
+
   game_view = new GameView();
   setCentralWidget(game_view);
   /* Calls all setup functions */
@@ -215,6 +238,13 @@ void Application::setupTopMenu()
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
+/*
+ * Description: Sets to any mde
+ */
+void Application::setView(EditorEnumDb::ViewMode v)
+{
+  game_view->setViewMode(v);
+}
 
 /*
  * Description: Sets to map view mode
@@ -247,6 +277,36 @@ void Application::setItemView()
 {
   game_view->setViewMode(EditorEnumDb::ITEMVIEW);
 }
+
+/*
+ * Description: Sets the map
+ */
+void Application::setMap(QPair<QString,EditorMap*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the person
+ */
+void Application::setPerson(QPair<QString,EditorPerson*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the map
+ */
+void Application::setParty(QPair<QString,EditorParty*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the map
+ */
+void Application::setItem(QPair<QString,EditorItem*>* pair)
+{
+  qDebug()<<pair->first;
+}
+
 /*
  * Description: Sets to basic cursor mode
  */

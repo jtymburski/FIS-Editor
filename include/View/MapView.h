@@ -30,6 +30,8 @@
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
 #include "View/RawImageList.h"
+#include "View/MapDatabase.h"
+#include "View/MapControl.h"
 
 class MapView : public QMainWindow
 {
@@ -48,13 +50,11 @@ public:
   MapRender* map_editor;
 
 private:
-  /* Map layer tabs */
-  QListWidget* sidetoolbar;
+  /* Map DB pointer */
+  MapDatabase* map_database;
 
-  /* Toolbox pointer */
-  QTabWidget* tab;
-  RawImageView* images_tab;
-  SpriteView* sprites_tab;
+  /* Map Control pointer */
+  MapControl* map_control;
 
   /* Scroll area pointer */
   QScrollArea* sprites_tab_scrollwrapper;
@@ -63,23 +63,6 @@ private:
   QDockWidget* dock;
   QDockWidget* layer_dock;
 
-
-  /* Map Mode Shift Actions (Active Layers) */
-  QListWidgetItem *active_lower_layer_01;
-  QListWidgetItem *active_lower_layer_02;
-  QListWidgetItem *active_lower_layer_03;
-  QListWidgetItem *active_lower_layer_04;
-  QListWidgetItem *active_lower_layer_05;
-  QListWidgetItem *active_enhancer_layer;
-  QListWidgetItem *active_item_layer;
-  QListWidgetItem *active_base_layer;
-  QListWidgetItem *active_person_layer;
-  QListWidgetItem *active_thing_layer;
-  QListWidgetItem *active_upper_layer_01;
-  QListWidgetItem *active_upper_layer_02;
-  QListWidgetItem *active_upper_layer_03;
-  QListWidgetItem *active_upper_layer_04;
-  QListWidgetItem *active_upper_layer_05;
 
   /* The currently selected sprite */
   QString current_sprite_choice;

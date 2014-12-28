@@ -50,7 +50,16 @@ SOURCES += \
     src/Dialog/FrameView.cc \
     src/Dialog/FrameDialog.cc \
     src/View/GameView.cc \
-    src/View/MapView.cc
+    src/View/MapView.cc \
+    src/View/MapDatabase.cc \
+    src/View/MapControl.cc \
+    src/Database/GameDatabase.cc \
+    src/Database/EditorMap.cc \
+    src/Database/EditorPerson.cc \
+    src/Database/EditorTile.cc \
+    src/Database/EditorThing.cc \
+    src/Database/EditorItem.cc \
+    src/Database/EditorParty.cc
 
 HEADERS += \
     include/Application.h \
@@ -75,7 +84,16 @@ HEADERS += \
     include/Dialog/FrameView.h \
     include/Dialog/FrameDialog.h \
     include/View/GameView.h \
-    include/View/MapView.h
+    include/View/MapView.h \
+    include/View/MapDatabase.h \
+    include/View/MapControl.h \
+    include/Database/EditorMap.h \
+    include/Database/EditorPerson.h \
+    include/Database/EditorThing.h \
+    include/Database/EditorTile.h \
+    include/Database/GameDatabase.h \
+    include/Database/EditorItem.h \
+    include/Database/EditorParty.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

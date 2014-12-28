@@ -41,11 +41,8 @@ MapView::~MapView()
 {
   //qDebug()<<"Removing MapView";
   delete map_editor;
-  delete images_tab;
-  delete sprites_tab;
+  delete map_database;
   map_editor = NULL;
-  images_tab = NULL;
-  sprites_tab = NULL;
 }
 
 /*============================================================================
@@ -59,34 +56,18 @@ MapView::~MapView()
  */
 void MapView::setupSidebar()
 {
-  /* Sets up a scroll area with the images tab */
-  images_tab = new RawImageView(this);
-
-  /* Sets up a scroll area with the sprites tab */
-  sprites_tab = new SpriteView(this);
-  sprites_tab->setFixedSize(288,600);
-
-  connect(images_tab->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
-          sprites_tab,SLOT(addEditorSprite(EditorSprite*)));
-
-
-  tab = new QTabWidget(this);
-  tab->addTab(images_tab,"Raw Images");
-  tab->addTab(sprites_tab,"Sprites");
-  //tab->setMinimumSize(290,68);
-  //tab->setMaximumWidth(290);
-
+  map_database = new MapDatabase(this);
   /* Sets up the dock which contains the sprites and images tabs */
   dock = new QDockWidget("Toolbox");
   dock->setAllowedAreas(Qt::LeftDockWidgetArea);
-  dock->setWidget(tab);
+  dock->setWidget(map_database);
   addDockWidget(Qt::LeftDockWidgetArea,dock);
   dock->setFeatures(QDockWidget::DockWidgetMovable
                     | QDockWidget::DockWidgetFloatable);
 
   /* Connects sprite picking */
-  connect(images_tab->getToolbox(),SIGNAL(pathOfImage(QString)),this,
-          SLOT(setSprite(QString)));
+  connect(map_database->getRawView()->getToolbox(),SIGNAL(pathOfImage(QString)),
+          this,SLOT(setSprite(QString)));
 }
 
 /*
@@ -97,7 +78,7 @@ void MapView::setupSidebar()
 void MapView::setupMapView(int x, int y)
 {
   /* Sets up the main map view widget */
-  map_editor = new MapRender(sprites_tab,this,x,y,cursor_mode);
+  map_editor = new MapRender(map_database->getSpriteView(),this,x,y,cursor_mode);
   map_scroller = new QGraphicsView(map_editor,this);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
@@ -148,49 +129,15 @@ void MapView::setupMapView(int x, int y)
  */
 void MapView::setupLayerBar()
 {
-  /* Sets up the active layer actions, makes them checkable and adds them to
-     an action group which allows only one to be active at a time */
-
-  active_base_layer = new QListWidgetItem("Base");
-  active_enhancer_layer = new QListWidgetItem("Enhancer");
-  active_lower_layer_01 = new QListWidgetItem("Lower 1");
-  active_lower_layer_02 = new QListWidgetItem("Lower 2");
-  active_lower_layer_03 = new QListWidgetItem("Lower 3");
-  active_lower_layer_04 = new QListWidgetItem("Lower 4");
-  active_lower_layer_05 = new QListWidgetItem("Lower 5");
-  active_item_layer = new QListWidgetItem("Item");
-  active_thing_layer = new QListWidgetItem("Thing");
-  active_person_layer = new QListWidgetItem("Person");
-  active_upper_layer_01 = new QListWidgetItem("Upper 1");
-  active_upper_layer_02 = new QListWidgetItem("Upper 2");
-  active_upper_layer_03 = new QListWidgetItem("Upper 3");
-  active_upper_layer_04 = new QListWidgetItem("Upper 4");
-  active_upper_layer_05 = new QListWidgetItem("Upper 5");
-
-  /* Sets up the side toolbar which shows the current active layer */
-  sidetoolbar = new QListWidget(this);
-  sidetoolbar->addItem(active_base_layer);
-  sidetoolbar->setCurrentRow(0);
-  sidetoolbar->addItem(active_enhancer_layer);
-  sidetoolbar->addItem(active_lower_layer_01);
-  sidetoolbar->addItem(active_lower_layer_02);
-  sidetoolbar->addItem(active_lower_layer_03);
-  sidetoolbar->addItem(active_lower_layer_04);
-  sidetoolbar->addItem(active_lower_layer_05);
-  //sidetoolbar->addItem(active_item_layer);
-  //sidetoolbar->addItem(active_thing_layer);
-  //sidetoolbar->addItem(active_person_layer);
-  sidetoolbar->addItem(active_upper_layer_01);
-  sidetoolbar->addItem(active_upper_layer_02);
-  sidetoolbar->addItem(active_upper_layer_03);
-  sidetoolbar->addItem(active_upper_layer_04);
-  sidetoolbar->addItem(active_upper_layer_05);
-  connect(sidetoolbar,SIGNAL(itemClicked(QListWidgetItem*)),
+  map_control = new MapControl(this);
+  connect(map_control,SIGNAL(itemClicked(QListWidgetItem*)),
           this,SLOT(setActiveLayer(QListWidgetItem*)));
 
   /* Sets up the active layer dock */
   layer_dock = new QDockWidget("Active Layer");
-  layer_dock->setWidget(sidetoolbar);
+  layer_dock->setWidget(map_control);
+  layer_dock->setMinimumWidth(256);
+  layer_dock->setMaximumWidth(256);
   layer_dock->setAllowedAreas(Qt::RightDockWidgetArea);
   addDockWidget(Qt::RightDockWidgetArea,layer_dock);
   layer_dock->setFeatures(QDockWidget::DockWidgetMovable

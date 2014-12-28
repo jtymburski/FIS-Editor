@@ -30,6 +30,7 @@
 #include <QStatusBar>
 #include <QTreeView>
 #include <QDesktopWidget>
+#include "Database/GameDatabase.h"
 #include "View/MapView.h"
 #include "View/GameView.h"
 #include "View/RawImageView.h"
@@ -48,6 +49,8 @@ public:
   ~Application();
 
 private:
+  /* game database */
+  GameDatabase* game_database;
   /* Game View */
   GameView* game_view;
 
@@ -140,6 +143,9 @@ public slots:
   /* Sets to Fill Mode */
   void setFillCursor();
 
+  /* Sets to any view */
+  void setView(EditorEnumDb::ViewMode);
+
   /* Sets To Map View */
   void setMapView();
 
@@ -151,6 +157,18 @@ public slots:
 
   /* Sets To Item View */
   void setItemView();
+
+  /* Sets To Map */
+  void setMap(QPair<QString,EditorMap*>*);
+
+  /* Sets To Person */
+  void setPerson(QPair<QString,EditorPerson*>*);
+
+  /* Sets To Party */
+  void setParty(QPair<QString,EditorParty*>*);
+
+  /* Sets To Item */
+  void setItem(QPair<QString,EditorItem*>*);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
