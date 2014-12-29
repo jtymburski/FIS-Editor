@@ -187,6 +187,7 @@ int EditorSprite::getFrameAngle(int frame_num)
 void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
 {
   frame_hflip[frame_num] = flip;
+  emit spriteChanged();
 }
 
 /*
@@ -197,6 +198,7 @@ void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
 void EditorSprite::setVerticalFlip(int frame_num, bool flip)
 {
   frame_vflip[frame_num] = flip;
+  emit spriteChanged();
 }
 
 /*
@@ -207,6 +209,7 @@ void EditorSprite::setVerticalFlip(int frame_num, bool flip)
 void EditorSprite::setFrameAngle(int frame_num, int angle)
 {
   frame_angles[frame_num] = angle;
+  emit spriteChanged();
 }
 /*
  * Description: Sets the Editor Sprites name
@@ -225,7 +228,13 @@ void EditorSprite::setName(QString n)
  */
 void EditorSprite::setBrightness(int brightness)
 {
-  sprite->setBrightness(brightness/100.0);
+  sprite->setBrightness(brightness/255.0);
+  emit spriteChanged();
+}
+
+int EditorSprite::getBrightness()
+{
+  return sprite->getBrightness()*255.0;
 }
 
 /*
@@ -241,6 +250,11 @@ void EditorSprite::setAnimationTime(QString time)
   else if(timeint < 0)
     timeint = 0;
   sprite->setAnimationTime(timeint);
+  emit spriteChanged();
+}
+QString EditorSprite::getAnimationTime()
+{
+  return QString::number(sprite->getAnimationTime());
 }
 
 /*
@@ -252,6 +266,11 @@ void EditorSprite::setColorRed(int red)
 {
   //Set Red
   sprite->setColorRed(red);
+  emit spriteChanged();
+}
+int EditorSprite::getColorRed()
+{
+  return sprite->getColorRed();
 }
 
 /*
@@ -263,6 +282,11 @@ void EditorSprite::setColorBlue(int blue)
 {
   //Set Blue
   sprite->setColorBlue(blue);
+  emit spriteChanged();
+}
+int EditorSprite::getColorBlue()
+{
+  return sprite->getColorBlue();
 }
 
 /*
@@ -274,6 +298,11 @@ void EditorSprite::setColorGreen(int green)
 {
   //Set Red
   sprite->setColorGreen(green);
+  emit spriteChanged();
+}
+int EditorSprite::getColorGreen()
+{
+  return sprite->getColorGreen();
 }
 
 /*
@@ -308,6 +337,11 @@ void EditorSprite::setDirection(int dir)
 void EditorSprite::setOpacity(int opacity)
 {
   sprite->setOpacity(opacity);
+  emit spriteChanged();
+}
+int EditorSprite::getOpacity()
+{
+  return sprite->getOpacity();
 }
 
 /*
@@ -318,6 +352,7 @@ void EditorSprite::setOpacity(int opacity)
 void EditorSprite::setRotation(QString angle)
 {
   sprite->setRotation(angle.toInt());
+  emit spriteChanged();
 }
 
 

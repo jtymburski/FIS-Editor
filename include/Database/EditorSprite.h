@@ -75,27 +75,33 @@ public slots:
   /* Sets the frame path at the given position */
   void setFramePath(int,QString);
 
-  /* Sets the sprites animation time */
+  /* Sets/Gets the sprites animation time */
   void setAnimationTime(QString time);
+  QString getAnimationTime();
 
-  /* Sets the sprites color mask */
+  /* Sets/Gets the sprites color mask */
   void setColorRed(int red);
   void setColorBlue(int blue);
   void setColorGreen(int green);
+  int getColorRed();
+  int getColorBlue();
+  int getColorGreen();
 
   /* Sets the sprites direction */
   void setDirection(int dir);
   void setDirectionForward();
   void setDirectionReverse();
 
-  /* Sets the sprites opacity */
+  /* Sets/Gets the sprites opacity */
   void setOpacity(int opacity);
+  int getOpacity();
 
   /* Sets the sprites rotation */
   void setRotation(QString angle);
 
-  /* Sets the sprites brightness */
+  /* Sets/Gets the sprites brightness */
   void setBrightness(int brightness);
+  int getBrightness();
 
   /* Sets the sprites id (Backend) */
   void setId(int);
@@ -162,6 +168,6 @@ private:
 
 
 signals:
-
+  void spriteChanged();
 };
 #endif // IMAGECHOICE_H

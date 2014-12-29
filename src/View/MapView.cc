@@ -82,7 +82,7 @@ void MapView::setupMapView(int x, int y)
   map_scroller = new QGraphicsView(map_editor,this);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
-  map_scroller->setMinimumSize(640,512);
+  //map_scroller->setMinimumSize(1024,640);
   //map_scroller->setMaximumSize(1280,720);
 //  connect(shown_base_layer,SIGNAL(toggled(bool)),
 //          map_editor,SLOT(toggleBase(bool)));
@@ -130,14 +130,12 @@ void MapView::setupMapView(int x, int y)
 void MapView::setupLayerBar()
 {
   map_control = new MapControl(this);
-  connect(map_control,SIGNAL(itemClicked(QListWidgetItem*)),
+  connect(map_control->getTopList(),SIGNAL(itemClicked(QListWidgetItem*)),
           this,SLOT(setActiveLayer(QListWidgetItem*)));
 
   /* Sets up the active layer dock */
   layer_dock = new QDockWidget("Active Layer");
   layer_dock->setWidget(map_control);
-  layer_dock->setMinimumWidth(256);
-  layer_dock->setMaximumWidth(256);
   layer_dock->setAllowedAreas(Qt::RightDockWidgetArea);
   addDockWidget(Qt::RightDockWidgetArea,layer_dock);
   layer_dock->setFeatures(QDockWidget::DockWidgetMovable

@@ -73,11 +73,11 @@ SpriteDialog::SpriteDialog(QWidget *parent,
   brightness_input = new QSlider(Qt::Horizontal);
   brightness_input->setTickInterval(1);
   brightness_input->setMinimum(0);
-  brightness_input->setMaximum(200);
+  brightness_input->setMaximum(510);
   brightness_backup = static_cast<int>(working_sprite->getSprite()->
-                                       getBrightness()*100);
+                                       getBrightness()*255);
   brightness_input->setSliderPosition(
-        static_cast<int>(working_sprite->getSprite()->getBrightness()*100));
+        static_cast<int>(working_sprite->getSprite()->getBrightness()*255));
   connect(brightness_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setBrightness(int)));
   layout->addWidget(brightness_input,2,1);
@@ -92,7 +92,7 @@ SpriteDialog::SpriteDialog(QWidget *parent,
   opacity_input = new QSlider(Qt::Horizontal);
   opacity_input->setTickInterval(1);
   opacity_input->setMinimum(0);
-  opacity_input->setMaximum(255);
+  opacity_input->setMaximum(100);
   opacity_backup = working_sprite->getSprite()->getOpacity();
   opacity_input->setSliderPosition(working_sprite->getSprite()->getOpacity());
   connect(opacity_input,SIGNAL(valueChanged(int)),
@@ -282,6 +282,7 @@ SpriteDialog::SpriteDialog(QWidget *parent,
     connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
             SIGNAL(sendUpEditorSprite(EditorSprite*)));
   }
+  connect(working_sprite,SIGNAL(spriteChanged()),frame_list,SLOT(update()));
 }
 
 /*

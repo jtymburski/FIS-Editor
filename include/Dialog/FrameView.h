@@ -34,6 +34,8 @@ public:
   void setHFlip(bool horizontal);
   void setVFlip(bool vertical);
   void setAngle(int angle);
+  QPixmap setBrightness(int value, QPixmap original);
+  QPixmap setColor(int red, int blue, int green, QPixmap original);
   void reloadFrame();
 protected:
   /* Mouse press event */

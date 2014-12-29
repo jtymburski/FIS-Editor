@@ -9,8 +9,12 @@
 #define MAPCONTROL_H
 
 #include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QWidget>
 
-class MapControl : public QListWidget
+class MapControl : public QWidget
 {
   Q_OBJECT
 public:
@@ -20,7 +24,24 @@ public:
   /* Destructor function */
   ~MapControl();
 
+  QListWidget* getTopList();
+
 private:
+  /* Lists */
+  QListWidget* top_list;
+  QListWidget* middle_list;
+  QListWidget* bottom_list;
+
+  /* Top Buttons */
+  QPushButton* grid_toggle;
+  QPushButton* passibility_toggle;
+
+  /* Bottom Buttons */
+  QPushButton* new_submap;
+  QPushButton* remove_submap;
+  QPushButton* duplicate_submap;
+  QPushButton* import_submap;
+
   /* Map Mode Shift Actions (Active Layers) */
   QListWidgetItem *active_lower_layer_01;
   QListWidgetItem *active_lower_layer_02;
@@ -37,6 +58,8 @@ private:
   QListWidgetItem *active_upper_layer_03;
   QListWidgetItem *active_upper_layer_04;
   QListWidgetItem *active_upper_layer_05;
+
+
 protected:
 
 public slots:

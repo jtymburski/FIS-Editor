@@ -30,6 +30,10 @@ public:
 
   /* Destructor function */
   ~SpriteView();
+
+
+  QPixmap setBrightness(int value, QPixmap original);
+  QPixmap setColor(int red, int blue, int green, QPixmap original);
 public slots:
   /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);

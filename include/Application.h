@@ -86,13 +86,6 @@ private:
   QAction *blockplacemode_action;
   QAction *fill_action;
 
-  /* Mode Action pointers */
-  QActionGroup *gameview_group;
-  QAction *mapview_action;
-  QAction *person_action;
-  QAction *party_action;
-  QAction *item_action;
-
   /* The users login name */
   QString username;
 
@@ -102,6 +95,9 @@ private:
 
   /* Initial Map Creation */
   QDialog* mapsize_dialog;
+
+  /* Cursor menu */
+  QMenu* cursor_menu;
 
   /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;

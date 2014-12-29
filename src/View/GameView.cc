@@ -11,15 +11,26 @@
 GameView::GameView(QWidget* parent) : QWidget(parent)
 {
   map_view = new MapView(this);
-  map_view->setGeometry(QApplication::desktop()->availableGeometry());
-
+  map_view->setGeometry(0,0,QApplication::desktop()->
+                           availableGeometry().width()-260,
+                           QApplication::desktop()->
+                           availableGeometry().height()-128);
   person_view = new QWidget(this);
-  person_view->setGeometry(QApplication::desktop()->availableGeometry());
+  person_view->setGeometry(0,0,QApplication::desktop()->
+                           availableGeometry().width()-256,
+                           QApplication::desktop()->
+                           availableGeometry().height()-128);
 
   party_view = new QWidget(this);
-  party_view->setGeometry(QApplication::desktop()->availableGeometry());
+  party_view->setGeometry(0,0,QApplication::desktop()->
+                              availableGeometry().width()-256,
+                              QApplication::desktop()->
+                              availableGeometry().height()-128);
   item_view = new QWidget(this);
-  item_view->setGeometry(QApplication::desktop()->availableGeometry());
+  item_view->setGeometry(0,0,QApplication::desktop()->
+                             availableGeometry().width()-256,
+                             QApplication::desktop()->
+                             availableGeometry().height()-128);
   person_view->setStyleSheet("background-color:red;");
   party_view->setStyleSheet("background-color:blue;");
   item_view->setStyleSheet("background-color:green;");

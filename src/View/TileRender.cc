@@ -358,6 +358,63 @@ QPixmap TileRender::transformPixmap(EditorSprite* pic, int pos)
   return returnimage.transformed(transform);
 }
 
+QPixmap TileRender::setBrightness(int delta, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red() + delta;
+      g = old_color.green() + delta;
+      b = old_color.blue() + delta;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
+}
+
+QPixmap TileRender::setColor(int deltared, int deltablue,
+                             int deltagreen, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red()+deltared-255;
+      g = old_color.green()+deltablue-255;
+      b = old_color.blue()+deltagreen-255;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
+}
+
 /*
  * Description: Paints the tile
  *
@@ -368,11 +425,22 @@ void TileRender::paint(QPainter *painter,
 {
   QRect bound(xpos*64,ypos*64,64,64);
   if(base && base_layer != NULL)
-    painter->drawPixmap(bound,transformPixmap(base_layer));
-
+  {
+    QPixmap base_image(base_layer->getPath(0));
+    painter->setOpacity(base_layer->getOpacity()/100.0);
+    base_image = setBrightness(base_layer->getBrightness()-255,base_image);
+    base_image = setColor(base_layer->getColorRed(),base_layer->getColorBlue(),
+                          base_layer->getColorGreen(),base_image);
+    QTransform temp1;
+    QTransform transformation1 =
+        temp1.rotate(base_layer->getQuickRotation());
+    QImage image = base_image.toImage();
+    painter->drawPixmap(bound,base_image.transformed(transformation1));
+  }
   if(enhancer && enhancer_layer !=NULL)
   {
     QPixmap enhancer_image(enhancer_layer->getPath(0));
+    painter->setOpacity(enhancer_layer->getOpacity()/100.0);
     QTransform temp2;
     QTransform transformation2 =
         temp2.rotate(enhancer_layer->getQuickRotation());
@@ -381,6 +449,7 @@ void TileRender::paint(QPainter *painter,
   if(lower1 && lower_layers[0] !=NULL)
   {
     QPixmap lower_image(lower_layers[0]->getPath(0));
+    painter->setOpacity(lower_layers[0]->getOpacity()/100.0);
     QTransform temp3;
     QTransform transformation3 =
         temp3.rotate(lower_layers[0]->getQuickRotation());
@@ -389,6 +458,7 @@ void TileRender::paint(QPainter *painter,
   if(lower2 && lower_layers[1] !=NULL)
   {
     QPixmap lower_image(lower_layers[1]->getPath(0));
+    painter->setOpacity(lower_layers[1]->getOpacity()/100.0);
     QTransform temp4;
     QTransform transformation4 =
         temp4.rotate(lower_layers[1]->getQuickRotation());
@@ -397,6 +467,7 @@ void TileRender::paint(QPainter *painter,
   if(lower3 && lower_layers[2] !=NULL)
   {
     QPixmap lower_image(lower_layers[2]->getPath(0));
+    painter->setOpacity(lower_layers[2]->getOpacity()/100.0);
     QTransform temp5;
     QTransform transformation5 =
         temp5.rotate(lower_layers[2]->getQuickRotation());
@@ -405,6 +476,7 @@ void TileRender::paint(QPainter *painter,
   if(lower4 && lower_layers[3] !=NULL)
   {
     QPixmap lower_image(lower_layers[3]->getPath(0));
+    painter->setOpacity(lower_layers[3]->getOpacity()/100.0);
     QTransform temp6;
     QTransform transformation6 =
         temp6.rotate(lower_layers[3]->getQuickRotation());
@@ -413,6 +485,7 @@ void TileRender::paint(QPainter *painter,
   if(lower5 && lower_layers[4] !=NULL)
   {
     QPixmap lower_image(lower_layers[4]->getPath(0));
+    painter->setOpacity(lower_layers[4]->getOpacity()/100.0);
     QTransform temp7;
     QTransform transformation7 =
         temp7.rotate(lower_layers[4]->getQuickRotation());
@@ -421,6 +494,7 @@ void TileRender::paint(QPainter *painter,
   if(upper1 && upper_layers[0] !=NULL)
   {
     QPixmap upper_image(upper_layers[0]->getPath(0));
+    painter->setOpacity(upper_layers[0]->getOpacity()/100.0);
     QTransform temp8;
     QTransform transformation8 =
         temp8.rotate(upper_layers[0]->getQuickRotation());
@@ -429,6 +503,7 @@ void TileRender::paint(QPainter *painter,
   if(upper2 && upper_layers[1] !=NULL)
   {
     QPixmap upper_image(upper_layers[1]->getPath(0));
+    painter->setOpacity(upper_layers[1]->getOpacity()/100.0);
     QTransform temp9;
     QTransform transformation9 =
         temp9.rotate(upper_layers[1]->getQuickRotation());
@@ -437,6 +512,7 @@ void TileRender::paint(QPainter *painter,
   if(upper3 && upper_layers[2] !=NULL)
   {
     QPixmap upper_image(upper_layers[2]->getPath(0));
+    painter->setOpacity(upper_layers[2]->getOpacity()/100.0);
     QTransform temp10;
     QTransform transformation10 =
         temp10.rotate(upper_layers[2]->getQuickRotation());
@@ -445,6 +521,7 @@ void TileRender::paint(QPainter *painter,
   if(upper4 && upper_layers[3] !=NULL)
   {
     QPixmap upper_image(upper_layers[3]->getPath(0));
+    painter->setOpacity(upper_layers[3]->getOpacity()/100.0);
     QTransform temp11;
     QTransform transformation11 =
         temp11.rotate(upper_layers[3]->getQuickRotation());
@@ -453,6 +530,7 @@ void TileRender::paint(QPainter *painter,
   if(upper5 && upper_layers[4] !=NULL)
   {
     QPixmap upper_image(upper_layers[4]->getPath(0));
+    painter->setOpacity(upper_layers[4]->getOpacity()/100.0);
     QTransform temp12;
     QTransform transformation12 =
         temp12.rotate(upper_layers[4]->getQuickRotation());

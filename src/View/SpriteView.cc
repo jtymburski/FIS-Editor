@@ -111,7 +111,72 @@ QPixmap SpriteView::transformPixmap(EditorSprite* pic, int pos)
   QTransform trans = transform;
   transform = trans.rotate(pic->getFrameAngle(pos));
   QPixmap returnimage(pic->getPath(pos));
+  if(current != NULL)
+  {
+    returnimage = setBrightness(current->getBrightness()-255,returnimage);
+    returnimage = setColor(current->getColorRed(),
+                           current->getColorBlue(),
+                           current->getColorGreen(),
+                           returnimage);
+  }
   return returnimage.transformed(transform);
+}
+
+QPixmap SpriteView::setBrightness(int delta, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red() + delta;
+      g = old_color.green() + delta;
+      b = old_color.blue() + delta;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
+}
+
+QPixmap SpriteView::setColor(int deltared, int deltablue,
+                             int deltagreen, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red()+deltared-255;
+      g = old_color.green()+deltablue-255;
+      b = old_color.blue()+deltagreen-255;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
 }
 
 /*============================================================================
@@ -132,7 +197,9 @@ void SpriteView::paintEvent(QPaintEvent *)
   QRect bound(12,520,64,64);
   QRect border(11,519,66,66);
   painter.setPen(QPen(QBrush(Qt::black),2));
+  painter.setOpacity(current->getOpacity()/100.0);
   painter.drawPixmap(bound,transformPixmap(current));
+  painter.setOpacity(1.0);
   painter.drawRect(border);
   painter.setFont(QFont("helvetica",14,QFont::Bold));
   painter.drawText(80,536,current->getName());

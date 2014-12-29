@@ -137,7 +137,6 @@ void GameDatabase::modifySelection(QModelIndex index)
 
 void GameDatabase::modifyIndex(int index)
 {
-  qDebug()<<"Category : "<<top_view->currentRow();
   switch(top_view->currentRow())
   {
     case 0:
@@ -155,12 +154,13 @@ void GameDatabase::modifyIndex(int index)
     default:
       break;
   }
-
+/*
   qDebug()<<"Map Index " <<current_map_index;
   qDebug()<<"Person Index " <<current_person_index;
   qDebug()<<"Party Index " <<current_party_index;
   qDebug()<<"Item Index " <<current_item_index;
   qDebug()<<" ";
+*/
 }
 
 void GameDatabase::resize()
@@ -317,82 +317,94 @@ void GameDatabase::createNewResource()
 void GameDatabase::duplicateResource()
 {
   QString name;
-  QString maptemp = map_pair[current_map_index]->first;
-  QString persontemp = person_pair[current_person_index]->first;
-  QString partytemp = party_pair[current_party_index]->first;
-  QString itemtemp = item_pair[current_item_index]->first;
-  switch(top_view->currentRow())
-  {
-    case 0:
-      if(map_pair.size()<10)
-        name.append(QString::number(0));
-      name.append(QString::number(map_pair.size()));
-      name.append(" ");
-      do
+
+   if(top_view->currentRow() == 0)
+   {
+      if(map_pair.size() > 0)
       {
-        maptemp.remove(0,1);
+        QString maptemp = map_pair[current_map_index]->first;
+        if(map_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(map_pair.size()));
+        name.append(" ");
+        do
+        {
+          maptemp.remove(0,1);
+        }
+        while(maptemp.at(0) != ':');
+        maptemp.prepend(name);
+        map_pair.push_back(new QPair<QString,EditorMap*>
+                          (maptemp,map_pair[current_map_index]->second->clone()));
+        current_map_index = map_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
       }
-      while(maptemp.at(0) != ':');
-      maptemp.prepend(name);
-      map_pair.push_back(new QPair<QString,EditorMap*>
-                        (maptemp,map_pair[current_map_index]->second->clone()));
-      current_map_index = map_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 1:
-      if(person_pair.size()<10)
-        name.append(QString::number(0));
-      name.append(QString::number(person_pair.size()));
-      name.append(" ");
-      do
+    }
+   else if(top_view->currentRow() == 1)
+   {
+      if(person_pair.size() > 0)
       {
-        persontemp.remove(0,1);
+        QString persontemp = person_pair[current_person_index]->first;
+        if(person_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(person_pair.size()));
+        name.append(" ");
+        do
+        {
+          persontemp.remove(0,1);
+        }
+        while(persontemp.at(0) != ':');
+        persontemp.prepend(name);
+        person_pair.push_back(new QPair<QString,EditorPerson*>
+                          (persontemp,person_pair[current_person_index]->
+                           second->clone()));
+        current_person_index = person_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
       }
-      while(persontemp.at(0) != ':');
-      persontemp.prepend(name);
-      person_pair.push_back(new QPair<QString,EditorPerson*>
-                        (persontemp,person_pair[current_person_index]->
-                         second->clone()));
-      current_person_index = person_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 2:
-      if(party_pair.size()<10)
-        name.append(QString::number(0));
-      name.append(QString::number(party_pair.size()));
-      name.append(" ");
-      do
+    }
+   else if(top_view->currentRow() == 2)
+   {
+      if(party_pair.size() > 0)
       {
-        partytemp.remove(0,1);
+        QString partytemp = party_pair[current_party_index]->first;
+        if(party_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(party_pair.size()));
+        name.append(" ");
+        do
+        {
+          partytemp.remove(0,1);
+        }
+        while(partytemp.at(0) != ':');
+        partytemp.prepend(name);
+        party_pair.push_back(new QPair<QString,EditorParty*>
+                          (partytemp,party_pair[current_party_index]->
+                           second->clone()));
+        current_party_index = party_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
       }
-      while(partytemp.at(0) != ':');
-      partytemp.prepend(name);
-      party_pair.push_back(new QPair<QString,EditorParty*>
-                        (partytemp,party_pair[current_party_index]->
-                         second->clone()));
-      current_party_index = party_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 3:
-      if(item_pair.size()<10)
-        name.append(QString::number(0));
-      name.append(QString::number(item_pair.size()));
-      name.append(" ");
-      do
+    }
+   else if(top_view->currentRow() == 3)
+   {
+      if(item_pair.size() > 0)
       {
-        itemtemp.remove(0,1);
+        QString itemtemp = item_pair[current_item_index]->first;
+        if(item_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(item_pair.size()));
+        name.append(" ");
+        do
+        {
+          itemtemp.remove(0,1);
+        }
+        while(itemtemp.at(0) != ':');
+        itemtemp.prepend(name);
+        item_pair.push_back(new QPair<QString,EditorItem*>
+                          (itemtemp,item_pair[current_item_index]->
+                           second->clone()));
+        current_item_index = item_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
       }
-      while(itemtemp.at(0) != ':');
-      itemtemp.prepend(name);
-      item_pair.push_back(new QPair<QString,EditorItem*>
-                        (itemtemp,item_pair[current_item_index]->
-                         second->clone()));
-      current_item_index = item_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    default:
-      break;
-  }
+    }
 
 }
 void GameDatabase::deleteResource()

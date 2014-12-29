@@ -51,11 +51,14 @@ Application::Application(QWidget* parent) :
 
   game_view = new GameView();
   setCentralWidget(game_view);
+  game_view->setGeometry(QApplication::desktop()->availableGeometry());
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
   setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
   setupTopMenu();
-  setGeometry(QApplication::desktop()->availableGeometry());
+  setGeometry(16,32,QApplication::desktop()->availableGeometry().width()-32,
+              QApplication::desktop()->availableGeometry().height()-64);
+  setMinimumSize(1280,720);
   showMaximized();
   setBasicCursor();
 }
@@ -163,7 +166,7 @@ void Application::setupTopMenu()
   fill_action->setCheckable(true);
   fill_action->setIcon(QIcon(":/Icons/Resources/flood-icon.png"));
 
-  QMenu* cursor_menu = menuBar()->addMenu("&Cursor Modes");
+  cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
 
   /* Sets up the menu toolbars */
@@ -196,38 +199,6 @@ void Application::setupTopMenu()
   brushbar->setFloatable(false);
   brushbar->setMovable(false);
 
-  gameview_group = new QActionGroup(this);
-  gameview_group->setExclusive(true);
-
-  mapview_action = new QAction("&Map",gameview_group);
-  mapview_action->setCheckable(true);
-  mapview_action->setChecked(true);
-  //mapview_action->setIcon(QIcon(":/Icons/Resources/pencil-icon.png"));
-  person_action = new QAction("&Person",gameview_group);
-  person_action->setCheckable(true);
-  //erasermode_action->setIcon(QIcon(":/Icons/Resources/eraser-icon.png"));
-  party_action = new QAction("&Party",gameview_group);
-  party_action->setCheckable(true);
-  //blockplacemode_action->setIcon(QIcon(":/Icons/Resources/rect-icon.png"));
-  item_action = new QAction("&Item",gameview_group);
-  item_action->setCheckable(true);
-  //fill_action->setIcon(QIcon(":/Icons/Resources/flood-icon.png"));
-
-  connect(mapview_action,SIGNAL(triggered()),this,SLOT(setMapView()));
-  connect(person_action,SIGNAL(triggered()),this,SLOT(setPersonView()));
-  connect(party_action,SIGNAL(triggered()),this,SLOT(setPartyView()));
-  connect(item_action,SIGNAL(triggered()),this,SLOT(setItemView()));
-
-  /* Sets up the view modes toolbar */
-  viewbar = new QToolBar("View Modes",this);
-  viewbar->addAction(mapview_action);
-  viewbar->addAction(person_action);
-  viewbar->addAction(party_action);
-  viewbar->addAction(item_action);
-  addToolBar(Qt::TopToolBarArea,viewbar);
-  viewbar->setFloatable(false);
-  viewbar->setMovable(false);
-
   connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setBasicCursor()));
   connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setEraserCursor()));
   connect(blockplacemode_action,SIGNAL(triggered()),
@@ -244,6 +215,16 @@ void Application::setupTopMenu()
 void Application::setView(EditorEnumDb::ViewMode v)
 {
   game_view->setViewMode(v);
+  if(v != EditorEnumDb::MAPVIEW)
+  {
+    brushbar->setDisabled(true);
+    cursor_menu->setDisabled(true);
+  }
+  else
+  {
+    brushbar->setEnabled(true);
+    cursor_menu->setEnabled(true);
+  }
 }
 
 /*

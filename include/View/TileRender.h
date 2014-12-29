@@ -61,6 +61,9 @@ public slots:
   void setPass(bool);
   void setGridColor(bool);
 
+  QPixmap setBrightness(int delta, QPixmap original);
+  QPixmap setColor(int deltared,int deltablue,int deltagreen,QPixmap original);
+
   /* Sets the toolbox that the tile gets the current Editor Sprite from */
   void setToolbox(SpriteView* tool);
 

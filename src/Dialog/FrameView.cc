@@ -65,6 +65,62 @@ FrameView::~FrameView()
 {
 }
 
+QPixmap FrameView::setBrightness(int delta, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red() + delta;
+      g = old_color.green() + delta;
+      b = old_color.blue() + delta;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
+}
+
+QPixmap FrameView::setColor(int deltared, int deltablue,
+                             int deltagreen, QPixmap original)
+{
+  QImage original_image = original.toImage();
+  QImage editing = original.toImage();
+  QColor old_color;
+  int r,g,b;
+
+  for(int i=0; i<editing.width(); i++)
+  {
+    for(int j=0; j<editing.height(); j++)
+    {
+      old_color = QColor(original_image.pixel(i,j));
+      r = old_color.red()+deltared-255;
+      g = old_color.green()+deltablue-255;
+      b = old_color.blue()+deltagreen-255;
+
+      r = qBound(0,r,255);
+      g = qBound(0,g,255);
+      b = qBound(0,b,255);
+
+      editing.setPixel(i,j,qRgb(r,g,b));
+    }
+  }
+  QPixmap output;
+  output = output.fromImage(editing);
+  return output;
+}
 
 /*
  * Description: Paints the label with transformations
@@ -128,6 +184,13 @@ void FrameView::paintEvent(QPaintEvent *)
   {
     QTransform trans = transform;
     transform = trans.rotate(currentsprite->getFrameAngle(pos));
+  }
+  if(currentsprite != NULL)
+  {
+    painter.setOpacity(currentsprite->getOpacity()/100.0);
+    temp = setBrightness(currentsprite->getBrightness()-255,temp);
+    temp = setColor(currentsprite->getColorRed(),currentsprite->getColorBlue(),
+                        currentsprite->getColorGreen(),temp);
   }
   painter.drawPixmap(0,0,width(),height(),temp.transformed(transform));
 }

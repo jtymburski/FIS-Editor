@@ -14,7 +14,6 @@ MapDatabase::MapDatabase(QWidget *parent) : QTabWidget(parent)
 
   /* Sets up a scroll area with the sprites tab */
   sprite_view = new SpriteView(this);
-  sprite_view->setFixedSize(288,600);
 
   connect(raw_view->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           sprite_view,SLOT(addEditorSprite(EditorSprite*)));
