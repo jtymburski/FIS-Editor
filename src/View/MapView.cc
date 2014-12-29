@@ -108,10 +108,10 @@ void MapView::setupMapView(int x, int y)
 //          map_editor,SLOT(toggleUpper4(bool)));
 //  connect(shown_upper_layer_05,SIGNAL(toggled(bool)),
 //          map_editor,SLOT(toggleUpper5(bool)));
-//  connect(shown_grid,SIGNAL(toggled(bool)),
-//          map_editor,SLOT(toggleGrid(bool)));
-//  connect(shown_pass,SIGNAL(toggled(bool)),
-//          map_editor,SLOT(togglePass(bool)));
+  connect(map_control->getGridToggle(),SIGNAL(toggled(bool)),
+          map_editor,SLOT(toggleGrid(bool)));
+  connect(map_control->getPassibilityToggle(),SIGNAL(toggled(bool)),
+          map_editor,SLOT(togglePass(bool)));
   setCentralWidget(map_scroller);
 
   /* Sets up the map status bar */

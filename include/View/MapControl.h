@@ -25,6 +25,8 @@ public:
   ~MapControl();
 
   QListWidget* getTopList();
+  QPushButton* getGridToggle();
+  QPushButton* getPassibilityToggle();
 
 private:
   /* Lists */

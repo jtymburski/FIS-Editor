@@ -576,7 +576,6 @@ void TileRender::paint(QPainter *painter,
       QPointF((xpos*64)+4,(ypos*64)+60),
       QPointF((xpos*64)+0,(ypos*64)+64)
     };
-    qDebug() << gameTile()->getBasePassability(Direction::NORTH) << " " << gameTile()->getLowerPassability(Direction::NORTH);
     if(gameTile()->getPassabilityExiting(Direction::NORTH))
       painter->setBrush(QColor(0,255,0,128));
     else

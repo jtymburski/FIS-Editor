@@ -13,6 +13,9 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   /* Sets up top toggle buttons */
   grid_toggle = new QPushButton("Grid",this);
   passibility_toggle = new QPushButton("Passibility",this);
+  grid_toggle->setCheckable(true);
+  grid_toggle->setChecked(true);
+  passibility_toggle->setCheckable(true);
   button_layout->addWidget(grid_toggle);
   button_layout->addWidget(passibility_toggle);
   main_layout->addLayout(button_layout);
@@ -80,6 +83,16 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
 MapControl::~MapControl()
 {
 
+}
+
+QPushButton* MapControl::getGridToggle()
+{
+  return grid_toggle;
+}
+
+QPushButton* MapControl::getPassibilityToggle()
+{
+  return passibility_toggle;
 }
 
 QListWidget* MapControl::getTopList()
