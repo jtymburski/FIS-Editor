@@ -497,7 +497,7 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
         break;
     }
   }
-  else
+  else if(current != NULL)
   {
     if(cursormode == EditorEnumDb::BLOCKPLACE)
     {
