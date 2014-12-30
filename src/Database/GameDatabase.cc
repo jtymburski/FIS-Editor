@@ -9,9 +9,6 @@
 
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {
-  setMinimumWidth(8);
-  setMaximumWidth(8);
-
   /* Set up the top list view and connect it to the changing of the
    * bottom list view */
   top_view = new QListWidget(this);
@@ -107,7 +104,12 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   connect(del_button,SIGNAL(clicked()),this,SLOT(deleteResource()));
   connect(duplicate_button,SIGNAL(clicked()),this,SLOT(duplicateResource()));
   layout = new QVBoxLayout(this);
-  layout->addSpacing(32);
+  QLabel *label = new QLabel("Game Database", this);
+  label->setAlignment(Qt::AlignHCenter);
+  QFont font = label->font();
+  font.setBold(true);
+  label->setFont(font);
+  layout->addWidget(label);
   layout->addWidget(top_view);
   layout->addWidget(bottom_view);
 
@@ -117,8 +119,6 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   button_layout->addWidget(import_button);
   button_layout->addWidget(duplicate_button);
   layout->addLayout(button_layout);
-
-
 }
 
 GameDatabase::~GameDatabase()
@@ -260,20 +260,6 @@ void GameDatabase::modifyIndex(int index)
   qDebug()<<"Item Index " <<current_item_index;
   qDebug()<<" ";
 */
-}
-
-void GameDatabase::resize()
-{
-  if(width()< 128)
-  {
-      setMinimumWidth(256);
-      setMaximumWidth(256);
-  }
-  else
-  {
-      setMinimumWidth(8);
-      setMaximumWidth(8);
-  }
 }
 
 void GameDatabase::modifyBottomList(int index)

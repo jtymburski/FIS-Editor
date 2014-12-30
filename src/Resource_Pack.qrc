@@ -19,5 +19,6 @@
         <file>Resources/start.png</file>
         <file>Resources/rect-icon.png</file>
         <file>Resources/flood-icon.png</file>
+        <file>Resources/database.png</file>
     </qresource>
 </RCC>

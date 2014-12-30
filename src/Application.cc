@@ -26,17 +26,16 @@ Application::Application(QWidget* parent) :
   x_size = 100;
   y_size = 100;
 
+  game_db_dock = new QDockWidget();
   game_database = new GameDatabase();
-  QDockWidget* game_db_dock = new QDockWidget();
   game_db_dock->setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
+  game_db_dock->setWidget(new QWidget());
   game_db_dock->setWidget(game_database);
   addDockWidget(Qt::LeftDockWidgetArea,game_db_dock);
   game_db_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
   game_db_dock->setAllowedAreas(Qt::LeftDockWidgetArea);
-  QPushButton* dock_button =
-      new QPushButton(QIcon(":/Icons/Resources/fbs_icon.ico"),"");
-  connect(dock_button,SIGNAL(pressed()),game_database,SLOT(resize()));
-  game_db_dock->setTitleBarWidget(dock_button);
+  game_db_dock->setTitleBarWidget(new QWidget());
+
   connect(game_database, SIGNAL(changeMode(EditorEnumDb::ViewMode)),
           this, SLOT(setView(EditorEnumDb::ViewMode)));
 
@@ -68,12 +67,13 @@ Application::Application(QWidget* parent) :
   game_view = new GameView();
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
+
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
   setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
   setupTopMenu();
-  setGeometry(16,32,QApplication::desktop()->availableGeometry().width()-32,
-              QApplication::desktop()->availableGeometry().height()-64);
+  //setGeometry(16,32,QApplication::desktop()->availableGeometry().width()-32,
+   //           QApplication::desktop()->availableGeometry().height()-64);
   setMinimumSize(1280,720);
   showMaximized();
   setBasicCursor();
@@ -111,6 +111,8 @@ void Application::setupTopMenu()
   connect(ok,SIGNAL(clicked()),this,SLOT(setupMap()));
 
   /* Sets up the File menu actions */
+  show_menu_action = new QAction("&Menu", this);
+  show_menu_action->setIcon(QIcon(":/Icons/Resources/database.png"));
   new_action = new QAction("&New",this);
   new_action->setIcon(QIcon(":/Icons/Resources/new-icon.png"));
   load_action = new QAction("&Load",this);
@@ -135,6 +137,7 @@ void Application::setupTopMenu()
 
 
   /* Connects File menu actions to slots */
+  connect(show_menu_action, SIGNAL(triggered()), this, SLOT(showDatabase()));
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
   connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
 
@@ -187,6 +190,8 @@ void Application::setupTopMenu()
 
   /* Sets up the menu toolbars */
   menubar = new QToolBar("Menus",this);
+  menubar->addAction(show_menu_action);
+  menubar->addSeparator();
   menubar->addAction(new_action);
   menubar->addAction(load_action);
   menubar->addAction(save_action);
@@ -422,6 +427,20 @@ void Application::setupMap()
     game_view->getMapView()->setupMapView(x_line.toInt(), y_line.toInt());
     mapsize_dialog->close();
   }
+}
+
+/* 
+ * Description: Show the database dock on the left side
+ *
+ * Inputs: none
+ * Output: none
+ */
+void Application::showDatabase()
+{
+  if(game_db_dock->isVisible())
+    game_db_dock->hide();
+  else
+    game_db_dock->show();
 }
 
 /*============================================================================

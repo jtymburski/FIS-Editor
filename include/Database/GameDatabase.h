@@ -12,6 +12,7 @@
 #include <QVector>
 #include <QPushButton>
 #include <QPair>
+#include <QLabel>
 #include "EditorEnumDb.h"
 #include "Database/EditorMap.h"
 #include "Database/EditorPerson.h"
@@ -113,7 +114,6 @@ private:
 
 protected:
 public slots:
-  void resize();
   void modifyBottomList(int index);
   void modifySelection(QModelIndex index);
   void modifyIndex(int);

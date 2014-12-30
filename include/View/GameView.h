@@ -1,18 +1,18 @@
 /*******************************************************************************
  * Class Name: GameView
  * Date Created: December 22, 2014
- * Inheritance: QWidget
+ * Inheritance: QStackedWidget
  * Description: View of the game editor component for all game related data:
  *              maps,
  ******************************************************************************/
 #ifndef GAMEVIEW_H
 #define GAMEVIEW_H
 
-#include <QWidget>
+#include <QStackedWidget>
 #include "View/MapView.h"
 #include "Database/GameDatabase.h"
 
-class GameView : public QWidget
+class GameView : public QStackedWidget
 {
   Q_OBJECT
 public:

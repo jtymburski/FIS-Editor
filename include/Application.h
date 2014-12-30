@@ -51,6 +51,8 @@ public:
 private:
   /* game database */
   GameDatabase* game_database;
+  QDockWidget* game_db_dock;
+
   /* Game View */
   GameView* game_view;
 
@@ -60,6 +62,7 @@ private:
   QToolBar* viewbar;
 
   /* File action pointers */
+  QAction *show_menu_action;
   QAction *new_action;
   QAction *load_action;
   QAction *recentfiles_action;
@@ -186,6 +189,9 @@ public slots:
 
   /* Sets To Bubby */
   void setBubby(QPair<QString,EditorBubby*>*);
+  
+  /* Shows and hides the game database view */
+  void showDatabase();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
