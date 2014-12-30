@@ -80,6 +80,18 @@ private:
   int current_equipment_index;
   int current_bubby_index;
 
+  int current_map_id;
+  int current_person_id;
+  int current_party_id;
+  int current_item_id;
+  int current_action_id;
+  int current_race_id;
+  int current_battleclass_id;
+  int current_skillset_id;
+  int current_skill_id;
+  int current_equipment_id;
+  int current_bubby_id;
+
   int current_map_selection;
   int current_person_selection;
   int current_party_selection;

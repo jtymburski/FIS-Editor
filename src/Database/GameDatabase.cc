@@ -85,6 +85,18 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   current_equipment_selection = -1;
   current_bubby_selection = -1;
 
+  current_map_id = map_pair.size()-1;
+  current_person_id = person_pair.size()-1;
+  current_party_id = party_pair.size()-1;
+  current_item_id = item_pair.size()-1;
+  current_action_id = action_pair.size()-1;
+  current_race_id = race_pair.size()-1;
+  current_battleclass_id = battleclass_pair.size()-1;
+  current_skillset_id = skillset_pair.size()-1;
+  current_skill_id = skill_pair.size()-1;
+  current_equipment_id = equipment_pair.size()-1;
+  current_bubby_id = bubby_pair.size()-1;
+
   new_button = new QPushButton("New",this);
   del_button = new QPushButton("Delete",this);
   import_button = new QPushButton("Import",this);
@@ -476,9 +488,9 @@ void GameDatabase::createNewResource()
   switch(top_view->currentRow())
   {
     case 0:
-      if(map_pair.size()<10)
+      if(current_map_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(map_pair.size()));
+      name.append(QString::number(++current_map_id));
       name.append(" : Some Land");
       map_pair.push_back(new QPair<QString,EditorMap*>
                          (name,new EditorMap(this)));
@@ -486,9 +498,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 1:
-      if(person_pair.size()<10)
+      if(current_person_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(person_pair.size()));
+      name.append(QString::number(++current_person_id));
       name.append(" : Some Guy");
       person_pair.push_back(new QPair<QString,EditorPerson*>
                          (name,new EditorPerson(this)));
@@ -496,9 +508,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 2:
-      if(party_pair.size()<10)
+      if(current_party_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(party_pair.size()));
+      name.append(QString::number(++current_party_id));
       name.append(" : Some Sleuth");
       party_pair.push_back(new QPair<QString,EditorParty*>
                          (name,new EditorParty(this)));
@@ -506,9 +518,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 3:
-      if(item_pair.size()<10)
+      if(current_item_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(item_pair.size()));
+      name.append(QString::number(++current_item_id));
       name.append(" : Some Doohickey");
       item_pair.push_back(new QPair<QString,EditorItem*>
                          (name,new EditorItem(this)));
@@ -516,9 +528,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 4:
-      if(action_pair.size()<10)
+      if(current_action_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(action_pair.size()));
+      name.append(QString::number(++current_action_id));
       name.append(" : Some Act");
       action_pair.push_back(new QPair<QString,EditorAction*>
                          (name,new EditorAction(this)));
@@ -526,9 +538,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 5:
-      if(race_pair.size()<10)
+      if(current_race_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(race_pair.size()));
+      name.append(QString::number(++current_race_id));
       name.append(" : Some Race");
       race_pair.push_back(new QPair<QString,EditorCategory*>
                          (name,new EditorCategory(this)));
@@ -536,9 +548,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 6:
-      if(battleclass_pair.size()<10)
+      if(current_battleclass_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(battleclass_pair.size()));
+      name.append(QString::number(++current_battleclass_id));
       name.append(" : Some Class");
       battleclass_pair.push_back(new QPair<QString,EditorCategory*>
                          (name,new EditorCategory(this)));
@@ -546,9 +558,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 7:
-      if(skillset_pair.size()<10)
+      if(current_skillset_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(skillset_pair.size()));
+      name.append(QString::number(++current_skillset_id));
       name.append(" : Some Set Of Skillz");
       skillset_pair.push_back(new QPair<QString,EditorSkillset*>
                          (name,new EditorSkillset(this)));
@@ -556,9 +568,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 8:
-      if(skill_pair.size()<10)
+      if(current_skill_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(skill_pair.size()));
+      name.append(QString::number(++current_skill_id));
       name.append(" : Some Skill");
       skill_pair.push_back(new QPair<QString,EditorSkill*>
                          (name,new EditorSkill(this)));
@@ -566,9 +578,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 9:
-      if(equipment_pair.size()<10)
+      if(current_equipment_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(equipment_pair.size()));
+      name.append(QString::number(++current_equipment_id));
       name.append(" : Some Equipment");
       equipment_pair.push_back(new QPair<QString,EditorEquipment*>
                          (name,new EditorEquipment(this)));
@@ -576,9 +588,9 @@ void GameDatabase::createNewResource()
       modifyBottomList(top_view->currentRow());
       break;
     case 10:
-      if(bubby_pair.size()<10)
+      if(current_bubby_id<9)
         name.append(QString::number(0));
-      name.append(QString::number(bubby_pair.size()));
+      name.append(QString::number(++current_bubby_id));
       name.append(" : Some Bubby");
       bubby_pair.push_back(new QPair<QString,EditorBubby*>
                          (name,new EditorBubby(this)));
@@ -596,12 +608,12 @@ void GameDatabase::duplicateResource()
 
    if(top_view->currentRow() == 0)
    {
-      if(map_pair.size() > 0)
+      if(current_map_id > 0)
       {
         QString maptemp = map_pair[current_map_index]->first;
-        if(map_pair.size()<10)
+        if(map_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(map_pair.size()));
+        name.append(QString::number(++current_map_id));
         name.append(" ");
         do
         {
@@ -617,12 +629,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 1)
    {
-      if(person_pair.size() > 0)
+      if(current_person_id > 0)
       {
         QString persontemp = person_pair[current_person_index]->first;
-        if(person_pair.size()<10)
+        if(person_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(person_pair.size()));
+        name.append(QString::number(++current_person_id));
         name.append(" ");
         do
         {
@@ -639,12 +651,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 2)
    {
-      if(party_pair.size() > 0)
+      if(current_party_id > 0)
       {
         QString partytemp = party_pair[current_party_index]->first;
-        if(party_pair.size()<10)
+        if(party_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(party_pair.size()));
+        name.append(QString::number(++current_party_id));
         name.append(" ");
         do
         {
@@ -661,12 +673,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 3)
    {
-      if(item_pair.size() > 0)
+      if(current_item_id > 0)
       {
         QString itemtemp = item_pair[current_item_index]->first;
-        if(item_pair.size()<10)
+        if(item_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(item_pair.size()));
+        name.append(QString::number(++current_item_id));
         name.append(" ");
         do
         {
@@ -683,12 +695,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 4)
    {
-      if(action_pair.size() > 0)
+      if(current_action_id > 0)
       {
         QString actiontemp = action_pair[current_action_index]->first;
-        if(action_pair.size()<10)
+        if(action_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(action_pair.size()));
+        name.append(QString::number(++current_action_id));
         name.append(" ");
         do
         {
@@ -705,12 +717,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 5)
    {
-      if(race_pair.size() > 0)
+      if(current_race_id > 0)
       {
         QString racetemp = race_pair[current_race_index]->first;
-        if(race_pair.size()<10)
+        if(race_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(race_pair.size()));
+        name.append(QString::number(++current_race_id));
         name.append(" ");
         do
         {
@@ -727,13 +739,13 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 6)
    {
-      if(battleclass_pair.size() > 0)
+      if(current_battleclass_id > 0)
       {
         QString battleclasstemp = battleclass_pair[current_battleclass_index]
             ->first;
-        if(battleclass_pair.size()<10)
+        if(battleclass_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(battleclass_pair.size()));
+        name.append(QString::number(++current_battleclass_id));
         name.append(" ");
         do
         {
@@ -751,12 +763,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 7)
    {
-      if(skillset_pair.size() > 0)
+      if(current_skillset_id > 0)
       {
         QString skillsettemp = skillset_pair[current_skillset_index]->first;
-        if(skillset_pair.size()<10)
+        if(skillset_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(skillset_pair.size()));
+        name.append(QString::number(++current_skillset_id));
         name.append(" ");
         do
         {
@@ -773,12 +785,12 @@ void GameDatabase::duplicateResource()
     }
    else if(top_view->currentRow() == 8)
    {
-      if(skill_pair.size() > 0)
+      if(current_skill_id > 0)
       {
         QString skilltemp = skill_pair[current_skill_index]->first;
-        if(skill_pair.size()<10)
+        if(skill_pair.size()<9)
           name.append(QString::number(0));
-        name.append(QString::number(skill_pair.size()));
+        name.append(QString::number(++current_skill_id));
         name.append(" ");
         do
         {
@@ -798,9 +810,9 @@ void GameDatabase::duplicateResource()
       if(equipment_pair.size() > 0)
       {
         QString equipmenttemp = equipment_pair[current_equipment_index]->first;
-        if(equipment_pair.size()<10)
+        if(current_equipment_id<9)
           name.append(QString::number(0));
-        name.append(QString::number(equipment_pair.size()));
+        name.append(QString::number(++current_equipment_id));
         name.append(" ");
         do
         {
@@ -820,9 +832,9 @@ void GameDatabase::duplicateResource()
       if(bubby_pair.size() > 0)
       {
         QString bubbytemp = bubby_pair[current_bubby_index]->first;
-        if(bubby_pair.size()<10)
+        if(current_bubby_id<9)
           name.append(QString::number(0));
-        name.append(QString::number(bubby_pair.size()));
+        name.append(QString::number(++current_bubby_id));
         name.append(" ");
         do
         {
