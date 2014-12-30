@@ -31,7 +31,7 @@ GameView::GameView(QWidget* parent) : QWidget(parent)
                              availableGeometry().width()-256,
                              QApplication::desktop()->
                              availableGeometry().height()-128);
-  action_view = new QWidget(this);
+  action_view = new EditorAction(this);
   action_view->setGeometry(0,0,QApplication::desktop()->
                              availableGeometry().width()-256,
                              QApplication::desktop()->
@@ -69,7 +69,7 @@ GameView::GameView(QWidget* parent) : QWidget(parent)
   person_view->setStyleSheet("background-color:red;");
   party_view->setStyleSheet("background-color:blue;");
   item_view->setStyleSheet("background-color:green;");
-  action_view->setStyleSheet("background-color:white;");
+  //action_view->setStyleSheet("background-color:black;");
   race_view->setStyleSheet("background-color:purple;");
   battleclass_view->setStyleSheet("background-color:pink;");
   skillset_view->setStyleSheet("background-color:orange;");
@@ -90,6 +90,26 @@ GameView::~GameView()
 MapView* GameView::getMapView()
 {
   return map_view;
+}
+
+/* Sets the map view */
+void GameView::setMapView(MapView *view)
+{
+
+}
+
+/* Returns the Editor Action View */
+EditorAction* GameView::getActionView()
+{
+  return action_view;
+}
+
+/* Sets the Editor Action View */
+void GameView::setActionView(EditorAction *action)
+{
+  //delete action_view;
+  action_view = action;
+  qDebug()<<"Set action view";
 }
 
 /* Sets The View Mode */

@@ -20,6 +20,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   items << "Maps" << "Persons" << "Parties" << "Items" << "Actions"
         << "Races" << "BattleClasses" << "Skill Sets" << "Skills"
         << "Equipment" << "B.U.B.B.I.E's";
+
   top_view->addItems(items);
   top_view->setCurrentRow(0);
   connect(top_view,SIGNAL(currentRowChanged(int)),

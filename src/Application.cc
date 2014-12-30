@@ -309,6 +309,7 @@ void Application::setItem(QPair<QString,EditorItem*>* pair)
 void Application::setAction(QPair<QString,EditorAction*>* pair)
 {
   qDebug()<<pair->first;
+  game_view->setActionView(pair->second);
 }
 /*
  * Description: Sets the race

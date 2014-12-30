@@ -7,6 +7,14 @@
  * Description: Editor Action
  ******************************************************************************/
 #include <QWidget>
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QLabel>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include "Game/Player/Action.h"
 class EditorAction : public QWidget
 {

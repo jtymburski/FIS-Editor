@@ -10,6 +10,7 @@
 
 #include <QWidget>
 #include "View/MapView.h"
+#include "Database/GameDatabase.h"
 
 class GameView : public QWidget
 {
@@ -29,7 +30,7 @@ private:
   QWidget* person_view;
   QWidget* party_view;
   QWidget* item_view;
-  QWidget* action_view;
+  EditorAction* action_view;
   QWidget* race_view;
   QWidget* battleclass_view;
   QWidget* skillset_view;
@@ -47,8 +48,13 @@ public slots:
   /* Loads the image with a valid given path */
 //  void loadSprite(QString path);
 
-  /* Returns the MapView */
+  /* View Get/Sets */
   MapView* getMapView();
+  void setMapView(MapView* view);
+
+  EditorAction* getActionView();
+  void setActionView(EditorAction* action);
+
 
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
