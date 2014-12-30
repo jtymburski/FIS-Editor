@@ -48,6 +48,22 @@ Application::Application(QWidget* parent) :
           this, SLOT(setParty(QPair<QString,EditorParty*>*)));
   connect(game_database, SIGNAL(changeItem(QPair<QString,EditorItem*>*)),
           this, SLOT(setItem(QPair<QString,EditorItem*>*)));
+  connect(game_database, SIGNAL(changeAction(QPair<QString,EditorAction*>*)),
+          this, SLOT(setAction(QPair<QString,EditorAction*>*)));
+  connect(game_database, SIGNAL(changeRace(QPair<QString,EditorCategory*>*)),
+          this, SLOT(setRace(QPair<QString,EditorCategory*>*)));
+  connect(game_database, SIGNAL(changeBattleclass
+                                (QPair<QString,EditorCategory*>*)),
+          this, SLOT(setBattleClass(QPair<QString,EditorCategory*>*)));
+  connect(game_database, SIGNAL(changeSkillset(QPair<QString,EditorSkillset*>*))
+          ,this, SLOT(setSkillset(QPair<QString,EditorSkillset*>*)));
+  connect(game_database, SIGNAL(changeSkill(QPair<QString,EditorSkill*>*)),
+          this, SLOT(setSkill(QPair<QString,EditorSkill*>*)));
+  connect(game_database, SIGNAL(changeEquipment
+                                (QPair<QString,EditorEquipment*>*)),
+          this, SLOT(setEquipment(QPair<QString,EditorEquipment*>*)));
+  connect(game_database, SIGNAL(changeBubby(QPair<QString,EditorBubby*>*)),
+          this, SLOT(setBubby(QPair<QString,EditorBubby*>*)));
 
   game_view = new GameView();
   setCentralWidget(game_view);
@@ -274,16 +290,65 @@ void Application::setPerson(QPair<QString,EditorPerson*>* pair)
   qDebug()<<pair->first;
 }
 /*
- * Description: Sets the map
+ * Description: Sets the party
  */
 void Application::setParty(QPair<QString,EditorParty*>* pair)
 {
   qDebug()<<pair->first;
 }
 /*
- * Description: Sets the map
+ * Description: Sets the item
  */
 void Application::setItem(QPair<QString,EditorItem*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the action
+ */
+void Application::setAction(QPair<QString,EditorAction*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the race
+ */
+void Application::setRace(QPair<QString,EditorCategory*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the battle class
+ */
+void Application::setBattleClass(QPair<QString,EditorCategory*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the skill set
+ */
+void Application::setSkillset(QPair<QString,EditorSkillset*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the skill
+ */
+void Application::setSkill(QPair<QString,EditorSkill*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the equipment
+ */
+void Application::setEquipment(QPair<QString,EditorEquipment*>* pair)
+{
+  qDebug()<<pair->first;
+}
+/*
+ * Description: Sets the bubby
+ */
+void Application::setBubby(QPair<QString,EditorBubby*>* pair)
 {
   qDebug()<<pair->first;
 }

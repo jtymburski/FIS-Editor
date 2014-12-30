@@ -166,6 +166,27 @@ public slots:
   /* Sets To Item */
   void setItem(QPair<QString,EditorItem*>*);
 
+  /* Sets To Action */
+  void setAction(QPair<QString,EditorAction*>*);
+
+  /* Sets To Race */
+  void setRace(QPair<QString,EditorCategory*>*);
+
+  /* Sets To Battle Class */
+  void setBattleClass(QPair<QString,EditorCategory*>*);
+
+  /* Sets To Skillset */
+  void setSkillset(QPair<QString,EditorSkillset*>*);
+
+  /* Sets To Skill */
+  void setSkill(QPair<QString,EditorSkill*>*);
+
+  /* Sets To Equipment */
+  void setEquipment(QPair<QString,EditorEquipment*>*);
+
+  /* Sets To Bubby */
+  void setBubby(QPair<QString,EditorBubby*>*);
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

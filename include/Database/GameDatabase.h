@@ -17,6 +17,12 @@
 #include "Database/EditorPerson.h"
 #include "Database/EditorParty.h"
 #include "Database/EditorItem.h"
+#include "Database/EditorAction.h"
+#include "Database/EditorCategory.h"
+#include "Database/EditorSkillset.h"
+#include "Database/EditorSkill.h"
+#include "Database/EditorEquipment.h"
+#include "Database/EditorBubby.h"
 
 class GameDatabase : public QWidget
 {
@@ -41,22 +47,50 @@ private:
   QVector<QPair<QString,EditorPerson*>* > person_pair;
   QVector<QPair<QString,EditorParty*>* > party_pair;
   QVector<QPair<QString,EditorItem*>* > item_pair;
+  QVector<QPair<QString,EditorAction*>* > action_pair;
+  QVector<QPair<QString,EditorCategory*>* > race_pair;
+  QVector<QPair<QString,EditorCategory*>* > battleclass_pair;
+  QVector<QPair<QString,EditorSkillset*>* > skillset_pair;
+  QVector<QPair<QString,EditorSkill*>* > skill_pair;
+  QVector<QPair<QString,EditorEquipment*>* > equipment_pair;
+  QVector<QPair<QString,EditorBubby*>* > bubby_pair;
 
   /* Currently selected object */
   QPair<QString,EditorMap*>* current_map;
   QPair<QString,EditorPerson*>* current_person;
   QPair<QString,EditorParty*>* current_party;
   QPair<QString,EditorItem*>* current_item;
+  QPair<QString,EditorAction*>* current_action;
+  QPair<QString,EditorCategory*>* current_race;
+  QPair<QString,EditorCategory*>* current_battleclass;
+  QPair<QString,EditorSkillset*>* current_skillset;
+  QPair<QString,EditorSkill*>* current_skill;
+  QPair<QString,EditorEquipment*>* current_equipment;
+  QPair<QString,EditorBubby*>* current_bubby;
 
   int current_map_index;
   int current_person_index;
   int current_party_index;
   int current_item_index;
+  int current_action_index;
+  int current_race_index;
+  int current_battleclass_index;
+  int current_skillset_index;
+  int current_skill_index;
+  int current_equipment_index;
+  int current_bubby_index;
 
   int current_map_selection;
   int current_person_selection;
   int current_party_selection;
   int current_item_selection;
+  int current_action_selection;
+  int current_race_selection;
+  int current_battleclass_selection;
+  int current_skillset_selection;
+  int current_skill_selection;
+  int current_equipment_selection;
+  int current_bubby_selection;
 
 
   QPushButton* new_button;
@@ -82,5 +116,12 @@ signals:
   void changePerson(QPair<QString,EditorPerson*>*);
   void changeParty(QPair<QString,EditorParty*>*);
   void changeItem(QPair<QString,EditorItem*>*);
+  void changeAction(QPair<QString,EditorAction*>*);
+  void changeRace(QPair<QString,EditorCategory*>*);
+  void changeBattleclass(QPair<QString,EditorCategory*>*);
+  void changeSkillset(QPair<QString,EditorSkillset*>*);
+  void changeSkill(QPair<QString,EditorSkill*>*);
+  void changeEquipment(QPair<QString,EditorEquipment*>*);
+  void changeBubby(QPair<QString,EditorBubby*>*);
 };
 #endif // GAMEDATABASE_H

@@ -59,7 +59,26 @@ SOURCES += \
     src/Database/EditorTile.cc \
     src/Database/EditorThing.cc \
     src/Database/EditorItem.cc \
-    src/Database/EditorParty.cc
+    src/Database/EditorParty.cc \
+    src/Database/EditorAction.cc \
+    ../Project/src/Game/Player/AttributeSet.cc \
+    ../Project/src/Game/Player/Action.cc \
+    src/Database/EditorCategory.cc \
+    src/Database/EditorSkillset.cc \
+    src/Database/EditorSkill.cc \
+    src/Database/EditorEquipment.cc \
+    src/Database/EditorBubby.cc \
+    ../Project/src/Game/Player/SkillSet.cc \
+    ../Project/src/Game/Player/Skill.cc \
+    ../Project/src/Game/Player/Person.cc \
+    ../Project/src/Game/Player/Party.cc \
+    ../Project/src/Game/Player/Item.cc \
+    ../Project/src/Game/Player/Equipment.cc \
+    ../Project/src/Game/Player/Category.cc \
+    ../Project/src/Game/Player/Bubby.cc \
+    ../Project/src/Game/Player/Signature.cc \
+    ../Project/src/Game/Player/Flavour.cc \
+    ../Project/src/Game/Battle/AIModule.cc
 
 HEADERS += \
     include/Application.h \
@@ -93,7 +112,27 @@ HEADERS += \
     include/Database/EditorTile.h \
     include/Database/GameDatabase.h \
     include/Database/EditorItem.h \
-    include/Database/EditorParty.h
+    include/Database/EditorParty.h \
+    include/Database/EditorAction.h \
+    ../Project/include/EnumFlags.h \
+    ../Project/include/Game/Player/AttributeSet.h \
+    ../Project/include/Game/Player/Action.h \
+    include/Database/EditorCategory.h \
+    include/Database/EditorSkillset.h \
+    include/Database/EditorSkill.h \
+    include/Database/EditorEquipment.h \
+    include/Database/EditorBubby.h \
+    ../Project/include/Game/Player/SkillSet.h \
+    ../Project/include/Game/Player/Skill.h \
+    ../Project/include/Game/Player/Person.h \
+    ../Project/include/Game/Player/Party.h \
+    ../Project/include/Game/Player/Item.h \
+    ../Project/include/Game/Player/Equipment.h \
+    ../Project/include/Game/Player/Category.h \
+    ../Project/include/Game/Player/Bubby.h \
+    ../Project/include/Game/Battle/AIModule.h \
+    ../Project/include/Game/Player/Signature.h \
+    ../Project/include/Game/Player/Flavour.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

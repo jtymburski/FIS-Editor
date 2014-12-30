@@ -29,6 +29,13 @@ private:
   QWidget* person_view;
   QWidget* party_view;
   QWidget* item_view;
+  QWidget* action_view;
+  QWidget* race_view;
+  QWidget* battleclass_view;
+  QWidget* skillset_view;
+  QWidget* skill_view;
+  QWidget* equipment_view;
+  QWidget* bubby_view;
 
   EditorEnumDb::ViewMode mode;
 

@@ -17,7 +17,9 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   top_view = new QListWidget(this);
   top_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Maps" << "Persons" << "Parties" << "Items";
+  items << "Maps" << "Persons" << "Parties" << "Items" << "Actions"
+        << "Races" << "BattleClasses" << "Skill Sets" << "Skills"
+        << "Equipment" << "B.U.B.B.I.E's";
   top_view->addItems(items);
   top_view->setCurrentRow(0);
   connect(top_view,SIGNAL(currentRowChanged(int)),
@@ -63,11 +65,25 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   current_person_index = 0;
   current_party_index = 0;
   current_item_index = 0;
+  current_action_index = 0;
+  current_race_index = 0;
+  current_battleclass_index = 0;
+  current_skillset_index = 0;
+  current_skill_index = 0;
+  current_equipment_index = 0;
+  current_bubby_index = 0;
 
   current_map_selection = -1;
   current_person_selection = -1;
   current_party_selection = -1;
   current_item_selection = -1;
+  current_action_selection = -1;
+  current_race_selection = -1;
+  current_battleclass_selection = -1;
+  current_skillset_selection = -1;
+  current_skill_selection = -1;
+  current_equipment_selection = -1;
+  current_bubby_selection = -1;
 
   new_button = new QPushButton("New",this);
   del_button = new QPushButton("Delete",this);
@@ -129,6 +145,55 @@ void GameDatabase::modifySelection(QModelIndex index)
       modifyBottomList(top_view->currentRow());
       emit changeItem(current_item);
       break;
+    case 4:
+      current_action = action_pair[index.row()];
+      current_action_selection = index.row();
+      current_action_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeAction(current_action);
+      break;
+    case 5:
+      current_race = race_pair[index.row()];
+      current_race_selection = index.row();
+      current_race_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeRace(current_race);
+      break;
+    case 6:
+      current_battleclass = battleclass_pair[index.row()];
+      current_battleclass_selection = index.row();
+      current_battleclass_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeBattleclass(current_battleclass);
+      break;
+    case 7:
+      current_skillset = skillset_pair[index.row()];
+      current_skillset_selection = index.row();
+      current_skillset_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeSkillset(current_skillset);
+      break;
+    case 8:
+      current_skill = skill_pair[index.row()];
+      current_skill_selection = index.row();
+      current_skill_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeSkill(current_skill);
+      break;
+    case 9:
+      current_equipment = equipment_pair[index.row()];
+      current_equipment_selection = index.row();
+      current_equipment_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeEquipment(current_equipment);
+      break;
+    case 10:
+      current_bubby = bubby_pair[index.row()];
+      current_bubby_selection = index.row();
+      current_bubby_index = index.row();
+      modifyBottomList(top_view->currentRow());
+      emit changeBubby(current_bubby);
+      break;
     default:
       break;
   }
@@ -150,6 +215,27 @@ void GameDatabase::modifyIndex(int index)
       break;
     case 3:
       current_item_index = index;
+      break;
+    case 4:
+      current_action_index = index;
+      break;
+    case 5:
+      current_race_index = index;
+      break;
+    case 6:
+      current_battleclass_index = index;
+      break;
+    case 7:
+      current_skillset_index = index;
+      break;
+    case 8:
+      current_skill_index = index;
+      break;
+    case 9:
+      current_equipment_index = index;
+      break;
+    case 10:
+      current_bubby_index = index;
       break;
     default:
       break;
@@ -183,6 +269,14 @@ void GameDatabase::modifyBottomList(int index)
   QStringList person_list;
   QStringList party_list;
   QStringList item_list;
+  QStringList action_list;
+  QStringList race_list;
+  QStringList battleclass_list;
+  QStringList skillset_list;
+  QStringList skill_list;
+  QStringList equipment_list;
+  QStringList bubby_list;
+
   QFont font;
 
   disconnect(bottom_view,SIGNAL(currentRowChanged(int)),
@@ -258,6 +352,118 @@ void GameDatabase::modifyBottomList(int index)
       bottom_view->setCurrentRow(current_item_index);
       emit changeMode(EditorEnumDb::ITEMVIEW);
       break;
+    case 4:
+      for(int i=0; i<action_pair.size(); i++)
+        action_list << action_pair[i]->first;
+      bottom_view->addItems(action_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_action_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_action_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_action_index);
+      emit changeMode(EditorEnumDb::ACTIONVIEW);
+      break;
+    case 5:
+      for(int i=0; i<race_pair.size(); i++)
+        race_list << race_pair[i]->first;
+      bottom_view->addItems(race_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_race_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_race_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_race_index);
+      emit changeMode(EditorEnumDb::RACEVIEW);
+      break;
+    case 6:
+      for(int i=0; i<battleclass_pair.size(); i++)
+        battleclass_list << battleclass_pair[i]->first;
+      bottom_view->addItems(battleclass_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_battleclass_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_battleclass_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_battleclass_index);
+      emit changeMode(EditorEnumDb::BATTLECLASSVIEW);
+      break;
+    case 7:
+      for(int i=0; i<skillset_pair.size(); i++)
+        skillset_list << skillset_pair[i]->first;
+      bottom_view->addItems(skillset_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_skillset_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_skillset_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_skillset_index);
+      emit changeMode(EditorEnumDb::SKILLSETVIEW);
+      break;
+    case 8:
+      for(int i=0; i<skill_pair.size(); i++)
+        skill_list << skill_pair[i]->first;
+      bottom_view->addItems(skill_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_skill_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_skill_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_skill_index);
+      emit changeMode(EditorEnumDb::SKILLVIEW);
+      break;
+    case 9:
+      for(int i=0; i<equipment_pair.size(); i++)
+        equipment_list << equipment_pair[i]->first;
+      bottom_view->addItems(equipment_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_equipment_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_equipment_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_equipment_index);
+      emit changeMode(EditorEnumDb::EQUIPMENTVIEW);
+      break;
+    case 10:
+      for(int i=0; i<bubby_pair.size(); i++)
+        bubby_list << bubby_pair[i]->first;
+      bottom_view->addItems(bubby_list);
+
+      font.setBold(false);
+      for(int i=0; i<bottom_view->count(); i++)
+        bottom_view->item(i)->setFont(font);
+      if(current_bubby_selection != -1)
+      {
+        font.setBold(true);
+        bottom_view->item(current_bubby_selection)->setFont(font);
+      }
+      bottom_view->setCurrentRow(current_bubby_index);
+      emit changeMode(EditorEnumDb::BUBBYVIEW);
+      break;
     default:
       break;
   }
@@ -306,7 +512,77 @@ void GameDatabase::createNewResource()
       name.append(" : Some Doohickey");
       item_pair.push_back(new QPair<QString,EditorItem*>
                          (name,new EditorItem(this)));
-      current_party_index = item_pair.size()-1;
+      current_item_index = item_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 4:
+      if(action_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(action_pair.size()));
+      name.append(" : Some Act");
+      action_pair.push_back(new QPair<QString,EditorAction*>
+                         (name,new EditorAction(this)));
+      current_action_index = action_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 5:
+      if(race_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(race_pair.size()));
+      name.append(" : Some Race");
+      race_pair.push_back(new QPair<QString,EditorCategory*>
+                         (name,new EditorCategory(this)));
+      current_race_index = race_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 6:
+      if(battleclass_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(battleclass_pair.size()));
+      name.append(" : Some Class");
+      battleclass_pair.push_back(new QPair<QString,EditorCategory*>
+                         (name,new EditorCategory(this)));
+      current_battleclass_index = battleclass_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 7:
+      if(skillset_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(skillset_pair.size()));
+      name.append(" : Some Set Of Skillz");
+      skillset_pair.push_back(new QPair<QString,EditorSkillset*>
+                         (name,new EditorSkillset(this)));
+      current_skillset_index = skillset_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 8:
+      if(skill_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(skill_pair.size()));
+      name.append(" : Some Skill");
+      skill_pair.push_back(new QPair<QString,EditorSkill*>
+                         (name,new EditorSkill(this)));
+      current_skill_index = skill_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 9:
+      if(equipment_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(equipment_pair.size()));
+      name.append(" : Some Equipment");
+      equipment_pair.push_back(new QPair<QString,EditorEquipment*>
+                         (name,new EditorEquipment(this)));
+      current_equipment_index = equipment_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+      break;
+    case 10:
+      if(bubby_pair.size()<10)
+        name.append(QString::number(0));
+      name.append(QString::number(bubby_pair.size()));
+      name.append(" : Some Bubby");
+      bubby_pair.push_back(new QPair<QString,EditorBubby*>
+                         (name,new EditorBubby(this)));
+      current_bubby_index = bubby_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;
     default:
@@ -405,6 +681,162 @@ void GameDatabase::duplicateResource()
         modifyBottomList(top_view->currentRow());
       }
     }
+   else if(top_view->currentRow() == 4)
+   {
+      if(action_pair.size() > 0)
+      {
+        QString actiontemp = action_pair[current_action_index]->first;
+        if(action_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(action_pair.size()));
+        name.append(" ");
+        do
+        {
+          actiontemp.remove(0,1);
+        }
+        while(actiontemp.at(0) != ':');
+        actiontemp.prepend(name);
+        action_pair.push_back(new QPair<QString,EditorAction*>
+                          (actiontemp,action_pair[current_action_index]->
+                           second->clone()));
+        current_action_index = action_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 5)
+   {
+      if(race_pair.size() > 0)
+      {
+        QString racetemp = race_pair[current_race_index]->first;
+        if(race_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(race_pair.size()));
+        name.append(" ");
+        do
+        {
+          racetemp.remove(0,1);
+        }
+        while(racetemp.at(0) != ':');
+        racetemp.prepend(name);
+        race_pair.push_back(new QPair<QString,EditorCategory*>
+                          (racetemp,race_pair[current_race_index]->
+                           second->clone()));
+        current_race_index = race_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 6)
+   {
+      if(battleclass_pair.size() > 0)
+      {
+        QString battleclasstemp = battleclass_pair[current_battleclass_index]
+            ->first;
+        if(battleclass_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(battleclass_pair.size()));
+        name.append(" ");
+        do
+        {
+          battleclasstemp.remove(0,1);
+        }
+        while(battleclasstemp.at(0) != ':');
+        battleclasstemp.prepend(name);
+        battleclass_pair.push_back(new QPair<QString,EditorCategory*>
+                          (battleclasstemp,
+                           battleclass_pair[current_battleclass_index]->
+                           second->clone()));
+        current_battleclass_index = battleclass_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 7)
+   {
+      if(skillset_pair.size() > 0)
+      {
+        QString skillsettemp = skillset_pair[current_skillset_index]->first;
+        if(skillset_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(skillset_pair.size()));
+        name.append(" ");
+        do
+        {
+          skillsettemp.remove(0,1);
+        }
+        while(skillsettemp.at(0) != ':');
+        skillsettemp.prepend(name);
+        skillset_pair.push_back(new QPair<QString,EditorSkillset*>
+                          (skillsettemp,skillset_pair[current_skillset_index]->
+                           second->clone()));
+        current_skillset_index = skillset_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 8)
+   {
+      if(skill_pair.size() > 0)
+      {
+        QString skilltemp = skill_pair[current_skill_index]->first;
+        if(skill_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(skill_pair.size()));
+        name.append(" ");
+        do
+        {
+          skilltemp.remove(0,1);
+        }
+        while(skilltemp.at(0) != ':');
+        skilltemp.prepend(name);
+        skill_pair.push_back(new QPair<QString,EditorSkill*>
+                          (skilltemp,skill_pair[current_skill_index]->
+                           second->clone()));
+        current_skill_index = skill_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 9)
+   {
+      if(equipment_pair.size() > 0)
+      {
+        QString equipmenttemp = equipment_pair[current_equipment_index]->first;
+        if(equipment_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(equipment_pair.size()));
+        name.append(" ");
+        do
+        {
+          equipmenttemp.remove(0,1);
+        }
+        while(equipmenttemp.at(0) != ':');
+        equipmenttemp.prepend(name);
+        equipment_pair.push_back(new QPair<QString,EditorEquipment*>
+                          (equipmenttemp,equipment_pair[current_equipment_index]->
+                           second->clone()));
+        current_equipment_index = equipment_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
+   else if(top_view->currentRow() == 10)
+   {
+      if(bubby_pair.size() > 0)
+      {
+        QString bubbytemp = bubby_pair[current_bubby_index]->first;
+        if(bubby_pair.size()<10)
+          name.append(QString::number(0));
+        name.append(QString::number(bubby_pair.size()));
+        name.append(" ");
+        do
+        {
+          bubbytemp.remove(0,1);
+        }
+        while(bubbytemp.at(0) != ':');
+        bubbytemp.prepend(name);
+        bubby_pair.push_back(new QPair<QString,EditorBubby*>
+                          (bubbytemp,bubby_pair[current_bubby_index]->
+                           second->clone()));
+        current_bubby_index = bubby_pair.size()-1;
+        modifyBottomList(top_view->currentRow());
+      }
+    }
 
 }
 void GameDatabase::deleteResource()
@@ -460,6 +892,97 @@ void GameDatabase::deleteResource()
           current_item_selection--;
         if(current_item_index > 0)
           current_item_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 4:
+      if(action_pair.size() > 0)
+      {
+        action_pair.remove(current_action_index);
+        if(current_action_index == current_action_selection)
+          current_action_selection = -1;
+        else if(current_action_selection > current_action_index)
+          current_action_selection--;
+        if(current_action_index > 0)
+          current_action_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 5:
+      if(race_pair.size() > 0)
+      {
+        race_pair.remove(current_race_index);
+        if(current_race_index == current_race_selection)
+          current_race_selection = -1;
+        else if(current_race_selection > current_race_index)
+          current_race_selection--;
+        if(current_race_index > 0)
+          current_race_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 6:
+      if(battleclass_pair.size() > 0)
+      {
+        battleclass_pair.remove(current_battleclass_index);
+        if(current_battleclass_index == current_battleclass_selection)
+          current_battleclass_selection = -1;
+        else if(current_battleclass_selection > current_battleclass_index)
+          current_battleclass_selection--;
+        if(current_battleclass_index > 0)
+          current_battleclass_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 7:
+      if(skillset_pair.size() > 0)
+      {
+        skillset_pair.remove(current_skillset_index);
+        if(current_skillset_index == current_skillset_selection)
+          current_skillset_selection = -1;
+        else if(current_skillset_selection > current_skillset_index)
+          current_skillset_selection--;
+        if(current_skillset_index > 0)
+          current_skillset_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 8:
+      if(skill_pair.size() > 0)
+      {
+        skill_pair.remove(current_skill_index);
+        if(current_skill_index == current_skill_selection)
+          current_skill_selection = -1;
+        else if(current_skill_selection > current_skill_index)
+          current_skill_selection--;
+        if(current_skill_index > 0)
+          current_skill_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 9:
+      if(equipment_pair.size() > 0)
+      {
+        equipment_pair.remove(current_equipment_index);
+        if(current_equipment_index == current_equipment_selection)
+          current_equipment_selection = -1;
+        else if(current_equipment_selection > current_equipment_index)
+          current_equipment_selection--;
+        if(current_equipment_index > 0)
+          current_equipment_index--;
+        modifyBottomList(top_view->currentRow());
+      }
+      break;
+    case 10:
+      if(bubby_pair.size() > 0)
+      {
+        bubby_pair.remove(current_bubby_index);
+        if(current_bubby_index == current_bubby_selection)
+          current_bubby_selection = -1;
+        else if(current_bubby_selection > current_bubby_index)
+          current_bubby_selection--;
+        if(current_bubby_index > 0)
+          current_bubby_index--;
         modifyBottomList(top_view->currentRow());
       }
       break;
