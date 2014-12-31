@@ -8,11 +8,13 @@
 #ifndef MAPDATABASE_H
 #define MAPDATABASE_H
 
-#include <QTabWidget>
+#include <QListWidget>
+#include <QWidget>
+
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
 
-class MapDatabase : public QTabWidget
+class MapDatabase : public QWidget
 {
   Q_OBJECT
 public:
@@ -23,8 +25,13 @@ public:
   ~MapDatabase();
 
 private:
+  /* The Views */
   RawImageView* raw_view;
   SpriteView* sprite_view;
+  QListWidget* top_view;
+
+  /* Layout */
+  QVBoxLayout* layout;
 
 protected:
   /* Paints the sprite in a bounding box */

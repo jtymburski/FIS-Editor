@@ -210,6 +210,7 @@ void Application::setupTopMenu()
 
   /* Sets up the brushes toolbar */
   brushbar = new QToolBar("Brushes",this);
+  brushbar->addSeparator();
   brushbar->addAction(basicmode_action);
   brushbar->addAction(erasermode_action);
   brushbar->addAction(blockplacemode_action);

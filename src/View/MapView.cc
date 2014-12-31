@@ -66,8 +66,8 @@ void MapView::setupSidebar()
                     | QDockWidget::DockWidgetFloatable);
 
   /* Connects sprite picking */
-  connect(map_database->getRawView()->getToolbox(),SIGNAL(pathOfImage(QString)),
-          this,SLOT(setSprite(QString)));
+  //connect(map_database->getRawView()->getToolbox(),SIGNAL(pathOfImage(QString)),
+  //        this,SLOT(setSprite(QString)));
 }
 
 /*

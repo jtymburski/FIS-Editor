@@ -18,15 +18,20 @@
  */
 SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 {
+  QVBoxLayout* layout = new QVBoxLayout(this);
+
   current = new EditorSprite();
-  edit_sprite = new SpriteDialog(this);
+  //edit_sprite = new SpriteDialog(this);
   editor_sprite_list = new EditorSpriteList(this);
   editor_sprite_list->show();
-  editor_sprite_list->setFixedSize(288,512);
-  connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
-          this,SLOT(setCurrent(int)));
-  connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
+  //editor_sprite_list->setFixedSize(288,512);
+  //connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
+  //        this,SLOT(setCurrent(int)));
+  //connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
   nextID = 1;
+
+  layout->addWidget(editor_sprite_list);
+  setLayout(layout);
 }
 
 /*
@@ -37,7 +42,7 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 SpriteView::~SpriteView()
 {
   //qDebug()<<"Removing Editor Sprite Toolbox";
-  delete edit_sprite;
+  //delete edit_sprite;
   for(int i=0; i<editor_sprites.size(); i++)
   {
     delete editor_sprites[i];
@@ -193,20 +198,20 @@ QPixmap SpriteView::setColor(int deltared, int deltablue,
  */
 void SpriteView::paintEvent(QPaintEvent *)
 {
-  QPainter painter(this);
-  QRect bound(12,520,64,64);
-  QRect border(11,519,66,66);
-  painter.setPen(QPen(QBrush(Qt::black),2));
-  painter.setOpacity(current->getOpacity()/100.0);
-  painter.drawPixmap(bound,transformPixmap(current));
-  painter.setOpacity(1.0);
-  painter.drawRect(border);
-  painter.setFont(QFont("helvetica",14,QFont::Bold));
-  painter.drawText(80,536,current->getName());
-  painter.setFont(QFont("arial",8));
-  QString framecount = "Framecount : ";
-  painter.drawText(85,554,framecount.append(QString::
-                                            number(current->frameCount())));
+//  QPainter painter(this);
+//  QRect bound(12,520,64,64);
+//  QRect border(11,519,66,66);
+//  painter.setPen(QPen(QBrush(Qt::black),2));
+//  painter.setOpacity(current->getOpacity()/100.0);
+//  painter.drawPixmap(bound,transformPixmap(current));
+//  painter.setOpacity(1.0);
+//  painter.drawRect(border);
+//  painter.setFont(QFont("helvetica",14,QFont::Bold));
+//  painter.drawText(80,536,current->getName());
+//  painter.setFont(QFont("arial",8));
+//  QString framecount = "Framecount : ";
+//  painter.drawText(85,554,framecount.append(QString::
+//                                            number(current->frameCount())));
 }
 
 /*

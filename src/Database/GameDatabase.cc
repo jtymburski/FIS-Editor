@@ -119,6 +119,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   button_layout->addWidget(import_button);
   button_layout->addWidget(duplicate_button);
   layout->addLayout(button_layout);
+  modifyBottomList(top_view->currentRow());
 }
 
 GameDatabase::~GameDatabase()
