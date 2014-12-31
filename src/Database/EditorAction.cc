@@ -3,7 +3,6 @@
 
 EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 {
-
   /* Main Layout */
   main_layout = new QHBoxLayout(this);
   text_layout = new QGridLayout();
@@ -74,7 +73,6 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   action_flags_revive = new QRadioButton("Revive",this);
   connect(action_flags_revive,SIGNAL(clicked()),this,SLOT(updateLayouts()));
 
-  //QRadioButton* action_flags_valid = new QRadioButton("Valid Action",this);
   /* Action flags layout */
   action_flags_layout = new QVBoxLayout();
   action_flags_layout->addWidget(action_flags_damage);
@@ -380,14 +378,14 @@ EditorAction* EditorAction::clone()
 
 void EditorAction::setNameAndID(QString str)
 {
-  qDebug() << base.getID();
-  qDebug() << str.split(" : ").at(0).toInt();
+  //qDebug() << base.getID();
+  //qDebug() << str.split(" : ").at(0).toInt();
   base.setID(str.split(" : ").at(0).toInt());
   name = str.split(" : ").at(1);
   name_edit->setText(name);
-  qDebug()<<name;
-  qDebug()<<base.getID();
-  qDebug()<<base.actionFlag(ActionFlags::DAMAGE);
+  //qDebug()<<name;
+  //qDebug()<<base.getID();
+  //qDebug()<<base.actionFlag(ActionFlags::DAMAGE);
   setWorkingAction(base);
 }
 
