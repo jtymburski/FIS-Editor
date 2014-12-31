@@ -24,6 +24,7 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   addWidget(item_view);
 
   action_view = new EditorAction(this);
+  action_view->setDisabled(true);
   addWidget(action_view);
   
   race_view = new QWidget(this);
@@ -85,58 +86,27 @@ EditorAction* GameView::getActionView()
 /* Sets the Editor Action View */
 void GameView::setActionView(EditorAction *action)
 {
-  //delete action_view;
+  disconnect(action_view,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+  refreshView(EditorEnumDb::ACTIONVIEW, action_view, action);
   action_view = action;
-  qDebug()<<"Set action view";
+  connect(action_view,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+  action_view->getEditedAction();
+}
+
+/* Refresh view */
+void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
+                           QWidget *replacement)
+{
+  removeWidget(old);
+  insertWidget(static_cast<int>(mode), replacement);
+  setViewMode(mode);
 }
 
 /* Sets The View Mode */
 void GameView::setViewMode(EditorEnumDb::ViewMode v)
 {
   mode = v;
-  switch(mode)
-  {
-    case EditorEnumDb::MAPVIEW:
-      setCurrentIndex(0);
-      break;
-    case EditorEnumDb::PERSONVIEW:
-
-      //removeWidget(person_view);
-      //person_view = new QWidget(this);
-      //person_view->setStyleSheet("background-color:black");
-      //insertWidget(1, person_view);
-
-      setCurrentIndex(1);
-      break;
-    case EditorEnumDb::PARTYVIEW:
-      setCurrentIndex(2);
-      break;
-    case EditorEnumDb::ITEMVIEW:
-      setCurrentIndex(3);
-      break;
-    case EditorEnumDb::ACTIONVIEW:
-      setCurrentIndex(4);
-      break;
-    case EditorEnumDb::RACEVIEW:
-      setCurrentIndex(5);
-      break;
-    case EditorEnumDb::BATTLECLASSVIEW:
-      setCurrentIndex(6);
-      break;
-    case EditorEnumDb::SKILLSETVIEW:
-      setCurrentIndex(7);
-      break;
-    case EditorEnumDb::SKILLVIEW:
-      setCurrentIndex(8);
-      break;
-    case EditorEnumDb::EQUIPMENTVIEW:
-      setCurrentIndex(9);
-      break;
-    case EditorEnumDb::BUBBYVIEW:
-      setCurrentIndex(10);
-      break;
-    default:
-      setCurrentIndex(0);
-      break;
-  }
+  setCurrentIndex(static_cast<int>(v));
 }

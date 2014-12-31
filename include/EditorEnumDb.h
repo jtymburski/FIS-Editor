@@ -27,8 +27,17 @@ public:
   enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
 
   /* Enum For View Mode */
-  enum ViewMode {MAPVIEW,PERSONVIEW,PARTYVIEW,ITEMVIEW, ACTIONVIEW, RACEVIEW,
-                 BATTLECLASSVIEW, SKILLSETVIEW, SKILLVIEW, EQUIPMENTVIEW,
-                 BUBBYVIEW };
+  enum ViewMode {MAPVIEW = 0,
+                 PERSONVIEW = 1,
+                 PARTYVIEW = 2,
+                 ITEMVIEW = 3,
+                 ACTIONVIEW = 4,
+                 RACEVIEW = 5,
+                 BATTLECLASSVIEW = 6,
+                 SKILLSETVIEW = 7,
+                 SKILLVIEW = 8,
+                 EQUIPMENTVIEW = 9,
+                 BUBBYVIEW = 10
+                };
 };
 #endif // EDITORENUMDB_H

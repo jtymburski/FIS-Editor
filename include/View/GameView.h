@@ -22,6 +22,10 @@ public:
   /* Destructor function */
   ~GameView();
 
+  /* Refresh View */
+  void refreshView(EditorEnumDb::ViewMode mode, QWidget* old,
+                   QWidget* replacement);
+
 private:
   /* The number of same images that trail this one */
 //  int followers;
@@ -62,5 +66,6 @@ public slots:
 signals:
   /* Emits to parent when selected to deselect all others */
 //  void chosen(int);
+  void nameChange(QString);
 };
 #endif // GAMEVIEW_H

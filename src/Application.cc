@@ -68,6 +68,8 @@ Application::Application(QWidget* parent) :
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
 
+  connect(game_view,SIGNAL(nameChange(QString)),game_database,
+          SLOT(updateBottomListName(QString)));
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
   setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
@@ -314,7 +316,10 @@ void Application::setItem(QPair<QString,EditorItem*>* pair)
 void Application::setAction(QPair<QString,EditorAction*>* pair)
 {
   qDebug()<<pair->first;
+  qDebug() << "=" << pair->second->getBaseAction().getID();
   game_view->setActionView(pair->second);
+  //game_view->getActionView()->setBaseAction(Action());
+  //game_view->getActionView()->setNameAndID(pair->first);
 }
 /*
  * Description: Sets the race

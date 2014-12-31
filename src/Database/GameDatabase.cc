@@ -131,6 +131,7 @@ void GameDatabase::modifySelection(QModelIndex index)
   switch(top_view->currentRow())
   {
     case 0:
+      current_name = &map_pair[index.row()]->first;
       current_map = map_pair[index.row()];
       current_map_selection = index.row();
       current_map_index = index.row();
@@ -138,6 +139,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeMap(current_map);
       break;
     case 1:
+      current_name = &person_pair[index.row()]->first;
       current_person = person_pair[index.row()];
       current_person_selection = index.row();
       current_person_index = index.row();
@@ -145,6 +147,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changePerson(current_person);
       break;
     case 2:
+      current_name = &party_pair[index.row()]->first;
       current_party = party_pair[index.row()];
       current_party_selection = index.row();
       current_party_index = index.row();
@@ -152,6 +155,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeParty(current_party);
       break;
     case 3:
+      current_name = &item_pair[index.row()]->first;
       current_item = item_pair[index.row()];
       current_item_selection = index.row();
       current_item_index = index.row();
@@ -159,6 +163,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeItem(current_item);
       break;
     case 4:
+      current_name = &action_pair[index.row()]->first;
       current_action = action_pair[index.row()];
       current_action_selection = index.row();
       current_action_index = index.row();
@@ -166,6 +171,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeAction(current_action);
       break;
     case 5:
+      current_name = &race_pair[index.row()]->first;
       current_race = race_pair[index.row()];
       current_race_selection = index.row();
       current_race_index = index.row();
@@ -173,6 +179,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeRace(current_race);
       break;
     case 6:
+      current_name = &battleclass_pair[index.row()]->first;
       current_battleclass = battleclass_pair[index.row()];
       current_battleclass_selection = index.row();
       current_battleclass_index = index.row();
@@ -180,6 +187,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeBattleclass(current_battleclass);
       break;
     case 7:
+      current_name = &skillset_pair[index.row()]->first;
       current_skillset = skillset_pair[index.row()];
       current_skillset_selection = index.row();
       current_skillset_index = index.row();
@@ -187,6 +195,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeSkillset(current_skillset);
       break;
     case 8:
+      current_name = &skill_pair[index.row()]->first;
       current_skill = skill_pair[index.row()];
       current_skill_selection = index.row();
       current_skill_index = index.row();
@@ -194,6 +203,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeSkill(current_skill);
       break;
     case 9:
+      current_name = &equipment_pair[index.row()]->first;
       current_equipment = equipment_pair[index.row()];
       current_equipment_selection = index.row();
       current_equipment_index = index.row();
@@ -201,6 +211,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       emit changeEquipment(current_equipment);
       break;
     case 10:
+      current_name = &bubby_pair[index.row()]->first;
       current_bubby = bubby_pair[index.row()];
       current_bubby_selection = index.row();
       current_bubby_index = index.row();
@@ -521,6 +532,9 @@ void GameDatabase::createNewResource()
       name.append(" : Some Act");
       action_pair.push_back(new QPair<QString,EditorAction*>
                          (name,new EditorAction(this)));
+      //action_pair.at(action_pair.size() - 1)->second->setBaseAction(Action());
+      action_pair.at(action_pair.size() - 1)->second->setNameAndID(action_pair.at(action_pair.size() - 1)->first);
+      //qDebug() << " : " << action_pair.at(action_pair.size() - 1)->second->getBaseAction().getID();
       current_action_index = action_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;
@@ -988,4 +1002,10 @@ void GameDatabase::deleteResource()
     default:
       break;
   }
+}
+
+void GameDatabase::updateBottomListName(QString str)
+{
+  *current_name = str;
+  modifyBottomList(top_view->currentRow());
 }

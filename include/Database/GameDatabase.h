@@ -111,12 +111,14 @@ private:
   QPushButton* import_button;
   QPushButton* duplicate_button;
 
+  QString* current_name;
 
 protected:
 public slots:
   void modifyBottomList(int index);
   void modifySelection(QModelIndex index);
   void modifyIndex(int);
+  void updateBottomListName(QString str);
 
   void createNewResource();
   void duplicateResource();
