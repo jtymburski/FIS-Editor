@@ -22,6 +22,7 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   text_layout->addWidget(maxduration_label,5,0,Qt::AlignLeft);
 
   name_edit = new QLineEdit(this);
+  name_edit->setMaximumWidth(350);
   text_layout->addWidget(name_edit,0,1,1,2);
   value_edit = new QLineEdit(this);
   text_layout->addWidget(value_edit,1,1,Qt::AlignLeft);
@@ -33,14 +34,15 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   text_layout->addWidget(minduration_edit,4,1,Qt::AlignLeft);
   maxduration_edit = new QLineEdit(this);
   text_layout->addWidget(maxduration_edit,5,1,Qt::AlignLeft);
+  text_layout->setColumnStretch(2, 1);
 
-  action_flags_base_pc = new QCheckBox("Base is Percent",this);
-  action_flags_vari_pc = new QCheckBox("Varience is Percent",this);
+  action_flags_base_pc = new QCheckBox("Value is Percent",this);
+  action_flags_vari_pc = new QCheckBox("Variance is Percent",this);
   text_layout->addWidget(action_flags_base_pc,1,2,Qt::AlignLeft);
   text_layout->addWidget(action_flags_vari_pc,3,2,Qt::AlignLeft);
   QHBoxLayout* names_layout = new QHBoxLayout();
   names_layout->addLayout(text_layout);
-  names_layout->addSpacing(512);
+
   /* Left Layout */
   left_layout = new QVBoxLayout();
   left_layout->addLayout(names_layout);
@@ -763,7 +765,7 @@ Action EditorAction::getEditedAction()
   working.setBaseVariance(variance_edit->text().toInt(),
                           action_flags_vari_pc->isChecked());
   working.setAilmentDuration(minduration_edit->text().toInt(),
-                      maxduration_edit->text().toInt());
+                             maxduration_edit->text().toInt());
   working.setIgnoreAttack(IgnoreFlags::PHYSICAL,
                           ignoreatk_flags_physical->isChecked());
   working.setIgnoreAttack(IgnoreFlags::THERMAL,
@@ -981,6 +983,7 @@ Action EditorAction::getEditedAction()
 
   base = working;
   outputString();
+  loadWorkingInfo();
   return base;
 }
 
