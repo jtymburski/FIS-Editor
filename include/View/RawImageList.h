@@ -30,22 +30,6 @@ public:
   /* Destructor function */
   ~RawImageList();
 
-public slots:
-  /* Opens the file selection dialog */
-  void openDialog();
-
-  /* Inputs the files from the given directory */
-  void switchDirectory(QModelIndex);
-
-  /* Deselects all sprites except the chosen one */
-  void deselectOthers(int);
-
-  /* Picks a sprite path for map operations */
-  void setSprite(QString);
-
-protected:
-  /* Sets up the painting of all selected files */
-  void paintEvent(QPaintEvent *);
 private:
   /* The button that opens the selection dialog */
   QPushButton* directory;
@@ -61,8 +45,25 @@ private:
 
   /* Pointer to the directory selection dialog */
   QFileSystemModel* directory_module;
-signals:
 
+protected:
+  /* Sets up the painting of all selected files */
+  void paintEvent(QPaintEvent *);
+
+public slots:
+  /* Opens the file selection dialog */
+  void openDialog();
+
+  /* Inputs the files from the given directory */
+  void switchDirectory(QModelIndex);
+
+  /* Deselects all sprites except the chosen one */
+  void deselectOthers(int);
+
+  /* Picks a sprite path for map operations */
+  void setSprite(QString);
+
+signals:
   /* Emits to parent to send an image path */
   void pathOfImage(QString);
   /* Sends up the edited sprite */

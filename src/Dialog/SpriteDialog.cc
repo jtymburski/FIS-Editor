@@ -31,8 +31,9 @@ SpriteDialog::SpriteDialog(QWidget *parent,
         frame_temp.append('0');
       frame_temp.append(QString::number(i+1));
       frame_temp.append(".png");
-      working_sprite->setPath(frame_temp);
-      working_sprite->setImage(QImage(frame_temp));
+      working_sprite->setPath(working_sprite->frameCount(), frame_temp);
+      //working_sprite->setPath(frame_temp);
+      //working_sprite->setImage(QImage(frame_temp));
     }
   }
 
@@ -120,26 +121,9 @@ SpriteDialog::SpriteDialog(QWidget *parent,
           red,SLOT(setNum(int)));
   layout->addWidget(red,4,2);
 
-  /* Blue input */
-  QLabel* blue_label = new QLabel("Blue Balance");
-  layout->addWidget(blue_label,5,0);
-  blue_input = new QSlider(Qt::Horizontal);
-  blue_input->setTickInterval(1);
-  blue_input->setMinimum(0);
-  blue_input->setMaximum(255);
-  blue_backup = working_sprite->getSprite()->getColorBlue();
-  blue_input->setSliderPosition(working_sprite->getSprite()->getColorBlue());
-  connect(blue_input,SIGNAL(valueChanged(int)),
-          working_sprite,SLOT(setColorBlue(int)));
-  layout->addWidget(blue_input,5,1);
-  QLabel* blue = new QLabel(QString::number(blue_input->value()));
-  connect(blue_input,SIGNAL(valueChanged(int)),
-          blue,SLOT(setNum(int)));
-  layout->addWidget(blue,5,2);
-
   /* Green input */
   QLabel* green_label = new QLabel("Green Balance");
-  layout->addWidget(green_label,6,0);
+  layout->addWidget(green_label,5,0);
   green_input = new QSlider(Qt::Horizontal);
   green_input->setTickInterval(1);
   green_input->setMinimum(0);
@@ -148,11 +132,28 @@ SpriteDialog::SpriteDialog(QWidget *parent,
   green_input->setSliderPosition(working_sprite->getSprite()->getColorGreen());
   connect(green_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorGreen(int)));
-  layout->addWidget(green_input,6,1);
+  layout->addWidget(green_input,5,1);
   QLabel* green = new QLabel(QString::number(green_input->value()));
   connect(green_input,SIGNAL(valueChanged(int)),
           green,SLOT(setNum(int)));
-  layout->addWidget(green,6,2);
+  layout->addWidget(green,5,2);
+
+  /* Blue input */
+  QLabel* blue_label = new QLabel("Blue Balance");
+  layout->addWidget(blue_label,6,0);
+  blue_input = new QSlider(Qt::Horizontal);
+  blue_input->setTickInterval(1);
+  blue_input->setMinimum(0);
+  blue_input->setMaximum(255);
+  blue_backup = working_sprite->getSprite()->getColorBlue();
+  blue_input->setSliderPosition(working_sprite->getSprite()->getColorBlue());
+  connect(blue_input,SIGNAL(valueChanged(int)),
+          working_sprite,SLOT(setColorBlue(int)));
+  layout->addWidget(blue_input,6,1);
+  QLabel* blue = new QLabel(QString::number(blue_input->value()));
+  connect(blue_input,SIGNAL(valueChanged(int)),
+          blue,SLOT(setNum(int)));
+  layout->addWidget(blue,6,2);
 
   /* Animation time input */
   QLabel* time_label = new QLabel("Animation Time:");

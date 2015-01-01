@@ -118,7 +118,7 @@ void FrameList::addHead(QString x)
  */
 void FrameList::addTail(QString x)
 {
-  currentsprite->setPath(x);
+  currentsprite->setPath(currentsprite->frameCount(), x);
   addFrames();
 }
 
@@ -127,8 +127,9 @@ void FrameList::addTail(QString x)
  *
  * Input: Frame path, before and after positions
  */
+// TODO: Remove before??
 void FrameList::addMidpoint(QString x, int before, int after)
 {
-  currentsprite->addMidpoint(x,before,after);
+  currentsprite->addMidpoint(x, after);
   addFrames();
 }

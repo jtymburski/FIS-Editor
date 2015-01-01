@@ -7,16 +7,16 @@
 #ifndef SpriteView_H
 #define SpriteView_H
 
-#include <QWidget>
-#include <QPainter>
-#include <QVector>
-#include <QMenu>
-#include <QVBoxLayout>
-#include <QListWidget>
-#include <QScrollArea>
-#include <QMouseEvent>
 #include <QDialog>
 #include <QLabel>
+#include <QListWidget>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QVector>
+#include <QWidget>
 #include "Database/EditorSprite.h"
 #include "View/EditorSpriteList.h"
 #include "Dialog/SpriteDialog.h"
@@ -31,24 +31,27 @@ public:
   /* Destructor function */
   ~SpriteView();
 
+private:
+  /* Bottom view widget to act as a placeholder */
+  QWidget* bottom_view;
 
-  QPixmap setBrightness(int value, QPixmap original);
-  QPixmap setColor(int red, int blue, int green, QPixmap original);
-public slots:
-  /* Adds an Editor Sprite to the toolbox */
-  void addEditorSprite(EditorSprite* e);
+  /* The current Sprite selected in the toolbox */
+  EditorSprite* current;
 
-  /* Returns the currently selected Editor Sprite */
-  EditorSprite* getCurrent();
+  /* The sprite dialog for editing */
+  SpriteDialog* edit_sprite;
 
-  /* Sets the current Editor Sprite to the given index */
-  void setCurrent(int);
+  /* The list widget that contains all the sprite names */
+  EditorSpriteList* editor_sprite_list;
 
-  /* Updates the sprite list */
-  void refreshList();
+  /* The vector for storing sprite choices */
+  QVector<EditorSprite* > editor_sprites;
 
-  /* Returns a transformed image */
-  QPixmap transformPixmap(EditorSprite*,int pos = 0);
+  /* A widget for showing the current selected sprite frame sequence */
+  QDialog* frames;
+
+  /* The next available ID */
+  uint16_t nextID;
 
 protected:
   /* Sets up the painting of all selected files */
@@ -57,28 +60,28 @@ protected:
   /* Views Frames */
   void mouseDoubleClickEvent(QMouseEvent *e);
 
-private:
-  /* The vector for storing sprite choices */
-  QVector<EditorSprite* > editor_sprites;
+public slots:
+  /* Adds an Editor Sprite to the toolbox */
+  void addEditorSprite(EditorSprite* e);
 
-  /* The next available ID */
-  uint16_t nextID;
+  /* Returns the currently selected Editor Sprite */
+  EditorSprite* getCurrent();
 
-  /* The current Sprite selected in the toolbox */
-  EditorSprite* current;
+  /* Updates the sprite list */
+  void refreshList();
 
-  /* The list widget that contains all the sprite names */
-  EditorSpriteList* editor_sprite_list;
+  /* Sets the current Editor Sprite to the given index */
+  void setCurrent(int);
 
-  /* A widget for showing the current selected sprite frame sequence */
-  QDialog* frames;
-
-  SpriteDialog* edit_sprite;
+  /* Returns a transformed image */
+  QPixmap transformPixmap(EditorSprite*,int pos = 0);
 
 signals:
-
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
+public:
+  QPixmap setBrightness(int value, QPixmap original);
+  QPixmap setColor(int red, int blue, int green, QPixmap original);
 };
 #endif // SpriteView_H

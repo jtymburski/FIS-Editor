@@ -38,16 +38,17 @@ protected:
 //  void paintEvent(QPaintEvent *);
 
 public slots:
-  /* Loads the image with a valid given path */
-//  void loadSprite(QString path);
-
-  /* Returns the views */
-  RawImageView* getRawView();
-  SpriteView* getSpriteView();
+  /* Updates based on selected index */
+  void updateSelected(int index);
 
 signals:
   /* Emits to parent when selected to deselect all others */
 //  void chosen(int);
+
+public:
+  /* Returns the views */
+  RawImageView* getRawView();
+  SpriteView* getSpriteView();
 };
 
 #endif // MAPDATABASE_H

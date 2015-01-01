@@ -141,6 +141,8 @@ void Application::setupTopMenu()
   /* Connects File menu actions to slots */
   connect(show_menu_action, SIGNAL(triggered()), this, SLOT(showDatabase()));
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
+  // TODO: This should be not map, but new game. New map should be triggered
+  // from a different view
   connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
 
   /* Sets up Edit menu actions*/
@@ -188,7 +190,6 @@ void Application::setupTopMenu()
   fill_action->setIcon(QIcon(":/Icons/Resources/flood-icon.png"));
 
   cursor_menu = menuBar()->addMenu("&Cursor Modes");
-
 
   /* Sets up the menu toolbars */
   menubar = new QToolBar("Menus",this);
@@ -317,8 +318,6 @@ void Application::setItem(QPair<QString,EditorItem*>* pair)
 void Application::setAction(QPair<QString,EditorAction*>* pair)
 {
   game_view->setActionView(pair->second);
-  //game_view->getActionView()->setBaseAction(Action());
-  //game_view->getActionView()->setNameAndID(pair->first);
 }
 /*
  * Description: Sets the race
@@ -458,6 +457,7 @@ void Application::showDatabase()
  */
 void Application::closeEvent(QCloseEvent *event)
 {
+/*
   QString message = "Are you sure you want to do this ";
   message.append(username);
   message.append("...");
@@ -469,4 +469,6 @@ void Application::closeEvent(QCloseEvent *event)
     event->accept();
   else
     event->ignore();
+*/
+  event->accept();
 }

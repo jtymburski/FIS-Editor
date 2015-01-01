@@ -24,7 +24,6 @@ MapRender::MapRender(SpriteView* tool, QWidget* parent,
                      int w, int h, EditorEnumDb::CursorMode cursor)
   : QGraphicsScene(parent)
 {
-
   remove_action = new QAction("&Remove Active Layer",0);
   setNpass_action = new QAction("&North Passibility",0);
   setEpass_action = new QAction("&East Passibility",0);
