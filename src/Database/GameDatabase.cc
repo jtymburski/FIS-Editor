@@ -21,7 +21,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   top_view->addItems(items);
   top_view->setCurrentRow(0);
   connect(top_view,SIGNAL(currentRowChanged(int)),
-          this,SLOT(modifyBottomList(int)));
+          this,SLOT(rowChange(int)));
 
   bottom_view = new QListWidget(this);
   bottom_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -127,6 +127,7 @@ GameDatabase::~GameDatabase()
 
 }
 
+/* Double click on an element */
 void GameDatabase::modifySelection(QModelIndex index)
 {
   switch(top_view->currentRow())
@@ -200,6 +201,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       current_skill = skill_pair[index.row()];
       current_skill_selection = index.row();
       current_skill_index = index.row();
+      skill_pair.at(index.row())->second->setTotalActionsList(&action_pair);
       modifyBottomList(top_view->currentRow());
       emit changeSkill(current_skill);
       break;
@@ -223,7 +225,63 @@ void GameDatabase::modifySelection(QModelIndex index)
       break;
   }
 }
-
+void GameDatabase::rowChange(int index)
+{
+  switch(index)
+  {
+    case 0:
+      if(map_pair.size() != 0 && current_map_selection != -1)
+        current_name = &map_pair[current_map_selection]->first;
+      break;
+    case 1:
+      if(person_pair.size() != 0 && current_person_selection != -1)
+        current_name = &person_pair[current_person_selection]->first;
+      break;
+    case 2:
+      if(party_pair.size() != 0 && current_party_selection != -1)
+        current_name = &party_pair[current_party_selection]->first;
+      break;
+    case 3:
+      if(item_pair.size() != 0 && current_item_selection != -1)
+        current_name = &item_pair[current_item_selection]->first;
+      break;
+    case 4:
+      if(action_pair.size() != 0 && current_action_selection != -1)
+        current_name = &action_pair[current_action_selection]->first;
+      break;
+    case 5:
+      if(race_pair.size() != 0 && current_race_selection != -1)
+        current_name = &race_pair[current_race_selection]->first;
+      break;
+    case 6:
+      if(battleclass_pair.size() != 0 && current_battleclass_selection != -1)
+        current_name = &battleclass_pair[current_battleclass_selection]->first;
+      break;
+    case 7:
+      if(skillset_pair.size() != 0 && current_skillset_selection != -1)
+        current_name = &skillset_pair[current_skillset_selection]->first;
+      break;
+    case 8:
+      if(skill_pair.size() != 0 && current_skill_selection != -1)
+      {
+        current_name = &skill_pair[current_skill_selection]->first;
+        skill_pair.at(current_skill_selection)->second->
+                      setTotalActionsList(&action_pair);
+      }
+      break;
+    case 9:
+      if(equipment_pair.size() != 0 && current_equipment_selection != -1)
+        current_name = &equipment_pair[current_equipment_selection]->first;
+      break;
+    case 10:
+      if(bubby_pair.size() != 0 && current_bubby_selection != -1)
+        current_name = &bubby_pair[current_bubby_selection]->first;
+      break;
+    default:
+      break;
+  }
+  modifyBottomList(index);
+}
 
 void GameDatabase::modifyIndex(int index)
 {

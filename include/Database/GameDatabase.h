@@ -119,6 +119,7 @@ public slots:
   void modifySelection(QModelIndex index);
   void modifyIndex(int);
   void updateBottomListName(QString str);
+  void rowChange(int);
 
   void createNewResource();
   void duplicateResource();

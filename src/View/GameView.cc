@@ -36,7 +36,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   skillset_view = new QWidget(this);
   addWidget(skillset_view);
   
-  skill_view = new QWidget(this);
+  skill_view = new EditorSkill(this);
+  skill_view->setDisabled(true);
   addWidget(skill_view);
   
   equipment_view = new QWidget(this);
@@ -52,7 +53,7 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   race_view->setStyleSheet("background-color:purple;");
   battleclass_view->setStyleSheet("background-color:pink;");
   skillset_view->setStyleSheet("background-color:orange;");
-  skill_view->setStyleSheet("background-color:yellow;");
+  //skill_view->setStyleSheet("background-color:yellow;");
   equipment_view->setStyleSheet("background-color:violet;");
   bubby_view->setStyleSheet("background-color:black;");
 
@@ -95,6 +96,23 @@ void GameView::setActionView(EditorAction *action)
   action_view->getEditedAction();
 }
 
+/* Returns the Editor Skill View */
+EditorSkill* GameView::getSkillView()
+{
+  return skill_view;
+}
+
+/* Sets the Editor Skill View */
+void GameView::setSkillView(EditorSkill *skill)
+{
+//  disconnect(action_view,SIGNAL(nameChange(QString)),
+//          this,SIGNAL(nameChange(QString)));
+  refreshView(EditorEnumDb::SKILLVIEW, skill_view, skill);
+  skill_view = skill;
+//  connect(action_view,SIGNAL(nameChange(QString)),
+//          this,SIGNAL(nameChange(QString)));
+//  action_view->getEditedAction();
+}
 /* Refresh view */
 void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
                            QWidget *replacement)

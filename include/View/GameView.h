@@ -38,7 +38,7 @@ private:
   QWidget* race_view;
   QWidget* battleclass_view;
   QWidget* skillset_view;
-  QWidget* skill_view;
+  EditorSkill* skill_view;
   QWidget* equipment_view;
   QWidget* bubby_view;
 
@@ -57,7 +57,10 @@ public slots:
   void setMapView(MapView* view);
 
   EditorAction* getActionView();
-  void setActionView(EditorAction* action);
+  void setActionView(EditorAction* sprite);
+
+  EditorSkill* getSkillView();
+  void setSkillView(EditorSkill* action);
 
 
   /* Sets The View Mode */

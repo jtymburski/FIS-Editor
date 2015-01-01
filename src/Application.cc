@@ -316,8 +316,6 @@ void Application::setItem(QPair<QString,EditorItem*>* pair)
  */
 void Application::setAction(QPair<QString,EditorAction*>* pair)
 {
-  qDebug()<<pair->first;
-  qDebug() << "=" << pair->second->getBaseAction().getID();
   game_view->setActionView(pair->second);
   //game_view->getActionView()->setBaseAction(Action());
   //game_view->getActionView()->setNameAndID(pair->first);
@@ -348,7 +346,7 @@ void Application::setSkillset(QPair<QString,EditorSkillset*>* pair)
  */
 void Application::setSkill(QPair<QString,EditorSkill*>* pair)
 {
-  qDebug()<<pair->first;
+  game_view->setSkillView(pair->second);
 }
 /*
  * Description: Sets the equipment
