@@ -105,12 +105,12 @@ EditorSkill* GameView::getSkillView()
 /* Sets the Editor Skill View */
 void GameView::setSkillView(EditorSkill *skill)
 {
-//  disconnect(action_view,SIGNAL(nameChange(QString)),
-//          this,SIGNAL(nameChange(QString)));
+  disconnect(skill_view,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
   refreshView(EditorEnumDb::SKILLVIEW, skill_view, skill);
   skill_view = skill;
-//  connect(action_view,SIGNAL(nameChange(QString)),
-//          this,SIGNAL(nameChange(QString)));
+  connect(skill_view,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
 //  action_view->getEditedAction();
 }
 /* Refresh view */
@@ -127,4 +127,47 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
 {
   mode = v;
   setCurrentIndex(static_cast<int>(v));
+}
+
+void GameView::deactivateCurrentView()
+{
+  switch(mode)
+  {
+    case EditorEnumDb::MAPVIEW:
+      map_view->setDisabled(true);
+      break;
+    case EditorEnumDb::PERSONVIEW:
+      person_view->setDisabled(true);
+      break;
+    case EditorEnumDb::PARTYVIEW:
+      party_view->setDisabled(true);
+      break;
+    case EditorEnumDb::ITEMVIEW:
+      item_view->setDisabled(true);
+      break;
+    case EditorEnumDb::ACTIONVIEW:
+      action_view->setDisabled(true);
+      break;
+    case EditorEnumDb::RACEVIEW:
+      race_view->setDisabled(true);
+      break;
+    case EditorEnumDb::BATTLECLASSVIEW:
+      battleclass_view->setDisabled(true);
+      break;
+    case EditorEnumDb::SKILLSETVIEW:
+      skillset_view->setDisabled(true);
+      break;
+    case EditorEnumDb::SKILLVIEW:
+      skill_view->setDisabled(true);
+      break;
+    case EditorEnumDb::EQUIPMENTVIEW:
+      equipment_view->setDisabled(true);
+      break;
+    case EditorEnumDb::BUBBYVIEW:
+      bubby_view->setDisabled(true);
+      break;
+    default:
+      break;
+
+  }
 }

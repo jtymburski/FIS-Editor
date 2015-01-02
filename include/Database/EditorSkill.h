@@ -45,6 +45,7 @@ private:
 
   QVector<QPair<QString,EditorAction*>* >* total_action_list;
   QVector<QPair<QString,EditorAction*>* >* skill_action_list;
+  QVector<QPair<QString,EditorAction*>* > previous_skill_action_list;
 
   QImage* animation_frame;
   QImage* thumbnail_frame;
@@ -95,6 +96,9 @@ private:
   QCheckBox* skill_assigning;
   QCheckBox* skill_valid;
 
+  QPushButton* save_skill;
+  QPushButton* reset_skill;
+
   QHBoxLayout* top_horizontal;
   QHBoxLayout* bottom_horizontal;
 
@@ -106,6 +110,7 @@ private:
   /* Action being worked on */
  // Action::Action working;
   int action_selection;
+  int skill_action_selection;
 
   int running_action_id;
 
@@ -114,18 +119,26 @@ public slots:
   /* Sets the action list */
   void setTotalActionsList(QVector<QPair<QString,EditorAction*>* >* list);
 
+  void setNameAndID(QString str);
+
   /* Adds an action to the skill */
   void addAction();
+  void removeAction();
 
   /* Alters the index */
   void changeIndex(int);
+  void changeSkillActionIndex(int);
 
   /* Set base skill */
   void setBaseSkill(Skill);
 
   void setWorkingSkill(Skill);
   void loadWorkingInfo();
+
+  Skill getEditedSkill();
+  void resetWorkingSkill();
 signals:
+  void nameChange(QString);
 
 };
 #endif // EDITORSKILL_H

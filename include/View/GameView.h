@@ -66,6 +66,7 @@ public slots:
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
 
+  void deactivateCurrentView();
 signals:
   /* Emits to parent when selected to deselect all others */
 //  void chosen(int);

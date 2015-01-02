@@ -64,7 +64,12 @@ Application::Application(QWidget* parent) :
   connect(game_database, SIGNAL(changeBubby(QPair<QString,EditorBubby*>*)),
           this, SLOT(setBubby(QPair<QString,EditorBubby*>*)));
 
+
   game_view = new GameView();
+
+  connect(game_database, SIGNAL(deactivateView()),
+          game_view, SLOT(deactivateCurrentView()));
+
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
 

@@ -138,5 +138,7 @@ signals:
   void changeSkill(QPair<QString,EditorSkill*>*);
   void changeEquipment(QPair<QString,EditorEquipment*>*);
   void changeBubby(QPair<QString,EditorBubby*>*);
+
+  void deactivateView();
 };
 #endif // GAMEDATABASE_H

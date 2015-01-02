@@ -121,6 +121,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   info_layout->addWidget(new QWidget(this));
   bottom_horizontal->addLayout(info_layout);
 
+  QVBoxLayout* total_right = new QVBoxLayout();
   QGridLayout* skill_layout = new QGridLayout();
   total_actions = new QListWidget();
   skill_layout->addWidget(total_actions,0,0);
@@ -131,6 +132,18 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   remove_action_from_skill = new QPushButton("Remove Action",this);
   skill_layout->addWidget(remove_action_from_skill,1,1);
 
+  QHBoxLayout* save_reset = new QHBoxLayout();
+  save_skill = new QPushButton("Save Skill",this);
+  save_reset->addWidget(save_skill);
+  reset_skill = new QPushButton("Reset Skill",this);
+  save_reset->addWidget(reset_skill);
+
+  connect(save_skill,SIGNAL(clicked()),this,SLOT(getEditedSkill()));
+  connect(reset_skill,SIGNAL(clicked()),this,SLOT(resetWorkingSkill()));
+  total_right->addLayout(skill_layout);
+  total_right->addSpacing(24);
+  total_right->addLayout(save_reset);
+
   total_action_list = new QVector<QPair<QString,EditorAction*>* >(0);
   skill_action_list = new QVector<QPair<QString,EditorAction*>* >(0);
 
@@ -138,14 +151,21 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   main_layout->addLayout(top_horizontal);
   main_layout->addLayout(bottom_horizontal);
   main_layout->addStretch(1);
+
   layout->addLayout(main_layout);
-  layout->addLayout(skill_layout);
+  layout->addLayout(total_right);
 
   action_selection = -1;
+  skill_action_selection = -1;
   running_action_id = 0;
   connect(total_actions,SIGNAL(currentRowChanged(int)),
           this,SLOT(changeIndex(int)));
+
   connect(add_action_to_skill,SIGNAL(clicked()),this,SLOT(addAction()));
+  connect(remove_action_from_skill,SIGNAL(clicked()),this,SLOT(removeAction()));
+
+  connect(skill_actions,SIGNAL(currentRowChanged(int)),
+          this,SLOT(changeSkillActionIndex(int)));
 
   setBaseSkill(Skill());
 }
@@ -188,13 +208,86 @@ void EditorSkill::loadWorkingInfo()
   skill_assigning->setChecked(working.getFlag(SkillFlags::ASSIGNING));
   skill_valid->setChecked(working.getFlag(SkillFlags::VALID));
 
+  if(working.getPrimary() == Element::PHYSICAL)
+    primary_flag->setCurrentIndex(0);
+  else if(working.getPrimary() == Element::FIRE)
+    primary_flag->setCurrentIndex(1);
+  else if(working.getPrimary() == Element::ICE)
+    primary_flag->setCurrentIndex(2);
+  else if(working.getPrimary() == Element::FOREST)
+    primary_flag->setCurrentIndex(3);
+  else if(working.getPrimary() == Element::ELECTRIC)
+    primary_flag->setCurrentIndex(4);
+  else if(working.getPrimary() == Element::DIGITAL)
+    primary_flag->setCurrentIndex(5);
+  else if(working.getPrimary() == Element::NIHIL)
+    primary_flag->setCurrentIndex(6);
+  else if(working.getPrimary() == Element::NONE)
+    primary_flag->setCurrentIndex(7);
 
+  if(working.getSecondary() == Element::PHYSICAL)
+    secondary_flag->setCurrentIndex(0);
+  else if(working.getSecondary() == Element::FIRE)
+    secondary_flag->setCurrentIndex(1);
+  else if(working.getSecondary() == Element::ICE)
+    secondary_flag->setCurrentIndex(2);
+  else if(working.getSecondary() == Element::FOREST)
+    secondary_flag->setCurrentIndex(3);
+  else if(working.getSecondary() == Element::ELECTRIC)
+    secondary_flag->setCurrentIndex(4);
+  else if(working.getSecondary() == Element::DIGITAL)
+    secondary_flag->setCurrentIndex(5);
+  else if(working.getSecondary() == Element::NIHIL)
+    secondary_flag->setCurrentIndex(6);
+  else if(working.getSecondary() == Element::NONE)
+    secondary_flag->setCurrentIndex(7);
+
+  if(working.getScope() == ActionScope::USER)
+    scope_flag->setCurrentIndex(0);
+  else if(working.getScope() == ActionScope::ONE_TARGET)
+    scope_flag->setCurrentIndex(1);
+  else if(working.getScope() == ActionScope::ONE_ENEMY)
+    scope_flag->setCurrentIndex(2);
+  else if(working.getScope() == ActionScope::TWO_ENEMIES)
+    scope_flag->setCurrentIndex(3);
+  else if(working.getScope() == ActionScope::ALL_ENEMIES)
+    scope_flag->setCurrentIndex(4);
+  else if(working.getScope() == ActionScope::ONE_ALLY)
+    scope_flag->setCurrentIndex(5);
+  else if(working.getScope() == ActionScope::ONE_ALLY_NOT_USER)
+    scope_flag->setCurrentIndex(6);
+  else if(working.getScope() == ActionScope::TWO_ALLIES)
+    scope_flag->setCurrentIndex(7);
+  else if(working.getScope() == ActionScope::ALL_ALLIES)
+    scope_flag->setCurrentIndex(8);
+  else if(working.getScope() == ActionScope::ONE_ALLY_KO)
+    scope_flag->setCurrentIndex(9);
+  else if(working.getScope() == ActionScope::ALL_ALLIES_KO)
+    scope_flag->setCurrentIndex(10);
+  else if(working.getScope() == ActionScope::ONE_PARTY)
+    scope_flag->setCurrentIndex(11);
+  else if(working.getScope() == ActionScope::ALL_TARGETS)
+    scope_flag->setCurrentIndex(12);
+  else if(working.getScope() == ActionScope::NOT_USER)
+    scope_flag->setCurrentIndex(13);
+  else if(working.getScope() == ActionScope::ALL_NOT_USER)
+    scope_flag->setCurrentIndex(14);
+  else if(working.getScope() == ActionScope::NO_SCOPE)
+    scope_flag->setCurrentIndex(15);
 
 }
 
 EditorSkill* EditorSkill::clone()
 {
   return this;
+}
+
+void EditorSkill::setNameAndID(QString str)
+{
+  base.setID(str.split(" : ").at(0).toInt());
+  name = str.split(" : ").at(1);
+  name_edit->setText(name);
+  setWorkingSkill(base);
 }
 
 void EditorSkill::setTotalActionsList
@@ -211,12 +304,16 @@ void EditorSkill::setTotalActionsList
 void EditorSkill::changeIndex(int x)
 {
   action_selection = x;
-  qDebug()<<action_selection;
+}
+
+void EditorSkill::changeSkillActionIndex(int x)
+{
+  skill_action_selection = x;
 }
 
 void EditorSkill::addAction()
 {
-  if(action_selection != -1)
+  if(action_selection >= 0)
   {
     QString new_string = total_actions->item(action_selection)->text().
         split(" : ").at(1);
@@ -233,6 +330,136 @@ void EditorSkill::addAction()
        Action(total_action_list->at(action_selection)->second->
               outputString().toStdString()));
     skill_action_list->last()->second->setNameAndID(new_string);
-    qDebug() << skill_action_list->last()->second->outputString();
   }
+}
+
+void EditorSkill::removeAction()
+{
+  if(skill_action_selection >= 0 &&
+     skill_action_list->size() > 0)
+  {
+    skill_action_list->remove(skill_action_selection);
+    skill_actions->takeItem(skill_action_selection);
+    if(skill_action_selection != 0)
+      skill_action_selection--;
+  }
+
+}
+
+Skill EditorSkill::getEditedSkill()
+{
+  QString full_name = "";
+  name = name_edit->text();
+  if(working.getID() < 10)
+    full_name.append("0");
+  full_name.append(QString::number(working.getID()));
+  qDebug() << full_name;
+  full_name.append(" : ");
+  full_name.append(name);
+  emit nameChange(full_name);
+
+  working.setName(name_edit->text().toStdString());
+  working.setMessage(message_edit->toPlainText().toStdString());
+  working.setDescription(description->toPlainText().toStdString());
+  working.setCost(cost_edit->text().toInt());
+  working.setChance(chance_edit->text().toFloat());
+  working.setCooldown(cooldown_edit->text().toInt());
+  working.setValue(value_edit->text().toInt());
+
+  working.setFlag(SkillFlags::OFFENSIVE,skill_offensive->isChecked());
+  working.setFlag(SkillFlags::DEFENSIVE,skill_defensive->isChecked());
+  working.setFlag(SkillFlags::NEUTRAL,skill_neutral->isChecked());
+  working.setFlag(SkillFlags::ALTERING,skill_altering->isChecked());
+  working.setFlag(SkillFlags::DAMAGING,skill_damaging->isChecked());
+  working.setFlag(SkillFlags::HEALING,skill_healing->isChecked());
+  working.setFlag(SkillFlags::INFLICTING,skill_inflicting->isChecked());
+  working.setFlag(SkillFlags::RELIEVING,skill_relieving->isChecked());
+  working.setFlag(SkillFlags::REVIVING,skill_reviving->isChecked());
+  working.setFlag(SkillFlags::ASSIGNING,skill_assigning->isChecked());
+  working.setFlag(SkillFlags::VALID,skill_valid->isChecked());
+
+  if(primary_flag->currentIndex() == 0)
+    working.setPrimary(Element::PHYSICAL);
+  else if(primary_flag->currentIndex() == 1)
+    working.setPrimary(Element::FIRE);
+  else if(primary_flag->currentIndex() == 2)
+    working.setPrimary(Element::ICE);
+  else if(primary_flag->currentIndex() == 3)
+    working.setPrimary(Element::FOREST);
+  else if(primary_flag->currentIndex() == 4)
+    working.setPrimary(Element::ELECTRIC);
+  else if(primary_flag->currentIndex() == 5)
+    working.setPrimary(Element::DIGITAL);
+  else if(primary_flag->currentIndex() == 6)
+    working.setPrimary(Element::NIHIL);
+  else if(primary_flag->currentIndex() == 7)
+    working.setPrimary(Element::NONE);
+
+  if(secondary_flag->currentIndex() == 0)
+    working.setSecondary(Element::PHYSICAL);
+  else if(secondary_flag->currentIndex() == 1)
+    working.setSecondary(Element::FIRE);
+  else if(secondary_flag->currentIndex() == 2)
+    working.setSecondary(Element::ICE);
+  else if(secondary_flag->currentIndex() == 3)
+    working.setSecondary(Element::FOREST);
+  else if(secondary_flag->currentIndex() == 4)
+    working.setSecondary(Element::ELECTRIC);
+  else if(secondary_flag->currentIndex() == 5)
+    working.setSecondary(Element::DIGITAL);
+  else if(secondary_flag->currentIndex() == 6)
+    working.setSecondary(Element::NIHIL);
+  else if(secondary_flag->currentIndex() == 7)
+    working.setSecondary(Element::NONE);
+
+  if(scope_flag->currentIndex() == 0)
+    working.setScope(ActionScope::USER);
+  else if(scope_flag->currentIndex() == 1)
+    working.setScope(ActionScope::ONE_TARGET);
+  else if(scope_flag->currentIndex() == 2)
+    working.setScope(ActionScope::ONE_ENEMY);
+  else if(scope_flag->currentIndex() == 3)
+    working.setScope(ActionScope::TWO_ENEMIES);
+  else if(scope_flag->currentIndex() == 4)
+    working.setScope(ActionScope::ALL_ENEMIES);
+  else if(scope_flag->currentIndex() == 5)
+    working.setScope(ActionScope::ONE_ALLY);
+  else if(scope_flag->currentIndex() == 6)
+    working.setScope(ActionScope::ONE_ALLY_NOT_USER);
+  else if(scope_flag->currentIndex() == 7)
+    working.setScope(ActionScope::TWO_ALLIES);
+  else if(scope_flag->currentIndex() == 8)
+    working.setScope(ActionScope::ALL_ALLIES);
+  else if(scope_flag->currentIndex() == 9)
+    working.setScope(ActionScope::ONE_ALLY_KO);
+  else if(scope_flag->currentIndex() == 10)
+    working.setScope(ActionScope::ALL_ALLIES_KO);
+  else if(scope_flag->currentIndex() == 11)
+    working.setScope(ActionScope::ONE_PARTY);
+  else if(scope_flag->currentIndex() == 12)
+    working.setScope(ActionScope::ALL_TARGETS);
+  else if(scope_flag->currentIndex() == 13)
+    working.setScope(ActionScope::NOT_USER);
+  else if(scope_flag->currentIndex() == 14)
+    working.setScope(ActionScope::ALL_NOT_USER);
+  else if(scope_flag->currentIndex() == 15)
+    working.setScope(ActionScope::NO_SCOPE);
+
+  previous_skill_action_list = *skill_action_list;
+
+  base = working;
+  return base;
+}
+
+void EditorSkill::resetWorkingSkill()
+{
+  working = base;
+  *skill_action_list = previous_skill_action_list;
+  skill_actions->clear();
+  for(int i=0; i<skill_action_list->size(); i++)
+  {
+    skill_actions->addItem(skill_action_list->at(i)->first);
+    skill_actions->setCurrentRow(i);
+  }
+  loadWorkingInfo();
 }

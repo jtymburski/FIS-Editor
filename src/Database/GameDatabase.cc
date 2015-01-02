@@ -634,6 +634,7 @@ void GameDatabase::createNewResource()
       name.append(" : Some Skill");
       skill_pair.push_back(new QPair<QString,EditorSkill*>
                          (name,new EditorSkill(this)));
+      skill_pair.at(skill_pair.size() - 1)->second->setNameAndID(skill_pair.at(skill_pair.size() - 1)->first);
       current_skill_index = skill_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;
@@ -920,7 +921,10 @@ void GameDatabase::deleteResource()
       {
         map_pair.remove(current_map_index);
         if(current_map_index == current_map_selection)
+        {
           current_map_selection = -1;
+          emit deactivateView();
+        }
         else if(current_map_selection > current_map_index)
           current_map_selection--;
         if(current_map_index > 0)
@@ -933,7 +937,10 @@ void GameDatabase::deleteResource()
       {
         person_pair.remove(current_person_index);
         if(current_person_index == current_person_selection)
+        {
           current_person_selection = -1;
+          emit deactivateView();
+        }
         else if(current_person_selection > current_person_index)
           current_person_selection--;
         if(current_person_index > 0)
@@ -946,7 +953,10 @@ void GameDatabase::deleteResource()
       {
         party_pair.remove(current_party_index);
         if(current_party_index == current_party_selection)
+        {
           current_party_selection = -1;
+          emit deactivateView();
+        }
         else if(current_party_selection > current_party_index)
           current_party_selection--;
         if(current_party_index > 0)
@@ -959,7 +969,10 @@ void GameDatabase::deleteResource()
       {
         item_pair.remove(current_item_index);
         if(current_item_index == current_item_selection)
+        {
           current_item_selection = -1;
+          emit deactivateView();
+        }
         else if(current_item_selection > current_item_index)
           current_item_selection--;
         if(current_item_index > 0)
@@ -972,7 +985,10 @@ void GameDatabase::deleteResource()
       {
         action_pair.remove(current_action_index);
         if(current_action_index == current_action_selection)
+        {
           current_action_selection = -1;
+          emit deactivateView();
+        }
         else if(current_action_selection > current_action_index)
           current_action_selection--;
         if(current_action_index > 0)
@@ -985,7 +1001,10 @@ void GameDatabase::deleteResource()
       {
         race_pair.remove(current_race_index);
         if(current_race_index == current_race_selection)
+        {
           current_race_selection = -1;
+          emit deactivateView();
+        }
         else if(current_race_selection > current_race_index)
           current_race_selection--;
         if(current_race_index > 0)
@@ -998,7 +1017,10 @@ void GameDatabase::deleteResource()
       {
         battleclass_pair.remove(current_battleclass_index);
         if(current_battleclass_index == current_battleclass_selection)
+        {
           current_battleclass_selection = -1;
+          emit deactivateView();
+        }
         else if(current_battleclass_selection > current_battleclass_index)
           current_battleclass_selection--;
         if(current_battleclass_index > 0)
@@ -1011,7 +1033,10 @@ void GameDatabase::deleteResource()
       {
         skillset_pair.remove(current_skillset_index);
         if(current_skillset_index == current_skillset_selection)
+        {
           current_skillset_selection = -1;
+          emit deactivateView();
+        }
         else if(current_skillset_selection > current_skillset_index)
           current_skillset_selection--;
         if(current_skillset_index > 0)
@@ -1024,7 +1049,10 @@ void GameDatabase::deleteResource()
       {
         skill_pair.remove(current_skill_index);
         if(current_skill_index == current_skill_selection)
+        {
           current_skill_selection = -1;
+          emit deactivateView();
+        }
         else if(current_skill_selection > current_skill_index)
           current_skill_selection--;
         if(current_skill_index > 0)
@@ -1037,7 +1065,10 @@ void GameDatabase::deleteResource()
       {
         equipment_pair.remove(current_equipment_index);
         if(current_equipment_index == current_equipment_selection)
+        {
           current_equipment_selection = -1;
+          emit deactivateView();
+        }
         else if(current_equipment_selection > current_equipment_index)
           current_equipment_selection--;
         if(current_equipment_index > 0)
@@ -1050,7 +1081,10 @@ void GameDatabase::deleteResource()
       {
         bubby_pair.remove(current_bubby_index);
         if(current_bubby_index == current_bubby_selection)
+        {
           current_bubby_selection = -1;
+          emit deactivateView();
+        }
         else if(current_bubby_selection > current_bubby_index)
           current_bubby_selection--;
         if(current_bubby_index > 0)
