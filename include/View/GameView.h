@@ -10,6 +10,7 @@
 
 #include <QStackedWidget>
 #include "View/MapView.h"
+#include "Database/EditorSkillset.h"
 #include "Database/GameDatabase.h"
 
 class GameView : public QStackedWidget
@@ -37,7 +38,7 @@ private:
   EditorAction* action_view;
   QWidget* race_view;
   QWidget* battleclass_view;
-  QWidget* skillset_view;
+  EditorSkillset* skillset_view;
   EditorSkill* skill_view;
   QWidget* equipment_view;
   QWidget* bubby_view;
@@ -61,6 +62,9 @@ public slots:
 
   EditorSkill* getSkillView();
   void setSkillView(EditorSkill* action);
+
+  EditorSkillset* getSkillsetView();
+  void setSkillsetView(EditorSkillset* action);
 
 
   /* Sets The View Mode */

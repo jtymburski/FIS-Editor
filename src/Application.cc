@@ -343,7 +343,7 @@ void Application::setBattleClass(QPair<QString,EditorCategory*>* pair)
  */
 void Application::setSkillset(QPair<QString,EditorSkillset*>* pair)
 {
-  qDebug()<<pair->first;
+  game_view->setSkillsetView(pair->second);
 }
 /*
  * Description: Sets the skill

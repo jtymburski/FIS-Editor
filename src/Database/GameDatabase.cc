@@ -193,6 +193,7 @@ void GameDatabase::modifySelection(QModelIndex index)
       current_skillset = skillset_pair[index.row()];
       current_skillset_selection = index.row();
       current_skillset_index = index.row();
+      skillset_pair.at(index.row())->second->setTotalSkillsList(skill_pair);
       modifyBottomList(top_view->currentRow());
       emit changeSkillset(current_skillset);
       break;
@@ -259,7 +260,11 @@ void GameDatabase::rowChange(int index)
       break;
     case 7:
       if(skillset_pair.size() != 0 && current_skillset_selection != -1)
+      {
         current_name = &skillset_pair[current_skillset_selection]->first;
+        skillset_pair.at(current_skillset_selection)->second->
+                      setTotalSkillsList(skill_pair);
+      }
       break;
     case 8:
       if(skill_pair.size() != 0 && current_skill_selection != -1)
@@ -592,7 +597,8 @@ void GameDatabase::createNewResource()
       action_pair.push_back(new QPair<QString,EditorAction*>
                          (name,new EditorAction(this)));
       //action_pair.at(action_pair.size() - 1)->second->setBaseAction(Action());
-      action_pair.at(action_pair.size() - 1)->second->setNameAndID(action_pair.at(action_pair.size() - 1)->first);
+      action_pair.at(action_pair.size() - 1)->second->
+          setNameAndID(action_pair.at(action_pair.size() - 1)->first);
       //qDebug() << " : " << action_pair.at(action_pair.size() - 1)->second->getBaseAction().getID();
       current_action_index = action_pair.size()-1;
       modifyBottomList(top_view->currentRow());
@@ -624,6 +630,8 @@ void GameDatabase::createNewResource()
       name.append(" : Some Set Of Skillz");
       skillset_pair.push_back(new QPair<QString,EditorSkillset*>
                          (name,new EditorSkillset(this)));
+      skillset_pair.at(skillset_pair.size() - 1)->second->
+          setNameAndID(skillset_pair.at(skillset_pair.size() - 1)->first);
       current_skillset_index = skillset_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;
@@ -634,7 +642,8 @@ void GameDatabase::createNewResource()
       name.append(" : Some Skill");
       skill_pair.push_back(new QPair<QString,EditorSkill*>
                          (name,new EditorSkill(this)));
-      skill_pair.at(skill_pair.size() - 1)->second->setNameAndID(skill_pair.at(skill_pair.size() - 1)->first);
+      skill_pair.at(skill_pair.size() - 1)->second->
+          setNameAndID(skill_pair.at(skill_pair.size() - 1)->first);
       current_skill_index = skill_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;
