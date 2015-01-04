@@ -1,16 +1,18 @@
 #ifndef SPRITEDIALOG_H
 #define SPRITEDIALOG_H
 
-#include <QDialog>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QSlider>
 #include <QAction>
-#include <QScrollArea>
-#include <QPushButton>
+#include <QCheckBox>
 #include <QComboBox>
+#include <QDialog>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSlider>
+#include <QVBoxLayout>
+
 #include "Dialog/FrameList.h"
 #include "Database/EditorSprite.h"
 
@@ -20,7 +22,7 @@ class SpriteDialog : public QDialog
 public:
   /* Constructor function */
   SpriteDialog(QWidget *parent = 0,
-                       EditorSprite *working = new EditorSprite(),
+                       EditorSprite *working = NULL,
                        QString path = "", int subsequent = 0,
                        bool creation = true);
 private:
@@ -30,47 +32,46 @@ private:
   QSlider* red_input;
   QSlider* blue_input;
   QSlider* green_input;
-  QCheckBox* rotate0;
-  QCheckBox* rotate90;
-  QCheckBox* rotate180;
-  QCheckBox* rotate270;
   FrameList* frame_list;
   QScrollArea* frame_scrollwrapper;
 
   /* The current sprite that is being altered/created by the dialog */
+  EditorSprite *original_sprite;
   EditorSprite *working_sprite;
-
   bool creation_mode;
 
-  QString name_backup;
-  int brightness_backup;
-  int opacity_backup;
-  int red_backup,blue_backup,green_backup;
-  QString time_backup;
-  bool direction_backup;
-  QString rotation_backup;
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 
-  bool rotate0_backup;
-  bool rotate90_backup;
-  bool rotate180_backup;
-  bool rotate270_backup;
+protected:
+  /* Custom close event */
+  void closeEvent(QCloseEvent *);
 
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+
+public slots:
+  /* destroys the current working sprite */
+  void destroyWorkingSprite();
+
+  /* Loads the given working Editor Sprite */
+  //void loadWorkingSprite(EditorSprite*);
+
+  /* Updates the current working sprite */
+  void updateWorkingSprite();
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 
 signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
+  /* Ok pressed */
   void ok();
-public slots:
-  /* Loads the given working Editor Sprite */
-  void loadWorkingSprite(EditorSprite*);
-
-  /* Updates the current working sprite */
-  void updateWorkingSprite();
-
-  /* destroys the current working sprite */
-  void destroyWorkingSprite();
-
 };
 
 #endif // SPRITEDIALOG_H

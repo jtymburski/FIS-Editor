@@ -17,44 +17,43 @@
  *        and frame direction
  */
 
-FrameView::FrameView(QWidget *parent,EditorEnumDb::FrameViewType type,
-                         QPixmap* frame_image,
-                         int position, int before, int after, QString framedir,
-                         EditorSprite* current)
+FrameView::FrameView(QWidget *parent, EditorEnumDb::FrameViewType type,
+                     EditorSprite* current, int position, int before, int after)
   : QWidget(parent)
 {
-  currentsprite = current;
-  t = type;
-  framepath = framedir;
-  pos = position;
-  bef = before;
-  aft = after;
-  horflip = false;
-  verflip = false;
+  current_sprite = current;
+  this->type = type;
+  //framepath = framedir;
+  position_current = position;
+  position_before = before;
+  position_after = after;
+  //horflip = false;
+  //verflip = false;
+
   /* If the type is a frame, the size is the frame size and the edit dialog
    * is triggered */
-  if(t == EditorEnumDb::FRAME)
+  if(type == EditorEnumDb::FRAME)
   {
-    setFixedSize(64,64);
-    frame = frame_image;
-    connect(this,SIGNAL(editFrame(int)),parent,SLOT(editFrame(int)));
+    setFixedSize(64, 64);
+    //frame = frame_image;
+    connect(this, SIGNAL(editFrame(int)), parent, SLOT(editFrame(int)));
   }
   /* If the type is viewonly, set the size and do not make connections */
-  else if(t == EditorEnumDb::VIEWONLY)
+  else if(type == EditorEnumDb::VIEWONLY)
   {
     setFixedSize(64,64);
-    frame = frame_image;
+    //frame = frame_image;
   }
   /* If the type is anything else, the size is 32x32 and the appropriate
    * frame addition is triggered */
   else
   {
     setFixedSize(32,32);
-    connect(this,SIGNAL(addHead(QString)),parent,SLOT(addHead(QString)));
-    connect(this,SIGNAL(addTail(QString)),parent,SLOT(addTail(QString)));
-    connect(this,SIGNAL(addMidpoint(QString,int,int)),
-            parent,SLOT(addMidpoint(QString,int,int)));
-    frame = frame_image;
+    connect(this, SIGNAL(addHead(QString)), parent, SLOT(addHead(QString)));
+    connect(this, SIGNAL(addTail(QString)), parent, SLOT(addTail(QString)));
+    connect(this, SIGNAL(addMidpoint(QString,int,int)),
+            parent, SLOT(addMidpoint(QString,int,int)));
+    //frame = frame_image;
   }
 }
 
@@ -65,136 +64,9 @@ FrameView::~FrameView()
 {
 }
 
-QPixmap FrameView::setBrightness(int delta, QPixmap original)
-{
-  QImage original_image = original.toImage();
-  QImage editing = original.toImage();
-  QColor old_color;
-  int r,g,b;
-
-  for(int i=0; i<editing.width(); i++)
-  {
-    for(int j=0; j<editing.height(); j++)
-    {
-      old_color = QColor(original_image.pixel(i,j));
-      r = old_color.red() + delta;
-      g = old_color.green() + delta;
-      b = old_color.blue() + delta;
-
-      r = qBound(0,r,255);
-      g = qBound(0,g,255);
-      b = qBound(0,b,255);
-
-      editing.setPixel(i,j,qRgb(r,g,b));
-    }
-  }
-  QPixmap output;
-  output = output.fromImage(editing);
-  return output;
-}
-
-QPixmap FrameView::setColor(int deltared, int deltablue,
-                             int deltagreen, QPixmap original)
-{
-  QImage original_image = original.toImage();
-  QImage editing = original.toImage();
-  QColor old_color;
-  int r,g,b;
-
-  for(int i=0; i<editing.width(); i++)
-  {
-    for(int j=0; j<editing.height(); j++)
-    {
-      old_color = QColor(original_image.pixel(i,j));
-      r = old_color.red()+deltared-255;
-      g = old_color.green()+deltablue-255;
-      b = old_color.blue()+deltagreen-255;
-
-      r = qBound(0,r,255);
-      g = qBound(0,g,255);
-      b = qBound(0,b,255);
-
-      editing.setPixel(i,j,qRgb(r,g,b));
-    }
-  }
-  QPixmap output;
-  output = output.fromImage(editing);
-  return output;
-}
-
-/*
- * Description: Paints the label with transformations
- */
-void FrameView::paintEvent(QPaintEvent *)
-{
-  QPainter painter(this);
-  QPixmap temp = *frame;
-  QTransform transform;
-
-  if(horflip)
-  {
-    qreal m11 = transform.m11();    // Horizontal scaling
-    qreal m12 = transform.m12();    // Vertical shearing
-    qreal m13 = transform.m13();    // Horizontal Projection
-    qreal m21 = transform.m21();    // Horizontal shearing
-    qreal m22 = transform.m22();    // vertical scaling
-    qreal m23 = transform.m23();    // Vertical Projection
-    qreal m31 = transform.m31();    // Horizontal Position (DX)
-    qreal m32 = transform.m32();    // Vertical Position (DY)
-    qreal m33 = transform.m33();    // Addtional Projection Factor
-
-    qreal scale = m11;
-
-    m11 = -m11;
-
-    // Re-position back to origin
-    if(m31 > 0)
-      m31 = 0;
-    else
-      m31 = (width() * scale);
-
-    // Write back to the matrix
-    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-  }
-  if(verflip)
-  {
-    qreal m11 = transform.m11();    // Horizontal scaling
-    qreal m12 = transform.m12();    // Vertical shearing
-    qreal m13 = transform.m13();    // Horizontal Projection
-    qreal m21 = transform.m21();    // Horizontal shearing
-    qreal m22 = transform.m22();    // vertical scaling
-    qreal m23 = transform.m23();    // Vertical Projection
-    qreal m31 = transform.m31();    // Horizontal Position (DX)
-    qreal m32 = transform.m32();    // Vertical Position (DY)
-    qreal m33 = transform.m33();    // Addtional Projection Factor
-
-    qreal scale = m22;
-    m22 = -m22;
-
-    // Re-position back to origin
-    if(m32 > 0)
-      m32 = 0;
-    else
-      m32 = (height() * scale);
-
-    // Write back to the matrix
-    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-  }
-  if(t == EditorEnumDb::FRAME || t == EditorEnumDb::VIEWONLY)
-  {
-    QTransform trans = transform;
-    transform = trans.rotate(currentsprite->getFrameAngle(pos));
-  }
-  if(currentsprite != NULL)
-  {
-    painter.setOpacity(currentsprite->getOpacity()/100.0);
-    temp = setBrightness(currentsprite->getBrightness()-255,temp);
-    temp = setColor(currentsprite->getColorRed(),currentsprite->getColorBlue(),
-                        currentsprite->getColorGreen(),temp);
-  }
-  painter.drawPixmap(0,0,width(),height(),temp.transformed(transform));
-}
-
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 
 /*
  * Description: Double click event for editing and adding frames
@@ -203,25 +75,27 @@ void FrameView::paintEvent(QPaintEvent *)
  */
 void FrameView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  if(event->buttons() & Qt::LeftButton)
+  if((event->buttons() & Qt::LeftButton) && current_sprite != NULL)
   {
-    QString path;
-    switch(t)
+    QString framepath = current_sprite->getPath(0);
+    QString path = "";
+    switch(type)
     {
       case EditorEnumDb::FRAME:
-        emit editFrame(pos);
+        emit editFrame(position_current);
         break;
       case EditorEnumDb::HEAD:
         path = QFileDialog::getOpenFileName(this,
                                     tr("Select A Frame To Add To The Head"),
                                     framepath,tr("Image Files (*.png)"));
+
         emit addHead(path);
         break;
       case EditorEnumDb::MIDPOINT:
         path = QFileDialog::getOpenFileName(this,
                                     tr("Select A Frame To Add To A Midpoint"),
                                     framepath,tr("Image Files (*.png)"));
-        emit addMidpoint(path,bef,aft);
+        emit addMidpoint(path, position_before, position_after);
         break;
       case EditorEnumDb::TAIL:
         path = QFileDialog::getOpenFileName(this,
@@ -236,47 +110,67 @@ void FrameView::mouseDoubleClickEvent(QMouseEvent *event)
   }
 }
 
-
 /*
- * Description: Sets horizontal and vertical flips
- *
- * Input: Flip toggles
+ * Description: Paints the label with transformations
  */
-void FrameView::setFlips(bool horizontal, bool vertical)
+void FrameView::paintEvent(QPaintEvent *)
 {
-  horflip = horizontal;
-  verflip = vertical;
-  update();
+  if(current_sprite != NULL)
+  {
+    QPainter painter(this);
+
+    if(type == EditorEnumDb::FRAME)
+      current_sprite->paint(position_current, &painter, 0, 0,
+                            width(), height());
+    else
+      current_sprite->paint(&painter, 0, 0, width(), height());
+  }
 }
 
-/*
- * Description: Sets horizontal flip
- *
- * Input: Flip toggle
- */
-void FrameView::setHFlip(bool horizontal)
-{
-  horflip = horizontal;
-  update();
-}
-
-/*
- * Description: Sets vertical flip
- *
- * Input: Flip toggle
- */
-void FrameView::setVFlip(bool vertical)
-{
-  verflip = vertical;
-  update();
-}
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 
 /*
  * Description: Reloads the frame image
  */
 void FrameView::reloadFrame()
 {
-  frame = new QPixmap(currentsprite->getPath(pos));
-  framepath = currentsprite->getPath(pos);
+  //frame = new QPixmap(currentsprite->getPath(pos));
+  //framepath = currentsprite->getPath(pos);
   update();
 }
+
+/*
+ * Description: Sets horizontal and vertical flips
+ *
+ * Input: Flip toggles
+ */
+//void FrameView::setFlips(bool horizontal, bool vertical)
+//{
+//  horflip = horizontal;
+//  verflip = vertical;
+//  update();
+//}
+
+/*
+ * Description: Sets horizontal flip
+ *
+ * Input: Flip toggle
+ */
+//void FrameView::setHFlip(bool horizontal)
+//{
+//  horflip = horizontal;
+//  update();
+//}
+
+/*
+ * Description: Sets vertical flip
+ *
+ * Input: Flip toggle
+ */
+//void FrameView::setVFlip(bool vertical)
+//{
+//  verflip = vertical;
+//  update();
+//}

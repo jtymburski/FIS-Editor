@@ -8,6 +8,7 @@
 #define SpriteView_H
 
 #include <QDialog>
+#include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QMenu>
@@ -73,15 +74,10 @@ public slots:
   /* Sets the current Editor Sprite to the given index */
   void setCurrent(int);
 
-  /* Returns a transformed image */
-  QPixmap transformPixmap(EditorSprite*,int pos = 0);
-
 signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
 public:
-  QPixmap setBrightness(int value, QPixmap original);
-  QPixmap setColor(int red, int blue, int green, QPixmap original);
 };
 #endif // SpriteView_H

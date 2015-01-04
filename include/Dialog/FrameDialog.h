@@ -7,13 +7,13 @@
 #ifndef FRAMEDIALOG_H
 #define FRAMEDIALOG_H
 
+#include <QCheckBox>
 #include <QDialog>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QCheckBox>
-#include <QLineEdit>
-#include <QDebug>
-#include <QMessageBox>
+
 #include "Database/EditorSprite.h"
 #include "Dialog/FrameView.h"
 
@@ -22,40 +22,12 @@ class FrameDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameDialog(QWidget* parent = 0,
-                          EditorSprite* s = 0,
-                          int framenum = 0);
+  FrameDialog(QWidget* parent = 0, EditorSprite* s = 0, int framenum = 0);
 
   /* Destructor Function */
   ~FrameDialog();
-public slots:
 
-  /* Sets the horizontal flip for the given frame */
-  void setHorizontalFlip(bool);
-
-  /* Sets the vertical flip for the given frame */
-  void setVerticalFlip(bool);
-
-  /* Sets the angle for the given frame */
-  void set0();
-  void set90();
-  void set180();
-  void set270();
-
-  /* Closes with no saving */
-  void closeNoSave();
-
-  /* Opens a dialog for frame replacement */
-  void replaceFrame();
-
-  /* Deletes the current frame */
-  void deleteFrame();
-signals:
-  /* Signal for finishing and saving the changes to the sequence */
-  void finishedSave();
-protected:
 private:
-
   FrameView* framelabel;
   QCheckBox* rotate0;
   QCheckBox* rotate90;
@@ -84,6 +56,34 @@ private:
 
   /* Frame number */
   int framenumber;
+
+protected:
+
+public slots:
+  /* Closes with no saving */
+  void closeNoSave();
+
+  /* Deletes the current frame */
+  void deleteFrame();
+
+  /* Opens a dialog for frame replacement */
+  void replaceFrame();
+
+  /* Sets the horizontal flip for the given frame */
+  void setHorizontalFlip(bool);
+
+  /* Sets the vertical flip for the given frame */
+  void setVerticalFlip(bool);
+
+  /* Sets the angle for the given frame */
+  void set0();
+  void set90();
+  void set180();
+  void set270();
+
+signals:
+  /* Signal for finishing and saving the changes to the sequence */
+  void finishedSave();
 };
 
 #endif // FRAMEDIALOG_H

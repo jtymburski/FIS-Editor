@@ -27,39 +27,52 @@ public:
   /* Destructor Function */
   ~FrameList();
 
-
-public slots:
-  /* Replaces frame at position x */
-  void editFrame(int x);
-  /* Appends a frame to the head */
-  void addHead(QString x);
-  /* Appends a frame to the tail */
-  void addTail(QString x);
-  /* Appends a frame to the sequence */
-  void addMidpoint(QString x, int before, int after);
-  /* Frame Addition */
-  void addFrames();
-
-protected:
 private:
-  /* Sprite whose frames are in the dialog */
-  EditorSprite* currentsprite;
-  FrameDialog* manipulator;
-
-  /* Vector of frame images */
-  QVector<FrameView*> framelabels;
-
   /* Vector of midpoint arrows */
   QVector<FrameView*> arrowlabels;
 
-  /* Head label */
-  FrameView* startlabel;
+  /* Sprite whose frames are in the dialog */
+  EditorSprite* currentsprite;
 
   /* Tail label */
   FrameView* endlabel;
 
+  /* Vector of frame images */
+  QVector<FrameView*> framelabels;
+
   /* Layout */
   QHBoxLayout* layout;
+
+  /* The dialog manipulator pop-up */
+  FrameDialog* manipulator;
+
+  /* Head label */
+  FrameView* startlabel;
+
+  /* Frame step sprites */
+  EditorSprite* step_end;
+  EditorSprite* step_mid;
+  EditorSprite* step_start;
+
+private:
+
+protected:
+
+public slots:
+  /* Frame Addition */
+  void addFrames();
+
+  /* Appends a frame to the head */
+  void addHead(QString x);
+
+  /* Appends a frame to the sequence */
+  void addMidpoint(QString x, int before, int after);
+
+  /* Appends a frame to the tail */
+  void addTail(QString x);
+
+  /* Replaces frame at position x */
+  void editFrame(int x);
 };
 
 #endif // FRAMELIST_H

@@ -5,6 +5,7 @@
  * Description: The frame dialog in the sprite creation dialog
  ******************************************************************************/
 #include "Dialog/FrameDialog.h"
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -15,19 +16,16 @@
  *
  * Input: Parent, editor sprite to work on, image path
  */
-FrameDialog::FrameDialog(QWidget *parent,
-                                                 EditorSprite* s, int framenum)
-  : QDialog(parent)
+FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
+           : QDialog(parent)
 {
-  setFixedSize(256,256);
+  //setFixedSize(256,256);
   framenumber = framenum;
   sprite = s;
-  framelabel = new FrameView(0,EditorEnumDb::VIEWONLY,
-                               new QPixmap(s->getPath(framenumber)),
-                               framenumber,0,0,QDir::current().absolutePath(),
-                               s);
-  framelabel->setHFlip(sprite->getHorizontalFlip(framenumber));
-  framelabel->setVFlip(sprite->getVerticalFlip(framenumber));
+  framelabel = new FrameView(NULL,EditorEnumDb::VIEWONLY, s,
+                             framenumber, 0, 0);
+  //framelabel->setHFlip(sprite->getHorizontalFlip(framenumber));
+  //framelabel->setVFlip(sprite->getVerticalFlip(framenumber));
 
   QCheckBox* horizontal_flip = new QCheckBox("Horizontal Flip",this);
   QCheckBox* vertical_flip = new QCheckBox("Vertical Flip",this);
@@ -166,53 +164,9 @@ FrameDialog::~FrameDialog()
 {
 }
 
-/*
- * Description: Sets the horizontal flip
- *
- * Input: Flip toggle
- */
-void FrameDialog::setHorizontalFlip(bool toggle)
-{
-  sprite->setHorizontalFlip(framenumber,toggle);
-  framelabel->setHFlip(toggle);
-}
-
-/*
- * Description: Sets the vertical flip
- *
- * Input: Flip toggle
- */
-void FrameDialog::setVerticalFlip(bool toggle)
-{
-  sprite->setVerticalFlip(framenumber,toggle);
-  framelabel->setVFlip(toggle);
-}
-
-/*
- * Description: Sets the angle
- *
- * Input: Angle string
- */
-void FrameDialog::set0()
-{
-  sprite->setFrameAngle(framenumber,0);
-  framelabel->update();
-}
-void FrameDialog::set90()
-{
-  sprite->setFrameAngle(framenumber,90);
-  framelabel->update();
-}
-void FrameDialog::set180()
-{
-  sprite->setFrameAngle(framenumber,180);
-  framelabel->update();
-}
-void FrameDialog::set270()
-{
-  sprite->setFrameAngle(framenumber,270);
-  framelabel->update();
-}
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
 /*
  * Description: Closes the dialog and reverts all of the input values
@@ -233,19 +187,6 @@ void FrameDialog::closeNoSave()
 }
 
 /*
- * Description : Replaces the current frame with a new path
- */
-void FrameDialog::replaceFrame()
-{
-  QString filename = QFileDialog::getOpenFileName(this,
-                                   tr("Select A Frame To Replace This"),
-                                   sprite->getPath(framenumber)
-                                   ,tr("Image Files (*.png)"));
-  sprite->setFramePath(framenumber,filename);
-  framelabel->reloadFrame();
-}
-
-/*
  * Description : Deletes this current frame from the sequence
  */
 void FrameDialog::deleteFrame()
@@ -261,4 +202,70 @@ void FrameDialog::deleteFrame()
     emit finishedSave();
     close();
   }
+}
+
+/*
+ * Description : Replaces the current frame with a new path
+ */
+void FrameDialog::replaceFrame()
+{
+  QString filename = QFileDialog::getOpenFileName(this,
+                                   tr("Select A Frame To Replace This"),
+                                   sprite->getPath(framenumber)
+                                   ,tr("Image Files (*.png)"));
+  sprite->setFramePath(framenumber,filename);
+  framelabel->reloadFrame();
+}
+
+/*
+ * Description: Sets the horizontal flip
+ *
+ * Input: Flip toggle
+ */
+void FrameDialog::setHorizontalFlip(bool toggle)
+{
+  sprite->setHorizontalFlip(framenumber,toggle);
+  //framelabel->setHFlip(toggle);
+  framelabel->update();
+}
+
+/*
+ * Description: Sets the vertical flip
+ *
+ * Input: Flip toggle
+ */
+void FrameDialog::setVerticalFlip(bool toggle)
+{
+  sprite->setVerticalFlip(framenumber,toggle);
+  //framelabel->setVFlip(toggle);
+  framelabel->update();
+}
+
+/*
+ * Description: Sets the angle
+ *
+ * Input: Angle string
+ */
+void FrameDialog::set0()
+{
+  sprite->setFrameAngle(framenumber,0);
+  framelabel->update();
+}
+
+void FrameDialog::set90()
+{
+  sprite->setFrameAngle(framenumber,90);
+  framelabel->update();
+}
+
+void FrameDialog::set180()
+{
+  sprite->setFrameAngle(framenumber,180);
+  framelabel->update();
+}
+
+void FrameDialog::set270()
+{
+  sprite->setFrameAngle(framenumber,270);
+  framelabel->update();
 }

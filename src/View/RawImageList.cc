@@ -128,7 +128,6 @@ void RawImageList::openDialog()
 
 
   /* Adds each sprite to the overall vector of sprites */
-
   if(filenames.size() != 0)
   {
     for(int i=0; i<filenames.size(); i++)
@@ -176,24 +175,33 @@ void RawImageList::switchDirectory(QModelIndex index)
   if(filenames.size() != 0)
   {
     QStringList chopped_names;
-    for(int i=0; i<filenames.size();i++)
+    QStringList filtered_names;
+
+    for(int i=0; i < filenames.size(); i++)
     {
-      int pathto = filenames[i].lastIndexOf('_');
+      int path_to = filenames[i].lastIndexOf('.');
       QString temp = filenames[i];
-      temp.chop(temp.size()-(pathto+2));
-      chopped_names.push_back(temp);
+      temp.chop(temp.size() - path_to);
+      QString temp2 = temp;
+      temp2.chop(2);
+
+      /* Only add filtered names if they match integers at end */
+      if(temp.at(temp.size() - 1).isDigit() &&
+         temp.at(temp.size() - 2).isDigit())
+      {
+        filtered_names.push_back(temp2);
+      }
+      chopped_names.push_back(temp2);
     }
-    for(int i=0; i<filenames.size(); i++)
+    for(int i = 0; i < filenames.size(); i++)
     {
       int samecount = 0;
-      for(int j = i+1; j<chopped_names.size(); j++)
-      {
-        if(chopped_names[i] == chopped_names[j])
+      for(int j = 0; j<filtered_names.size(); j++)
+        if(chopped_names[i] == filtered_names[j])
           samecount++;
-      }
 
       sprites.push_back(new RawImage(this,filenames.at(i),
-                                         sprites.size(),samecount));
+                                     sprites.size(),samecount));
     }
 
     /* Calls update to setup the view */

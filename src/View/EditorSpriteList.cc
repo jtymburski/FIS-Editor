@@ -87,8 +87,8 @@ void EditorSpriteList::viewFrameSequence()
     labels.push_back(new QLabel());
     QPixmap temp(currentsprite->getPath(i));
     QTransform trans;
-    QTransform transformation =
-        trans.rotate(currentsprite->getQuickRotation());
+    QTransform transformation = // TODO: Fix
+        trans.rotate(0);//currentsprite->getQuickRotation());
     labels.last()->setPixmap(temp.transformed(transformation));
     framelayout->addWidget(labels.last());
   }
@@ -100,10 +100,11 @@ void EditorSpriteList::viewFrameSequence()
 
 void EditorSpriteList::editSprite()
 {
-  spriteeditordialog = new SpriteDialog(this,currentsprite,
-                                         currentsprite->getPath(0),
-                                         0,false);
-  connect(spriteeditordialog,SIGNAL(ok()),this,SIGNAL(updateSprites()));
+  if(spriteeditordialog != NULL)
+    delete spriteeditordialog;
+  spriteeditordialog = new SpriteDialog(this, currentsprite, "",
+                                        0, false);
+  connect(spriteeditordialog, SIGNAL(ok()), this, SIGNAL(updateSprites()));
   spriteeditordialog->show();
 }
 

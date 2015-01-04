@@ -7,11 +7,10 @@
 #ifndef FrameView_H
 #define FrameView_H
 
-#include <QMouseEvent>
-#include <QPixmap>
-#include <QWidget>
-#include <QPainter>
 #include <QFileDialog>
+#include <QMouseEvent>
+#include <QWidget>
+
 #include "EditorEnumDb.h"
 #include "Database/EditorSprite.h"
 
@@ -20,23 +19,35 @@ class FrameView : public QWidget
   Q_OBJECT
 public:
   /* Constructor function */
-  FrameView(QWidget* parent = 0,
-              EditorEnumDb::FrameViewType type = EditorEnumDb::FRAME,
-      QPixmap* frame_image = 0,int position = 0, int before = 0, int after = 0,
-              QString framedir = QDir::current().absolutePath(),
-              EditorSprite* current = 0);
+  FrameView(QWidget* parent = NULL,
+            EditorEnumDb::FrameViewType type = EditorEnumDb::FRAME,
+            EditorSprite* current = NULL, int position = 0, int before = 0,
+            int after = 0);
 
   /* Destructor function */
   ~FrameView();
 
-  /* Flip setting */
-  void setFlips(bool horizontal, bool vertical);
-  void setHFlip(bool horizontal);
-  void setVFlip(bool vertical);
-  void setAngle(int angle);
-  QPixmap setBrightness(int value, QPixmap original);
-  QPixmap setColor(int red, int blue, int green, QPixmap original);
-  void reloadFrame();
+private:
+  /* Label type */
+  EditorEnumDb::FrameViewType type;
+
+  /* Editor sprite pointer */
+  EditorSprite* current_sprite;
+
+  /* Position Before After and Current */
+  int position_after;
+  int position_before;
+  int position_current;
+
+  /* A pointer to the frame for viewing */
+  //QPixmap* frame;
+
+  /* Horizontal and Vertical flip */
+  //bool horflip,verflip;
+
+  /* Path to the frame */
+  //QString framepath;
+
 protected:
   /* Mouse press event */
   void mouseDoubleClickEvent(QMouseEvent *event);
@@ -57,24 +68,21 @@ signals:
   /* Adds a new tail frame */
   void addTail(QString);
 
-private:
-  /* Label type */
-  EditorEnumDb::FrameViewType t;
+public:
+  /* Reloads the frames after changes */
+  void reloadFrame();
 
-  /* Editor sprite pointer */
-  EditorSprite* currentsprite;
+  /* Set angle */
+  //void setAngle(int angle);
 
-  /* Position Before After and Current */
-  int pos,bef,aft;
+  /* Painting control */
+  //QPixmap setBrightness(int value, QPixmap original);
+  //QPixmap setColor(int red, int blue, int green, QPixmap original);
 
-  /* A pointer to the frame for viewing */
-  QPixmap* frame;
-
-  /* Horizontal and Vertical flip */
-  bool horflip,verflip;
-
-  /* Path to the frame */
-  QString framepath;
+  /* Flip setting */
+  //void setFlips(bool horizontal, bool vertical);
+  //void setHFlip(bool horizontal);
+  //void setVFlip(bool vertical);
 };
 
 #endif // FrameView_H

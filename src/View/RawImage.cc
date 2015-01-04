@@ -36,7 +36,7 @@ RawImage::RawImage(QWidget *parent, QString p, int id, int f)
   rightclick_menu = new QMenu();
   rightclick_menu->hide();
   rightclick_menu->addAction(spriteify_action);
-  creation_dialog = new SpriteDialog(this);
+  creation_dialog = NULL;
   connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
                                  SIGNAL(sendUpEditorSprite(EditorSprite*)));
 
@@ -51,7 +51,8 @@ RawImage::RawImage(QWidget *parent, QString p, int id, int f)
 RawImage::~RawImage()
 {
   //qDebug()<<"Removing Sprite Choice";
-  delete creation_dialog;
+  if(creation_dialog != NULL)
+    delete creation_dialog;
   creation_dialog = NULL;
 }
 
@@ -86,9 +87,10 @@ void RawImage::deselect()
  */
 void RawImage::makeSprite()
 {
-  delete creation_dialog;
+  if(creation_dialog != NULL)
+    delete creation_dialog;
   creation_dialog =
-      new SpriteDialog(this,new EditorSprite(path),path,followers);
+      new SpriteDialog(this, NULL, path, followers);
   creation_dialog->show();
 }
 

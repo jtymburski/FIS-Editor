@@ -22,7 +22,8 @@ EditorSprite::EditorSprite(QString img_path)
   mode = EditorEnumDb::STANDARD;
   name = "Default";
   sprite = new Sprite();
-  setPath(0, img_path);
+  if(img_path != "")
+    setPath(0, img_path);
 }
 
 /*
@@ -123,22 +124,6 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h)
   /* Return the pixmap */
   return QPixmap::fromImage(editing_image).transformed(transform);
 }
-
-/*============================================================================
- * PROTECTED FUNCTIONS
- *===========================================================================*/
-
-/*
- * Description: The paint event for the sprite. Sets up the bounding box, then
- *              draws the current image into said box
- *
- * Inputs: Unused
- */
-//void EditorSprite::paintEvent(QPaintEvent *)
-//{
-//  QPainter painter(this);
-//  painter.drawRect(0,0,65,65);
-//}
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -242,25 +227,6 @@ int EditorSprite::getColorGreen()
 int EditorSprite::getOpacity()
 {
   return sprite->getOpacity();
-}
-
-/*
- * Description: Gets the rotation value flags.
- *
- * Inputs: none
- * Output: int - returns the angle to rotate
- */
-// TODO: Remove
-int EditorSprite::getQuickRotation()
-{
-//  if(flipped90)
-//    return 90;
-//  else if(flipped180)
-//    return 180;
-//  else if(flipped270)
-//    return 270;
-//  else
-    return 0;
 }
 
 /*
@@ -611,6 +577,18 @@ bool EditorSprite::getVerticalFlip(int frame_num)
 }
 
 /*
+ * Description: Paints the top frame on the stack at the given QRect bound.
+ *
+ * Inputs: QPainter* painter - the paint controller
+ *         QRect rect - the bounding rectangle
+ * Output: bool - did it get rendered?
+ */
+bool EditorSprite::paint(QPainter* painter, QRect rect)
+{
+  return paint(painter, rect.x(), rect.y(), rect.width(), rect.height());
+}
+
+/*
  * Description: Paints the top frame on the stack at the given x, y and with
  *              the width and height.
  *
@@ -628,10 +606,25 @@ bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h)
 }
 
 /*
+ * Description: Paints the top frame at the index on the stack at the given
+ *              QRect bound.
+ *
+ * Inputs: int index - the index in the frame stack
+ *         QPainter* painter - the paint controller
+ *         QRect rect - the bounding rectangle
+ * Output: bool - did it get rendered?
+ */
+bool EditorSprite::paint(int index, QPainter* painter, QRect rect)
+{
+  return paint(index, painter, rect.x(), rect.y(), rect.width(), rect.height());
+}
+
+/*
  * Description: Paints the frame at the index on the stack at the given x, y
  *              and with the width and height.
  *
- * Inputs: QPainter* painter - the paint controller
+ * Inputs: int index - the index in the frame stack
+ *         QPainter* painter - the paint controller
  *         int x - x offset from top of QPainter object
  *         int y - y offset from top of QPainter object
  *         int w - width of rendering image
@@ -681,4 +674,33 @@ void EditorSprite::setPath(int index, QString path)
     frame_info.push_back(info);
   else
     frame_info.insert(index, info);
+}
+
+/*=============================================================================
+ * OPERATOR FUNCTIONS
+ *============================================================================*/
+
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorSprite.
+ *
+ * Inputs: const EditorSprite &source - the source class constructor
+ * Output: EditorSprite& - pointer to the copied class
+ */
+EditorSprite& EditorSprite::operator= (const EditorSprite &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  mode = source.mode;
+  name = source.name;
+  sprite = new Sprite();
+  *sprite = *source.sprite;
+  frame_info = source.frame_info;
+
+  /* Return the copied object */
+  return *this;
 }

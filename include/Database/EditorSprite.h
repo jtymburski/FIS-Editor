@@ -29,7 +29,7 @@ class EditorSprite : public QObject
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSprite(QString img_path = " ");
+  EditorSprite(QString img_path = "");
 
   /* Destructor function */
   ~EditorSprite();
@@ -50,10 +50,6 @@ private:
 private:
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
-
-protected:
-  /* Painting event */
-//  void paintEvent(QPaintEvent *);
 
 public slots:
   /* Adds a frame to the top of the sequence */
@@ -78,9 +74,6 @@ public slots:
 
   /* Gets the sprites opacity */
   int getOpacity();
-
-  /* Gets all of the sprites frames rotations */
-  int getQuickRotation(); // TODO: Remove
 
   /* Sets the sprites animation time */
   void setAnimationTime(QString time);
@@ -163,10 +156,19 @@ public:
   bool getVerticalFlip(int);
 
   /* Paint the base sprite */
+  bool paint(QPainter* painter, QRect rect);
   bool paint(QPainter* painter, int x, int y, int w, int h);
+  bool paint(int index, QPainter* painter, QRect rect);
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
 
   /* Sets the sprite path */
   void setPath(int index, QString path);
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+public:
+  /* The copy operator */
+  EditorSprite& operator= (const EditorSprite &source);
 };
 #endif // EDITORSPRITE_H
