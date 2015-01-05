@@ -27,6 +27,7 @@
 #include <QTreeView>
 #include <QDesktopWidget>
 #include <QSizePolicy>
+
 #include "View/MapRender.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"

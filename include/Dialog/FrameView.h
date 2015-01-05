@@ -12,6 +12,7 @@
 #include <QWidget>
 
 #include "EditorEnumDb.h"
+#include "EditorHelpers.h"
 #include "Database/EditorSprite.h"
 
 class FrameView : public QWidget
@@ -28,9 +29,6 @@ public:
   ~FrameView();
 
 private:
-  /* Label type */
-  EditorEnumDb::FrameViewType type;
-
   /* Editor sprite pointer */
   EditorSprite* current_sprite;
 
@@ -39,14 +37,8 @@ private:
   int position_before;
   int position_current;
 
-  /* A pointer to the frame for viewing */
-  //QPixmap* frame;
-
-  /* Horizontal and Vertical flip */
-  //bool horflip,verflip;
-
-  /* Path to the frame */
-  //QString framepath;
+  /* Label type */
+  EditorEnumDb::FrameViewType type;
 
 protected:
   /* Mouse press event */
@@ -60,7 +52,7 @@ signals:
   void editFrame(int);
 
   /* Adds a midpoint */
-  void addMidpoint(QString,int,int);
+  void addMidpoint(QString,int);
 
   /* Adds a new head frame */
   void addHead(QString);
@@ -69,20 +61,6 @@ signals:
   void addTail(QString);
 
 public:
-  /* Reloads the frames after changes */
-  void reloadFrame();
-
-  /* Set angle */
-  //void setAngle(int angle);
-
-  /* Painting control */
-  //QPixmap setBrightness(int value, QPixmap original);
-  //QPixmap setColor(int red, int blue, int green, QPixmap original);
-
-  /* Flip setting */
-  //void setFlips(bool horizontal, bool vertical);
-  //void setHFlip(bool horizontal);
-  //void setVFlip(bool vertical);
 };
 
-#endif // FrameView_H
+#endif // FRAMEVIEW_H

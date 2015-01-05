@@ -27,21 +27,7 @@ public:
 
   /* Destructor Function */
   ~EditorSpriteList();
-public slots:
-  /* Sets the current sprite */
-  void setCurrentSprite(EditorSprite* e);
 
-  /* Views the frame sequence */
-  void viewFrameSequence();
-
-  /* Opens the sprite editing dialog */
-  void editSprite();
-
-protected:
-  /* Right click menu */
-  void mousePressEvent(QMouseEvent *event);
-  /* Double click */
-  void mouseDoubleClickEvent(QMouseEvent *event);
 private:
   /* Right click menu */
   QMenu* rightclick_menu;
@@ -52,9 +38,26 @@ private:
   /* Sprite Creation dialog */
   SpriteDialog* spriteeditordialog;
 
+protected:
+  /* Double click */
+  void mouseDoubleClickEvent(QMouseEvent *event);
+
+  /* Right click menu */
+  void mousePressEvent(QMouseEvent *event);
+
 signals:
   /* Updates the current sprite after editing it */
   void updateSprites();
+
+public slots:
+  /* Opens the sprite editing dialog */
+  void editSprite();
+
+  /* Sets the current sprite */
+  void setCurrentSprite(EditorSprite* e);
+
+  /* Views the frame sequence */
+  void viewFrameSequence();
 };
 
 #endif // EDITORSPRITELIST_H

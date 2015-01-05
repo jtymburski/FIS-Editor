@@ -11,6 +11,8 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QFileSystemModel>
+
+#include "EditorHelpers.h"
 #include "View/RawImageList.h"
 
 class RawImageView : public QWidget

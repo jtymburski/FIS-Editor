@@ -230,6 +230,22 @@ int EditorSprite::getOpacity()
 }
 
 /*
+ * Description: Resets the flip on all frames in the sprite
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorSprite::resetFlips()
+{
+  for(int i = 0; i < frame_info.size(); i++)
+  {
+    frame_info[i].hflip = false;
+    frame_info[i].vflip = false;
+  }
+  emit spriteChanged();
+}
+
+/*
  * Description: Sets the sprites animation time
  *
  * Input: Time (As a string which is converted to an int)
@@ -365,7 +381,7 @@ void EditorSprite::setFramePath(int frame_num, QString newpath)
 }
 
 /*
- * Description: Sets the frame horizonal flip
+ * Description: Sets the frame horizonal flip of a single frame index
  *
  * Input: Frame number and flip
  */
@@ -379,14 +395,15 @@ void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
 }
 
 /*
- * Description: Sets the sprites id (backend)
+ * Description: Sets the frame horizontal flips for all frames
  *
- * Input: ID value
+ * Input: bool flip
  */
-void EditorSprite::setId(int id)
+void EditorSprite::setHorizontalFlips()
 {
-  if(id >= 0 && id <= 65535)
-    sprite->setId(id);
+  for(int i = 0; i < frame_info.size(); i++)
+    frame_info[i].hflip = true;
+  emit spriteChanged();
 }
 
 /*
@@ -422,7 +439,7 @@ void EditorSprite::setRotation(QString angle)
 }
 
 /*
- * Description: Sets the frame vertical flip
+ * Description: Sets the frame vertical flip for a single index
  *
  * Input: Frame number and flip
  */
@@ -433,6 +450,18 @@ void EditorSprite::setVerticalFlip(int frame_num, bool flip)
     frame_info[frame_num].vflip = flip;
     emit spriteChanged();
   }
+}
+
+/*
+ * Description: Sets the frame vertical flip for all frames
+ *
+ * Input: bool flip
+ */
+void EditorSprite::setVerticalFlips()
+{
+  for(int i = 0; i < frame_info.size(); i++)
+    frame_info[i].vflip = true;
+  emit spriteChanged();
 }
 
 /*
@@ -517,6 +546,17 @@ bool EditorSprite::getHorizontalFlip(int frame_num)
 }
 
 /*
+ * Description: Returns the sprite ID
+ *
+ * Input: none
+ * Output: int - the id of the sprite
+ */
+int EditorSprite::getId()
+{
+  return sprite->getId();
+}
+
+/*
  * Description: Gets the frame image
  *
  * Input: The frames position in the sequence
@@ -552,6 +592,14 @@ QString EditorSprite::getPath(int frame_num)
   if(frame_num >= 0 && frame_num < frame_info.size())
     return frame_info[frame_num].path;
   return "";
+}
+
+/* Returns the modified pixmap */
+QPixmap EditorSprite::getPixmap(int index, int w, int h)
+{
+  if(index >= 0 && index < frame_info.size())
+    return transformPixmap(index, w, h).scaled(w, h);
+  return QPixmap();
 }
 
 /*
@@ -652,6 +700,17 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
 }
 
 /*
+ * Description: Sets the sprites id (backend)
+ *
+ * Input: ID value
+ */
+void EditorSprite::setId(int id)
+{
+  if(id >= 0 && id <= 65535)
+    sprite->setId(id);
+}
+
+/*
  * Description: Sets the frame path
  *
  * Input: The frames path
@@ -699,6 +758,7 @@ EditorSprite& EditorSprite::operator= (const EditorSprite &source)
   name = source.name;
   sprite = new Sprite();
   *sprite = *source.sprite;
+  sprite->setId(source.sprite->getId());
   frame_info = source.frame_info;
 
   /* Return the copied object */

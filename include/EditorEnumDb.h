@@ -17,14 +17,20 @@ public:
   /* Enum for sprite/image border modes */
   enum Border {STANDARD, HOVERED, SELECTED};
 
-  /* Enum for the tile layers */
-  enum Layer {BASE,ENHANCER,LOWER1,LOWER2,LOWER3,LOWER4,
-                    LOWER5,UPPER1,UPPER2,UPPER3,UPPER4,UPPER5};
   /* Enum for cursor mode */
   enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL};
 
   /* Enum for type of FrameView */
   enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
+
+  /* Enum for the tile layers */
+  enum Layer {BASE,ENHANCER,LOWER1,LOWER2,LOWER3,LOWER4,
+                    LOWER5,UPPER1,UPPER2,UPPER3,UPPER4,UPPER5};
+
+  /* Map view mode */
+  enum MapViewMode {RAW_VIEW = 0,
+                    SPRITE_VIEW = 1
+                   };
 
   /* Enum For View Mode */
   enum ViewMode {MAPVIEW = 0,

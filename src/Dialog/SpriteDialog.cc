@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Class Name: SpriteDialog
+ * Date Created: January 22, 2014
+ * Inheritance: QDialog
+ * Description: The dialog that displays the sprites and the information
+ *              related to it. Allows manipulation of the data.
+ ******************************************************************************/
 #include "Dialog/SpriteDialog.h"
 #include <QDebug>
 
@@ -52,7 +59,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
 
   /* ID display */
   QString id_label("ID: ");
-  id_label.append(QString::number(working_sprite->getSprite()->getId()));
+  id_label.append(QString::number(working_sprite->getId()));
   QLabel* id_number = new QLabel(id_label);
   layout->addWidget(id_number,0,0);
 
@@ -69,7 +76,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   frame_scrollwrapper = new QScrollArea();
   frame_list = new FrameList(this,working_sprite);
   frame_scrollwrapper->setWidget(frame_list);
-  //frame_scrollwrapper->setBaseSize(360,128);
   frame_scrollwrapper->setFixedHeight(105);
   frame_scrollwrapper->setMaximumWidth(446);
   frame_scrollwrapper->setBackgroundRole(QPalette::Base);
@@ -205,19 +211,32 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   /* Frame rotation add */
   QGroupBox *box = new QGroupBox("Frame Mods", this);
   QHBoxLayout *hlayout = new QHBoxLayout();
+  QHBoxLayout *hlayout2 = new QHBoxLayout();
+  QVBoxLayout *vlayout = new QVBoxLayout();
   QPushButton *rotate0 = new QPushButton("Rotate 0", this);
   QPushButton *rotate90 = new QPushButton("Rotate 90", this);
   QPushButton *rotate180 = new QPushButton("Rotate 180", this);
   QPushButton *rotate270 = new QPushButton("Rotate 270", this);
-  hlayout->addWidget(rotate0);//,10,0);
-  hlayout->addWidget(rotate90);//,10,1);
-  hlayout->addWidget(rotate180);//,10,2);
-  hlayout->addWidget(rotate270);//,10,3);
+  QPushButton *flipH = new QPushButton("Flip Horizontal", this);
+  QPushButton *flipV = new QPushButton("Flip Vertical", this);
+  QPushButton *resetFlip = new QPushButton("Reset Flips", this);
+  hlayout->addWidget(rotate0);
+  hlayout->addWidget(rotate90);
+  hlayout->addWidget(rotate180);
+  hlayout->addWidget(rotate270);
+  hlayout2->addWidget(flipH);
+  hlayout2->addWidget(flipV);
+  hlayout2->addWidget(resetFlip);
+  vlayout->addLayout(hlayout);
+  vlayout->addLayout(hlayout2);
   connect(rotate0,SIGNAL(clicked()),working_sprite,SLOT(set0()));
   connect(rotate90,SIGNAL(clicked()),working_sprite,SLOT(set90()));
   connect(rotate180,SIGNAL(clicked()),working_sprite,SLOT(set180()));
   connect(rotate270,SIGNAL(clicked()),working_sprite,SLOT(set270()));
-  box->setLayout(hlayout);
+  connect(flipH, SIGNAL(clicked()), working_sprite, SLOT(setHorizontalFlips()));
+  connect(flipV, SIGNAL(clicked()), working_sprite, SLOT(setVerticalFlips()));
+  connect(resetFlip, SIGNAL(clicked()), working_sprite, SLOT(resetFlips()));
+  box->setLayout(vlayout);
   layout->addWidget(box, 11, 0, 1, 4);
 
   /* Spacing */
@@ -282,17 +301,6 @@ void SpriteDialog::destroyWorkingSprite()
 
   close();
 }
-
-/*
- * Description: Loads a working sprite
- *
- * Input: Editor sprite
- */
-//void SpriteDialog::loadWorkingSprite(EditorSprite *s)
-//{
-//  if(s != NULL)
-//    working_sprite = s;
-//}
 
 /*
  * Description: Emits the sprite with the new changes and closes the dialog

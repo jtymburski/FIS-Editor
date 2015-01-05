@@ -25,19 +25,31 @@ public:
   ~MapDatabase();
 
 private:
-  /* The Views */
-  RawImageView* raw_view;
-  SpriteView* sprite_view;
-  QListWidget* top_view;
+  /* Buttons for database control */
+  QPushButton* button_delete;
+  QPushButton* button_duplicate;
+  QPushButton* button_import;
+  QPushButton* button_new;
 
   /* Layout */
   QVBoxLayout* layout;
+
+  /* The Views */
+  RawImageView* view_raw;
+  SpriteView* view_sprite;
+  QListWidget* view_top;
 
 protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
 
 public slots:
+  /* Button clicks */
+  void buttonDelete();
+  void buttonDuplicate();
+  void buttonImport();
+  void buttonNew();
+
   /* Updates based on selected index */
   void updateSelected(int index);
 
