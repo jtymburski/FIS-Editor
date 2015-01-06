@@ -16,7 +16,11 @@ class EditorHelpers
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the sprite directory, based on the location of the editor */
   static QString getSpriteDir();
+
+  /* Returns the tile rendering width and height */
+  static int getTileSize();
 };
 
 #endif // EDITORHELPERS_H

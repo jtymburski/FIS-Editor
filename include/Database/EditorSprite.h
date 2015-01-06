@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QPainter>
+
 #include "EditorEnumDb.h"
 
 /* Struct for frame option storage */
