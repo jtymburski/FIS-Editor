@@ -40,9 +40,24 @@ EditorSpriteList::~EditorSpriteList()
   delete rightclick_menu;
 }
 
-void EditorSpriteList::setCurrentSprite(EditorSprite *e)
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: The mouse event for double clicking
+ *
+ * Inputs: Mouse event
+ */
+void EditorSpriteList::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  currentsprite = e;
+  QListWidget::mouseDoubleClickEvent(event);
+  if(event->buttons() & Qt::LeftButton)
+  {
+    QListWidgetItem* current = itemAt(event->pos());
+    if(current != NULL)
+      editSprite();
+  }
 }
 
 /*
@@ -61,35 +76,38 @@ void EditorSpriteList::mousePressEvent(QMouseEvent *event)
   }
 }
 
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
-/*
- * Description: The mouse event for double clicking
- *
- * Inputs: Mouse event
- */
-void EditorSpriteList::mouseDoubleClickEvent(QMouseEvent *event)
+// TODO: Comment
+void EditorSpriteList::editSprite()
 {
-  QListWidget::mouseDoubleClickEvent(event);
-  if(event->buttons() & Qt::LeftButton)
-  {
-    QListWidgetItem* current = itemAt(event->pos());
-    if(current != NULL)
-      editSprite();
-  }
+  if(spriteeditordialog != NULL)
+    delete spriteeditordialog;
+  spriteeditordialog = new SpriteDialog(this, currentsprite, "",
+                                        0, false);
+  connect(spriteeditordialog, SIGNAL(ok()), this, SIGNAL(updateSprites()));
+  spriteeditordialog->show();
 }
+
+// TODO: Comment
+void EditorSpriteList::setCurrentSprite(EditorSprite *e)
+{
+  currentsprite = e;
+}
+
+// TODO: Comment
 void EditorSpriteList::viewFrameSequence()
 {
   QDialog* frames = new QDialog(this);
   QHBoxLayout* framelayout = new QHBoxLayout(frames);
   QVector<QLabel*> labels;
-  for(int i=0; i<currentsprite->frameCount(); i++)
+  for(int i = 0; i < currentsprite->frameCount(); i++)
   {
     labels.push_back(new QLabel());
-    QPixmap temp(currentsprite->getPath(i));
-    QTransform trans;
-    QTransform transformation =
-        trans.rotate(currentsprite->getQuickRotation());
-    labels.last()->setPixmap(temp.transformed(transformation));
+    labels.last()->setFixedSize(64, 64);
+    labels.last()->setPixmap(currentsprite->getPixmap(i, 64, 64));
     framelayout->addWidget(labels.last());
   }
   frames->setLayout(framelayout);
@@ -98,12 +116,5 @@ void EditorSpriteList::viewFrameSequence()
   frames->exec();
 }
 
-void EditorSpriteList::editSprite()
-{
-  spriteeditordialog = new SpriteDialog(this,currentsprite,
-                                         currentsprite->getPath(0),
-                                         0,false);
-  connect(spriteeditordialog,SIGNAL(ok()),this,SIGNAL(updateSprites()));
-  spriteeditordialog->show();
-}
+
 

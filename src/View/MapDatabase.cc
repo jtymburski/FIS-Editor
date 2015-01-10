@@ -10,38 +10,46 @@
 MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
 {
   /* Top view */
-  top_view = new QListWidget(this);
-  top_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  view_top = new QListWidget(this);
+  view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
   items << "Raw Images" << "Sprites";
-  top_view->addItems(items);
-  top_view->setCurrentRow(0);
-  top_view->setMaximumHeight(100);
-  connect(top_view, SIGNAL(currentRowChanged(int)),
+  view_top->addItems(items);
+  view_top->setCurrentRow(0);
+  view_top->setMaximumHeight(100);
+  connect(view_top, SIGNAL(currentRowChanged(int)),
           this, SLOT(updateSelected(int)));
 
   /* Sets up the various views */
-  raw_view = new RawImageView(this);
-  sprite_view = new SpriteView(this);
+  view_raw = new RawImageView(this);
+  view_sprite = new SpriteView(this);
 
   /* Connections for the views */
-  connect(raw_view->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
-          sprite_view,SLOT(addEditorSprite(EditorSprite*)));
+  connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
+          view_sprite,SLOT(addEditorSprite(EditorSprite*)));
+
+  /* Push buttons at the bottom of the layout */
+  button_delete = new QPushButton("Delete", this);
+  button_duplicate = new QPushButton("Duplicate", this);
+  button_import = new QPushButton("Import", this);
+  button_new = new QPushButton("New", this);
+  QHBoxLayout* hlayout = new QHBoxLayout();
+  hlayout->addWidget(button_new);
+  hlayout->addWidget(button_delete);
+  hlayout->addWidget(button_import);
+  hlayout->addWidget(button_duplicate);
+  connect(button_delete, SIGNAL(clicked()), this, SLOT(buttonDelete()));
+  connect(button_duplicate, SIGNAL(clicked()), this, SLOT(buttonDuplicate()));
+  connect(button_import, SIGNAL(clicked()), this, SLOT(buttonImport()));
+  connect(button_new, SIGNAL(clicked()), this, SLOT(buttonNew()));
 
   /* Layout */
   layout = new QVBoxLayout(this);
-  layout->addWidget(top_view);
-  layout->addWidget(raw_view);
-  layout->addWidget(sprite_view);
-  updateSelected(0);
-
-  //QHBoxLayout* button_layout = new QHBoxLayout();
-  //button_layout->addWidget(new_button);
-  //button_layout->addWidget(del_button);
-  //button_layout->addWidget(import_button);
-  //button_layout->addWidget(duplicate_button);
-  //layout->addLayout(button_layout);
-  //modifyBottomList(top_view->currentRow());
+  layout->addWidget(view_top);
+  layout->addWidget(view_raw);
+  layout->addWidget(view_sprite);
+  layout->addLayout(hlayout);
+  updateSelected(EditorEnumDb::RAW_VIEW);
 }
 
 /*
@@ -49,26 +57,63 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
  */
 MapDatabase::~MapDatabase()
 {
-  delete raw_view;
-  delete sprite_view;
+  delete view_raw;
+  delete view_sprite;
 }
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+// TODO: Comment
+void MapDatabase::buttonDelete()
+{
+  qDebug() << "DELETE";
+}
+
+// TODO: Comment
+void MapDatabase::buttonDuplicate()
+{
+  qDebug() << "DUPLICATE";
+}
+
+// TODO: Comment
+void MapDatabase::buttonImport()
+{
+  qDebug() << "IMPORT";
+}
+
+// TODO: Comment
+void MapDatabase::buttonNew()
+{
+  qDebug() << "NEW";
+}
+
 /* Updates based on selected index */
 void MapDatabase::updateSelected(int index)
 {
-  if(index == 0)
+  /* General assumption is enabled buttons */
+  button_delete->setEnabled(true);
+  button_duplicate->setEnabled(true);
+  button_import->setEnabled(true);
+  button_new->setEnabled(true);
+
+  /* Switch the index view */
+  if(index == EditorEnumDb::RAW_VIEW)
   {
-    raw_view->show();
-    sprite_view->hide();
+    view_raw->show();
+    view_sprite->hide();
+
+    /* Raw view has no buttons enabled */
+    button_delete->setEnabled(false);
+    button_duplicate->setEnabled(false);
+    button_import->setEnabled(false);
+    button_new->setEnabled(false);
   }
-  else if(index == 1)
+  else if(index == EditorEnumDb::SPRITE_VIEW)
   {
-    raw_view->hide();
-    sprite_view->show();
+    view_raw->hide();
+    view_sprite->show();
   }
 }
 
@@ -78,11 +123,11 @@ void MapDatabase::updateSelected(int index)
 
 RawImageView* MapDatabase::getRawView()
 {
-  return raw_view;
+  return view_raw;
 }
 
 SpriteView* MapDatabase::getSpriteView()
 {
-  return sprite_view;
+  return view_sprite;
 }
 

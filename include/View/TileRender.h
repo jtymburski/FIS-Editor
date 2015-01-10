@@ -61,9 +61,6 @@ public slots:
   void setPass(bool);
   void setGridColor(bool);
 
-  QPixmap setBrightness(int delta, QPixmap original);
-  QPixmap setColor(int deltared,int deltablue,int deltagreen,QPixmap original);
-
   /* Sets the toolbox that the tile gets the current Editor Sprite from */
   void setToolbox(SpriteView* tool);
 
@@ -83,8 +80,6 @@ public slots:
   int getActivePath();
   int getToolPath();
 
-  /* Transforms the image and returns it */
-  QPixmap transformPixmap(EditorSprite* pic,int pos = 0);
   /* Variable for the currently active layer */
   EditorEnumDb::Layer active_layer;
 protected:

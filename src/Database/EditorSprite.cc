@@ -22,7 +22,8 @@ EditorSprite::EditorSprite(QString img_path)
   mode = EditorEnumDb::STANDARD;
   name = "Default";
   sprite = new Sprite();
-  setPath(0, img_path);
+  if(img_path != "")
+    setPath(0, img_path);
 }
 
 /*
@@ -123,22 +124,6 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h)
   /* Return the pixmap */
   return QPixmap::fromImage(editing_image).transformed(transform);
 }
-
-/*============================================================================
- * PROTECTED FUNCTIONS
- *===========================================================================*/
-
-/*
- * Description: The paint event for the sprite. Sets up the bounding box, then
- *              draws the current image into said box
- *
- * Inputs: Unused
- */
-//void EditorSprite::paintEvent(QPaintEvent *)
-//{
-//  QPainter painter(this);
-//  painter.drawRect(0,0,65,65);
-//}
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -245,22 +230,19 @@ int EditorSprite::getOpacity()
 }
 
 /*
- * Description: Gets the rotation value flags.
+ * Description: Resets the flip on all frames in the sprite
  *
  * Inputs: none
- * Output: int - returns the angle to rotate
+ * Output: none
  */
-// TODO: Remove
-int EditorSprite::getQuickRotation()
+void EditorSprite::resetFlips()
 {
-//  if(flipped90)
-//    return 90;
-//  else if(flipped180)
-//    return 180;
-//  else if(flipped270)
-//    return 270;
-//  else
-    return 0;
+  for(int i = 0; i < frame_info.size(); i++)
+  {
+    frame_info[i].hflip = false;
+    frame_info[i].vflip = false;
+  }
+  emit spriteChanged();
 }
 
 /*
@@ -399,7 +381,7 @@ void EditorSprite::setFramePath(int frame_num, QString newpath)
 }
 
 /*
- * Description: Sets the frame horizonal flip
+ * Description: Sets the frame horizonal flip of a single frame index
  *
  * Input: Frame number and flip
  */
@@ -413,14 +395,15 @@ void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
 }
 
 /*
- * Description: Sets the sprites id (backend)
+ * Description: Sets the frame horizontal flips for all frames
  *
- * Input: ID value
+ * Input: bool flip
  */
-void EditorSprite::setId(int id)
+void EditorSprite::setHorizontalFlips()
 {
-  if(id >= 0 && id <= 65535)
-    sprite->setId(id);
+  for(int i = 0; i < frame_info.size(); i++)
+    frame_info[i].hflip = true;
+  emit spriteChanged();
 }
 
 /*
@@ -456,7 +439,7 @@ void EditorSprite::setRotation(QString angle)
 }
 
 /*
- * Description: Sets the frame vertical flip
+ * Description: Sets the frame vertical flip for a single index
  *
  * Input: Frame number and flip
  */
@@ -467,6 +450,18 @@ void EditorSprite::setVerticalFlip(int frame_num, bool flip)
     frame_info[frame_num].vflip = flip;
     emit spriteChanged();
   }
+}
+
+/*
+ * Description: Sets the frame vertical flip for all frames
+ *
+ * Input: bool flip
+ */
+void EditorSprite::setVerticalFlips()
+{
+  for(int i = 0; i < frame_info.size(); i++)
+    frame_info[i].vflip = true;
+  emit spriteChanged();
 }
 
 /*
@@ -551,6 +546,17 @@ bool EditorSprite::getHorizontalFlip(int frame_num)
 }
 
 /*
+ * Description: Returns the sprite ID
+ *
+ * Input: none
+ * Output: int - the id of the sprite
+ */
+int EditorSprite::getId()
+{
+  return sprite->getId();
+}
+
+/*
  * Description: Gets the frame image
  *
  * Input: The frames position in the sequence
@@ -588,6 +594,14 @@ QString EditorSprite::getPath(int frame_num)
   return "";
 }
 
+/* Returns the modified pixmap */
+QPixmap EditorSprite::getPixmap(int index, int w, int h)
+{
+  if(index >= 0 && index < frame_info.size())
+    return transformPixmap(index, w, h).scaled(w, h);
+  return QPixmap();
+}
+
 /*
  * Description: Returns the actual sprite
  *
@@ -611,6 +625,18 @@ bool EditorSprite::getVerticalFlip(int frame_num)
 }
 
 /*
+ * Description: Paints the top frame on the stack at the given QRect bound.
+ *
+ * Inputs: QPainter* painter - the paint controller
+ *         QRect rect - the bounding rectangle
+ * Output: bool - did it get rendered?
+ */
+bool EditorSprite::paint(QPainter* painter, QRect rect)
+{
+  return paint(painter, rect.x(), rect.y(), rect.width(), rect.height());
+}
+
+/*
  * Description: Paints the top frame on the stack at the given x, y and with
  *              the width and height.
  *
@@ -628,10 +654,25 @@ bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h)
 }
 
 /*
+ * Description: Paints the top frame at the index on the stack at the given
+ *              QRect bound.
+ *
+ * Inputs: int index - the index in the frame stack
+ *         QPainter* painter - the paint controller
+ *         QRect rect - the bounding rectangle
+ * Output: bool - did it get rendered?
+ */
+bool EditorSprite::paint(int index, QPainter* painter, QRect rect)
+{
+  return paint(index, painter, rect.x(), rect.y(), rect.width(), rect.height());
+}
+
+/*
  * Description: Paints the frame at the index on the stack at the given x, y
  *              and with the width and height.
  *
- * Inputs: QPainter* painter - the paint controller
+ * Inputs: int index - the index in the frame stack
+ *         QPainter* painter - the paint controller
  *         int x - x offset from top of QPainter object
  *         int y - y offset from top of QPainter object
  *         int w - width of rendering image
@@ -659,6 +700,17 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
 }
 
 /*
+ * Description: Sets the sprites id (backend)
+ *
+ * Input: ID value
+ */
+void EditorSprite::setId(int id)
+{
+  if(id >= 0 && id <= 65535)
+    sprite->setId(id);
+}
+
+/*
  * Description: Sets the frame path
  *
  * Input: The frames path
@@ -681,4 +733,34 @@ void EditorSprite::setPath(int index, QString path)
     frame_info.push_back(info);
   else
     frame_info.insert(index, info);
+}
+
+/*=============================================================================
+ * OPERATOR FUNCTIONS
+ *============================================================================*/
+
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorSprite.
+ *
+ * Inputs: const EditorSprite &source - the source class constructor
+ * Output: EditorSprite& - pointer to the copied class
+ */
+EditorSprite& EditorSprite::operator= (const EditorSprite &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  mode = source.mode;
+  name = source.name;
+  sprite = new Sprite();
+  *sprite = *source.sprite;
+  sprite->setId(source.sprite->getId());
+  frame_info = source.frame_info;
+
+  /* Return the copied object */
+  return *this;
 }

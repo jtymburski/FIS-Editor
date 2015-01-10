@@ -31,6 +31,7 @@ QT += opengl widgets #phonon network xml, core and gui are default
 SOURCES += \
     src/Main.cc \
     src/Application.cc \
+    src/EditorHelpers.cc \
     src/View/MapRender.cc \
     ../Project/src/Helpers.cc \
     ../Project/src/Frame.cc \
@@ -78,11 +79,12 @@ SOURCES += \
     ../Project/src/Game/Player/Bubby.cc \
     ../Project/src/Game/Player/Signature.cc \
     ../Project/src/Game/Player/Flavour.cc \
-    ../Project/src/Game/Battle/AIModule.cc
+    ../Project/src/Game/Battle/AIModule.cc \
 
 HEADERS += \
     include/Application.h \
     include/EditorEnumDb.h \
+    include/EditorHelpers.h \
     include/View/MapRender.h \
     ../Project/include/EnumDb.h \
     ../Project/include/Helpers.h \
@@ -132,7 +134,7 @@ HEADERS += \
     ../Project/include/Game/Player/Bubby.h \
     ../Project/include/Game/Battle/AIModule.h \
     ../Project/include/Game/Player/Signature.h \
-    ../Project/include/Game/Player/Flavour.h
+    ../Project/include/Game/Player/Flavour.h \
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

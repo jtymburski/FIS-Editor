@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QPainter>
+
 #include "EditorEnumDb.h"
 
 /* Struct for frame option storage */
@@ -29,7 +30,7 @@ class EditorSprite : public QObject
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSprite(QString img_path = " ");
+  EditorSprite(QString img_path = "");
 
   /* Destructor function */
   ~EditorSprite();
@@ -50,10 +51,6 @@ private:
 private:
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
-
-protected:
-  /* Painting event */
-//  void paintEvent(QPaintEvent *);
 
 public slots:
   /* Adds a frame to the top of the sequence */
@@ -79,8 +76,8 @@ public slots:
   /* Gets the sprites opacity */
   int getOpacity();
 
-  /* Gets all of the sprites frames rotations */
-  int getQuickRotation(); // TODO: Remove
+  /* Reset the flips for all frames */
+  void resetFlips();
 
   /* Sets the sprites animation time */
   void setAnimationTime(QString time);
@@ -106,9 +103,7 @@ public slots:
 
   /* Sets the frames horizontal flip of a given frame */
   void setHorizontalFlip(int,bool);
-
-  /* Sets the sprites id (Backend) */
-  void setId(int);
+  void setHorizontalFlips();
 
   /* Sets the user submitted name */
   void setName(QString name);
@@ -121,6 +116,7 @@ public slots:
 
   /* Sets the frames vertical flip of a given frame */
   void setVerticalFlip(int,bool);
+  void setVerticalFlips();
 
   /* Sets all of the sprites frames to 270 deg rotation */
   void set0();
@@ -147,6 +143,9 @@ public:
   /* Gets the frames horizontal flip of a given frame */
   bool getHorizontalFlip(int frame_num);
 
+  /* Gets the ID for the sprite */
+  int getId();
+
   /* Gets the image path */
   QImage getImage(int frame_num);
 
@@ -156,6 +155,9 @@ public:
   /* Gets the sprite path */
   QString getPath(int frame_num);
 
+  /* Returns the modified pixmap */
+  QPixmap getPixmap(int index, int w, int h);
+
   /* Gets the sprite for alteration */
   Sprite* getSprite();
 
@@ -163,10 +165,22 @@ public:
   bool getVerticalFlip(int);
 
   /* Paint the base sprite */
+  bool paint(QPainter* painter, QRect rect);
   bool paint(QPainter* painter, int x, int y, int w, int h);
+  bool paint(int index, QPainter* painter, QRect rect);
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
+
+  /* Sets the sprites id (Backend) */
+  void setId(int);
 
   /* Sets the sprite path */
   void setPath(int index, QString path);
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+public:
+  /* The copy operator */
+  EditorSprite& operator= (const EditorSprite &source);
 };
 #endif // EDITORSPRITE_H

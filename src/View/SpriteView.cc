@@ -21,18 +21,13 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
   QVBoxLayout* layout = new QVBoxLayout(this);
 
   current = new EditorSprite();
-  //QWidget* widget = new QWidget(this);
-  //widget->setStyleSheet("background-color:red;");
-  //edit_sprite = new SpriteDialog(this);
   bottom_view = new QWidget(this);
   bottom_view->setMinimumHeight(150);
   editor_sprite_list = new EditorSpriteList(this);
-  //editor_sprite_list->show();
-  //editor_sprite_list->setFixedSize(288,512);
   connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
           this,SLOT(setCurrent(int)));
   connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
-  nextID = 1;
+  nextID = 0;
 
   //layout->addWidget(widget);//editor_sprite_list);
   layout->addWidget(editor_sprite_list);
@@ -115,12 +110,11 @@ void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 
   if(e->button() & Qt::RightButton)
   {
-      edit_sprite = new SpriteDialog(this,current,
-                                             current->getPath(0),
-                                             0,false);
+    edit_sprite = new SpriteDialog(this, current, current->getPath(0),
+                                   0, false);
 
-      connect(edit_sprite,SIGNAL(ok()),this,SLOT(refreshList()));
-      edit_sprite->show();
+    connect(edit_sprite, SIGNAL(ok()), this, SLOT(refreshList()));
+    edit_sprite->show();
   }
 }
 
@@ -141,14 +135,14 @@ void SpriteView::addEditorSprite(EditorSprite *e)
   /* Puts the sprite in the library */
   editor_sprites.push_back(e);
 
-  /* Increments the id tracker */
-  nextID++;
-
   /* Adds the item to the visible list */
-  editor_sprite_list->addItem(e->getName());
+  editor_sprite_list->addItem("temp");
   editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
   editor_sprite_list->setCurrentSprite(e);
-  update();
+
+  /* Increments the id tracker and updates view */
+  nextID++;
+  refreshList();
 }
 
 /*
@@ -167,7 +161,16 @@ EditorSprite* SpriteView::getCurrent()
 void SpriteView::refreshList()
 {
   for(int i=0; i<editor_sprites.size(); i++)
-    editor_sprite_list->item(i)->setText(editor_sprites[i]->getName());
+  {
+    EditorSprite* e = editor_sprites[i];
+
+    QString name_str = QString::number(e->getId()) + ": " + e->getName();
+    if(nextID < 10)
+      name_str = "0" + name_str;
+    if(nextID < 100)
+      name_str = "0" + name_str;
+    editor_sprite_list->item(i)->setText(name_str);
+  }
   update();
 }
 
@@ -183,152 +186,6 @@ void SpriteView::setCurrent(int index)
   update();
 }
 
-/*
- * Description: Transforms the given frame from the given sprite
- *
- * Input: Editor sprite and position (Default is zero)
- *
- * Output: Returns the transformed pixmap
- */
-QPixmap SpriteView::transformPixmap(EditorSprite* pic, int pos)
-{
-  QTransform transform;
-
-  /* Execute horizontal flip */
-  if(pic->getHorizontalFlip(pos))
-  {
-    qreal m11 = transform.m11();    // Horizontal scaling
-    qreal m12 = transform.m12();    // Vertical shearing
-    qreal m13 = transform.m13();    // Horizontal Projection
-    qreal m21 = transform.m21();    // Horizontal shearing
-    qreal m22 = transform.m22();    // vertical scaling
-    qreal m23 = transform.m23();    // Vertical Projection
-    qreal m31 = transform.m31();    // Horizontal Position (DX)
-    qreal m32 = transform.m32();    // Vertical Position (DY)
-    qreal m33 = transform.m33();    // Addtional Projection Factor
-
-    qreal scale = m11;
-
-    m11 = -m11;
-
-    // Re-position back to origin
-    if(m31 > 0)
-      m31 = 0;
-    else
-      m31 = (64 * scale);
-
-    // Write back to the matrix
-    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-  }
-
-  /* Execute vertical flip */
-  if(pic->getVerticalFlip(pos))
-  {
-    qreal m11 = transform.m11();    // Horizontal scaling
-    qreal m12 = transform.m12();    // Vertical shearing
-    qreal m13 = transform.m13();    // Horizontal Projection
-    qreal m21 = transform.m21();    // Horizontal shearing
-    qreal m22 = transform.m22();    // vertical scaling
-    qreal m23 = transform.m23();    // Vertical Projection
-    qreal m31 = transform.m31();    // Horizontal Position (DX)
-    qreal m32 = transform.m32();    // Vertical Position (DY)
-    qreal m33 = transform.m33();    // Addtional Projection Factor
-
-    qreal scale = m22;
-    m22 = -m22;
-
-    // Re-position back to origin
-    if(m32 > 0)
-      m32 = 0;
-    else
-      m32 = (64 * scale);
-
-    // Write back to the matrix
-    transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-  }
-
-  /* Transform */
-  QTransform trans = transform;
-  transform = trans.rotate(pic->getFrameAngle(pos));
-  QPixmap returnimage(pic->getPath(pos));
-
-  /* Modify brightness and color */
-  if(current != NULL)
-  {
-    returnimage = setBrightness(current->getBrightness()-255,returnimage);
-    returnimage = setColor(current->getColorRed(),
-                           current->getColorBlue(),
-                           current->getColorGreen(),
-                           returnimage);
-  }
-  return returnimage.transformed(transform);
-}
-
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-
-// TODO: Comment
-QPixmap SpriteView::setBrightness(int delta, QPixmap original)
-{
-  QImage original_image = original.toImage();
-  QImage editing = original.toImage();
-  QColor old_color;
-  int r,g,b;
-
-  for(int i=0; i<editing.width(); i++)
-  {
-    for(int j=0; j<editing.height(); j++)
-    {
-      if(qAlpha(original_image.pixel(i,j)) > 0)
-      {
-        old_color = QColor(original_image.pixel(i,j));
-        r = old_color.red() + delta;
-        g = old_color.green() + delta;
-        b = old_color.blue() + delta;
-
-        r = qBound(0,r,255);
-        g = qBound(0,g,255);
-        b = qBound(0,b,255);
-
-        editing.setPixel(i,j,qRgb(r,g,b));
-      }
-    }
-  }
-  QPixmap output;
-  output = output.fromImage(editing);
-  return output;
-}
-
-// TODO: Comment
-QPixmap SpriteView::setColor(int deltared, int deltablue,
-                             int deltagreen, QPixmap original)
-{
-  QImage original_image = original.toImage();
-  QImage editing = original.toImage();
-  QColor old_color;
-  int r,g,b;
-
-  for(int i=0; i<editing.width(); i++)
-  {
-    for(int j=0; j<editing.height(); j++)
-    {
-      if(qAlpha(original_image.pixel(i,j)) > 0)
-      {
-        old_color = QColor(original_image.pixel(i,j));
-        r = old_color.red()+deltared-255;
-        g = old_color.green()+deltablue-255;
-        b = old_color.blue()+deltagreen-255;
-
-        r = qBound(0,r,255);
-        g = qBound(0,g,255);
-        b = qBound(0,b,255);
-
-        editing.setPixel(i,j,qRgb(r,g,b));
-      }
-    }
-  }
-  QPixmap output;
-  output = output.fromImage(editing);
-  return output;
-}

@@ -7,13 +7,13 @@
 #ifndef FRAMEDIALOG_H
 #define FRAMEDIALOG_H
 
+#include <QCheckBox>
 #include <QDialog>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QCheckBox>
-#include <QLineEdit>
-#include <QDebug>
-#include <QMessageBox>
+
 #include "Database/EditorSprite.h"
 #include "Dialog/FrameView.h"
 
@@ -22,13 +22,33 @@ class FrameDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameDialog(QWidget* parent = 0,
-                          EditorSprite* s = 0,
-                          int framenum = 0);
+  FrameDialog(QWidget* parent = NULL, EditorSprite* s = NULL, int framenum = 0);
 
   /* Destructor Function */
   ~FrameDialog();
+
+private:
+  /* The frame label in the view */
+  FrameView* framelabel;
+
+  /* Frame number */
+  int framenumber;
+
+  /* The sprite being edited */
+  EditorSprite* sprite_original;
+  EditorSprite* sprite_working;
+
+protected:
+signals:
 public slots:
+  /* Deletes the current frame */
+  void deleteFrame();
+
+  /* Slot for finishing the saving of changes to the sequence */
+  void finishSave();
+
+  /* Opens a dialog for frame replacement */
+  void replaceFrame();
 
   /* Sets the horizontal flip for the given frame */
   void setHorizontalFlip(bool);
@@ -41,49 +61,6 @@ public slots:
   void set90();
   void set180();
   void set270();
-
-  /* Closes with no saving */
-  void closeNoSave();
-
-  /* Opens a dialog for frame replacement */
-  void replaceFrame();
-
-  /* Deletes the current frame */
-  void deleteFrame();
-signals:
-  /* Signal for finishing and saving the changes to the sequence */
-  void finishedSave();
-protected:
-private:
-
-  FrameView* framelabel;
-  QCheckBox* rotate0;
-  QCheckBox* rotate90;
-  QCheckBox* rotate180;
-  QCheckBox* rotate270;
-
-  /* The sprite being edited */
-  EditorSprite* sprite;
-
-  /* Ok button */
-  QPushButton* ok;
-
-  /* Cancel button */
-  QPushButton* cancel;
-
-  /* File selection button (For changing) */
-  QPushButton* select_file;
-
-  /* Backups (For Cancellation) */
-  bool horizontal_backup;
-  bool vertical_backup;
-  bool rotate0_backup;
-  bool rotate90_backup;
-  bool rotate180_backup;
-  bool rotate270_backup;
-
-  /* Frame number */
-  int framenumber;
 };
 
 #endif // FRAMEDIALOG_H

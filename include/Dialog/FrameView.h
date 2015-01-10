@@ -7,12 +7,12 @@
 #ifndef FrameView_H
 #define FrameView_H
 
-#include <QMouseEvent>
-#include <QPixmap>
-#include <QWidget>
-#include <QPainter>
 #include <QFileDialog>
+#include <QMouseEvent>
+#include <QWidget>
+
 #include "EditorEnumDb.h"
+#include "EditorHelpers.h"
 #include "Database/EditorSprite.h"
 
 class FrameView : public QWidget
@@ -20,23 +20,26 @@ class FrameView : public QWidget
   Q_OBJECT
 public:
   /* Constructor function */
-  FrameView(QWidget* parent = 0,
-              EditorEnumDb::FrameViewType type = EditorEnumDb::FRAME,
-      QPixmap* frame_image = 0,int position = 0, int before = 0, int after = 0,
-              QString framedir = QDir::current().absolutePath(),
-              EditorSprite* current = 0);
+  FrameView(QWidget* parent = NULL,
+            EditorEnumDb::FrameViewType type = EditorEnumDb::FRAME,
+            EditorSprite* current = NULL, int position = 0, int before = 0,
+            int after = 0);
 
   /* Destructor function */
   ~FrameView();
 
-  /* Flip setting */
-  void setFlips(bool horizontal, bool vertical);
-  void setHFlip(bool horizontal);
-  void setVFlip(bool vertical);
-  void setAngle(int angle);
-  QPixmap setBrightness(int value, QPixmap original);
-  QPixmap setColor(int red, int blue, int green, QPixmap original);
-  void reloadFrame();
+private:
+  /* Editor sprite pointer */
+  EditorSprite* current_sprite;
+
+  /* Position Before After and Current */
+  int position_after;
+  int position_before;
+  int position_current;
+
+  /* Label type */
+  EditorEnumDb::FrameViewType type;
+
 protected:
   /* Mouse press event */
   void mouseDoubleClickEvent(QMouseEvent *event);
@@ -49,7 +52,7 @@ signals:
   void editFrame(int);
 
   /* Adds a midpoint */
-  void addMidpoint(QString,int,int);
+  void addMidpoint(QString,int);
 
   /* Adds a new head frame */
   void addHead(QString);
@@ -57,24 +60,7 @@ signals:
   /* Adds a new tail frame */
   void addTail(QString);
 
-private:
-  /* Label type */
-  EditorEnumDb::FrameViewType t;
-
-  /* Editor sprite pointer */
-  EditorSprite* currentsprite;
-
-  /* Position Before After and Current */
-  int pos,bef,aft;
-
-  /* A pointer to the frame for viewing */
-  QPixmap* frame;
-
-  /* Horizontal and Vertical flip */
-  bool horflip,verflip;
-
-  /* Path to the frame */
-  QString framepath;
+public:
 };
 
-#endif // FrameView_H
+#endif // FRAMEVIEW_H
