@@ -30,6 +30,9 @@ public:
   /* Constructor Function */
   EditorMap();//QWidget* parent = NULL);
 
+  /* Constructor function with id and name */
+  EditorMap(int id, QString name);
+
   /* Destructor function */
   ~EditorMap();
 
@@ -67,6 +70,7 @@ public:
 
   /* Returns the name of the map set */
   QString getName();
+  QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();

@@ -1,11 +1,12 @@
-#ifndef EDITORSKILL_H
-#define EDITORSKILL_H
 /*******************************************************************************
  * Class Name: EditorAction
  * Date Created: December 27, 2014
  * Inheritance: QWidget
  * Description: Editor Action
  ******************************************************************************/
+#ifndef EDITORSKILL_H
+#define EDITORSKILL_H
+
 #include <QWidget>
 #include <QListWidget>
 #include <QPixmap>
@@ -17,8 +18,10 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QFormLayout>
+
 #include "Game/Player/Skill.h"
 #include "Database/EditorAction.h"
+
 class EditorSkill : public QWidget
 {
   Q_OBJECT

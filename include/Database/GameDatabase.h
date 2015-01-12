@@ -44,7 +44,8 @@ private:
   QVBoxLayout* layout;
 
   /* Vector for actual data in bottom list, populated from game xml data */
-  QVector<QPair<QString,EditorMap*>* > map_pair;
+  QVector<EditorMap*> map_set;
+  //QVector<QPair<QString,EditorMap*>* > map_pair;
   QVector<QPair<QString,EditorPerson*>* > person_pair;
   QVector<QPair<QString,EditorParty*>* > party_pair;
   QVector<QPair<QString,EditorItem*>* > item_pair;
@@ -57,7 +58,8 @@ private:
   QVector<QPair<QString,EditorBubby*>* > bubby_pair;
 
   /* Currently selected object */
-  QPair<QString,EditorMap*>* current_map;
+  EditorMap* current_map;
+  //QPair<QString,EditorMap*>* current_map;
   QPair<QString,EditorPerson*>* current_person;
   QPair<QString,EditorParty*>* current_party;
   QPair<QString,EditorItem*>* current_item;

@@ -32,6 +32,9 @@ MapView::MapView(QWidget* parent, int xsize, int ysize) :
   setupLayerBar();
   setupMapView();
   setWindowFlags(windowFlags() & ~Qt::Window);
+
+  /* Starts disabled */
+  setDisabled(true);
 }
 
 /*

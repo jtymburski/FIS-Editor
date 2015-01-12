@@ -16,6 +16,9 @@ class EditorHelpers
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the list string, taking an id and name */
+  static QString getListString(int id, QString name);
+
   /* Returns the sprite directory, based on the location of the editor */
   static QString getSpriteDir();
 

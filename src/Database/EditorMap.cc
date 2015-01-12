@@ -21,6 +21,18 @@ EditorMap::EditorMap()//QWidget *parent) : QWidget(parent)
 }
 
 /*
+ * Description: Non-blank constructor with id and name.
+ *
+ * Inputs: int id - the id of the editor map
+ *         QString name - the string name of the map
+ */
+EditorMap::EditorMap(int id, QString name) : EditorMap()
+{
+  setID(id);
+  setName(name);
+}
+
+/*
  * Description: Desctructor function
  */
 EditorMap::~EditorMap()
@@ -118,6 +130,16 @@ QVector<SubMapInfo*> EditorMap::getMaps()
 QString EditorMap::getName()
 {
   return name;
+}
+
+/* Description: Returns the name plus ID for the map editor
+ *
+ * Inputs: none
+ * Output: QString - list name
+ */
+QString EditorMap::getNameList()
+{
+  return EditorHelpers::getListString(id, name);
 }
 
 /*

@@ -12,6 +12,33 @@
  *===========================================================================*/
 
 /*
+ * Description: Returns the list string for storing for various map objects.
+ *
+ * Inputs: int id - the id of the object
+ *         QString name - the name of the object
+ * Output: QString - the combined string in the format "000: sssssssss"
+ */
+QString EditorHelpers::getListString(int id, QString name)
+{
+  QString title = "";
+
+  if(id >= 0)
+  {
+    /* Append modifiers */
+    if(id < 100)
+      title += "0";
+    if(id < 10)
+      title += "0";
+    title += QString::number(id);
+
+    /* Add the name */
+    title += ": " + name;
+  }
+
+  return title;
+}
+
+/*
  * Description: Returns the sprite directory, based on the location in the
  *              Univursa project folder.
  *

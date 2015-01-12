@@ -31,16 +31,17 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 
   connect(bottom_view,SIGNAL(currentRowChanged(int)),
           this,SLOT(modifyIndex(int)));
+
   /* Sets up temporary data for the bottom list view */
-  map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("00 : Dynaton",new EditorMap()));
-  map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("01 : Aviation Violation",new EditorMap()));
-  map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("02 : Fish with Frickin' Rockets Attached",
-                      new EditorMap()));
-  map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("03 : Bsian Season",new EditorMap()));
+  //map_pair.push_back(new QPair<QString,EditorMap*>
+  //                   ("00 : Dynaton",new EditorMap()));
+  //map_pair.push_back(new QPair<QString,EditorMap*>
+  //                   ("01 : Aviation Violation",new EditorMap()));
+  //map_pair.push_back(new QPair<QString,EditorMap*>
+  //                   ("02 : Fish with Frickin' Rockets Attached",
+  //                    new EditorMap()));
+  //map_pair.push_back(new QPair<QString,EditorMap*>
+  //                   ("03 : Bsian Season",new EditorMap()));
 
   person_pair.push_back(new QPair<QString,EditorPerson*>
                         ("00 : Main Character",new EditorPerson(this)));
@@ -83,7 +84,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   current_equipment_selection = -1;
   current_bubby_selection = -1;
 
-  current_map_id = map_pair.size()-1;
+  current_map_id = map_set.size()-1;
   current_person_id = person_pair.size()-1;
   current_party_id = party_pair.size()-1;
   current_item_id = item_pair.size()-1;
@@ -133,12 +134,13 @@ void GameDatabase::modifySelection(QModelIndex index)
   switch(top_view->currentRow())
   {
     case 0:
-      current_name = &map_pair[index.row()]->first;
-      current_map = map_pair[index.row()];
+      // TODO: Fix
+      //current_name = map_set[index.row()]->getName();
+      current_map = map_set[index.row()];
       current_map_selection = index.row();
       current_map_index = index.row();
       modifyBottomList(top_view->currentRow());
-      emit changeMap(current_map);
+      //emit changeMap(current_map);
       break;
     case 1:
       current_name = &person_pair[index.row()]->first;
@@ -231,8 +233,9 @@ void GameDatabase::rowChange(int index)
   switch(index)
   {
     case 0:
-      if(map_pair.size() != 0 && current_map_selection != -1)
-        current_name = &map_pair[current_map_selection]->first;
+      // TODO: Fix
+      //if(map_set.size() != 0 && current_map_selection != -1)
+      //  current_name = &map_set[current_map_selection]->getName();
       break;
     case 1:
       if(person_pair.size() != 0 && current_person_selection != -1)
@@ -357,17 +360,17 @@ void GameDatabase::modifyBottomList(int index)
           this,SLOT(modifyIndex(int)));
   bottom_view->clear();
 
-  connect(bottom_view,SIGNAL(currentRowChanged(int)),
-          this,SLOT(modifyIndex(int)));
+  connect(bottom_view, SIGNAL(currentRowChanged(int)),
+          this, SLOT(modifyIndex(int)));
   switch(index)
   {
     case 0:
-      for(int i=0; i<map_pair.size(); i++)
-        map_list << map_pair[i]->first;
+      for(int i = 0; i < map_set.size(); i++)
+        map_list << map_set[i]->getNameList();
       bottom_view->addItems(map_list);
 
       font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
+      for(int i = 0; i < bottom_view->count(); i++)
         bottom_view->item(i)->setFont(font);
       if(current_map_selection != -1)
       {
@@ -550,14 +553,15 @@ void GameDatabase::createNewResource()
   switch(top_view->currentRow())
   {
     case 0:
-      if(current_map_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_map_id));
-      name.append(" : Some Land");
-      map_pair.push_back(new QPair<QString,EditorMap*>
-                         (name,new EditorMap()));
-      current_map_index = map_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
+      // TODO: Fix
+      //if(current_map_id<9)
+      //  name.append(QString::number(0));
+      //name.append(QString::number(++current_map_id));
+      //name.append(" : Some Land");
+      //map_pair.push_back(new QPair<QString,EditorMap*>
+      //                   (name,new EditorMap()));
+      //current_map_index = map_pair.size()-1;
+      //modifyBottomList(top_view->currentRow());
       break;
     case 1:
       if(current_person_id<9)
@@ -676,256 +680,259 @@ void GameDatabase::duplicateResource()
 {
   QString name;
 
-   if(top_view->currentRow() == 0)
-   {
-      if(current_map_id > 0)
+  if(top_view->currentRow() == 0)
+  {
+    // TODO: Fix
+    /*
+    if(current_map_id > 0)
+    {
+      QString maptemp = map_pair[current_map_index]->first;
+      if(map_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_map_id));
+      name.append(" ");
+      do
       {
-        QString maptemp = map_pair[current_map_index]->first;
-        if(map_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_map_id));
-        name.append(" ");
-        do
-        {
-          maptemp.remove(0,1);
-        }
-        while(maptemp.at(0) != ':');
-        maptemp.prepend(name);
-        map_pair.push_back(new QPair<QString,EditorMap*>
-                          (maptemp,map_pair[current_map_index]->second->clone()));
-        current_map_index = map_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        maptemp.remove(0,1);
       }
-    }
-   else if(top_view->currentRow() == 1)
-   {
-      if(current_person_id > 0)
+      while(maptemp.at(0) != ':');
+      maptemp.prepend(name);
+      map_pair.push_back(new QPair<QString,EditorMap*>
+                        (maptemp,map_pair[current_map_index]->second->clone()));
+      current_map_index = map_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
+    }*/
+  }
+  else if(top_view->currentRow() == 1)
+  {
+    if(current_person_id > 0)
+    {
+      QString persontemp = person_pair[current_person_index]->first;
+      if(person_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_person_id));
+      name.append(" ");
+      do
       {
-        QString persontemp = person_pair[current_person_index]->first;
-        if(person_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_person_id));
-        name.append(" ");
-        do
-        {
-          persontemp.remove(0,1);
-        }
-        while(persontemp.at(0) != ':');
-        persontemp.prepend(name);
-        person_pair.push_back(new QPair<QString,EditorPerson*>
-                          (persontemp,person_pair[current_person_index]->
-                           second->clone()));
-        current_person_index = person_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        persontemp.remove(0,1);
       }
+      while(persontemp.at(0) != ':');
+      persontemp.prepend(name);
+      person_pair.push_back(new QPair<QString,EditorPerson*>
+                        (persontemp,person_pair[current_person_index]->
+                         second->clone()));
+      current_person_index = person_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 2)
-   {
-      if(current_party_id > 0)
+  }
+  else if(top_view->currentRow() == 2)
+  {
+    if(current_party_id > 0)
+    {
+      QString partytemp = party_pair[current_party_index]->first;
+      if(party_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_party_id));
+      name.append(" ");
+      do
       {
-        QString partytemp = party_pair[current_party_index]->first;
-        if(party_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_party_id));
-        name.append(" ");
-        do
-        {
-          partytemp.remove(0,1);
-        }
-        while(partytemp.at(0) != ':');
-        partytemp.prepend(name);
-        party_pair.push_back(new QPair<QString,EditorParty*>
-                          (partytemp,party_pair[current_party_index]->
-                           second->clone()));
-        current_party_index = party_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        partytemp.remove(0,1);
       }
+      while(partytemp.at(0) != ':');
+      partytemp.prepend(name);
+      party_pair.push_back(new QPair<QString,EditorParty*>
+                        (partytemp,party_pair[current_party_index]->
+                         second->clone()));
+      current_party_index = party_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 3)
-   {
-      if(current_item_id > 0)
+  }
+  else if(top_view->currentRow() == 3)
+  {
+    if(current_item_id > 0)
+    {
+      QString itemtemp = item_pair[current_item_index]->first;
+      if(item_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_item_id));
+      name.append(" ");
+      do
       {
-        QString itemtemp = item_pair[current_item_index]->first;
-        if(item_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_item_id));
-        name.append(" ");
-        do
-        {
-          itemtemp.remove(0,1);
-        }
-        while(itemtemp.at(0) != ':');
-        itemtemp.prepend(name);
-        item_pair.push_back(new QPair<QString,EditorItem*>
-                          (itemtemp,item_pair[current_item_index]->
-                           second->clone()));
-        current_item_index = item_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        itemtemp.remove(0,1);
       }
+      while(itemtemp.at(0) != ':');
+      itemtemp.prepend(name);
+      item_pair.push_back(new QPair<QString,EditorItem*>
+                        (itemtemp,item_pair[current_item_index]->
+                         second->clone()));
+      current_item_index = item_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 4)
-   {
-      if(current_action_id > 0)
+  }
+  else if(top_view->currentRow() == 4)
+  {
+    if(current_action_id > 0)
+    {
+      QString actiontemp = action_pair[current_action_index]->first;
+      if(action_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_action_id));
+      name.append(" ");
+      do
       {
-        QString actiontemp = action_pair[current_action_index]->first;
-        if(action_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_action_id));
-        name.append(" ");
-        do
-        {
-          actiontemp.remove(0,1);
-        }
-        while(actiontemp.at(0) != ':');
-        actiontemp.prepend(name);
-        action_pair.push_back(new QPair<QString,EditorAction*>
-                          (actiontemp,action_pair[current_action_index]->
-                           second->clone()));
-        current_action_index = action_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        actiontemp.remove(0,1);
       }
+      while(actiontemp.at(0) != ':');
+      actiontemp.prepend(name);
+      action_pair.push_back(new QPair<QString,EditorAction*>
+                        (actiontemp,action_pair[current_action_index]->
+                         second->clone()));
+      current_action_index = action_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 5)
-   {
-      if(current_race_id > 0)
+  }
+  else if(top_view->currentRow() == 5)
+  {
+    if(current_race_id > 0)
+    {
+      QString racetemp = race_pair[current_race_index]->first;
+      if(race_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_race_id));
+      name.append(" ");
+      do
       {
-        QString racetemp = race_pair[current_race_index]->first;
-        if(race_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_race_id));
-        name.append(" ");
-        do
-        {
-          racetemp.remove(0,1);
-        }
-        while(racetemp.at(0) != ':');
-        racetemp.prepend(name);
-        race_pair.push_back(new QPair<QString,EditorCategory*>
-                          (racetemp,race_pair[current_race_index]->
-                           second->clone()));
-        current_race_index = race_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        racetemp.remove(0,1);
       }
+      while(racetemp.at(0) != ':');
+      racetemp.prepend(name);
+      race_pair.push_back(new QPair<QString,EditorCategory*>
+                        (racetemp,race_pair[current_race_index]->
+                         second->clone()));
+      current_race_index = race_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 6)
-   {
-      if(current_battleclass_id > 0)
+  }
+  else if(top_view->currentRow() == 6)
+  {
+    if(current_battleclass_id > 0)
+    {
+      QString battleclasstemp = battleclass_pair[current_battleclass_index]
+          ->first;
+      if(battleclass_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_battleclass_id));
+      name.append(" ");
+      do
       {
-        QString battleclasstemp = battleclass_pair[current_battleclass_index]
-            ->first;
-        if(battleclass_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_battleclass_id));
-        name.append(" ");
-        do
-        {
-          battleclasstemp.remove(0,1);
-        }
-        while(battleclasstemp.at(0) != ':');
-        battleclasstemp.prepend(name);
-        battleclass_pair.push_back(new QPair<QString,EditorCategory*>
-                          (battleclasstemp,
-                           battleclass_pair[current_battleclass_index]->
-                           second->clone()));
-        current_battleclass_index = battleclass_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        battleclasstemp.remove(0,1);
       }
+      while(battleclasstemp.at(0) != ':');
+      battleclasstemp.prepend(name);
+      battleclass_pair.push_back(new QPair<QString,EditorCategory*>
+                        (battleclasstemp,
+                         battleclass_pair[current_battleclass_index]->
+                         second->clone()));
+      current_battleclass_index = battleclass_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 7)
-   {
-      if(current_skillset_id > 0)
+  }
+  else if(top_view->currentRow() == 7)
+  {
+    if(current_skillset_id > 0)
+    {
+      QString skillsettemp = skillset_pair[current_skillset_index]->first;
+      if(skillset_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_skillset_id));
+      name.append(" ");
+      do
       {
-        QString skillsettemp = skillset_pair[current_skillset_index]->first;
-        if(skillset_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_skillset_id));
-        name.append(" ");
-        do
-        {
-          skillsettemp.remove(0,1);
-        }
-        while(skillsettemp.at(0) != ':');
-        skillsettemp.prepend(name);
-        skillset_pair.push_back(new QPair<QString,EditorSkillset*>
-                          (skillsettemp,skillset_pair[current_skillset_index]->
-                           second->clone()));
-        current_skillset_index = skillset_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        skillsettemp.remove(0,1);
       }
+      while(skillsettemp.at(0) != ':');
+      skillsettemp.prepend(name);
+      skillset_pair.push_back(new QPair<QString,EditorSkillset*>
+                        (skillsettemp,skillset_pair[current_skillset_index]->
+                         second->clone()));
+      current_skillset_index = skillset_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 8)
-   {
-      if(current_skill_id > 0)
+  }
+  else if(top_view->currentRow() == 8)
+  {
+    if(current_skill_id > 0)
+    {
+      QString skilltemp = skill_pair[current_skill_index]->first;
+      if(skill_pair.size()<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_skill_id));
+      name.append(" ");
+      do
       {
-        QString skilltemp = skill_pair[current_skill_index]->first;
-        if(skill_pair.size()<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_skill_id));
-        name.append(" ");
-        do
-        {
-          skilltemp.remove(0,1);
-        }
-        while(skilltemp.at(0) != ':');
-        skilltemp.prepend(name);
-        skill_pair.push_back(new QPair<QString,EditorSkill*>
-                          (skilltemp,skill_pair[current_skill_index]->
-                           second->clone()));
-        current_skill_index = skill_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        skilltemp.remove(0,1);
       }
+      while(skilltemp.at(0) != ':');
+      skilltemp.prepend(name);
+      skill_pair.push_back(new QPair<QString,EditorSkill*>
+                        (skilltemp,skill_pair[current_skill_index]->
+                         second->clone()));
+      current_skill_index = skill_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 9)
-   {
-      if(equipment_pair.size() > 0)
+  }
+  else if(top_view->currentRow() == 9)
+  {
+    if(equipment_pair.size() > 0)
+    {
+      QString equipmenttemp = equipment_pair[current_equipment_index]->first;
+      if(current_equipment_id<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_equipment_id));
+      name.append(" ");
+      do
       {
-        QString equipmenttemp = equipment_pair[current_equipment_index]->first;
-        if(current_equipment_id<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_equipment_id));
-        name.append(" ");
-        do
-        {
-          equipmenttemp.remove(0,1);
-        }
-        while(equipmenttemp.at(0) != ':');
-        equipmenttemp.prepend(name);
-        equipment_pair.push_back(new QPair<QString,EditorEquipment*>
-                          (equipmenttemp,equipment_pair[current_equipment_index]->
-                           second->clone()));
-        current_equipment_index = equipment_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        equipmenttemp.remove(0,1);
       }
+      while(equipmenttemp.at(0) != ':');
+      equipmenttemp.prepend(name);
+      equipment_pair.push_back(new QPair<QString,EditorEquipment*>
+                        (equipmenttemp,equipment_pair[current_equipment_index]->
+                         second->clone()));
+      current_equipment_index = equipment_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-   else if(top_view->currentRow() == 10)
-   {
-      if(bubby_pair.size() > 0)
+  }
+  else if(top_view->currentRow() == 10)
+  {
+    if(bubby_pair.size() > 0)
+    {
+      QString bubbytemp = bubby_pair[current_bubby_index]->first;
+      if(current_bubby_id<9)
+        name.append(QString::number(0));
+      name.append(QString::number(++current_bubby_id));
+      name.append(" ");
+      do
       {
-        QString bubbytemp = bubby_pair[current_bubby_index]->first;
-        if(current_bubby_id<9)
-          name.append(QString::number(0));
-        name.append(QString::number(++current_bubby_id));
-        name.append(" ");
-        do
-        {
-          bubbytemp.remove(0,1);
-        }
-        while(bubbytemp.at(0) != ':');
-        bubbytemp.prepend(name);
-        bubby_pair.push_back(new QPair<QString,EditorBubby*>
-                          (bubbytemp,bubby_pair[current_bubby_index]->
-                           second->clone()));
-        current_bubby_index = bubby_pair.size()-1;
-        modifyBottomList(top_view->currentRow());
+        bubbytemp.remove(0,1);
       }
+      while(bubbytemp.at(0) != ':');
+      bubbytemp.prepend(name);
+      bubby_pair.push_back(new QPair<QString,EditorBubby*>
+                        (bubbytemp,bubby_pair[current_bubby_index]->
+                         second->clone()));
+      current_bubby_index = bubby_pair.size()-1;
+      modifyBottomList(top_view->currentRow());
     }
-
+  }
 }
 void GameDatabase::deleteResource()
 {
   switch(top_view->currentRow())
   {
     case 0:
+      // TODO: Fix
+      /*
       if(map_pair.size() > 0)
       {
         map_pair.remove(current_map_index);
@@ -940,6 +947,7 @@ void GameDatabase::deleteResource()
           current_map_index--;
         modifyBottomList(top_view->currentRow());
       }
+      */
       break;
     case 1:
       if(person_pair.size() > 0)
