@@ -84,6 +84,9 @@ Application::Application(QWidget* parent) :
   setMinimumSize(1280,720);
   showMaximized();
   setBasicCursor();
+
+  setStyleSheet("QMainWindow::separator { background: rgb(153, 153, 153); \
+                                          width: 1px; height: 1px; }");
 }
 
 /*

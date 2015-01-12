@@ -7,12 +7,11 @@
 #ifndef FRAMELIST_H
 #define FRAMELIST_H
 
-#include <QPixmap>
 #include <QVector>
 #include <QWidget>
-#include <QLabel>
 #include <QHBoxLayout>
 #include <QMouseEvent>
+
 #include "Dialog/FrameDialog.h"
 #include "Database/EditorSprite.h"
 #include "Dialog/FrameView.h"
@@ -22,32 +21,22 @@ class FrameList : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameList(QWidget* parent = 0, EditorSprite* c = 0);
+  FrameList(QWidget* parent = NULL, EditorSprite* c = NULL);
 
   /* Destructor Function */
   ~FrameList();
 
 private:
-  /* Vector of midpoint arrows */
-  QVector<FrameView*> arrowlabels;
-
   /* Sprite whose frames are in the dialog */
   EditorSprite* currentsprite;
 
-  /* Tail label */
-  FrameView* endlabel;
-
-  /* Vector of frame images */
-  QVector<FrameView*> framelabels;
-
-  /* Layout */
-  QHBoxLayout* layout;
+  /* Labels in the list */
+  FrameView* label_end;
+  QVector<FrameView*> label_frames;
+  FrameView* label_start;
 
   /* The dialog manipulator pop-up */
   FrameDialog* manipulator;
-
-  /* Head label */
-  FrameView* startlabel;
 
   /* Frame step sprites */
   EditorSprite* step_end;
@@ -66,7 +55,7 @@ public slots:
   void addHead(QString x);
 
   /* Appends a frame to the sequence */
-  void addMidpoint(QString x, int before, int after);
+  void addMidpoint(QString x, int after);
 
   /* Appends a frame to the tail */
   void addTail(QString x);

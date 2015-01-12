@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Class Name: SpriteDialog
+ * Date Created: January 22, 2014
+ * Inheritance: QDialog
+ * Description: The dialog that displays the sprites and the information
+ *              related to it. Allows manipulation of the data.
+ ******************************************************************************/
 #ifndef SPRITEDIALOG_H
 #define SPRITEDIALOG_H
 
@@ -21,7 +28,7 @@ class SpriteDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  SpriteDialog(QWidget *parent = 0,
+  SpriteDialog(QWidget *parent = NULL,
                        EditorSprite *working = NULL,
                        QString path = "", int subsequent = 0,
                        bool creation = true);
@@ -55,9 +62,6 @@ protected:
 public slots:
   /* destroys the current working sprite */
   void destroyWorkingSprite();
-
-  /* Loads the given working Editor Sprite */
-  //void loadWorkingSprite(EditorSprite*);
 
   /* Updates the current working sprite */
   void updateWorkingSprite();

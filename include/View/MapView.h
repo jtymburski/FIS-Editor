@@ -27,6 +27,7 @@
 #include <QTreeView>
 #include <QDesktopWidget>
 #include <QSizePolicy>
+
 #include "View/MapRender.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
@@ -64,10 +65,8 @@ private:
   QDockWidget* dock;
   QDockWidget* layer_dock;
 
-
   /* The currently selected sprite */
   QString current_sprite_choice;
-
 
   /* Map size for initial creation */
   int x_size;

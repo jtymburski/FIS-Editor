@@ -33,14 +33,14 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
           this,SLOT(modifyIndex(int)));
   /* Sets up temporary data for the bottom list view */
   map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("00 : Dynaton",new EditorMap(this)));
+                     ("00 : Dynaton",new EditorMap()));
   map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("01 : Aviation Violation",new EditorMap(this)));
+                     ("01 : Aviation Violation",new EditorMap()));
   map_pair.push_back(new QPair<QString,EditorMap*>
                      ("02 : Fish with Frickin' Rockets Attached",
-                      new EditorMap(this)));
+                      new EditorMap()));
   map_pair.push_back(new QPair<QString,EditorMap*>
-                     ("03 : Bsian Season",new EditorMap(this)));
+                     ("03 : Bsian Season",new EditorMap()));
 
   person_pair.push_back(new QPair<QString,EditorPerson*>
                         ("00 : Main Character",new EditorPerson(this)));
@@ -555,7 +555,7 @@ void GameDatabase::createNewResource()
       name.append(QString::number(++current_map_id));
       name.append(" : Some Land");
       map_pair.push_back(new QPair<QString,EditorMap*>
-                         (name,new EditorMap(this)));
+                         (name,new EditorMap()));
       current_map_index = map_pair.size()-1;
       modifyBottomList(top_view->currentRow());
       break;

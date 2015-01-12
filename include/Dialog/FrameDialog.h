@@ -22,49 +22,30 @@ class FrameDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor Function */
-  FrameDialog(QWidget* parent = 0, EditorSprite* s = 0, int framenum = 0);
+  FrameDialog(QWidget* parent = NULL, EditorSprite* s = NULL, int framenum = 0);
 
   /* Destructor Function */
   ~FrameDialog();
 
 private:
+  /* The frame label in the view */
   FrameView* framelabel;
-  QCheckBox* rotate0;
-  QCheckBox* rotate90;
-  QCheckBox* rotate180;
-  QCheckBox* rotate270;
-
-  /* The sprite being edited */
-  EditorSprite* sprite;
-
-  /* Ok button */
-  QPushButton* ok;
-
-  /* Cancel button */
-  QPushButton* cancel;
-
-  /* File selection button (For changing) */
-  QPushButton* select_file;
-
-  /* Backups (For Cancellation) */
-  bool horizontal_backup;
-  bool vertical_backup;
-  bool rotate0_backup;
-  bool rotate90_backup;
-  bool rotate180_backup;
-  bool rotate270_backup;
 
   /* Frame number */
   int framenumber;
 
+  /* The sprite being edited */
+  EditorSprite* sprite_original;
+  EditorSprite* sprite_working;
+
 protected:
-
+signals:
 public slots:
-  /* Closes with no saving */
-  void closeNoSave();
-
   /* Deletes the current frame */
   void deleteFrame();
+
+  /* Slot for finishing the saving of changes to the sequence */
+  void finishSave();
 
   /* Opens a dialog for frame replacement */
   void replaceFrame();
@@ -80,10 +61,6 @@ public slots:
   void set90();
   void set180();
   void set270();
-
-signals:
-  /* Signal for finishing and saving the changes to the sequence */
-  void finishedSave();
 };
 
 #endif // FRAMEDIALOG_H

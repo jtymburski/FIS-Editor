@@ -27,7 +27,7 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
   connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
           this,SLOT(setCurrent(int)));
   connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
-  nextID = 1;
+  nextID = 0;
 
   //layout->addWidget(widget);//editor_sprite_list);
   layout->addWidget(editor_sprite_list);
@@ -110,12 +110,11 @@ void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 
   if(e->button() & Qt::RightButton)
   {
-      edit_sprite = new SpriteDialog(this,current,
-                                             current->getPath(0),
-                                             0,false);
+    edit_sprite = new SpriteDialog(this, current, current->getPath(0),
+                                   0, false);
 
-      connect(edit_sprite,SIGNAL(ok()),this,SLOT(refreshList()));
-      edit_sprite->show();
+    connect(edit_sprite, SIGNAL(ok()), this, SLOT(refreshList()));
+    edit_sprite->show();
   }
 }
 
@@ -136,14 +135,14 @@ void SpriteView::addEditorSprite(EditorSprite *e)
   /* Puts the sprite in the library */
   editor_sprites.push_back(e);
 
-  /* Increments the id tracker */
-  nextID++;
-
   /* Adds the item to the visible list */
-  editor_sprite_list->addItem(e->getName());
+  editor_sprite_list->addItem("temp");
   editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
   editor_sprite_list->setCurrentSprite(e);
-  update();
+
+  /* Increments the id tracker and updates view */
+  nextID++;
+  refreshList();
 }
 
 /*
@@ -162,7 +161,16 @@ EditorSprite* SpriteView::getCurrent()
 void SpriteView::refreshList()
 {
   for(int i=0; i<editor_sprites.size(); i++)
-    editor_sprite_list->item(i)->setText(editor_sprites[i]->getName());
+  {
+    EditorSprite* e = editor_sprites[i];
+
+    QString name_str = QString::number(e->getId()) + ": " + e->getName();
+    if(nextID < 10)
+      name_str = "0" + name_str;
+    if(nextID < 100)
+      name_str = "0" + name_str;
+    editor_sprite_list->item(i)->setText(name_str);
+  }
   update();
 }
 

@@ -116,6 +116,7 @@ void MapView::setupMapView(int x, int y)
 
   /* Sets up the map status bar */
   map_data = new QStatusBar(this);
+  map_data->setStyleSheet("border-top: 1px solid #999999");
   connect(map_editor,SIGNAL(sendCurrentPosition(int,int)),
           this,SLOT(setCurrentTile(int,int)));
 

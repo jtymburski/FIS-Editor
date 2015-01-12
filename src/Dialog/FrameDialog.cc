@@ -19,142 +19,94 @@
 FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
            : QDialog(parent)
 {
-  //setFixedSize(256,256);
   framenumber = framenum;
-  sprite = s;
-  framelabel = new FrameView(NULL,EditorEnumDb::VIEWONLY, s,
-                             framenumber, 0, 0);
-  //framelabel->setHFlip(sprite->getHorizontalFlip(framenumber));
-  //framelabel->setVFlip(sprite->getVerticalFlip(framenumber));
+  sprite_original = s;
+  sprite_working = new EditorSprite();
 
-  QCheckBox* horizontal_flip = new QCheckBox("Horizontal Flip",this);
-  QCheckBox* vertical_flip = new QCheckBox("Vertical Flip",this);
-
-
-  rotate0 = new QCheckBox("0",this);
-  if(sprite->getFrameAngle(framenumber) == 0)
+  /* Only proceed if sprite isn't NULL */
+  if(s != NULL)
   {
-    rotate0_backup = true;
-    rotate90_backup = false;
-    rotate180_backup = false;
-    rotate270_backup = false;
-    rotate0->setChecked(true);
-  }
-  rotate0->setAutoExclusive(true);
+    *sprite_working = *s;
+    framelabel = new FrameView(this, EditorEnumDb::VIEWONLY, sprite_working,
+                               framenumber, 0, 0);
 
-  rotate90 = new QCheckBox("90",this);
-  if(sprite->getFrameAngle(framenumber) == 90)
-  {
-    rotate0_backup = false;
-    rotate90_backup = true;
-    rotate180_backup = false;
-    rotate270_backup = false;
-    rotate90->setChecked(true);
-  }
-  rotate90->setAutoExclusive(true);
+    /* Checkboxes for flipping */
+    QCheckBox* horizontal_flip = new QCheckBox("Horizontal Flip", this);
+    horizontal_flip->setChecked(sprite_working->getHorizontalFlip(framenumber));
+    QCheckBox* vertical_flip = new QCheckBox("Vertical Flip", this);
+    vertical_flip->setChecked(sprite_working->getVerticalFlip(framenumber));
+    connect(horizontal_flip, SIGNAL(toggled(bool)),
+            this, SLOT(setHorizontalFlip(bool)));
+    connect(vertical_flip, SIGNAL(toggled(bool)),
+            this, SLOT(setVerticalFlip(bool)));
 
-  rotate180 = new QCheckBox("180",this);
-  if(sprite->getFrameAngle(framenumber) == 180)
-  {
-    rotate0_backup = false;
-    rotate90_backup = false;
-    rotate180_backup = true;
-    rotate270_backup = false;
-    rotate180->setChecked(true);
-  }
-  rotate180->setAutoExclusive(true);
+    /* Checkboxes for rotation */
+    QCheckBox* rotate0 = new QCheckBox("0", this);
+    rotate0->setChecked(sprite_working->getFrameAngle(framenumber) == 0);
+    rotate0->setAutoExclusive(true);
+    QCheckBox* rotate90 = new QCheckBox("90", this);
+    rotate90->setChecked(sprite_working->getFrameAngle(framenumber) == 90);
+    rotate90->setAutoExclusive(true);
+    QCheckBox* rotate180 = new QCheckBox("180", this);
+    rotate180->setChecked(sprite_working->getFrameAngle(framenumber) == 180);
+    rotate180->setAutoExclusive(true);
+    QCheckBox* rotate270 = new QCheckBox("270", this);
+    rotate270->setChecked(sprite_working->getFrameAngle(framenumber) == 270);
+    rotate270->setAutoExclusive(true);
+    connect(rotate0, SIGNAL(clicked()), this, SLOT(set0()));
+    connect(rotate90, SIGNAL(clicked()), this, SLOT(set90()));
+    connect(rotate180, SIGNAL(clicked()), this, SLOT(set180()));
+    connect(rotate270, SIGNAL(clicked()), this, SLOT(set270()));
 
-  rotate270 = new QCheckBox("270",this);
-  if(sprite->getFrameAngle(framenumber) == 270)
-  {
-    rotate0_backup = false;
-    rotate90_backup = false;
-    rotate180_backup = false;
-    rotate270_backup = true;
-    rotate270->setChecked(true);
-  }
-  rotate270->setAutoExclusive(true);
-  connect(rotate0,SIGNAL(clicked()),this,SLOT(set0()));
-  connect(rotate90,SIGNAL(clicked()),this,SLOT(set90()));
-  connect(rotate180,SIGNAL(clicked()),this,SLOT(set180()));
-  connect(rotate270,SIGNAL(clicked()),this,SLOT(set270()));
+    /* Ok button setup */
+    QPushButton* ok = new QPushButton("Ok", this);
+    connect(ok,SIGNAL(pressed()),this,SLOT(finishSave()));
+    connect(ok,SIGNAL(pressed()),this,SLOT(close()));
 
+    /* Cancel button setup */
+    QPushButton* cancel = new QPushButton("Cancel", this);
+    connect(cancel,SIGNAL(pressed()),this,SLOT(close()));
 
-  if(sprite->getHorizontalFlip(framenumber))
-  {
-    horizontal_backup = true;
-    horizontal_flip->setChecked(true);
-  }
-  else
-  {
-    horizontal_backup = false;
-    horizontal_flip->setChecked(false);
-  }
+    /* Replace button setup */
+    QPushButton* replace = new QPushButton("Replace Frame", this);
+    connect(replace,SIGNAL(pressed()),this,SLOT(replaceFrame()));
 
-  if(sprite->getVerticalFlip(framenumber))
-  {
-    vertical_backup = true;
-    vertical_flip->setChecked(true);
-  }
-  else
-  {
-    vertical_backup = false;
-    vertical_flip->setChecked(false);
-  }
-
-  connect(horizontal_flip,SIGNAL(toggled(bool)),
-          this,SLOT(setHorizontalFlip(bool)));
-  connect(vertical_flip,SIGNAL(toggled(bool)),
-          this,SLOT(setVerticalFlip(bool)));
-
-  ok = new QPushButton("Ok",this);
-  connect(ok,SIGNAL(pressed()),this,SIGNAL(finishedSave()));
-  connect(ok,SIGNAL(pressed()),this,SLOT(close()));
-
-  cancel = new QPushButton("Cancel",this);
-  connect(cancel,SIGNAL(pressed()),this,SLOT(closeNoSave()));
-
-  QPushButton* replace = new QPushButton("Replace Frame",this);
-  connect(replace,SIGNAL(pressed()),this,SLOT(replaceFrame()));
-
-  QPushButton* deleteframe = new QPushButton("Delete This Frame",this);
-
-  /* If the framecount is only one, then grey out the delete functionality */
-  if(s->frameCount() > 1)
+    /* Delete button setup */
+    QPushButton* deleteframe = new QPushButton("Delete This Frame", this);
     connect(deleteframe,SIGNAL(pressed()),this,SLOT(deleteFrame()));
-  else
-    deleteframe->setEnabled(false);
+    if(s->frameCount() <= 1)
+      deleteframe->setEnabled(false);
 
-  /* Sets up layouts */
-  QVBoxLayout* layout = new QVBoxLayout(this);
+    /* Set up the layout */
+    QVBoxLayout* layout = new QVBoxLayout(this);
 
-  QVBoxLayout* rotation_layout = new QVBoxLayout();
-  rotation_layout->addWidget(rotate0);
-  rotation_layout->addWidget(rotate90);
-  rotation_layout->addWidget(rotate180);
-  rotation_layout->addWidget(rotate270);
+    QVBoxLayout* rotation_layout = new QVBoxLayout();
+    rotation_layout->addWidget(rotate0);
+    rotation_layout->addWidget(rotate90);
+    rotation_layout->addWidget(rotate180);
+    rotation_layout->addWidget(rotate270);
 
-  QVBoxLayout* flip_layout = new QVBoxLayout();
-  flip_layout->addWidget(horizontal_flip);
-  flip_layout->addWidget(vertical_flip);
+    QVBoxLayout* flip_layout = new QVBoxLayout();
+    flip_layout->addWidget(horizontal_flip);
+    flip_layout->addWidget(vertical_flip);
 
 
-  QHBoxLayout* checkbox_layout = new QHBoxLayout();
-  checkbox_layout->addLayout(rotation_layout);
-  checkbox_layout->addLayout(flip_layout);
+    QHBoxLayout* checkbox_layout = new QHBoxLayout();
+    checkbox_layout->addLayout(rotation_layout);
+    checkbox_layout->addLayout(flip_layout);
 
-  QHBoxLayout* buttonlayout = new QHBoxLayout();
-  buttonlayout->addWidget(ok);
-  buttonlayout->addWidget(cancel);
+    QHBoxLayout* buttonlayout = new QHBoxLayout();
+    buttonlayout->addWidget(ok);
+    buttonlayout->addWidget(cancel);
 
-  layout->addWidget(framelabel);
-  layout->addWidget(replace);
-  layout->addWidget(deleteframe);
-  layout->addLayout(checkbox_layout);
-  layout->addLayout(buttonlayout);
+    layout->addWidget(framelabel, 0, Qt::AlignCenter);
+    layout->addWidget(replace);
+    layout->addWidget(deleteframe);
+    layout->addLayout(checkbox_layout);
+    layout->addLayout(buttonlayout);
 
-  setLayout(layout);
-
+    setLayout(layout);
+  }
 }
 
 /*
@@ -162,29 +114,12 @@ FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
  */
 FrameDialog::~FrameDialog()
 {
+  delete sprite_working;
 }
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-
-/*
- * Description: Closes the dialog and reverts all of the input values
- */
-void FrameDialog::closeNoSave()
-{
-  sprite->setHorizontalFlip(framenumber,horizontal_backup);
-  sprite->setVerticalFlip(framenumber,vertical_backup);
-  if(rotate0_backup)
-    sprite->setFrameAngle(framenumber,0);
-  if(rotate90_backup)
-    sprite->setFrameAngle(framenumber,90);
-  if(rotate180_backup)
-    sprite->setFrameAngle(framenumber,180);
-  if(rotate270_backup)
-    sprite->setFrameAngle(framenumber,270);
-  close();
-}
 
 /*
  * Description : Deletes this current frame from the sequence
@@ -195,13 +130,19 @@ void FrameDialog::deleteFrame()
   ret = QMessageBox::warning(this, tr("Application"),
                              tr("Are you sure you want to delete this frame?"),
                              QMessageBox::Yes | QMessageBox::Cancel);
-  qDebug()<<"Delete?";
   if(ret == QMessageBox::Yes)
   {
-    sprite->deleteFrame(framenumber);
-    emit finishedSave();
+    sprite_working->deleteFrame(framenumber);
+    *sprite_original = *sprite_working;
+    finishSave();
     close();
   }
+}
+
+/* Slot for finishing the saving of changes to the sequence */
+void FrameDialog::finishSave()
+{
+  *sprite_original = *sprite_working;
 }
 
 /*
@@ -211,10 +152,13 @@ void FrameDialog::replaceFrame()
 {
   QString filename = QFileDialog::getOpenFileName(this,
                                    tr("Select A Frame To Replace This"),
-                                   sprite->getPath(framenumber)
-                                   ,tr("Image Files (*.png)"));
-  sprite->setFramePath(framenumber,filename);
-  framelabel->reloadFrame();
+                                   sprite_working->getPath(framenumber),
+                                   tr("Image Files (*.png)"));
+  if(filename != "")
+  {
+    sprite_working->setFramePath(framenumber,filename);
+    framelabel->update();
+  }
 }
 
 /*
@@ -224,8 +168,7 @@ void FrameDialog::replaceFrame()
  */
 void FrameDialog::setHorizontalFlip(bool toggle)
 {
-  sprite->setHorizontalFlip(framenumber,toggle);
-  //framelabel->setHFlip(toggle);
+  sprite_working->setHorizontalFlip(framenumber, toggle);
   framelabel->update();
 }
 
@@ -236,8 +179,7 @@ void FrameDialog::setHorizontalFlip(bool toggle)
  */
 void FrameDialog::setVerticalFlip(bool toggle)
 {
-  sprite->setVerticalFlip(framenumber,toggle);
-  //framelabel->setVFlip(toggle);
+  sprite_working->setVerticalFlip(framenumber, toggle);
   framelabel->update();
 }
 
@@ -248,24 +190,24 @@ void FrameDialog::setVerticalFlip(bool toggle)
  */
 void FrameDialog::set0()
 {
-  sprite->setFrameAngle(framenumber,0);
+  sprite_working->setFrameAngle(framenumber, 0);
   framelabel->update();
 }
 
 void FrameDialog::set90()
 {
-  sprite->setFrameAngle(framenumber,90);
+  sprite_working->setFrameAngle(framenumber, 90);
   framelabel->update();
 }
 
 void FrameDialog::set180()
 {
-  sprite->setFrameAngle(framenumber,180);
+  sprite_working->setFrameAngle(framenumber, 180);
   framelabel->update();
 }
 
 void FrameDialog::set270()
 {
-  sprite->setFrameAngle(framenumber,270);
+  sprite_working->setFrameAngle(framenumber, 270);
   framelabel->update();
 }
