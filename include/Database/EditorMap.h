@@ -11,6 +11,7 @@
 #include <QVector>
 
 #include "Database/EditorSprite.h"
+#include "Database/EditorTemplate.h"
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
@@ -23,7 +24,7 @@ struct SubMapInfo
   QVector<QVector<EditorTile*>> tiles;
 };
 
-class EditorMap// : public QWidget
+class EditorMap : public EditorTemplate
 {
 //  Q_OBJECT
 public:
@@ -34,7 +35,7 @@ public:
   EditorMap(int id, QString name);
 
   /* Destructor function */
-  ~EditorMap();
+  virtual ~EditorMap();
 
 private:
   /* The map set ID */
@@ -60,7 +61,7 @@ public:
   EditorMap* clone();
 
   /* Returns the ID of the map set */
-  int getID();
+  virtual int getID();
 
   /* Returns the stored map information */
   SubMapInfo* getMap(int id);
@@ -69,8 +70,8 @@ public:
   QVector<SubMapInfo*> getMaps();
 
   /* Returns the name of the map set */
-  QString getName();
-  QString getNameList();
+  virtual QString getName();
+  virtual QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();
@@ -83,14 +84,14 @@ public:
   QVector<EditorSprite*> getSprites();
 
   /* Sets the ID of the map set */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets a map, based on ID */
   int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles);
   int setMap(int id, QString name, int width, int height);
 
   /* Sets the name of the map set */
-  void setName(QString name);
+  virtual void setName(QString name);
 
   /* Sets a sprite */
   int setSprite(EditorSprite* sprite);

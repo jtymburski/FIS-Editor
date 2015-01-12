@@ -135,6 +135,7 @@ HEADERS += \
     ../Project/include/Game/Battle/AIModule.h \
     ../Project/include/Game/Player/Signature.h \
     ../Project/include/Game/Player/Flavour.h \
+    include/Database/EditorTemplate.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

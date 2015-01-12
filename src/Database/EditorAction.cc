@@ -391,11 +391,9 @@ EditorAction::~EditorAction()
 {
 }
 
-EditorAction* EditorAction::clone()
-{
-  return this;
-}
-
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
 void EditorAction::setNameAndID(QString str)
 {
@@ -1031,10 +1029,7 @@ float EditorAction::getChance() const
   return working.getChance();
 }
 
-int EditorAction::getID() const
-{
-  return working.getID();
-}
+
 
 int EditorAction::getMin() const
 {
@@ -1049,18 +1044,6 @@ int EditorAction::getMax() const
 int EditorAction::getVariance() const
 {
   return working.getVariance();
-}
-
-/* Returns the name of the item */
-QString EditorAction::getName()
-{
-  return name;
-}
-
-/* Returns the name of the item for listing */
-QString EditorAction::getNameList()
-{
-  return EditorHelpers::getListString(getID(), getName());
 }
 
 QString EditorAction::outputString()
@@ -1111,15 +1094,6 @@ bool EditorAction::setChance(float chance)
   return working.setChance(chance);
 }
 
-/* Sets the ID */
-void EditorAction::setID(int id)
-{
-  if(id < 0)
-    this->id = kUNSET_ID;
-  else
-    this->id = id;
-}
-
 void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 {
   working.setIgnoreAttack(flag,set);
@@ -1128,14 +1102,6 @@ void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 void EditorAction::setIgnoreDefense(IgnoreFlags flag, bool set)
 {
   working.setIgnoreDefense(flag,set);
-}
-
-/* Sets the name */
-void EditorAction::setName(QString name)
-{
-  this->name = name;
-  name_edit->setText(name);
-  setWorkingAction(base);
 }
 
 void EditorAction::updateLayouts()
@@ -1202,4 +1168,49 @@ void EditorAction::updateLayouts()
     action_flags_vari_pc->setDisabled(false);
   }
 
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Clone */
+EditorAction* EditorAction::clone()
+{
+  return this;
+}
+
+/* Returns the ID of the Action */
+int EditorAction::getID()
+{
+  return working.getID();
+}
+
+/* Returns the name of the item */
+QString EditorAction::getName()
+{
+  return name;
+}
+
+/* Returns the name of the item for listing */
+QString EditorAction::getNameList()
+{
+  return EditorHelpers::getListString(getID(), getName());
+}
+
+/* Sets the ID */
+void EditorAction::setID(int id)
+{
+  if(id < 0)
+    this->id = kUNSET_ID;
+  else
+    this->id = id;
+}
+
+/* Sets the name */
+void EditorAction::setName(QString name)
+{
+  this->name = name;
+  name_edit->setText(name);
+  setWorkingAction(base);
 }

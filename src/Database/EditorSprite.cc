@@ -551,7 +551,7 @@ bool EditorSprite::getHorizontalFlip(int frame_num)
  * Input: none
  * Output: int - the id of the sprite
  */
-int EditorSprite::getId()
+int EditorSprite::getID()
 {
   return sprite->getId();
 }
@@ -578,6 +578,18 @@ QImage EditorSprite::getImage(int frame_num)
 QString EditorSprite::getName()
 {
   return name;
+}
+
+/*
+ * Description: Returns the formatted name and ID for listing. It's in the
+ *              format: "XXX: sssssssssssss"
+ *
+ * Inputs: none
+ * Output: QString - the name for a list
+ */
+QString EditorSprite::getNameList()
+{
+  return EditorHelpers::getListString(getID(), getName());
 }
 
 /*
@@ -704,7 +716,7 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  *
  * Input: ID value
  */
-void EditorSprite::setId(int id)
+void EditorSprite::setID(int id)
 {
   if(id >= 0 && id <= 65535)
     sprite->setId(id);

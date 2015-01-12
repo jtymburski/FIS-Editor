@@ -15,10 +15,11 @@
 #include <QPushButton>
 
 #include "Database/EditorSkill.h"
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/SkillSet.h"
 
-class EditorSkillset : public QWidget
+class EditorSkillset : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -29,7 +30,7 @@ public:
   EditorSkillset(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorSkillset();
+  virtual ~EditorSkillset();
 
 private:
   /* Editor ID */
@@ -89,19 +90,19 @@ public:
   EditorSkillset* clone();
 
   /* Returns the ID of the skillset */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the skillset */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the skillset for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the skillset */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the skillset */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORSKILLSET_H

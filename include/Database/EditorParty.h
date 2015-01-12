@@ -9,10 +9,11 @@
 
 #include <QWidget>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Party.h"
 
-class EditorParty : public QWidget
+class EditorParty : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -23,7 +24,7 @@ public:
   EditorParty(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorParty();
+  virtual ~EditorParty();
 
 private:
   /* The name of the map set */
@@ -40,19 +41,19 @@ public:
   EditorParty* clone();
 
   /* Returns the ID of the party */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the party */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the party for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the party */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the party */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORPARTY_H

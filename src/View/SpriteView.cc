@@ -161,16 +161,7 @@ EditorSprite* SpriteView::getCurrent()
 void SpriteView::refreshList()
 {
   for(int i=0; i<editor_sprites.size(); i++)
-  {
-    EditorSprite* e = editor_sprites[i];
-
-    QString name_str = QString::number(e->getId()) + ": " + e->getName();
-    if(nextID < 10)
-      name_str = "0" + name_str;
-    if(nextID < 100)
-      name_str = "0" + name_str;
-    editor_sprite_list->item(i)->setText(name_str);
-  }
+    editor_sprite_list->item(i)->setText(editor_sprites[i]->getNameList());
   update();
 }
 

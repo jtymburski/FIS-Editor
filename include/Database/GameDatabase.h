@@ -1,11 +1,12 @@
-#ifndef GAMEDATABASE_H
-#define GAMEDATABASE_H
 /*******************************************************************************
  * Class Name: GameDatabase
  * Date Created: December 23, 2014
  * Inheritance: QWidget
  * Description: Far left view that determines what the game view will become.
  ******************************************************************************/
+#ifndef GAMEDATABASE_H
+#define GAMEDATABASE_H
+
 #include <QWidget>
 #include <QListWidget>
 #include <QVBoxLayout>
@@ -13,6 +14,7 @@
 #include <QPushButton>
 #include <QPair>
 #include <QLabel>
+
 #include "EditorEnumDb.h"
 #include "Database/EditorMap.h"
 #include "Database/EditorPerson.h"
@@ -107,7 +109,6 @@ private:
   int current_equipment_selection;
   int current_bubby_selection;
 
-
   QPushButton* new_button;
   QPushButton* del_button;
   QPushButton* import_button;
@@ -143,4 +144,5 @@ signals:
 
   void deactivateView();
 };
+
 #endif // GAMEDATABASE_H

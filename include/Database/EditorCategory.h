@@ -9,10 +9,11 @@
 
 #include <QWidget>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Category.h"
 
-class EditorCategory : public QWidget
+class EditorCategory : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -23,7 +24,7 @@ public:
   EditorCategory(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorCategory();
+  virtual ~EditorCategory();
 
 private:
   /* The reference category for data */
@@ -38,19 +39,19 @@ public:
   EditorCategory* clone();
 
   /* Returns the ID of the category */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the category */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the category for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the category */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the category */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORCATEGORY_H

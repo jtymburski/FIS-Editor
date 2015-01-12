@@ -9,10 +9,11 @@
 
 #include <QWidget>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Item.h"
 
-class EditorItem : public QWidget
+class EditorItem : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -23,7 +24,7 @@ public:
   EditorItem(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorItem();
+  virtual ~EditorItem();
 
 private:
   /* The reference item for data */
@@ -38,19 +39,19 @@ public:
   EditorItem* clone();
 
   /* Returns the ID of the item */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the item */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the item for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the item */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the item */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORITEM_H

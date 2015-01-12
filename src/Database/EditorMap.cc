@@ -180,7 +180,7 @@ int EditorMap::getNextSpriteID()
 
   for(int i = 0; !found && (i < sprites.size()); i++)
   {
-    if(sprites[i]->getId() != i)
+    if(sprites[i]->getID() != i)
     {
       id = i;
       found = true;
@@ -200,7 +200,7 @@ EditorSprite* EditorMap::getSprite(int id)
 {
   if(id >= 0)
     for(int i = 0; i < sprites.size(); i++)
-      if(sprites[i]->getId() == id)
+      if(sprites[i]->getID() == id)
         return sprites[i];
   return NULL;
 }
@@ -227,7 +227,7 @@ int EditorMap::getSpriteIndex(int id)
 {
   if(id >= 0)
     for(int i = 0; i < sprites.size(); i++)
-      if(sprites[i]->getId() == id)
+      if(sprites[i]->getID() == id)
         return i;
   return -1;
 }
@@ -373,7 +373,7 @@ void EditorMap::setName(QString name)
  */
 int EditorMap::setSprite(EditorSprite* sprite)
 {
-  if(sprite != NULL && sprite->getId() >= 0)
+  if(sprite != NULL && sprite->getID() >= 0)
   {
     bool found = false;
     int index = -1;
@@ -382,12 +382,12 @@ int EditorMap::setSprite(EditorSprite* sprite)
     /* Find if the ID exists */
     for(int i = 0; !found && !near && (i < sprites.size()); i++)
     {
-      if(sprites[i]->getId() == sprite->getId())
+      if(sprites[i]->getID() == sprite->getID())
       {
         index = i;
         found = true;
       }
-      else if(sprites[i]->getId() > sprite->getId())
+      else if(sprites[i]->getID() > sprite->getID())
       {
         index = i;
         near = true;

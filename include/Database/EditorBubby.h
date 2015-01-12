@@ -9,10 +9,11 @@
 
 #include <QWidget>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Bubby.h"
 
-class EditorBubby : public QWidget
+class EditorBubby : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -23,7 +24,7 @@ public:
   EditorBubby(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorBubby();
+  virtual ~EditorBubby();
 
 private:
   /* The reference bubby for data */
@@ -38,19 +39,19 @@ public:
   EditorBubby* clone();
 
   /* Returns the ID of the bubby */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the bubby */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the bubby for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the bubby */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the bubby */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORBUBBY_H

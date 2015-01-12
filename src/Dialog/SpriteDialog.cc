@@ -59,7 +59,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
 
   /* ID display */
   QString id_label("ID: ");
-  id_label.append(QString::number(working_sprite->getId()));
+  id_label.append(QString::number(working_sprite->getID()));
   QLabel* id_number = new QLabel(id_label);
   layout->addWidget(id_number,0,0);
 

@@ -10,7 +10,9 @@
 #include <QObject>
 #include <QPainter>
 
+#include "Database/EditorTemplate.h"
 #include "EditorEnumDb.h"
+#include "EditorHelpers.h"
 
 /* Struct for frame option storage */
 struct FrameInfo
@@ -25,7 +27,7 @@ struct FrameInfo
   bool rotate270;
 };
 
-class EditorSprite : public QObject
+class EditorSprite : public QObject, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -33,7 +35,7 @@ public:
   EditorSprite(QString img_path = "");
 
   /* Destructor function */
-  ~EditorSprite();
+  virtual ~EditorSprite();
 
 private:
   /* The view mode for the border */
@@ -106,7 +108,7 @@ public slots:
   void setHorizontalFlips();
 
   /* Sets the user submitted name */
-  void setName(QString name);
+  virtual void setName(QString name);
 
   /* Sets the sprites opacity */
   void setOpacity(int opacity);
@@ -144,13 +146,16 @@ public:
   bool getHorizontalFlip(int frame_num);
 
   /* Gets the ID for the sprite */
-  int getId();
+  virtual int getID();
 
   /* Gets the image path */
   QImage getImage(int frame_num);
 
   /* Gets the user submitted name of the sprite */
-  QString getName();
+  virtual QString getName();
+
+  /* Gets the proper formatted name and ID for listing */
+  virtual QString getNameList();
 
   /* Gets the sprite path */
   QString getPath(int frame_num);
@@ -171,7 +176,7 @@ public:
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
 
   /* Sets the sprites id (Backend) */
-  void setId(int);
+  virtual void setID(int);
 
   /* Sets the sprite path */
   void setPath(int index, QString path);

@@ -20,11 +20,12 @@
 #include <QFormLayout>
 
 #include "Database/EditorAction.h"
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Skill.h"
 
 
-class EditorSkill : public QWidget
+class EditorSkill : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -35,7 +36,7 @@ public:
   EditorSkill(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorSkill();
+  virtual ~EditorSkill();
 
 private:
   /* Corresponding skill */
@@ -152,19 +153,19 @@ public:
   EditorSkill* clone();
 
   /* Returns the ID of the skill */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the skill */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the skill for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the skill */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the skill */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITORSKILL_H

@@ -18,10 +18,11 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Action.h"
 
-class EditorAction : public QWidget
+class EditorAction : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -32,10 +33,7 @@ public:
   EditorAction(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorAction();
-
-  /* Clone */
-  EditorAction* clone();
+  virtual ~EditorAction();
 
 private:
   /* Editor ID */
@@ -276,18 +274,9 @@ public slots:
   /* Return the chance of the action occuring */
   float getChance() const;
 
-  /* Returns the ID of the Action */
-  int getID() const;
-
   /* Methods for returning the min and max portions of the duration */
   int getMin() const;
   int getMax() const;
-
-  /* Returns the name of the item */
-  QString getName();
-
-  /* Returns the name of the item for listing */
-  QString getNameList();
 
   /* Returns the variance of the Action */
   int getVariance() const;
@@ -314,18 +303,33 @@ public slots:
   /* Sets the chance of the action occuring */
   bool setChance(float chance);
 
-  /* Sets the ID */
-  void setID(int id); // TODO
+
 
   /* Sets the ignore flags for attack and defense */
   void setIgnoreAttack(IgnoreFlags flag, bool set);
   void setIgnoreDefense(IgnoreFlags flag, bool set);
 
-  /* Sets the name */
-  void setName(QString name);
-
 signals:
   void nameChange(QString);
+
+public:
+  /* Clone */
+  EditorAction* clone();
+
+  /* Returns the ID of the Action */
+  virtual int getID();
+
+  /* Returns the name of the item */
+  virtual QString getName();
+
+  /* Returns the name of the item for listing */
+  virtual QString getNameList();
+
+  /* Sets the ID */
+  virtual void setID(int id);
+
+  /* Sets the name */
+  virtual void setName(QString name);
 };
 
 #endif // EDITORACTION_H

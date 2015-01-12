@@ -9,10 +9,11 @@
 
 #include <QWidget>
 
+#include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Equipment.h"
 
-class EditorEquipment : public QWidget
+class EditorEquipment : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
@@ -23,7 +24,7 @@ public:
   EditorEquipment(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~EditorEquipment();
+  virtual ~EditorEquipment();
 
 private:
   /* The reference equipment for data */
@@ -38,19 +39,19 @@ public:
   EditorEquipment* clone();
 
   /* Returns the ID of the equipment */
-  int getID();
+  virtual int getID();
 
   /* Returns the name of the equipment */
-  QString getName();
+  virtual QString getName();
 
   /* Returns the name of the equipment for listing */
-  QString getNameList();
+  virtual QString getNameList();
 
   /* Sets the ID of the equipment */
-  void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the equipment */
-  void setName(QString name);
+  virtual void setName(QString name);
 };
 
 #endif // EDITOREQUIPMENT_H
