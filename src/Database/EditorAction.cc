@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Class Name: EditorAction
+ * Date Created: December 27, 2014
+ * Inheritance: QWidget
+ * Description: Editor Action to interface with game action.
+ ******************************************************************************/
 #include "Database/EditorAction.h"
 #include <QDebug>
+
+/* Constant Implementation - see header file for descriptions */
+const int EditorAction::kUNSET_ID = -1;
 
 EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 {
@@ -364,6 +373,18 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   // TODO : Replace this with some file loading
   setBaseAction(Action());
   //setBaseAction(Action("509,INFLICT,2.5,PHYSICAL,POLAR.PRIMAL,ALLDEFBUFF,AMOUNT.0,,VITA,99"));
+
+  /* Set ID and name */
+  id = kUNSET_ID;
+  name = "";
+}
+
+/* Constructor function with id and name */
+EditorAction::EditorAction(int id, QString name, QWidget* parent)
+            : EditorAction(parent)
+{
+  setID(id);
+  setName(name);
 }
 
 EditorAction::~EditorAction()
@@ -1030,6 +1051,18 @@ int EditorAction::getVariance() const
   return working.getVariance();
 }
 
+/* Returns the name of the item */
+QString EditorAction::getName()
+{
+  return name;
+}
+
+/* Returns the name of the item for listing */
+QString EditorAction::getNameList()
+{
+  return EditorHelpers::getListString(getID(), getName());
+}
+
 QString EditorAction::outputString()
 {
   qDebug() << base.getID();
@@ -1078,6 +1111,15 @@ bool EditorAction::setChance(float chance)
   return working.setChance(chance);
 }
 
+/* Sets the ID */
+void EditorAction::setID(int id)
+{
+  if(id < 0)
+    this->id = kUNSET_ID;
+  else
+    this->id = id;
+}
+
 void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 {
   working.setIgnoreAttack(flag,set);
@@ -1086,6 +1128,14 @@ void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 void EditorAction::setIgnoreDefense(IgnoreFlags flag, bool set)
 {
   working.setIgnoreDefense(flag,set);
+}
+
+/* Sets the name */
+void EditorAction::setName(QString name)
+{
+  this->name = name;
+  name_edit->setText(name);
+  setWorkingAction(base);
 }
 
 void EditorAction::updateLayouts()

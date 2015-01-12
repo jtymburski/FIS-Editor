@@ -1,5 +1,12 @@
+/*******************************************************************************
+ * Class Name: EditorSkillset
+ * Date Created: December 27, 2014
+ * Inheritance: QWidget
+ * Description: Editor Skillset which contains a set of Editor Skills.
+ ******************************************************************************/
 #include "Database/EditorSkillset.h"
 #include <QDebug>
+
 EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
 {
   /* Setup layout */
@@ -59,14 +66,21 @@ EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
   setBaseSkillset(SkillSet());
 }
 
+/* Constructor function with id and name */
+EditorSkillset::EditorSkillset(int id, QString name, QWidget* parent)
+              : EditorSkillset(parent)
+{
+  setID(id);
+  setName(name);
+}
+
 EditorSkillset::~EditorSkillset()
 {
 }
 
-EditorSkillset* EditorSkillset::clone()
-{
-  return this;
-}
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
 void EditorSkillset::setNameAndID(QString str)
 {
@@ -191,4 +205,43 @@ void EditorSkillset::resetWorkingSkillset()
     working_set_list->setCurrentRow(i);
   }
   loadWorkingInfo();
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+EditorSkillset* EditorSkillset::clone()
+{
+  return this;
+}
+
+/* Returns the ID of the skillset */
+int EditorSkillset::getID()
+{
+  return id;
+}
+
+/* Returns the name of the skillset */
+QString EditorSkillset::getName()
+{
+  return name;
+}
+
+/* Returns the name of the skillset for listing */
+QString EditorSkillset::getNameList()
+{
+  return EditorHelpers::getListString(getID(), getName());
+}
+
+/* Sets the ID of the skillset */
+void EditorSkillset::setID(int id)
+{
+  this->id = id;
+}
+
+/* Sets the name of the skillset */
+void EditorSkillset::setName(QString name)
+{
+  this->name = name;
 }

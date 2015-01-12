@@ -1,8 +1,8 @@
 /*******************************************************************************
- * Class Name: EditorAction
+ * Class Name: EditorSkill
  * Date Created: December 27, 2014
  * Inheritance: QWidget
- * Description: Editor Action
+ * Description: Editor Skill which contains the connections to edit a skill.
  ******************************************************************************/
 #ifndef EDITORSKILL_H
 #define EDITORSKILL_H
@@ -19,8 +19,10 @@
 #include <QCheckBox>
 #include <QFormLayout>
 
-#include "Game/Player/Skill.h"
 #include "Database/EditorAction.h"
+#include "EditorHelpers.h"
+#include "Game/Player/Skill.h"
+
 
 class EditorSkill : public QWidget
 {
@@ -29,16 +31,17 @@ public:
   /* Constructor Function */
   EditorSkill(QWidget* parent = NULL);
 
+  /* Constructor function with id and name */
+  EditorSkill(int id, QString name, QWidget* parent = NULL);
+
   /* Destructor function */
   ~EditorSkill();
-
-  /* Clone */
-  EditorSkill* clone();
 
 private:
   /* Corresponding skill */
   Skill base;
   Skill working;
+
   /* Editor ID */
   int id;
   /* Editor name */
@@ -140,8 +143,28 @@ public slots:
 
   Skill getEditedSkill();
   void resetWorkingSkill();
+
 signals:
   void nameChange(QString);
 
+public:
+  /* Clone */
+  EditorSkill* clone();
+
+  /* Returns the ID of the skill */
+  int getID();
+
+  /* Returns the name of the skill */
+  QString getName();
+
+  /* Returns the name of the skill for listing */
+  QString getNameList();
+
+  /* Sets the ID of the skill */
+  void setID(int id);
+
+  /* Sets the name of the skill */
+  void setName(QString name);
 };
+
 #endif // EDITORSKILL_H

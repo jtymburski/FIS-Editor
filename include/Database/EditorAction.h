@@ -1,11 +1,12 @@
-#ifndef EDITORACTION_H
-#define EDITORACTION_H
 /*******************************************************************************
  * Class Name: EditorAction
  * Date Created: December 27, 2014
  * Inheritance: QWidget
- * Description: Editor Action
+ * Description: Editor Action to interface with game action.
  ******************************************************************************/
+#ifndef EDITORACTION_H
+#define EDITORACTION_H
+
 #include <QWidget>
 #include <QGroupBox>
 #include <QCheckBox>
@@ -16,13 +17,19 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
+
+#include "EditorHelpers.h"
 #include "Game/Player/Action.h"
+
 class EditorAction : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
   EditorAction(QWidget* parent = NULL);
+
+  /* Constructor function with id and name */
+  EditorAction(int id, QString name, QWidget* parent = NULL);
 
   /* Destructor function */
   ~EditorAction();
@@ -33,9 +40,11 @@ public:
 private:
   /* Editor ID */
   int id;
+
   /* Editor name */
   QString name;
   QString full_name;
+
   /* Testing string (May be removed) */
   QString test_string;
 
@@ -226,6 +235,9 @@ private:
   QVBoxLayout* target_flags_layout;
   QHBoxLayout* buttons_layout;
 
+  /*------------------- Constants -----------------------*/
+  const static int kUNSET_ID; /* The unset ID */
+
 protected:
 public slots:
   /* Sets the name */
@@ -271,6 +283,12 @@ public slots:
   int getMin() const;
   int getMax() const;
 
+  /* Returns the name of the item */
+  QString getName();
+
+  /* Returns the name of the item for listing */
+  QString getNameList();
+
   /* Returns the variance of the Action */
   int getVariance() const;
 
@@ -296,10 +314,18 @@ public slots:
   /* Sets the chance of the action occuring */
   bool setChance(float chance);
 
+  /* Sets the ID */
+  void setID(int id); // TODO
+
   /* Sets the ignore flags for attack and defense */
   void setIgnoreAttack(IgnoreFlags flag, bool set);
   void setIgnoreDefense(IgnoreFlags flag, bool set);
+
+  /* Sets the name */
+  void setName(QString name);
+
 signals:
   void nameChange(QString);
 };
+
 #endif // EDITORACTION_H

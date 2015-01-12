@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * Class Name: EditorSkill
+ * Date Created: December 27, 2014
+ * Inheritance: QWidget
+ * Description: Editor Skill which contains the connections to edit a skill.
+ ******************************************************************************/
 #include "Database/EditorSkill.h"
 #include <QDebug>
 
@@ -170,9 +176,21 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   setBaseSkill(Skill());
 }
 
+/* Constructor function with id and name */
+EditorSkill::EditorSkill(int id, QString name, QWidget* parent)
+           : EditorSkill(parent)
+{
+  setID(id);
+  setName(name);
+}
+
 EditorSkill::~EditorSkill()
 {
 }
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
 void EditorSkill::setBaseSkill(Skill s)
 {
@@ -275,11 +293,6 @@ void EditorSkill::loadWorkingInfo()
   else if(working.getScope() == ActionScope::NO_SCOPE)
     scope_flag->setCurrentIndex(15);
 
-}
-
-EditorSkill* EditorSkill::clone()
-{
-  return this;
 }
 
 void EditorSkill::setNameAndID(QString str)
@@ -462,4 +475,44 @@ void EditorSkill::resetWorkingSkill()
     skill_actions->setCurrentRow(i);
   }
   loadWorkingInfo();
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+EditorSkill* EditorSkill::clone()
+{
+  return this;
+}
+
+/* Returns the ID of the skill */
+int EditorSkill::getID()
+{
+  return id;
+}
+
+/* Returns the name of the skill */
+QString EditorSkill::getName()
+{
+  return name;
+}
+
+/* Returns the name of the skill for listing */
+QString EditorSkill::getNameList()
+{
+  return EditorHelpers::getListString(getID(), getName());
+}
+
+/* Sets the ID of the skill */
+void EditorSkill::setID(int id)
+{
+  this->id = id;
+}
+
+/* Sets the name of the skill */
+void EditorSkill::setName(QString name)
+{
+  this->name = name;
+  name_edit->setText(name);
 }

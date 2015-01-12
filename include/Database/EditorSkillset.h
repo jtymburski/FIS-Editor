@@ -1,19 +1,22 @@
-#ifndef EDITORSKILLSET_H
-#define EDITORSKILLSET_H
 /*******************************************************************************
  * Class Name: EditorSkillset
  * Date Created: December 27, 2014
  * Inheritance: QWidget
- * Description: Editor Skillset
+ * Description: Editor Skillset which contains a set of Editor Skills.
  ******************************************************************************/
+#ifndef EDITORSKILLSET_H
+#define EDITORSKILLSET_H
+
 #include <QWidget>
 #include <QListWidget>
 #include <QLineEdit>
 #include <QLabel>
 #include <QGridLayout>
 #include <QPushButton>
-#include "Game/Player/SkillSet.h"
+
 #include "Database/EditorSkill.h"
+#include "EditorHelpers.h"
+#include "Game/Player/SkillSet.h"
 
 class EditorSkillset : public QWidget
 {
@@ -22,11 +25,11 @@ public:
   /* Constructor Function */
   EditorSkillset(QWidget* parent = NULL);
 
+  /* Constructor function with id and name */
+  EditorSkillset(int id, QString name, QWidget* parent = NULL);
+
   /* Destructor function */
   ~EditorSkillset();
-
-  /* Clone */
-  EditorSkillset* clone();
 
 private:
   /* Editor ID */
@@ -77,8 +80,28 @@ public slots:
 
   SkillSet getEditedSkillset();
   void resetWorkingSkillset();
+
 signals:
   void nameChange(QString);
 
+public:
+  /* Clone */
+  EditorSkillset* clone();
+
+  /* Returns the ID of the skillset */
+  int getID();
+
+  /* Returns the name of the skillset */
+  QString getName();
+
+  /* Returns the name of the skillset for listing */
+  QString getNameList();
+
+  /* Sets the ID of the skillset */
+  void setID(int id);
+
+  /* Sets the name of the skillset */
+  void setName(QString name);
 };
+
 #endif // EDITORSKILLSET_H
