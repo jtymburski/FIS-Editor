@@ -23,6 +23,9 @@ public:
   /* Constructor function with id and name */
   EditorEquipment(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorEquipment(const EditorEquipment &source);
+
   /* Destructor function */
   virtual ~EditorEquipment();
 
@@ -31,6 +34,9 @@ private:
   Equipment equipment;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorEquipment &source);
+
 public slots:
 signals:
 
@@ -52,6 +58,11 @@ public:
 
   /* Sets the name of the equipment */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorEquipment& operator= (const EditorEquipment &source);
 };
 
 #endif // EDITOREQUIPMENT_H

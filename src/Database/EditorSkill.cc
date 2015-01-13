@@ -184,8 +184,40 @@ EditorSkill::EditorSkill(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorSkill::EditorSkill(const EditorSkill &source) : EditorSkill()
+{
+  copySelf(source);
+}
+
 EditorSkill::~EditorSkill()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorSkill::copySelf(const EditorSkill &source)
+{
+  id = source.id;
+  name = source.name;
+  test_string = source.test_string;
+
+  /* Action lists */
+  total_action_list = source.total_action_list;
+  skill_action_list = source.skill_action_list;
+  previous_skill_action_list = source.previous_skill_action_list;
+  running_action_id = source.running_action_id;
+
+  /* Frame connections */
+  // TODO: Fix for when the real frames are used -> sprite
+  //*animation_frame = *source.animation_frame;
+  //*thumbnail_frame = *source.thumbnail_frame;
+
+  setBaseSkill(source.base);
+  loadWorkingInfo();
 }
 
 /*============================================================================
@@ -515,4 +547,22 @@ void EditorSkill::setName(QString name)
 {
   this->name = name;
   name_edit->setText(name);
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorSkill& EditorSkill::operator= (const EditorSkill &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

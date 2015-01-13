@@ -92,13 +92,6 @@ private:
   /* The users login name */
   QString username;
 
-  /* Map size for initial creation */
-  int x_size;
-  int y_size;
-
-  /* Initial Map Creation */
-  QDialog* mapsize_dialog;
-
   /* Cursor menu */
   QMenu* cursor_menu;
 
@@ -127,9 +120,6 @@ protected:
  * SLOTS
  *===========================================================================*/
 public slots:
-  /* Sets up a map */
-  void setupMap();
-
   /* Sets to Eraser Mode */
   void setBasicCursor();
 
@@ -158,37 +148,37 @@ public slots:
   void setItemView();
 
   /* Sets To Map */
-  void setMap(QPair<QString,EditorMap*>*);
+  void setMap(EditorMap* map);
 
   /* Sets To Person */
-  void setPerson(QPair<QString,EditorPerson*>*);
+  void setPerson(EditorPerson* person);
 
   /* Sets To Party */
-  void setParty(QPair<QString,EditorParty*>*);
+  void setParty(EditorParty* party);
 
   /* Sets To Item */
-  void setItem(QPair<QString,EditorItem*>*);
+  void setItem(EditorItem* item);
 
   /* Sets To Action */
-  void setAction(QPair<QString,EditorAction*>*);
+  void setAction(EditorAction* action);
 
   /* Sets To Race */
-  void setRace(QPair<QString,EditorCategory*>*);
+  void setRace(EditorCategory* race);
 
   /* Sets To Battle Class */
-  void setBattleClass(QPair<QString,EditorCategory*>*);
+  void setBattleClass(EditorCategory* battle_class);
 
   /* Sets To Skillset */
-  void setSkillset(QPair<QString,EditorSkillset*>*);
+  void setSkillset(EditorSkillset* skill_set);
 
   /* Sets To Skill */
-  void setSkill(QPair<QString,EditorSkill*>*);
+  void setSkill(EditorSkill* skill);
 
   /* Sets To Equipment */
-  void setEquipment(QPair<QString,EditorEquipment*>*);
+  void setEquipment(EditorEquipment* equipment);
 
   /* Sets To Bubby */
-  void setBubby(QPair<QString,EditorBubby*>*);
+  void setBubby(EditorBubby* bubby);
   
   /* Shows and hides the game database view */
   void showDatabase();

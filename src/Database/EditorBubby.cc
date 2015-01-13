@@ -18,8 +18,24 @@ EditorBubby::EditorBubby(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorBubby::EditorBubby(const EditorBubby &source) : EditorBubby()
+{
+  copySelf(source);
+}
+
 EditorBubby::~EditorBubby()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorBubby::copySelf(const EditorBubby &source)
+{
+  bubby = source.bubby;
 }
 
 /*============================================================================
@@ -59,4 +75,22 @@ void EditorBubby::setID(int id)
 void EditorBubby::setName(QString name)
 {
   bubby.setName(name.toStdString());
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorBubby& EditorBubby::operator= (const EditorBubby &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

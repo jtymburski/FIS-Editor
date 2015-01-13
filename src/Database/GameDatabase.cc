@@ -9,101 +9,48 @@
 
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {
-  /* Set up the top list view and connect it to the changing of the
-   * bottom list view */
+  /* Clear out variables */
+  current_action = NULL;
+  current_battleclass = NULL;
+  current_bubby = NULL;
+  current_equipment = NULL;
+  current_item = NULL;
+  current_map = NULL;
+  current_party = NULL;
+  current_person = NULL;
+  current_race = NULL;
+  current_skill = NULL;
+  current_skillset = NULL;
+  mapsize_dialog = NULL;
+
+  /* Top view set-up */
   top_view = new QListWidget(this);
   top_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
   items << "Maps" << "Persons" << "Parties" << "Items" << "Actions"
         << "Races" << "BattleClasses" << "Skill Sets" << "Skills"
         << "Equipment" << "B.U.B.B.I.E's";
-
   top_view->addItems(items);
   top_view->setCurrentRow(0);
   connect(top_view,SIGNAL(currentRowChanged(int)),
           this,SLOT(rowChange(int)));
 
+  /* Bottom view set-up */
   bottom_view = new QListWidget(this);
   bottom_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  connect(bottom_view, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(modifySelection(QListWidgetItem*)));
 
-  connect(bottom_view,SIGNAL(doubleClicked(QModelIndex)),
-         this,SLOT(modifySelection(QModelIndex)));
-
-  connect(bottom_view,SIGNAL(currentRowChanged(int)),
-          this,SLOT(modifyIndex(int)));
-
-  /* Sets up temporary data for the bottom list view */
-  //map_pair.push_back(new QPair<QString,EditorMap*>
-  //                   ("00 : Dynaton",new EditorMap()));
-  //map_pair.push_back(new QPair<QString,EditorMap*>
-  //                   ("01 : Aviation Violation",new EditorMap()));
-  //map_pair.push_back(new QPair<QString,EditorMap*>
-  //                   ("02 : Fish with Frickin' Rockets Attached",
-  //                    new EditorMap()));
-  //map_pair.push_back(new QPair<QString,EditorMap*>
-  //                   ("03 : Bsian Season",new EditorMap()));
-
-  person_pair.push_back(new QPair<QString,EditorPerson*>
-                        ("00 : Main Character",new EditorPerson(this)));
-  person_pair.push_back(new QPair<QString,EditorPerson*>
-                        ("01 : Arcadius",new EditorPerson(this)));
-  person_pair.push_back(new QPair<QString,EditorPerson*>
-                        ("02 : Frosty, A Doopy Snowman",
-                                  new EditorPerson(this)));
-
-  party_pair.push_back(new QPair<QString,EditorParty*>
-                       ("00 : The Master Sleuth", new EditorParty(this)));
-  party_pair.push_back(new QPair<QString,EditorParty*>
-                       ("01 : The Doop Troop", new EditorParty(this)));
-
-  item_pair.push_back(new QPair<QString,EditorItem*>
-                      ("00 : Fated Oak Saber", new EditorItem(this)));
-  item_pair.push_back(new QPair<QString,EditorItem*>
-                      ("01 : Bear Arms", new EditorItem(this)));
-  current_map_index = 0;
-  current_person_index = 0;
-  current_party_index = 0;
-  current_item_index = 0;
-  current_action_index = 0;
-  current_race_index = 0;
-  current_battleclass_index = 0;
-  current_skillset_index = 0;
-  current_skill_index = 0;
-  current_equipment_index = 0;
-  current_bubby_index = 0;
-
-  current_map_selection = -1;
-  current_person_selection = -1;
-  current_party_selection = -1;
-  current_item_selection = -1;
-  current_action_selection = -1;
-  current_race_selection = -1;
-  current_battleclass_selection = -1;
-  current_skillset_selection = -1;
-  current_skill_selection = -1;
-  current_equipment_selection = -1;
-  current_bubby_selection = -1;
-
-  current_map_id = map_set.size()-1;
-  current_person_id = person_pair.size()-1;
-  current_party_id = party_pair.size()-1;
-  current_item_id = item_pair.size()-1;
-  current_action_id = action_pair.size()-1;
-  current_race_id = race_pair.size()-1;
-  current_battleclass_id = battleclass_pair.size()-1;
-  current_skillset_id = skillset_pair.size()-1;
-  current_skill_id = skill_pair.size()-1;
-  current_equipment_id = equipment_pair.size()-1;
-  current_bubby_id = bubby_pair.size()-1;
-
+  /* Set-up buttons at the bottom */
   new_button = new QPushButton("New",this);
   del_button = new QPushButton("Delete",this);
   import_button = new QPushButton("Import",this);
   duplicate_button = new QPushButton("Duplicate",this);
-
   connect(new_button,SIGNAL(clicked()),this,SLOT(createNewResource()));
   connect(del_button,SIGNAL(clicked()),this,SLOT(deleteResource()));
   connect(duplicate_button,SIGNAL(clicked()),this,SLOT(duplicateResource()));
+
+  /* Configure the layout */
   layout = new QVBoxLayout(this);
   QLabel *label = new QLabel("Game Database", this);
   label->setAlignment(Qt::AlignHCenter);
@@ -113,1009 +60,756 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(label);
   layout->addWidget(top_view);
   layout->addWidget(bottom_view);
-
   QHBoxLayout* button_layout = new QHBoxLayout();
   button_layout->addWidget(new_button);
   button_layout->addWidget(del_button);
   button_layout->addWidget(import_button);
   button_layout->addWidget(duplicate_button);
   layout->addLayout(button_layout);
-  modifyBottomList(top_view->currentRow());
+
+  /* Update the bottom list */
+  rowChange(top_view->currentRow());
 }
 
 GameDatabase::~GameDatabase()
 {
+  /* Action clean-up */
+  emit changeAction(NULL);
+  for(int i = 0; i < data_action.size(); i++)
+    delete data_action[i];
+  data_action.clear();
 
+  /* Battle Class clean-up */
+  emit changeBattleclass(NULL);
+  for(int i = 0; i < data_battleclass.size(); i++)
+    delete data_battleclass[i];
+  data_battleclass.clear();
+
+  /* Bubby clean-up */
+  emit changeBubby(NULL);
+  for(int i = 0; i < data_bubby.size(); i++)
+    delete data_bubby[i];
+  data_bubby.clear();
+
+  /* Equipment clean-up */
+  emit changeEquipment(NULL);
+  for(int i = 0; i < data_equipment.size(); i++)
+    delete data_equipment[i];
+  data_equipment.clear();
+
+  /* Item clean-up */
+  emit changeItem(NULL);
+  for(int i = 0; i < data_item.size(); i++)
+    delete data_item[i];
+  data_item.clear();
+
+  /* Map clean-up */
+  emit changeMap(NULL);
+  for(int i = 0; i < data_map.size(); i++)
+    delete data_map[i];
+  data_map.clear();
+
+  /* Party clean-up */
+  emit changeParty(NULL);
+  for(int i = 0; i < data_party.size(); i++)
+    delete data_party[i];
+  data_party.clear();
+
+  /* Person clean-up */
+  emit changePerson(NULL);
+  for(int i = 0; i < data_person.size(); i++)
+    delete data_person[i];
+  data_person.clear();
+
+  /* Race clean-up */
+  emit changeRace(NULL);
+  for(int i = 0; i < data_race.size(); i++)
+    delete data_race[i];
+  data_race.clear();
+
+  /* Skill clean-up */
+  emit changeSkill(NULL);
+  for(int i = 0; i < data_skill.size(); i++)
+    delete data_skill[i];
+  data_skill.clear();
+
+  /* Skillset clean-up */
+  emit changeSkillset(NULL);
+  for(int i = 0; i < data_skillset.size(); i++)
+    delete data_skillset[i];
+  data_skillset.clear();
+}
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+
+/* Creates a new map, from the dialog */
+void GameDatabase::createNewMap()
+{
+  QString name = EditorMap::getDialogName(mapsize_dialog);
+  int width = EditorMap::getDialogWidth(mapsize_dialog);
+  int height = EditorMap::getDialogHeight(mapsize_dialog);
+
+  /* Add the new map */
+  if(!name.isEmpty() && width > 0 && height > 0)
+  {
+    if(data_map.size() > 0)
+      data_map.push_back(new EditorMap(data_map.last()->getID() + 1, name,
+                                       width, height));
+    else
+      data_map.push_back(new EditorMap(0, name, width, height));
+  }
+
+  /* Finally, close the dialog */
+  mapsize_dialog->close();
+  delete mapsize_dialog;
+  mapsize_dialog = NULL;
+
+  /* Update bottom view */
+  modifyBottomList(top_view->currentRow());
+  bottom_view->setCurrentRow(bottom_view->count() - 1);
+}
+
+/* Creates a new resource -> new button */
+void GameDatabase::createNewResource()
+{
+  QString name;
+  switch(top_view->currentRow())
+  {
+    /* -- MAP -- */
+    case 0:
+      if(mapsize_dialog != NULL)
+        delete mapsize_dialog;
+      mapsize_dialog = EditorMap::createMapDialog(this);
+      connect(EditorMap::getDialogButton(mapsize_dialog), SIGNAL(clicked()),
+              this, SLOT(createNewMap()));
+      mapsize_dialog->show();
+      break;
+    /* -- PERSON -- */
+    case 1:
+      name = "New Person";
+      if(data_person.size() > 0)
+        data_person.push_back(
+                       new EditorPerson(data_person.last()->getID() + 1, name));
+      else
+        data_person.push_back(new EditorPerson(0, name));
+      break;
+    /* -- PARTY -- */
+    case 2:
+      name = "New Party";
+      if(data_party.size() > 0)
+        data_party.push_back(
+                         new EditorParty(data_party.last()->getID() + 1, name));
+      else
+        data_party.push_back(new EditorParty(0, name));
+      break;
+    /* -- ITEM -- */
+    case 3:
+      name = "New Item";
+      if(data_item.size() > 0)
+        data_item.push_back(new EditorItem(data_item.last()->getID() + 1,name));
+      else
+        data_item.push_back(new EditorItem(0, name));
+      break;
+    /* -- ACTION -- */
+    case 4:
+      name = "New Action";
+      if(data_action.size() > 0)
+        data_action.push_back(
+                       new EditorAction(data_action.last()->getID() + 1, name));
+      else
+        data_action.push_back(new EditorAction(0, name));
+      break;
+    /* -- RACE -- */
+    case 5:
+      name = "New Race";
+      if(data_race.size() > 0)
+        data_race.push_back(
+                       new EditorCategory(data_race.last()->getID() + 1, name));
+      else
+        data_race.push_back(new EditorCategory(0, name));
+      break;
+    /* -- BATTLE CLASS -- */
+    case 6:
+      name = "New Battle Class";
+      if(data_battleclass.size() > 0)
+        data_battleclass.push_back(
+                new EditorCategory(data_battleclass.last()->getID() + 1, name));
+      else
+        data_battleclass.push_back(new EditorCategory(0, name));
+      break;
+    /* -- SKILL SET -- */
+    case 7:
+      name = "New Skill Set";
+      if(data_skillset.size() > 0)
+        data_skillset.push_back(
+                   new EditorSkillset(data_skillset.last()->getID() + 1, name));
+      else
+        data_skillset.push_back(new EditorSkillset(0, name));
+      break;
+    /* -- SKILL -- */
+    case 8:
+      name = "New Skill";
+      if(data_skill.size() > 0)
+        data_skill.push_back(
+                         new EditorSkill(data_skill.last()->getID() + 1, name));
+      else
+        data_skill.push_back(new EditorSkill(0, name));
+      break;
+    /* -- EQUIPMENT -- */
+    case 9:
+      name = "New Equipment";
+      if(data_equipment.size() > 0)
+        data_equipment.push_back(
+                 new EditorEquipment(data_equipment.last()->getID() + 1, name));
+      else
+        data_equipment.push_back(new EditorEquipment(0, name));
+      break;
+    /* -- BUBBY -- */
+    case 10:
+      name = "New Bubby";
+      if(data_bubby.size() > 0)
+        data_bubby.push_back(
+                         new EditorBubby(data_bubby.last()->getID() + 1, name));
+      else
+        data_bubby.push_back(new EditorBubby(0, name));
+      break;
+    default:
+      break;
+  }
+
+  /* Set selection to the new row and update */
+  modifyBottomList(top_view->currentRow());
+  if(top_view->currentRow() != 0)
+    bottom_view->setCurrentRow(bottom_view->count() - 1);
+}
+
+// TODO: Comment
+void GameDatabase::deleteResource()
+{
+  if(bottom_view->currentRow() >= 0)
+  {
+    int index = bottom_view->currentRow();
+
+    /* Check if it's the bottom row */
+    bool bottom = false;
+    if((index + 1) == bottom_view->count())
+      bottom = true;
+
+    /* Switch through what to do */
+    switch(top_view->currentRow())
+    {
+      /* -- MAP -- */
+      case 0:
+        if(data_map[index] == current_map)
+        {
+          emit changeMap(NULL);
+          current_map = NULL;
+        }
+        delete data_map[index];
+        data_map.remove(index);
+        break;
+      /* -- PERSON -- */
+      case 1:
+        if(data_person[index] == current_person)
+        {
+          emit changePerson(NULL);
+          current_person = NULL;
+        }
+        delete data_person[index];
+        data_person.remove(index);
+        break;
+      /* -- PARTY -- */
+      case 2:
+        if(data_party[index] == current_party)
+        {
+          emit changeParty(NULL);
+          current_party = NULL;
+        }
+        delete data_party[index];
+        data_party.remove(index);
+        break;
+      /* -- ITEM -- */
+      case 3:
+        if(data_item[index] == current_item)
+        {
+          emit changeItem(NULL);
+          current_item = NULL;
+        }
+        delete data_item[index];
+        data_item.remove(index);
+        break;
+      /* -- ACTION -- */
+      case 4:
+        if(data_action[index] == current_action)
+        {
+          emit changeAction(NULL);
+          current_action = NULL;
+        }
+        delete data_action[index];
+        data_action.remove(index);
+        break;
+      /* -- RACE CLASS -- */
+      case 5:
+        if(data_race[index] == current_race)
+        {
+          emit changeRace(NULL);
+          current_race = NULL;
+        }
+        delete data_race[index];
+        data_race.remove(index);
+        break;
+      /* -- BATTLE CLASS -- */
+      case 6:
+        if(data_battleclass[index] == current_battleclass)
+        {
+          emit changeBattleclass(NULL);
+          current_battleclass = NULL;
+        }
+        delete data_battleclass[index];
+        data_battleclass.remove(index);
+        break;
+      /* -- SKILL SET -- */
+      case 7:
+        if(data_skillset[index] == current_skillset)
+        {
+          emit changeSkillset(NULL);
+          current_skillset = NULL;
+        }
+        delete data_skillset[index];
+        data_skillset.remove(index);
+        break;
+      /* -- SKILL -- */
+      case 8:
+        if(data_skill[index] == current_skill)
+        {
+          emit changeSkill(NULL);
+          current_skill = NULL;
+        }
+        delete data_skill[index];
+        data_skill.remove(index);
+        break;
+      /* -- EQUIPMENT -- */
+      case 9:
+        if(data_equipment[index] == current_equipment)
+        {
+          emit changeEquipment(NULL);
+          current_equipment = NULL;
+        }
+        delete data_equipment[index];
+        data_equipment.remove(index);
+        break;
+      /* -- BUBBY -- */
+      case 10:
+        if(data_bubby[index] == current_bubby)
+        {
+          emit changeBubby(NULL);
+          current_bubby = NULL;
+        }
+        delete data_bubby[index];
+        data_bubby.remove(index);
+        break;
+      default:
+        break;
+    }
+
+    /* Update list */
+    modifyBottomList(top_view->currentRow());
+    if(bottom)
+      bottom_view->setCurrentRow(bottom_view->count() - 1);
+  }
+}
+
+// TODO: Fix the bugs with this
+void GameDatabase::duplicateResource()
+{
+  if(bottom_view->currentRow() >= 0)
+  {
+    /* Store old index and create a new resource */
+    int id = 0;
+    int index = bottom_view->currentRow();
+    createNewResource();
+
+    /* Switch through and copy the data from the selected */
+    switch(top_view->currentRow())
+    {
+      /* -- MAP -- */
+      case 0:
+        id = data_map.last()->getID();
+        *data_map.last() = *data_map[index];
+        data_map.last()->setID(id);
+        break;
+      /* -- PERSON -- */
+      case 1:
+        id = data_person.last()->getID();
+        *data_person.last() = *data_person[index];
+        data_person.last()->setID(id);
+        break;
+      /* -- PARTY -- */
+      case 2:
+        id = data_party.last()->getID();
+        *data_party.last() = *data_party[index];
+        data_party.last()->setID(id);
+        break;
+      /* -- ITEM -- */
+      case 3:
+        id = data_item.last()->getID();
+        *data_item.last() = *data_item[index];
+        data_item.last()->setID(id);
+        break;
+      /* -- ACTION -- */
+      case 4:
+        id = data_action.last()->getID();
+        *data_action.last() = *data_action[index];
+        data_action.last()->setID(id);
+        break;
+      /* -- RACE CLASS -- */
+      case 5:
+        id = data_race.last()->getID();
+        *data_race.last() = *data_race[index];
+        data_race.last()->setID(id);
+        break;
+      /* -- BATTLE CLASS -- */
+      case 6:
+        id = data_battleclass.last()->getID();
+        *data_battleclass.last() = *data_battleclass[index];
+        data_battleclass.last()->setID(id);
+        break;
+      /* -- SKILL SET -- */
+      case 7:
+        id = data_skillset.last()->getID();
+        *data_skillset.last() = *data_skillset[index];
+        data_skillset.last()->setID(id);
+        break;
+      /* -- SKILL -- */
+      case 8:
+        id = data_skill.last()->getID();
+        *data_skill.last() = *data_skill[index];
+        data_skill.last()->setID(id);
+        break;
+      /* -- EQUIPMENT -- */
+      case 9:
+        id = data_equipment.last()->getID();
+        *data_equipment.last() = *data_equipment[index];
+        data_equipment.last()->setID(id);
+        break;
+      /* -- BUBBY -- */
+      case 10:
+        id = data_bubby.last()->getID();
+        *data_bubby.last() = *data_bubby[index];
+        data_bubby.last()->setID(id);
+        break;
+      default:
+        break;
+    }
+
+    /* Update list */
+    modifyBottomList(top_view->currentRow());
+    bottom_view->setCurrentRow(bottom_view->count() - 1);
+  }
 }
 
 /* Double click on an element */
-void GameDatabase::modifySelection(QModelIndex index)
+//void GameDatabase::modifySelection(QModelIndex index)
+void GameDatabase::modifySelection(QListWidgetItem* item)
 {
+  int index = bottom_view->currentRow();
+  (void)item;
+
   switch(top_view->currentRow())
   {
+    /* -- MAP -- */
     case 0:
-      // TODO: Fix
-      //current_name = map_set[index.row()]->getName();
-      current_map = map_set[index.row()];
-      current_map_selection = index.row();
-      current_map_index = index.row();
-      modifyBottomList(top_view->currentRow());
-      //emit changeMap(current_map);
+      current_map = data_map[index];
+      emit changeMap(current_map);
       break;
+    /* -- PERSON -- */
     case 1:
-      current_name = &person_pair[index.row()]->first;
-      current_person = person_pair[index.row()];
-      current_person_selection = index.row();
-      current_person_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_person = data_person[index];
       emit changePerson(current_person);
       break;
+    /* -- PARTY -- */
     case 2:
-      current_name = &party_pair[index.row()]->first;
-      current_party = party_pair[index.row()];
-      current_party_selection = index.row();
-      current_party_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_party = data_party[index];
       emit changeParty(current_party);
       break;
+    /* -- ITEM -- */
     case 3:
-      current_name = &item_pair[index.row()]->first;
-      current_item = item_pair[index.row()];
-      current_item_selection = index.row();
-      current_item_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_item = data_item[index];
       emit changeItem(current_item);
       break;
+    /* -- ACTION -- */
     case 4:
-      current_name = &action_pair[index.row()]->first;
-      current_action = action_pair[index.row()];
-      current_action_selection = index.row();
-      current_action_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_action = data_action[index];
       emit changeAction(current_action);
       break;
+    /* -- RACE -- */
     case 5:
-      current_name = &race_pair[index.row()]->first;
-      current_race = race_pair[index.row()];
-      current_race_selection = index.row();
-      current_race_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_race = data_race[index];
       emit changeRace(current_race);
       break;
+    /* -- BATTLE CLASS -- */
     case 6:
-      current_name = &battleclass_pair[index.row()]->first;
-      current_battleclass = battleclass_pair[index.row()];
-      current_battleclass_selection = index.row();
-      current_battleclass_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_battleclass = data_battleclass[index];
       emit changeBattleclass(current_battleclass);
       break;
+    /* -- SKILL SET -- */
     case 7:
-      current_name = &skillset_pair[index.row()]->first;
-      current_skillset = skillset_pair[index.row()];
-      current_skillset_selection = index.row();
-      current_skillset_index = index.row();
-      skillset_pair.at(index.row())->second->setTotalSkillsList(skill_pair);
-      modifyBottomList(top_view->currentRow());
+      current_skillset = data_skillset[index];
       emit changeSkillset(current_skillset);
       break;
+    /* -- SKILL -- */
     case 8:
-      current_name = &skill_pair[index.row()]->first;
-      current_skill = skill_pair[index.row()];
-      current_skill_selection = index.row();
-      current_skill_index = index.row();
-      skill_pair.at(index.row())->second->setTotalActionsList(&action_pair);
-      modifyBottomList(top_view->currentRow());
+      current_skill = data_skill[index];
       emit changeSkill(current_skill);
       break;
+    /* -- EQUIPMENT -- */
     case 9:
-      current_name = &equipment_pair[index.row()]->first;
-      current_equipment = equipment_pair[index.row()];
-      current_equipment_selection = index.row();
-      current_equipment_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_equipment = data_equipment[index];
       emit changeEquipment(current_equipment);
       break;
+    /* -- BUBBY -- */
     case 10:
-      current_name = &bubby_pair[index.row()]->first;
-      current_bubby = bubby_pair[index.row()];
-      current_bubby_selection = index.row();
-      current_bubby_index = index.row();
-      modifyBottomList(top_view->currentRow());
+      current_bubby = data_bubby[index];
       emit changeBubby(current_bubby);
       break;
     default:
       break;
   }
+
+  modifyBottomList(top_view->currentRow());
 }
+
 void GameDatabase::rowChange(int index)
 {
   switch(index)
   {
+    /* -- MAP -- */
     case 0:
-      // TODO: Fix
-      //if(map_set.size() != 0 && current_map_selection != -1)
-      //  current_name = &map_set[current_map_selection]->getName();
-      break;
-    case 1:
-      if(person_pair.size() != 0 && current_person_selection != -1)
-        current_name = &person_pair[current_person_selection]->first;
-      break;
-    case 2:
-      if(party_pair.size() != 0 && current_party_selection != -1)
-        current_name = &party_pair[current_party_selection]->first;
-      break;
-    case 3:
-      if(item_pair.size() != 0 && current_item_selection != -1)
-        current_name = &item_pair[current_item_selection]->first;
-      break;
-    case 4:
-      if(action_pair.size() != 0 && current_action_selection != -1)
-        current_name = &action_pair[current_action_selection]->first;
-      break;
-    case 5:
-      if(race_pair.size() != 0 && current_race_selection != -1)
-        current_name = &race_pair[current_race_selection]->first;
-      break;
-    case 6:
-      if(battleclass_pair.size() != 0 && current_battleclass_selection != -1)
-        current_name = &battleclass_pair[current_battleclass_selection]->first;
-      break;
-    case 7:
-      if(skillset_pair.size() != 0 && current_skillset_selection != -1)
-      {
-        current_name = &skillset_pair[current_skillset_selection]->first;
-        skillset_pair.at(current_skillset_selection)->second->
-                      setTotalSkillsList(skill_pair);
-      }
-      break;
-    case 8:
-      if(skill_pair.size() != 0 && current_skill_selection != -1)
-      {
-        current_name = &skill_pair[current_skill_selection]->first;
-        skill_pair.at(current_skill_selection)->second->
-                      setTotalActionsList(&action_pair);
-      }
-      break;
-    case 9:
-      if(equipment_pair.size() != 0 && current_equipment_selection != -1)
-        current_name = &equipment_pair[current_equipment_selection]->first;
-      break;
-    case 10:
-      if(bubby_pair.size() != 0 && current_bubby_selection != -1)
-        current_name = &bubby_pair[current_bubby_selection]->first;
-      break;
-    default:
-      break;
-  }
-  modifyBottomList(index);
-}
-
-void GameDatabase::modifyIndex(int index)
-{
-  switch(top_view->currentRow())
-  {
-    case 0:
-      current_map_index = index;
-      break;
-    case 1:
-      current_person_index = index;
-      break;
-    case 2:
-      current_party_index = index;
-      break;
-    case 3:
-      current_item_index = index;
-      break;
-    case 4:
-      current_action_index = index;
-      break;
-    case 5:
-      current_race_index = index;
-      break;
-    case 6:
-      current_battleclass_index = index;
-      break;
-    case 7:
-      current_skillset_index = index;
-      break;
-    case 8:
-      current_skill_index = index;
-      break;
-    case 9:
-      current_equipment_index = index;
-      break;
-    case 10:
-      current_bubby_index = index;
-      break;
-    default:
-      break;
-  }
-/*
-  qDebug()<<"Map Index " <<current_map_index;
-  qDebug()<<"Person Index " <<current_person_index;
-  qDebug()<<"Party Index " <<current_party_index;
-  qDebug()<<"Item Index " <<current_item_index;
-  qDebug()<<" ";
-*/
-}
-
-void GameDatabase::modifyBottomList(int index)
-{
-  QStringList map_list;
-  QStringList person_list;
-  QStringList party_list;
-  QStringList item_list;
-  QStringList action_list;
-  QStringList race_list;
-  QStringList battleclass_list;
-  QStringList skillset_list;
-  QStringList skill_list;
-  QStringList equipment_list;
-  QStringList bubby_list;
-
-  QFont font;
-
-  disconnect(bottom_view,SIGNAL(currentRowChanged(int)),
-          this,SLOT(modifyIndex(int)));
-  bottom_view->clear();
-
-  connect(bottom_view, SIGNAL(currentRowChanged(int)),
-          this, SLOT(modifyIndex(int)));
-  switch(index)
-  {
-    case 0:
-      for(int i = 0; i < map_set.size(); i++)
-        map_list << map_set[i]->getNameList();
-      bottom_view->addItems(map_list);
-
-      font.setBold(false);
-      for(int i = 0; i < bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_map_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_map_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_map_index);
       emit changeMode(EditorEnumDb::MAPVIEW);
       break;
+    /* -- PERSON -- */
     case 1:
-      for(int i=0; i<person_pair.size(); i++)
-        person_list << person_pair[i]->first;
-      bottom_view->addItems(person_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_person_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_person_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_person_index);
       emit changeMode(EditorEnumDb::PERSONVIEW);
       break;
+    /* -- PARTY -- */
     case 2:
-      for(int i=0; i<party_pair.size(); i++)
-        party_list << party_pair[i]->first;
-      bottom_view->addItems(party_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_party_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_party_selection)->setFont(font);
-      }
-
-      bottom_view->setCurrentRow(current_party_index);
       emit changeMode(EditorEnumDb::PARTYVIEW);
       break;
+    /* -- ITEM -- */
     case 3:
-      for(int i=0; i<item_pair.size(); i++)
-        item_list << item_pair[i]->first;
-      bottom_view->addItems(item_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_item_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_item_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_item_index);
       emit changeMode(EditorEnumDb::ITEMVIEW);
       break;
+    /* -- ACTION -- */
     case 4:
-      for(int i=0; i<action_pair.size(); i++)
-        action_list << action_pair[i]->first;
-      bottom_view->addItems(action_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_action_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_action_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_action_index);
       emit changeMode(EditorEnumDb::ACTIONVIEW);
       break;
+    /* -- RACE -- */
     case 5:
-      for(int i=0; i<race_pair.size(); i++)
-        race_list << race_pair[i]->first;
-      bottom_view->addItems(race_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_race_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_race_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_race_index);
       emit changeMode(EditorEnumDb::RACEVIEW);
       break;
+    /* -- BATTLE CLASS -- */
     case 6:
-      for(int i=0; i<battleclass_pair.size(); i++)
-        battleclass_list << battleclass_pair[i]->first;
-      bottom_view->addItems(battleclass_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_battleclass_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_battleclass_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_battleclass_index);
       emit changeMode(EditorEnumDb::BATTLECLASSVIEW);
       break;
+    /* -- SKILL SET -- */
     case 7:
-      for(int i=0; i<skillset_pair.size(); i++)
-        skillset_list << skillset_pair[i]->first;
-      bottom_view->addItems(skillset_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_skillset_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_skillset_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_skillset_index);
-      emit changeMode(EditorEnumDb::SKILLSETVIEW);
+      emit changeMode(EditorEnumDb::SKILLSETVIEW); // TODO: Move to modifySelection()
+//      if(skillset_pair.size() != 0 && current_skillset_selection != -1)
+//      {
+//        current_name = &skillset_pair[current_skillset_selection]->first;
+//        skillset_pair.at(current_skillset_selection)->second->
+//                      setTotalSkillsList(skill_pair);
+//      }
       break;
+    /* -- SKILL -- */
     case 8:
-      for(int i=0; i<skill_pair.size(); i++)
-        skill_list << skill_pair[i]->first;
-      bottom_view->addItems(skill_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_skill_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_skill_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_skill_index);
-      emit changeMode(EditorEnumDb::SKILLVIEW);
+      emit changeMode(EditorEnumDb::SKILLVIEW); // TODO: MOve to modifySelection()
+//      if(skill_pair.size() != 0 && current_skill_selection != -1)
+//      {
+//        current_name = &skill_pair[current_skill_selection]->first;
+//        skill_pair.at(current_skill_selection)->second->
+//                      setTotalActionsList(&action_pair);
+//      }
       break;
+    /* -- EQUIPMENT -- */
     case 9:
-      for(int i=0; i<equipment_pair.size(); i++)
-        equipment_list << equipment_pair[i]->first;
-      bottom_view->addItems(equipment_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_equipment_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_equipment_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_equipment_index);
       emit changeMode(EditorEnumDb::EQUIPMENTVIEW);
       break;
+    /* -- BUBBY -- */
     case 10:
-      for(int i=0; i<bubby_pair.size(); i++)
-        bubby_list << bubby_pair[i]->first;
-      bottom_view->addItems(bubby_list);
-
-      font.setBold(false);
-      for(int i=0; i<bottom_view->count(); i++)
-        bottom_view->item(i)->setFont(font);
-      if(current_bubby_selection != -1)
-      {
-        font.setBold(true);
-        bottom_view->item(current_bubby_selection)->setFont(font);
-      }
-      bottom_view->setCurrentRow(current_bubby_index);
       emit changeMode(EditorEnumDb::BUBBYVIEW);
       break;
     default:
       break;
   }
 
+  modifyBottomList(index);
 }
 
-void GameDatabase::createNewResource()
-{
-  QString name;
-  switch(top_view->currentRow())
-  {
-    case 0:
-      // TODO: Fix
-      //if(current_map_id<9)
-      //  name.append(QString::number(0));
-      //name.append(QString::number(++current_map_id));
-      //name.append(" : Some Land");
-      //map_pair.push_back(new QPair<QString,EditorMap*>
-      //                   (name,new EditorMap()));
-      //current_map_index = map_pair.size()-1;
-      //modifyBottomList(top_view->currentRow());
-      break;
-    case 1:
-      if(current_person_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_person_id));
-      name.append(" : Some Guy");
-      person_pair.push_back(new QPair<QString,EditorPerson*>
-                         (name,new EditorPerson(this)));
-      current_person_index = person_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 2:
-      if(current_party_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_party_id));
-      name.append(" : Some Sleuth");
-      party_pair.push_back(new QPair<QString,EditorParty*>
-                         (name,new EditorParty(this)));
-      current_party_index = party_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 3:
-      if(current_item_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_item_id));
-      name.append(" : Some Doohickey");
-      item_pair.push_back(new QPair<QString,EditorItem*>
-                         (name,new EditorItem(this)));
-      current_item_index = item_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 4:
-      if(current_action_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_action_id));
-      name.append(" : Some Act");
-      action_pair.push_back(new QPair<QString,EditorAction*>
-                         (name,new EditorAction(this)));
-      //action_pair.at(action_pair.size() - 1)->second->setBaseAction(Action());
-      action_pair.at(action_pair.size() - 1)->second->
-          setNameAndID(action_pair.at(action_pair.size() - 1)->first);
-      //qDebug() << " : " << action_pair.at(action_pair.size() - 1)->second->getBaseAction().getID();
-      current_action_index = action_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 5:
-      if(current_race_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_race_id));
-      name.append(" : Some Race");
-      race_pair.push_back(new QPair<QString,EditorCategory*>
-                         (name,new EditorCategory(this)));
-      current_race_index = race_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 6:
-      if(current_battleclass_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_battleclass_id));
-      name.append(" : Some Class");
-      battleclass_pair.push_back(new QPair<QString,EditorCategory*>
-                         (name,new EditorCategory(this)));
-      current_battleclass_index = battleclass_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 7:
-      if(current_skillset_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_skillset_id));
-      name.append(" : Some Set Of Skillz");
-      skillset_pair.push_back(new QPair<QString,EditorSkillset*>
-                         (name,new EditorSkillset(this)));
-      skillset_pair.at(skillset_pair.size() - 1)->second->
-          setNameAndID(skillset_pair.at(skillset_pair.size() - 1)->first);
-      current_skillset_index = skillset_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 8:
-      if(current_skill_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_skill_id));
-      name.append(" : Some Skill");
-      skill_pair.push_back(new QPair<QString,EditorSkill*>
-                         (name,new EditorSkill(this)));
-      skill_pair.at(skill_pair.size() - 1)->second->
-          setNameAndID(skill_pair.at(skill_pair.size() - 1)->first);
-      current_skill_index = skill_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 9:
-      if(current_equipment_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_equipment_id));
-      name.append(" : Some Equipment");
-      equipment_pair.push_back(new QPair<QString,EditorEquipment*>
-                         (name,new EditorEquipment(this)));
-      current_equipment_index = equipment_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    case 10:
-      if(current_bubby_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_bubby_id));
-      name.append(" : Some Bubby");
-      bubby_pair.push_back(new QPair<QString,EditorBubby*>
-                         (name,new EditorBubby(this)));
-      current_bubby_index = bubby_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-      break;
-    default:
-      break;
-  }
-}
-//TODO: Fix the bugs with this
-void GameDatabase::duplicateResource()
-{
-  QString name;
-
-  if(top_view->currentRow() == 0)
-  {
-    // TODO: Fix
-    /*
-    if(current_map_id > 0)
-    {
-      QString maptemp = map_pair[current_map_index]->first;
-      if(map_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_map_id));
-      name.append(" ");
-      do
-      {
-        maptemp.remove(0,1);
-      }
-      while(maptemp.at(0) != ':');
-      maptemp.prepend(name);
-      map_pair.push_back(new QPair<QString,EditorMap*>
-                        (maptemp,map_pair[current_map_index]->second->clone()));
-      current_map_index = map_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }*/
-  }
-  else if(top_view->currentRow() == 1)
-  {
-    if(current_person_id > 0)
-    {
-      QString persontemp = person_pair[current_person_index]->first;
-      if(person_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_person_id));
-      name.append(" ");
-      do
-      {
-        persontemp.remove(0,1);
-      }
-      while(persontemp.at(0) != ':');
-      persontemp.prepend(name);
-      person_pair.push_back(new QPair<QString,EditorPerson*>
-                        (persontemp,person_pair[current_person_index]->
-                         second->clone()));
-      current_person_index = person_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 2)
-  {
-    if(current_party_id > 0)
-    {
-      QString partytemp = party_pair[current_party_index]->first;
-      if(party_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_party_id));
-      name.append(" ");
-      do
-      {
-        partytemp.remove(0,1);
-      }
-      while(partytemp.at(0) != ':');
-      partytemp.prepend(name);
-      party_pair.push_back(new QPair<QString,EditorParty*>
-                        (partytemp,party_pair[current_party_index]->
-                         second->clone()));
-      current_party_index = party_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 3)
-  {
-    if(current_item_id > 0)
-    {
-      QString itemtemp = item_pair[current_item_index]->first;
-      if(item_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_item_id));
-      name.append(" ");
-      do
-      {
-        itemtemp.remove(0,1);
-      }
-      while(itemtemp.at(0) != ':');
-      itemtemp.prepend(name);
-      item_pair.push_back(new QPair<QString,EditorItem*>
-                        (itemtemp,item_pair[current_item_index]->
-                         second->clone()));
-      current_item_index = item_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 4)
-  {
-    if(current_action_id > 0)
-    {
-      QString actiontemp = action_pair[current_action_index]->first;
-      if(action_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_action_id));
-      name.append(" ");
-      do
-      {
-        actiontemp.remove(0,1);
-      }
-      while(actiontemp.at(0) != ':');
-      actiontemp.prepend(name);
-      action_pair.push_back(new QPair<QString,EditorAction*>
-                        (actiontemp,action_pair[current_action_index]->
-                         second->clone()));
-      current_action_index = action_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 5)
-  {
-    if(current_race_id > 0)
-    {
-      QString racetemp = race_pair[current_race_index]->first;
-      if(race_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_race_id));
-      name.append(" ");
-      do
-      {
-        racetemp.remove(0,1);
-      }
-      while(racetemp.at(0) != ':');
-      racetemp.prepend(name);
-      race_pair.push_back(new QPair<QString,EditorCategory*>
-                        (racetemp,race_pair[current_race_index]->
-                         second->clone()));
-      current_race_index = race_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 6)
-  {
-    if(current_battleclass_id > 0)
-    {
-      QString battleclasstemp = battleclass_pair[current_battleclass_index]
-          ->first;
-      if(battleclass_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_battleclass_id));
-      name.append(" ");
-      do
-      {
-        battleclasstemp.remove(0,1);
-      }
-      while(battleclasstemp.at(0) != ':');
-      battleclasstemp.prepend(name);
-      battleclass_pair.push_back(new QPair<QString,EditorCategory*>
-                        (battleclasstemp,
-                         battleclass_pair[current_battleclass_index]->
-                         second->clone()));
-      current_battleclass_index = battleclass_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 7)
-  {
-    if(current_skillset_id > 0)
-    {
-      QString skillsettemp = skillset_pair[current_skillset_index]->first;
-      if(skillset_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_skillset_id));
-      name.append(" ");
-      do
-      {
-        skillsettemp.remove(0,1);
-      }
-      while(skillsettemp.at(0) != ':');
-      skillsettemp.prepend(name);
-      skillset_pair.push_back(new QPair<QString,EditorSkillset*>
-                        (skillsettemp,skillset_pair[current_skillset_index]->
-                         second->clone()));
-      current_skillset_index = skillset_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 8)
-  {
-    if(current_skill_id > 0)
-    {
-      QString skilltemp = skill_pair[current_skill_index]->first;
-      if(skill_pair.size()<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_skill_id));
-      name.append(" ");
-      do
-      {
-        skilltemp.remove(0,1);
-      }
-      while(skilltemp.at(0) != ':');
-      skilltemp.prepend(name);
-      skill_pair.push_back(new QPair<QString,EditorSkill*>
-                        (skilltemp,skill_pair[current_skill_index]->
-                         second->clone()));
-      current_skill_index = skill_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 9)
-  {
-    if(equipment_pair.size() > 0)
-    {
-      QString equipmenttemp = equipment_pair[current_equipment_index]->first;
-      if(current_equipment_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_equipment_id));
-      name.append(" ");
-      do
-      {
-        equipmenttemp.remove(0,1);
-      }
-      while(equipmenttemp.at(0) != ':');
-      equipmenttemp.prepend(name);
-      equipment_pair.push_back(new QPair<QString,EditorEquipment*>
-                        (equipmenttemp,equipment_pair[current_equipment_index]->
-                         second->clone()));
-      current_equipment_index = equipment_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-  else if(top_view->currentRow() == 10)
-  {
-    if(bubby_pair.size() > 0)
-    {
-      QString bubbytemp = bubby_pair[current_bubby_index]->first;
-      if(current_bubby_id<9)
-        name.append(QString::number(0));
-      name.append(QString::number(++current_bubby_id));
-      name.append(" ");
-      do
-      {
-        bubbytemp.remove(0,1);
-      }
-      while(bubbytemp.at(0) != ':');
-      bubbytemp.prepend(name);
-      bubby_pair.push_back(new QPair<QString,EditorBubby*>
-                        (bubbytemp,bubby_pair[current_bubby_index]->
-                         second->clone()));
-      current_bubby_index = bubby_pair.size()-1;
-      modifyBottomList(top_view->currentRow());
-    }
-  }
-}
-void GameDatabase::deleteResource()
-{
-  switch(top_view->currentRow())
-  {
-    case 0:
-      // TODO: Fix
-      /*
-      if(map_pair.size() > 0)
-      {
-        map_pair.remove(current_map_index);
-        if(current_map_index == current_map_selection)
-        {
-          current_map_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_map_selection > current_map_index)
-          current_map_selection--;
-        if(current_map_index > 0)
-          current_map_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      */
-      break;
-    case 1:
-      if(person_pair.size() > 0)
-      {
-        person_pair.remove(current_person_index);
-        if(current_person_index == current_person_selection)
-        {
-          current_person_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_person_selection > current_person_index)
-          current_person_selection--;
-        if(current_person_index > 0)
-          current_person_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 2:
-      if(party_pair.size() > 0)
-      {
-        party_pair.remove(current_party_index);
-        if(current_party_index == current_party_selection)
-        {
-          current_party_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_party_selection > current_party_index)
-          current_party_selection--;
-        if(current_party_index > 0)
-          current_party_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 3:
-      if(item_pair.size() > 0)
-      {
-        item_pair.remove(current_item_index);
-        if(current_item_index == current_item_selection)
-        {
-          current_item_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_item_selection > current_item_index)
-          current_item_selection--;
-        if(current_item_index > 0)
-          current_item_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 4:
-      if(action_pair.size() > 0)
-      {
-        action_pair.remove(current_action_index);
-        if(current_action_index == current_action_selection)
-        {
-          current_action_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_action_selection > current_action_index)
-          current_action_selection--;
-        if(current_action_index > 0)
-          current_action_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 5:
-      if(race_pair.size() > 0)
-      {
-        race_pair.remove(current_race_index);
-        if(current_race_index == current_race_selection)
-        {
-          current_race_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_race_selection > current_race_index)
-          current_race_selection--;
-        if(current_race_index > 0)
-          current_race_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 6:
-      if(battleclass_pair.size() > 0)
-      {
-        battleclass_pair.remove(current_battleclass_index);
-        if(current_battleclass_index == current_battleclass_selection)
-        {
-          current_battleclass_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_battleclass_selection > current_battleclass_index)
-          current_battleclass_selection--;
-        if(current_battleclass_index > 0)
-          current_battleclass_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 7:
-      if(skillset_pair.size() > 0)
-      {
-        skillset_pair.remove(current_skillset_index);
-        if(current_skillset_index == current_skillset_selection)
-        {
-          current_skillset_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_skillset_selection > current_skillset_index)
-          current_skillset_selection--;
-        if(current_skillset_index > 0)
-          current_skillset_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 8:
-      if(skill_pair.size() > 0)
-      {
-        skill_pair.remove(current_skill_index);
-        if(current_skill_index == current_skill_selection)
-        {
-          current_skill_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_skill_selection > current_skill_index)
-          current_skill_selection--;
-        if(current_skill_index > 0)
-          current_skill_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 9:
-      if(equipment_pair.size() > 0)
-      {
-        equipment_pair.remove(current_equipment_index);
-        if(current_equipment_index == current_equipment_selection)
-        {
-          current_equipment_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_equipment_selection > current_equipment_index)
-          current_equipment_selection--;
-        if(current_equipment_index > 0)
-          current_equipment_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    case 10:
-      if(bubby_pair.size() > 0)
-      {
-        bubby_pair.remove(current_bubby_index);
-        if(current_bubby_index == current_bubby_selection)
-        {
-          current_bubby_selection = -1;
-          emit deactivateView();
-        }
-        else if(current_bubby_selection > current_bubby_index)
-          current_bubby_selection--;
-        if(current_bubby_index > 0)
-          current_bubby_index--;
-        modifyBottomList(top_view->currentRow());
-      }
-      break;
-    default:
-      break;
-  }
-}
-
+// TODO: Comment
 void GameDatabase::updateBottomListName(QString str)
 {
-  *current_name = str;
+  (void)str;
   modifyBottomList(top_view->currentRow());
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+// TODO: Comment
+void GameDatabase::modifyBottomList(int index)
+{
+  int bold_index = -1;
+  QStringList bottom_list;
+  int last_row = bottom_view->currentRow();
+
+  /* Clear up the existing list */
+  bottom_view->clear();
+
+  switch(index)
+  {
+    /* -- MAP -- */
+    case 0:
+      /* Fill the data */
+      for(int i = 0; i < data_map.size(); i++)
+      {
+        bottom_list << data_map[i]->getNameList();
+        if(data_map[i] == current_map)
+          bold_index = i;
+      }
+      break;
+    /* -- PERSON -- */
+    case 1:
+      /* Fill the data */
+      for(int i = 0; i < data_person.size(); i++)
+      {
+        bottom_list << data_person[i]->getNameList();
+        if(data_person[i] == current_person)
+          bold_index = i;
+      }
+      break;
+    /* -- PARTY -- */
+    case 2:
+      /* Fill the data */
+      for(int i = 0; i < data_party.size(); i++)
+      {
+        bottom_list << data_party[i]->getNameList();
+        if(data_party[i] == current_party)
+          bold_index = i;
+      }
+      break;
+    /* -- ITEM -- */
+    case 3:
+      /* Fill the data */
+      for(int i = 0; i < data_item.size(); i++)
+      {
+        bottom_list << data_item[i]->getNameList();
+        if(data_item[i] == current_item)
+          bold_index = i;
+      }
+      break;
+    /* -- ACTION -- */
+    case 4:
+      /* Fill the data */
+      for(int i = 0; i < data_action.size(); i++)
+      {
+        bottom_list << data_action[i]->getNameList();
+        if(data_action[i] == current_action)
+          bold_index = i;
+      }
+      break;
+    /* -- RACE -- */
+    case 5:
+      /* Fill the data */
+      for(int i = 0; i < data_race.size(); i++)
+      {
+        bottom_list << data_race[i]->getNameList();
+        if(data_race[i] == current_race)
+          bold_index = i;
+      }
+      break;
+    /* -- BATTLE CLASS -- */
+    case 6:
+      /* Fill the data */
+      for(int i = 0; i < data_battleclass.size(); i++)
+      {
+        bottom_list << data_battleclass[i]->getNameList();
+        if(data_battleclass[i] == current_battleclass)
+          bold_index = i;
+      }
+      break;
+    /* -- SKILL SET -- */
+    case 7:
+      /* Fill the data */
+      for(int i = 0; i < data_skillset.size(); i++)
+      {
+        bottom_list << data_skillset[i]->getNameList();
+        if(data_skillset[i] == current_skillset)
+          bold_index = i;
+      }
+      break;
+    /* -- SKILL -- */
+    case 8:
+      /* Fill the data */
+      for(int i = 0; i < data_skill.size(); i++)
+      {
+        bottom_list << data_skill[i]->getNameList();
+        if(data_skill[i] == current_skill)
+          bold_index = i;
+      }
+      break;
+    /* -- EQUIPMENT -- */
+    case 9:
+      /* Fill the data */
+      for(int i = 0; i < data_equipment.size(); i++)
+      {
+        bottom_list << data_equipment[i]->getNameList();
+        if(data_equipment[i] == current_equipment)
+          bold_index = i;
+      }
+      break;
+    /* -- BUBBY -- */
+    case 10:
+      /* Fill the data */
+      for(int i = 0; i < data_bubby.size(); i++)
+      {
+        bottom_list << data_bubby[i]->getNameList();
+        if(data_bubby[i] == current_bubby)
+          bold_index = i;
+      }
+      break;
+    default:
+      break;
+  }
+
+  /* Set up the bottom view */
+  QFont font;
+  bottom_view->addItems(bottom_list);
+  font.setBold(false);
+  for(int i = 0; i < bottom_view->count(); i++)
+    bottom_view->item(i)->setFont(font);
+  if(bold_index != -1)
+  {
+    font.setBold(true);
+    bottom_view->item(bold_index)->setFont(font);
+  }
+
+  /* Replace selected row */
+  if(last_row >= 0 && last_row < bottom_view->count())
+    bottom_view->setCurrentRow(last_row);
+
+  /* Enable/disable buttons as needed */
+  if(bottom_view->count() > 0)
+  {
+    del_button->setEnabled(true);
+    duplicate_button->setEnabled(true);
+  }
+  else
+  {
+    del_button->setDisabled(true);
+    duplicate_button->setDisabled(true);
+  }
 }

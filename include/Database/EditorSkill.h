@@ -35,6 +35,9 @@ public:
   /* Constructor function with id and name */
   EditorSkill(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorSkill(const EditorSkill &source);
+
   /* Destructor function */
   virtual ~EditorSkill();
 
@@ -122,6 +125,9 @@ private:
   int running_action_id;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorSkill &source);
+
 public slots:
   /* Sets the action list */
   void setTotalActionsList(QVector<QPair<QString,EditorAction*>* >* list);
@@ -166,6 +172,11 @@ public:
 
   /* Sets the name of the skill */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorSkill& operator= (const EditorSkill &source);
 };
 
 #endif // EDITORSKILL_H

@@ -25,11 +25,23 @@ EditorMap::EditorMap()//QWidget *parent) : QWidget(parent)
  *
  * Inputs: int id - the id of the editor map
  *         QString name - the string name of the map
+ *         int width - width of base map in tiles
+ *         int height - height of base map in tiles
  */
-EditorMap::EditorMap(int id, QString name) : EditorMap()
+EditorMap::EditorMap(int id, QString name, int width, int height) : EditorMap()
 {
   setID(id);
   setName(name);
+
+  /* Set up base map, if applicable */
+  if(width > 0 && height > 0)
+    setMap(0, "MAIN", width, height);
+}
+
+/* Copy constructor */
+EditorMap::EditorMap(const EditorMap &source)
+{
+  copySelf(source);
 }
 
 /*
@@ -39,6 +51,36 @@ EditorMap::~EditorMap()
 {
   unsetMaps();
   unsetSprites();
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorMap::copySelf(const EditorMap &source)
+{
+  /* Add const values */
+  name = source.name;
+
+  /* Add sprites */
+  for(int i = 0; i < source.sprites.size(); i++)
+    sprites.push_back(new EditorSprite(*source.sprites[i]));
+
+  /* Add sub-maps */
+  for(int i = 0; i < source.sub_maps.size(); i++)
+  {
+    sub_maps.push_back(new SubMapInfo);
+    sub_maps.last()->id = source.sub_maps[i]->id;
+    sub_maps.last()->name = source.sub_maps[i]->name;
+    for(int j = 0; j < source.sub_maps[i]->tiles.size(); j++)
+    {
+      QVector<EditorTile*> row;
+      for(int k = 0; k < source.sub_maps[i]->tiles[j].size(); k++)
+        row.push_back(new EditorTile(*source.sub_maps[i]->tiles[j][k]));
+      sub_maps.last()->tiles.push_back(row);
+    }
+  }
 }
 
 /*============================================================================
@@ -493,4 +535,150 @@ void EditorMap::unsetSprites()
     delete sprites[i];
   }
   sprites.clear();
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another object.
+ *
+ * Inputs: const EditorMap &source - the source class constructor
+ * Output: EditorMap& - pointer to the copied class
+ */
+EditorMap& EditorMap::operator= (const EditorMap &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
+}
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: Creates the map dialog for editing the name and size.
+ *
+ * Inputs: QWidget* parent - the parent that owns the dialog
+ *         QString name - name of new/edited map
+ *         int width - the width of tiles set
+ *         int height - the height of tiles set
+ * Output: QDialog* the dialog pointer. Parent to delete
+ */
+QDialog* EditorMap::createMapDialog(QWidget* parent, QString title,
+                                    QString name, int width, int height)
+{
+  QDialog* mapsize_dialog = new QDialog(parent);
+  mapsize_dialog->setWindowTitle(title);
+
+  /* Sets up map size dialog */
+  QGridLayout* layout = new QGridLayout(mapsize_dialog);
+
+  /* Name */
+  layout->addWidget(new QLabel("Name"), 0, 0);
+  QLineEdit* name_edit = new QLineEdit(name, mapsize_dialog);
+  layout->addWidget(name_edit, 0, 1);
+
+  /* Map Size */
+  layout->addWidget(new QLabel("Width:"),1,0);
+  QLineEdit* sizexedit = new QLineEdit("100",mapsize_dialog);
+  if(width > 0)
+    sizexedit->setText(QString::number(width));
+  layout->addWidget(sizexedit,1,1);
+  layout->addWidget(new QLabel("Height:"),2,0);
+  QLineEdit* sizeyedit = new QLineEdit("100",mapsize_dialog);
+  if(height > 0)
+    sizeyedit->setText(QString::number(height));
+  layout->addWidget(sizeyedit,2,1);
+
+  /* Confirmation button */
+  QPushButton* ok = new QPushButton("&Create Map",mapsize_dialog);
+  layout->addWidget(ok,3,0,1,2);
+
+  return mapsize_dialog;
+}
+
+/*
+ * Description: Returns the push button in the map dialog, that was created
+ *              above. This will not return expected results on dialogs not
+ *              created with the createMapDialog() function.
+ *
+ * Inputs: QDialog* dialog - the dialog pointer
+ * Output: QPushButton* - the button in the dialog
+ */
+QPushButton* EditorMap::getDialogButton(QDialog* dialog)
+{
+  QPushButton* button = NULL;
+
+  if(dialog != NULL)
+  {
+    QGridLayout* layout = (QGridLayout*)dialog->layout();
+    QLayoutItem* item = layout->itemAtPosition(3, 0);
+    button = (QPushButton*)item->widget();
+  }
+
+  return button;
+}
+
+/*
+ * Description: Returns the height stored within the dialog.
+ *
+ * Inputs: QDialog* dialog - the dialog pointer
+ * Output: int - the height, in tiles. Invalid is -1
+ */
+int EditorMap::getDialogHeight(QDialog* dialog)
+{
+  if(dialog != NULL)
+  {
+    QGridLayout* layout = (QGridLayout*)dialog->layout();
+    QLayoutItem* item = layout->itemAtPosition(2, 1);
+    return (((QLineEdit*)item->widget())->text()).toInt();
+  }
+
+  return -1;
+}
+
+/*
+ * Description: Returns the name stored within the dialog.
+ *
+ * Inputs: QDialog* dialog - the dialog pointer
+ * Output: QString - the name, in string format. Invalid if blank
+ */
+QString EditorMap::getDialogName(QDialog* dialog)
+{
+  if(dialog != NULL)
+  {
+    QGridLayout* layout = (QGridLayout*)dialog->layout();
+    QLayoutItem* item = layout->itemAtPosition(0, 1);
+    return ((QLineEdit*)item->widget())->text();
+  }
+
+  return "";
+}
+
+/*
+ * Description: Returns the width stored within the dialog.
+ *
+ * Inputs: QDialog* dialog - the dialog pointer
+ * Output: int - the width, in tiles. Invalid is -1
+ */
+int EditorMap::getDialogWidth(QDialog* dialog)
+{
+  if(dialog != NULL)
+  {
+    QGridLayout* layout = (QGridLayout*)dialog->layout();
+    QLayoutItem* item = layout->itemAtPosition(1, 1);
+    return (((QLineEdit*)item->widget())->text()).toInt();
+  }
+
+  return -1;
 }

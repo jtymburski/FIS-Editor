@@ -48,6 +48,16 @@ EditorTile::EditorTile(int x, int y)
 }
 
 /*
+ * Description: Copy constructor function
+ *
+ * Inputs: EditorTile &source - the source to copy from
+ */
+EditorTile::EditorTile(const EditorTile &source) : EditorTile()
+{
+  copySelf(source);
+}
+
+/*
  * Description: Destructor function
  */
 EditorTile::~EditorTile()
@@ -62,6 +72,46 @@ EditorTile::~EditorTile()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: The copy function that is called by any copying methods in the
+ *              class. Utilized by the copy constructor and the copy operator.
+ *
+ * Inputs: const EditorTile &source - the reference sprite class
+ * Output: none
+ */
+void EditorTile::copySelf(const EditorTile &source)
+{
+  /* Copy normal variables */
+  hovered = false;
+  tile = source.tile;
+  visible_grid = source.visible_grid;
+  visible_passability = source.visible_passability;
+  x_pos = source.x_pos;
+  y_pos = source.y_pos;
+
+  /* Copy base */
+  *layer_base.sprite = *source.layer_base.sprite;
+  layer_base.visible = source.layer_base.visible;
+
+  /* Copy enhancer */
+  *layer_enhancer.sprite = *source.layer_enhancer.sprite;
+  layer_enhancer.visible = source.layer_enhancer.visible;
+
+  /* Copy lower */
+  for(int i = 0; i < layers_lower.size(); i++)
+  {
+    *layers_lower[i].sprite = *source.layers_lower[i].sprite;
+    layers_lower[i].visible = source.layers_lower[i].visible;
+  }
+
+  /* Copy upper */
+  for(int i = 0; i < layers_upper.size(); i++)
+  {
+    *layers_upper[i].sprite = *source.layers_upper[i].sprite;
+    layers_upper[i].visible = source.layers_upper[i].visible;
+  }
+}
 
 /*
  * Description: Hover enter event class re-implementation
@@ -549,4 +599,28 @@ void EditorTile::unplace(EditorSprite* sprite)
       tile.unsetUpper(i);
     }
   }
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another object.
+ *
+ * Inputs: const EditorTile &source - the source class constructor
+ * Output: EditorTile& - reference to the copied class
+ */
+EditorTile& EditorTile::operator= (const EditorTile &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

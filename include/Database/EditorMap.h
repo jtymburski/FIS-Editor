@@ -7,8 +7,14 @@
 #ifndef EDITORMAP_H
 #define EDITORMAP_H
 
+#include <QDialog>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QString>
 #include <QVector>
+#include <QWidget>
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
@@ -31,8 +37,12 @@ public:
   /* Constructor Function */
   EditorMap();//QWidget* parent = NULL);
 
-  /* Constructor function with id and name */
-  EditorMap(int id, QString name);
+  /* Constructor function with id and name plus optional width and height
+   * of base map */
+  EditorMap(int id, QString name, int width = 0, int height = 0);
+
+  /* Copy constructor */
+  EditorMap(const EditorMap &source);
 
   /* Destructor function */
   virtual ~EditorMap();
@@ -54,6 +64,9 @@ private:
   const static int kUNSET_ID; /* The unset ID */
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorMap &source);
+
 public slots:
 signals:
 public:
@@ -103,6 +116,26 @@ public:
   /* Unset sprite(s) */
   void unsetSprite(int id);
   void unsetSprites();
+
+/* Operator functions */
+public:
+  EditorMap& operator= (const EditorMap &source);
+
+/* Public static functions */
+public:
+  /* Creates the map size and name dialog */
+  static QDialog* createMapDialog(QWidget* parent,
+                                  QString title = "New Map Details",
+                                  QString name = "Awesomeland",
+                                  int width = 0, int height = 0);
+
+  /* Returns the push button for the map dialog above. Will seg with others */
+  static QPushButton* getDialogButton(QDialog* dialog);
+
+  /* Dialog information for map */
+  static int getDialogHeight(QDialog* dialog);
+  static QString getDialogName(QDialog* dialog);
+  static int getDialogWidth(QDialog* dialog);
 };
 
 #endif // EDITORMAP_H

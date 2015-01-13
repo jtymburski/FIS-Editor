@@ -23,6 +23,9 @@ public:
   /* Constructor function with id and name */
   EditorBubby(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorBubby(const EditorBubby &source);
+
   /* Destructor function */
   virtual ~EditorBubby();
 
@@ -31,6 +34,9 @@ private:
   Bubby bubby;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorBubby &source);
+
 public slots:
 signals:
 
@@ -52,6 +58,11 @@ public:
 
   /* Sets the name of the bubby */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorBubby& operator= (const EditorBubby &source);
 };
 
 #endif // EDITORBUBBY_H

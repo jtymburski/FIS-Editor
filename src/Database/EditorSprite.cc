@@ -15,15 +15,25 @@
 /*
  * Description: Constructor function - Requires a path
  *
- * Input: File path
+ * Inputs: File path
  */
-EditorSprite::EditorSprite(QString img_path)
+EditorSprite::EditorSprite(QString img_path) : QObject()
 {
   mode = EditorEnumDb::STANDARD;
   name = "Default";
   sprite = new Sprite();
   if(img_path != "")
     setPath(0, img_path);
+}
+
+/*
+ * Description: Copy constructor.
+ *
+ * Inputs: none
+ */
+EditorSprite::EditorSprite(const EditorSprite &source) : EditorSprite()
+{
+  copySelf(source);
 }
 
 /*
@@ -40,7 +50,31 @@ EditorSprite::~EditorSprite()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Returns a transformed image */
+/*
+ * Description: Copies all data from source editor sprite to this editor
+ *              sprite.
+ *
+ * Inputs: EditorSprite &source - the source to copy from
+ * Output: none
+ */
+void EditorSprite::copySelf(const EditorSprite &source)
+{
+  mode = source.mode;
+  name = source.name;
+  sprite = new Sprite();
+  *sprite = *source.sprite;
+  sprite->setId(source.sprite->getId());
+  frame_info = source.frame_info;
+}
+
+/*
+ * Description: Returns the transformed pixmap, with all necessary sprite mods.
+ *
+ * Inputs: int index - the frame index
+ *         int w - the width of the pixmap
+ *         int h - the height of the pixmap
+ * Output: QPixmap - the transformed pixmap
+ */
 QPixmap EditorSprite::transformPixmap(int index, int w, int h)
 {
   QTransform transform;
@@ -766,12 +800,7 @@ EditorSprite& EditorSprite::operator= (const EditorSprite &source)
     return *this;
 
   /* Do the copy */
-  mode = source.mode;
-  name = source.name;
-  sprite = new Sprite();
-  *sprite = *source.sprite;
-  sprite->setId(source.sprite->getId());
-  frame_info = source.frame_info;
+  copySelf(source);
 
   /* Return the copied object */
   return *this;

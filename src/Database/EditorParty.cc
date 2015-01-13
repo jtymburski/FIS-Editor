@@ -19,8 +19,26 @@ EditorParty::EditorParty(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorParty::EditorParty(const EditorParty &source) : EditorParty()
+{
+  copySelf(source);
+}
+
+/* Destructor function */
 EditorParty::~EditorParty()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorParty::copySelf(const EditorParty &source)
+{
+  name = source.name;
+  party = source.party;
 }
 
 /*============================================================================
@@ -60,4 +78,22 @@ void EditorParty::setID(int id)
 void EditorParty::setName(QString name)
 {
   this->name = name;
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorParty& EditorParty::operator= (const EditorParty &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

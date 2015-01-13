@@ -34,6 +34,9 @@ public:
   /* Constructor Function */
   EditorSprite(QString img_path = "");
 
+  /* Copy constructor */
+  EditorSprite(const EditorSprite &source);
+
   /* Destructor function */
   virtual ~EditorSprite();
 
@@ -51,6 +54,9 @@ private:
   QVector<FrameInfo> frame_info;
 
 private:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorSprite &source);
+
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
 

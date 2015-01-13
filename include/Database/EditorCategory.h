@@ -23,6 +23,9 @@ public:
   /* Constructor function with id and name */
   EditorCategory(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorCategory(const EditorCategory &source);
+
   /* Destructor function */
   virtual ~EditorCategory();
 
@@ -31,6 +34,9 @@ private:
   Category category;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorCategory &source);
+
 public slots:
 signals:
 
@@ -52,6 +58,11 @@ public:
 
   /* Sets the name of the category */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorCategory& operator= (const EditorCategory &source);
 };
 
 #endif // EDITORCATEGORY_H

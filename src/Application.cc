@@ -23,8 +23,6 @@ Application::Application(QWidget* parent) :
 
   /* Gets the users name in windows only */
   username = getenv("USERNAME");
-  x_size = 100;
-  y_size = 100;
 
   game_db_dock = new QDockWidget();
   game_database = new GameDatabase();
@@ -39,36 +37,32 @@ Application::Application(QWidget* parent) :
   connect(game_database, SIGNAL(changeMode(EditorEnumDb::ViewMode)),
           this, SLOT(setView(EditorEnumDb::ViewMode)));
 
-  connect(game_database, SIGNAL(changeMap(QPair<QString,EditorMap*>*)),
-          this, SLOT(setMap(QPair<QString,EditorMap*>*)));
-  connect(game_database, SIGNAL(changePerson(QPair<QString,EditorPerson*>*)),
-          this, SLOT(setPerson(QPair<QString,EditorPerson*>*)));
-  connect(game_database, SIGNAL(changeParty(QPair<QString,EditorParty*>*)),
-          this, SLOT(setParty(QPair<QString,EditorParty*>*)));
-  connect(game_database, SIGNAL(changeItem(QPair<QString,EditorItem*>*)),
-          this, SLOT(setItem(QPair<QString,EditorItem*>*)));
-  connect(game_database, SIGNAL(changeAction(QPair<QString,EditorAction*>*)),
-          this, SLOT(setAction(QPair<QString,EditorAction*>*)));
-  connect(game_database, SIGNAL(changeRace(QPair<QString,EditorCategory*>*)),
-          this, SLOT(setRace(QPair<QString,EditorCategory*>*)));
+  connect(game_database, SIGNAL(changeMap(EditorMap*)),
+          this, SLOT(setMap(EditorMap*)));
+  connect(game_database, SIGNAL(changePerson(EditorPerson*)),
+          this, SLOT(setPerson(EditorPerson*)));
+  connect(game_database, SIGNAL(changeParty(EditorParty*)),
+          this, SLOT(setParty(EditorParty*)));
+  connect(game_database, SIGNAL(changeItem(EditorItem*)),
+          this, SLOT(setItem(EditorItem*)));
+  connect(game_database, SIGNAL(changeAction(EditorAction*)),
+          this, SLOT(setAction(EditorAction*)));
+  connect(game_database, SIGNAL(changeRace(EditorCategory*)),
+          this, SLOT(setRace(EditorCategory*)));
   connect(game_database, SIGNAL(changeBattleclass
-                                (QPair<QString,EditorCategory*>*)),
-          this, SLOT(setBattleClass(QPair<QString,EditorCategory*>*)));
-  connect(game_database, SIGNAL(changeSkillset(QPair<QString,EditorSkillset*>*))
-          ,this, SLOT(setSkillset(QPair<QString,EditorSkillset*>*)));
-  connect(game_database, SIGNAL(changeSkill(QPair<QString,EditorSkill*>*)),
-          this, SLOT(setSkill(QPair<QString,EditorSkill*>*)));
+                                (EditorCategory*)),
+          this, SLOT(setBattleClass(EditorCategory*)));
+  connect(game_database, SIGNAL(changeSkillset(EditorSkillset*))
+          ,this, SLOT(setSkillset(EditorSkillset*)));
+  connect(game_database, SIGNAL(changeSkill(EditorSkill*)),
+          this, SLOT(setSkill(EditorSkill*)));
   connect(game_database, SIGNAL(changeEquipment
-                                (QPair<QString,EditorEquipment*>*)),
-          this, SLOT(setEquipment(QPair<QString,EditorEquipment*>*)));
-  connect(game_database, SIGNAL(changeBubby(QPair<QString,EditorBubby*>*)),
-          this, SLOT(setBubby(QPair<QString,EditorBubby*>*)));
-
+                                (EditorEquipment*)),
+          this, SLOT(setEquipment(EditorEquipment*)));
+  connect(game_database, SIGNAL(changeBubby(EditorBubby*)),
+          this, SLOT(setBubby(EditorBubby*)));
 
   game_view = new GameView();
-
-  connect(game_database, SIGNAL(deactivateView()),
-          game_view, SLOT(deactivateCurrentView()));
 
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
@@ -106,24 +100,11 @@ Application::~Application()
  */
 void Application::setupTopMenu()
 {
-  /* Sets up map size dialog */
-  mapsize_dialog = new QDialog(this);
-  QGridLayout* layout = new QGridLayout(mapsize_dialog);
-  layout->addWidget(new QLabel("Choose Initial Map Size"),0,0);
-  layout->addWidget(new QLabel("X:"),1,0);
-  QLineEdit* sizexedit = new QLineEdit("100",this);
-  layout->addWidget(sizexedit,1,1);
-  layout->addWidget(new QLabel("Y:"),2,0);
-  QLineEdit* sizeyedit = new QLineEdit("100",this);
-  layout->addWidget(sizeyedit,2,1);
-  QPushButton* ok = new QPushButton("&Create Map",this);
-  layout->addWidget(ok,3,0);
-  connect(ok,SIGNAL(clicked()),this,SLOT(setupMap()));
-
   /* Sets up the File menu actions */
   show_menu_action = new QAction("&Menu", this);
   show_menu_action->setIcon(QIcon(":/Icons/Resources/database.png"));
   new_action = new QAction("&New",this);
+  new_action->setDisabled(true);
   new_action->setIcon(QIcon(":/Icons/Resources/new-icon.png"));
   load_action = new QAction("&Load",this);
   load_action->setIcon(QIcon(":/Icons/Resources/load-icon.png"));
@@ -151,7 +132,7 @@ void Application::setupTopMenu()
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
   // TODO: This should be not map, but new game. New map should be triggered
   // from a different view
-  connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
+  //connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
 
   /* Sets up Edit menu actions*/
   undo_action = new QAction("&Undo",this);
@@ -295,79 +276,85 @@ void Application::setItemView()
 /*
  * Description: Sets the map
  */
-void Application::setMap(QPair<QString,EditorMap*>* pair)
+void Application::setMap(EditorMap* map)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Map: " << map;
 }
 /*
  * Description: Sets the person
  */
-void Application::setPerson(QPair<QString,EditorPerson*>* pair)
+void Application::setPerson(EditorPerson* person)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Person: " << person;
 }
 /*
  * Description: Sets the party
  */
-void Application::setParty(QPair<QString,EditorParty*>* pair)
+void Application::setParty(EditorParty* party)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Party: " << party;
 }
 /*
  * Description: Sets the item
  */
-void Application::setItem(QPair<QString,EditorItem*>* pair)
+void Application::setItem(EditorItem* item)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Item: " << item;
 }
 /*
  * Description: Sets the action
  */
-void Application::setAction(QPair<QString,EditorAction*>* pair)
+void Application::setAction(EditorAction* action)
 {
-  game_view->setActionView(pair->second);
+  game_view->setActionView(action);
 }
+
 /*
  * Description: Sets the race
  */
-void Application::setRace(QPair<QString,EditorCategory*>* pair)
+void Application::setRace(EditorCategory* race)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Race: " << race;
 }
+
 /*
  * Description: Sets the battle class
  */
-void Application::setBattleClass(QPair<QString,EditorCategory*>* pair)
+void Application::setBattleClass(EditorCategory* battle_class)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Battle Class: " << battle_class;
 }
+
 /*
  * Description: Sets the skill set
  */
-void Application::setSkillset(QPair<QString,EditorSkillset*>* pair)
+void Application::setSkillset(EditorSkillset* skill_set)
 {
-  game_view->setSkillsetView(pair->second);
+  game_view->setSkillsetView(skill_set);
 }
+
 /*
  * Description: Sets the skill
  */
-void Application::setSkill(QPair<QString,EditorSkill*>* pair)
+void Application::setSkill(EditorSkill* skill)
 {
-  game_view->setSkillView(pair->second);
+  game_view->setSkillView(skill);
 }
+
 /*
  * Description: Sets the equipment
  */
-void Application::setEquipment(QPair<QString,EditorEquipment*>* pair)
+void Application::setEquipment(EditorEquipment* equipment)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Equipment: " << equipment;
 }
+
 /*
  * Description: Sets the bubby
  */
-void Application::setBubby(QPair<QString,EditorBubby*>* pair)
+void Application::setBubby(EditorBubby* bubby)
 {
-  qDebug()<<pair->first;
+  qDebug() << "Bubby: " << bubby;
 }
 
 /*
@@ -417,27 +404,6 @@ void Application::setFillCursor()
   erasermode_action->setChecked(false);
   cursor_mode = EditorEnumDb::FILL;
   game_view->getMapView()->map_editor->setCursorMode(EditorEnumDb::FILL);
-}
-
-/*
- * Description: Sets up the map based on the popup with the size
- *
- * Inputs: none
- * Output: none
- */
-void Application::setupMap()
-{
-  if(mapsize_dialog != NULL)
-  {
-    QLayout* layout = mapsize_dialog->layout();
-    QString x_line = ((QLineEdit*)((QGridLayout*)layout)->itemAtPosition(1,1)
-                                                        ->widget())->text();
-    QString y_line = ((QLineEdit*)((QGridLayout*)layout)->itemAtPosition(2,1)
-                                                        ->widget())->text();
-
-    game_view->getMapView()->setupMapView(x_line.toInt(), y_line.toInt());
-    mapsize_dialog->close();
-  }
 }
 
 /* 

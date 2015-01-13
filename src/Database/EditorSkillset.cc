@@ -74,8 +74,42 @@ EditorSkillset::EditorSkillset(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorSkillset::EditorSkillset(const EditorSkillset &source) : EditorSkillset()
+{
+  copySelf(source);
+}
+
 EditorSkillset::~EditorSkillset()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorSkillset::copySelf(const EditorSkillset &source)
+{
+  id = source.id;
+  name = source.name;
+  deletion = source.deletion;
+
+  available_set_list = source.available_set_list;
+  working_set_list = source.working_set_list;
+  available_skill_index = source.available_skill_index;
+  working_skill_index = source.working_skill_index;
+  running_skill_id = source.running_skill_id;
+
+  available_set = source.available_set;
+  working_set = source.working_set;
+  base_set = source.base_set;
+  previous_set = source.previous_set;
+  working_level_set = source.working_level_set;
+  previous_level_set = source.previous_level_set;
+  base_level_set = source.base_level_set;
+
+  setBaseSkillset(source.base);
 }
 
 /*============================================================================
@@ -128,6 +162,7 @@ void EditorSkillset::setWorkingSkillset(SkillSet s)
 {
   working = base;
 }
+
 void EditorSkillset::setBaseSkillset(SkillSet s)
 {
   base = s;
@@ -244,4 +279,22 @@ void EditorSkillset::setID(int id)
 void EditorSkillset::setName(QString name)
 {
   this->name = name;
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorSkillset& EditorSkillset::operator= (const EditorSkillset &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

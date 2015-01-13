@@ -32,13 +32,13 @@ public:
   /* Constructor function with id and name */
   EditorAction(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorAction(const EditorAction &source);
+
   /* Destructor function */
   virtual ~EditorAction();
 
 private:
-  /* Editor ID */
-  int id;
-
   /* Editor name */
   QString name;
   QString full_name;
@@ -125,7 +125,6 @@ private:
   QCheckBox* ignoredef_flags_armor;
   /* Action flags layout */
   QVBoxLayout* ignoredef_flags_layout;
-
 
   /* Boxes Layout */
   QHBoxLayout* radio_layout;
@@ -233,10 +232,10 @@ private:
   QVBoxLayout* target_flags_layout;
   QHBoxLayout* buttons_layout;
 
-  /*------------------- Constants -----------------------*/
-  const static int kUNSET_ID; /* The unset ID */
-
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorAction &source);
+
 public slots:
   /* Sets the name */
   void setNameAndID(QString str);
@@ -303,8 +302,6 @@ public slots:
   /* Sets the chance of the action occuring */
   bool setChance(float chance);
 
-
-
   /* Sets the ignore flags for attack and defense */
   void setIgnoreAttack(IgnoreFlags flag, bool set);
   void setIgnoreDefense(IgnoreFlags flag, bool set);
@@ -330,6 +327,11 @@ public:
 
   /* Sets the name */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorAction& operator= (const EditorAction &source);
 };
 
 #endif // EDITORACTION_H

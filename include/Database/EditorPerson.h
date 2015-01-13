@@ -23,6 +23,9 @@ public:
   /* Constructor function with id and name */
   EditorPerson(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorPerson(const EditorPerson &source);
+
   /* Destructor function */
   virtual ~EditorPerson();
 
@@ -31,6 +34,9 @@ private:
   Person person;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorPerson &source);
+
 public slots:
 signals:
 
@@ -52,6 +58,11 @@ public:
 
   /* Sets the name of the person */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorPerson& operator= (const EditorPerson &source);
 };
 
 #endif // EDITORPERSON_H

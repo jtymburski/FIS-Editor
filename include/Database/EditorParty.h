@@ -23,6 +23,9 @@ public:
   /* Constructor function with id and name */
   EditorParty(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorParty(const EditorParty &source);
+
   /* Destructor function */
   virtual ~EditorParty();
 
@@ -34,6 +37,9 @@ private:
   Party party;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorParty &source);
+
 public slots:
 signals:
 public:
@@ -54,6 +60,11 @@ public:
 
   /* Sets the name of the party */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorParty& operator= (const EditorParty &source);
 };
 
 #endif // EDITORPARTY_H

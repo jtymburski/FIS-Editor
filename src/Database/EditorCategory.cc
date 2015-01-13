@@ -18,8 +18,24 @@ EditorCategory::EditorCategory(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorCategory::EditorCategory(const EditorCategory &source) : EditorCategory()
+{
+  copySelf(source);
+}
+
 EditorCategory::~EditorCategory()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorCategory::copySelf(const EditorCategory &source)
+{
+  category = source.category;
 }
 
 /*============================================================================
@@ -59,4 +75,22 @@ void EditorCategory::setID(int id)
 void EditorCategory::setName(QString name)
 {
   category.setName(name.toStdString());
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorCategory& EditorCategory::operator= (const EditorCategory &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

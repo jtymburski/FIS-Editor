@@ -23,25 +23,31 @@ public:
   /* Destructor function */
   ~GameView();
 
-  /* Refresh View */
-  void refreshView(EditorEnumDb::ViewMode mode, QWidget* old,
-                   QWidget* replacement);
-
 private:
-  /* The number of same images that trail this one */
-//  int followers;
-  MapView* map_view;
-  //TODO : Delete the following temporary widgets
-  QWidget* person_view;
-  QWidget* party_view;
-  QWidget* item_view;
-  EditorAction* action_view;
-  QWidget* race_view;
-  QWidget* battleclass_view;
-  EditorSkillset* skillset_view;
-  EditorSkill* skill_view;
-  QWidget* equipment_view;
-  QWidget* bubby_view;
+  /* Blank views */
+  EditorAction* null_action;
+  QWidget* null_battleclass;
+  QWidget* null_bubby;
+  QWidget* null_equipment;
+  QWidget* null_item;
+  QWidget* null_party;
+  QWidget* null_person;
+  QWidget* null_race;
+  EditorSkill* null_skill;
+  EditorSkillset* null_skillset;
+
+  /* The views, as they're set */
+  EditorAction* view_action;
+  QWidget* view_battleclass;
+  QWidget* view_bubby;
+  QWidget* view_equipment;
+  QWidget* view_item;
+  MapView* view_map;
+  QWidget* view_party;
+  QWidget* view_person;
+  QWidget* view_race;
+  EditorSkill* view_skill;
+  EditorSkillset* view_skillset;
 
   EditorEnumDb::ViewMode mode;
 
@@ -70,10 +76,16 @@ public slots:
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
 
-  void deactivateCurrentView();
+  //void deactivateCurrentView();
+
 signals:
   /* Emits to parent when selected to deselect all others */
 //  void chosen(int);
   void nameChange(QString);
+
+public:
+  /* Refresh View */
+  void refreshView(EditorEnumDb::ViewMode mode, QWidget* old,
+                   QWidget* replacement);
 };
 #endif // GAMEVIEW_H

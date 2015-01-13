@@ -11,52 +11,62 @@
 /* Constructor function */
 GameView::GameView(QWidget* parent) : QStackedWidget(parent)
 {
-  map_view = new MapView(this);
-  addWidget(map_view);
+  view_map = new MapView(this);
+  addWidget(view_map);
 
-  person_view = new QWidget(this);
-  addWidget(person_view);
+  view_person = new QWidget(this);
+  null_person = view_person;
+  addWidget(view_person);
 
-  party_view = new QWidget(this);
-  addWidget(party_view);
+  view_party = new QWidget(this);
+  null_party = view_party;
+  addWidget(view_party);
 
-  item_view = new QWidget(this);
-  addWidget(item_view);
+  view_item = new QWidget(this);
+  null_item = view_item;
+  addWidget(view_item);
 
-  action_view = new EditorAction(this);
-  action_view->setDisabled(true);
-  addWidget(action_view);
+  view_action = new EditorAction(this);
+  view_action->setDisabled(true);
+  null_action = view_action;
+  addWidget(view_action);
   
-  race_view = new QWidget(this);
-  addWidget(race_view);
+  view_race = new QWidget(this);
+  null_race = view_race;
+  addWidget(view_race);
   
-  battleclass_view = new QWidget(this);
-  addWidget(battleclass_view);
+  view_battleclass = new QWidget(this);
+  null_battleclass = view_battleclass;
+  addWidget(view_battleclass);
   
-  skillset_view = new EditorSkillset(this);
-  skillset_view->setDisabled(true);
-  addWidget(skillset_view);
+  view_skillset = new EditorSkillset(this);
+  view_skillset->setDisabled(true);
+  null_skillset = view_skillset;
+  addWidget(view_skillset);
   
-  skill_view = new EditorSkill(this);
-  skill_view->setDisabled(true);
-  addWidget(skill_view);
+  view_skill = new EditorSkill(this);
+  view_skill->setDisabled(true);
+  null_skill = view_skill;
+  addWidget(view_skill);
   
-  equipment_view = new QWidget(this);
-  addWidget(equipment_view);
+  view_equipment = new QWidget(this);
+  null_equipment = view_equipment;
+  addWidget(view_equipment);
   
-  bubby_view = new QWidget(this);
-  addWidget(bubby_view);
+  view_bubby = new QWidget(this);
+  null_bubby = view_bubby;
+  addWidget(view_bubby);
   
-  person_view->setStyleSheet("background-color:red;");
-  party_view->setStyleSheet("background-color:blue;");
-  item_view->setStyleSheet("background-color:green;");
-  //action_view->setStyleSheet("background-color:black;");
-  race_view->setStyleSheet("background-color:purple;");
-  battleclass_view->setStyleSheet("background-color:pink;");
-  skillset_view->setStyleSheet("background-color:orange;");
-  //skill_view->setStyleSheet("background-color:yellow;");
-  equipment_view->setStyleSheet("background-color:violet;");
-  bubby_view->setStyleSheet("background-color:black;");
+  view_person->setStyleSheet("background-color:red;");
+  view_party->setStyleSheet("background-color:blue;");
+  view_item->setStyleSheet("background-color:green;");
+  //view_action->setStyleSheet("background-color:black;");
+  view_race->setStyleSheet("background-color:purple;");
+  view_battleclass->setStyleSheet("background-color:pink;");
+  //view_skillset->setStyleSheet("background-color:orange;");
+  //view_skill->setStyleSheet("background-color:yellow;");
+  view_equipment->setStyleSheet("background-color:violet;");
+  view_bubby->setStyleSheet("background-color:black;");
 
   setViewMode(EditorEnumDb::MAPVIEW);
 }
@@ -64,13 +74,16 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
 /* Destructor function */
 GameView::~GameView()
 {
-  delete map_view;
 }
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 
 /* Returns the MapView */
 MapView* GameView::getMapView()
 {
-  return map_view;
+  return view_map;
 }
 
 /* Sets the map view */
@@ -82,65 +95,69 @@ void GameView::setMapView(MapView *view)
 /* Returns the Editor Action View */
 EditorAction* GameView::getActionView()
 {
-  return action_view;
+  return view_action;
 }
 
 /* Sets the Editor Action View */
 void GameView::setActionView(EditorAction *action)
 {
-  disconnect(action_view,SIGNAL(nameChange(QString)),
+  /* Disconnect the old view */
+  disconnect(view_action,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-  refreshView(EditorEnumDb::ACTIONVIEW, action_view, action);
-  action_view = action;
-  connect(action_view,SIGNAL(nameChange(QString)),
+  if(action == NULL)
+    action = null_action;
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::ACTIONVIEW, view_action, action);
+  view_action = action;
+  connect(view_action,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-  action_view->getEditedAction();
+  //view_action->getEditedAction();
 }
 
 /* Returns the Editor Skill View */
 EditorSkill* GameView::getSkillView()
 {
-  return skill_view;
+  return view_skill;
 }
 
 /* Sets the Editor Skill View */
 void GameView::setSkillView(EditorSkill *skill)
 {
-  disconnect(skill_view,SIGNAL(nameChange(QString)),
+  /* Disconnect the old view */
+  disconnect(view_skill,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-  refreshView(EditorEnumDb::SKILLVIEW, skill_view, skill);
-  skill_view = skill;
-  connect(skill_view,SIGNAL(nameChange(QString)),
+  if(skill == NULL)
+    skill = null_skill;
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::SKILLVIEW, view_skill, skill);
+  view_skill = skill;
+  connect(view_skill,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-//  action_view->getEditedAction();
 }
 
 /* Returns the Editor Skillset View */
 EditorSkillset* GameView::getSkillsetView()
 {
-  return skillset_view;
+  return view_skillset;
 }
 
 /* Sets the Editor Skillset View */
 void GameView::setSkillsetView(EditorSkillset *skillset)
 {
-  disconnect(skillset_view,SIGNAL(nameChange(QString)),
+  /* Disconnect the old skillset view */
+  disconnect(view_skillset,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-  refreshView(EditorEnumDb::SKILLSETVIEW, skillset_view, skillset);
-  skillset_view = skillset;
-  connect(skillset_view,SIGNAL(nameChange(QString)),
+  if(skillset == NULL)
+    skillset = null_skillset;
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::SKILLSETVIEW, view_skillset, skillset);
+  view_skillset = skillset;
+  connect(view_skillset,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-//  action_view->getEditedAction();
-}
-
-
-/* Refresh view */
-void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
-                           QWidget *replacement)
-{
-  removeWidget(old);
-  insertWidget(static_cast<int>(mode), replacement);
-  setViewMode(mode);
+//  view_action->getEditedAction();
 }
 
 /* Sets The View Mode */
@@ -150,45 +167,59 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
   setCurrentIndex(static_cast<int>(v));
 }
 
-void GameView::deactivateCurrentView()
-{
-  switch(mode)
-  {
-    case EditorEnumDb::MAPVIEW:
-      map_view->setDisabled(true);
-      break;
-    case EditorEnumDb::PERSONVIEW:
-      person_view->setDisabled(true);
-      break;
-    case EditorEnumDb::PARTYVIEW:
-      party_view->setDisabled(true);
-      break;
-    case EditorEnumDb::ITEMVIEW:
-      item_view->setDisabled(true);
-      break;
-    case EditorEnumDb::ACTIONVIEW:
-      action_view->setDisabled(true);
-      break;
-    case EditorEnumDb::RACEVIEW:
-      race_view->setDisabled(true);
-      break;
-    case EditorEnumDb::BATTLECLASSVIEW:
-      battleclass_view->setDisabled(true);
-      break;
-    case EditorEnumDb::SKILLSETVIEW:
-      skillset_view->setDisabled(true);
-      break;
-    case EditorEnumDb::SKILLVIEW:
-      skill_view->setDisabled(true);
-      break;
-    case EditorEnumDb::EQUIPMENTVIEW:
-      equipment_view->setDisabled(true);
-      break;
-    case EditorEnumDb::BUBBYVIEW:
-      bubby_view->setDisabled(true);
-      break;
-    default:
-      break;
+// TODO: Remove widget if it's set in the view
+//void GameView::deactivateCurrentView()
+//{
+//  switch(mode)
+//  {
+//    case EditorEnumDb::MAPVIEW:
+//      view_map->setDisabled(true);
+//      break;
+//    case EditorEnumDb::PERSONVIEW:
+//      view_person->setDisabled(true);
+//      break;
+//    case EditorEnumDb::PARTYVIEW:
+//      view_party->setDisabled(true);
+//      break;
+//    case EditorEnumDb::ITEMVIEW:
+//      view_item->setDisabled(true);
+//      break;
+//    case EditorEnumDb::ACTIONVIEW:
+//      view_action->setDisabled(true);
+//      break;
+//    case EditorEnumDb::RACEVIEW:
+//      view_race->setDisabled(true);
+//      break;
+//    case EditorEnumDb::BATTLECLASSVIEW:
+//      view_battleclass->setDisabled(true);
+//      break;
+//    case EditorEnumDb::SKILLSETVIEW:
+//      view_skillset->setDisabled(true);
+//      break;
+//    case EditorEnumDb::SKILLVIEW:
+//      view_skill->setDisabled(true);
+//      break;
+//    case EditorEnumDb::EQUIPMENTVIEW:
+//      view_equipment->setDisabled(true);
+//      break;
+//    case EditorEnumDb::BUBBYVIEW:
+//      view_bubby->setDisabled(true);
+//      break;
+//    default:
+//      break;
 
-  }
+//  }
+//}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Refresh view */
+void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
+                           QWidget *replacement)
+{
+  removeWidget(old);
+  insertWidget(static_cast<int>(mode), replacement);
+  setViewMode(mode);
 }

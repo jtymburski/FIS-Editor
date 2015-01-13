@@ -7,9 +7,6 @@
 #include "Database/EditorAction.h"
 #include <QDebug>
 
-/* Constant Implementation - see header file for descriptions */
-const int EditorAction::kUNSET_ID = -1;
-
 EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 {
   /* Main Layout */
@@ -374,8 +371,7 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   setBaseAction(Action());
   //setBaseAction(Action("509,INFLICT,2.5,PHYSICAL,POLAR.PRIMAL,ALLDEFBUFF,AMOUNT.0,,VITA,99"));
 
-  /* Set ID and name */
-  id = kUNSET_ID;
+  /* Set name */
   name = "";
 }
 
@@ -387,8 +383,26 @@ EditorAction::EditorAction(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorAction::EditorAction(const EditorAction &source) : EditorAction()
+{
+  copySelf(source);
+}
+
 EditorAction::~EditorAction()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorAction::copySelf(const EditorAction &source)
+{
+  name = source.name;
+  full_name = source.full_name;
+  setBaseAction(source.base);
 }
 
 /*============================================================================
@@ -397,14 +411,9 @@ EditorAction::~EditorAction()
 
 void EditorAction::setNameAndID(QString str)
 {
-  //qDebug() << base.getID();
-  //qDebug() << str.split(" : ").at(0).toInt();
   base.setID(str.split(" : ").at(0).toInt());
   name = str.split(" : ").at(1);
   name_edit->setText(name);
-  //qDebug()<<name;
-  //qDebug()<<base.getID();
-  //qDebug()<<base.actionFlag(ActionFlags::DAMAGE);
   setWorkingAction(base);
 }
 
@@ -496,6 +505,10 @@ void EditorAction::loadWorkingInfo()
     action_flags_assignflip->setChecked(true);
   if(working.actionFlag(ActionFlags::REVIVE))
     action_flags_revive->setChecked(true);
+  if(working.actionFlag(ActionFlags::BASE_PC))
+    action_flags_base_pc->setChecked(true);
+  if(working.actionFlag(ActionFlags::VARI_PC))
+    action_flags_vari_pc->setChecked(true);
 
   switch(working.getAilment())
   {
@@ -1029,8 +1042,6 @@ float EditorAction::getChance() const
   return working.getChance();
 }
 
-
-
 int EditorAction::getMin() const
 {
   return working.getMax();
@@ -1048,9 +1059,7 @@ int EditorAction::getVariance() const
 
 QString EditorAction::outputString()
 {
-  qDebug() << base.getID();
-  qDebug() << base.actionFlag(ActionFlags::DAMAGE);
-  qDebug()<<QString::fromStdString(base.outputString());
+  qDebug() << "Action String: " << QString::fromStdString(base.outputString());
   return QString::fromStdString(base.outputString());
 }
 
@@ -1067,6 +1076,7 @@ void EditorAction::setAilment(Infliction ailment)
 bool EditorAction::setAilmentDuration(int min, int max)
 {
   working.setAilmentDuration(min,max);
+  return true;
 }
 
 void EditorAction::setAttributeTarget(Attribute target)
@@ -1201,10 +1211,8 @@ QString EditorAction::getNameList()
 /* Sets the ID */
 void EditorAction::setID(int id)
 {
-  if(id < 0)
-    this->id = kUNSET_ID;
-  else
-    this->id = id;
+  base.setID(id);
+  setWorkingAction(base);
 }
 
 /* Sets the name */
@@ -1213,4 +1221,22 @@ void EditorAction::setName(QString name)
   this->name = name;
   name_edit->setText(name);
   setWorkingAction(base);
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorAction& EditorAction::operator= (const EditorAction &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

@@ -33,6 +33,9 @@ public:
   /* Constructor Function */
   EditorTile(int x = 0, int y = 0);
 
+  /* Copy constructor function */
+  EditorTile(const EditorTile &source);
+
   /* Destructor Function */
   ~EditorTile();
 
@@ -66,6 +69,9 @@ private:
   const static uint8_t kUPPER_COUNT_MAX; /* The max number of upper layers */
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorTile &source);
+
   /* Hover events */
   void hoverEnterEvent(QGraphicsSceneHoverEvent * event);
   void hoverLeaveEvent(QGraphicsSceneHoverEvent * event);
@@ -104,6 +110,11 @@ public:
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorTile& operator= (const EditorTile &source);
 };
 
 #endif // EDITORTILE_H

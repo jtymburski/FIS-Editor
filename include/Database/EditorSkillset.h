@@ -29,6 +29,9 @@ public:
   /* Constructor function with id and name */
   EditorSkillset(int id, QString name, QWidget* parent = NULL);
 
+  /* Copy constructor */
+  EditorSkillset(const EditorSkillset &source);
+
   /* Destructor function */
   virtual ~EditorSkillset();
 
@@ -67,6 +70,9 @@ private:
   QPushButton* reset;
 
 protected:
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorSkillset &source);
+
 public slots:
   void setTotalSkillsList(QVector<QPair<QString,EditorSkill*>* > s);
   void setBaseSkillset(SkillSet s);
@@ -103,6 +109,11 @@ public:
 
   /* Sets the name of the skillset */
   virtual void setName(QString name);
+
+/* Operator functions */
+public:
+  /* The copy operator */
+  EditorSkillset& operator= (const EditorSkillset &source);
 };
 
 #endif // EDITORSKILLSET_H

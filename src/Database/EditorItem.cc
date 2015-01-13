@@ -18,8 +18,24 @@ EditorItem::EditorItem(int id, QString name, QWidget* parent)
   setName(name);
 }
 
+/* Copy constructor */
+EditorItem::EditorItem(const EditorItem &source) : EditorItem()
+{
+  copySelf(source);
+}
+
 EditorItem::~EditorItem()
 {
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Copy function, to be called by a copy or equal operator constructor */
+void EditorItem::copySelf(const EditorItem &source)
+{
+  item = source.item;
 }
 
 /*============================================================================
@@ -59,4 +75,22 @@ void EditorItem::setID(int id)
 void EditorItem::setName(QString name)
 {
   item.setName(name.toStdString());
+}
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+
+/* The copy operator */
+EditorItem& EditorItem::operator= (const EditorItem &source)
+{
+  /* Check for self assignment */
+  if(this == &source)
+    return *this;
+
+  /* Do the copy */
+  copySelf(source);
+
+  /* Return the copied object */
+  return *this;
 }

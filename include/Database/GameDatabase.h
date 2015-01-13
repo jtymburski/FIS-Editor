@@ -12,7 +12,6 @@
 #include <QVBoxLayout>
 #include <QVector>
 #include <QPushButton>
-#include <QPair>
 #include <QLabel>
 
 #include "EditorEnumDb.h"
@@ -45,104 +44,81 @@ private:
   /* Layout */
   QVBoxLayout* layout;
 
-  /* Vector for actual data in bottom list, populated from game xml data */
-  QVector<EditorMap*> map_set;
-  //QVector<QPair<QString,EditorMap*>* > map_pair;
-  QVector<QPair<QString,EditorPerson*>* > person_pair;
-  QVector<QPair<QString,EditorParty*>* > party_pair;
-  QVector<QPair<QString,EditorItem*>* > item_pair;
-  QVector<QPair<QString,EditorAction*>* > action_pair;
-  QVector<QPair<QString,EditorCategory*>* > race_pair;
-  QVector<QPair<QString,EditorCategory*>* > battleclass_pair;
-  QVector<QPair<QString,EditorSkillset*>* > skillset_pair;
-  QVector<QPair<QString,EditorSkill*>* > skill_pair;
-  QVector<QPair<QString,EditorEquipment*>* > equipment_pair;
-  QVector<QPair<QString,EditorBubby*>* > bubby_pair;
-
   /* Currently selected object */
+  EditorAction* current_action;
+  EditorCategory* current_battleclass;
+  EditorBubby* current_bubby;
+  EditorEquipment* current_equipment;
+  EditorItem* current_item;
   EditorMap* current_map;
-  //QPair<QString,EditorMap*>* current_map;
-  QPair<QString,EditorPerson*>* current_person;
-  QPair<QString,EditorParty*>* current_party;
-  QPair<QString,EditorItem*>* current_item;
-  QPair<QString,EditorAction*>* current_action;
-  QPair<QString,EditorCategory*>* current_race;
-  QPair<QString,EditorCategory*>* current_battleclass;
-  QPair<QString,EditorSkillset*>* current_skillset;
-  QPair<QString,EditorSkill*>* current_skill;
-  QPair<QString,EditorEquipment*>* current_equipment;
-  QPair<QString,EditorBubby*>* current_bubby;
+  EditorParty* current_party;
+  EditorPerson* current_person;
+  EditorCategory* current_race;
+  EditorSkill* current_skill;
+  EditorSkillset* current_skillset;
 
-  int current_map_index;
-  int current_person_index;
-  int current_party_index;
-  int current_item_index;
-  int current_action_index;
-  int current_race_index;
-  int current_battleclass_index;
-  int current_skillset_index;
-  int current_skill_index;
-  int current_equipment_index;
-  int current_bubby_index;
+  /* Vector for actual data in bottom list, populated from game xml data */
+  QVector<EditorAction*> data_action;
+  QVector<EditorCategory*> data_battleclass;
+  QVector<EditorBubby*> data_bubby;
+  QVector<EditorEquipment*> data_equipment;
+  QVector<EditorItem*> data_item;
+  QVector<EditorMap*> data_map;
+  QVector<EditorParty*> data_party;
+  QVector<EditorPerson*> data_person;
+  QVector<EditorCategory*> data_race;
+  QVector<EditorSkill*> data_skill;
+  QVector<EditorSkillset*> data_skillset;
 
-  int current_map_id;
-  int current_person_id;
-  int current_party_id;
-  int current_item_id;
-  int current_action_id;
-  int current_race_id;
-  int current_battleclass_id;
-  int current_skillset_id;
-  int current_skill_id;
-  int current_equipment_id;
-  int current_bubby_id;
+  /* The map modifying dialog */
+  QDialog* mapsize_dialog;
 
-  int current_map_selection;
-  int current_person_selection;
-  int current_party_selection;
-  int current_item_selection;
-  int current_action_selection;
-  int current_race_selection;
-  int current_battleclass_selection;
-  int current_skillset_selection;
-  int current_skill_selection;
-  int current_equipment_selection;
-  int current_bubby_selection;
-
+  /* Buttons at bottom of database */
   QPushButton* new_button;
   QPushButton* del_button;
   QPushButton* import_button;
   QPushButton* duplicate_button;
 
-  QString* current_name;
-
 protected:
 public slots:
-  void modifyBottomList(int index);
-  void modifySelection(QModelIndex index);
-  void modifyIndex(int);
-  void updateBottomListName(QString str);
-  void rowChange(int);
+  /* Creates a new map, from the dialog */
+  void createNewMap();
 
+  /* Creates a new resource -> new button */
   void createNewResource();
-  void duplicateResource();
+
+  /* Deletes an existing resource -> delete button */
   void deleteResource();
 
-signals:
-  void changeMode(EditorEnumDb::ViewMode);
-  void changeMap(QPair<QString,EditorMap*>*);
-  void changePerson(QPair<QString,EditorPerson*>*);
-  void changeParty(QPair<QString,EditorParty*>*);
-  void changeItem(QPair<QString,EditorItem*>*);
-  void changeAction(QPair<QString,EditorAction*>*);
-  void changeRace(QPair<QString,EditorCategory*>*);
-  void changeBattleclass(QPair<QString,EditorCategory*>*);
-  void changeSkillset(QPair<QString,EditorSkillset*>*);
-  void changeSkill(QPair<QString,EditorSkill*>*);
-  void changeEquipment(QPair<QString,EditorEquipment*>*);
-  void changeBubby(QPair<QString,EditorBubby*>*);
+  /* Duplicates a selected resource -> duplicate */
+  void duplicateResource();
 
-  void deactivateView();
+  /* Triggers on double click of the bottom list -> updates view */
+  void modifySelection(QListWidgetItem* item);
+
+  /* Triggers on row change on top list -> shifts view */
+  void rowChange(int);
+
+  /* Updates the bottom list -> when a name changes */
+  void updateBottomListName(QString str);
+
+signals:
+  void changeAction(EditorAction* action);
+  void changeBattleclass(EditorCategory* battle_class);
+  void changeBubby(EditorBubby* bubby);
+  void changeEquipment(EditorEquipment* equipment);
+  void changeItem(EditorItem* item);
+  void changeMap(EditorMap* map);
+  void changeMode(EditorEnumDb::ViewMode);
+  void changeParty(EditorParty* party);
+  void changePerson(EditorPerson* person);
+  void changeRace(EditorCategory* race);
+  void changeSkill(EditorSkill* skill);
+  void changeSkillset(EditorSkillset* skill_set);
+
+public:
+  /* Modifies the bottom list with the passed in index */
+  void modifyBottomList(int index);
 };
 
 #endif // GAMEDATABASE_H
