@@ -17,23 +17,24 @@
  *
  * Input: Parent Widget
  */
-MapView::MapView(QWidget* parent, int xsize, int ysize) :
-  QMainWindow(parent)
+MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
+       : QMainWindow(parent)
 {
-  x_size = xsize;
-  y_size = ysize;
+  //x_size = xsize;
+  //y_size = ysize;
 
-  cursor_mode = EditorEnumDb::BASIC;
+  //cursor_mode = EditorEnumDb::BASIC;
   current_sprite_choice = "Sup";
-  map_editor = NULL;
+  //map_editor = NULL;
 
   /* Calls all setup functions */
-  setupSidebar();
-  setupLayerBar();
+  setupLeftBar();
+  setupRightBar();
   setupMapView();
   setWindowFlags(windowFlags() & ~Qt::Window);
 
   /* Starts disabled */
+  editing_map = NULL;
   setDisabled(true);
 }
 
@@ -43,9 +44,9 @@ MapView::MapView(QWidget* parent, int xsize, int ysize) :
 MapView::~MapView()
 {
   //qDebug()<<"Removing MapView";
-  delete map_editor;
-  delete map_database;
-  map_editor = NULL;
+  //delete map_editor;
+  //delete map_database;
+  //map_editor = NULL;
 }
 
 /*============================================================================
@@ -57,11 +58,12 @@ MapView::~MapView()
  *
  * Inputs: none
  */
-void MapView::setupSidebar()
+void MapView::setupLeftBar()
 {
   map_database = new MapDatabase(this);
+
   /* Sets up the dock which contains the sprites and images tabs */
-  dock = new QDockWidget("Toolbox");
+  QDockWidget* dock = new QDockWidget("Toolbox");
   dock->setAllowedAreas(Qt::LeftDockWidgetArea);
   dock->setWidget(map_database);
   addDockWidget(Qt::LeftDockWidgetArea,dock);
@@ -78,13 +80,16 @@ void MapView::setupSidebar()
  *
  * Inputs: none
  */
-void MapView::setupMapView(int x, int y)
+void MapView::setupMapView()//int x, int y)
 {
   /* Sets up the main map view widget */
-  map_editor = new MapRender(map_database->getSpriteView(),this,x,y,cursor_mode);
-  map_scroller = new QGraphicsView(map_editor,this);
+  map_editor = new MapRender(map_database->getSpriteView(), this);
+
+  /* Set up the view - scroller */
+  QGraphicsView* map_scroller = new QGraphicsView(map_editor, this);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
+
   //map_scroller->setMinimumSize(1024,640);
   //map_scroller->setMaximumSize(1280,720);
 //  connect(shown_base_layer,SIGNAL(toggled(bool)),
@@ -111,17 +116,17 @@ void MapView::setupMapView(int x, int y)
 //          map_editor,SLOT(toggleUpper4(bool)));
 //  connect(shown_upper_layer_05,SIGNAL(toggled(bool)),
 //          map_editor,SLOT(toggleUpper5(bool)));
-  connect(map_control->getGridToggle(),SIGNAL(toggled(bool)),
-          map_editor,SLOT(toggleGrid(bool)));
-  connect(map_control->getPassibilityToggle(),SIGNAL(toggled(bool)),
-          map_editor,SLOT(togglePass(bool)));
+  connect(map_control->getGridToggle(), SIGNAL(toggled(bool)),
+          map_editor, SLOT(toggleGrid(bool)));
+  connect(map_control->getPassibilityToggle(), SIGNAL(toggled(bool)),
+          map_editor, SLOT(togglePass(bool)));
   setCentralWidget(map_scroller);
 
   /* Sets up the map status bar */
   map_data = new QStatusBar(this);
   map_data->setStyleSheet("border-top: 1px solid #999999");
-  connect(map_editor,SIGNAL(sendCurrentPosition(int,int)),
-          this,SLOT(setCurrentTile(int,int)));
+  connect(map_editor, SIGNAL(sendCurrentPosition(int,int)),
+          this, SLOT(setCurrentTile(int,int)));
 
   setStatusBar(map_data);
 }
@@ -131,14 +136,14 @@ void MapView::setupMapView(int x, int y)
  *
  * Inputs: none
  */
-void MapView::setupLayerBar()
+void MapView::setupRightBar()
 {
   map_control = new MapControl(this);
   connect(map_control->getTopList(),SIGNAL(itemClicked(QListWidgetItem*)),
           this,SLOT(setActiveLayer(QListWidgetItem*)));
 
   /* Sets up the active layer dock */
-  layer_dock = new QDockWidget("Active Layer");
+  QDockWidget* layer_dock = new QDockWidget("Active Layer");
   layer_dock->setWidget(map_control);
   layer_dock->setAllowedAreas(Qt::RightDockWidgetArea);
   addDockWidget(Qt::RightDockWidgetArea,layer_dock);
@@ -216,7 +221,6 @@ void MapView::setActiveLayer(QListWidgetItem *layer)
   {
     map_editor->setEditingLayer(EditorEnumDb::UPPER5);
   }
-
 }
 
 /*
@@ -227,6 +231,7 @@ void MapView::setActiveLayer(QListWidgetItem *layer)
 void MapView::setCurrentTile(int x, int y)
 {
   map_data->clearMessage();
+
   /* Adds the total map data to the status bar */
   QString mapsize = "Map Size: ";
   mapsize.append(QString::number(map_editor->getMapWidth()));
@@ -243,5 +248,47 @@ void MapView::setCurrentTile(int x, int y)
     coordinates.append(QString::number(y));
     mapsize.append(coordinates);
   }
+
   map_data->showMessage(mapsize);
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Returns the map being edited */
+EditorMap* MapView::getMapEditor()
+{
+  return editing_map;
+}
+
+/* Returns the Map Editor (center portion */
+MapRender* MapView::getMapEditorView()
+{
+  return map_editor;
+}
+
+/* Sets the map being edited */
+void MapView::setMapEditor(EditorMap* editor)
+{
+  /* Remove connections to the old map */
+  map_editor->setRenderingMap(NULL);
+  setDisabled(true);
+
+  /* Set the new editing map */
+  editing_map = editor;
+
+  /* Load in the new info */
+  if(editing_map != NULL)
+  {
+    /* Un-disable view */
+    setDisabled(false);
+
+    /* Add the top sub-map by default */
+    if(editing_map->getMap(0) != NULL)
+      map_editor->setRenderingMap(editing_map->getMap(0));
+
+    /* Add the sprites */
+    map_database->getSpriteView()->setEditorMap(editor);
+  }
 }

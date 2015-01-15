@@ -20,16 +20,20 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
 
-  current = new EditorSprite();
+  //current = NULL;//new EditorSprite();
+  editor_map = NULL;
+  sprite_dialog = NULL;
   bottom_view = new QWidget(this);
   bottom_view->setMinimumHeight(150);
-  editor_sprite_list = new EditorSpriteList(this);
+  editor_sprite_list = new SpriteViewList(this);
   connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
-          this,SLOT(setCurrent(int)));
-  connect(editor_sprite_list,SIGNAL(updateSprites()),this,SLOT(refreshList()));
+          this,SLOT(update()));
+  connect(editor_sprite_list, SIGNAL(editSprite()), this, SLOT(editSprite()));
+  connect(editor_sprite_list, SIGNAL(viewFrameSequence()),
+          this, SLOT(viewFrameSequence()));
+
   nextID = 0;
 
-  //layout->addWidget(widget);//editor_sprite_list);
   layout->addWidget(editor_sprite_list);
   layout->addWidget(bottom_view);
   setLayout(layout);
@@ -44,13 +48,13 @@ SpriteView::~SpriteView()
 {
   //qDebug()<<"Removing Editor Sprite Toolbox";
   //delete edit_sprite;
-  for(int i=0; i<editor_sprites.size(); i++)
-  {
-    delete editor_sprites[i];
-    editor_sprites[i] = NULL;
-  }
+  //for(int i=0; i<editor_sprites.size(); i++)
+  //{
+  //  delete editor_sprites[i];
+  //  editor_sprites[i] = NULL;
+  //}
   //delete current;
-  current = NULL;
+  //current = NULL;
 }
 
 /*============================================================================
@@ -77,6 +81,7 @@ void SpriteView::paintEvent(QPaintEvent *)
     QRect border(bottom_view->x(), bottom_view->y(), l + 2, l + 2);
 
     /* Paint the sprite */
+    EditorSprite* current = getSelected();
     if(current != NULL)
       current->paint(&painter, bottom_view->x() + 1, bottom_view->y() + 1, l, l);
 
@@ -110,11 +115,7 @@ void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 
   if(e->button() & Qt::RightButton)
   {
-    edit_sprite = new SpriteDialog(this, current, current->getPath(0),
-                                   0, false);
-
-    connect(edit_sprite, SIGNAL(ok()), this, SLOT(refreshList()));
-    edit_sprite->show();
+    editSprite();
   }
 }
 
@@ -129,20 +130,23 @@ void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
  */
 void SpriteView::addEditorSprite(EditorSprite *e)
 {
-  /* Sets the id */
-  e->getSprite()->setId(nextID);
+  if(editor_map != NULL)
+  {
+    /* Sets the id and puts the sprite in the library */
+    e->setID(nextID);
+    editor_map->setSprite(e);
 
-  /* Puts the sprite in the library */
-  editor_sprites.push_back(e);
+    /* Adds the item to the visible list */
+    //editor_sprite_list->addItem("temp");
+    //editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
+    //editor_sprite_list->setCurrentSprite(e);
 
-  /* Adds the item to the visible list */
-  editor_sprite_list->addItem("temp");
-  editor_sprite_list->setCurrentRow(editor_sprite_list->count()-1);
-  editor_sprite_list->setCurrentSprite(e);
-
-  /* Increments the id tracker and updates view */
-  nextID++;
-  refreshList();
+    /* Increments the id tracker and updates view */
+    nextID++;
+    updateList();
+    editor_sprite_list->setCurrentRow(editor_sprite_list->count() - 1);
+    //editor_sprite_list->setCurrentSprite(e);
+  }
 }
 
 /*
@@ -150,33 +154,111 @@ void SpriteView::addEditorSprite(EditorSprite *e)
  *
  * Output: The current editor sprite
  */
-EditorSprite* SpriteView::getCurrent()
-{
-  return current;
-}
+//EditorSprite* SpriteView::getCurrent()
+//{
+//  return current;
+//}
 
-/* Description: Refreshes the Editor Sprite list
- *
- */
-void SpriteView::refreshList()
-{
-  for(int i=0; i<editor_sprites.size(); i++)
-    editor_sprite_list->item(i)->setText(editor_sprites[i]->getNameList());
-  update();
-}
+
 
 /*
  * Description: Sets the index of the current editor sprite
  *
  * Inputs: Index
  */
-void SpriteView::setCurrent(int index)
+//void SpriteView::setCurrent(int index)
+//{
+//  current = editor_map->getSprite(index);
+//  editor_sprite_list->setCurrentSprite(current);
+//  update();
+//}
+
+/* Opens the sprite editing dialog */
+void SpriteView::editSprite()
 {
-  current = editor_sprites[index];
-  editor_sprite_list->setCurrentSprite(current);
+  EditorSprite* current = getSelected();
+
+  /* Delete the old and create the new dialog */
+  if(sprite_dialog != NULL)
+    delete sprite_dialog;
+  sprite_dialog = new SpriteDialog(this, current, "",0, false);
+  connect(sprite_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+  sprite_dialog->show();
+}
+
+/*
+ * Description: Refreshes the Editor Sprite list
+ */
+void SpriteView::updateList()
+{
+  int index = editor_sprite_list->currentRow();
+
+  editor_sprite_list->clear();
+  if(editor_map != NULL)
+  {
+    for(int i = 0; i < editor_map->getSpriteCount(); i++)
+      editor_sprite_list->addItem(editor_map->getSprite(i)->getNameList());
+  }
+
+  editor_sprite_list->setCurrentRow(index);
   update();
+}
+
+/* Views the frame sequence */
+void SpriteView::viewFrameSequence()
+{
+  EditorSprite* current_sprite = getSelected();
+  int size = EditorHelpers::getTileSize();
+
+  if(current_sprite != NULL)
+  {
+    QDialog* frames = new QDialog(this);
+    QHBoxLayout* framelayout = new QHBoxLayout(frames);
+    QVector<QLabel*> labels;
+
+    /* Fill with the frames */
+    for(int i = 0; i < current_sprite->frameCount(); i++)
+    {
+      labels.push_back(new QLabel());
+      labels.last()->setFixedSize(size, size);
+      labels.last()->setPixmap(current_sprite->getPixmap(i, size, size));
+      framelayout->addWidget(labels.last());
+    }
+
+    /* Finalize dialog */
+    frames->setLayout(framelayout);
+    frames->setModal(false);
+    frames->setWindowTitle(current_sprite->getName());
+    frames->exec();
+  }
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/* Get current sprite */
+EditorSprite* SpriteView::getSelected()
+{
+  int index = editor_sprite_list->currentRow();
+  EditorSprite* sprite = NULL;
+
+  /* Check the validity */
+  if(editor_map != NULL)
+    sprite = editor_map->getSprite(index);
+
+  return sprite;
+}
+
+/* Gets the editor map */
+EditorMap* SpriteView::getEditorMap()
+{
+  return editor_map;
+}
+
+/* Sets the editor map, which contains the data needed */
+void SpriteView::setEditorMap(EditorMap* map)
+{
+  editor_map = map;
+  updateList();
+}

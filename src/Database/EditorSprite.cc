@@ -644,7 +644,10 @@ QString EditorSprite::getPath(int frame_num)
 QPixmap EditorSprite::getPixmap(int index, int w, int h)
 {
   if(index >= 0 && index < frame_info.size())
-    return transformPixmap(index, w, h).scaled(w, h);
+  {
+    QPixmap original = transformPixmap(index, w, h);
+    return original.scaled(w, h);
+  }
   return QPixmap();
 }
 

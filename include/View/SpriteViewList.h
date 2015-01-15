@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: EditorSpriteList
+ * Class Name: SpriteViewList
  * Date Created: January 19, 2014
  * Inheritance: QListWidget
  * Description: The list of editor sprites
  ******************************************************************************/
-#ifndef EDITORSPRITELIST_H
-#define EDITORSPRITELIST_H
+#ifndef SpriteViewList_H
+#define SpriteViewList_H
 
 #include <QListWidget>
 #include <QMouseEvent>
@@ -15,28 +15,23 @@
 #include <QLabel>
 #include <QDebug>
 #include <QMenu>
+
 #include "Database/EditorSprite.h"
 #include "Dialog/SpriteDialog.h"
 
-class EditorSpriteList : public QListWidget
+class SpriteViewList : public QListWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSpriteList(QWidget* parent = 0, EditorSprite* c = 0);
+  SpriteViewList(QWidget* parent = 0, EditorSprite* c = 0);
 
   /* Destructor Function */
-  ~EditorSpriteList();
+  ~SpriteViewList();
 
 private:
   /* Right click menu */
   QMenu* rightclick_menu;
-
-  /* Current Editor Sprite */
-  EditorSprite* currentsprite;
-
-  /* Sprite Creation dialog */
-  SpriteDialog* spriteeditordialog;
 
 protected:
   /* Double click */
@@ -46,18 +41,13 @@ protected:
   void mousePressEvent(QMouseEvent *event);
 
 signals:
-  /* Updates the current sprite after editing it */
-  void updateSprites();
-
-public slots:
-  /* Opens the sprite editing dialog */
+  /* Edit sprite signal */
   void editSprite();
 
-  /* Sets the current sprite */
-  void setCurrentSprite(EditorSprite* e);
-
-  /* Views the frame sequence */
+  /* View frame sequence signal */
   void viewFrameSequence();
+
+public slots:
 };
 
-#endif // EDITORSPRITELIST_H
+#endif // SpriteViewList_H

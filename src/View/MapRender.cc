@@ -21,7 +21,7 @@
  *        the parent widget, and the dimensions of the map
  */
 MapRender::MapRender(SpriteView* tool, QWidget* parent,
-                     int w, int h, EditorEnumDb::CursorMode cursor)
+                     EditorEnumDb::CursorMode cursor)
   : QGraphicsScene(parent)
 {
   remove_action = new QAction("&Remove Active Layer",0);
@@ -64,8 +64,8 @@ MapRender::MapRender(SpriteView* tool, QWidget* parent,
   setCursorMode(cursor);
 
   /* Sets the width and height, and all of the layers to be visible */
-  width = w;
-  height = h;
+  //width = w;
+  //height = h;
   blockx = 0;
   blocky = 0;
   blockmodepress = false;
@@ -86,25 +86,31 @@ MapRender::MapRender(SpriteView* tool, QWidget* parent,
   highlight = new QRubberBand(QRubberBand::Rectangle,0);
 
   /* Sets the size of the map scene */
-  setSceneRect(0,0,width*64,height*64);
+  //setSceneRect(0,0,width*64,height*64);
 
   /* Sets up a blank canvas of tiles on the map */
-  for(int i=0; i<width; i++)
-  {
-    QList<TileRender*> stack;
-    for(int j=0; j<height; j++)
-      stack.push_back(new TileRender(i,j));
-    tiles.push_back(stack);
-  }
+  //for(int i=0; i<width; i++)
+  //{
+  //  QList<TileRender*> stack;
+  //  for(int j=0; j<height; j++)
+  //    stack.push_back(new TileRender(i,j));
+  //  tiles.push_back(stack);
+  //}
+
   /* Adds each tile to the map view and sets its toolbox pointer */
-  for(int i=0; i<width; i++)
-  {
-      for(int j=0; j<height; j++)
-      {
-        addItem(tiles[i][j]);
-        tiles[i][j]->setToolbox(tool);
-      }
-  }
+  //for(int i=0; i<width; i++)
+  //{
+  //    for(int j=0; j<height; j++)
+  //    {
+  //      addItem(tiles[i][j]);
+  //      tiles[i][j]->setToolbox(tool);
+  //    }
+  //}
+
+  /* ---- NEW INITIATION ---- */
+
+  /* Data init */
+  map = NULL;
 }
 
 /*
@@ -385,6 +391,9 @@ void MapRender::setEditingLayer(EditorEnumDb::Layer active)
  */
 void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+  QGraphicsScene::mouseMoveEvent(event);
+// TODO: Fix
+/*
   TileRender* current =
       qgraphicsitem_cast<TileRender*>
       (itemAt(event->scenePos(),QTransform()));
@@ -423,6 +432,7 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         break;
     }
   }
+*/
 }
 
 /*
@@ -777,5 +787,42 @@ void MapRender::setAPassCurrent(bool toggle)
     current->gameTile()->setBasePassability(Direction::SOUTH,toggle);
     current->gameTile()->setBasePassability(Direction::WEST,toggle);
     current->update();
+  }
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Returns the rendering sub-map */
+SubMapInfo* MapRender::getRenderingMap()
+{
+  return map;
+}
+
+/* Sets the rendering sub-map */
+void MapRender::setRenderingMap(SubMapInfo* map)
+{
+  /* Clean up the existing list */
+  QList<QGraphicsItem*> existing_items = items();
+  for(int i = 0; i < existing_items.size(); i++)
+    removeItem(existing_items[i]);
+  setSceneRect(0, 0, 0, 0);
+
+  /* Set the new map */
+  this->map = map;
+
+  /* Add in the new map info */
+  if(map != NULL)
+  {
+    /* Add tiles */
+    for(int i = 0; i < map->tiles.size(); i++)
+      for(int j = 0; j < map->tiles[i].size(); j++)
+        addItem(map->tiles[i][j]);
+
+    /* Set the size of the map scene */
+    if(map->tiles.size() > 0)
+      setSceneRect(0, 0, map->tiles.size() * EditorHelpers::getTileSize(),
+                   map->tiles.front().size() * EditorHelpers::getTileSize());
   }
 }

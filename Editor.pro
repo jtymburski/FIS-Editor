@@ -40,7 +40,6 @@ SOURCES += \
     ../Project/src/Game/Map/Tile.cc \
     src/Database/EditorSprite.cc \
     ../Project/src/Game/EventHandler.cc \
-    src/View/EditorSpriteList.cc \
     src/View/RawImageView.cc \
     src/View/RawImageList.cc \
     src/View/RawImage.cc \
@@ -80,6 +79,7 @@ SOURCES += \
     ../Project/src/Game/Player/Signature.cc \
     ../Project/src/Game/Player/Flavour.cc \
     ../Project/src/Game/Battle/AIModule.cc \
+    src/View/SpriteViewList.cc
 
 HEADERS += \
     include/Application.h \
@@ -94,7 +94,6 @@ HEADERS += \
     ../Project/include/Game/Map/Tile.h \
     include/Database/EditorSprite.h \
     ../Project/include/Game/EventHandler.h \
-    include/View/EditorSpriteList.h \
     include/View/RawImageView.h \
     include/View/RawImageList.h \
     include/View/RawImage.h \
@@ -135,7 +134,8 @@ HEADERS += \
     ../Project/include/Game/Battle/AIModule.h \
     ../Project/include/Game/Player/Signature.h \
     ../Project/include/Game/Player/Flavour.h \
-    include/Database/EditorTemplate.h
+    include/Database/EditorTemplate.h \
+    include/View/SpriteViewList.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include

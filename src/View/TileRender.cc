@@ -289,7 +289,8 @@ int TileRender::getActivePath()
  */
 int TileRender::getToolPath()
 {
-  return toolbox->getCurrent()->getSprite()->getId();
+  //return toolbox->getCurrent()->getSprite()->getId();
+  return 0;
 }
 
 /*
@@ -417,6 +418,8 @@ QRectF TileRender::boundingRect() const
  */
 void TileRender::place()
 {
+// TODO: Move to EditorTile...
+/*
   switch(active_layer)
   {
     case EditorEnumDb::BASE:
@@ -471,6 +474,8 @@ void TileRender::place()
       break;
   }
   update();
+*/
+
 }
 
 /*

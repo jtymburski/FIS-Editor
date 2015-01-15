@@ -43,6 +43,10 @@ protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
 
+signals:
+  /* Emits to parent when selected to deselect all others */
+//  void chosen(int);
+
 public slots:
   /* Button clicks */
   void buttonDelete();
@@ -52,10 +56,6 @@ public slots:
 
   /* Updates based on selected index */
   void updateSelected(int index);
-
-signals:
-  /* Emits to parent when selected to deselect all others */
-//  void chosen(int);
 
 public:
   /* Returns the views */

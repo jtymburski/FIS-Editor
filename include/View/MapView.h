@@ -28,6 +28,7 @@
 #include <QDesktopWidget>
 #include <QSizePolicy>
 
+#include "Database/EditorMap.h"
 #include "View/MapRender.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
@@ -41,53 +42,60 @@ class MapView : public QMainWindow
 
 public:
   /* Constructor function */
-  MapView(QWidget* parent = 0, int xsize = 100, int ysize = 100);
+  MapView(QWidget* parent = NULL);//, int xsize = 100, int ysize = 100);
 
   /* Destructor function */
   ~MapView();
 
-
-  /* Map View pointer */
-  QGraphicsView* map_scroller;
-  MapRender* map_editor;
-
 private:
-  /* Map DB pointer */
-  MapDatabase* map_database;
+  /* The editing map */
+  EditorMap* editing_map;
 
-  /* Map Control pointer */
+  /* Map Control pointer - right portion */
   MapControl* map_control;
 
+  /* Map Status Bar - data at the bottom */
+  QStatusBar* map_data;
+
+  /* Map DB pointer - left portion */
+  MapDatabase* map_database;
+
+  /* Map editor - center portion */
+  MapRender* map_editor;
+  //QGraphicsView*
+
   /* Scroll area pointer */
-  QScrollArea* sprites_tab_scrollwrapper;
+  //QScrollArea* sprites_tab_scrollwrapper;
 
   /* Sidebar dock pointer */
-  QDockWidget* dock;
-  QDockWidget* layer_dock;
+  //QDockWidget* dock;
+  //QDockWidget* layer_dock;
 
   /* The currently selected sprite */
   QString current_sprite_choice;
 
   /* Map size for initial creation */
-  int x_size;
-  int y_size;
+  //int x_size;
+  //int y_size;
 
   /* Cursor Mode */
-  EditorEnumDb::CursorMode cursor_mode;
+  //EditorEnumDb::CursorMode cursor_mode;
 
-  /* Map Data Bar */
-  QStatusBar* map_data;
+  /* Map View pointer */
+  //QGraphicsView* map_scroller;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Sets up the database bar */
+  void setupLeftBar();
 
-  /* Sets up the Sidebar */
-  void setupSidebar();
+  /* Sets up the Map View - center portion */
+  void setupMapView();//int x = 0, int y = 0);
 
-  /* Sets up the Layer Bar */
-  void setupLayerBar();
+  /* Sets up the control bar */
+  void setupRightBar();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -101,14 +109,11 @@ signals:
   void sendUpEditorSprite(EditorSprite* e);
 
 /*============================================================================
- * SLOTS
+ * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
   /* Sets the picked sprite */
   void setSprite(QString);
-
-  /* Sets up the Map View */
-  void setupMapView(int x = 0, int y = 0);
 
   /* Sets the Active Layer on the Map */
   void setActiveLayer(QListWidgetItem* layer);
@@ -119,5 +124,14 @@ public slots:
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+public:
+  /* Returns the map being edited */
+  EditorMap* getMapEditor();
+
+  /* Returns the Map Editor (center portion */
+  MapRender* getMapEditorView();
+
+  /* Sets the map being edited */
+  void setMapEditor(EditorMap* editor);
 };
 #endif // MAPVIEW_H

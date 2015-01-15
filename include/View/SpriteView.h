@@ -18,9 +18,11 @@
 #include <QVBoxLayout>
 #include <QVector>
 #include <QWidget>
-#include "Database/EditorSprite.h"
-#include "View/EditorSpriteList.h"
+
+#include "Database/EditorMap.h"
 #include "Dialog/SpriteDialog.h"
+#include "EditorHelpers.h"
+#include "View/SpriteViewList.h"
 
 class SpriteView : public QWidget
 {
@@ -37,19 +39,22 @@ private:
   QWidget* bottom_view;
 
   /* The current Sprite selected in the toolbox */
-  EditorSprite* current;
+  //EditorSprite* current;
 
   /* The sprite dialog for editing */
-  SpriteDialog* edit_sprite;
+  SpriteDialog* sprite_dialog;
+
+  /* The current editing map */
+  EditorMap* editor_map;
 
   /* The list widget that contains all the sprite names */
-  EditorSpriteList* editor_sprite_list;
+  SpriteViewList* editor_sprite_list;
 
   /* The vector for storing sprite choices */
-  QVector<EditorSprite* > editor_sprites;
+  //QVector<EditorSprite* > editor_sprites;
 
   /* A widget for showing the current selected sprite frame sequence */
-  QDialog* frames;
+  //QDialog* frames;
 
   /* The next available ID */
   uint16_t nextID;
@@ -62,22 +67,37 @@ protected:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
 public slots:
+
   /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);
 
   /* Returns the currently selected Editor Sprite */
-  EditorSprite* getCurrent();
-
-  /* Updates the sprite list */
-  void refreshList();
+  //EditorSprite* getCurrent();
 
   /* Sets the current Editor Sprite to the given index */
-  void setCurrent(int);
+  //void setCurrent(int);
+
+  /* Opens the sprite editing dialog */
+  void editSprite();
+
+  /* Updates the sprite list */
+  void updateList();
+
+  /* Views the frame sequence */
+  void viewFrameSequence();
 
 signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
 public:
+  /* Get current sprite */
+  EditorSprite* getSelected();
+
+  /* Gets the editor map */
+  EditorMap* getEditorMap();
+
+  /* Sets the editor map, which contains the data needed */
+  void setEditorMap(EditorMap* map);
 };
 #endif // SpriteView_H

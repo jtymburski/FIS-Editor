@@ -123,6 +123,7 @@ void EditorTile::hoverEnterEvent(QGraphicsSceneHoverEvent * event)
 {
   (void)event;
   hovered = true;
+  update();
 }
 
 /*
@@ -135,6 +136,7 @@ void EditorTile::hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
 {
   (void)event;
   hovered = false;
+  update();
 }
 
 /*============================================================================

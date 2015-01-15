@@ -87,10 +87,10 @@ MapView* GameView::getMapView()
 }
 
 /* Sets the map view */
-void GameView::setMapView(MapView *view)
-{
-
-}
+//void GameView::setMapView(MapView *view)
+//{
+//
+//}
 
 /* Returns the Editor Action View */
 EditorAction* GameView::getActionView()

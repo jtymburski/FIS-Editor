@@ -278,7 +278,7 @@ void Application::setItemView()
  */
 void Application::setMap(EditorMap* map)
 {
-  qDebug() << "Map: " << map;
+  game_view->getMapView()->setMapEditor(map);
 }
 /*
  * Description: Sets the person
@@ -366,7 +366,7 @@ void Application::setBasicCursor()
   blockplacemode_action->setChecked(false);
   fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::BASIC;
-  game_view->getMapView()->map_editor->setCursorMode(EditorEnumDb::BASIC);
+  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::BASIC);
 }
 
 /*
@@ -378,7 +378,7 @@ void Application::setEraserCursor()
   blockplacemode_action->setChecked(false);
   fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::ERASER;
-  game_view->getMapView()->map_editor->setCursorMode(EditorEnumDb::ERASER);
+  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::ERASER);
 }
 
 /*
@@ -390,7 +390,7 @@ void Application::setBlockCursor()
   erasermode_action->setChecked(false);
   fill_action->setChecked(false);
   cursor_mode = EditorEnumDb::BLOCKPLACE;
-  game_view->getMapView()->map_editor->setCursorMode(EditorEnumDb::BLOCKPLACE);
+  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::BLOCKPLACE);
 }
 
 
@@ -403,7 +403,7 @@ void Application::setFillCursor()
   blockplacemode_action->setChecked(false);
   erasermode_action->setChecked(false);
   cursor_mode = EditorEnumDb::FILL;
-  game_view->getMapView()->map_editor->setCursorMode(EditorEnumDb::FILL);
+  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::FILL);
 }
 
 /* 

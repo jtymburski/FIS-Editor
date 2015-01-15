@@ -15,6 +15,8 @@
 #include <QList>
 #include <QRect>
 #include <QWidget>
+
+#include "Database/EditorMap.h"
 #include "EnumDb.h"
 #include "View/TileRender.h"
 
@@ -24,13 +26,85 @@ class MapRender : public QGraphicsScene
 
 public:
   /* Constructor function */
-  MapRender(SpriteView* toolbox = 0,
-            QWidget* parent = 0,int w = 100,
-            int h = 100, EditorEnumDb::CursorMode cursor = EditorEnumDb::BASIC);
+  MapRender(SpriteView* toolbox = NULL,
+            QWidget* parent = NULL,
+            EditorEnumDb::CursorMode cursor = EditorEnumDb::BASIC);
 
   /* Destructor function */
   ~MapRender();
 
+private:
+  /* Boolean values for determining which layers are shown */
+  bool base, enhancer;
+  bool lower1, lower2, lower3, lower4, lower5;
+  bool upper1, upper2, upper3, upper4, upper5;
+
+  /* Right click menu */
+  QMenu* rightclick_menu;
+  QAction* remove_action;
+  QAction* setNpass_action;
+  QAction* setEpass_action;
+  QAction* setSpass_action;
+  QAction* setWpass_action;
+  QAction* setApass_action;
+
+  /* Map layer tabs */
+  QTabWidget* layer_tabs;
+
+  /* The list of tiles */
+  QList<QList<TileRender*> > tiles;
+
+  /* Rubber Band */
+  QRubberBand* highlight;
+  QPoint origin;
+
+  /* Dimensions of the map */
+  int width;
+  int height;
+
+  /* Block Select Startpoint */
+  int blockx, blocky;
+  bool blockmodepress;
+  bool eraseblock;
+
+  /* Cursor type */
+  EditorEnumDb::CursorMode cursormode;
+
+  /* Position of current (Only used for removeCurrent() */
+  QPointF current_position;
+  QPointF up_position;
+  QPointF down_position;
+  QPointF left_position;
+  QPointF right_position;
+
+  /* ---- NEW DATA ---- */
+
+  /* The rendering map */
+  SubMapInfo* map;
+
+  /*------------------- Constants -----------------------*/
+  //const static int kELEMENT_DATA;     /* Element data type for sprite */
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+protected:
+  /* Paint event */
+  void paintEvent(QPaintEvent *);
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Sends the tile position to the map status bar */
+  void sendCurrentPosition(int,int);
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Functions to toggle each layer to be shown */
   void toggleBase(bool);
@@ -71,62 +145,15 @@ public slots:
   /* Recursively fills areas with tiles */
   void recursiveFill(int x, int y, int target, int replace);
 
-signals:
-  /* Sends the tile position to the map status bar */
-  void sendCurrentPosition(int,int);
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Returns the rendering sub-map */
+  SubMapInfo* getRenderingMap();
 
-protected:
-  /* Paint event */
-  void paintEvent(QPaintEvent *);
-  void mousePressEvent(QGraphicsSceneMouseEvent *event);
-  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-
-private:
-  /* Boolean values for determining which layers are shown */
-  bool base,enhancer;
-  bool lower1,lower2,lower3,lower4,lower5;
-  bool upper1,upper2,upper3,upper4,upper5;
-
-  /* Right click menu */
-  QMenu* rightclick_menu;
-  QAction* remove_action;
-  QAction* setNpass_action;
-  QAction* setEpass_action;
-  QAction* setSpass_action;
-  QAction* setWpass_action;
-  QAction* setApass_action;
-
-  /* Map layer tabs */
-  QTabWidget* layer_tabs;
-
-  /* The list of tiles */
-  QList<QList<TileRender*> > tiles;
-
-  /* Rubber Band */
-  QRubberBand* highlight;
-  QPoint origin;
-
-  /* Dimensions of the map */
-  int width;
-  int height;
-
-  /* Block Select Startpoint */
-  int blockx, blocky;
-  bool blockmodepress;
-  bool eraseblock;
-
-  /* Cursor type */
-  EditorEnumDb::CursorMode cursormode;
-
-  /* Position of current (Only used for removeCurrent() */
-  QPointF current_position;
-  QPointF up_position;
-  QPointF down_position;
-  QPointF left_position;
-  QPointF right_position;
-  /*------------------- Constants -----------------------*/
-  //const static int kELEMENT_DATA;     /* Element data type for sprite */
+  /* Sets the rendering sub-map */
+  void setRenderingMap(SubMapInfo* map);
 };
 
 #endif // MAPRENDER_H

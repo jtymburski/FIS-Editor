@@ -61,7 +61,7 @@ public slots:
 
   /* View Get/Sets */
   MapView* getMapView();
-  void setMapView(MapView* view);
+  //void setMapView(MapView* view);
 
   EditorAction* getActionView();
   void setActionView(EditorAction* sprite);
