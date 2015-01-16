@@ -92,6 +92,7 @@ public:
 
   /* Return stored sprite information */
   EditorSprite* getSprite(int id);
+  EditorSprite* getSpriteByIndex(int index);
   int getSpriteCount();
   int getSpriteIndex(int id);
   QVector<EditorSprite*> getSprites();
@@ -114,7 +115,8 @@ public:
   void unsetMaps();
 
   /* Unset sprite(s) */
-  void unsetSprite(int id);
+  bool unsetSprite(int id);
+  bool unsetSpriteByIndex(int index);
   void unsetSprites();
 
 /* Operator functions */

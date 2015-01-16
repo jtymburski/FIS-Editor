@@ -31,19 +31,22 @@ FrameView::FrameView(QWidget *parent, EditorEnumDb::FrameViewType type,
    * is triggered */
   if(type == EditorEnumDb::FRAME)
   {
-    setFixedSize(66, 66);
+    setFixedSize(EditorHelpers::getTileSize() + 2,
+                 EditorHelpers::getTileSize() + 2);
     connect(this, SIGNAL(editFrame(int)), parent, SLOT(editFrame(int)));
   }
   /* If the type is viewonly, set the size and do not make connections */
   else if(type == EditorEnumDb::VIEWONLY)
   {
-    setFixedSize(66,66);
+    setFixedSize(EditorHelpers::getTileSize() + 2,
+                 EditorHelpers::getTileSize() + 2);
   }
   /* If the type is anything else, the size is 32x32 and the appropriate
    * frame addition is triggered */
   else
   {
-    setFixedSize(32,32);
+    setFixedSize(EditorHelpers::getTileSize() / 2,
+                 EditorHelpers::getTileSize() / 2);
     connect(this, SIGNAL(addHead(QString)), parent, SLOT(addHead(QString)));
     connect(this, SIGNAL(addTail(QString)), parent, SLOT(addTail(QString)));
     connect(this, SIGNAL(addMidpoint(QString,int)),

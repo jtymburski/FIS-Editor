@@ -68,25 +68,33 @@ MapDatabase::~MapDatabase()
 // TODO: Comment
 void MapDatabase::buttonDelete()
 {
-  qDebug() << "DELETE";
+  /* Sprite control */
+  if(view_sprite->isVisible())
+    view_sprite->deleteSprite();
 }
 
 // TODO: Comment
 void MapDatabase::buttonDuplicate()
 {
-  qDebug() << "DUPLICATE";
+  /* Sprite control */
+  if(view_sprite->isVisible())
+    view_sprite->duplicateSprite();
 }
 
 // TODO: Comment
 void MapDatabase::buttonImport()
 {
-  qDebug() << "IMPORT";
+  /* Sprite control */
+  if(view_sprite->isVisible())
+    view_sprite->importSprite();
 }
 
 // TODO: Comment
 void MapDatabase::buttonNew()
 {
-  qDebug() << "NEW";
+  /* Sprite control */
+  if(view_sprite->isVisible())
+    view_sprite->newSprite();
 }
 
 /* Updates based on selected index */

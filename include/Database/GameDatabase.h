@@ -7,12 +7,13 @@
 #ifndef GAMEDATABASE_H
 #define GAMEDATABASE_H
 
-#include <QWidget>
+#include <QLabel>
 #include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QVector>
-#include <QPushButton>
-#include <QLabel>
+#include <QWidget>
 
 #include "EditorEnumDb.h"
 #include "Database/EditorMap.h"
@@ -93,6 +94,9 @@ public slots:
   /* Duplicates a selected resource -> duplicate */
   void duplicateResource();
 
+  /* Imports a resource */
+  void importResource();
+
   /* Triggers on double click of the bottom list -> updates view */
   void modifySelection(QListWidgetItem* item);
 
@@ -119,6 +123,9 @@ signals:
 public:
   /* Modifies the bottom list with the passed in index */
   void modifyBottomList(int index);
+
+  /* Temp start - TODO: REMOVE */
+  void tempMake();
 };
 
 #endif // GAMEDATABASE_H

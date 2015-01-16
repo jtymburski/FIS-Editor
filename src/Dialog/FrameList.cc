@@ -28,6 +28,8 @@ FrameList::FrameList(QWidget *parent, EditorSprite *c)
   manipulator = NULL;
   if(currentsprite != NULL)
     addFrames();
+
+  setMinimumHeight(EditorHelpers::getTileSize() + 10);
 }
 
 /*

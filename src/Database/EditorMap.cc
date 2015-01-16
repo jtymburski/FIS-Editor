@@ -5,6 +5,7 @@
  * Description: Editor Map
  ******************************************************************************/
 #include "Database/EditorMap.h"
+#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 const int EditorMap::kUNSET_ID = -1;
@@ -229,6 +230,10 @@ int EditorMap::getNextSpriteID()
     }
   }
 
+  /* If nothing found, just make it the last ID + 1 */
+  if(!found && sprites.size() > 0)
+    id = sprites.last()->getID() + 1;
+
   return id;
 }
 
@@ -244,6 +249,19 @@ EditorSprite* EditorMap::getSprite(int id)
     for(int i = 0; i < sprites.size(); i++)
       if(sprites[i]->getID() == id)
         return sprites[i];
+  return NULL;
+}
+
+/*
+ * Description: Returns the sprite at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ * Output: EditorSprite* - the pointer to match the index. NULL if out of range
+ */
+EditorSprite* EditorMap::getSpriteByIndex(int index)
+{
+  if(index >= 0 && index < sprites.size())
+    return sprites[index];
   return NULL;
 }
 
@@ -449,6 +467,7 @@ int EditorMap::setSprite(EditorSprite* sprite)
     else
     {
       sprites.append(sprite);
+      index = sprites.size() - 1;
     }
 
     return index;
@@ -492,12 +511,23 @@ void EditorMap::unsetMaps()
  * Description: Unset the sprite within the list that correspond to the ID.
  *
  * Inputs: int id - the sprite id
- * Output: none
+ * Output: bool - was a sprite deleted?
  */
-void EditorMap::unsetSprite(int id)
+bool EditorMap::unsetSprite(int id)
 {
   int index = getSpriteIndex(id);
-  if(index >= 0)
+  return unsetSpriteByIndex(index);
+}
+
+/*
+ * Description: Unset the sprite within the list that correspond to the index.
+ *
+ * Inputs: int index - the sprite index corresponder
+ * Output: bool - was a sprite deleted?
+ */
+bool EditorMap::unsetSpriteByIndex(int index)
+{
+  if(index >= 0 && index < sprites.size())
   {
     /* Remove all sprites related to this index from all tiles */
     for(int i = 0; i < sub_maps.size(); i++)
@@ -510,7 +540,11 @@ void EditorMap::unsetSprite(int id)
     /* Finally, delete the sprite */
     delete sprites[index];
     sprites.remove(index);
+
+    return true;
   }
+
+  return false;
 }
 
 /*

@@ -46,9 +46,10 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   del_button = new QPushButton("Delete",this);
   import_button = new QPushButton("Import",this);
   duplicate_button = new QPushButton("Duplicate",this);
-  connect(new_button,SIGNAL(clicked()),this,SLOT(createNewResource()));
-  connect(del_button,SIGNAL(clicked()),this,SLOT(deleteResource()));
-  connect(duplicate_button,SIGNAL(clicked()),this,SLOT(duplicateResource()));
+  connect(new_button, SIGNAL(clicked()), this, SLOT(createNewResource()));
+  connect(del_button, SIGNAL(clicked()), this, SLOT(deleteResource()));
+  connect(import_button, SIGNAL(clicked()), this, SLOT(importResource()));
+  connect(duplicate_button, SIGNAL(clicked()), this, SLOT(duplicateResource()));
 
   /* Configure the layout */
   layout = new QVBoxLayout(this);
@@ -421,7 +422,6 @@ void GameDatabase::deleteResource()
   }
 }
 
-// TODO: Fix the bugs with this
 void GameDatabase::duplicateResource()
 {
   if(bottom_view->currentRow() >= 0)
@@ -508,6 +508,14 @@ void GameDatabase::duplicateResource()
     modifyBottomList(top_view->currentRow());
     bottom_view->setCurrentRow(bottom_view->count() - 1);
   }
+}
+
+/* Imports a resource */
+void GameDatabase::importResource()
+{
+  // TODO: Future
+  QMessageBox::information(this, "Notification",
+                           "Coming soon to a production near you!");
 }
 
 /* Double click on an element */
@@ -812,4 +820,14 @@ void GameDatabase::modifyBottomList(int index)
     del_button->setDisabled(true);
     duplicate_button->setDisabled(true);
   }
+}
+
+/* Temp start - TODO: REMOVE */
+void GameDatabase::tempMake()
+{
+  data_map.push_back(new EditorMap(0, "TEST", 100, 100));
+  current_map = data_map.last();
+  modifyBottomList(top_view->currentRow());
+  bottom_view->setCurrentRow(bottom_view->count() - 1);
+  emit changeMap(current_map);
 }

@@ -118,6 +118,10 @@ MapRender::MapRender(SpriteView* tool, QWidget* parent,
  */
 MapRender::~MapRender()
 {
+  /* Clear out the rendering map */
+  setRenderingMap(NULL);
+
+/*
   for(int i=0; i<width; i++)
   {
     for(int j=0; j<height; j++)
@@ -126,6 +130,7 @@ MapRender::~MapRender()
       tiles[i][j] = NULL;
     }
   }
+*/
 }
 
 /*

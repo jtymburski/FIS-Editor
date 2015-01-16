@@ -87,6 +87,7 @@ void MapView::setupMapView()//int x, int y)
 
   /* Set up the view - scroller */
   QGraphicsView* map_scroller = new QGraphicsView(map_editor, this);
+  //map_scroller->setDragMode(QGraphicsView::RubberBandDrag);
   map_scroller->ensureVisible(0,0,1,1);
   map_scroller->show();
 
