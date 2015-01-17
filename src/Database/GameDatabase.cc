@@ -480,6 +480,7 @@ void GameDatabase::duplicateResource()
         id = data_map.last()->getID();
         *data_map.last() = *data_map[index];
         data_map.last()->setID(id);
+        data_map.last()->setTileIcons(data_map[index]->getTileIcons());
         break;
       /* -- PERSON -- */
       case 1:

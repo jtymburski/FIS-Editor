@@ -76,6 +76,7 @@ void EditorMap::copySelf(const EditorMap &source)
   /* Add sub-maps */
   for(int i = 0; i < source.sub_maps.size(); i++)
   {
+    /* Copy the initial tile */
     sub_maps.push_back(new SubMapInfo);
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
@@ -86,23 +87,27 @@ void EditorMap::copySelf(const EditorMap &source)
         row.push_back(new EditorTile(*source.sub_maps[i]->tiles[j][k]));
       sub_maps.last()->tiles.push_back(row);
     }
+
+    /* Fix the tile pointers to the new sprite sets */
+    for(int j = 0; j < sub_maps.last()->tiles.size(); j++)
+    {
+      for(int k = 0; k < sub_maps.last()->tiles[j].size(); k++)
+      {
+        for(int m = 0; m < EditorEnumDb::INVALID; m++)
+        {
+          EditorTile* tile = sub_maps.last()->tiles[j][k];
+          EditorSprite* sprite = tile->getSprite((EditorEnumDb::Layer)m);
+          if(sprite != NULL)
+            tile->place((EditorEnumDb::Layer)m, getSprite(sprite->getID()));
+        }
+      }
+    }
   }
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-
-/*
- * Description: Clone the editor map pointer for outside usage
- *
- * Inputs: none
- * Output: EditorMap* - map editor pointer
- */
-EditorMap* EditorMap::clone()
-{
-  return this;
-}
 
 /*
  * Description: Returns the ID of the editor map.
@@ -338,6 +343,17 @@ int EditorMap::getSpriteIndex(int id)
 QVector<EditorSprite*> EditorMap::getSprites()
 {
   return sprites;
+}
+
+/*
+ * Description: Returns the tile icons that is stored within the editor map.
+ *
+ * Inputs: none
+ * Output: TileIcons* - the icon struct.
+ */
+TileIcons* EditorMap::getTileIcons()
+{
+  return tile_icons;
 }
 
 /*
@@ -784,9 +800,11 @@ QDialog* EditorMap::createMapDialog(QWidget* parent, QString title,
  *
  * Inputs: SubMapInfo* copy_map - the map to copy information from
  *         SubMapInfo* new_map - the map to copy information to
+ *         TileIcons* icons - the icons to load into the tiles
  * Output: bool - true if the info was copied
  */
-bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
+bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map, 
+                           TileIcons* icons)
 {
   if(copy_map != NULL && new_map != NULL)
   {
@@ -805,7 +823,7 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
 
       for(int j = 0; j < copy_map->tiles[i].size(); j++)
       {
-        row.push_back(new EditorTile(i, j));
+        row.push_back(new EditorTile(i, j, icons));
         *row.last() = *copy_map->tiles[i][j];
       }
 

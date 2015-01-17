@@ -370,18 +370,14 @@ void EditorTile::paint(QPainter *painter,
   /* Render the grid */
   if(visible_grid)
   {
-    QPen pen(QColor(255, 255, 255, 128));
-
-    if(hovered)
-    {
-      pen.setColor(QColor(0,255,100,255));
-      //pen.setWidth(2);
-    }
-
-    /* Set pen and draw rect */
-    painter->setPen(pen);
+    painter->setPen(QColor(255, 255, 255, 128));
     painter->drawRect(1 + (x_pos * size), 1 + (y_pos * size),
                       size - 2, size - 2);
+  }
+  if(hovered)
+  {
+    painter->fillRect(2 + x_pos * size, 2 + y_pos * size, size - 3, size - 3,
+                      QColor(200, 200, 200, 128));
   }
 
   /* Render the passability */

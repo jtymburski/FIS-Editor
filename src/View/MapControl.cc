@@ -218,7 +218,7 @@ void MapControl::duplicateSubMap()
     /* Create new map */
     int map_index = editing_map->setMap(id, "TEMP", 1, 1);
     SubMapInfo* new_map = editing_map->getMapByIndex(map_index);
-    EditorMap::copySubMap(copy_map, new_map);
+    EditorMap::copySubMap(copy_map, new_map, editing_map->getTileIcons());
     if(new_map->name == "MAIN")
       new_map->name += " duped";
 

@@ -74,9 +74,6 @@ protected:
 public slots:
 signals:
 public:
-  /* Clone */
-  EditorMap* clone();
-
   /* Returns the ID of the map set */
   virtual int getID();
 
@@ -102,6 +99,9 @@ public:
   int getSpriteCount();
   int getSpriteIndex(int id);
   QVector<EditorSprite*> getSprites();
+
+  /* Returns the tile icons */
+  TileIcons* getTileIcons();
 
   /* Sets the ID of the map set */
   virtual void setID(int id);
@@ -152,7 +152,8 @@ public:
                                   int width = 0, int height = 0);
 
   /* Copies information, except ID, from one sub-map to another */
-  static bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
+  static bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map, 
+                         TileIcons* icons);
 
   /* Returns the push button for the map dialog above. Will seg with others */
   static QPushButton* getDialogButton(QDialog* dialog);

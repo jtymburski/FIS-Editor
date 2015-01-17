@@ -166,8 +166,9 @@ void MapView::itemClick(EditorTile* tile)
     }
     else if(cursor_mode == EditorEnumDb::FILL)
     {
-      recursiveFill(tile->getX(), tile->getY(), layer,
-                    tile->getSprite(layer), map_render->getRenderingMap());
+      if(selected != tile->getSprite(layer))
+        recursiveFill(tile->getX(), tile->getY(), layer,
+                      tile->getSprite(layer), map_render->getRenderingMap());
     }
   }
 }
