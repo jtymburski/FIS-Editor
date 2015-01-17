@@ -18,14 +18,30 @@ public:
   enum Border {STANDARD, HOVERED, SELECTED};
 
   /* Enum for cursor mode */
-  enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL};
+  enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL,PASS_ALL,
+                   PASS_N,PASS_E,PASS_S,PASS_W};
 
   /* Enum for type of FrameView */
   enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
 
   /* Enum for the tile layers */
-  enum Layer {BASE,ENHANCER,LOWER1,LOWER2,LOWER3,LOWER4,
-                    LOWER5,UPPER1,UPPER2,UPPER3,UPPER4,UPPER5};
+  enum Layer {BASE = 0,
+              ENHANCER = 1,
+              LOWER1 = 2,
+              LOWER2 = 3,
+              LOWER3 = 4,
+              LOWER4 = 5,
+              LOWER5 = 6,
+              ITEM = 7,
+              THING = 8,
+              PERSON = 9,
+              UPPER1 = 10,
+              UPPER2 = 11,
+              UPPER3 = 12,
+              UPPER4 = 13,
+              UPPER5 = 14,
+              INVALID = 15
+             };
 
   /* Map view mode */
   enum MapViewMode {RAW_VIEW = 0,

@@ -24,7 +24,7 @@ class SpriteViewList : public QListWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteViewList(QWidget* parent = 0, EditorSprite* c = 0);
+  SpriteViewList(QWidget* parent = NULL);
 
   /* Destructor Function */
   ~SpriteViewList();

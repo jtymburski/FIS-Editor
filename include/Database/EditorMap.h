@@ -39,7 +39,8 @@ public:
 
   /* Constructor function with id and name plus optional width and height
    * of base map */
-  EditorMap(int id, QString name, int width = 0, int height = 0);
+  EditorMap(int id, QString name, int width = 0, int height = 0,
+            TileIcons* icons = NULL);
 
   /* Copy constructor */
   EditorMap(const EditorMap &source);
@@ -60,6 +61,9 @@ private:
   /* The set of sub-maps */
   QVector<SubMapInfo*> sub_maps;
 
+  /* Rendering tile icons */
+  TileIcons* tile_icons;
+
   /*------------------- Constants -----------------------*/
   const static int kUNSET_ID; /* The unset ID */
 
@@ -78,8 +82,10 @@ public:
 
   /* Returns the stored map information */
   SubMapInfo* getMap(int id);
+  SubMapInfo* getMapByIndex(int index);
   int getMapCount();
   int getMapIndex(int id);
+  QString getMapNameList(int index);
   QVector<SubMapInfo*> getMaps();
 
   /* Returns the name of the map set */
@@ -110,8 +116,22 @@ public:
   /* Sets a sprite */
   int setSprite(EditorSprite* sprite);
 
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons);
+
+  /* Sets layer visibility */
+  void setVisibility(EditorEnumDb::Layer layer, bool visible);
+
+  /* Set grid and passability visibility */
+  void setVisibilityGrid(bool);
+  void setVisibilityPass(bool);
+
+  /* Update all tiles */
+  void updateAll();
+
   /* Unset map(s) */
-  void unsetMap(int id);
+  bool unsetMap(int id);
+  bool unsetMapByIndex(int index);
   void unsetMaps();
 
   /* Unset sprite(s) */
@@ -130,6 +150,9 @@ public:
                                   QString title = "New Map Details",
                                   QString name = "Awesomeland",
                                   int width = 0, int height = 0);
+
+  /* Copies information, except ID, from one sub-map to another */
+  static bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
 
   /* Returns the push button for the map dialog above. Will seg with others */
   static QPushButton* getDialogButton(QDialog* dialog);

@@ -31,7 +31,7 @@ class EditorTile : public QGraphicsItem
 {
 public:
   /* Constructor Function */
-  EditorTile(int x = 0, int y = 0);
+  EditorTile(int x = 0, int y = 0, TileIcons* icons = NULL);
 
   /* Copy constructor function */
   EditorTile(const EditorTile &source);
@@ -56,6 +56,9 @@ private:
   /* The Tile that will be placed into Univursa.exe */
   Tile tile;
 
+  /* The rendering tile icons */
+  TileIcons* tile_icons;
+
   /* Visibility painting control */
   bool visible_grid;
   bool visible_passability;
@@ -72,10 +75,6 @@ protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorTile &source);
 
-  /* Hover events */
-  void hoverEnterEvent(QGraphicsSceneHoverEvent * event);
-  void hoverLeaveEvent(QGraphicsSceneHoverEvent * event);
-
 public slots:
 public:
   /* Necessary function for returning the bounding rectangle */
@@ -87,6 +86,20 @@ public:
   /* Returns the passability based on layer and direction */
   bool getPassability(EditorEnumDb::Layer layer, Direction direction);
 
+  /* Returns the passability based on direction and what layers are visible */
+  bool getPassabilityVisible(Direction direction);
+
+  /* Returns layer visibility */
+  bool getVisibility(EditorEnumDb::Layer layer);
+
+  /* Returns grid and passability visibility */
+  bool getVisibilityGrid();
+  bool getVisibilityPass();
+
+  /* Returns X and Y, in tile set */
+  int getX();
+  int getY();
+
   /* Returns the sprite based on layer and direction */
   EditorSprite* getSprite(EditorEnumDb::Layer layer);
 
@@ -97,7 +110,18 @@ public:
   /* Function to place a current sprite on the maps active layer */
   bool place(EditorEnumDb::Layer layer, EditorSprite* sprite);
 
+  /* Sets the hover state */
+  void setHover(bool);
+
+  /* Sets the passability based on layer and direction */
+  void setPassability(EditorEnumDb::Layer layer, Direction direction,
+                      bool passable);
+
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons);
+
   /* Sets the various layer visibilities */
+  void setVisibility(EditorEnumDb::Layer layer, bool visible);
   void setVisibilityBase(bool);
   void setVisibilityEnhancer(bool);
   bool setVisibilityLower(int, bool);

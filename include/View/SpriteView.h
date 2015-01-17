@@ -55,7 +55,6 @@ protected:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
 public slots:
-
   /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);
 

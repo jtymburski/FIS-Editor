@@ -48,6 +48,9 @@ public:
   ~MapView();
 
 private:
+  /* Cursor Mode */
+  EditorEnumDb::CursorMode cursor_mode;
+
   /* The editing map */
   EditorMap* editing_map;
 
@@ -61,33 +64,17 @@ private:
   MapDatabase* map_database;
 
   /* Map editor - center portion */
-  MapRender* map_editor;
-  //QGraphicsView*
-
-  /* Scroll area pointer */
-  //QScrollArea* sprites_tab_scrollwrapper;
-
-  /* Sidebar dock pointer */
-  //QDockWidget* dock;
-  //QDockWidget* layer_dock;
-
-  /* The currently selected sprite */
-  QString current_sprite_choice;
-
-  /* Map size for initial creation */
-  //int x_size;
-  //int y_size;
-
-  /* Cursor Mode */
-  //EditorEnumDb::CursorMode cursor_mode;
-
-  /* Map View pointer */
-  //QGraphicsView* map_scroller;
+  MapRender* map_render;
+  QGraphicsView* map_render_view;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Recursively fill all similar adjoining tiles with the selected sprite */
+  void recursiveFill(int x, int y, EditorEnumDb::Layer layer,
+                     EditorSprite* target, SubMapInfo* map);
+
   /* Sets up the database bar */
   void setupLeftBar();
 
@@ -112,11 +99,15 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Sets the picked sprite */
-  void setSprite(QString);
+  /* Adds item, as dictated by parent classes, to the tile */
+  void itemClick(EditorTile* tile);
 
-  /* Sets the Active Layer on the Map */
-  void setActiveLayer(QListWidgetItem* layer);
+  /* Mass add/delete of rect of tiles */
+  void itemMassClick(QList<EditorTile*> tiles, bool erase);
+
+  /* Passability set and unset on given tile */
+  void passSet(EditorTile* tile);
+  void passUnset(EditorTile* tile);
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
@@ -130,6 +121,9 @@ public:
 
   /* Returns the Map Editor (center portion */
   MapRender* getMapEditorView();
+
+  /* Sets the internal cursor mode */
+  void setCursorMode(EditorEnumDb::CursorMode mode);
 
   /* Sets the map being edited */
   void setMapEditor(EditorMap* editor);

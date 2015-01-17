@@ -20,11 +20,13 @@ const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
  * Description: Constructor function
  *
  * Input: x/y coordinates on the map grid and a z depth
+ *        TileIcons* icons - the rendering tile icons. Default NULL
  */
-EditorTile::EditorTile(int x, int y)
+EditorTile::EditorTile(int x, int y, TileIcons* icons)
 {
-  /* Class control */
   setAcceptHoverEvents(true);
+
+  /* Class control */
   hovered = false;
   tile.setStatus(Tile::ACTIVE);
   visible_grid = true;
@@ -45,6 +47,8 @@ EditorTile::EditorTile(int x, int y)
     layers_lower.push_back(temp);
   for(int i = 0; i < kUPPER_COUNT_MAX; i++)
     layers_upper.push_back(temp);
+
+  setTileIcons(icons);
 }
 
 /*
@@ -91,52 +95,26 @@ void EditorTile::copySelf(const EditorTile &source)
   y_pos = source.y_pos;
 
   /* Copy base */
-  *layer_base.sprite = *source.layer_base.sprite;
+  layer_base.sprite = source.layer_base.sprite;
   layer_base.visible = source.layer_base.visible;
 
   /* Copy enhancer */
-  *layer_enhancer.sprite = *source.layer_enhancer.sprite;
+  layer_enhancer.sprite = source.layer_enhancer.sprite;
   layer_enhancer.visible = source.layer_enhancer.visible;
 
   /* Copy lower */
   for(int i = 0; i < layers_lower.size(); i++)
   {
-    *layers_lower[i].sprite = *source.layers_lower[i].sprite;
+    layers_lower[i].sprite = source.layers_lower[i].sprite;
     layers_lower[i].visible = source.layers_lower[i].visible;
   }
 
   /* Copy upper */
   for(int i = 0; i < layers_upper.size(); i++)
   {
-    *layers_upper[i].sprite = *source.layers_upper[i].sprite;
+    layers_upper[i].sprite = source.layers_upper[i].sprite;
     layers_upper[i].visible = source.layers_upper[i].visible;
   }
-}
-
-/*
- * Description: Hover enter event class re-implementation
- *
- * Inputs: QGraphicsSceneHoverEvent* - hover event handler
- * Output: none
- */
-void EditorTile::hoverEnterEvent(QGraphicsSceneHoverEvent * event)
-{
-  (void)event;
-  hovered = true;
-  update();
-}
-
-/*
- * Description: Hover exit event class re-implementation
- *
- * Inputs: QGraphicsSceneHoverEvent* - hover event handler
- * Output: none
- */
-void EditorTile::hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
-{
-  (void)event;
-  hovered = false;
-  update();
 }
 
 /*============================================================================
@@ -204,6 +182,111 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
       break;
   }
   return false;
+}
+
+/*
+ * Description: Returns passability based on visible layers and a direction.
+ *
+ * Inputs: Direction direction - the direction trying to exit.
+ * Output: bool - true if passable
+ */
+bool EditorTile::getPassabilityVisible(Direction direction)
+{
+  bool passable = true;
+
+  if(layer_base.visible)
+    passable &= getPassability(EditorEnumDb::BASE, direction);
+  if(layers_lower[0].visible)
+    passable &= getPassability(EditorEnumDb::LOWER1, direction);
+  if(layers_lower[1].visible)
+    passable &= getPassability(EditorEnumDb::LOWER2, direction);
+  if(layers_lower[2].visible)
+    passable &= getPassability(EditorEnumDb::LOWER3, direction);
+  if(layers_lower[3].visible)
+    passable &= getPassability(EditorEnumDb::LOWER4, direction);
+  if(layers_lower[4].visible)
+    passable &= getPassability(EditorEnumDb::LOWER5, direction);
+
+  return passable;
+}
+
+/*
+ * Description: Returns the visibility of the passed in layer.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to get visibility for
+ * Output: bool - true if that layer is visible
+ */
+bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
+{
+  if(layer == EditorEnumDb::BASE)
+    return layer_base.visible;
+  else if(layer == EditorEnumDb::ENHANCER)
+    return layer_enhancer.visible;
+  else if(layer == EditorEnumDb::LOWER1)
+    return layers_lower[0].visible;
+  else if(layer == EditorEnumDb::LOWER2)
+    return layers_lower[1].visible;
+  else if(layer == EditorEnumDb::LOWER3)
+    return layers_lower[2].visible;
+  else if(layer == EditorEnumDb::LOWER4)
+    return layers_lower[3].visible;
+  else if(layer == EditorEnumDb::LOWER5)
+    return layers_lower[4].visible;
+  else if(layer == EditorEnumDb::UPPER1)
+    return layers_upper[0].visible;
+  else if(layer == EditorEnumDb::UPPER2)
+    return layers_upper[1].visible;
+  else if(layer == EditorEnumDb::UPPER3)
+    return layers_upper[2].visible;
+  else if(layer == EditorEnumDb::UPPER4)
+    return layers_upper[3].visible;
+  else if(layer == EditorEnumDb::UPPER5)
+    return layers_upper[4].visible;
+  return true;
+}
+
+/*
+ * Description: Returns if the grid is visible on the tile.
+ *
+ * Inputs: none
+ * Output: bool - true if grid is visible
+ */
+bool EditorTile::getVisibilityGrid()
+{
+  return visible_grid;
+}
+
+/*
+ * Description: Returns if the passability is visible on the tile.
+ *
+ * Inputs: none
+ * Output: bool - true if passability is visible
+ */
+bool EditorTile::getVisibilityPass()
+{
+  return visible_passability;
+}
+
+/*
+ * Description: Returns the X of the tile in the map array.
+ *
+ * Inputs: none
+ * Output: int - array interpretation of X
+ */
+int EditorTile::getX()
+{
+  return x_pos;
+}
+
+/*
+ * Description: Returns the Y of the tile in the map array.
+ *
+ * Inputs: none
+ * Output: int - array interpretation of Y
+ */
+int EditorTile::getY()
+{
+  return y_pos;
 }
 
 /*
@@ -287,70 +370,54 @@ void EditorTile::paint(QPainter *painter,
   /* Render the grid */
   if(visible_grid)
   {
-    if(hovered)
-      painter->setPen(QColor(0,255,100,255));
-    else
-      painter->setPen(QColor(255,255,255,128));
+    QPen pen(QColor(255, 255, 255, 128));
 
+    if(hovered)
+    {
+      pen.setColor(QColor(0,255,100,255));
+      //pen.setWidth(2);
+    }
+
+    /* Set pen and draw rect */
+    painter->setPen(pen);
     painter->drawRect(1 + (x_pos * size), 1 + (y_pos * size),
                       size - 2, size - 2);
   }
 
   /* Render the passability */
-  if(visible_passability)
+  if(visible_passability && tile_icons != NULL)
   {
-    painter->setPen(QColor(0,0,0,0));
-    QPointF Npoints[4] =
-    {
-      QPointF((x_pos * size) + 0, (y_pos * size) + 0),
-      QPointF((x_pos * size) + 4, (y_pos * size) + 4),
-      QPointF((x_pos * size) + size - 4, (y_pos * size) + 4),
-      QPointF((x_pos * size) + size, (y_pos * size) + 0)
-    };
-    QPointF Epoints[4] =
-    {
-      QPointF((x_pos * size) + size,(y_pos*size)+0),
-      QPointF((x_pos * size) + size-4,(y_pos*size)+4),
-      QPointF((x_pos * size) + size-4,(y_pos*size)+size-4),
-      QPointF((x_pos * size) + size,(y_pos*size)+size)
-    };
-    QPointF Spoints[4] =
-    {
-      QPointF((x_pos * size) + 0, (y_pos * size) + size),
-      QPointF((x_pos * size) + 4, (y_pos * size) + size - 4),
-      QPointF((x_pos * size) + size - 4, (y_pos * size) + size - 4),
-      QPointF((x_pos * size) + size, (y_pos * size) + size)
-    };
-    QPointF Wpoints[4] =
-    {
-      QPointF((x_pos * size) + 0, (y_pos * size) + 0),
-      QPointF((x_pos * size) + 4, (y_pos * size) + 4),
-      QPointF((x_pos * size) + 4, (y_pos * size) + size - 4),
-      QPointF((x_pos * size) + 0, (y_pos * size) + size)
-    };
-    if(tile.getPassabilityExiting(Direction::NORTH))
-      painter->setBrush(QColor(0,255,0,128));
+    /* North Passability */
+    if(getPassabilityVisible(Direction::NORTH))
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->passN);
     else
-      painter->setBrush(QColor(255,0,0,128));
-    painter->drawPolygon(Npoints,4);
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->nopassN);
 
-    if(tile.getPassabilityExiting(Direction::EAST))
-      painter->setBrush(QColor(0,255,0,128));
+    /* East Passability */
+    if(getPassabilityVisible(Direction::EAST))
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->passE);
     else
-      painter->setBrush(QColor(255,0,0,128));
-    painter->drawPolygon(Epoints,4);
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->nopassE);
 
-    if(tile.getPassabilityExiting(Direction::SOUTH))
-      painter->setBrush(QColor(0,255,0,128));
+    /* South Passability */
+    if(getPassabilityVisible(Direction::SOUTH))
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->passS);
     else
-      painter->setBrush(QColor(255,0,0,128));
-    painter->drawPolygon(Spoints,4);
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->nopassS);
 
-    if(tile.getPassabilityExiting(Direction::WEST))
-      painter->setBrush(QColor(0,255,0,128));
+    /* West Passability */
+    if(getPassabilityVisible(Direction::WEST))
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->passW);
     else
-      painter->setBrush(QColor(255,0,0,128));
-    painter->drawPolygon(Wpoints,4);
+      painter->drawPixmap(x_pos * size, y_pos * size, size, size,
+                          *tile_icons->nopassW);
   }
 }
 
@@ -370,6 +437,12 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite)
       case EditorEnumDb::BASE:
         layer_base.sprite = sprite;
         tile.setBase(sprite->getSprite());
+
+        /* Default to fully passable */
+        tile.setBasePassability(Direction::NORTH, true);
+        tile.setBasePassability(Direction::EAST, true);
+        tile.setBasePassability(Direction::SOUTH, true);
+        tile.setBasePassability(Direction::WEST, true);
         break;
       case EditorEnumDb::ENHANCER:
         layer_enhancer.sprite = sprite;
@@ -425,6 +498,100 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite)
 }
 
 /*
+ * Description: Sets the hover state of the QGraphicsItem.
+ *
+ * Inputs: bool hover - is it being hovered on?
+ * Output: none
+ */
+void EditorTile::setHover(bool hover)
+{
+  hovered = hover;
+  update();
+}
+
+/* Sets the passability based on layer and direction */
+void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
+                                bool passable)
+{
+  switch(layer)
+  {
+    case EditorEnumDb::BASE:
+      tile.setBasePassability(direction, passable);
+      break;
+    case EditorEnumDb::LOWER1:
+      tile.setLowerPassability(0, direction, passable);
+      break;
+    case EditorEnumDb::LOWER2:
+      tile.setLowerPassability(1, direction, passable);
+      break;
+    case EditorEnumDb::LOWER3:
+      tile.setLowerPassability(2, direction, passable);
+      break;
+    case EditorEnumDb::LOWER4:
+      tile.setLowerPassability(3, direction, passable);
+      break;
+    case EditorEnumDb::LOWER5:
+      tile.setLowerPassability(4, direction, passable);
+      break;
+    case EditorEnumDb::ENHANCER:
+    case EditorEnumDb::UPPER1:
+    case EditorEnumDb::UPPER2:
+    case EditorEnumDb::UPPER3:
+    case EditorEnumDb::UPPER4:
+    case EditorEnumDb::UPPER5:
+    default:
+      break;
+  }
+  update();
+}
+
+/*
+ * Description: Sets the tile icons, for rendering purposes.
+ *
+ * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
+ * Output: none
+ */
+void EditorTile::setTileIcons(TileIcons* icons)
+{
+  tile_icons = icons;
+}
+
+/*
+ * Description: Sets the visiblity based on the layer and visible status.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to modify visibility
+ *         bool visible - is the layer visible?
+ * Output: none
+ */
+void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
+{
+  if(layer == EditorEnumDb::BASE)
+    setVisibilityBase(visible);
+  else if(layer == EditorEnumDb::ENHANCER)
+    setVisibilityEnhancer(visible);
+  else if(layer == EditorEnumDb::LOWER1)
+    setVisibilityLower(0, visible);
+  else if(layer == EditorEnumDb::LOWER2)
+    setVisibilityLower(1, visible);
+  else if(layer == EditorEnumDb::LOWER3)
+    setVisibilityLower(2, visible);
+  else if(layer == EditorEnumDb::LOWER4)
+    setVisibilityLower(3, visible);
+  else if(layer == EditorEnumDb::LOWER5)
+    setVisibilityLower(4, visible);
+  else if(layer == EditorEnumDb::UPPER1)
+    setVisibilityUpper(0, visible);
+  else if(layer == EditorEnumDb::UPPER2)
+    setVisibilityUpper(1, visible);
+  else if(layer == EditorEnumDb::UPPER3)
+    setVisibilityUpper(2, visible);
+  else if(layer == EditorEnumDb::UPPER4)
+    setVisibilityUpper(3, visible);
+  else if(layer == EditorEnumDb::UPPER5)
+    setVisibilityUpper(4, visible);
+}
+
+/*
  * Description: Sets the base layer visibility
  *
  * Input: Visibility toggle
@@ -432,6 +599,7 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite)
 void EditorTile::setVisibilityBase(bool toggle)
 {
   layer_base.visible = toggle;
+  update();
 }
 
 /*
@@ -442,6 +610,7 @@ void EditorTile::setVisibilityBase(bool toggle)
 void EditorTile::setVisibilityEnhancer(bool toggle)
 {
   layer_enhancer.visible = toggle;
+  update();
 }
 
 /*
@@ -452,6 +621,7 @@ void EditorTile::setVisibilityEnhancer(bool toggle)
 void EditorTile::setVisibilityGrid(bool toggle)
 {
   visible_grid = toggle;
+  update();
 }
 
 /*
@@ -465,6 +635,7 @@ bool EditorTile::setVisibilityLower(int index, bool toggle)
   if(index >= 0 && index < kLOWER_COUNT_MAX)
   {
     layers_lower[index].visible = toggle;
+    update();
     return true;
   }
   return false;
@@ -478,6 +649,7 @@ bool EditorTile::setVisibilityLower(int index, bool toggle)
 void EditorTile::setVisibilityPass(bool toggle)
 {
   visible_passability = toggle;
+  update();
 }
 
 /*
@@ -491,6 +663,7 @@ bool EditorTile::setVisibilityUpper(int index, bool toggle)
   if(index >= 0 && index < kUPPER_COUNT_MAX)
   {
     layers_upper[index].visible = toggle;
+    update();
     return true;
   }
   return false;
@@ -601,6 +774,8 @@ void EditorTile::unplace(EditorSprite* sprite)
       tile.unsetUpper(i);
     }
   }
+
+  update();
 }
 
 /*============================================================================

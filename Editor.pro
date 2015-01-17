@@ -44,7 +44,6 @@ SOURCES += \
     src/View/RawImageList.cc \
     src/View/RawImage.cc \
     src/View/SpriteView.cc \
-    src/View/TileRender.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
@@ -98,7 +97,6 @@ HEADERS += \
     include/View/RawImageList.h \
     include/View/RawImage.h \
     include/View/SpriteView.h \
-    include/View/TileRender.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \

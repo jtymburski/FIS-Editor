@@ -24,32 +24,42 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   mapsize_dialog = NULL;
 
   /* Top view set-up */
-  top_view = new QListWidget(this);
-  top_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  view_top = new QListWidget(this);
+  view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
   items << "Maps" << "Persons" << "Parties" << "Items" << "Actions"
         << "Races" << "BattleClasses" << "Skill Sets" << "Skills"
         << "Equipment" << "B.U.B.B.I.E's";
-  top_view->addItems(items);
-  top_view->setCurrentRow(0);
-  connect(top_view,SIGNAL(currentRowChanged(int)),
+  view_top->addItems(items);
+  view_top->setCurrentRow(0);
+  connect(view_top,SIGNAL(currentRowChanged(int)),
           this,SLOT(rowChange(int)));
 
   /* Bottom view set-up */
-  bottom_view = new QListWidget(this);
-  bottom_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  connect(bottom_view, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+  view_bottom = new QListWidget(this);
+  view_bottom->setContextMenuPolicy(Qt::CustomContextMenu);
+  view_bottom->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  connect(view_bottom, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
           this, SLOT(modifySelection(QListWidgetItem*)));
+  connect(view_bottom, SIGNAL(customContextMenuRequested(QPoint)),
+          this, SLOT(listMenuRequested(QPoint)));
+
+  /* Right click menu control */
+  rightclick_menu = new QMenu("Map Edit", this);
+  QAction* rename_map = new QAction("Rename", rightclick_menu);
+  connect(rename_map, SIGNAL(triggered()), this, SLOT(renameMap()));
+  rightclick_menu->addAction(rename_map);
+  rightclick_menu->hide();
 
   /* Set-up buttons at the bottom */
-  new_button = new QPushButton("New",this);
-  del_button = new QPushButton("Delete",this);
-  import_button = new QPushButton("Import",this);
-  duplicate_button = new QPushButton("Duplicate",this);
-  connect(new_button, SIGNAL(clicked()), this, SLOT(createNewResource()));
-  connect(del_button, SIGNAL(clicked()), this, SLOT(deleteResource()));
-  connect(import_button, SIGNAL(clicked()), this, SLOT(importResource()));
-  connect(duplicate_button, SIGNAL(clicked()), this, SLOT(duplicateResource()));
+  button_new = new QPushButton("New",this);
+  button_delete = new QPushButton("Delete",this);
+  button_import = new QPushButton("Import",this);
+  button_duplicate = new QPushButton("Duplicate",this);
+  connect(button_new, SIGNAL(clicked()), this, SLOT(createNewResource()));
+  connect(button_delete, SIGNAL(clicked()), this, SLOT(deleteResource()));
+  connect(button_import, SIGNAL(clicked()), this, SLOT(importResource()));
+  connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateResource()));
 
   /* Configure the layout */
   layout = new QVBoxLayout(this);
@@ -59,17 +69,27 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   font.setBold(true);
   label->setFont(font);
   layout->addWidget(label);
-  layout->addWidget(top_view);
-  layout->addWidget(bottom_view);
+  layout->addWidget(view_top);
+  layout->addWidget(view_bottom);
   QHBoxLayout* button_layout = new QHBoxLayout();
-  button_layout->addWidget(new_button);
-  button_layout->addWidget(del_button);
-  button_layout->addWidget(import_button);
-  button_layout->addWidget(duplicate_button);
+  button_layout->addWidget(button_new);
+  button_layout->addWidget(button_delete);
+  button_layout->addWidget(button_import);
+  button_layout->addWidget(button_duplicate);
   layout->addLayout(button_layout);
 
   /* Update the bottom list */
-  rowChange(top_view->currentRow());
+  rowChange(view_top->currentRow());
+
+  /* Set-up the tile icons */
+  tile_icons.passN = new QPixmap(":/Icons/Resources/pass_N.png");
+  tile_icons.passE = new QPixmap(":/Icons/Resources/pass_E.png");
+  tile_icons.passS = new QPixmap(":/Icons/Resources/pass_S.png");
+  tile_icons.passW = new QPixmap(":/Icons/Resources/pass_W.png");
+  tile_icons.nopassN = new QPixmap(":/Icons/Resources/nopass_N.png");
+  tile_icons.nopassE = new QPixmap(":/Icons/Resources/nopass_E.png");
+  tile_icons.nopassS = new QPixmap(":/Icons/Resources/nopass_S.png");
+  tile_icons.nopassW = new QPixmap(":/Icons/Resources/nopass_W.png");
 }
 
 GameDatabase::~GameDatabase()
@@ -139,6 +159,24 @@ GameDatabase::~GameDatabase()
   for(int i = 0; i < data_skillset.size(); i++)
     delete data_skillset[i];
   data_skillset.clear();
+
+  /* UnSet the tile icons */
+  delete tile_icons.passN;
+  tile_icons.passN = NULL;
+  delete tile_icons.passE;
+  tile_icons.passE = NULL;
+  delete tile_icons.passS;
+  tile_icons.passS = NULL;
+  delete tile_icons.passW;
+  tile_icons.passW = NULL;
+  delete tile_icons.nopassN;
+  tile_icons.nopassN = NULL;
+  delete tile_icons.nopassE;
+  tile_icons.nopassE = NULL;
+  delete tile_icons.nopassS;
+  tile_icons.nopassS = NULL;
+  delete tile_icons.nopassW;
+  tile_icons.nopassW = NULL;
 }
 
 /*============================================================================
@@ -157,9 +195,9 @@ void GameDatabase::createNewMap()
   {
     if(data_map.size() > 0)
       data_map.push_back(new EditorMap(data_map.last()->getID() + 1, name,
-                                       width, height));
+                                       width, height, &tile_icons));
     else
-      data_map.push_back(new EditorMap(0, name, width, height));
+      data_map.push_back(new EditorMap(0, name, width, height, &tile_icons));
   }
 
   /* Finally, close the dialog */
@@ -168,15 +206,15 @@ void GameDatabase::createNewMap()
   mapsize_dialog = NULL;
 
   /* Update bottom view */
-  modifyBottomList(top_view->currentRow());
-  bottom_view->setCurrentRow(bottom_view->count() - 1);
+  modifyBottomList(view_top->currentRow());
+  view_bottom->setCurrentRow(view_bottom->count() - 1);
 }
 
 /* Creates a new resource -> new button */
 void GameDatabase::createNewResource()
 {
   QString name;
-  switch(top_view->currentRow())
+  switch(view_top->currentRow())
   {
     /* -- MAP -- */
     case 0:
@@ -281,25 +319,25 @@ void GameDatabase::createNewResource()
   }
 
   /* Set selection to the new row and update */
-  modifyBottomList(top_view->currentRow());
-  if(top_view->currentRow() != 0)
-    bottom_view->setCurrentRow(bottom_view->count() - 1);
+  modifyBottomList(view_top->currentRow());
+  if(view_top->currentRow() != 0)
+    view_bottom->setCurrentRow(view_bottom->count() - 1);
 }
 
 // TODO: Comment
 void GameDatabase::deleteResource()
 {
-  if(bottom_view->currentRow() >= 0)
+  if(view_bottom->currentRow() >= 0)
   {
-    int index = bottom_view->currentRow();
+    int index = view_bottom->currentRow();
 
     /* Check if it's the bottom row */
     bool bottom = false;
-    if((index + 1) == bottom_view->count())
+    if((index + 1) == view_bottom->count())
       bottom = true;
 
     /* Switch through what to do */
-    switch(top_view->currentRow())
+    switch(view_top->currentRow())
     {
       /* -- MAP -- */
       case 0:
@@ -416,26 +454,29 @@ void GameDatabase::deleteResource()
     }
 
     /* Update list */
-    modifyBottomList(top_view->currentRow());
+    modifyBottomList(view_top->currentRow());
     if(bottom)
-      bottom_view->setCurrentRow(bottom_view->count() - 1);
+      view_bottom->setCurrentRow(view_bottom->count() - 1);
   }
 }
 
 void GameDatabase::duplicateResource()
 {
-  if(bottom_view->currentRow() >= 0)
+  if(view_bottom->currentRow() >= 0)
   {
     /* Store old index and create a new resource */
     int id = 0;
-    int index = bottom_view->currentRow();
-    createNewResource();
+    int index = view_bottom->currentRow();
+    if(view_top->currentRow() != 0)
+      createNewResource();
 
     /* Switch through and copy the data from the selected */
-    switch(top_view->currentRow())
+    switch(view_top->currentRow())
     {
       /* -- MAP -- */
       case 0:
+        data_map.push_back(new EditorMap(data_map.last()->getID() + 1,
+                                         "TEMP", 0, 0));
         id = data_map.last()->getID();
         *data_map.last() = *data_map[index];
         data_map.last()->setID(id);
@@ -505,8 +546,8 @@ void GameDatabase::duplicateResource()
     }
 
     /* Update list */
-    modifyBottomList(top_view->currentRow());
-    bottom_view->setCurrentRow(bottom_view->count() - 1);
+    modifyBottomList(view_top->currentRow());
+    view_bottom->setCurrentRow(view_bottom->count() - 1);
   }
 }
 
@@ -518,14 +559,23 @@ void GameDatabase::importResource()
                            "Coming soon to a production near you!");
 }
 
+/* Right click list menu on bottom list */
+void GameDatabase::listMenuRequested(const QPoint & pos)
+{
+  (void)pos;
+  /* Only proceed if it's the map set */
+  if(view_top->currentRow() == 0)
+    rightclick_menu->exec(QCursor::pos());
+}
+
 /* Double click on an element */
 //void GameDatabase::modifySelection(QModelIndex index)
 void GameDatabase::modifySelection(QListWidgetItem* item)
 {
-  int index = bottom_view->currentRow();
+  int index = view_bottom->currentRow();
   (void)item;
 
-  switch(top_view->currentRow())
+  switch(view_top->currentRow())
   {
     /* -- MAP -- */
     case 0:
@@ -586,9 +636,30 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       break;
   }
 
-  modifyBottomList(top_view->currentRow());
+  modifyBottomList(view_top->currentRow());
 }
 
+/* Renames the selected map */
+void GameDatabase::renameMap()
+{
+  rightclick_menu->hide();
+
+  QListWidgetItem* item = view_bottom->currentItem();
+  if(item != NULL)
+  {
+    int row_index = view_bottom->currentRow();
+    bool ok;
+    QString text = QInputDialog::getText(this, "Rename Map", "Map Name:",
+                        QLineEdit::Normal, data_map[row_index]->getName(), &ok);
+    if(ok && !text.isEmpty())
+    {
+      data_map[row_index]->setName(text);
+      modifyBottomList(view_top->currentRow());
+    }
+  }
+}
+
+/* Row change on top list */
 void GameDatabase::rowChange(int index)
 {
   switch(index)
@@ -660,7 +731,7 @@ void GameDatabase::rowChange(int index)
 void GameDatabase::updateBottomListName(QString str)
 {
   (void)str;
-  modifyBottomList(top_view->currentRow());
+  modifyBottomList(view_top->currentRow());
 }
 
 /*============================================================================
@@ -672,10 +743,10 @@ void GameDatabase::modifyBottomList(int index)
 {
   int bold_index = -1;
   QStringList bottom_list;
-  int last_row = bottom_view->currentRow();
+  int last_row = view_bottom->currentRow();
 
   /* Clear up the existing list */
-  bottom_view->clear();
+  view_bottom->clear();
 
   switch(index)
   {
@@ -795,39 +866,39 @@ void GameDatabase::modifyBottomList(int index)
 
   /* Set up the bottom view */
   QFont font;
-  bottom_view->addItems(bottom_list);
+  view_bottom->addItems(bottom_list);
   font.setBold(false);
-  for(int i = 0; i < bottom_view->count(); i++)
-    bottom_view->item(i)->setFont(font);
+  for(int i = 0; i < view_bottom->count(); i++)
+    view_bottom->item(i)->setFont(font);
   if(bold_index != -1)
   {
     font.setBold(true);
-    bottom_view->item(bold_index)->setFont(font);
+    view_bottom->item(bold_index)->setFont(font);
   }
 
   /* Replace selected row */
-  if(last_row >= 0 && last_row < bottom_view->count())
-    bottom_view->setCurrentRow(last_row);
+  if(last_row >= 0 && last_row < view_bottom->count())
+    view_bottom->setCurrentRow(last_row);
 
   /* Enable/disable buttons as needed */
-  if(bottom_view->count() > 0)
+  if(view_bottom->count() > 0)
   {
-    del_button->setEnabled(true);
-    duplicate_button->setEnabled(true);
+    button_delete->setEnabled(true);
+    button_duplicate->setEnabled(true);
   }
   else
   {
-    del_button->setDisabled(true);
-    duplicate_button->setDisabled(true);
+    button_delete->setDisabled(true);
+    button_duplicate->setDisabled(true);
   }
 }
 
 /* Temp start - TODO: REMOVE */
 void GameDatabase::tempMake()
 {
-  data_map.push_back(new EditorMap(0, "TEST", 100, 100));
+  data_map.push_back(new EditorMap(0, "TEST", 100, 100, &tile_icons));
   current_map = data_map.last();
-  modifyBottomList(top_view->currentRow());
-  bottom_view->setCurrentRow(bottom_view->count() - 1);
+  modifyBottomList(view_top->currentRow());
+  view_bottom->setCurrentRow(view_bottom->count() - 1);
   emit changeMap(current_map);
 }

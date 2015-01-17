@@ -7,6 +7,7 @@
 #ifndef GAMEDATABASE_H
 #define GAMEDATABASE_H
 
+#include <QInputDialog>
 #include <QLabel>
 #include <QListWidget>
 #include <QMessageBox>
@@ -38,12 +39,11 @@ public:
   ~GameDatabase();
 
 private:
-  /* List Widgets */
-  QListWidget* top_view;
-  QListWidget* bottom_view;
-
-  /* Layout */
-  QVBoxLayout* layout;
+  /* Buttons at bottom of database */
+  QPushButton* button_new;
+  QPushButton* button_delete;
+  QPushButton* button_import;
+  QPushButton* button_duplicate;
 
   /* Currently selected object */
   EditorAction* current_action;
@@ -71,14 +71,21 @@ private:
   QVector<EditorSkill*> data_skill;
   QVector<EditorSkillset*> data_skillset;
 
+  /* Layout */
+  QVBoxLayout* layout;
+
   /* The map modifying dialog */
   QDialog* mapsize_dialog;
 
-  /* Buttons at bottom of database */
-  QPushButton* new_button;
-  QPushButton* del_button;
-  QPushButton* import_button;
-  QPushButton* duplicate_button;
+  /* Right click menu on bottom list */
+  QMenu* rightclick_menu;
+
+  /* The tile icons */
+  TileIcons tile_icons;
+
+  /* List Widgets */
+  QListWidget* view_bottom;
+  QListWidget* view_top;
 
 protected:
 public slots:
@@ -97,8 +104,14 @@ public slots:
   /* Imports a resource */
   void importResource();
 
+  /* Right click list menu on bottom list */
+  void listMenuRequested(const QPoint & pos);
+
   /* Triggers on double click of the bottom list -> updates view */
   void modifySelection(QListWidgetItem* item);
+
+  /* Renames the selected map */
+  void renameMap();
 
   /* Triggers on row change on top list -> shifts view */
   void rowChange(int);

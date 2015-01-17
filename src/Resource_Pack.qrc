@@ -20,5 +20,18 @@
         <file>Resources/rect-icon.png</file>
         <file>Resources/flood-icon.png</file>
         <file>Resources/database.png</file>
+        <file>Resources/nopass_E.png</file>
+        <file>Resources/nopass_N.png</file>
+        <file>Resources/nopass_S.png</file>
+        <file>Resources/nopass_W.png</file>
+        <file>Resources/pass_E.png</file>
+        <file>Resources/pass_N.png</file>
+        <file>Resources/pass_S.png</file>
+        <file>Resources/pass_W.png</file>
+        <file>Resources/changepass_all.png</file>
+        <file>Resources/changepass_N.png</file>
+        <file>Resources/changepass_E.png</file>
+        <file>Resources/changepass_S.png</file>
+        <file>Resources/changepass_W.png</file>
     </qresource>
 </RCC>

@@ -15,7 +15,7 @@
  *
  * Input: Parent Widget
  */
-SpriteViewList::SpriteViewList(QWidget* parent, EditorSprite* c)
+SpriteViewList::SpriteViewList(QWidget* parent)
               : QListWidget(parent)
 {
   /* Right click menu control */

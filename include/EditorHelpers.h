@@ -9,13 +9,39 @@
 #define EDITORHELPERS_H
 
 #include <QDir>
+#include <QPixmap>
+#include <QPointF>
+#include <QRectF>
+
+#include "EditorEnumDb.h"
+
+/* Struct for icons for tile rendering */
+struct TileIcons
+{
+  QPixmap* passN;
+  QPixmap* passE;
+  QPixmap* passS;
+  QPixmap* passW;
+
+  QPixmap* nopassN;
+  QPixmap* nopassE;
+  QPixmap* nopassS;
+  QPixmap* nopassW;
+};
 
 class EditorHelpers
 {
 /*============================================================================
+ * PUBLIC VARIABLES
+ *===========================================================================*/
+
+/*============================================================================
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the corresponding layer string */
+  static QString getLayerString(EditorEnumDb::Layer layer);
+
   /* Returns the list string, taking an id and name */
   static QString getListString(int id, QString name);
 
@@ -24,6 +50,9 @@ public:
 
   /* Returns the tile rendering width and height */
   static int getTileSize();
+
+  /* Normalize two points to top left and bottom right and return rect */
+  static QRectF normalizePoints(QPointF point1, QPointF point2);
 };
 
 #endif // EDITORHELPERS_H

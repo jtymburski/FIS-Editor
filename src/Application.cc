@@ -17,10 +17,9 @@
  *
  * Input: Parent Widget
  */
-Application::Application(QWidget* parent) :
-  QMainWindow(parent)
+Application::Application(QWidget* parent)
+           : QMainWindow(parent)
 {
-
   /* Gets the users name in windows only */
   username = getenv("USERNAME");
 
@@ -129,7 +128,6 @@ void Application::setupTopMenu()
   file_menu->addSeparator();
   file_menu->addAction(quit_action);
 
-
   /* Connects File menu actions to slots */
   connect(show_menu_action, SIGNAL(triggered()), this, SLOT(showDatabase()));
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
@@ -164,23 +162,37 @@ void Application::setupTopMenu()
   edit_menu->addSeparator();
   edit_menu->addAction(mapsize_action);
 
-  cursor_group = new QActionGroup(this);
-  cursor_group->setExclusive(false);
+  QActionGroup* cursor_group = new QActionGroup(this);
+  cursor_group->setExclusive(true);
 
-  basicmode_action = new QAction("&Basic",cursor_group);
+  QAction* basicmode_action = new QAction("&Basic",cursor_group);
   basicmode_action->setCheckable(true);
   basicmode_action->setChecked(true);
   basicmode_action->setIcon(QIcon(":/Icons/Resources/pencil-icon.png"));
-  erasermode_action = new QAction("&Eraser",cursor_group);
+  QAction* erasermode_action = new QAction("&Eraser",cursor_group);
   erasermode_action->setCheckable(true);
   erasermode_action->setIcon(QIcon(":/Icons/Resources/eraser-icon.png"));
-  blockplacemode_action = new QAction("&Block Place",cursor_group);
+  QAction* blockplacemode_action = new QAction("&Block Place",cursor_group);
   blockplacemode_action->setCheckable(true);
   blockplacemode_action->setIcon(QIcon(":/Icons/Resources/rect-icon.png"));
-  fill_action = new QAction("&Fill",cursor_group);
+  QAction* fill_action = new QAction("&Fill",cursor_group);
   fill_action->setCheckable(true);
   fill_action->setIcon(QIcon(":/Icons/Resources/flood-icon.png"));
-
+  QAction* pass_all_action = new QAction("&Passability All", cursor_group);
+  pass_all_action->setCheckable(true);
+  pass_all_action->setIcon(QIcon(":/Icons/Resources/changepass_all.png"));
+  QAction* pass_north_action = new QAction("&Passability North", cursor_group);
+  pass_north_action->setCheckable(true);
+  pass_north_action->setIcon(QIcon(":/Icons/Resources/changepass_N.png"));
+  QAction* pass_east_action = new QAction("&Passability East", cursor_group);
+  pass_east_action->setCheckable(true);
+  pass_east_action->setIcon(QIcon(":/Icons/Resources/changepass_E.png"));
+  QAction* pass_south_action = new QAction("&Passability South", cursor_group);
+  pass_south_action->setCheckable(true);
+  pass_south_action->setIcon(QIcon(":/Icons/Resources/changepass_S.png"));
+  QAction* pass_west_action = new QAction("&Passability West", cursor_group);
+  pass_west_action->setCheckable(true);
+  pass_west_action->setIcon(QIcon(":/Icons/Resources/changepass_W.png"));
   cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
   /* Sets up the menu toolbars */
@@ -202,17 +214,27 @@ void Application::setupTopMenu()
   menubar->setMovable(false);
 
   /* Sets up the brushes toolbar */
-  brushbar = new QToolBar("Brushes",this);
+  brushbar = new QToolBar("Brushes", this);
   brushbar->addSeparator();
   brushbar->addAction(basicmode_action);
   brushbar->addAction(erasermode_action);
   brushbar->addAction(blockplacemode_action);
   brushbar->addAction(fill_action);
+  brushbar->addAction(pass_all_action);
+  brushbar->addAction(pass_north_action);
+  brushbar->addAction(pass_east_action);
+  brushbar->addAction(pass_south_action);
+  brushbar->addAction(pass_west_action);
   addToolBar(Qt::TopToolBarArea,brushbar);
   cursor_menu->addAction(basicmode_action);
   cursor_menu->addAction(erasermode_action);
   cursor_menu->addAction(blockplacemode_action);
   cursor_menu->addAction(fill_action);
+  cursor_menu->addAction(pass_all_action);
+  cursor_menu->addAction(pass_north_action);
+  cursor_menu->addAction(pass_east_action);
+  cursor_menu->addAction(pass_south_action);
+  cursor_menu->addAction(pass_west_action);
   brushbar->setFloatable(false);
   brushbar->setMovable(false);
 
@@ -221,6 +243,15 @@ void Application::setupTopMenu()
   connect(blockplacemode_action,SIGNAL(triggered()),
           this,SLOT(setBlockCursor()));
   connect(fill_action,SIGNAL(triggered()),this,SLOT(setFillCursor()));
+  connect(pass_all_action, SIGNAL(triggered()), this, SLOT(setPassAllCursor()));
+  connect(pass_north_action, SIGNAL(triggered()),
+          this, SLOT(setPassNorthCursor()));
+  connect(pass_east_action, SIGNAL(triggered()),
+          this, SLOT(setPassEastCursor()));
+  connect(pass_south_action, SIGNAL(triggered()),
+          this, SLOT(setPassSouthCursor()));
+  connect(pass_west_action, SIGNAL(triggered()),
+          this, SLOT(setPassWestCursor()));
 }
 
 /*============================================================================
@@ -365,11 +396,7 @@ void Application::setBubby(EditorBubby* bubby)
  */
 void Application::setBasicCursor()
 {
-  erasermode_action->setChecked(false);
-  blockplacemode_action->setChecked(false);
-  fill_action->setChecked(false);
-  cursor_mode = EditorEnumDb::BASIC;
-  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::BASIC);
+  game_view->getMapView()->setCursorMode(EditorEnumDb::BASIC);
 }
 
 /*
@@ -377,11 +404,7 @@ void Application::setBasicCursor()
  */
 void Application::setEraserCursor()
 {
-  basicmode_action->setChecked(false);
-  blockplacemode_action->setChecked(false);
-  fill_action->setChecked(false);
-  cursor_mode = EditorEnumDb::ERASER;
-  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::ERASER);
+  game_view->getMapView()->setCursorMode(EditorEnumDb::ERASER);
 }
 
 /*
@@ -389,11 +412,7 @@ void Application::setEraserCursor()
  */
 void Application::setBlockCursor()
 {
-  basicmode_action->setChecked(false);
-  erasermode_action->setChecked(false);
-  fill_action->setChecked(false);
-  cursor_mode = EditorEnumDb::BLOCKPLACE;
-  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::BLOCKPLACE);
+  game_view->getMapView()->setCursorMode(EditorEnumDb::BLOCKPLACE);
 }
 
 
@@ -402,11 +421,37 @@ void Application::setBlockCursor()
  */
 void Application::setFillCursor()
 {
-  basicmode_action->setChecked(false);
-  blockplacemode_action->setChecked(false);
-  erasermode_action->setChecked(false);
-  cursor_mode = EditorEnumDb::FILL;
-  //game_view->getMapView()->getMapEditor()->setCursorMode(EditorEnumDb::FILL);
+  game_view->getMapView()->setCursorMode(EditorEnumDb::FILL);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassAllCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_ALL);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassNorthCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_N);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassEastCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_E);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassSouthCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_S);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassWestCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_W);
 }
 
 /* 

@@ -157,6 +157,7 @@ void SpriteView::updateList()
     for(int i = 0; i < editor_map->getSpriteCount(); i++)
       editor_sprite_list->addItem(editor_map->getSpriteByIndex(i)
                                             ->getNameList());
+    editor_map->updateAll();
   }
 
   editor_sprite_list->setCurrentRow(index);

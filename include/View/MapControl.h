@@ -8,11 +8,15 @@
 #ifndef MAPCONTROL_H
 #define MAPCONTROL_H
 
+#include <QHBoxLayout>
+#include <QInputDialog>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QWidget>
+
+#include "Database/EditorMap.h"
 
 class MapControl : public QWidget
 {
@@ -24,51 +28,105 @@ public:
   /* Destructor function */
   ~MapControl();
 
-  QListWidget* getTopList();
-  QPushButton* getGridToggle();
-  QPushButton* getPassibilityToggle();
-
 private:
-  /* Lists */
-  QListWidget* top_list;
-  QListWidget* middle_list;
-  QListWidget* bottom_list;
+  /* Bottom delete button */
+  QPushButton* button_delete;
 
-  /* Top Buttons */
+  /* The current sub-map being edited */
+  SubMapInfo* current_map;
+
+  /* The editing map */
+  EditorMap* editing_map;
+
+  /* Top Grid visible Button */
   QPushButton* grid_toggle;
-  QPushButton* passibility_toggle;
 
-  /* Bottom Buttons */
-  QPushButton* new_submap;
-  QPushButton* remove_submap;
-  QPushButton* duplicate_submap;
-  QPushButton* import_submap;
+  /* Lists */
+  QListWidget* list_bottom;
+  QListWidget* list_middle;
+  QListWidget* list_top;
 
-  /* Map Mode Shift Actions (Active Layers) */
-  QListWidgetItem *active_lower_layer_01;
-  QListWidgetItem *active_lower_layer_02;
-  QListWidgetItem *active_lower_layer_03;
-  QListWidgetItem *active_lower_layer_04;
-  QListWidgetItem *active_lower_layer_05;
-  QListWidgetItem *active_enhancer_layer;
-  QListWidgetItem *active_item_layer;
-  QListWidgetItem *active_base_layer;
-  QListWidgetItem *active_person_layer;
-  QListWidgetItem *active_thing_layer;
-  QListWidgetItem *active_upper_layer_01;
-  QListWidgetItem *active_upper_layer_02;
-  QListWidgetItem *active_upper_layer_03;
-  QListWidgetItem *active_upper_layer_04;
-  QListWidgetItem *active_upper_layer_05;
+  /* The map modifying dialog */
+  QDialog* mapsize_dialog;
 
+  /* Top passability visible button */
+  QPushButton* passability_toggle;
+
+  /* Right click menu on bottom list */
+  QMenu* rightclick_menu;
 
 protected:
+  /* Select the sub-map, by index */
+  void selectSubMap(int index);
+
+  /* Updates list at the bottom right for maps selected */
+  void updateMapList(int selected = -1);
 
 public slots:
+  /* Creates the new Sub-Map, as instantiated from dialog */
+  void createNewSubMap();
 
+  /* Delete Sub-Map */
+  void deleteSubMap();
+
+  /* Duplicate Sub-Map */
+  void duplicateSubMap();
+
+  /* Import Sub-Map */
+  void importSubMap();
+
+  /* Item check change */
+  void itemCheckChanged(QListWidgetItem* item);
+
+  /* Right click list menu on bottom list */
+  void listMenuRequested(const QPoint & pos);
+
+  /* New Sub-Map */
+  void newSubMap();
+
+  /* Renames the selected map */
+  void renameSubMap();
+
+  /* Select the sub-map, by double click */
+  void selectSubMap(QListWidgetItem* item);
+
+  /* Toggles the grid */
+  void toggleGrid(bool visible);
+
+  /* Toggles the passability */
+  void togglePassability(bool visible);
+
+  /* Update map row on bottom list */
+  void updateBottomRow(int current_row);
 
 signals:
+  /* Signal for setting the sub-map in the rendering space */
+  void addMap(SubMapInfo*);
 
+public:
+  /* Get the current sub-map */
+  SubMapInfo* getCurrentMap();
+
+  /* Returns grid toggle status */
+  bool getGridToggle();
+
+  /* Returns the map being edited */
+  EditorMap* getMapEditor();
+
+  /* Returns passability status */
+  bool getPassabilityToggle();
+
+  /* Returns the selected layer in the top list */
+  EditorEnumDb::Layer getSelectedLayer();
+
+  /* Returns the top list widget */
+  QListWidget* getTopList();
+
+  /* Returns the visibility setting of the checked boxes in the top list */
+  bool getVisibility(EditorEnumDb::Layer layer);
+
+  /* Sets the map being edited */
+  void setMapEditor(EditorMap* editor);
 };
 
 #endif // MAPCONTROL_H

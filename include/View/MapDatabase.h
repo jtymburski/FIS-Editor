@@ -61,6 +61,9 @@ public:
   /* Returns the views */
   RawImageView* getRawView();
   SpriteView* getSpriteView();
+
+  /* Sets the map editor */
+  void setMapEditor(EditorMap* editing_map);
 };
 
 #endif // MAPDATABASE_H

@@ -19,6 +19,7 @@ EditorMap::EditorMap()//QWidget *parent) : QWidget(parent)
 {
   id = kUNSET_ID;
   name = "";
+  tile_icons = NULL;
 }
 
 /*
@@ -28,11 +29,15 @@ EditorMap::EditorMap()//QWidget *parent) : QWidget(parent)
  *         QString name - the string name of the map
  *         int width - width of base map in tiles
  *         int height - height of base map in tiles
+ *         TileIcons* icons - the rendering tile icons
  */
-EditorMap::EditorMap(int id, QString name, int width, int height) : EditorMap()
+EditorMap::EditorMap(int id, QString name, int width, int height,
+                     TileIcons* icons)
+         : EditorMap()
 {
   setID(id);
   setName(name);
+  setTileIcons(icons);
 
   /* Set up base map, if applicable */
   if(width > 0 && height > 0)
@@ -127,6 +132,20 @@ SubMapInfo* EditorMap::getMap(int id)
 }
 
 /*
+ * Description: Returns the map with the corresponding index. NULL if index is
+ *              out of range.
+ *
+ * Inputs: int index - the index in the sub-map array.
+ * Output: SubMapInfo* - the sub-map struct to return.
+ */
+SubMapInfo* EditorMap::getMapByIndex(int index)
+{
+  if(index >= 0 && index < sub_maps.size())
+    return sub_maps[index];
+  return NULL;
+}
+
+/*
  * Description: Returns the number of maps within the editor map (master).
  *
  * Inputs: none
@@ -151,6 +170,20 @@ int EditorMap::getMapIndex(int id)
       if(sub_maps[i]->id == id)
         return i;
   return -1;
+}
+
+/*
+ * Description: Returns the name plus ID for the sub-map at the index
+ *
+ * Inputs: int index - the sub-map name index
+ * Output: QString - list name
+ */
+QString EditorMap::getMapNameList(int index)
+{
+  if(index >= 0 && index < sub_maps.size())
+    return EditorHelpers::getListString(sub_maps[index]->id,
+                                        sub_maps[index]->name);
+  return "";
 }
 
 /*
@@ -205,6 +238,10 @@ int EditorMap::getNextMapID()
       found = true;
     }
   }
+
+  /* If nothing found, just make it the last ID + 1 */
+  if(!found && sub_maps.size() > 0)
+    id = sub_maps.last()->id + 1;
 
   return id;
 }
@@ -374,6 +411,16 @@ int EditorMap::setMap(int id, QString name,
       }
     }
 
+    /* Modifiy grid and passability */
+    EditorTile* ref_tile = sub_maps.front()->tiles.front().front();
+    bool grid = ref_tile->getVisibilityGrid();
+    bool pass = ref_tile->getVisibilityPass();
+    setVisibilityGrid(grid);
+    setVisibilityPass(pass);
+    for(int i = 0; i < (int)EditorEnumDb::INVALID; i++)
+      setVisibility((EditorEnumDb::Layer)i,
+                    ref_tile->getVisibility((EditorEnumDb::Layer)i));
+
     return index;
   }
 
@@ -401,7 +448,7 @@ int EditorMap::setMap(int id, QString name, int width, int height)
       QVector<EditorTile*> row;
 
       for(int j = 0; j < height; j++)
-        row.push_back(new EditorTile(i, j));
+        row.push_back(new EditorTile(i, j, tile_icons));
 
       tiles.push_back(row);
     }
@@ -457,8 +504,8 @@ int EditorMap::setSprite(EditorSprite* sprite)
     /* If found, modify the index with the new information */
     if(found)
     {
-      delete sprites[index];
-      sprites[index] = sprite;
+      unsetSpriteByIndex(index);
+      sprites.insert(index, sprite);
     }
     else if(near)
     {
@@ -477,21 +524,110 @@ int EditorMap::setSprite(EditorSprite* sprite)
 }
 
 /*
+ * Description: Sets the rendering tile icons reference for painting.
+ *
+ * Inputs: TileIcons* icons - the icons to render on the map
+ * Output: none
+ */
+void EditorMap::setTileIcons(TileIcons* icons)
+{
+  tile_icons = icons;
+
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setTileIcons(icons);
+}
+
+/*
+ * Description: Sets the layer visibility in all tiles within the sub-maps.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to switch visibility on
+ *         bool visible - true if the layer is visible
+ * Output: none
+ */
+void EditorMap::setVisibility(EditorEnumDb::Layer layer, bool visible)
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setVisibility(layer, visible);
+}
+
+/*
+ * Description: Sets the grid visibility on all sub-map tiles.
+ *              Controlled by the map view.
+ *
+ * Inputs: bool visible - is the grid visible?
+ * Output: none
+ */
+void EditorMap::setVisibilityGrid(bool visible)
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setVisibilityGrid(visible);
+}
+
+/*
+ * Description: Sets the passability visibility on all sub-map tiles.
+ *              Controlled by the map view.
+ *
+ * Inputs: bool visible - is the passability visible?
+ * Output: none
+ */
+void EditorMap::setVisibilityPass(bool visible)
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setVisibilityPass(visible);
+}
+
+/*
+ * Description: Updates all tiles and forces a paint
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::updateAll()
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->update();
+}
+
+/*
  * Description: Unset the map within the list that correspond to the ID.
  *
  * Inputs: int id - the map id
- * Output: none
+ * Output: bool - true if deleted
  */
-void EditorMap::unsetMap(int id)
+bool EditorMap::unsetMap(int id)
 {
   int index = getMapIndex(id);
-  if(index >= 0)
+  return unsetMapByIndex(index);
+}
+
+/*
+ * Description: Unsets the map within the list that correspond to the index.
+ *
+ * Inputs: int index - the sub-map index
+ * Output: bool - true if deleted
+ */
+bool EditorMap::unsetMapByIndex(int index)
+{
+  if(index >= 0 && index < sub_maps.size())
   {
     delete sub_maps[index];
     sub_maps.remove(index);
 
     // TODO: have this remove the teleport events related
+
+    return true;
   }
+  return false;
 }
 
 /*
@@ -639,6 +775,46 @@ QDialog* EditorMap::createMapDialog(QWidget* parent, QString title,
   layout->addWidget(ok,3,0,1,2);
 
   return mapsize_dialog;
+}
+
+/*
+ * Description: Copies the sub-map information from a base map to a new map.
+ *              It does not copy the ID. It does not take ownership of newly
+ *              created tiles.
+ *
+ * Inputs: SubMapInfo* copy_map - the map to copy information from
+ *         SubMapInfo* new_map - the map to copy information to
+ * Output: bool - true if the info was copied
+ */
+bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
+{
+  if(copy_map != NULL && new_map != NULL)
+  {
+    new_map->name = copy_map->name;
+
+    /* Delete all tiles in the new map -> not relevant */
+    for(int i = 0; i < new_map->tiles.size(); i++)
+      for(int j = 0; j < new_map->tiles[i].size(); j++)
+        delete new_map->tiles[i][j];
+    new_map->tiles.clear();
+
+    /* Add a copy of all tiles in copy to new */
+    for(int i = 0; i < copy_map->tiles.size(); i++)
+    {
+      QVector<EditorTile*> row;
+
+      for(int j = 0; j < copy_map->tiles[i].size(); j++)
+      {
+        row.push_back(new EditorTile(i, j));
+        *row.last() = *copy_map->tiles[i][j];
+      }
+
+      new_map->tiles.push_back(row);
+    }
+
+    return true;
+  }
+  return false;
 }
 
 /*

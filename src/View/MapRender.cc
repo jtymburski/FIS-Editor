@@ -20,97 +20,17 @@
  * Input: a pointer to the Editor Sprite Toolbox,
  *        the parent widget, and the dimensions of the map
  */
-MapRender::MapRender(SpriteView* tool, QWidget* parent,
+MapRender::MapRender(QWidget* parent,
                      EditorEnumDb::CursorMode cursor)
-  : QGraphicsScene(parent)
+         : QGraphicsScene(parent)
 {
-  remove_action = new QAction("&Remove Active Layer",0);
-  setNpass_action = new QAction("&North Passibility",0);
-  setEpass_action = new QAction("&East Passibility",0);
-  setSpass_action = new QAction("&South Passibility",0);
-  setWpass_action = new QAction("&West Passibility",0);
-  setApass_action = new QAction("&All Passibility",0);
-  setNpass_action->setCheckable(true);
-  setEpass_action->setCheckable(true);
-  setSpass_action->setCheckable(true);
-  setWpass_action->setCheckable(true);
-  setApass_action->setCheckable(true);
-
-  rightclick_menu = new QMenu();
-  rightclick_menu->hide();
-  rightclick_menu->addAction(remove_action);
-  rightclick_menu->addSeparator();
-  rightclick_menu->addAction(setNpass_action);
-  rightclick_menu->addAction(setEpass_action);
-  rightclick_menu->addAction(setSpass_action);
-  rightclick_menu->addAction(setWpass_action);
-  rightclick_menu->addSeparator();
-  rightclick_menu->addAction(setApass_action);
-  connect(remove_action,SIGNAL(triggered()),this,SLOT(removeCurrent()));
-
-  connect(setNpass_action,SIGNAL(triggered(bool)),
-          this,SLOT(setNPassCurrent(bool)));
-  connect(setEpass_action,SIGNAL(triggered(bool)),
-          this,SLOT(setEPassCurrent(bool)));
-  connect(setSpass_action,SIGNAL(triggered(bool)),
-          this,SLOT(setSPassCurrent(bool)));
-  connect(setWpass_action,SIGNAL(triggered(bool)),
-          this,SLOT(setWPassCurrent(bool)));
-  connect(setApass_action,SIGNAL(triggered(bool)),
-          this,SLOT(setAPassCurrent(bool)));
+  /* Data init */
+  active_tile = NULL;
+  setCursorMode(cursor);
+  map = NULL;
 
   /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
-  setCursorMode(cursor);
-
-  /* Sets the width and height, and all of the layers to be visible */
-  //width = w;
-  //height = h;
-  blockx = 0;
-  blocky = 0;
-  blockmodepress = false;
-  eraseblock = false;
-  base = true;
-  enhancer = true;
-  lower1 = true;
-  lower2 = true;
-  lower3 = true;
-  lower4 = true;
-  lower5 = true;
-  upper1 = true;
-  upper2 = true;
-  upper3 = true;
-  upper4 = true;
-  upper5 = true;
-
-  highlight = new QRubberBand(QRubberBand::Rectangle,0);
-
-  /* Sets the size of the map scene */
-  //setSceneRect(0,0,width*64,height*64);
-
-  /* Sets up a blank canvas of tiles on the map */
-  //for(int i=0; i<width; i++)
-  //{
-  //  QList<TileRender*> stack;
-  //  for(int j=0; j<height; j++)
-  //    stack.push_back(new TileRender(i,j));
-  //  tiles.push_back(stack);
-  //}
-
-  /* Adds each tile to the map view and sets its toolbox pointer */
-  //for(int i=0; i<width; i++)
-  //{
-  //    for(int j=0; j<height; j++)
-  //    {
-  //      addItem(tiles[i][j]);
-  //      tiles[i][j]->setToolbox(tool);
-  //    }
-  //}
-
-  /* ---- NEW INITIATION ---- */
-
-  /* Data init */
-  map = NULL;
 }
 
 /*
@@ -120,272 +40,11 @@ MapRender::~MapRender()
 {
   /* Clear out the rendering map */
   setRenderingMap(NULL);
-
-/*
-  for(int i=0; i<width; i++)
-  {
-    for(int j=0; j<height; j++)
-    {
-      delete tiles[i][j];
-      tiles[i][j] = NULL;
-    }
-  }
-*/
 }
 
-/*
- * Description: Toggles the base layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleBase(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setBase(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the enhancer layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleEnhancer(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setEnhancer(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the lower layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleLower1(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setLower1(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the lower layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleLower2(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setLower2(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the lower layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleLower3(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setLower3(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the lower layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleLower4(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setLower4(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the lower layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleLower5(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setLower5(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the upper layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleUpper1(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setUpper1(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the upper layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleUpper2(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setUpper2(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the upper layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleUpper3(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setUpper3(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the upper layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleUpper4(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setUpper4(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the upper layers for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleUpper5(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setUpper5(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the grid for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::toggleGrid(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setGrid(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Toggles the passibility view for each tile
- *
- * Inputs: Visiblity boolean
- */
-void MapRender::togglePass(bool toggle)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->setPass(toggle);
-      tiles[i][j]->update();
-    }
-  }
-}
-
-/*
- * Description: Sets the layer that is currently being edited for each tile
- *
- * Inputs: Layer choice
- */
-void MapRender::setEditingLayer(EditorEnumDb::Layer active)
-{
-  for(int i=0; i<tiles.size(); i++)
-  {
-    for(int j=0; j<tiles[i].size(); j++)
-    {
-      tiles[i][j]->active_layer = active;
-    }
-  }
-}
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 
 /*
  * Description: Mouse Move Event (Handles all individual tile events, including
@@ -396,70 +55,51 @@ void MapRender::setEditingLayer(EditorEnumDb::Layer active)
  */
 void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-  QGraphicsScene::mouseMoveEvent(event);
-// TODO: Fix
-/*
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(event->scenePos(),QTransform()));
-  for(int i=0; i<tiles.size(); i++)
+  bool new_hover = false;
+
+  /* Check if left the current tile */
+  if(active_tile != NULL)
   {
-    for(int j=0; j<tiles[i].size(); j++)
-      tiles[i][j]->setGridColor(false);
-  }
-  if(current != NULL)
-    emit sendCurrentPosition((current->boundingRect().x()/64),
-                             (current->boundingRect().y()/64));
-  else
-    emit sendCurrentPosition(-1,-1);
-  if(current != NULL)
-    current->setGridColor(true);
-  if(event->buttons() == Qt::LeftButton || event->buttons() == Qt::RightButton)
-  {
-    switch(cursormode)
+    QRectF bound = active_tile->boundingRect();
+    if(!bound.contains(event->scenePos()))
     {
-      case EditorEnumDb::BASIC:
-        if(current != NULL)
-          current->place();
-        break;
-      case EditorEnumDb::ERASER:
-        if(current != NULL)
-          current->unplace();
-        break;
-      case EditorEnumDb::BLOCKPLACE:
-        if(blockmodepress)
-          highlight->setGeometry(QRect(origin.x(),origin.y(),
-                                       QCursor::pos().x()-origin.x(),
-                                       QCursor::pos().y()-origin.y())
-                                 .normalized());
-        break;
-      default:
-        break;
+      active_tile->setHover(false);
+      active_tile = NULL;
     }
   }
-*/
-}
 
-/*
- * Description: Recursively fills all of the similar adjoining tiles with the
- *              selected sprite
- *
- * Inputs: x and y positions for the tile, and target(the tile's ID)
- *         and replacement (New sprite) id numbers
- */
-void MapRender::recursiveFill(int x, int y, int target, int replace)
-{
-  if(target != replace)
+  /* Check which tile it's hovering on now */
+  if(active_tile == NULL)
   {
-    tiles[x][y]->place();
-    if(x < width-1 && tiles[x+1][y]->getActivePath() == target)
-      recursiveFill(x+1,y,target,replace);
-    if(x > 0 && tiles[x-1][y]->getActivePath() == target)
-      recursiveFill(x-1,y,target,replace);
-    if(y < height-1 && tiles[x][y+1]->getActivePath() == target)
-      recursiveFill(x,y+1,target,replace);
-    if(y > 0 && tiles[x][y-1]->getActivePath() == target)
-      recursiveFill(x,y-1,target,replace);
+    QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
+    if(hover_item != NULL)
+    {
+      active_tile = (EditorTile*)hover_item;
+      active_tile->setHover(true);
+      new_hover = true;
+    }
+  }
+
+  /* If a new hover tile, check if a button is pressed and trigger item click */
+  if(new_hover && (event->buttons() & Qt::LeftButton ||
+                   event->buttons() & Qt::RightButton))
+  {
+    if(cursor_mode == EditorEnumDb::BASIC ||
+       cursor_mode == EditorEnumDb::ERASER)
+    {
+      emit itemClick(active_tile);
+    }
+    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+             cursor_mode == EditorEnumDb::PASS_N ||
+             cursor_mode == EditorEnumDb::PASS_E ||
+             cursor_mode == EditorEnumDb::PASS_S ||
+             cursor_mode == EditorEnumDb::PASS_W)
+    {
+      if(event->buttons() & Qt::LeftButton)
+        emit passSet(active_tile);
+      else
+        emit passUnset(active_tile);
+    }
   }
 }
 
@@ -471,343 +111,80 @@ void MapRender::recursiveFill(int x, int y, int target, int replace)
  */
 void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-  current_position = event->scenePos();
-  origin = QCursor::pos();
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(event->buttons() & Qt::LeftButton)
+  /* If click, proceed to trigger item click for normal pens */
+  if(event->button() == Qt::LeftButton)
   {
-    switch(cursormode)
+    if(cursor_mode == EditorEnumDb::BASIC ||
+       cursor_mode == EditorEnumDb::ERASER ||
+       cursor_mode == EditorEnumDb::FILL)
+      emit itemClick(active_tile);
+    else if(cursor_mode == EditorEnumDb::BLOCKPLACE)
     {
-      case EditorEnumDb::BASIC:
-        if(current != NULL)
-          current->place();
-        break;
-      case EditorEnumDb::ERASER:
-        if(current != NULL)
-          current->unplace();
-        break;
-      case EditorEnumDb::BLOCKPLACE:
-        if(current != NULL)
-        {
-          blockmodepress = true;
-          blockx = current->boundingRect().x()/64;
-          blocky = current->boundingRect().y()/64;
-          highlight->setGeometry(QRect(origin.x(),origin.y(),0,0));
-          highlight->show();
-        }
-        break;
-      case EditorEnumDb::FILL:
-        if(current != NULL)
-        {
-            recursiveFill(current_position.x()/64,
-                          current_position.y()/64,
-                          current->getActivePath(),
-                          current->getToolPath());
-        }
-        break;
-      default:
-        break;
+      block_origin = event->scenePos().toPoint();
+      block_erase = false;
+    }
+    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+             cursor_mode == EditorEnumDb::PASS_N ||
+             cursor_mode == EditorEnumDb::PASS_E ||
+             cursor_mode == EditorEnumDb::PASS_S ||
+             cursor_mode == EditorEnumDb::PASS_W)
+    {
+      emit passSet(active_tile);
     }
   }
-  else if(current != NULL)
+  else if(event->button() == Qt::RightButton)
   {
-    if(cursormode == EditorEnumDb::BLOCKPLACE)
+    if(cursor_mode == EditorEnumDb::BLOCKPLACE)
     {
-      blockmodepress = true;
-      eraseblock = true;
-      blockx = current->boundingRect().x()/64;
-      blocky = current->boundingRect().y()/64;
-      highlight->setGeometry(QRect(origin.x(),origin.y(),0,0));
-      highlight->show();
+      block_origin = event->scenePos();
+      block_erase = true;
     }
-    else if(rightclick_menu->isHidden())
+    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+             cursor_mode == EditorEnumDb::PASS_N ||
+             cursor_mode == EditorEnumDb::PASS_E ||
+             cursor_mode == EditorEnumDb::PASS_S ||
+             cursor_mode == EditorEnumDb::PASS_W)
     {
-      setNpass_action->setChecked(
-            current->gameTile()->getBasePassability(Direction::NORTH));
-      setEpass_action->setChecked(
-            current->gameTile()->getBasePassability(Direction::EAST));
-      setSpass_action->setChecked(
-            current->gameTile()->getBasePassability(Direction::SOUTH));
-      setWpass_action->setChecked(
-            current->gameTile()->getBasePassability(Direction::WEST));
-      if(current->gameTile()->getBasePassability(Direction::NORTH) &&
-         current->gameTile()->getBasePassability(Direction::EAST) &&
-         current->gameTile()->getBasePassability(Direction::SOUTH) &&
-         current->gameTile()->getBasePassability(Direction::WEST))
-        setApass_action->setChecked(true);
-      else
-        setApass_action->setChecked(false);
-      rightclick_menu->exec(QCursor::pos());
+      emit passUnset(active_tile);
     }
-    else
-      rightclick_menu->hide();
   }
 }
 
+/* Mouse release event */
 void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(event->scenePos(),QTransform()));
-
-  highlight->hide();
-  if(current != NULL)
+  /* If click release, and block place, proceed */
+  if(cursor_mode == EditorEnumDb::BLOCKPLACE)
   {
-    if(cursormode == EditorEnumDb::BLOCKPLACE)
+    if((event->button() == Qt::LeftButton && !block_erase) ||
+       (event->button() == Qt::RightButton && block_erase))
     {
-      int currentx = current->boundingRect().x()/64;
-      int currenty = current->boundingRect().y()/64;
-
-      if(!eraseblock)
-      {
-        if(blockx <= currentx && blocky <= currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+blockx <= width && j+blocky <= height)
-                tiles[i+blockx][j+blocky]->place();
-            }
-          }
-        }
-        else if(blockx <= currentx && blocky > currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+blockx <= width && j+currenty <= height)
-                tiles[i+blockx][j+currenty]->place();
-            }
-          }
-        }
-        else if(blockx > currentx && blocky <= currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+currentx <= width && j+blocky <= height)
-                tiles[i+currentx][j+blocky]->place();
-            }
-          }
-        }
-        else if(blockx > currentx && blocky > currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+currentx <= width && j+currenty <= height)
-                tiles[i+currentx][j+currenty]->place();
-            }
-          }
-        }
-      }
-      else
-      {
-        if(blockx <= currentx && blocky <= currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+blockx <= width && j+blocky <= height)
-                tiles[i+blockx][j+blocky]->unplace();
-            }
-          }
-        }
-        else if(blockx <= currentx && blocky > currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+blockx <= width && j+currenty <= height)
-                tiles[i+blockx][j+currenty]->unplace();
-            }
-          }
-        }
-        else if(blockx > currentx && blocky <= currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+currentx <= width && j+blocky <= height)
-                tiles[i+currentx][j+blocky]->unplace();
-            }
-          }
-        }
-        else if(blockx > currentx && blocky > currenty)
-        {
-          for(int i=0; i<abs(currentx-blockx)+1; i++)
-          {
-            for(int j=0; j<abs(currenty-blocky)+1; j++)
-            {
-              if(i+currentx <= width && j+currenty <= height)
-                tiles[i+currentx][j+currenty]->unplace();
-            }
-          }
-        }
-      }
+      QRectF rect = EditorHelpers::normalizePoints(block_origin,
+                                                   event->scenePos());
+      QList<QGraphicsItem*> item_set =
+                                    items(rect, Qt::IntersectsItemBoundingRect);
+      QList<EditorTile*> tile_set;
+      for(int i = 0; i < item_set.size(); i++)
+        tile_set.push_back((EditorTile*)item_set[i]);
+      emit itemMassClick(tile_set, block_erase);
     }
-  }
-  blockx = 0;
-  blocky = 0;
-  blockmodepress = false;
-  eraseblock = false;
-}
-
-void MapRender::paintEvent(QPaintEvent *)
-{}
-
-/*
- * Description: Removes the currently active layers sprite
- */
-void MapRender::removeCurrent()
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-    current->unplace();
-}
-
-/*
- * Description: Sets the cursor mode
- *
- * Input: Cursor mode
- */
-void MapRender::setCursorMode(EditorEnumDb::CursorMode mode)
-{
-  cursormode = mode;
-}
-
-/*
- * Description: Gets the width
- *
- * Output: Width
- */
-int MapRender::getMapWidth()
-{
-  return width;
-}
-
-/*
- * Description: Gets the height
- *
- * Output: Height
- */
-int MapRender::getMapHeight()
-{
-  return height;
-}
-
-/*
- * Description : Sets passibility
- *
- * Input : toggle
- */
-void MapRender::setNPassCurrent(bool toggle)
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-  {
-    current->gameTile()->setBasePassability(Direction::NORTH,toggle);
-    current->update();
-  }
-}
-
-/*
- * Description : Sets passibility
- *
- * Input : toggle
- */
-void MapRender::setEPassCurrent(bool toggle)
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-  {
-    current->gameTile()->setBasePassability(Direction::EAST,toggle);
-    current->update();
-  }
-}
-
-/*
- * Description : Sets passibility
- *
- * Input : toggle
- */
-void MapRender::setSPassCurrent(bool toggle)
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-  {
-    current->gameTile()->setBasePassability(Direction::SOUTH,toggle);
-    current->update();
-  }
-}
-
-/*
- * Description : Sets passibility
- *
- * Input : toggle
- */
-void MapRender::setWPassCurrent(bool toggle)
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-  {
-    current->gameTile()->setBasePassability(Direction::WEST,toggle);
-    current->update();
-  }
-}
-
-/*
- * Description : Sets passibility
- *
- * Input : toggle
- */
-void MapRender::setAPassCurrent(bool toggle)
-{
-  TileRender* current =
-      qgraphicsitem_cast<TileRender*>
-      (itemAt(current_position,QTransform()));
-  if(current != NULL)
-  {
-    current->gameTile()->setBasePassability(Direction::NORTH,toggle);
-    current->gameTile()->setBasePassability(Direction::EAST,toggle);
-    current->gameTile()->setBasePassability(Direction::SOUTH,toggle);
-    current->gameTile()->setBasePassability(Direction::WEST,toggle);
-    current->update();
   }
 }
 
 /*============================================================================
- * PUBLIC FUNCTIONS
+ * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-
-/* Returns the rendering sub-map */
-SubMapInfo* MapRender::getRenderingMap()
-{
-  return map;
-}
 
 /* Sets the rendering sub-map */
 void MapRender::setRenderingMap(SubMapInfo* map)
 {
+  /* Remove services from active tile */
+  if(active_tile != NULL)
+  {
+    active_tile->setHover(false);
+    active_tile = NULL;
+  }
+
   /* Clean up the existing list */
   QList<QGraphicsItem*> existing_items = items();
   for(int i = 0; i < existing_items.size(); i++)
@@ -830,4 +207,60 @@ void MapRender::setRenderingMap(SubMapInfo* map)
       setSceneRect(0, 0, map->tiles.size() * EditorHelpers::getTileSize(),
                    map->tiles.front().size() * EditorHelpers::getTileSize());
   }
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Returns the active tile */
+EditorTile* MapRender::getActiveTile()
+{
+  return active_tile;
+}
+
+/*
+ * Description: Gets the height
+ *
+ * Output: Height
+ */
+int MapRender::getMapHeight()
+{
+  if(map != NULL && map->tiles.size() > 0)
+    return map->tiles.front().size();
+  return 0;
+}
+
+/*
+ * Description: Gets the width
+ *
+ * Output: Width
+ */
+int MapRender::getMapWidth()
+{
+  if(map != NULL)
+    return map->tiles.size();
+  return 0;
+}
+
+/* Returns the rendering sub-map */
+SubMapInfo* MapRender::getRenderingMap()
+{
+  return map;
+}
+
+/*
+ * Description: Sets the cursor mode
+ *
+ * Input: Cursor mode
+ */
+void MapRender::setCursorMode(EditorEnumDb::CursorMode mode)
+{
+  cursor_mode = mode;
+}
+
+/* Update the entire scene */
+void MapRender::updateAll()
+{
+  update(sceneRect());
 }

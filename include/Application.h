@@ -82,21 +82,11 @@ private:
   /* View action pointers */
   QAction *viewalllayers_action;
 
-  /* Cursor action pointers */
-  QActionGroup *cursor_group;
-  QAction *erasermode_action;
-  QAction *basicmode_action;
-  QAction *blockplacemode_action;
-  QAction *fill_action;
-
   /* The users login name */
   QString username;
 
   /* Cursor menu */
   QMenu* cursor_menu;
-
-  /* Cursor Mode */
-  EditorEnumDb::CursorMode cursor_mode;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -131,6 +121,13 @@ public slots:
 
   /* Sets to Fill Mode */
   void setFillCursor();
+
+  /* Sets to Passability Mode */
+  void setPassAllCursor();
+  void setPassNorthCursor();
+  void setPassEastCursor();
+  void setPassSouthCursor();
+  void setPassWestCursor();
 
   /* Sets to any view */
   void setView(EditorEnumDb::ViewMode);

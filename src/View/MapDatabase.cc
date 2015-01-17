@@ -139,3 +139,9 @@ SpriteView* MapDatabase::getSpriteView()
   return view_sprite;
 }
 
+/* Sets the map editor */
+void MapDatabase::setMapEditor(EditorMap* editing_map)
+{
+  /* Add the sprites */
+  view_sprite->setEditorMap(editing_map);
+}
