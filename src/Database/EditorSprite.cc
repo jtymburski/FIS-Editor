@@ -68,6 +68,33 @@ void EditorSprite::copySelf(const EditorSprite &source)
 }
 
 /*
+ * Description: Returns the frame mods in string form - for file handling.
+ *
+ * Inputs: int index - the index of the frame data
+ * Output: QString - the output string
+ */
+QString EditorSprite::getFrameMods(int index)
+{
+  QString temp = "path";
+
+  if(index >= 0 && index < frame_info.size())
+  {
+    if(frame_info[index].hflip)
+      temp += "_hf";
+    if(frame_info[index].vflip)
+      temp += "_vf";
+    if(frame_info[index].rotate90)
+      temp += "_90";
+    if(frame_info[index].rotate180)
+      temp += "_180";
+    if(frame_info[index].rotate270)
+      temp += "_270";
+  }
+
+  return temp;
+}
+
+/*
  * Description: Returns the transformed pixmap, with all necessary sprite mods.
  *
  * Inputs: int index - the frame index
@@ -640,7 +667,15 @@ QString EditorSprite::getPath(int frame_num)
   return "";
 }
 
-/* Returns the modified pixmap */
+/*
+ * Description: Returns the pixmap of the given frame index scaled with the
+ *              sprite settings.
+ *
+ * Inputs: int index - the frame index
+ *         int w - the width of the pixmap
+ *         int h - the height of the pixmap
+ * Output: QPixmap - a paintable QPixmap of the above frame
+ */
 QPixmap EditorSprite::getPixmap(int index, int w, int h)
 {
   if(index >= 0 && index < frame_info.size())
@@ -649,6 +684,64 @@ QPixmap EditorSprite::getPixmap(int index, int w, int h)
     return original.scaled(w, h);
   }
   return QPixmap();
+}
+
+/*
+ * Description: Returns the number of frames at the start of the sprite that
+ *              can be lumped together.
+ *
+ * Inputs: none
+ * Output: int - a count of number of frames to lump together. 0 if none
+ */
+int EditorSprite::getSmartCount()
+{
+  bool finished = false;
+  int index = 1;
+  int png_width = 4;
+
+  /* Only proceed checks if there is more than one frame */
+  if(frame_info.size() > 1)
+  {
+    int size = frame_info.front().path.size();
+    QString no_end = frame_info.front().path.left(size - png_width);
+    QString main = no_end.left(no_end.size() - 2);
+
+    /* Only proceed if the end two numbers are digits */
+    if(no_end.at(no_end.size() - 1).isDigit() &&
+       no_end.at(no_end.size() - 2).isDigit())
+    {
+      int index = 1;
+
+      for(int i = 1; !finished && (i < frame_info.size()); i++)
+      {
+        QString orig = frame_info[i].path;
+        QString sub = orig.left(orig.size() - png_width);
+        QString sub_t = sub.left(sub.size() - 2);
+
+        /* Processing to check if it's valid */
+        if(sub_t == main &&
+           sub.at(sub.size() - 1).isDigit() &&
+           sub.at(sub.size() - 2).isDigit() &&
+           frame_info[i].hflip == frame_info.front().hflip &&
+           frame_info[i].vflip == frame_info.front().vflip &&
+           frame_info[i].rotate90 == frame_info.front().rotate90 &&
+           frame_info[i].rotate180 == frame_info.front().rotate180 &&
+           frame_info[i].rotate270 == frame_info.front().rotate270)
+        {
+          index++;
+        }
+        else
+        {
+          finished = true;
+        }
+      }
+
+      if(index > 1)
+        return index;
+    }
+  }
+
+  return 0;
 }
 
 /*
@@ -671,6 +764,12 @@ bool EditorSprite::getVerticalFlip(int frame_num)
   if(frame_num >= 0 && frame_num < frame_info.size())
     return frame_info[frame_num].vflip;
   return false;
+}
+
+/* Loads the game data */
+void EditorSprite::load(FileHandler* fh)
+{
+  // TODO: Future - fix as per game database and match
 }
 
 /*
@@ -746,6 +845,67 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Saves the data of this sprite to the file handler pointer.
+ *              Game only toggle removes editor only data.
+ *
+ * Inputs: FileHandler* fh - the saving file handler
+ *         bool game_only - true if you only want game relevant data, not editor
+ * Output: none
+ */
+void EditorSprite::save(FileHandler* fh, bool game_only)
+{
+  QString base_path = EditorHelpers::getSpriteDir();
+  base_path = base_path.left(base_path.indexOf("/sprites"));
+  EditorSprite default_sprite;
+
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("sprite", "id", getID());
+
+    /* Write sprite data */
+    if(!game_only)
+      fh->writeXmlData("name", getName().toStdString());
+    if(default_sprite.getAnimationTime() != getAnimationTime())
+      fh->writeXmlData("animation", getAnimationTime().toInt());
+    if(default_sprite.getSprite()->getRotation() != sprite->getRotation())
+      fh->writeXmlData("rotation", sprite->getRotation());
+    if(default_sprite.getSprite()->getBrightness() != sprite->getBrightness())
+      fh->writeXmlData("brightness", (float)sprite->getBrightness());
+    if(default_sprite.getSprite()->getColorRed() != sprite->getColorRed())
+      fh->writeXmlData("color_r", sprite->getColorRed());
+    if(default_sprite.getSprite()->getColorGreen() != sprite->getColorGreen())
+      fh->writeXmlData("color_g", sprite->getColorGreen());
+    if(default_sprite.getSprite()->getColorBlue() != sprite->getColorBlue())
+      fh->writeXmlData("color_b", sprite->getColorBlue());
+    if(default_sprite.getSprite()->getOpacity() != sprite->getOpacity())
+      fh->writeXmlData("opacity", sprite->getOpacity());
+    if(default_sprite.getSprite()->isDirectionForward() !=
+                           sprite->isDirectionForward())
+      fh->writeXmlData("forward", sprite->isDirectionForward());
+    //fh->writeXmlData("sound", NULL); // TODO
+
+    /* Write frame data */
+    int index = getSmartCount();
+    if(index > 0)
+    {
+      QString png = ".png";
+      QString sep = "|";
+      QString base_path = EditorHelpers::trimPath(frame_info.front().path);
+      base_path = base_path.left(base_path.size() - png.size() - 2);
+      base_path += sep + QString::number(index) + sep + png;
+      fh->writeXmlData(getFrameMods(0).toStdString(), base_path.toStdString());
+    }
+    for(int i = index; i < frame_info.size(); i++)
+    {
+      fh->writeXmlData(getFrameMods(i).toStdString(), EditorHelpers::trimPath(
+                                             frame_info[i].path).toStdString());
+    }
+
+    fh->writeXmlElementEnd();
+  }
 }
 
 /*

@@ -63,6 +63,51 @@ EditorMap::~EditorMap()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
+/* Adds tile sprite data */
+// TODO: Fix for passability
+// TODO: Optimize for rects dissilation in a multi section field
+void EditorMap::addTileSpriteData(FileHandler* fh, int index,
+                                  EditorEnumDb::Layer layer)
+{
+  QString sep = ",";
+
+  for(int i = 0; i < sprites.size(); i++)
+  {
+    QList<QPoint> coords;
+
+    for(int j = 0; j < sub_maps[index]->tiles.size(); j++)
+    {
+      for(int k = 0; k < sub_maps[index]->tiles[j].size(); k++)
+      {
+        if(sub_maps[index]->tiles[j][k]->getSprite(layer) == sprites[i])
+          coords.push_back(QPoint(j, k));
+      }
+    }
+
+    /* Parse all coords */
+    if(coords.size() > 0)
+    {
+      QString x_set = "";
+      QString y_set = "";
+      for(int j = 0; j < coords.size(); j++)
+      {
+        x_set += QString::number(coords[j].x()) + sep;
+        y_set += QString::number(coords[j].y()) + sep;
+      }
+      x_set.chop(1);
+      y_set.chop(1);
+
+      /* Print the elements */
+      fh->writeXmlElement("x", "index", x_set.toStdString());
+      fh->writeXmlElement("y", "index", y_set.toStdString());
+      fh->writeXmlData("sprite_id",
+                       QString::number(sprites[i]->getID()).toStdString());
+      fh->writeXmlElementEnd();
+      fh->writeXmlElementEnd();
+    }
+  }
+}
+
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorMap::copySelf(const EditorMap &source)
 {
@@ -354,6 +399,90 @@ QVector<EditorSprite*> EditorMap::getSprites()
 TileIcons* EditorMap::getTileIcons()
 {
   return tile_icons;
+}
+
+/* Loads the map */
+void EditorMap::load(FileHandler* fh)
+{
+  // TODO: Future - fix as per game database and match
+}
+
+/* Saves the map */
+void EditorMap::save(FileHandler* fh, bool game_only)
+{
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("map", "id", getID());
+
+    /* Add sprites */
+    for(int i = 0; i < sprites.size(); i++)
+      sprites[i]->save(fh, game_only);
+
+    /* Add the sub-maps */
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      /* Initial element */
+      if(i == 0)
+        fh->writeXmlElement("main");
+      else
+        fh->writeXmlElement("section", "index", sub_maps[i]->id);
+
+      /* Add size and name */
+      if(!game_only)
+        fh->writeXmlData("name", sub_maps[i]->name.toStdString());
+      fh->writeXmlData("width", sub_maps[i]->tiles.size());
+      fh->writeXmlData("height", sub_maps[i]->tiles.front().size());
+
+      /* Add base tiles */
+      fh->writeXmlElement("base");
+      addTileSpriteData(fh, i, EditorEnumDb::BASE);
+      fh->writeXmlElementEnd();
+
+      /* Add enhancer tiles */
+      fh->writeXmlElement("enhancer");
+      addTileSpriteData(fh, i, EditorEnumDb::ENHANCER);
+      fh->writeXmlElementEnd();
+
+      /* Add lower tiles */
+      fh->writeXmlElement("lower", "index", "0");
+      addTileSpriteData(fh, i, EditorEnumDb::LOWER1);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("lower", "index", "1");
+      addTileSpriteData(fh, i, EditorEnumDb::LOWER2);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("lower", "index", "2");
+      addTileSpriteData(fh, i, EditorEnumDb::LOWER3);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("lower", "index", "3");
+      addTileSpriteData(fh, i, EditorEnumDb::LOWER4);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("lower", "index", "4");
+      addTileSpriteData(fh, i, EditorEnumDb::LOWER5);
+      fh->writeXmlElementEnd();
+
+      /* Add upper tiles */
+      fh->writeXmlElement("upper", "index", "0");
+      addTileSpriteData(fh, i, EditorEnumDb::UPPER1);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("upper", "index", "1");
+      addTileSpriteData(fh, i, EditorEnumDb::UPPER2);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("upper", "index", "2");
+      addTileSpriteData(fh, i, EditorEnumDb::UPPER3);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("upper", "index", "3");
+      addTileSpriteData(fh, i, EditorEnumDb::UPPER4);
+      fh->writeXmlElementEnd();
+      fh->writeXmlElement("upper", "index", "4");
+      addTileSpriteData(fh, i, EditorEnumDb::UPPER5);
+      fh->writeXmlElementEnd();
+
+      /* End element */
+      fh->writeXmlElementEnd();
+    }
+
+    fh->writeXmlElementEnd();
+  }
 }
 
 /*

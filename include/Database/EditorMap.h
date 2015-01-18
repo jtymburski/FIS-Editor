@@ -21,6 +21,7 @@
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
+#include "FileHandler.h"
 
 /* Struct for sub map info storage */
 struct SubMapInfo
@@ -68,6 +69,9 @@ private:
   const static int kUNSET_ID; /* The unset ID */
 
 protected:
+  /* Adds tile sprite data */
+  void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
+
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
 
@@ -102,6 +106,12 @@ public:
 
   /* Returns the tile icons */
   TileIcons* getTileIcons();
+
+  /* Loads the map */
+  void load(FileHandler* fh);
+
+  /* Saves the map */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the ID of the map set */
   virtual void setID(int id);

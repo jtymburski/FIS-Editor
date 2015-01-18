@@ -45,6 +45,9 @@ public:
   /* Returns the list string, taking an id and name */
   static QString getListString(int id, QString name);
 
+  /* Returns the project directory, based on the location of the editor */
+  static QString getProjectDir();
+
   /* Returns the sprite directory, based on the location of the editor */
   static QString getSpriteDir();
 
@@ -53,6 +56,9 @@ public:
 
   /* Normalize two points to top left and bottom right and return rect */
   static QRectF normalizePoints(QPointF point1, QPointF point2);
+
+  /* Trim path */
+  static QString trimPath(QString path);
 };
 
 #endif // EDITORHELPERS_H

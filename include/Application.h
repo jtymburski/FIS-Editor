@@ -30,7 +30,9 @@
 #include <QStatusBar>
 #include <QTreeView>
 #include <QDesktopWidget>
+
 #include "Database/GameDatabase.h"
+#include "FileHandler.h"
 #include "View/MapView.h"
 #include "View/GameView.h"
 #include "View/RawImageView.h"
@@ -43,41 +45,29 @@ class Application : public QMainWindow
 
 public:
   /* Constructor function */
-  Application(QWidget* parent = 0);
+  Application(QWidget* parent = NULL);
 
   /* Destructor function */
   ~Application();
 
 private:
-  /* game database */
+  /* Brush and Menu Tabs */
+  QToolBar* bar_brush;
+  QToolBar* bar_menu;
+  QToolBar* bar_view;
+
+  /* Cursor menu */
+  QMenu* cursor_menu;
+
+  /* File name - last used save as */
+  QString file_name;
+
+  /* Game Database */
   GameDatabase* game_database;
   QDockWidget* game_db_dock;
 
   /* Game View */
   GameView* game_view;
-
-  /* Brush and Menu Tabs */
-  QToolBar* brushbar;
-  QToolBar* menubar;
-  QToolBar* viewbar;
-
-  /* File action pointers */
-  QAction *show_menu_action;
-  QAction *new_action;
-  QAction *load_action;
-  QAction *recentfiles_action;
-  QAction *save_action;
-  QAction *saveas_action;
-  QAction *quit_action;
-
-  /* Edit action pointers */
-  QAction *undo_action;
-  QAction *redo_action;
-  QAction *cut_action;
-  QAction *copy_action;
-  QAction *paste_action;
-  QAction *findreplace_action;
-  QAction *mapsize_action;
 
   /* View action pointers */
   QAction *viewalllayers_action;
@@ -85,13 +75,19 @@ private:
   /* The users login name */
   QString username;
 
-  /* Cursor menu */
-  QMenu* cursor_menu;
-
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Export application to run in Univursa */
+  void exportGame();
+
+  /* Load application */
+  void loadApp();
+
+  /* Save application */
+  void saveApp();
+
   /* Sets up the Top Menu */
   void setupTopMenu();
 
@@ -110,73 +106,66 @@ protected:
  * SLOTS
  *===========================================================================*/
 public slots:
-  /* Sets to Eraser Mode */
-  void setBasicCursor();
+  /* Load action */
+  void load();
 
-  /* Sets to Basic Mode */
-  void setEraserCursor();
-
-  /* Sets to Block Mode */
-  void setBlockCursor();
-
-  /* Sets to Fill Mode */
-  void setFillCursor();
-
-  /* Sets to Passability Mode */
-  void setPassAllCursor();
-  void setPassNorthCursor();
-  void setPassEastCursor();
-  void setPassSouthCursor();
-  void setPassWestCursor();
-
-  /* Sets to any view */
-  void setView(EditorEnumDb::ViewMode);
-
-  /* Sets To Map View */
-  void setMapView();
-
-  /* Sets To Person View */
-  void setPersonView();
-
-  /* Sets To Party View */
-  void setPartyView();
-
-  /* Sets To Item View */
-  void setItemView();
-
-  /* Sets To Map */
-  void setMap(EditorMap* map);
-
-  /* Sets To Person */
-  void setPerson(EditorPerson* person);
-
-  /* Sets To Party */
-  void setParty(EditorParty* party);
-
-  /* Sets To Item */
-  void setItem(EditorItem* item);
+  /* Save and save as action */
+  void save();
+  void saveAs();
 
   /* Sets To Action */
   void setAction(EditorAction* action);
 
-  /* Sets To Race */
-  void setRace(EditorCategory* race);
-
   /* Sets To Battle Class */
   void setBattleClass(EditorCategory* battle_class);
 
-  /* Sets To Skillset */
-  void setSkillset(EditorSkillset* skill_set);
+  /* Sets To Bubby */
+  void setBubby(EditorBubby* bubby);
 
-  /* Sets To Skill */
-  void setSkill(EditorSkill* skill);
+  /* Sets normal cursors */
+  void setCursorBasic();
+  void setCursorBlock();
+  void setCursorEraser();
+  void setCursorFill();
 
   /* Sets To Equipment */
   void setEquipment(EditorEquipment* equipment);
 
-  /* Sets To Bubby */
-  void setBubby(EditorBubby* bubby);
-  
+  /* Sets To Item */
+  void setItem(EditorItem* item);
+
+  /* Sets To Map */
+  void setMap(EditorMap* map);
+
+  /* Sets To Party */
+  void setParty(EditorParty* party);
+
+  /* Sets passability cursors */
+  void setPassAllCursor();
+  void setPassEastCursor();
+  void setPassNorthCursor();
+  void setPassSouthCursor();
+  void setPassWestCursor();
+
+  /* Sets To Person */
+  void setPerson(EditorPerson* person);
+
+  /* Sets To Race */
+  void setRace(EditorCategory* race);
+
+  /* Sets To Skill */
+  void setSkill(EditorSkill* skill);
+
+  /* Sets To Skillset */
+  void setSkillset(EditorSkillset* skill_set);
+
+  /* Sets to any view */
+  void setView(EditorEnumDb::ViewMode);
+  void setViewItem();
+  void setViewMap();
+  void setViewParty();
+  void setViewPerson();
+
   /* Shows and hides the game database view */
   void showDatabase();
 

@@ -739,6 +739,12 @@ void GameDatabase::updateBottomListName(QString str)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Load the game */
+void GameDatabase::load(FileHandler* fh)
+{
+  // TODO: Future. Possibly revise for XML data, like map in game instead
+}
+
 // TODO: Comment
 void GameDatabase::modifyBottomList(int index)
 {
@@ -891,6 +897,21 @@ void GameDatabase::modifyBottomList(int index)
   {
     button_delete->setDisabled(true);
     button_duplicate->setDisabled(true);
+  }
+}
+
+/* Save the game */
+void GameDatabase::save(FileHandler* fh, bool game_only)
+{
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("game");
+
+    /* Save all maps */
+    for(int i = 0; i < data_map.size(); i++)
+      data_map[i]->save(fh, game_only);
+
+    fh->writeXmlElementEnd();
   }
 }
 

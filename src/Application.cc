@@ -21,6 +21,7 @@ Application::Application(QWidget* parent)
            : QMainWindow(parent)
 {
   /* Gets the users name in windows only */
+  file_name = "";
   username = getenv("USERNAME");
 
   game_db_dock = new QDockWidget();
@@ -68,6 +69,7 @@ Application::Application(QWidget* parent)
 
   connect(game_view,SIGNAL(nameChange(QString)),game_database,
           SLOT(updateBottomListName(QString)));
+
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
   setWindowIcon(QIcon(":/Icons/Resources/fbs_icon.ico"));
@@ -76,7 +78,7 @@ Application::Application(QWidget* parent)
    //           QApplication::desktop()->availableGeometry().height()-64);
   setMinimumSize(1280,720);
   showMaximized();
-  setBasicCursor();
+  setCursorBasic();
 
   setStyleSheet("QMainWindow::separator { background: rgb(153, 153, 153); \
                                           width: 1px; height: 1px; }");
@@ -95,6 +97,33 @@ Application::~Application()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
+
+/* Export application to run in Univursa */
+void Application::exportGame()
+{
+
+}
+
+/* Load application */
+void Application::loadApp()
+{
+  qDebug() << "Load: " << file_name;
+}
+
+/* Save application */
+void Application::saveApp()
+{
+  /* Start file write */
+  FileHandler fh(file_name.toStdString(), true, true);
+  fh.start();
+
+  /* Write the data */
+  game_database->save(&fh);
+
+  /* Finish the file write */
+  fh.stop();
+}
+
 /*
  * Description: Sets up the Top Menu
  *
@@ -103,19 +132,19 @@ Application::~Application()
 void Application::setupTopMenu()
 {
   /* Sets up the File menu actions */
-  show_menu_action = new QAction("&Menu", this);
+  QAction* show_menu_action = new QAction("&Menu", this);
   show_menu_action->setIcon(QIcon(":/Icons/Resources/database.png"));
-  new_action = new QAction("&New",this);
+  QAction* new_action = new QAction("&New",this);
   new_action->setDisabled(true);
   new_action->setIcon(QIcon(":/Icons/Resources/new-icon.png"));
-  load_action = new QAction("&Load",this);
+  QAction* load_action = new QAction("&Load",this);
   load_action->setIcon(QIcon(":/Icons/Resources/load-icon.png"));
-  recentfiles_action = new QAction("&Recent Files",this);
-  save_action = new QAction("&Save",this);
+  QAction* recentfiles_action = new QAction("&Recent Files",this);
+  QAction* save_action = new QAction("&Save",this);
   save_action->setIcon(QIcon(":/Icons/Resources/save-icon.png"));
-  saveas_action = new QAction("&Save As",this);
+  QAction* saveas_action = new QAction("&Save As",this);
   saveas_action->setIcon(QIcon(":/Icons/Resources/saveas-icon.png"));
-  quit_action = new QAction("&Quit",this);
+  QAction* quit_action = new QAction("&Quit",this);
 
   /* Sets up file menu itself */
   QMenu* file_menu = menuBar()->addMenu("&File");
@@ -131,23 +160,20 @@ void Application::setupTopMenu()
   /* Connects File menu actions to slots */
   connect(show_menu_action, SIGNAL(triggered()), this, SLOT(showDatabase()));
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
-  // TODO: This should be not map, but new game. New map should be triggered
-  // from a different view
-  //connect(new_action,SIGNAL(triggered()),mapsize_dialog,SLOT(show()));
 
   /* Sets up Edit menu actions*/
-  undo_action = new QAction("&Undo",this);
+  QAction* undo_action = new QAction("&Undo",this);
   undo_action->setIcon(QIcon(":/Icons/Resources/undo-icon.png"));
-  redo_action = new QAction("&Redo",this);
+  QAction* redo_action = new QAction("&Redo",this);
   redo_action->setIcon(QIcon(":/Icons/Resources/redo-icon.png"));
-  cut_action = new QAction("&Cut",this);
+  QAction* cut_action = new QAction("&Cut",this);
   cut_action->setIcon(QIcon(":/Icons/Resources/cut-icon.png"));
-  copy_action = new QAction("&Copy",this);
+  QAction* copy_action = new QAction("&Copy",this);
   copy_action->setIcon(QIcon(":/Icons/Resources/copy-icon.png"));
-  paste_action = new QAction("&Paste",this);
+  QAction* paste_action = new QAction("&Paste",this);
   paste_action->setIcon(QIcon(":/Icons/Resources/paste-icon.png"));
-  findreplace_action = new QAction("&Find/Replace",this);
-  mapsize_action = new QAction("&Map Size",this);
+  QAction* findreplace_action = new QAction("&Find/Replace",this);
+  QAction* mapsize_action = new QAction("&Map Size",this);
 
   /* Sets up Edit menu itself */
   QMenu* edit_menu = menuBar()->addMenu("&Edit");
@@ -196,36 +222,39 @@ void Application::setupTopMenu()
   cursor_menu = menuBar()->addMenu("&Cursor Modes");
 
   /* Sets up the menu toolbars */
-  menubar = new QToolBar("Menus",this);
-  menubar->addAction(show_menu_action);
-  menubar->addSeparator();
-  menubar->addAction(new_action);
-  menubar->addAction(load_action);
-  menubar->addAction(save_action);
-  menubar->addAction(saveas_action);
-  menubar->addSeparator();
-  menubar->addAction(undo_action);
-  menubar->addAction(redo_action);
-  menubar->addAction(cut_action);
-  menubar->addAction(copy_action);
-  menubar->addAction(paste_action);
-  addToolBar(Qt::TopToolBarArea,menubar);
-  menubar->setFloatable(false);
-  menubar->setMovable(false);
+  bar_menu = new QToolBar("Menus",this);
+  bar_menu->addAction(show_menu_action);
+  bar_menu->addSeparator();
+  bar_menu->addAction(new_action);
+  bar_menu->addAction(load_action);
+  bar_menu->addAction(save_action);
+  bar_menu->addAction(saveas_action);
+  bar_menu->addSeparator();
+  bar_menu->addAction(undo_action);
+  bar_menu->addAction(redo_action);
+  bar_menu->addAction(cut_action);
+  bar_menu->addAction(copy_action);
+  bar_menu->addAction(paste_action);
+  addToolBar(Qt::TopToolBarArea,bar_menu);
+  bar_menu->setFloatable(false);
+  bar_menu->setMovable(false);
+  connect(load_action, SIGNAL(triggered()), this, SLOT(load()));
+  connect(save_action, SIGNAL(triggered()), this, SLOT(save()));
+  connect(saveas_action, SIGNAL(triggered()), this, SLOT(saveAs()));
 
   /* Sets up the brushes toolbar */
-  brushbar = new QToolBar("Brushes", this);
-  brushbar->addSeparator();
-  brushbar->addAction(basicmode_action);
-  brushbar->addAction(erasermode_action);
-  brushbar->addAction(blockplacemode_action);
-  brushbar->addAction(fill_action);
-  brushbar->addAction(pass_all_action);
-  brushbar->addAction(pass_north_action);
-  brushbar->addAction(pass_east_action);
-  brushbar->addAction(pass_south_action);
-  brushbar->addAction(pass_west_action);
-  addToolBar(Qt::TopToolBarArea,brushbar);
+  bar_brush = new QToolBar("Brushes", this);
+  bar_brush->addSeparator();
+  bar_brush->addAction(basicmode_action);
+  bar_brush->addAction(erasermode_action);
+  bar_brush->addAction(blockplacemode_action);
+  bar_brush->addAction(fill_action);
+  bar_brush->addAction(pass_all_action);
+  bar_brush->addAction(pass_north_action);
+  bar_brush->addAction(pass_east_action);
+  bar_brush->addAction(pass_south_action);
+  bar_brush->addAction(pass_west_action);
+  addToolBar(Qt::TopToolBarArea,bar_brush);
   cursor_menu->addAction(basicmode_action);
   cursor_menu->addAction(erasermode_action);
   cursor_menu->addAction(blockplacemode_action);
@@ -235,14 +264,14 @@ void Application::setupTopMenu()
   cursor_menu->addAction(pass_east_action);
   cursor_menu->addAction(pass_south_action);
   cursor_menu->addAction(pass_west_action);
-  brushbar->setFloatable(false);
-  brushbar->setMovable(false);
+  bar_brush->setFloatable(false);
+  bar_brush->setMovable(false);
 
-  connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setBasicCursor()));
-  connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setEraserCursor()));
+  connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setCursorBasic()));
+  connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setCursorEraser()));
   connect(blockplacemode_action,SIGNAL(triggered()),
-          this,SLOT(setBlockCursor()));
-  connect(fill_action,SIGNAL(triggered()),this,SLOT(setFillCursor()));
+          this,SLOT(setCursorBlock()));
+  connect(fill_action,SIGNAL(triggered()),this,SLOT(setCursorFill()));
   connect(pass_all_action, SIGNAL(triggered()), this, SLOT(setPassAllCursor()));
   connect(pass_north_action, SIGNAL(triggered()),
           this, SLOT(setPassNorthCursor()));
@@ -257,84 +286,43 @@ void Application::setupTopMenu()
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
-/*
- * Description: Sets to any mde
- */
-void Application::setView(EditorEnumDb::ViewMode v)
+
+/* Load action */
+void Application::load()
 {
-  game_view->setViewMode(v);
-  if(v != EditorEnumDb::MAPVIEW)
+  QString file = QFileDialog::getOpenFileName(this, "Load Game Editor File",
+                          EditorHelpers::getSpriteDir() + "/../../Editor/saves",
+                          tr("Univursa Saves (*.usv)"));
+  if(file != "")
   {
-    brushbar->setDisabled(true);
-    cursor_menu->setDisabled(true);
+    file_name = file;
+    loadApp();
   }
+}
+
+/* Save and save as action */
+void Application::save()
+{
+  if(file_name == "")
+    saveAs();
   else
+    saveApp();
+}
+
+void Application::saveAs()
+{
+  QString file = QFileDialog::getSaveFileName(this, "Save Game Editor File",
+                          EditorHelpers::getSpriteDir() + "/../../Editor/saves",
+                          tr("Univursa Saves (*.usv)"));
+  if(file != "")
   {
-    brushbar->setEnabled(true);
-    cursor_menu->setEnabled(true);
+    if(!file.endsWith(".usv"))
+      file += ".usv";
+    file_name = file;
+    saveApp();
   }
 }
 
-/*
- * Description: Sets to map view mode
- */
-void Application::setMapView()
-{
-  game_view->setViewMode(EditorEnumDb::MAPVIEW);
-}
-
-/*
- * Description: Sets to person view mode
- */
-void Application::setPersonView()
-{
-  game_view->setViewMode(EditorEnumDb::PERSONVIEW);
-}
-
-/*
- * Description: Sets to party view mode
- */
-void Application::setPartyView()
-{
-  game_view->setViewMode(EditorEnumDb::PARTYVIEW);
-}
-
-/*
- * Description: Sets to item view mode
- */
-void Application::setItemView()
-{
-  game_view->setViewMode(EditorEnumDb::ITEMVIEW);
-}
-
-/*
- * Description: Sets the map
- */
-void Application::setMap(EditorMap* map)
-{
-  game_view->getMapView()->setMapEditor(map);
-}
-/*
- * Description: Sets the person
- */
-void Application::setPerson(EditorPerson* person)
-{
-  qDebug() << "Person: " << person;
-}
-/*
- * Description: Sets the party
- */
-void Application::setParty(EditorParty* party)
-{
-  qDebug() << "Party: " << party;
-}
-/*
- * Description: Sets the item
- */
-void Application::setItem(EditorItem* item)
-{
-  qDebug() << "Item: " << item;
-}
 /*
  * Description: Sets the action
  */
@@ -344,43 +332,11 @@ void Application::setAction(EditorAction* action)
 }
 
 /*
- * Description: Sets the race
- */
-void Application::setRace(EditorCategory* race)
-{
-  qDebug() << "Race: " << race;
-}
-
-/*
  * Description: Sets the battle class
  */
 void Application::setBattleClass(EditorCategory* battle_class)
 {
   qDebug() << "Battle Class: " << battle_class;
-}
-
-/*
- * Description: Sets the skill set
- */
-void Application::setSkillset(EditorSkillset* skill_set)
-{
-  game_view->setSkillsetView(skill_set);
-}
-
-/*
- * Description: Sets the skill
- */
-void Application::setSkill(EditorSkill* skill)
-{
-  game_view->setSkillView(skill);
-}
-
-/*
- * Description: Sets the equipment
- */
-void Application::setEquipment(EditorEquipment* equipment)
-{
-  qDebug() << "Equipment: " << equipment;
 }
 
 /*
@@ -394,34 +350,65 @@ void Application::setBubby(EditorBubby* bubby)
 /*
  * Description: Sets to basic cursor mode
  */
-void Application::setBasicCursor()
+void Application::setCursorBasic()
 {
   game_view->getMapView()->setCursorMode(EditorEnumDb::BASIC);
 }
 
 /*
+ * Description: Sets to block place cursor mode
+ */
+void Application::setCursorBlock()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::BLOCKPLACE);
+}
+
+/*
  * Description: Sets to eraser cursor mode
  */
-void Application::setEraserCursor()
+void Application::setCursorEraser()
 {
   game_view->getMapView()->setCursorMode(EditorEnumDb::ERASER);
 }
 
 /*
- * Description: Sets to block place cursor mode
- */
-void Application::setBlockCursor()
-{
-  game_view->getMapView()->setCursorMode(EditorEnumDb::BLOCKPLACE);
-}
-
-
-/*
  * Description: Sets to fill cursor mode
  */
-void Application::setFillCursor()
+void Application::setCursorFill()
 {
   game_view->getMapView()->setCursorMode(EditorEnumDb::FILL);
+}
+
+/*
+ * Description: Sets the equipment
+ */
+void Application::setEquipment(EditorEquipment* equipment)
+{
+  qDebug() << "Equipment: " << equipment;
+}
+
+/*
+ * Description: Sets the item
+ */
+void Application::setItem(EditorItem* item)
+{
+  qDebug() << "Item: " << item;
+}
+
+/*
+ * Description: Sets the map
+ */
+void Application::setMap(EditorMap* map)
+{
+  game_view->getMapView()->setMapEditor(map);
+}
+
+/*
+ * Description: Sets the party
+ */
+void Application::setParty(EditorParty* party)
+{
+  qDebug() << "Party: " << party;
 }
 
 /* Sets to Passability Mode */
@@ -431,15 +418,15 @@ void Application::setPassAllCursor()
 }
 
 /* Sets to Passability Mode */
-void Application::setPassNorthCursor()
-{
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_N);
-}
-
-/* Sets to Passability Mode */
 void Application::setPassEastCursor()
 {
   game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_E);
+}
+
+/* Sets to Passability Mode */
+void Application::setPassNorthCursor()
+{
+  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_N);
 }
 
 /* Sets to Passability Mode */
@@ -452,6 +439,88 @@ void Application::setPassSouthCursor()
 void Application::setPassWestCursor()
 {
   game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_W);
+}
+
+/*
+ * Description: Sets the person
+ */
+void Application::setPerson(EditorPerson* person)
+{
+  qDebug() << "Person: " << person;
+}
+
+/*
+ * Description: Sets the race
+ */
+void Application::setRace(EditorCategory* race)
+{
+  qDebug() << "Race: " << race;
+}
+
+/*
+ * Description: Sets the skill
+ */
+void Application::setSkill(EditorSkill* skill)
+{
+  game_view->setSkillView(skill);
+}
+
+/*
+ * Description: Sets the skill set
+ */
+void Application::setSkillset(EditorSkillset* skill_set)
+{
+  game_view->setSkillsetView(skill_set);
+}
+
+/*
+ * Description: Sets to any mde
+ */
+void Application::setView(EditorEnumDb::ViewMode v)
+{
+  game_view->setViewMode(v);
+  if(v != EditorEnumDb::MAPVIEW)
+  {
+    bar_brush->setDisabled(true);
+    cursor_menu->setDisabled(true);
+  }
+  else
+  {
+    bar_brush->setEnabled(true);
+    cursor_menu->setEnabled(true);
+  }
+}
+
+/*
+ * Description: Sets to item view mode
+ */
+void Application::setViewItem()
+{
+  game_view->setViewMode(EditorEnumDb::ITEMVIEW);
+}
+
+/*
+ * Description: Sets to map view mode
+ */
+void Application::setViewMap()
+{
+  game_view->setViewMode(EditorEnumDb::MAPVIEW);
+}
+
+/*
+ * Description: Sets to party view mode
+ */
+void Application::setViewParty()
+{
+  game_view->setViewMode(EditorEnumDb::PARTYVIEW);
+}
+
+/*
+ * Description: Sets to person view mode
+ */
+void Application::setViewPerson()
+{
+  game_view->setViewMode(EditorEnumDb::PERSONVIEW);
 }
 
 /* 

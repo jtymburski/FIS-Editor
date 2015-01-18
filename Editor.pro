@@ -34,8 +34,11 @@ SOURCES += \
     src/EditorHelpers.cc \
     src/View/MapRender.cc \
     ../Project/src/Helpers.cc \
+    ../Project/src/FileHandler.cc \
     ../Project/src/Frame.cc \
+    ../Project/src/Md5.cc \
     ../Project/src/Sprite.cc \
+    ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/Map/Tile.cc \
     src/Database/EditorSprite.cc \
@@ -87,8 +90,11 @@ HEADERS += \
     include/View/MapRender.h \
     ../Project/include/EnumDb.h \
     ../Project/include/Helpers.h \
+    ../Project/include/FileHandler.h \
     ../Project/include/Frame.h \
+    ../Project/include/Md5.h \
     ../Project/include/Sprite.h \
+    ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/Map/Tile.h \
     include/Database/EditorSprite.h \

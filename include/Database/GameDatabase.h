@@ -27,6 +27,7 @@
 #include "Database/EditorSkill.h"
 #include "Database/EditorEquipment.h"
 #include "Database/EditorBubby.h"
+#include "FileHandler.h"
 
 class GameDatabase : public QWidget
 {
@@ -134,8 +135,14 @@ signals:
   void changeSkillset(EditorSkillset* skill_set);
 
 public:
+  /* Load the game */
+  void load(FileHandler* fh);
+
   /* Modifies the bottom list with the passed in index */
   void modifyBottomList(int index);
+
+  /* Save the game */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Temp start - TODO: REMOVE */
   void tempMake();

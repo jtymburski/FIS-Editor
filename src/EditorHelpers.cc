@@ -76,6 +76,22 @@ QString EditorHelpers::getListString(int id, QString name)
 }
 
 /*
+ * Description: Returns the project directory, based on the location in the
+ *              Univursa project folder.
+ *
+ * Inputs: none
+ * Output: QString - string for a full path to the directory
+ */
+QString EditorHelpers::getProjectDir()
+{
+  QString ref_name = "Univursa";
+  QString project_dir = QDir::current().absolutePath();
+  project_dir = project_dir.left(project_dir.indexOf(ref_name) +
+                                 ref_name.length()) + "/Project";
+  return project_dir;
+}
+
+/*
  * Description: Returns the sprite directory, based on the location in the
  *              Univursa project folder.
  *
@@ -84,11 +100,7 @@ QString EditorHelpers::getListString(int id, QString name)
  */
 QString EditorHelpers::getSpriteDir()
 {
-  QString ref_name = "Univursa";
-  QString sprites_dir = QDir::current().absolutePath();
-  sprites_dir = sprites_dir.left(sprites_dir.indexOf(ref_name) +
-                                 ref_name.length()) + "/Project/sprites";
-  return sprites_dir;
+  return (EditorHelpers::getProjectDir() + "/sprites");
 }
 
 /*
@@ -136,4 +148,15 @@ QRectF EditorHelpers::normalizePoints(QPointF point1, QPointF point2)
   }
 
   return rect;
+}
+
+/* Trim path */
+QString EditorHelpers::trimPath(QString path)
+{
+  QString ref_path = EditorHelpers::getProjectDir();
+  int index = path.indexOf(ref_path);
+
+  if(index == 0)
+    return path.right(path.size() - ref_path.size() - 1);
+  return path;
 }

@@ -13,6 +13,7 @@
 #include "Database/EditorTemplate.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
+#include "FileHandler.h"
 
 /* Struct for frame option storage */
 struct FrameInfo
@@ -56,6 +57,9 @@ private:
 private:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSprite &source);
+
+  /* Get frame mods */
+  QString getFrameMods(int index);
 
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
@@ -169,17 +173,26 @@ public:
   /* Returns the modified pixmap */
   QPixmap getPixmap(int index, int w, int h);
 
+  /* Get the number of paths that are similar, to be optimized */
+  int getSmartCount();
+
   /* Gets the sprite for alteration */
   Sprite* getSprite();
 
   /* Gets the frames vertical flip of a given frame */
   bool getVerticalFlip(int);
 
+  /* Loads the game data */
+  void load(FileHandler* fh);
+
   /* Paint the base sprite */
   bool paint(QPainter* painter, QRect rect);
   bool paint(QPainter* painter, int x, int y, int w, int h);
   bool paint(int index, QPainter* painter, QRect rect);
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
+
+  /* Saves the game data */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the sprites id (Backend) */
   virtual void setID(int);
