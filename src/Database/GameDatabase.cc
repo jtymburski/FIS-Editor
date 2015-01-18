@@ -94,71 +94,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 
 GameDatabase::~GameDatabase()
 {
-  /* Action clean-up */
-  emit changeAction(NULL);
-  for(int i = 0; i < data_action.size(); i++)
-    delete data_action[i];
-  data_action.clear();
-
-  /* Battle Class clean-up */
-  emit changeBattleclass(NULL);
-  for(int i = 0; i < data_battleclass.size(); i++)
-    delete data_battleclass[i];
-  data_battleclass.clear();
-
-  /* Bubby clean-up */
-  emit changeBubby(NULL);
-  for(int i = 0; i < data_bubby.size(); i++)
-    delete data_bubby[i];
-  data_bubby.clear();
-
-  /* Equipment clean-up */
-  emit changeEquipment(NULL);
-  for(int i = 0; i < data_equipment.size(); i++)
-    delete data_equipment[i];
-  data_equipment.clear();
-
-  /* Item clean-up */
-  emit changeItem(NULL);
-  for(int i = 0; i < data_item.size(); i++)
-    delete data_item[i];
-  data_item.clear();
-
-  /* Map clean-up */
-  emit changeMap(NULL);
-  for(int i = 0; i < data_map.size(); i++)
-    delete data_map[i];
-  data_map.clear();
-
-  /* Party clean-up */
-  emit changeParty(NULL);
-  for(int i = 0; i < data_party.size(); i++)
-    delete data_party[i];
-  data_party.clear();
-
-  /* Person clean-up */
-  emit changePerson(NULL);
-  for(int i = 0; i < data_person.size(); i++)
-    delete data_person[i];
-  data_person.clear();
-
-  /* Race clean-up */
-  emit changeRace(NULL);
-  for(int i = 0; i < data_race.size(); i++)
-    delete data_race[i];
-  data_race.clear();
-
-  /* Skill clean-up */
-  emit changeSkill(NULL);
-  for(int i = 0; i < data_skill.size(); i++)
-    delete data_skill[i];
-  data_skill.clear();
-
-  /* Skillset clean-up */
-  emit changeSkillset(NULL);
-  for(int i = 0; i < data_skillset.size(); i++)
-    delete data_skillset[i];
-  data_skillset.clear();
+  deleteAll();
 
   /* UnSet the tile icons */
   delete tile_icons.passN;
@@ -738,6 +674,86 @@ void GameDatabase::updateBottomListName(QString str)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/* Delete the game */
+void GameDatabase::deleteAll()
+{
+  /* Get the current top view */
+  int index = view_top->currentRow();
+
+  /* Action clean-up */
+  emit changeAction(NULL);
+  for(int i = 0; i < data_action.size(); i++)
+    delete data_action[i];
+  data_action.clear();
+
+  /* Battle Class clean-up */
+  emit changeBattleclass(NULL);
+  for(int i = 0; i < data_battleclass.size(); i++)
+    delete data_battleclass[i];
+  data_battleclass.clear();
+
+  /* Bubby clean-up */
+  emit changeBubby(NULL);
+  for(int i = 0; i < data_bubby.size(); i++)
+    delete data_bubby[i];
+  data_bubby.clear();
+
+  /* Equipment clean-up */
+  emit changeEquipment(NULL);
+  for(int i = 0; i < data_equipment.size(); i++)
+    delete data_equipment[i];
+  data_equipment.clear();
+
+  /* Item clean-up */
+  emit changeItem(NULL);
+  for(int i = 0; i < data_item.size(); i++)
+    delete data_item[i];
+  data_item.clear();
+
+  /* Map clean-up */
+  emit changeMap(NULL);
+  for(int i = 0; i < data_map.size(); i++)
+    delete data_map[i];
+  data_map.clear();
+
+  /* Party clean-up */
+  emit changeParty(NULL);
+  for(int i = 0; i < data_party.size(); i++)
+    delete data_party[i];
+  data_party.clear();
+
+  /* Person clean-up */
+  emit changePerson(NULL);
+  for(int i = 0; i < data_person.size(); i++)
+    delete data_person[i];
+  data_person.clear();
+
+  /* Race clean-up */
+  emit changeRace(NULL);
+  for(int i = 0; i < data_race.size(); i++)
+    delete data_race[i];
+  data_race.clear();
+
+  /* Skill clean-up */
+  emit changeSkill(NULL);
+  for(int i = 0; i < data_skill.size(); i++)
+    delete data_skill[i];
+  data_skill.clear();
+
+  /* Skillset clean-up */
+  emit changeSkillset(NULL);
+  for(int i = 0; i < data_skillset.size(); i++)
+    delete data_skillset[i];
+  data_skillset.clear();
+
+  /* Reset the view */
+  if(index == 0)
+    view_top->setCurrentRow(1);
+  else
+    view_top->setCurrentRow(0);
+  view_top->setCurrentRow(index);
+}
 
 /* Load the game */
 void GameDatabase::load(FileHandler* fh)

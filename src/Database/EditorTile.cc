@@ -185,6 +185,23 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
 }
 
 /*
+ * Description: Returns a number between 0 and 15 for what the passability is.
+ *              This number is the binary realization in base 10 of the 4
+ *              passability directions.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to check passability on
+ * Output: int - the base 10 integer representation of passability
+ */
+int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
+{
+  return EditorHelpers::getPassabilityNum(
+                                        getPassability(layer, Direction::NORTH),
+                                        getPassability(layer, Direction::EAST),
+                                        getPassability(layer, Direction::SOUTH),
+                                        getPassability(layer, Direction::WEST));
+}
+
+/*
  * Description: Returns passability based on visible layers and a direction.
  *
  * Inputs: Direction direction - the direction trying to exit.

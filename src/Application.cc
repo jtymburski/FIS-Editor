@@ -135,7 +135,6 @@ void Application::setupTopMenu()
   QAction* show_menu_action = new QAction("&Menu", this);
   show_menu_action->setIcon(QIcon(":/Icons/Resources/database.png"));
   QAction* new_action = new QAction("&New",this);
-  new_action->setDisabled(true);
   new_action->setIcon(QIcon(":/Icons/Resources/new-icon.png"));
   QAction* load_action = new QAction("&Load",this);
   load_action->setIcon(QIcon(":/Icons/Resources/load-icon.png"));
@@ -238,6 +237,7 @@ void Application::setupTopMenu()
   addToolBar(Qt::TopToolBarArea,bar_menu);
   bar_menu->setFloatable(false);
   bar_menu->setMovable(false);
+  connect(new_action, SIGNAL(triggered()), this, SLOT(newGame()));
   connect(load_action, SIGNAL(triggered()), this, SLOT(load()));
   connect(save_action, SIGNAL(triggered()), this, SLOT(save()));
   connect(saveas_action, SIGNAL(triggered()), this, SLOT(saveAs()));
@@ -297,6 +297,18 @@ void Application::load()
   {
     file_name = file;
     loadApp();
+  }
+}
+
+/* New game */
+void Application::newGame()
+{
+  QMessageBox::StandardButton reply = QMessageBox::question(this, "New?",
+                 "Are you sure you want to lose all changes for a blank slate?",
+                 QMessageBox::Yes | QMessageBox::No);
+  if(reply == QMessageBox::Yes)
+  {
+    game_database->deleteAll();
   }
 }
 

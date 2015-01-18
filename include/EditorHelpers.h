@@ -45,6 +45,14 @@ public:
   /* Returns the list string, taking an id and name */
   static QString getListString(int id, QString name);
 
+  /* Returns a base 10 number of the representing passability (as a binary) */
+  static int getPassabilityNum(bool north, bool east, bool south, bool west);
+
+  /* Returns the passability string */
+  static QString getPassabilityStr(bool north, bool east,
+                                   bool south, bool west);
+  static QString getPassabilityStr(int passability_num);
+
   /* Returns the project directory, based on the location of the editor */
   static QString getProjectDir();
 
@@ -56,6 +64,10 @@ public:
 
   /* Normalize two points to top left and bottom right and return rect */
   static QRectF normalizePoints(QPointF point1, QPointF point2);
+
+  /* Rectilinear split */
+  static QList<QPair<QString, QString>> rectilinearSplit(
+                                                       QList<QPoint> point_set);
 
   /* Trim path */
   static QString trimPath(QString path);

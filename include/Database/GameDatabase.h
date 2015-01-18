@@ -135,6 +135,9 @@ signals:
   void changeSkillset(EditorSkillset* skill_set);
 
 public:
+  /* Delete the game */
+  void deleteAll();
+
   /* Load the game */
   void load(FileHandler* fh);
 

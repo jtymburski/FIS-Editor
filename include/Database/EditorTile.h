@@ -86,6 +86,9 @@ public:
   /* Returns the passability based on layer and direction */
   bool getPassability(EditorEnumDb::Layer layer, Direction direction);
 
+  /* Returns a number between 0 and 15 for what the passability is */
+  int getPassabilityNum(EditorEnumDb::Layer layer);
+
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
 

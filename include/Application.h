@@ -109,6 +109,9 @@ public slots:
   /* Load action */
   void load();
 
+  /* New game */
+  void newGame();
+
   /* Save and save as action */
   void save();
   void saveAs();

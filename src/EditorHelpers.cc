@@ -6,6 +6,7 @@
  *              Essentially, all public static functions for outside access.
  ******************************************************************************/
 #include "EditorHelpers.h"
+#include <QDebug>
 
 /*============================================================================
  * PUBLIC STATIC FUNCTIONS
@@ -73,6 +74,103 @@ QString EditorHelpers::getListString(int id, QString name)
   }
 
   return title;
+}
+
+/*
+ * Description: Returns the passability number corresponding to the 4
+ *              directions. NESW is the order of the binary number.
+ *
+ * Inputs: bool north - north direction passable
+ *         bool east - east direction passable
+ *         bool south - south direction passable
+ *         bool west - west direction passable
+ * Output: int - integer representation of the passability
+ */
+int EditorHelpers::getPassabilityNum(bool north, bool east,
+                                     bool south, bool west)
+{
+  int num = 0;
+
+  if(north)
+    num += 8;
+  if(east)
+    num += 4;
+  if(south)
+    num += 2;
+  if(west)
+    num += 1;
+
+  return num;
+}
+
+/*
+ * Description: Returns the passability in string format for storing in file.
+ *              This puts the directions comma delimited.
+ *
+ * Inputs: bool north - north direction passable
+ *         bool east - east direction passable
+ *         bool south - south direction passable
+ *         bool west - west direction passable
+ * Output: QString - comma delimited string of directions
+ */
+QString EditorHelpers::getPassabilityStr(bool north, bool east,
+                                         bool south, bool west)
+{
+  QString passability = "";
+
+  /* Passability binary parsing */
+  if(north)
+    passability += "N,";
+  if(east)
+    passability += "E,";
+  if(south)
+    passability += "S,";
+  if(west)
+    passability += "W,";
+
+  /* Clean-up */
+  if(passability.size() > 0)
+    passability.chop(1);
+  return passability;
+}
+
+/*
+ * Description: Returns the passability in string format for storing in file.
+ *              This puts the directions comma delimited.
+ *
+ * Inputs: int passability_num - the integer representation of all 4 directions
+ * Output: QString - comma delimited string of directions
+ */
+QString EditorHelpers::getPassabilityStr(int passability_num)
+{
+  QString passability = "";
+
+  /* Passability number unroll */
+  if(passability_num >= 8)
+  {
+    passability += "N,";
+    passability_num -= 8;
+  }
+  if(passability_num >= 4)
+  {
+    passability += "E,";
+    passability_num -= 4;
+  }
+  if(passability_num >= 2)
+  {
+    passability += "S,";
+    passability_num -= 2;
+  }
+  if(passability_num >= 1)
+  {
+    passability += "W,";
+    passability_num -= 1;
+  }
+
+  /* Final checks and clean-up */
+  if(passability.size() > 0)
+    passability.chop(1);
+  return passability;
 }
 
 /*
@@ -150,7 +248,121 @@ QRectF EditorHelpers::normalizePoints(QPointF point1, QPointF point2)
   return rect;
 }
 
-/* Trim path */
+/*
+ * Description: Rectilinear split of the points to rectangle sets that can
+ *              be stored within the file.
+ *
+ * Inputs: QList<QPoint<int,int>> - the points (x, y) that are in the tile
+ * Output: QList<QPoint<QString,QString>> - the combined rectangle sets
+ */
+QList<QPair<QString,QString>> EditorHelpers::rectilinearSplit(
+                                               QList<QPoint> point_set)
+{
+  int count = 0;
+  QList<int> int_set;
+  QList<QPair<QString,QString>> set;
+  QList<QString> str_set;
+  int x_index = -1;
+  int y_index = -1;
+
+  /* Go through all the points */
+  for(int i = 0; i < point_set.size(); i++)
+  {
+    /* If in the valid range, check if the next number is valid */
+    if(x_index != -1)
+    {
+      if(x_index != point_set[i].x() || (y_index + count) != point_set[i].y())
+      {
+        if(count > 1)
+        {
+          str_set.push_back(QString::number(y_index) + "-" +
+                            QString::number(y_index + count - 1));
+        }
+        else
+        {
+          str_set.push_back(QString::number(y_index));
+        }
+
+        int_set.push_back(x_index);
+        x_index = -1;
+      }
+      else
+      {
+        count++;
+      }
+    }
+
+    /* If the x_index is -1, then reset the values */
+    if(x_index == -1)
+    {
+      x_index = point_set[i].x();
+      y_index = point_set[i].y();
+      count = 1;
+    }
+  }
+
+  /* Grab the final number */
+  if(count > 1)
+  {
+    str_set.push_back(QString::number(y_index) + "-" +
+                      QString::number(y_index + count - 1));
+  }
+  else
+  {
+    str_set.push_back(QString::number(y_index));
+  }
+  int_set.push_back(x_index);
+
+  /* Try to optimize further with side lines of similar size */
+  QString size = "";
+  QList<int> indexes;
+  while(int_set.size() > 0)
+  {
+    /* Get the first value */
+    count = 1;
+    bool done = false;
+    indexes.push_back(0);
+    x_index = int_set.front();
+    size = str_set.front();
+
+    /* Loop through and check for optimizations */
+    for(int i = 1; !done && (i < int_set.size()); i++)
+    {
+      if(int_set[i] == (x_index + count) && str_set[i] == size)
+      {
+        count++;
+        indexes.push_back(i);
+      }
+      else if(int_set[i] > (x_index + count))
+      {
+        done = true;
+      }
+    }
+
+    /* Load up set */
+    if(count > 1)
+      set.push_back(QPair<QString,QString>(QString::number(x_index) + "-" +
+                                   QString::number(x_index + count - 1), size));
+    else
+      set.push_back(QPair<QString,QString>(QString::number(x_index), size));
+    for(int i = indexes.size() - 1; i >= 0; i--)
+    {
+      int_set.removeAt(indexes[i]);
+      str_set.removeAt(indexes[i]);
+    }
+    indexes.clear();
+  }
+
+  return set;
+}
+
+/*
+ * Description: Trims a path and removes the project directory portion from
+ *              the head of it.
+ *
+ * Inputs: QString path - the path to clean-up
+ * Output: QString - the resulting cleaned-up path without project directory
+ */
 QString EditorHelpers::trimPath(QString path)
 {
   QString ref_path = EditorHelpers::getProjectDir();

@@ -69,41 +69,63 @@ EditorMap::~EditorMap()
 void EditorMap::addTileSpriteData(FileHandler* fh, int index,
                                   EditorEnumDb::Layer layer)
 {
+  QList<QPoint> empty_set;
+  int max_pass = EditorHelpers::getPassabilityNum(true, true, true, true);
   QString sep = ",";
 
   for(int i = 0; i < sprites.size(); i++)
   {
-    QList<QPoint> coords;
+    QList<QList<QPoint>> coords;
+    for(int j = 0; j <= max_pass; j++)
+      coords.push_back(empty_set);
+
 
     for(int j = 0; j < sub_maps[index]->tiles.size(); j++)
     {
       for(int k = 0; k < sub_maps[index]->tiles[j].size(); k++)
       {
         if(sub_maps[index]->tiles[j][k]->getSprite(layer) == sprites[i])
-          coords.push_back(QPoint(j, k));
+        {
+          int pass = sub_maps[index]->tiles[j][k]->getPassabilityNum(layer);
+          coords[pass].push_back(QPoint(j, k));
+        }
       }
     }
 
     /* Parse all coords */
-    if(coords.size() > 0)
+    for(int j = 0; j < coords.size(); j++)
     {
-      QString x_set = "";
-      QString y_set = "";
-      for(int j = 0; j < coords.size(); j++)
+      if(coords[j].size() > 0)
       {
-        x_set += QString::number(coords[j].x()) + sep;
-        y_set += QString::number(coords[j].y()) + sep;
-      }
-      x_set.chop(1);
-      y_set.chop(1);
+        QList<QPair<QString,QString>> str_set =
+                                     EditorHelpers::rectilinearSplit(coords[j]);
 
-      /* Print the elements */
-      fh->writeXmlElement("x", "index", x_set.toStdString());
-      fh->writeXmlElement("y", "index", y_set.toStdString());
-      fh->writeXmlData("sprite_id",
-                       QString::number(sprites[i]->getID()).toStdString());
-      fh->writeXmlElementEnd();
-      fh->writeXmlElementEnd();
+        QString x_set = "";
+        QString y_set = "";
+        for(int k = 0; k < str_set.size(); k++)
+        {
+          x_set += str_set[k].first + sep;
+          y_set += str_set[k].second + sep;
+        }
+        x_set.chop(1);
+        y_set.chop(1);
+
+        /* Print the elements */
+        fh->writeXmlElement("x", "index", x_set.toStdString());
+        fh->writeXmlElement("y", "index", y_set.toStdString());
+        fh->writeXmlData("sprite_id",
+                         QString::number(sprites[i]->getID()).toStdString());
+        if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::LOWER1 ||
+           layer == EditorEnumDb::LOWER2 || layer == EditorEnumDb::LOWER3 ||
+           layer == EditorEnumDb::LOWER4 || layer == EditorEnumDb::LOWER5)
+        {
+          QString passability = EditorHelpers::getPassabilityStr(j);
+          if(!passability.isEmpty())
+            fh->writeXmlData("passability", passability.toStdString());
+        }
+        fh->writeXmlElementEnd();
+        fh->writeXmlElementEnd();
+      }
     }
   }
 }
