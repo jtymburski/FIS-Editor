@@ -172,6 +172,92 @@ void EditorMap::copySelf(const EditorMap &source)
   }
 }
 
+/* Loads sub-map info */
+void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
+{
+  QString element = QString::fromStdString(data.getElement(index));
+  if(element == "name")
+  {
+    map->name = QString::fromStdString(data.getDataString());
+  }
+  else if(element == "width")
+  {
+    setMap(map->id, map->name, data.getDataInteger(),map->tiles.front().size());
+  }
+  else if(element == "height")
+  {
+    setMap(map->id, map->name, map->tiles.size(), data.getDataInteger());
+  }
+  else if((element == "base" || element == "enhancer" ||
+           element == "lower" || element == "upper") &&
+          data.getElement(index + 1) == "x" &&
+          data.getElement(index + 2) == "y")
+  {
+    /* Determine the layer */
+    EditorEnumDb::Layer layer;
+    if(element == "base")
+      layer = EditorEnumDb::BASE;
+    else if(element == "enhancer")
+      layer = EditorEnumDb::ENHANCER;
+    else if(element == "lower")
+      layer = (EditorEnumDb::Layer)(static_cast<int>(EditorEnumDb::LOWER1) +
+                       QString::fromStdString(data.getKeyValue(index)).toInt());
+    else if(element == "upper")
+      layer = (EditorEnumDb::Layer)(static_cast<int>(EditorEnumDb::UPPER1) +
+                       QString::fromStdString(data.getKeyValue(index)).toInt());
+
+    /* Determine the sprite, if applicable. or passability, if applicable */
+    int last = data.getNumElements() - 1;
+    bool pass_north = false;
+    bool pass_east = false;
+    bool pass_south = false;
+    bool pass_west = false;
+    EditorSprite* sprite = NULL;
+    if(data.getElement(last) == "sprite_id")
+      sprite = getSprite(QString::fromStdString(data.getDataString()).toInt());
+    else if(data.getElement(last) == "passability")
+      EditorHelpers::getPassability(
+                       QString::fromStdString(data.getDataString()), pass_north,
+                       pass_east, pass_south, pass_west);
+
+    /* Parse through x and y index */
+    int parse = 0;
+    QStringList x_list = QString::fromStdString(data.getKeyValue(index + 1))
+                          .split(",");
+    QStringList y_list = QString::fromStdString(data.getKeyValue(index + 2))
+                          .split(",");
+    while(parse < x_list.size() && parse < y_list.size())
+    {
+      QStringList x_pair = x_list[parse].split("-");
+      QStringList y_pair = y_list[parse].split("-");
+
+      /* Loop through all tiles */
+      for(int i = x_pair.front().toInt(); i <= x_pair.back().toInt(); i++)
+      {
+        for(int j = y_pair.front().toInt(); j <= y_pair.back().toInt(); j++)
+        {
+          if(map->tiles.size() > i && map->tiles[i].size() > j)
+          {
+            EditorTile* tile = map->tiles[i][j];
+            if(data.getElement(last) == "sprite_id")
+              tile->place(layer, sprite, true);
+            else if(data.getElement(last) == "passability")
+            {
+              tile->setPassability(layer, Direction::NORTH, pass_north);
+              tile->setPassability(layer, Direction::EAST, pass_east);
+              tile->setPassability(layer, Direction::SOUTH, pass_south);
+              tile->setPassability(layer, Direction::WEST, pass_west);
+            }
+          }
+        }
+      }
+
+      /* Increment */
+      parse++;
+    }
+  }
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -423,18 +509,71 @@ TileIcons* EditorMap::getTileIcons()
   return tile_icons;
 }
 
-/* Loads the map */
-void EditorMap::load(FileHandler* fh)
+/*
+ * Description: Loads the map data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
+void EditorMap::load(XmlData data, int index)
 {
-  // TODO: Future - fix as per game database and match
+  /* Parse the data for the map */
+  if(data.getElement(index) == "name")
+  {
+    setName(QString::fromStdString(data.getDataString()));
+  }
+  else if(data.getElement(index) == "sprite" && data.getKey(index) == "id")
+  {
+    int sprite_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorSprite* sprite = getSprite(sprite_id);
+
+    /* Create new sprite if it doesn't exist */
+    if(sprite == NULL)
+    {
+      sprite = new EditorSprite();
+      sprite->setID(sprite_id);
+      setSprite(sprite);
+    }
+
+    /* Continue to parse the data in the sprite */
+    sprite->load(data, index + 1);
+  }
+  else if(data.getElement(index) == "main" ||
+          (data.getElement(index) == "section" && data.getKey(index) == "id"))
+  {
+    int id = -1;
+    if(data.getElement(index) == "main")
+      id = 0;
+    else
+      id = QString::fromStdString(data.getKeyValue(index)).toInt();
+
+    /* Attempt to get map. If it doesn't exist, make new */
+    SubMapInfo* access_map = getMap(id);
+    if(access_map == NULL)
+    {
+      int index = setMap(id, "TEMP", 1, 1);
+      access_map = getMapByIndex(index);
+    }
+
+    /* Proceed to modify the map as needed */
+    loadSubMap(access_map, data, index + 1);
+  }
 }
 
-/* Saves the map */
+/*
+ * Description: Saves the map data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorMap::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
   {
     fh->writeXmlElement("map", "id", getID());
+    fh->writeXmlData("name", getName().toStdString());
 
     /* Add sprites */
     for(int i = 0; i < sprites.size(); i++)
@@ -447,7 +586,7 @@ void EditorMap::save(FileHandler* fh, bool game_only)
       if(i == 0)
         fh->writeXmlElement("main");
       else
-        fh->writeXmlElement("section", "index", sub_maps[i]->id);
+        fh->writeXmlElement("section", "id", sub_maps[i]->id);
 
       /* Add size and name */
       if(!game_only)
@@ -558,6 +697,12 @@ int EditorMap::setMap(int id, QString name,
     if(found)
     {
       sub_maps[index]->name = name;
+
+      /* Delete existing tiles */
+      for(int i = 0; i < sub_maps[index]->tiles.size(); i++)
+        for(int j = 0; j < sub_maps[index]->tiles[i].size(); j++)
+          delete sub_maps[index]->tiles[i][j];
+
       sub_maps[index]->tiles = tiles;
     }
     else

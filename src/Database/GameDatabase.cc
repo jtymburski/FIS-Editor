@@ -758,7 +758,57 @@ void GameDatabase::deleteAll()
 /* Load the game */
 void GameDatabase::load(FileHandler* fh)
 {
-  // TODO: Future. Possibly revise for XML data, like map in game instead
+  if(fh != NULL)
+  {
+    XmlData data;
+    bool done = false;
+    bool read_success = true;
+    bool success = true;
+
+    /* Loop through all elements */
+    do
+    {
+      /* Read set of XML data */
+      data = fh->readXmlData(&done, &read_success);
+      success &= read_success;
+
+      /* Only validate if wrapped within game and successful read */
+      if(success && data.getElement(0) == "game")
+      {
+        /* If map element, add new map if it doesn't exist; then send
+         * new information to map */
+        if(data.getElement(1) == "map" && data.getKey(1) == "id")
+        {
+          int map_id = QString::fromStdString(data.getKeyValue(1)).toInt();
+          int map_index = -1;
+
+          /* Try and find map index */
+          for(int i = 0; i < data_map.size(); i++)
+            if(data_map[i]->getID() == map_id)
+              map_index = i;
+
+          /* Create the map if it doesn't exist */
+          if(map_index == -1)
+          {
+            data_map.push_back(new EditorMap(map_id,"TEMP",0,0,&tile_icons));
+            map_index = data_map.size() - 1;
+          }
+
+          /* Pass the XML data to the map */
+          data_map[map_index]->load(data, 2);
+        }
+      }
+
+    } while(!done);
+  }
+
+  /* Update the view */
+  int index = view_top->currentRow();
+  if(index == 0)
+    view_top->setCurrentRow(1);
+  else
+    view_top->setCurrentRow(0);
+  view_top->setCurrentRow(index);
 }
 
 // TODO: Comment

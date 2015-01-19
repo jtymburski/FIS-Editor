@@ -95,6 +95,37 @@ QString EditorSprite::getFrameMods(int index)
 }
 
 /*
+ * Description: Takes a path from the load procedure of sprite and splits it
+ *              to determine if there are multiple frames.
+ *
+ * Inputs: QString base_path - the base path to split
+ * Output: QList<QString> - the set of paths from the split (possibly 1)
+ */
+QList<QString> EditorSprite::splitPath(QString base_path)
+{
+  QList<QString> paths;
+
+  /* Split first */
+  QStringList split_set = base_path.split("|");
+  if(split_set.size() == 3 && split_set[1].toInt() > 0)
+  {
+    for(int i = 0; i < split_set[1].toInt(); i++)
+    {
+      if(i < 10)
+        paths.push_back(split_set[0] + "0" + QString::number(i) + split_set[2]);
+      else
+        paths.push_back(split_set[0] + QString::number(i) + split_set[2]);
+    }
+  }
+  else
+  {
+    paths.push_back(base_path);
+  }
+
+  return paths;
+}
+
+/*
  * Description: Returns the transformed pixmap, with all necessary sprite mods.
  *
  * Inputs: int index - the frame index
@@ -766,10 +797,94 @@ bool EditorSprite::getVerticalFlip(int frame_num)
   return false;
 }
 
-/* Loads the game data */
-void EditorSprite::load(FileHandler* fh)
+/*
+ * Description: Loads the game data from file.
+ *
+ * Inputs: XmlData data - the data struct from the XML
+ *         int index - the offset index into the XML stack.
+ * Output: none
+ */
+void EditorSprite::load(XmlData data, int index)
 {
-  // TODO: Future - fix as per game database and match
+  QString element = QString::fromStdString(data.getElement(index));
+  QStringList elements = element.split("_");
+
+  if(element == "name")
+  {
+    setName(QString::fromStdString(data.getDataString()));
+  }
+  else if(element == "animation")
+  {
+    setAnimationTime(QString::number(data.getDataInteger()));
+  }
+  else if(element == "rotation")
+  {
+    setRotation(QString::number(data.getDataFloat()));
+  }
+  else if(element == "brightness")
+  {
+    setBrightness(static_cast<int>(data.getDataFloat() * 255));
+  }
+  else if(element == "color_r")
+  {
+    setColorRed(data.getDataInteger());
+  }
+  else if(element == "color_g")
+  {
+    setColorGreen(data.getDataInteger());
+  }
+  else if(element == "color_b")
+  {
+    setColorBlue(data.getDataInteger());
+  }
+  else if(element == "opacity")
+  {
+    setOpacity(data.getDataInteger());
+  }
+  else if(element == "forward")
+  {
+    if(data.getDataBool())
+      setDirectionForward();
+    else
+      setDirectionReverse();
+  }
+  else if(elements.front() == "path")
+  {
+    /* Base element */
+    FrameInfo base;
+    base.path = "";
+    base.hflip = false;
+    base.vflip = false;
+    base.rotate90 = false;
+    base.rotate180 = false;
+    base.rotate270 = false;
+
+    /* Add adjustments */
+    for(int i = 0; i < elements.size(); i++)
+    {
+      if(elements[i] == "hf")
+        base.hflip = true;
+      else if(elements[i] == "vf")
+        base.vflip = true;
+      else if(elements[i] == "90")
+        base.rotate90 = true;
+      else if(elements[i] == "180")
+        base.rotate180 = true;
+      else if(elements[i] == "270")
+        base.rotate270 = true;
+    }
+
+    /* Get all paths and parse them all */
+    QString sep = "/";
+    QList<QString> path_set = splitPath(EditorHelpers::getProjectDir() + sep +
+                                  QString::fromStdString(data.getDataString()));
+    for(int i = 0; i < path_set.size(); i++)
+    {
+      frame_info.push_back(base);
+      frame_info.back().path = path_set[i];
+      frame_info.back().image = QImage(path_set[i]);
+    }
+  }
 }
 
 /*

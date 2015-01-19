@@ -105,9 +105,21 @@ void Application::exportGame()
 }
 
 /* Load application */
-void Application::loadApp()
+void Application::loadApp(QString filename)
 {
-  qDebug() << "Load: " << file_name;
+  if(newGame())
+  {
+    file_name = filename;
+    FileHandler fh(file_name.toStdString(), false, true);
+    bool success = fh.start();
+
+    /* Load the info into the game database */
+    if(success)
+      game_database->load(&fh);
+
+    /* Finish the file read */
+    fh.stop();
+  }
 }
 
 /* Save application */
@@ -294,14 +306,11 @@ void Application::load()
                           EditorHelpers::getSpriteDir() + "/../../Editor/saves",
                           tr("Univursa Saves (*.usv)"));
   if(file != "")
-  {
-    file_name = file;
-    loadApp();
-  }
+    loadApp(file);
 }
 
 /* New game */
-void Application::newGame()
+bool Application::newGame()
 {
   QMessageBox::StandardButton reply = QMessageBox::question(this, "New?",
                  "Are you sure you want to lose all changes for a blank slate?",
@@ -309,7 +318,9 @@ void Application::newGame()
   if(reply == QMessageBox::Yes)
   {
     game_database->deleteAll();
+    return true;
   }
+  return false;
 }
 
 /* Save and save as action */

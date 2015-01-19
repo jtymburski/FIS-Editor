@@ -61,6 +61,9 @@ private:
   /* Get frame mods */
   QString getFrameMods(int index);
 
+  /* Takes a path from file and splits it to determine if there is more than 1*/
+  QList<QString> splitPath(QString base_path);
+
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
 
@@ -183,7 +186,7 @@ public:
   bool getVerticalFlip(int);
 
   /* Loads the game data */
-  void load(FileHandler* fh);
+  void load(XmlData data, int index);
 
   /* Paint the base sprite */
   bool paint(QPainter* painter, QRect rect);

@@ -76,6 +76,24 @@ QString EditorHelpers::getListString(int id, QString name)
   return title;
 }
 
+/* Converts the string into passability values */
+void EditorHelpers::getPassability(QString str, bool &north, bool &east,
+                                   bool &south, bool &west)
+{
+  QStringList set = str.split(",");
+  for(int i = 0; i < set.size(); i++)
+  {
+    if(set[i] == "N")
+      north = true;
+    else if(set[i] == "E")
+      east = true;
+    else if(set[i] == "S")
+      south = true;
+    else if(set[i] == "W")
+      west = true;
+  }
+}
+
 /*
  * Description: Returns the passability number corresponding to the 4
  *              directions. NESW is the order of the binary number.

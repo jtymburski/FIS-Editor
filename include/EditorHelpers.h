@@ -45,6 +45,10 @@ public:
   /* Returns the list string, taking an id and name */
   static QString getListString(int id, QString name);
 
+  /* Converts the string into passability values */
+  static void getPassability(QString str, bool &north, bool &east,
+                             bool &south, bool &west);
+
   /* Returns a base 10 number of the representing passability (as a binary) */
   static int getPassabilityNum(bool north, bool east, bool south, bool west);
 

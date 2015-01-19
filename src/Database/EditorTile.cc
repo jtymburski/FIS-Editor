@@ -439,9 +439,11 @@ void EditorTile::paint(QPainter *painter,
  *
  * Inputs: EditorEnumDb::Layer - the layer to change the sprite
  *         EditorSprite* - the new sprite
+ *         bool load - if triggered by a file load
  * Output: bool - true if the sprite was changed
  */
-bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite)
+bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite,
+                       bool load)
 {
   if(sprite != NULL)
   {
@@ -452,10 +454,13 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite)
         tile.setBase(sprite->getSprite());
 
         /* Default to fully passable */
-        tile.setBasePassability(Direction::NORTH, true);
-        tile.setBasePassability(Direction::EAST, true);
-        tile.setBasePassability(Direction::SOUTH, true);
-        tile.setBasePassability(Direction::WEST, true);
+        if(!load)
+        {
+          tile.setBasePassability(Direction::NORTH, true);
+          tile.setBasePassability(Direction::EAST, true);
+          tile.setBasePassability(Direction::SOUTH, true);
+          tile.setBasePassability(Direction::WEST, true);
+        }
         break;
       case EditorEnumDb::ENHANCER:
         layer_enhancer.sprite = sprite;

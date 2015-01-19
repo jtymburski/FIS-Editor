@@ -77,9 +77,12 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
       active_tile = (EditorTile*)hover_item;
       active_tile->setHover(true);
       new_hover = true;
+      emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
     }
-
-    emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
+    else
+    {
+      emit sendCurrentPosition(-1, -1);
+    }
   }
 
   /* If a new hover tile, check if a button is pressed and trigger item click */

@@ -111,7 +111,8 @@ public:
              QWidget* widget = NULL);
 
   /* Function to place a current sprite on the maps active layer */
-  bool place(EditorEnumDb::Layer layer, EditorSprite* sprite);
+  bool place(EditorEnumDb::Layer layer, EditorSprite* sprite,
+             bool load = false);
 
   /* Sets the hover state */
   void setHover(bool);

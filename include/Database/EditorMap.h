@@ -75,6 +75,9 @@ protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
 
+  /* Loads sub-map info */
+  void loadSubMap(SubMapInfo* map, XmlData data, int index);
+
 public slots:
 signals:
 public:
@@ -108,7 +111,7 @@ public:
   TileIcons* getTileIcons();
 
   /* Loads the map */
-  void load(FileHandler* fh);
+  void load(XmlData data, int index);
 
   /* Saves the map */
   void save(FileHandler* fh, bool game_only = false);

@@ -83,7 +83,7 @@ private:
   void exportGame();
 
   /* Load application */
-  void loadApp();
+  void loadApp(QString filename);
 
   /* Save application */
   void saveApp();
@@ -110,7 +110,7 @@ public slots:
   void load();
 
   /* New game */
-  void newGame();
+  bool newGame();
 
   /* Save and save as action */
   void save();
