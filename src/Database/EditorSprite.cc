@@ -727,7 +727,6 @@ QPixmap EditorSprite::getPixmap(int index, int w, int h)
 int EditorSprite::getSmartCount()
 {
   bool finished = false;
-  int index = 1;
   int png_width = 4;
 
   /* Only proceed checks if there is more than one frame */
