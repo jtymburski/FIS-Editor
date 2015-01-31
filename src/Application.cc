@@ -79,6 +79,8 @@ Application::Application(QWidget* parent)
   setMinimumSize(1280,720);
   showMaximized();
   setCursorBasic();
+
+  /* Configure the run process */
   run_process.setWorkingDirectory(EditorHelpers::getProjectDir());
 
   setStyleSheet("QMainWindow::separator { background: rgb(153, 153, 153); \
@@ -362,7 +364,7 @@ void Application::load()
 bool Application::newGame()
 {
   QMessageBox::StandardButton reply = QMessageBox::question(this, "New?",
-                 "Are you sure you want to lose all changes for a blank slate?",
+                 "Are you sure you want to lose all changes for a new slate?",
                  QMessageBox::Yes | QMessageBox::No);
   if(reply == QMessageBox::Yes)
   {
@@ -375,15 +377,13 @@ bool Application::newGame()
 /* Plays the current sub-map in the game */
 void Application::play()
 {
-  /* Output proc result */
-  //qDebug() << run_process.readAllStandardOutput();
-
   /* If no process is running, start it */
-  if(run_process.state() != QProcess::Running)
+  if(run_process.state() != QProcess::Running &&
+     game_view->getMapView()->getCurrentSubMap() >= 0)
   {
     /* Choose the file name and start */
-    QString play_file = EditorHelpers::getSpriteDir() +
-                        "/../../Editor/exports/xXx_TMP_xXx.utv";
+    QString play_file = //EditorHelpers::getProjectDir() +
+                        "../Editor/exports/xXx_TMP_xXx.utv";
     FileHandler fh(play_file.toStdString(), true, true);
     fh.start();
 
@@ -394,20 +394,31 @@ void Application::play()
     /* Finish the write */
     fh.stop();
 
+    /* Determine which execute program to use */
+    QString exec_program = "./Univursa";
+#ifdef WIN32
+    exec_program = "\"" + EditorHelpers::getProjectDir() + "/Univursa.exe\"";
+#endif
+
     /* Execute the program */
     QStringList arg_list;
     arg_list.push_back(play_file);
-    run_process.start("./Univursa", arg_list);
+    run_process.start(exec_program, arg_list);
 
     /* Finally, delete the file */
     run_process.waitForFinished(1500);
     QFile::remove(play_file);
   }
   /* Otherwise, pop-up warning */
-  else
+  else if(run_process.state() == QProcess::Running)
   {
     QMessageBox::information(this, "Can't Start!",
                          "Univursa app must be closed before testing another.");
+  }
+  else
+  {
+    QMessageBox::information(this, "Can't Start!",
+                             "No sub-map selected to test.");
   }
 }
 
