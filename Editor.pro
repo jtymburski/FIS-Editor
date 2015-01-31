@@ -144,5 +144,4 @@ HEADERS += \
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
 
-RESOURCES += \
-    src/Resource_Pack.qrc
+RESOURCES += resources.qrc

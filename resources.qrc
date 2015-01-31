@@ -1,0 +1,43 @@
+<RCC>
+  <qresource>
+    <file>images/end.png</file>
+    <file>images/fbs_icon.ico</file>
+    <file>images/fbs_logo_transparent.png</file>
+    <file>images/fbs_logo_watermark.png</file>
+    <file>images/midpoint.png</file>
+    <file>images/nopass_E.png</file>
+    <file>images/nopass_N.png</file>
+    <file>images/nopass_S.png</file>
+    <file>images/nopass_W.png</file>
+    <file>images/pass_E.png</file>
+    <file>images/pass_N.png</file>
+    <file>images/pass_S.png</file>
+    <file>images/pass_W.png</file>
+
+    <file>images/icons/32_copy.png</file>
+    <file>images/icons/32_cut.png</file>
+    <file>images/icons/32_database.png</file>
+    <file>images/icons/32_eraser.png</file>
+    <file>images/icons/32_export.png</file>
+    <file>images/icons/32_eye.png</file>
+    <file>images/icons/32_fill.png</file>
+    <file>images/icons/32_load.png</file>
+    <file>images/icons/32_lock.png</file>
+    <file>images/icons/32_new.png</file>
+    <file>images/icons/32_passA.png</file>
+    <file>images/icons/32_passE.png</file>
+    <file>images/icons/32_passN.png</file>
+    <file>images/icons/32_passS.png</file>
+    <file>images/icons/32_passW.png</file>
+    <file>images/icons/32_paste.png</file>
+    <file>images/icons/32_pencil.png</file>
+    <file>images/icons/32_play.png</file>
+    <file>images/icons/32_rect_fill.png</file>
+    <file>images/icons/32_redo.png</file>
+    <file>images/icons/32_save_as.png</file>
+    <file>images/icons/32_save.png</file>
+    <file>images/icons/32_undo.png</file>
+    <file>images/icons/32_zoom_in.png</file>
+    <file>images/icons/32_zoom_out.png</file>
+  </qresource>
+</RCC>

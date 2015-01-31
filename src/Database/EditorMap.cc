@@ -64,9 +64,14 @@ EditorMap::~EditorMap()
  *===========================================================================*/
 
 /* Adds tile sprite data */
-// TODO: Fix for passability
-// TODO: Optimize for rects dissilation in a multi section field
 void EditorMap::addTileSpriteData(FileHandler* fh, int index,
+                                  EditorEnumDb::Layer layer)
+{
+  addTileSpriteData(fh, sub_maps[index], layer);
+}
+
+/* Adds tile sprite data */
+void EditorMap::addTileSpriteData(FileHandler* fh, SubMapInfo* map,
                                   EditorEnumDb::Layer layer)
 {
   QList<QPoint> empty_set;
@@ -80,13 +85,13 @@ void EditorMap::addTileSpriteData(FileHandler* fh, int index,
       coords.push_back(empty_set);
 
 
-    for(int j = 0; j < sub_maps[index]->tiles.size(); j++)
+    for(int j = 0; j < map->tiles.size(); j++)
     {
-      for(int k = 0; k < sub_maps[index]->tiles[j].size(); k++)
+      for(int k = 0; k < map->tiles[j].size(); k++)
       {
-        if(sub_maps[index]->tiles[j][k]->getSprite(layer) == sprites[i])
+        if(map->tiles[j][k]->getSprite(layer) == sprites[i])
         {
-          int pass = sub_maps[index]->tiles[j][k]->getPassabilityNum(layer);
+          int pass = map->tiles[j][k]->getPassabilityNum(layer);
           coords[pass].push_back(QPoint(j, k));
         }
       }
@@ -258,9 +263,107 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   }
 }
 
+/* Saves the sub-map */
+/*
+ * Description: Saves the sub map pointer passed in to the file handler. If
+ *              game only, some parts are skipped. If first, it makes the
+ *              sub-map a main.
+ *
+ * Inputs: FileHandler* fh - the file handling control pointer
+ *         bool game_only - only game applicable data
+ *         SubMapInfo* map - the sub map struct
+ *         bool first - only the first used
+ * Output: none
+ */
+void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
+                           SubMapInfo* map, bool first)
+{
+  /* Initial element */
+  if(first)
+    fh->writeXmlElement("main");
+  else
+    fh->writeXmlElement("section", "id", map->id);
+
+  /* Add size and name */
+  if(!game_only)
+    fh->writeXmlData("name", map->name.toStdString());
+  fh->writeXmlData("width", map->tiles.size());
+  fh->writeXmlData("height", map->tiles.front().size());
+
+  /* Add base tiles */
+  fh->writeXmlElement("base");
+  addTileSpriteData(fh, map, EditorEnumDb::BASE);
+  fh->writeXmlElementEnd();
+
+  /* Add enhancer tiles */
+  fh->writeXmlElement("enhancer");
+  addTileSpriteData(fh, map, EditorEnumDb::ENHANCER);
+  fh->writeXmlElementEnd();
+
+  /* Add lower tiles */
+  fh->writeXmlElement("lower", "index", "0");
+  addTileSpriteData(fh, map, EditorEnumDb::LOWER1);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("lower", "index", "1");
+  addTileSpriteData(fh, map, EditorEnumDb::LOWER2);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("lower", "index", "2");
+  addTileSpriteData(fh, map, EditorEnumDb::LOWER3);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("lower", "index", "3");
+  addTileSpriteData(fh, map, EditorEnumDb::LOWER4);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("lower", "index", "4");
+  addTileSpriteData(fh, map, EditorEnumDb::LOWER5);
+  fh->writeXmlElementEnd();
+
+  /* Add upper tiles */
+  fh->writeXmlElement("upper", "index", "0");
+  addTileSpriteData(fh, map, EditorEnumDb::UPPER1);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("upper", "index", "1");
+  addTileSpriteData(fh, map, EditorEnumDb::UPPER2);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("upper", "index", "2");
+  addTileSpriteData(fh, map, EditorEnumDb::UPPER3);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("upper", "index", "3");
+  addTileSpriteData(fh, map, EditorEnumDb::UPPER4);
+  fh->writeXmlElementEnd();
+  fh->writeXmlElement("upper", "index", "4");
+  addTileSpriteData(fh, map, EditorEnumDb::UPPER5);
+  fh->writeXmlElementEnd();
+
+  /* End element */
+  fh->writeXmlElementEnd();
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Returns the active layers in the given tile, in comma delimited
+ *              string format.
+ *
+ * Inputs: int map_index - the index of the sub-map
+ *         int x - the x coordinate of the tile
+ *         int y - the y coordinate of the tile
+ * Output: QString - the comma delimited string format: B,E,L1, etc
+ */
+QString EditorMap::getActiveLayers(int map_index, int x, int y)
+{
+  if(map_index >= 0 && map_index < sub_maps.size())
+  {
+    if(x >= 0 && x < sub_maps[map_index]->tiles.size() &&
+       y >= 0 && y < sub_maps[map_index]->tiles[x].size())
+    {
+      return sub_maps[map_index]->tiles[x][y]->getActiveLayers();
+    }
+  }
+
+  return "";
+}
 
 /*
  * Description: Returns the ID of the editor map.
@@ -566,80 +669,33 @@ void EditorMap::load(XmlData data, int index)
  *
  * Inputs: FileHandler* fh - the file handling pointer
  *         bool game_only - true if the data should include game only relevant
+ *         int sub_index - the sub map index to save
  * Output: none
  */
-void EditorMap::save(FileHandler* fh, bool game_only)
+// TODO: Once thing creation is done, need to have create temporary player
+//       for sub_map saving if one doesn't exist
+void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
 {
   if(fh != NULL)
   {
     fh->writeXmlElement("map", "id", getID());
-    fh->writeXmlData("name", getName().toStdString());
+    if(!game_only)
+      fh->writeXmlData("name", getName().toStdString());
 
     /* Add sprites */
     for(int i = 0; i < sprites.size(); i++)
       sprites[i]->save(fh, game_only);
 
-    /* Add the sub-maps */
-    for(int i = 0; i < sub_maps.size(); i++)
+    /* Save all maps if sub_index is out of range */
+    if(sub_index <= 0 || sub_index >= sub_maps.size())
     {
-      /* Initial element */
-      if(i == 0)
-        fh->writeXmlElement("main");
-      else
-        fh->writeXmlElement("section", "id", sub_maps[i]->id);
-
-      /* Add size and name */
-      if(!game_only)
-        fh->writeXmlData("name", sub_maps[i]->name.toStdString());
-      fh->writeXmlData("width", sub_maps[i]->tiles.size());
-      fh->writeXmlData("height", sub_maps[i]->tiles.front().size());
-
-      /* Add base tiles */
-      fh->writeXmlElement("base");
-      addTileSpriteData(fh, i, EditorEnumDb::BASE);
-      fh->writeXmlElementEnd();
-
-      /* Add enhancer tiles */
-      fh->writeXmlElement("enhancer");
-      addTileSpriteData(fh, i, EditorEnumDb::ENHANCER);
-      fh->writeXmlElementEnd();
-
-      /* Add lower tiles */
-      fh->writeXmlElement("lower", "index", "0");
-      addTileSpriteData(fh, i, EditorEnumDb::LOWER1);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("lower", "index", "1");
-      addTileSpriteData(fh, i, EditorEnumDb::LOWER2);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("lower", "index", "2");
-      addTileSpriteData(fh, i, EditorEnumDb::LOWER3);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("lower", "index", "3");
-      addTileSpriteData(fh, i, EditorEnumDb::LOWER4);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("lower", "index", "4");
-      addTileSpriteData(fh, i, EditorEnumDb::LOWER5);
-      fh->writeXmlElementEnd();
-
-      /* Add upper tiles */
-      fh->writeXmlElement("upper", "index", "0");
-      addTileSpriteData(fh, i, EditorEnumDb::UPPER1);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("upper", "index", "1");
-      addTileSpriteData(fh, i, EditorEnumDb::UPPER2);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("upper", "index", "2");
-      addTileSpriteData(fh, i, EditorEnumDb::UPPER3);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("upper", "index", "3");
-      addTileSpriteData(fh, i, EditorEnumDb::UPPER4);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("upper", "index", "4");
-      addTileSpriteData(fh, i, EditorEnumDb::UPPER5);
-      fh->writeXmlElementEnd();
-
-      /* End element */
-      fh->writeXmlElementEnd();
+      for(int i = 0; i < sub_maps.size(); i++)
+        saveSubMap(fh, game_only, sub_maps[i], i == 0);
+    }
+    /* Otherwise, just save the only map */
+    else
+    {
+      saveSubMap(fh, game_only, sub_maps[sub_index], true);
     }
 
     fh->writeXmlElementEnd();

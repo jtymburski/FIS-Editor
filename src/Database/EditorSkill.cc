@@ -14,7 +14,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
 
   main_layout = new QVBoxLayout();
 
-  animation_frame = new QImage(":/Icons/Resources/fbs_logo_transparent.png");
+  animation_frame = new QImage(":/images/fbs_logo_transparent.png");
   QImage temp = animation_frame->scaled(128,128);
   animation_frame = &temp;
   animation_label = new QLabel(this);
@@ -65,7 +65,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   combo_layout->addLayout(combos);
   top_horizontal->addLayout(combo_layout);
 
-  thumbnail_frame = new QImage(":/Icons/Resources/fbs_logo_transparent.png");
+  thumbnail_frame = new QImage(":/images/fbs_logo_transparent.png");
   QImage temp2 = thumbnail_frame->scaled(64,64);
   thumbnail_frame = &temp2;
   thumbnail_label = new QLabel(this);

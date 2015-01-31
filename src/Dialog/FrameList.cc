@@ -19,9 +19,9 @@ FrameList::FrameList(QWidget *parent, EditorSprite *c)
          : QWidget(parent)
 {
   /* Make the stepper sprites */
-  step_end = new EditorSprite(":/Icons/Resources/end.png");
-  step_mid = new EditorSprite(":/Icons/Resources/midpoint.png");
-  step_start = new EditorSprite(":/Icons/Resources/start.png");
+  step_end = new EditorSprite(":/images/end.png");
+  step_mid = new EditorSprite(":/images/midpoint.png");
+  step_start = new EditorSprite(":/images/end.png");
 
   /* Set up the manipulator dialog and current sprites */
   currentsprite = c;

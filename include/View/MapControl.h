@@ -53,7 +53,11 @@ private:
   QPushButton* passability_toggle;
 
   /* Right click menu on bottom list */
+  QAction* rename_map;
   QMenu* rightclick_menu;
+
+  /* The stored resize index */
+  int resize_index;
 
 protected:
   /* Select the sub-map, by index */
@@ -87,6 +91,10 @@ public slots:
   /* Renames the selected map */
   void renameSubMap();
 
+  /* Resizes the selected map */
+  void resizeSubMap();
+  void resizeTrigger();
+
   /* Select the sub-map, by double click */
   void selectSubMap(QListWidgetItem* item);
 
@@ -106,6 +114,7 @@ signals:
 public:
   /* Get the current sub-map */
   SubMapInfo* getCurrentMap();
+  int getCurrentMapIndex();
 
   /* Returns grid toggle status */
   bool getGridToggle();

@@ -82,14 +82,14 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   rowChange(view_top->currentRow());
 
   /* Set-up the tile icons */
-  tile_icons.passN = new QPixmap(":/Icons/Resources/pass_N.png");
-  tile_icons.passE = new QPixmap(":/Icons/Resources/pass_E.png");
-  tile_icons.passS = new QPixmap(":/Icons/Resources/pass_S.png");
-  tile_icons.passW = new QPixmap(":/Icons/Resources/pass_W.png");
-  tile_icons.nopassN = new QPixmap(":/Icons/Resources/nopass_N.png");
-  tile_icons.nopassE = new QPixmap(":/Icons/Resources/nopass_E.png");
-  tile_icons.nopassS = new QPixmap(":/Icons/Resources/nopass_S.png");
-  tile_icons.nopassW = new QPixmap(":/Icons/Resources/nopass_W.png");
+  tile_icons.passN = new QPixmap(":/images/pass_N.png");
+  tile_icons.passE = new QPixmap(":/images/pass_E.png");
+  tile_icons.passS = new QPixmap(":/images/pass_S.png");
+  tile_icons.passW = new QPixmap(":/images/pass_W.png");
+  tile_icons.nopassN = new QPixmap(":/images/nopass_N.png");
+  tile_icons.nopassE = new QPixmap(":/images/nopass_E.png");
+  tile_icons.nopassS = new QPixmap(":/images/nopass_S.png");
+  tile_icons.nopassW = new QPixmap(":/images/nopass_W.png");
 }
 
 GameDatabase::~GameDatabase()
@@ -967,15 +967,24 @@ void GameDatabase::modifyBottomList(int index)
 }
 
 /* Save the game */
-void GameDatabase::save(FileHandler* fh, bool game_only)
+void GameDatabase::save(FileHandler* fh, bool game_only,
+                        bool selected_map, int sub_index)
 {
   if(fh != NULL)
   {
     fh->writeXmlElement("game");
 
-    /* Save all maps */
-    for(int i = 0; i < data_map.size(); i++)
-      data_map[i]->save(fh, game_only);
+    /* If not the selected map, save all the maps */
+    if(!selected_map)
+    {
+      for(int i = 0; i < data_map.size(); i++)
+        data_map[i]->save(fh, game_only);
+    }
+    /* Otherwise, save the single map */
+    else if(current_map != NULL)
+    {
+      current_map->save(fh, game_only, sub_index);
+    }
 
     fh->writeXmlElementEnd();
   }

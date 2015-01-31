@@ -80,6 +80,9 @@ public:
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
 
+  /* Returns the active layers in a string */
+  QString getActiveLayers();
+
   /* Gets the tile for editing */
   Tile* getGameTile();
 

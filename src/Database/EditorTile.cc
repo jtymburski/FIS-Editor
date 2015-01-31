@@ -123,6 +123,9 @@ void EditorTile::copySelf(const EditorTile &source)
 
 /*
  * Description: Returns the bounding rectangle (Needed by API)
+ *
+ * Inputs: none
+ * Output: QRectF - a float rect struct
  */
 QRectF EditorTile::boundingRect() const
 {
@@ -131,8 +134,39 @@ QRectF EditorTile::boundingRect() const
 }
 
 /*
+ * Description: Returns the active layers of the tile, as a comma-delimited
+ *              string.
+ *
+ * Inputs: none
+ * Output: QString - comma-delimited string format - B,E,L1, etc.
+ */
+QString EditorTile::getActiveLayers()
+{
+  QString layer_string = "";
+
+  /* Make the string */
+  if(layer_base.sprite != NULL)
+    layer_string += "B,";
+  if(layer_enhancer.sprite != NULL)
+    layer_string += "E,";
+  for(int i = 0; i < layers_lower.size(); i++)
+    if(layers_lower[i].sprite != NULL)
+      layer_string += "L" + QString::number(i + 1) + ",";
+  for(int i = 0; i < layers_upper.size(); i++)
+    if(layers_upper[i].sprite != NULL)
+      layer_string += "U" + QString::number(i + 1) + ",";
+
+  /* String clean-up */
+  if(layer_string.size() > 0)
+    layer_string.chop(1);
+
+  return layer_string;
+}
+
+/*
  * Description : Gets the game tile
  *
+ * Inputs: none
  * Output: Tile pointer
  */
 Tile* EditorTile::getGameTile()
@@ -393,7 +427,7 @@ void EditorTile::paint(QPainter *painter,
   }
   if(hovered)
   {
-    painter->fillRect(2 + x_pos * size, 2 + y_pos * size, size - 3, size - 3,
+    painter->fillRect(x_pos * size + 1, y_pos * size + 1, size - 2, size - 2,
                       QColor(200, 200, 200, 128));
   }
 

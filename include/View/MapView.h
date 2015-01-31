@@ -67,6 +67,14 @@ private:
   MapRender* map_render;
   QGraphicsView* map_render_view;
 
+  /* The current zoom state */
+  int zoom_state;
+
+  /* Constants */
+  static const int kDEFAULT_ZOOM;
+  static const int kNUM_ZOOM_STATES;
+  static const float kZOOM_STATES[];
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
@@ -116,6 +124,9 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the current sub-map index */
+  int getCurrentSubMap();
+
   /* Returns the map being edited */
   EditorMap* getMapEditor();
 
@@ -127,5 +138,9 @@ public:
 
   /* Sets the map being edited */
   void setMapEditor(EditorMap* editor);
+
+  /* Zooms the map view in or out */
+  bool zoomIn();
+  bool zoomOut();
 };
 #endif // MAPVIEW_H

@@ -46,7 +46,7 @@ FrameView::FrameView(QWidget *parent, EditorEnumDb::FrameViewType type,
   else
   {
     setFixedSize(EditorHelpers::getTileSize() / 2,
-                 EditorHelpers::getTileSize() / 2);
+                 EditorHelpers::getTileSize());
     connect(this, SIGNAL(addHead(QString)), parent, SLOT(addHead(QString)));
     connect(this, SIGNAL(addTail(QString)), parent, SLOT(addTail(QString)));
     connect(this, SIGNAL(addMidpoint(QString,int)),

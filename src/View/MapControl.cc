@@ -63,10 +63,14 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
 
   /* Right click menu control */
   rightclick_menu = new QMenu("Map Edit", this);
-  QAction* rename_map = new QAction("Rename", rightclick_menu);
+  rename_map = new QAction("Rename", rightclick_menu);
   connect(rename_map, SIGNAL(triggered()), this, SLOT(renameSubMap()));
+  QAction* resize_map = new QAction("Resize", rightclick_menu);
+  connect(resize_map, SIGNAL(triggered()), this, SLOT(resizeTrigger()));
   rightclick_menu->addAction(rename_map);
+  rightclick_menu->addAction(resize_map);
   rightclick_menu->hide();
+  resize_index = 0;
 
   /* Sets up the bottom buttons that interact with the sub-map list */
   QPushButton* new_submap = new QPushButton("New",this);
@@ -247,8 +251,14 @@ void MapControl::listMenuRequested(const QPoint & pos)
 {
   (void)pos;
   /* Only proceed if it's the map set */
-  if(editing_map != NULL && list_bottom->currentRow() != 0)
+  if(editing_map != NULL)
+  {
+    if(list_bottom->currentRow() == 0)
+      rename_map->setDisabled(true);
+    else
+      rename_map->setEnabled(true);
     rightclick_menu->exec(QCursor::pos());
+  }
 }
 
 /* New Sub-Map */
@@ -279,6 +289,102 @@ void MapControl::renameSubMap()
       editing_map->getMapByIndex(row_index)->name = text;
       updateMapList();
     }
+  }
+}
+
+/* Resizes the selected map */
+void MapControl::resizeSubMap()
+{
+  QString name = EditorMap::getDialogName(mapsize_dialog);
+  int width = EditorMap::getDialogWidth(mapsize_dialog);
+  int height = EditorMap::getDialogHeight(mapsize_dialog);
+
+  /* Modify the sub-map information, if changed */
+  SubMapInfo* info = editing_map->getMapByIndex(resize_index);
+  if(info != NULL)
+  {
+    if(list_bottom->currentRow() != 0)
+      info->name = name;
+
+    /* If smaller, delete tiles on width */
+    if(info->tiles.size() > width)
+    {
+      while(info->tiles.size() > width)
+      {
+        for(int i = 0; i < info->tiles.back().size(); i++)
+          delete info->tiles.back()[i];
+        info->tiles.removeLast();
+      }
+    }
+    /* If larger, add tiles on width */
+    else if(info->tiles.size() < width)
+    {
+      for(int i = info->tiles.size(); i < width; i++)
+      {
+        QVector<EditorTile*> row;
+
+        for(int j = 0; j < info->tiles.front().size(); j++)
+          row.push_back(new EditorTile(i, j, editing_map->getTileIcons()));
+
+        info->tiles.push_back(row);
+      }
+    }
+
+    /* If smaller, delete tiles on height */
+    if(info->tiles.front().size() > height)
+    {
+      while(info->tiles.front().size() > height)
+      {
+        for(int i = 0; i < info->tiles.size(); i++)
+        {
+          delete info->tiles[i].back();
+          info->tiles[i].removeLast();
+        }
+      }
+    }
+    /* If larger, add tiles on height */
+    else if(info->tiles.front().size() < height)
+    {
+      for(int i = 0; i < info->tiles.size(); i++)
+      {
+        for(int j = info->tiles[i].size(); j < height; j++)
+          info->tiles[i].push_back(new EditorTile(
+                                            i, j, editing_map->getTileIcons()));
+      }
+    }
+  }
+
+  /* Finally, close the dialog */
+  mapsize_dialog->close();
+  delete mapsize_dialog;
+  mapsize_dialog = NULL;
+
+  /* Update list, and view if applicable */
+  updateMapList();
+  if(info == current_map)
+    emit addMap(current_map);
+}
+
+/* Resize trigger from the menu */
+void MapControl::resizeTrigger()
+{
+  rightclick_menu->hide();
+
+  QListWidgetItem* item = list_bottom->currentItem();
+  if(item != NULL)
+  {
+    resize_index = list_bottom->currentRow();
+
+    /* Open map size dialog */
+    if(mapsize_dialog != NULL)
+      delete mapsize_dialog;
+    SubMapInfo* info = editing_map->getMapByIndex(resize_index);
+    mapsize_dialog = EditorMap::createMapDialog(this, "New Map Details",
+                                                info->name, info->tiles.size(),
+                                                info->tiles.front().size());
+    connect(EditorMap::getDialogButton(mapsize_dialog), SIGNAL(clicked()),
+            this, SLOT(resizeSubMap()));
+    mapsize_dialog->show();
   }
 }
 
@@ -320,6 +426,12 @@ void MapControl::updateBottomRow(int current_row)
 SubMapInfo* MapControl::getCurrentMap()
 {
   return current_map;
+}
+
+/* Returns the current map index */
+int MapControl::getCurrentMapIndex()
+{
+  return list_bottom->currentRow();
 }
 
 /* Gets the status of the grid toggle */

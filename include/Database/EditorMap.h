@@ -71,6 +71,8 @@ private:
 protected:
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
+  void addTileSpriteData(FileHandler* fh, SubMapInfo* map,
+                         EditorEnumDb::Layer layer);
 
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
@@ -78,9 +80,16 @@ protected:
   /* Loads sub-map info */
   void loadSubMap(SubMapInfo* map, XmlData data, int index);
 
+  /* Saves the sub-map */
+  void saveSubMap(FileHandler* fh, bool game_only,
+                  SubMapInfo* map, bool first = false);
+
 public slots:
 signals:
 public:
+  /* Returns the active layers in a string */
+  QString getActiveLayers(int map_index, int x, int y);
+
   /* Returns the ID of the map set */
   virtual int getID();
 
@@ -114,7 +123,7 @@ public:
   void load(XmlData data, int index);
 
   /* Saves the map */
-  void save(FileHandler* fh, bool game_only = false);
+  void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
 
   /* Sets the ID of the map set */
   virtual void setID(int id);

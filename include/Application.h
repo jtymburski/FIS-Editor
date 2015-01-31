@@ -21,8 +21,10 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <QProcess>
 #include <QScrollArea>
 #include <QTabWidget>
+#include <QTextStream>
 #include <QToolBar>
 #include <QTabWidget>
 #include <QGraphicsView>
@@ -53,6 +55,7 @@ public:
 private:
   /* Brush and Menu Tabs */
   QToolBar* bar_brush;
+  QToolBar* bar_map_ctrl;
   QToolBar* bar_menu;
   QToolBar* bar_view;
 
@@ -69,18 +72,24 @@ private:
   /* Game View */
   GameView* game_view;
 
+  /* Process execution variable */
+  QProcess run_process;
   /* View action pointers */
   QAction *viewalllayers_action;
 
   /* The users login name */
   QString username;
 
+  /* Zoom in and zoom out map buttons */
+  QAction* zoom_in_action;
+  QAction* zoom_out_action;
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
   /* Export application to run in Univursa */
-  void exportGame();
+  void exportGame(QString filename);
 
   /* Load application */
   void loadApp(QString filename);
@@ -106,11 +115,17 @@ protected:
  * SLOTS
  *===========================================================================*/
 public slots:
+  /* Export action */
+  void exportTo();
+
   /* Load action */
   void load();
 
   /* New game */
   bool newGame();
+
+  /* Plays the current sub-map in the game */
+  void play();
 
   /* Save and save as action */
   void save();
@@ -171,6 +186,10 @@ public slots:
 
   /* Shows and hides the game database view */
   void showDatabase();
+
+  /* Zoom in or out in the map */
+  void zoomInMap();
+  void zoomOutMap();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
