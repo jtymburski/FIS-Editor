@@ -38,6 +38,7 @@ SOURCES += \
     src/Database/EditorEquipment.cc \
     src/Database/EditorItem.cc \
     src/Database/EditorMap.cc \
+    src/Database/EditorMatrix.cc \
     src/Database/EditorParty.cc \
     src/Database/EditorPerson.cc \
     src/Database/EditorSkill.cc \
@@ -95,6 +96,7 @@ HEADERS += \
     include/Database/EditorEquipment.h \
     include/Database/EditorItem.h \
     include/Database/EditorMap.h \
+    include/Database/EditorMatrix.h \
     include/Database/EditorParty.h \
     include/Database/EditorPerson.h \
     include/Database/EditorSkill.h \
