@@ -60,7 +60,7 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   
   view_person->setStyleSheet("background-color:red;");
   view_party->setStyleSheet("background-color:blue;");
-  view_item->setStyleSheet("background-color:green;");
+  //view_item->setStyleSheet("background-color:green;");
   //view_action->setStyleSheet("background-color:black;");
   view_race->setStyleSheet("background-color:purple;");
   view_battleclass->setStyleSheet("background-color:pink;");

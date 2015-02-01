@@ -13,6 +13,7 @@
 #include <QTextEdit>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QRadioButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -57,13 +58,13 @@ private:
   QTextEdit* description_edit;
 
   QGroupBox* composition_box;
-  QCheckBox* composition_wood;
-  QCheckBox* composition_steel;
-  QCheckBox* composition_brass;
-  QCheckBox* composition_titanium;
-  QCheckBox* composition_graphene;
-  QCheckBox* composition_physical;
-  QCheckBox* composition_nonphysical;
+  QRadioButton* composition_wood;
+  QRadioButton* composition_steel;
+  QRadioButton* composition_brass;
+  QRadioButton* composition_titanium;
+  QRadioButton* composition_graphene;
+  QRadioButton* composition_physical;
+  QRadioButton* composition_nonphysical;
   QCheckBox* composition_fire;
   QCheckBox* composition_forest;
   QCheckBox* composition_ice;
@@ -93,13 +94,13 @@ private:
   QCheckBox* itemflags_money;
 
   QGroupBox* itemtier_box;
-  QCheckBox* itemtier_trash;
-  QCheckBox* itemtier_common;
-  QCheckBox* itemtier_uncommon;
-  QCheckBox* itemtier_rare;
-  QCheckBox* itemtier_veryrare;
-  QCheckBox* itemtier_legendary;
-  QCheckBox* itemtier_none;
+  QRadioButton* itemtier_trash;
+  QRadioButton* itemtier_common;
+  QRadioButton* itemtier_uncommon;
+  QRadioButton* itemtier_rare;
+  QRadioButton* itemtier_veryrare;
+  QRadioButton* itemtier_legendary;
+  QRadioButton* itemtier_none;
 
   QLabel* mass_label;
   QLineEdit* mass_edit;
@@ -111,10 +112,10 @@ private:
   QLineEdit* prefix_edit;
 
   QGroupBox* occasion_box;
-  QCheckBox* occasion_always;
-  QCheckBox* occasion_battle;
-  QCheckBox* occasion_menu;
-  QCheckBox* occasion_none;
+  QRadioButton* occasion_always;
+  QRadioButton* occasion_battle;
+  QRadioButton* occasion_menu;
+  QRadioButton* occasion_none;
 
   QLabel* usingmessage_label;
   QLineEdit* usingmessage_edit;
