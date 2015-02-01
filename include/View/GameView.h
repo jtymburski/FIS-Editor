@@ -29,7 +29,7 @@ private:
   QWidget* null_battleclass;
   QWidget* null_bubby;
   QWidget* null_equipment;
-  QWidget* null_item;
+  EditorItem* null_item;
   QWidget* null_party;
   QWidget* null_person;
   QWidget* null_race;
@@ -41,7 +41,7 @@ private:
   QWidget* view_battleclass;
   QWidget* view_bubby;
   QWidget* view_equipment;
-  QWidget* view_item;
+  EditorItem* view_item;
   MapView* view_map;
   QWidget* view_party;
   QWidget* view_person;
@@ -71,6 +71,9 @@ public slots:
 
   EditorSkillset* getSkillsetView();
   void setSkillsetView(EditorSkillset* action);
+
+  EditorItem* getItemView();
+  void setItemView(EditorItem* item);
 
 
   /* Sets The View Mode */

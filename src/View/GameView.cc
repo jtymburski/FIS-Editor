@@ -22,7 +22,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_party = view_party;
   addWidget(view_party);
 
-  view_item = new QWidget(this);
+  view_item = new EditorItem(this);
+  view_item->setDisabled(true);
   null_item = view_item;
   addWidget(view_item);
 
@@ -137,11 +138,35 @@ void GameView::setSkillView(EditorSkill *skill)
           this,SIGNAL(nameChange(QString)));
 }
 
+/* Returns the Editor Item View */
+EditorItem* GameView::getItemView()
+{
+  return view_item;
+}
+
+/* Sets the Editor Skill View */
+void GameView::setItemView(EditorItem *item)
+{
+  /* Disconnect the old view */
+  disconnect(view_item,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+  if(item == NULL)
+    item = null_item;
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::ITEMVIEW, view_item, item);
+  view_item = item;
+  connect(view_item,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+}
+
+
 /* Returns the Editor Skillset View */
 EditorSkillset* GameView::getSkillsetView()
 {
   return view_skillset;
 }
+
 
 /* Sets the Editor Skillset View */
 void GameView::setSkillsetView(EditorSkillset *skillset)

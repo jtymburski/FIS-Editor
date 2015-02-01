@@ -514,7 +514,7 @@ void Application::setEquipment(EditorEquipment* equipment)
  */
 void Application::setItem(EditorItem* item)
 {
-  qDebug() << "Item: " << item;
+  game_view->setItemView(item);
 }
 
 /*
