@@ -379,7 +379,7 @@ void MapControl::resizeTrigger()
     if(mapsize_dialog != NULL)
       delete mapsize_dialog;
     SubMapInfo* info = editing_map->getMapByIndex(resize_index);
-    mapsize_dialog = EditorMap::createMapDialog(this, "New Map Details",
+    mapsize_dialog = EditorMap::createMapDialog(this, "Revise Map",
                                                 info->name, info->tiles.size(),
                                                 info->tiles.front().size());
     connect(EditorMap::getDialogButton(mapsize_dialog), SIGNAL(clicked()),

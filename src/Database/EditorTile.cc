@@ -146,15 +146,18 @@ QString EditorTile::getActiveLayers()
 
   /* Make the string */
   if(layer_base.sprite != NULL)
-    layer_string += "B,";
+    layer_string += "B(" + QString::number(layer_base.sprite->getID()) + "),";
   if(layer_enhancer.sprite != NULL)
-    layer_string += "E,";
+    layer_string += "E(" + QString::number(layer_enhancer.sprite->getID())
+                 + "),";
   for(int i = 0; i < layers_lower.size(); i++)
     if(layers_lower[i].sprite != NULL)
-      layer_string += "L" + QString::number(i + 1) + ",";
+      layer_string += "L" + QString::number(i + 1) + "("
+                   + QString::number(layers_lower[i].sprite->getID()) + "),";
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].sprite != NULL)
-      layer_string += "U" + QString::number(i + 1) + ",";
+      layer_string += "U" + QString::number(i + 1) + "("
+                   + QString::number(layers_upper[i].sprite->getID()) + "),";
 
   /* String clean-up */
   if(layer_string.size() > 0)

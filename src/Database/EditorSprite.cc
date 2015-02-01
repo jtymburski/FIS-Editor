@@ -47,7 +47,7 @@ EditorSprite::~EditorSprite()
 }
 
 /*============================================================================
- * PRIVATE FUNCTIONS
+ * PROTECTED FUNCTIONS
  *===========================================================================*/
 
 /*
@@ -61,6 +61,8 @@ void EditorSprite::copySelf(const EditorSprite &source)
 {
   mode = source.mode;
   name = source.name;
+  if(sprite != NULL)
+    delete sprite;
   sprite = new Sprite();
   *sprite = *source.sprite;
   sprite->setId(source.sprite->getId());

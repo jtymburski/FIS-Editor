@@ -54,7 +54,7 @@ private:
   /* Frame information */
   QVector<FrameInfo> frame_info;
 
-private:
+protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSprite &source);
 

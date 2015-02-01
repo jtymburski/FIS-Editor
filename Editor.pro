@@ -32,114 +32,118 @@ SOURCES += \
     src/Main.cc \
     src/Application.cc \
     src/EditorHelpers.cc \
+    src/Database/EditorAction.cc \
+    src/Database/EditorBubby.cc \
+    src/Database/EditorCategory.cc \
+    src/Database/EditorEquipment.cc \
+    src/Database/EditorItem.cc \
+    src/Database/EditorMap.cc \
+    src/Database/EditorParty.cc \
+    src/Database/EditorPerson.cc \
+    src/Database/EditorSkill.cc \
+    src/Database/EditorSkillset.cc \
+    src/Database/EditorSprite.cc \
+    src/Database/EditorThing.cc \
+    src/Database/EditorTile.cc \
+    src/Database/EditorTileSprite.cc \
+    src/Database/GameDatabase.cc \
+    src/Dialog/FrameDialog.cc \
+    src/Dialog/FrameList.cc \
+    src/Dialog/FrameView.cc \
+    src/Dialog/SpriteDialog.cc \
+    src/View/GameView.cc \
+    src/View/MapControl.cc \
+    src/View/MapDatabase.cc \
     src/View/MapRender.cc \
-    ../Project/src/Helpers.cc \
+    src/View/MapView.cc \
+    src/View/RawImage.cc \
+    src/View/RawImageList.cc \
+    src/View/RawImageView.cc \
+    src/View/SpriteView.cc \
+    src/View/SpriteViewList.cc \
     ../Project/src/FileHandler.cc \
     ../Project/src/Frame.cc \
+    ../Project/src/Helpers.cc \
     ../Project/src/Md5.cc \
     ../Project/src/Sprite.cc \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
-    ../Project/src/Game/Map/Tile.cc \
-    src/Database/EditorSprite.cc \
     ../Project/src/Game/EventHandler.cc \
-    src/View/RawImageView.cc \
-    src/View/RawImageList.cc \
-    src/View/RawImage.cc \
-    src/View/SpriteView.cc \
-    src/Dialog/SpriteDialog.cc \
-    src/Dialog/FrameList.cc \
-    src/Dialog/FrameView.cc \
-    src/Dialog/FrameDialog.cc \
-    src/View/GameView.cc \
-    src/View/MapView.cc \
-    src/View/MapDatabase.cc \
-    src/View/MapControl.cc \
-    src/Database/GameDatabase.cc \
-    src/Database/EditorMap.cc \
-    src/Database/EditorPerson.cc \
-    src/Database/EditorTile.cc \
-    src/Database/EditorThing.cc \
-    src/Database/EditorItem.cc \
-    src/Database/EditorParty.cc \
-    src/Database/EditorAction.cc \
-    ../Project/src/Game/Player/AttributeSet.cc \
+    ../Project/src/Game/Map/Tile.cc \
+    ../Project/src/Game/Map/TileSprite.cc \
     ../Project/src/Game/Player/Action.cc \
-    src/Database/EditorCategory.cc \
-    src/Database/EditorSkillset.cc \
-    src/Database/EditorSkill.cc \
-    src/Database/EditorEquipment.cc \
-    src/Database/EditorBubby.cc \
-    ../Project/src/Game/Player/SkillSet.cc \
-    ../Project/src/Game/Player/Skill.cc \
-    ../Project/src/Game/Player/Person.cc \
-    ../Project/src/Game/Player/Party.cc \
-    ../Project/src/Game/Player/Item.cc \
-    ../Project/src/Game/Player/Equipment.cc \
-    ../Project/src/Game/Player/Category.cc \
-    ../Project/src/Game/Player/Bubby.cc \
-    ../Project/src/Game/Player/Signature.cc \
-    ../Project/src/Game/Player/Flavour.cc \
     ../Project/src/Game/Battle/AIModule.cc \
-    src/View/SpriteViewList.cc
+    ../Project/src/Game/Player/AttributeSet.cc \
+    ../Project/src/Game/Player/Bubby.cc \
+    ../Project/src/Game/Player/Category.cc \
+    ../Project/src/Game/Player/Equipment.cc \
+    ../Project/src/Game/Player/Flavour.cc \
+    ../Project/src/Game/Player/Item.cc \
+    ../Project/src/Game/Player/Party.cc \
+    ../Project/src/Game/Player/Person.cc \
+    ../Project/src/Game/Player/Signature.cc \
+    ../Project/src/Game/Player/Skill.cc \
+    ../Project/src/Game/Player/SkillSet.cc
 
 HEADERS += \
     include/Application.h \
     include/EditorEnumDb.h \
     include/EditorHelpers.h \
+    include/Database/EditorAction.h \
+    include/Database/EditorBubby.h \
+    include/Database/EditorCategory.h \
+    include/Database/EditorEquipment.h \
+    include/Database/EditorItem.h \
+    include/Database/EditorMap.h \
+    include/Database/EditorParty.h \
+    include/Database/EditorPerson.h \
+    include/Database/EditorSkill.h \
+    include/Database/EditorSkillset.h \
+    include/Database/EditorSprite.h \
+    include/Database/EditorTemplate.h \
+    include/Database/EditorThing.h \
+    include/Database/EditorTile.h \
+    include/Database/EditorTileSprite.h \
+    include/Database/GameDatabase.h \
+    include/Dialog/FrameDialog.h \
+    include/Dialog/FrameList.h \
+    include/Dialog/FrameView.h \
+    include/Dialog/SpriteDialog.h \
+    include/View/GameView.h \
+    include/View/MapControl.h \
+    include/View/MapDatabase.h \
     include/View/MapRender.h \
+    include/View/MapView.h \
+    include/View/RawImage.h \
+    include/View/RawImageList.h \
+    include/View/RawImageView.h \
+    include/View/SpriteView.h \
+    include/View/SpriteViewList.h \
     ../Project/include/EnumDb.h \
-    ../Project/include/Helpers.h \
+    ../Project/include/EnumFlags.h \
     ../Project/include/FileHandler.h \
     ../Project/include/Frame.h \
+    ../Project/include/Helpers.h \
     ../Project/include/Md5.h \
     ../Project/include/Sprite.h \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
-    ../Project/include/Game/Map/Tile.h \
-    include/Database/EditorSprite.h \
     ../Project/include/Game/EventHandler.h \
-    include/View/RawImageView.h \
-    include/View/RawImageList.h \
-    include/View/RawImage.h \
-    include/View/SpriteView.h \
-    include/Dialog/SpriteDialog.h \
-    include/Dialog/FrameList.h \
-    include/Dialog/FrameView.h \
-    include/Dialog/FrameDialog.h \
-    include/View/GameView.h \
-    include/View/MapView.h \
-    include/View/MapDatabase.h \
-    include/View/MapControl.h \
-    include/Database/EditorMap.h \
-    include/Database/EditorPerson.h \
-    include/Database/EditorThing.h \
-    include/Database/EditorTile.h \
-    include/Database/GameDatabase.h \
-    include/Database/EditorItem.h \
-    include/Database/EditorParty.h \
-    include/Database/EditorAction.h \
-    ../Project/include/EnumFlags.h \
+    ../Project/include/Game/Map/Tile.h \
+    ../Project/include/Game/Map/TileSprite.h \
+    ../Project/include/Game/Battle/AIModule.h \
     ../Project/include/Game/Player/AttributeSet.h \
     ../Project/include/Game/Player/Action.h \
-    include/Database/EditorCategory.h \
-    include/Database/EditorSkillset.h \
-    include/Database/EditorSkill.h \
-    include/Database/EditorEquipment.h \
-    include/Database/EditorBubby.h \
-    ../Project/include/Game/Player/SkillSet.h \
-    ../Project/include/Game/Player/Skill.h \
-    ../Project/include/Game/Player/Person.h \
-    ../Project/include/Game/Player/Party.h \
-    ../Project/include/Game/Player/Item.h \
-    ../Project/include/Game/Player/Equipment.h \
-    ../Project/include/Game/Player/Category.h \
     ../Project/include/Game/Player/Bubby.h \
-    ../Project/include/Game/Battle/AIModule.h \
-    ../Project/include/Game/Player/Signature.h \
+    ../Project/include/Game/Player/Category.h \
+    ../Project/include/Game/Player/Equipment.h \
     ../Project/include/Game/Player/Flavour.h \
-    include/Database/EditorTemplate.h \
-    include/View/SpriteViewList.h
+    ../Project/include/Game/Player/Item.h \
+    ../Project/include/Game/Player/Party.h \
+    ../Project/include/Game/Player/Person.h \
+    ../Project/include/Game/Player/Signature.h \
+    ../Project/include/Game/Player/Skill.h \
+    ../Project/include/Game/Player/SkillSet.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
