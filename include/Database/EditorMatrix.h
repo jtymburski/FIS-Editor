@@ -37,6 +37,19 @@ private:
 
 protected:
 public:
+  /* Decrease the width and height, by the count factor */
+  void decreaseHeight(int count = 1);
+  void decreaseWidth(int count = 1);
+
+  /* Returns the height of the matrix */
+  int getHeight();
+
+  /* Returns the width of the matrix */
+  int getWidth();
+
+  /* Increase the width and height, by the count factor */
+  void increaseHeight(int count = 1);
+  void increaseWidth(int count = 1);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
