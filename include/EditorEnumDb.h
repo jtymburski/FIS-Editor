@@ -48,6 +48,10 @@ public:
                     SPRITE_VIEW = 1
                    };
 
+  /* Thing cursor for editing the scene */
+  enum ThingCursor {THING_ADD, THING_REMOVE, 
+                    THING_RENDER_PLUS, THING_RENDER_MINUS};
+
   /* Enum For View Mode */
   enum ViewMode {MAPVIEW = 0,
                  PERSONVIEW = 1,

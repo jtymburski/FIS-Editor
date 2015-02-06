@@ -51,6 +51,7 @@ SOURCES += \
     src/Dialog/FrameDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
+    src/Dialog/MatrixDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/View/GameView.cc \
     src/View/MapControl.cc \
@@ -110,6 +111,7 @@ HEADERS += \
     include/Dialog/FrameDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
+    include/Dialog/MatrixDialog.h \
     include/Dialog/SpriteDialog.h \
     include/View/GameView.h \
     include/View/MapControl.h \

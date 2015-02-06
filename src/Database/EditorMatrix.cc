@@ -5,6 +5,23 @@
  * Description: This class is for the editing sprite matrix, which contains a 
  *              scene of EditorTileSprites that are used for thing creation.
  ******************************************************************************/
+// TODO: Integrate in
+// Link: http://stackoverflow.com/questions/7451183/
+//              how-to-create-image-file-from-qgraphicsscene-qgraphicsview
+//QImage image(fn);
+//QPainter painter(&image);
+//painter.setRenderHint(QPainter::Antialiasing);
+//scene.render(&painter);
+//image.save("file_name.png")
+// --
+//scene->clearSelection();
+//scene->setSceneRect(scene->itemsBoundingRect());
+//QImage image(scene->sceneRect().size().toSize(), QImage::Format_ARGB32);
+//image.fill(Qt::transparent);
+//QPainter painter(&image);
+//scene->render(&painter);
+//image.save("file_name.png");
+
 #include "Database/EditorMatrix.h"
 
 /*============================================================================
@@ -20,11 +37,20 @@
  */
 EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
 {
+  active_sprite = NULL;
+
+  /* Increase height and width, if both are greater than 0 */
   if(width > 0 && height > 0)
   {
     increaseWidth(width);
     increaseHeight(height - 1);
   }
+
+  /* Set up defaults for painting visibility control */
+  setCursorMode(EditorEnumDb::THING_ADD);
+  setVisibilityGrid(true, true);
+  setVisibilityPass(false, true);
+  setVisibilityRender(false, true);
 }
 
 /*
@@ -57,6 +83,13 @@ EditorMatrix::~EditorMatrix()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
+  
+/* Adds the frames to the selected active sprite */
+// TODO: Comment
+void EditorMatrix::addFramesOnActive()
+{
+  // TODO: Implementation
+}
 
 /*
  * Description: Copies all data from source editor matrix to this editor
@@ -65,16 +98,124 @@ EditorMatrix::~EditorMatrix()
  * Inputs: EditorMatrix &source - the source to copy from
  * Output: none
  */
-// TODO
 void EditorMatrix::copySelf(const EditorMatrix &source)
 {
+  // TODO: Implementation
   /* Copy data for this class */
   //tile_sprite = source.tile_sprite;
+}
+  
+/* Decrements the render depth on the active tile */
+// TODO: Comment
+bool EditorMatrix::decrementDepthOnActive()
+{
+  return active_sprite->decrementRenderDepth();
+}
+
+/* Increments the render depth on the active tile */
+// TODO: Comment
+bool EditorMatrix::incrementDepthOnActive()
+{
+  return active_sprite->incrementRenderDepth();
+}
+
+/* Removes the frames from the selected active sprite */
+// TODO: Comment
+void EditorMatrix::removeFramesOnActive()
+{
+  // TODO: Implementation
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/* Mouse move, press, and release events */
+// TODO: Comment
+void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+  bool new_hover = false;
+
+  /* Check if left the current sprite */
+  if(active_sprite != NULL)
+  {
+    QRectF bound = active_sprite->boundingRect();
+    if(!bound.contains(event->scenePos()))
+    {
+      active_sprite->setHover(false);
+      active_sprite = NULL;
+    }
+  }
+
+  /* Check which sprite it's hovering on now */
+  if(active_sprite == NULL)
+  {
+    QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
+    if(hover_item != NULL)
+    {
+      active_sprite = (EditorTileSprite*)hover_item;
+      active_sprite->setHover(true);
+      new_hover = true;
+    }
+  }
+
+  /* If a new hover tile, check if a button is pressed and trigger click */
+  if(new_hover && (event->buttons() & Qt::LeftButton))
+  {
+    if(cursor_mode == EditorEnumDb::THING_REMOVE)
+      removeFramesOnActive();
+    else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
+      incrementDepthOnActive();
+    else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
+      decrementDepthOnActive();
+  }
+}
+
+// TODO: Comment
+void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+  if(active_sprite != NULL)
+  {
+    /* If left click, utilize the cursors */
+    if(event->button() == Qt::LeftButton)
+    {
+      if(cursor_mode == EditorEnumDb::THING_ADD)
+        addFramesOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_REMOVE)
+        removeFramesOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
+        incrementDepthOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
+        decrementDepthOnActive();
+    }
+    /* Otherwise, show right click menu */
+    else if(event->button() == Qt::RightButton)
+    {
+      // TODO: Implementation
+    }
+  }
+}
+
+// TODO: Comment
+void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+  (void)event;
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+  
+/* Cleans the scene. Used for when adding or removing from view */
+// TODO: Comment
+void EditorMatrix::cleanScene()
+{
+  /* Clean-up the hover sprite, set by previous views */
+  active_sprite = NULL;
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      matrix[i][j]->setHover(false);
+}
 
 /*
  * Description: Decreases the height of the matrix in the scene, by a count
@@ -109,6 +250,9 @@ void EditorMatrix::decreaseHeight(int count)
   /* If wiping out all columns, clear matrix */
   if(clear_array)
     matrix.clear();
+
+  /* Clean up the scene */
+  cleanScene();
 }
 
 /*
@@ -145,6 +289,9 @@ void EditorMatrix::decreaseWidth(int count)
   /* If wiping out all rows, clear matrix */
   if(clear_array)
     matrix.clear();
+
+  /* Clean up the scene */
+  cleanScene();
 }
 
 /*
@@ -158,6 +305,25 @@ int EditorMatrix::getHeight()
   if(getWidth() > 0)
     return matrix.last().size();
   return 0;
+}
+  
+/* Gets the visibility for control objects */
+// TODO: Comment
+bool EditorMatrix::getVisibilityGrid()
+{
+  return visible_grid;
+}
+
+// TODO: Comment
+bool EditorMatrix::getVisibilityPass()
+{
+  return visible_passability;
+}
+
+// TODO: Comment
+bool EditorMatrix::getVisibilityRender()
+{
+  return visible_render;
 }
 
 /*
@@ -206,6 +372,14 @@ void EditorMatrix::increaseHeight(int count)
       }
     }
   }
+
+  /* Update painting visibility */
+  setVisibilityGrid(visible_grid, true);
+  setVisibilityPass(visible_passability, true);
+  setVisibilityRender(visible_render, true);
+  
+  /* Clean up the scene */
+  cleanScene();
 }
 
 /*
@@ -237,6 +411,64 @@ void EditorMatrix::increaseWidth(int count)
 
     /* Put the column in the matrix */
     matrix.push_back(col);
+  }
+
+  /* Update painting visibility */
+  setVisibilityGrid(visible_grid, true);
+  setVisibilityPass(visible_passability, true);
+  setVisibilityRender(visible_render, true);
+
+  /* Clean up the scene */
+  cleanScene();
+}
+  
+/* Sets the cursor mode */
+// TODO: Comment
+void EditorMatrix::setCursorMode(EditorEnumDb::ThingCursor mode)
+{
+  cursor_mode = mode;
+}
+
+/* Sets the visibility for control objects */
+// TODO: Comment
+void EditorMatrix::setVisibilityGrid(bool visible, bool force)
+{
+  if(visible != visible_grid || force)
+  {
+    visible_grid = visible;
+
+    /* Loop through all tile sprites and update */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        matrix[i][j]->setVisibilityGrid(visible);
+  }
+}
+
+// TODO: Comment
+void EditorMatrix::setVisibilityPass(bool visible, bool force)
+{
+  if(visible != visible_passability || force)
+  {
+    visible_passability = visible;
+
+    /* Loop through all tile sprites and update */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        matrix[i][j]->setVisibilityPass(visible);
+  }
+}
+
+// TODO: Comment
+void EditorMatrix::setVisibilityRender(bool visible, bool force)
+{
+  if(visible != visible_render || force)
+  {
+    visible_render = visible;
+
+    /* Loop through all tile sprites and update */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        matrix[i][j]->setVisibilityRender(visible);
   }
 }
 
