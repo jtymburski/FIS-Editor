@@ -100,15 +100,38 @@ void MatrixDialog::checkFilename()
       cbox_width_from->setEnabled(true);
       cbox_width_to->setEnabled(true);
 
-      /* Choose the correct letter in the combo boxes to match the path */
-      int height_index = second_last.at(1).unicode() - QChar('A').unicode();
-      cbox_height_from->setCurrentIndex(height_index);
-      int width_index = second_last.at(0).unicode() - QChar('A').unicode();
-      cbox_width_from->setCurrentIndex(width_index);
+      /* Disable signals */
+      cbox_height_from->blockSignals(true);
+      cbox_height_to->blockSignals(true);
+      cbox_width_from->blockSignals(true);
+      cbox_width_to->blockSignals(true);
+
+      /* Choose the full range and then update scene and trim */
+      cbox_height_from->setCurrentIndex(0);
+      cbox_height_to->setCurrentIndex(cbox_height_to->count() - 1);
+      cbox_width_from->setCurrentIndex(0);
+      cbox_width_to->setCurrentIndex(cbox_width_to->count() - 1);
+      updateScene();
+      buttonTrim();
 
       /* Check if both digits are 0 (base frame */
       if(last.at(1).digitValue() == 0 && last.at(2).digitValue() == 0)
+      {
+        /* If they are, set a slightly higher value and trim */
         num_spinner->setEnabled(true);
+        num_spinner->setValue(10);
+        buttonTrim();
+      }
+      else
+      {
+        updateScene();
+      }
+
+      /* Enable signals */
+      cbox_height_from->blockSignals(false);
+      cbox_height_to->blockSignals(false);
+      cbox_width_from->blockSignals(false);
+      cbox_width_to->blockSignals(false);
     }
   }
 }
