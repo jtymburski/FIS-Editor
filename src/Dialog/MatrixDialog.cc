@@ -27,6 +27,7 @@ MatrixDialog::MatrixDialog(QString path, QWidget* parent) : QDialog(parent)
   if(!path.isEmpty() && path.endsWith(".png"))
   {
     /* Initial variables */
+    path = QDir::toNativeSeparators(path);
     QStringList path_set = path.split(QDir::separator());
     initial_filename = path_set.last();
     initial_path = path.remove(initial_filename);
