@@ -158,19 +158,19 @@ void MatrixDialog::createDialog()
   lbl_scene->setMinimumWidth(kSCENE_SIZE);
   lbl_scene->setMinimumHeight(kSCENE_SIZE);
   lbl_scene->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_scene, 0, 0, 5, 3);
+  layout->addWidget(lbl_scene, 0, 0, 6, 3);
 
   /* Scene control */
   button_prev = new QPushButton("<", this);
   button_prev->setMaximumWidth(kSCENE_SIZE / 10);
   connect(button_prev, SIGNAL(clicked()), this, SLOT(buttonPreviousFrame()));
-  layout->addWidget(button_prev, 5, 0, Qt::AlignRight);
+  layout->addWidget(button_prev, 6, 0, Qt::AlignRight);
   lbl_frame_num = new QLabel(QString::number(frame_num), this);
-  layout->addWidget(lbl_frame_num, 5, 1, Qt::AlignCenter);
+  layout->addWidget(lbl_frame_num, 6, 1, Qt::AlignCenter);
   button_next = new QPushButton(">", this);
   button_next->setMaximumWidth(kSCENE_SIZE / 10);
   connect(button_next, SIGNAL(clicked()), this, SLOT(buttonNextFrame()));
-  layout->addWidget(button_next, 5, 2, Qt::AlignLeft);
+  layout->addWidget(button_next, 6, 2, Qt::AlignLeft);
 
   /* Path label */
   QLabel* lbl_initial = new QLabel("Filename: " + initial_filename, this);
@@ -209,30 +209,40 @@ void MatrixDialog::createDialog()
           this, SLOT(editObjectChanged(int)));
   layout->addWidget(cbox_height_to, 2, 6);
 
+  /* Scene flipping control */
+  button_flip_h = new QPushButton("Horizontal Flip", this);
+  button_flip_h->setCheckable(true);
+  connect(button_flip_h, SIGNAL(clicked()), this, SLOT(buttonFlip()));
+  layout->addWidget(button_flip_h, 3, 3, 1, 2);
+  button_flip_v = new QPushButton("Vertical Flip", this);
+  button_flip_v->setCheckable(true);
+  connect(button_flip_v, SIGNAL(clicked()), this, SLOT(buttonFlip()));
+  layout->addWidget(button_flip_v, 3, 5, 1, 2);
+
   /* Number of frames */
   QLabel* lbl_num = new QLabel("Number of Frames", this);
-  layout->addWidget(lbl_num, 3, 3, 1, 2);
+  layout->addWidget(lbl_num, 4, 3, 1, 2);
   num_spinner = new QSpinBox(this);
   num_spinner->setMinimum(1);
   num_spinner->setMaximum(99);
   connect(num_spinner, SIGNAL(valueChanged(int)),
           this, SLOT(editObjectChanged(int)));
-  layout->addWidget(num_spinner, 3, 5, 1, 2);
+  layout->addWidget(num_spinner, 4, 5, 1, 2);
 
   /* Result label */
   lbl_result = new QLabel("Result:", this);
-  layout->addWidget(lbl_result, 4, 3, 1, 4);
+  layout->addWidget(lbl_result, 5, 3, 1, 4);
 
   /* Buttons at bottom */
   QPushButton* button_trim = new QPushButton("Trim", this);
   connect(button_trim, SIGNAL(clicked()), this, SLOT(buttonTrim()));
-  layout->addWidget(button_trim, 5, 4);
+  layout->addWidget(button_trim, 6, 4);
   QPushButton* button_ok = new QPushButton("Ok", this);
   connect(button_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(button_ok, 5, 5);
+  layout->addWidget(button_ok, 6, 5);
   QPushButton* button_cancel = new QPushButton("Cancel", this);
   connect(button_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(button_cancel, 5, 6);
+  layout->addWidget(button_cancel, 6, 6);
 
   /* Dialog control */
   setLayout(layout);
@@ -287,7 +297,8 @@ void MatrixDialog::updateScene()
 {
   /* Update the scene with the new path */
   QString result_file = getResultFile();
-  matrix.addPath(initial_path + result_file, 0, 0, true);
+  matrix.addPath(initial_path + result_file, 0, 0, 
+                 button_flip_h->isChecked(), button_flip_v->isChecked(), true);
 
   /* Paint the image */
   matrix.clearSelection();
@@ -330,6 +341,18 @@ void MatrixDialog::updateScene()
 void MatrixDialog::buttonCancel()
 {
   close();
+}
+
+/* 
+ * Description: Button trigger called on a flip click (horizontal or vertical).
+ *              Updates the scene for the new flip.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonFlip()
+{
+  updateScene();
 }
 
 /*
@@ -508,6 +531,28 @@ void MatrixDialog::editObjectChanged(int)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/ 
+  
+/*
+ * Description: Is the matrix flipped horizontally?
+ *
+ * Inputs: none
+ * Output: bool - true if the matrix is flipped horizontally
+ */
+bool MatrixDialog::isFlipHorizontal()
+{
+  return button_flip_h->isChecked();
+}
+
+/*
+ * Description: Is the matrix flipped vertically?
+ *
+ * Inputs: none
+ * Output: bool - true if the matrix is flipped vertically
+ */
+bool MatrixDialog::isFlipVertical()
+{
+  return button_flip_v->isChecked();
+}
 
 /*
  * Description: Returns the result file of the matrix in the format of 
@@ -529,17 +574,37 @@ QString MatrixDialog::getResultFile()
 
     /* Get the width */
     if(cbox_width_from->currentText() != cbox_width_to->currentText())
-      file += "[" + cbox_width_from->currentText() + "-" + 
-                    cbox_width_to->currentText() + "]"; 
+    {
+      file += "[";
+      if(button_flip_h->isChecked())
+        file += cbox_width_to->currentText() + "-" + 
+                cbox_width_from->currentText();
+      else
+        file += cbox_width_from->currentText() + "-" + 
+                cbox_width_to->currentText();
+      file += "]";
+    }
     else
+    {
       file += cbox_width_from->currentText();
+    }
 
     /* Get the height */
     if(cbox_height_from->currentText() != cbox_height_to->currentText())
-      file += "[" + cbox_height_from->currentText() + "-" + 
-                    cbox_height_to->currentText() + "]";
+    {
+      file += "[";
+      if(button_flip_v->isChecked())
+        file += cbox_height_to->currentText() + "-" + 
+                cbox_height_from->currentText();
+      else
+        file += cbox_height_from->currentText() + "-" + 
+                cbox_height_to->currentText();
+      file += "]";
+    }
     else
+    {
       file += cbox_height_from->currentText();
+    }
     file += "_";
 
     /* Get the frame count */

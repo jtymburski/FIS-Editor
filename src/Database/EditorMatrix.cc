@@ -22,6 +22,8 @@
 EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
 {
   active_sprite = NULL;
+  place_x = 0;
+  place_y = 0;
 
   /* Increase height and width, if both are greater than 0 */
   if(width > 0 && height > 0)
@@ -73,7 +75,12 @@ EditorMatrix::~EditorMatrix()
 // TODO: Comment
 void EditorMatrix::addFramesOnActive()
 {
-  // TODO: Implementation
+  /* Get the place X and Y, from the active sprite */
+  place_x = active_sprite->getX();
+  place_y = active_sprite->getY();
+ 
+  /* Trigger the start matrix place in parent class */
+  emit initMatrixPlace();
 }
 
 /*
@@ -108,7 +115,7 @@ bool EditorMatrix::incrementDepthOnActive()
 // TODO: Comment
 void EditorMatrix::removeFramesOnActive()
 {
-  // TODO: Implementation
+  active_sprite->deleteAllFrames();
 }
   
 /* Size manipulation on matrix */
@@ -250,17 +257,30 @@ void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 }
 
 /*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+
+/* Matrix place sprite trigger */
+void EditorMatrix::matrixPlace(QString result_path)
+{
+  if(!result_path.isEmpty())
+    addPath(result_path, place_x, place_y);
+}
+
+/*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
    
 /* Adds a path to the Editor Matrix. It can handle matrix format file names */
 // TODO: Comment
-bool EditorMatrix::addPath(QString path, int x, int y, bool reset)
+bool EditorMatrix::addPath(QString path, int x, int y, bool hflip, 
+                           bool vflip, bool reset)
 {
   if(!path.isEmpty())
   {
     QStringList path_set = path.split(QDir::separator());
-    return addPath(path.remove(path_set.last()), path_set.last(), x, y, reset);
+    return addPath(path.remove(path_set.last()), path_set.last(), x, y, 
+                   hflip, vflip, reset);
   }
 
   return false;
@@ -268,7 +288,7 @@ bool EditorMatrix::addPath(QString path, int x, int y, bool reset)
 
 // TODO: Comment
 bool EditorMatrix::addPath(QString root_path, QString file_name, 
-                           int x, int y, bool reset)
+                           int x, int y, bool hflip, bool vflip, bool reset)
 {
   if(!root_path.isEmpty() && !file_name.isEmpty() && x >= 0 && y >= 0)
   {
@@ -288,9 +308,15 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
 
     /* Go through paths and add them */
     for(uint16_t i = 0; i < name_set.size(); i++)
+    {
       for(uint16_t j = 0; j < name_set[i].size(); j++)
+      {
         matrix[x + i][y + j]->addPath(root_path + 
                                       QString::fromStdString(name_set[i][j]));
+        matrix[x + i][y + j]->setHorizontalFlips(hflip);
+        matrix[x + i][y + j]->setVerticalFlips(vflip);
+      }
+    }
   }
 
   return false;
@@ -665,6 +691,23 @@ void EditorMatrix::setActiveFrame(int index, bool force)
 void EditorMatrix::setCursorMode(EditorEnumDb::ThingCursor mode)
 {
   cursor_mode = mode;
+}
+  
+/* Sets if all tiles should be horizontally or vertically flipped */
+// TODO: Comment
+void EditorMatrix::setFlipHorizontal(bool flip)
+{
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      matrix[i][j]->setHorizontalFlips(flip);
+}
+
+// TODO: Comment
+void EditorMatrix::setFlipVertical(bool flip)
+{
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      matrix[i][j]->setVerticalFlips(flip);
 }
 
 /* Sets the visibility for control objects */

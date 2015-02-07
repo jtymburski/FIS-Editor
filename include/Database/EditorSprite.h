@@ -121,7 +121,7 @@ public slots:
 
   /* Sets the frames horizontal flip of a given frame */
   void setHorizontalFlip(int,bool);
-  void setHorizontalFlips();
+  void setHorizontalFlips(bool flip = true);
 
   /* Sets the user submitted name */
   virtual void setName(QString name);
@@ -134,7 +134,7 @@ public slots:
 
   /* Sets the frames vertical flip of a given frame */
   void setVerticalFlip(int,bool);
-  void setVerticalFlips();
+  void setVerticalFlips(bool flip = true);
 
   /* Sets all of the sprites frames to 270 deg rotation */
   void set0();
@@ -154,6 +154,9 @@ signals:
 public:
   /* Adds paths to the tail end of the sprite stack. Splits on | */
   int addPath(QString path);
+
+  /* Deletes all frames */
+  void deleteAllFrames();
 
   /* Gets the current number of frames */
   int frameCount();

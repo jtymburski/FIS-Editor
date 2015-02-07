@@ -8,6 +8,7 @@
 #ifndef EDITORMATRIX_H
 #define EDITORMATRIX_H
 
+#include <QFileDialog>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QVector>
@@ -18,6 +19,7 @@
 
 class EditorMatrix : public QGraphicsScene
 {
+  Q_OBJECT
 public:
   /* Constructor function */
   EditorMatrix(int width = 0, int height = 0);
@@ -40,6 +42,10 @@ private:
 
   /* The structure of tiles in the matrix */
   QVector<QVector<EditorTileSprite*>> matrix;
+
+  /* Placement location - the active sprite when clicked */
+  int place_x;
+  int place_y;
 
   /* Visibility painting control */
   bool visible_grid;
@@ -79,13 +85,28 @@ protected:
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 /*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Triggers a parent class to start matrix place process */ 
+  void initMatrixPlace();
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+public slots:
+  /* Matrix place sprite trigger */
+  void matrixPlace(QString result_path);
+
+/*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
   /* Adds a path to the Editor Matrix. It can handle matrix format file names */
-  bool addPath(QString path, int x = 0, int y = 0, bool reset = false);
-  bool addPath(QString root_path, QString file_name, 
-               int x = 0, int y = 0, bool reset = false);
+  bool addPath(QString path, int x = 0, int y = 0, bool hflip = false, 
+               bool vflip = false, bool reset = false);
+  bool addPath(QString root_path, QString file_name, int x = 0, int y = 0, 
+               bool hflip = false, bool vflip = false, bool reset = false);
 
   /* Cleans the scene. Used for when adding or removing from view */
   void cleanScene();
@@ -121,7 +142,11 @@ public:
 
   /* Sets the cursor mode */
   void setCursorMode(EditorEnumDb::ThingCursor mode);
-  
+ 
+  /* Sets if all tiles should be horizontally or vertically flipped */
+  void setFlipHorizontal(bool flip);
+  void setFlipVertical(bool flip);
+
   /* Sets the visibility for control objects */
   void setVisibilityGrid(bool visible, bool force = false);
   void setVisibilityPass(bool visible, bool force = false);

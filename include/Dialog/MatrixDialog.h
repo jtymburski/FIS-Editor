@@ -30,6 +30,8 @@ public:
 
 private:
   /* Buttons for frame control */
+  QPushButton* button_flip_h;
+  QPushButton* button_flip_v;
   QPushButton* button_prev;
   QPushButton* button_next;
 
@@ -89,6 +91,7 @@ signals:
 public slots:
   /* Button triggers */
   void buttonCancel();
+  void buttonFlip();
   void buttonNextFrame();
   void buttonOk();
   void buttonPreviousFrame();
@@ -105,6 +108,10 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/ 
 public:
+  /* Is the matrix being flipped horizontally or vertically? */
+  bool isFlipHorizontal();
+  bool isFlipVertical();
+
   /* Returns the resulting file or path, in the format used by game */
   QString getResultFile();
   QString getResultPath();

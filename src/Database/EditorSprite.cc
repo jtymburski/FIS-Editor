@@ -492,12 +492,12 @@ void EditorSprite::setHorizontalFlip(int frame_num, bool flip)
 /*
  * Description: Sets the frame horizontal flips for all frames
  *
- * Input: bool flip
+ * Input: bool flip - true if wanting to flip
  */
-void EditorSprite::setHorizontalFlips()
+void EditorSprite::setHorizontalFlips(bool flip)
 {
   for(int i = 0; i < frame_info.size(); i++)
-    frame_info[i].hflip = true;
+    frame_info[i].hflip = flip;
   emit spriteChanged();
 }
 
@@ -550,12 +550,12 @@ void EditorSprite::setVerticalFlip(int frame_num, bool flip)
 /*
  * Description: Sets the frame vertical flip for all frames
  *
- * Input: bool flip
+ * Input: bool flip - true if wanting to vertically flip the sprite
  */
-void EditorSprite::setVerticalFlips()
+void EditorSprite::setVerticalFlips(bool flip)
 {
   for(int i = 0; i < frame_info.size(); i++)
-    frame_info[i].vflip = true;
+    frame_info[i].vflip = flip;
   emit spriteChanged();
 }
 
@@ -623,6 +623,18 @@ int EditorSprite::addPath(QString path)
   }
 
   return count;
+}
+  
+/*
+ * Description: Deletes all frames in the sprite
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorSprite::deleteAllFrames()
+{
+  while(frameCount() > 0)
+    frame_info.removeLast();
 }
 
 /*
