@@ -5,24 +5,8 @@
  * Description: This class is for the editing sprite matrix, which contains a 
  *              scene of EditorTileSprites that are used for thing creation.
  ******************************************************************************/
-// TODO: Integrate in
-// Link: http://stackoverflow.com/questions/7451183/
-//              how-to-create-image-file-from-qgraphicsscene-qgraphicsview
-//QImage image(fn);
-//QPainter painter(&image);
-//painter.setRenderHint(QPainter::Antialiasing);
-//scene.render(&painter);
-//image.save("file_name.png")
-// --
-//scene->clearSelection();
-//scene->setSceneRect(scene->itemsBoundingRect());
-//QImage image(scene->sceneRect().size().toSize(), QImage::Format_ARGB32);
-//image.fill(Qt::transparent);
-//QPainter painter(&image);
-//scene->render(&painter);
-//image.save("file_name.png");
-
 #include "Database/EditorMatrix.h"
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -47,6 +31,7 @@ EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
   }
 
   /* Set up defaults for painting visibility control */
+  setActiveFrame(0, true);
   setCursorMode(EditorEnumDb::THING_ADD);
   setVisibilityGrid(true, true);
   setVisibilityPass(false, true);
@@ -124,6 +109,68 @@ bool EditorMatrix::incrementDepthOnActive()
 void EditorMatrix::removeFramesOnActive()
 {
   // TODO: Implementation
+}
+  
+/* Size manipulation on matrix */
+// TODO: Comment
+bool EditorMatrix::setNewOrigin(int x, int y)
+{
+  if(x >= 0 && y >= 0)
+  {
+    /* Trim the width first */
+    for(int i = 0; i < x; i++)
+    {
+      for(int j = 0; j < matrix.first().size(); j++)
+      {
+        removeItem(matrix.first()[j]);
+        delete matrix.first()[j];
+      }
+      matrix.removeFirst();
+    }
+    
+    /* Trim the height next */
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      for(int j = 0; j < y; j++)
+      {
+        removeItem(matrix[i].first());
+        delete matrix[i].first();
+        matrix[i].removeFirst();
+      }
+    }
+
+    /* Re-base matrix */
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      for(int j = 0; j < matrix[i].size(); j++)
+      {
+        matrix[i][j]->setX(i);
+        matrix[i][j]->setY(j);
+      }
+    }
+
+    return true;
+  }
+  return false;
+}
+
+/* Size manipulation on matrix */
+// TODO: Comment
+bool EditorMatrix::setNewSize(int width, int height)
+{
+  if(width >= 0 && height >= 0)
+  {
+    /* Fix the width */
+    if(width < getWidth())
+      decreaseWidth(getWidth() - width);
+
+    /* Fix the height */
+    if(height < getHeight())
+      decreaseHeight(getHeight() - height);
+
+    return true;
+  }
+  return false;
 }
 
 /*============================================================================
@@ -205,7 +252,50 @@ void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  
+   
+/* Adds a path to the Editor Matrix. It can handle matrix format file names */
+// TODO: Comment
+bool EditorMatrix::addPath(QString path, int x, int y, bool reset)
+{
+  if(!path.isEmpty())
+  {
+    QStringList path_set = path.split(QDir::separator());
+    return addPath(path.remove(path_set.last()), path_set.last(), x, y, reset);
+  }
+
+  return false;
+}
+
+// TODO: Comment
+bool EditorMatrix::addPath(QString root_path, QString file_name, 
+                           int x, int y, bool reset)
+{
+  if(!root_path.isEmpty() && !file_name.isEmpty() && x >= 0 && y >= 0)
+  {
+    /* If reset, clear the scene */
+    if(reset)
+      decreaseWidth(getWidth());
+
+    /* Split up the set of frames for the matrix */
+    std::vector<std::vector<std::string>> name_set = 
+                               Helpers::frameSeparator(file_name.toStdString());
+
+    /* Ensure the matrix is large enough */
+    if((x + (int)name_set.size()) > getWidth())
+      increaseWidth(x + name_set.size() - getWidth());
+    if((y + (int)name_set.front().size()) > getHeight())
+      increaseHeight(y + name_set.front().size() - getHeight());
+
+    /* Go through paths and add them */
+    for(uint16_t i = 0; i < name_set.size(); i++)
+      for(uint16_t j = 0; j < name_set[i].size(); j++)
+        matrix[x + i][y + j]->addPath(root_path + 
+                                      QString::fromStdString(name_set[i][j]));
+  }
+
+  return false;
+}
+
 /* Cleans the scene. Used for when adding or removing from view */
 // TODO: Comment
 void EditorMatrix::cleanScene()
@@ -293,6 +383,13 @@ void EditorMatrix::decreaseWidth(int count)
   /* Clean up the scene */
   cleanScene();
 }
+  
+/* Returns the active frame index */
+// TODO: Comment
+int EditorMatrix::getActiveFrameIndex()
+{
+  return active_frame;
+}
 
 /*
  * Description: Returns the height of the matrix, in tiles.
@@ -306,7 +403,131 @@ int EditorMatrix::getHeight()
     return matrix.last().size();
   return 0;
 }
-  
+   
+/* Gets trim values - rows, columns, and frames - that are unused */
+// TODO: Comment
+int EditorMatrix::getTrimFrames(bool largest)
+{
+  int ref_index = -1;
+
+  for(int i = 0; i < matrix.size(); i++)
+  {
+    for(int j = 0; j < matrix[i].size(); j++)
+    {
+      int result = matrix[i][j]->getLastValidFrame();
+      if(largest)
+      {
+        if(result > ref_index)
+          ref_index = result;
+      }
+      else
+      {
+        if(ref_index == -1)
+          ref_index = result;
+        else if(result >= 0 && result < ref_index)
+          ref_index = result;
+      }
+    }
+  }
+
+  return ref_index;
+}
+
+// TODO: Comment
+QRect EditorMatrix::getTrimRect()
+{
+  QVector<QVector<int>> matrix_null;
+
+  /* Parse the entire matrix */
+  for(int i = 0; i < matrix.size(); i++)
+  {
+    QVector<int> col;
+
+    for(int j = 0; j < matrix[i].size(); j++)
+    {
+      if(matrix[i][j]->isAllNull())
+        col.push_back(0);
+      else
+        col.push_back(1);
+    }
+
+    matrix_null.push_back(col);
+  }
+
+  /* Set up the initial rect to the size of the matrix */
+  int x1 = 0;
+  int x2 = getWidth();
+  int y1 = 0;
+  int y2 = getHeight();
+
+  /* Parse the left columns to see if optimizations can be made */
+  bool valid = true;
+  for(int i = x1; valid && (i < x2); i++)
+  {
+    bool all_null = true;
+
+    for(int j = y1; j < y2; j++)
+      if(matrix_null[i][j] == 1)
+        all_null = false;
+
+    if(all_null)
+      x1 = i + 1;
+    else
+      valid = false;
+  }
+
+  /* Parse the right columns to see if optimizations can be made */
+  valid = true;
+  for(int i = x2 - 1; i >= x1; i--)
+  {
+    bool all_null = true;
+
+    for(int j = y1; j < y2; j++)
+      if(matrix_null[i][j] == 1)
+        all_null = false;
+
+    if(all_null)
+      x2 = i;
+    else
+      valid = false;
+  }
+
+  /* Parse the top rows to see if optimizations can be made */
+  valid = true;
+  for(int i = y1; valid && (i < y2); i++)
+  {
+    bool all_null = true;
+
+    for(int j = x1; j < x2; j++)
+      if(matrix_null[j][i] == 1)
+        all_null = false;
+
+    if(all_null)
+      y1 = i + 1;
+    else
+      valid = false;
+  }
+
+  /* Parse the bottom rows to see if optimizations can be made */
+  valid = true;
+  for(int i = y2 - 1; i >= y1; i--)
+  {
+    bool all_null = true;
+
+    for(int j = x1; j < x2; j++)
+      if(matrix_null[j][i] == 1)
+        all_null = false;
+
+    if(all_null)
+      y2 = i;
+    else
+      valid = false;
+  }
+
+  /* Construct rect */
+  return QRect(x1, y1, x2 - x1, y2 - y1);
+}
+
 /* Gets the visibility for control objects */
 // TODO: Comment
 bool EditorMatrix::getVisibilityGrid()
@@ -374,6 +595,7 @@ void EditorMatrix::increaseHeight(int count)
   }
 
   /* Update painting visibility */
+  setActiveFrame(active_frame, true);
   setVisibilityGrid(visible_grid, true);
   setVisibilityPass(visible_passability, true);
   setVisibilityRender(visible_render, true);
@@ -414,6 +636,7 @@ void EditorMatrix::increaseWidth(int count)
   }
 
   /* Update painting visibility */
+  setActiveFrame(active_frame, true);
   setVisibilityGrid(visible_grid, true);
   setVisibilityPass(visible_passability, true);
   setVisibilityRender(visible_render, true);
@@ -421,7 +644,22 @@ void EditorMatrix::increaseWidth(int count)
   /* Clean up the scene */
   cleanScene();
 }
-  
+   
+/* Sets the active frame for all sprites in the matrix */
+// TODO: Comment
+void EditorMatrix::setActiveFrame(int index, bool force)
+{
+  if(index >= 0 && (index != active_frame || force))
+  {
+    active_frame = index;
+
+    /* Loop through all tile sprites and update */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        matrix[i][j]->setActiveFrame(index);
+  }
+}
+
 /* Sets the cursor mode */
 // TODO: Comment
 void EditorMatrix::setCursorMode(EditorEnumDb::ThingCursor mode)
@@ -470,6 +708,31 @@ void EditorMatrix::setVisibilityRender(bool visible, bool force)
       for(int j = 0; j < matrix[i].size(); j++)
         matrix[i][j]->setVisibilityRender(visible);
   }
+}
+
+/* Trims the scene  (removes excess sprites and frames) */
+// TODO: Comment
+void EditorMatrix::trim(bool only_se)
+{
+  /* Clean the scene */
+  cleanScene();
+
+  /* Get trimmed rect */
+  QRect trim_rect = getTrimRect();
+
+  /* Update width / height */
+  setNewSize(trim_rect.x() + trim_rect.width(), 
+             trim_rect.y() + trim_rect.height());
+
+  /* Update origin points */
+  if(!only_se)
+    setNewOrigin(trim_rect.x(), trim_rect.y());
+
+  /* Update number of frames */
+  int frame_count = getTrimFrames(false) + 1;
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      matrix[i][j]->setMaximumFrames(frame_count);
 }
 
 /*============================================================================

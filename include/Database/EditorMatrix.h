@@ -14,9 +14,11 @@
 
 #include "Database/EditorTileSprite.h"
 #include "EditorEnumDb.h"
+#include "Helpers.h"
 
 class EditorMatrix : public QGraphicsScene
 {
+public:
   /* Constructor function */
   EditorMatrix(int width = 0, int height = 0);
 
@@ -27,6 +29,9 @@ class EditorMatrix : public QGraphicsScene
   ~EditorMatrix();
 
 private:
+  /* Active frame reference */
+  int active_frame;
+
   /* Active hover sprite */
   EditorTileSprite* active_sprite;
 
@@ -60,6 +65,10 @@ private:
   /* Removes the frames from the selected active sprite */
   void removeFramesOnActive();
 
+  /* Size manipulation on matrix */
+  bool setNewOrigin(int x, int y);
+  bool setNewSize(int width, int height);
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -73,6 +82,11 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Adds a path to the Editor Matrix. It can handle matrix format file names */
+  bool addPath(QString path, int x = 0, int y = 0, bool reset = false);
+  bool addPath(QString root_path, QString file_name, 
+               int x = 0, int y = 0, bool reset = false);
+
   /* Cleans the scene. Used for when adding or removing from view */
   void cleanScene();
 
@@ -80,8 +94,15 @@ public:
   void decreaseHeight(int count = 1);
   void decreaseWidth(int count = 1);
 
+  /* Returns the active frame index */
+  int getActiveFrameIndex();
+
   /* Returns the height of the matrix */
   int getHeight();
+
+  /* Gets trim values - rows, columns, and frames - that are unused */
+  int getTrimFrames(bool largest = true);
+  QRect getTrimRect();
 
   /* Gets the visibility for control objects */
   bool getVisibilityGrid();
@@ -94,7 +115,10 @@ public:
   /* Increase the width and height, by the count factor */
   void increaseHeight(int count = 1);
   void increaseWidth(int count = 1);
-  
+ 
+  /* Sets the active frame for all sprites in the matrix */
+  void setActiveFrame(int index, bool force = false);
+
   /* Sets the cursor mode */
   void setCursorMode(EditorEnumDb::ThingCursor mode);
   
@@ -102,6 +126,9 @@ public:
   void setVisibilityGrid(bool visible, bool force = false);
   void setVisibilityPass(bool visible, bool force = false);
   void setVisibilityRender(bool visible, bool force = false);
+
+  /* Trims the scene  (removes excess sprites and frames) */
+  void trim(bool only_se = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

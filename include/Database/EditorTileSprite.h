@@ -69,6 +69,10 @@ public:
   /* Returns the render depth */
   uint8_t getRenderDepth();
 
+  /* Returns the X and Y, for the tile sprite */
+  int getX();
+  int getY();
+
   /* Increments the render depth by 1 */
   bool incrementRenderDepth();
 

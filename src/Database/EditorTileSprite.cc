@@ -129,6 +129,28 @@ uint8_t EditorTileSprite::getRenderDepth()
 {
   return tile_sprite.getRenderDepth();
 }
+  
+/*
+ * Description: Returns the X, tile location, of the sprite.
+ *
+ * Inputs: none
+ * Output: int - the x tile offset of the tile. 0 is base
+ */
+int EditorTileSprite::getX()
+{
+  return x_pos;
+}
+
+/*
+ * Description: Returns the Y, tile location, of the sprite.
+ *
+ * Inputs: none
+ * Output: int - the y tile offset of the tile. 0 is base
+ */
+int EditorTileSprite::getY()
+{
+  return y_pos;
+}
 
 /*
  * Description: Increments the render depth, if possible, by 1. Highest point is 

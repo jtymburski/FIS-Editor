@@ -9,20 +9,14 @@
 #ifndef MATRIXDIALOG_H
 #define MATRIXDIALOG_H
 
-//#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QGridLayout>
 #include <QLabel>
-//#include <QLineEdit>
-//#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
-//#include <QVBoxLayout>
 
 #include "Database/EditorMatrix.h"
-//#include "Database/EditorSprite.h"
-//#include "Dialog/FrameView.h"
 
 class MatrixDialog : public QDialog
 {
@@ -35,47 +29,85 @@ public:
   ~MatrixDialog();
 
 private:
-  /* The frame label in the view */
-  //FrameView* framelabel;
+  /* Buttons for frame control */
+  QPushButton* button_prev;
+  QPushButton* button_next;
 
-  /* Frame number */
-  //int framenumber;
+  /* Combo box with width and height data */
+  QComboBox* cbox_height_from;
+  QComboBox* cbox_height_to;
+  QComboBox* cbox_width_from;
+  QComboBox* cbox_width_to;
 
-  /* The sprite being edited */
-  //EditorSprite* sprite_original;
-  //EditorSprite* sprite_working;
+  /* The frame number */
+  int frame_num;
+
+  /* The initial filename and path that instatiated the dialog */
+  QString initial_filename;
+  QString initial_path;
+
+  /* Labels used for display */
+  QLabel* lbl_frame_num;
+  QLabel* lbl_result;
+  QLabel* lbl_scene;
+
+  /* The view matrix */
+  EditorMatrix matrix;
+
+  /* Spinner with the number of frames */
+  QSpinBox* num_spinner;
+
+  /*------------------- Constants -----------------------*/
+  const static int kSCENE_SIZE; /* Render size of the scene */
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Checks the initial filename and disables portions of control not needed */
+  void checkFilename();
+
+  /* Creates the dialog */
+  void createDialog();
+
   /* Fills the drop down passed in with all the characters of the alphabet */
   void fillDropDown(QComboBox* box, QString starting_letter = "A");
 
-protected:
+  /* Updates the scene view */
+  void updateScene();
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
+  /* Finished processing signal */
+  void matrixSuccess();
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
+  /* Button triggers */
+  void buttonCancel();
+  void buttonNextFrame();
+  void buttonOk();
+  void buttonPreviousFrame();
+  void buttonTrim();
+
+  /* The "from" combo box for width or height change trigger */
+  void comboHeightChanged(int);
+  void comboWidthChanged(int);
+  
+  /* One of the other edit objects changed */
+  void editObjectChanged(int);
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/ 
 public:
-  /* Deletes the current frame */
-  //void deleteFrame();
-
-  /* Slot for finishing the saving of changes to the sequence */
-  //void finishSave();
-
-  /* Opens a dialog for frame replacement */
-  //void replaceFrame();
-
-  /* Sets the horizontal flip for the given frame */
-  //void setHorizontalFlip(bool);
-
-  /* Sets the vertical flip for the given frame */
-  //void setVerticalFlip(bool);
-
-  /* Sets the angle for the given frame */
-  //void set0();
-  //void set90();
-  //void set180();
-  //void set270();
+  /* Returns the resulting file or path, in the format used by game */
+  QString getResultFile();
+  QString getResultPath();
 };
 
 #endif // MATRIXDIALOG_H

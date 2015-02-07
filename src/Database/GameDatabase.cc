@@ -7,6 +7,9 @@
 #include "Database/GameDatabase.h"
 #include <QDebug>
 
+#include "Dialog/MatrixDialog.h"
+#include <QFileDialog>
+
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {
   /* Clear out variables */
@@ -492,8 +495,19 @@ void GameDatabase::duplicateResource()
 void GameDatabase::importResource()
 {
   // TODO: Future
-  QMessageBox::information(this, "Notification",
-                           "Coming soon to a production near you!");
+  //QMessageBox::information(this, "Notification",
+  //                         "Coming soon to a production near you!");
+
+  // TODO: Remove - testing
+  QString path = QFileDialog::getOpenFileName(this, 
+                                              tr("Select a matrix sprite"), 
+                                              EditorHelpers::getSpriteDir(), 
+                                              tr("Image Files (*.png)"));
+  if(path != "")
+  {
+    MatrixDialog* mdia = new MatrixDialog(path, this);
+    mdia->show();
+  }
 }
 
 /* Right click list menu on bottom list */

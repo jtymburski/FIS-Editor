@@ -7,8 +7,6 @@
  ******************************************************************************/
 #include "Application.h"
 
-#include "Dialog/MatrixDialog.h"
-
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -89,10 +87,6 @@ Application::Application(QWidget* parent)
 
   /* TEMPORARY - TODO: REMOVE */
   game_database->tempMake();
-
-  /* TESTING - TODO: REMOVE */
-  MatrixDialog* mdia = new MatrixDialog("gigante32_CC_D00.png", this);
-  mdia->show();
 }
 
 /*

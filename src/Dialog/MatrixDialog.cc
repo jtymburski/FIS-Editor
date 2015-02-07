@@ -9,6 +9,9 @@
 #include "Dialog/MatrixDialog.h"
 #include <QDebug>
 
+/* Constant Implementation - see header file for descriptions */
+const int MatrixDialog::kSCENE_SIZE = 320;
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -21,156 +24,27 @@
  */
 MatrixDialog::MatrixDialog(QString path, QWidget* parent) : QDialog(parent)
 {
-  /* Layout setup */
-  QGridLayout* layout = new QGridLayout(this);
-  layout->setSizeConstraint(QLayout::SetFixedSize);
-
-  /* Image label */
-  QLabel* scene_lbl = new QLabel(this);
-  QImage scene_img(320, 320, QImage::Format_ARGB32);
-  scene_lbl->setPixmap(QPixmap::fromImage(scene_img));
-  scene_lbl->setStyleSheet("border: 2px solid black");
-  scene_lbl->setMinimumWidth(320);
-  scene_lbl->setMinimumHeight(320);
-  layout->addWidget(scene_lbl, 0, 0, 6, 1);
-
-  /* Path label */
-  QLabel* initial_lbl = new QLabel("Filename: " + path, this);
-  //initial_lbl->setMinimumWidth(320);
-  layout->addWidget(initial_lbl, 0, 1, 1, 4);
-
-  /* Horizontal width control */
-  QLabel* width_lbl_1 = new QLabel("Horizontal", this);
-  layout->addWidget(width_lbl_1, 1, 1);
-  QComboBox* width_from_combo = new QComboBox(this);
-  fillDropDown(width_from_combo);
-  layout->addWidget(width_from_combo, 1, 2);
-  QLabel* width_lbl_2 = new QLabel("TO", this);
-  layout->addWidget(width_lbl_2, 1, 3);
-  QComboBox* width_to_combo = new QComboBox(this);
-  fillDropDown(width_to_combo, width_from_combo->currentText());
-  layout->addWidget(width_to_combo, 1, 4);
-
-  /* Vertical height control */
-  QLabel* height_lbl_1 = new QLabel("Vertical", this);
-  layout->addWidget(height_lbl_1, 2, 1);
-  QComboBox* height_from_combo = new QComboBox(this);
-  fillDropDown(height_from_combo);
-  layout->addWidget(height_from_combo, 2, 2);
-  QLabel* height_lbl_2 = new QLabel("TO", this);
-  layout->addWidget(height_lbl_2, 2, 3);
-  QComboBox* height_to_combo = new QComboBox(this);
-  fillDropDown(height_to_combo, height_from_combo->currentText());
-  layout->addWidget(height_to_combo, 2, 4);
-
-  /* Number of frames */
-  QLabel* num_lbl = new QLabel("Number of Frames", this);
-  layout->addWidget(num_lbl, 3, 1, 1, 2);
-  QSpinBox* num_spinner = new QSpinBox(this);
-  num_spinner->setMinimum(1);
-  num_spinner->setMaximum(99);
-  layout->addWidget(num_spinner, 3, 3, 1, 2);
-
-  /* Result label */
-  QLabel* result_lbl = new QLabel("Result: TODO", this);
-  layout->addWidget(result_lbl, 4, 1, 1, 4);
-
-  /* Buttons at bottom */
-  QPushButton* button_trim = new QPushButton("Trim", this);
-  layout->addWidget(button_trim, 5, 2);
-  QPushButton* button_ok = new QPushButton("Ok", this);
-  layout->addWidget(button_ok, 5, 3);
-  QPushButton* button_cancel = new QPushButton("Cancel", this);
-  layout->addWidget(button_cancel, 5, 4);
-
-  /* Dialog control */
-  setLayout(layout);
-  //setFixedSize(320 * 2 + 5 * 3, 320 + 5 * 2);
-}
-/*FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
-           : QDialog(parent)
-{
-  framenumber = framenum;
-  sprite_original = s;
-  sprite_working = new EditorSprite();
-
-  if(s != NULL)
+  if(!path.isEmpty() && path.endsWith(".png"))
   {
-    *sprite_working = *s;
-    framelabel = new FrameView(this, EditorEnumDb::VIEWONLY, sprite_working,
-                               framenumber, 0, 0);
+    /* Initial variables */
+    QStringList path_set = path.split(QDir::separator());
+    initial_filename = path_set.last();
+    initial_path = path.remove(initial_filename);
+    frame_num = 0;
 
-    QCheckBox* horizontal_flip = new QCheckBox("Horizontal Flip", this);
-    horizontal_flip->setChecked(sprite_working->getHorizontalFlip(framenumber));
-    QCheckBox* vertical_flip = new QCheckBox("Vertical Flip", this);
-    vertical_flip->setChecked(sprite_working->getVerticalFlip(framenumber));
-    connect(horizontal_flip, SIGNAL(toggled(bool)),
-            this, SLOT(setHorizontalFlip(bool)));
-    connect(vertical_flip, SIGNAL(toggled(bool)),
-            this, SLOT(setVerticalFlip(bool)));
+    /* Matrix config */
+    matrix.setVisibilityGrid(false);
+    matrix.setVisibilityPass(false);
+    matrix.setVisibilityRender(false);
 
-    QCheckBox* rotate0 = new QCheckBox("0", this);
-    rotate0->setChecked(sprite_working->getFrameAngle(framenumber) == 0);
-    rotate0->setAutoExclusive(true);
-    QCheckBox* rotate90 = new QCheckBox("90", this);
-    rotate90->setChecked(sprite_working->getFrameAngle(framenumber) == 90);
-    rotate90->setAutoExclusive(true);
-    QCheckBox* rotate180 = new QCheckBox("180", this);
-    rotate180->setChecked(sprite_working->getFrameAngle(framenumber) == 180);
-    rotate180->setAutoExclusive(true);
-    QCheckBox* rotate270 = new QCheckBox("270", this);
-    rotate270->setChecked(sprite_working->getFrameAngle(framenumber) == 270);
-    rotate270->setAutoExclusive(true);
-    connect(rotate0, SIGNAL(clicked()), this, SLOT(set0()));
-    connect(rotate90, SIGNAL(clicked()), this, SLOT(set90()));
-    connect(rotate180, SIGNAL(clicked()), this, SLOT(set180()));
-    connect(rotate270, SIGNAL(clicked()), this, SLOT(set270()));
+    /* Set up the view objects */
+    createDialog();
+    checkFilename();
 
-    QPushButton* ok = new QPushButton("Ok", this);
-    connect(ok,SIGNAL(pressed()),this,SLOT(finishSave()));
-    connect(ok,SIGNAL(pressed()),this,SLOT(close()));
-
-    QPushButton* cancel = new QPushButton("Cancel", this);
-    connect(cancel,SIGNAL(pressed()),this,SLOT(close()));
-
-    QPushButton* replace = new QPushButton("Replace Frame", this);
-    connect(replace,SIGNAL(pressed()),this,SLOT(replaceFrame()));
-
-    QPushButton* deleteframe = new QPushButton("Delete This Frame", this);
-    connect(deleteframe,SIGNAL(pressed()),this,SLOT(deleteFrame()));
-    if(s->frameCount() <= 1)
-      deleteframe->setEnabled(false);
-
-    QVBoxLayout* layout = new QVBoxLayout(this);
-
-    QVBoxLayout* rotation_layout = new QVBoxLayout();
-    rotation_layout->addWidget(rotate0);
-    rotation_layout->addWidget(rotate90);
-    rotation_layout->addWidget(rotate180);
-    rotation_layout->addWidget(rotate270);
-
-    QVBoxLayout* flip_layout = new QVBoxLayout();
-    flip_layout->addWidget(horizontal_flip);
-    flip_layout->addWidget(vertical_flip);
-
-
-    QHBoxLayout* checkbox_layout = new QHBoxLayout();
-    checkbox_layout->addLayout(rotation_layout);
-    checkbox_layout->addLayout(flip_layout);
-
-    QHBoxLayout* buttonlayout = new QHBoxLayout();
-    buttonlayout->addWidget(ok);
-    buttonlayout->addWidget(cancel);
-
-    layout->addWidget(framelabel, 0, Qt::AlignCenter);
-    layout->addWidget(replace);
-    layout->addWidget(deleteframe);
-    layout->addLayout(checkbox_layout);
-    layout->addLayout(buttonlayout);
-
-    setLayout(layout);
+    /* Finally, update the scene */
+    updateScene();
   }
-}*/
+}
 
 /*
  * Description: Destructor Function
@@ -179,92 +53,491 @@ MatrixDialog::~MatrixDialog()
 {
 
 }
-//FrameDialog::~FrameDialog()
-//{
-//  delete sprite_working;
-//}
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Fills the drop down passed in with all the characters of the alphabet */
+/*
+ * Description: Checks the initial file name from the path and disables 
+ *              the control objects that aren't valid (if the sprite doesn't
+ *              conform to Univursa naming standards).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::checkFilename()
+{
+  /* Initial split */
+  QString file = initial_filename;
+  file.chop(QString(".png").size());
+  QStringList file_split = file.split('_');
+
+  /* Start with all elements disabled */
+  button_prev->setDisabled(true);
+  button_next->setDisabled(true);
+  cbox_height_from->setDisabled(true);
+  cbox_height_to->setDisabled(true);
+  cbox_width_from->setDisabled(true);
+  cbox_width_to->setDisabled(true);
+  num_spinner->setDisabled(true);
+
+  /* Ensure there are at least enough elements */
+  if(file_split.size() >= 3)
+  {
+    QString last = file_split.last();
+    QString second_last = file_split.at(file_split.size() - 2);
+
+    /* Check that the last and second last sections meet the standard */
+    if(last.size() == 3 && second_last.size() == 2 && 
+       second_last.at(0).isUpper() && second_last.at(1).isUpper() && 
+       last.at(0).isUpper() && last.at(1).isDigit() && last.at(2).isDigit())
+    {
+      /* Enable combo boxes */
+      cbox_height_from->setEnabled(true);
+      cbox_height_to->setEnabled(true);
+      cbox_width_from->setEnabled(true);
+      cbox_width_to->setEnabled(true);
+
+      /* Choose the correct letter in the combo boxes to match the path */
+      int height_index = second_last.at(1).unicode() - QChar('A').unicode();
+      cbox_height_from->setCurrentIndex(height_index);
+      int width_index = second_last.at(0).unicode() - QChar('A').unicode();
+      cbox_width_from->setCurrentIndex(width_index);
+
+      /* Check if both digits are 0 (base frame */
+      if(last.at(1).digitValue() == 0 && last.at(2).digitValue() == 0)
+        num_spinner->setEnabled(true);
+    }
+  }
+}
+
+/*
+ * Description: Creates the dialog and fills it with objects with the correct
+ *              configuration. Only called once on initial construction and
+ *              necessary for the dialog to work.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::createDialog()
+{
+  /* Layout setup */
+  QGridLayout* layout = new QGridLayout(this);
+  layout->setSizeConstraint(QLayout::SetFixedSize);
+
+  /* Image label */
+  lbl_scene = new QLabel(this);
+  QImage scene_img(kSCENE_SIZE, kSCENE_SIZE, QImage::Format_ARGB32);
+  lbl_scene->setPixmap(QPixmap::fromImage(scene_img));
+  lbl_scene->setStyleSheet("border: 2px solid black");
+  lbl_scene->setMinimumWidth(kSCENE_SIZE);
+  lbl_scene->setMinimumHeight(kSCENE_SIZE);
+  lbl_scene->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_scene, 0, 0, 5, 3);
+
+  /* Scene control */
+  button_prev = new QPushButton("<", this);
+  button_prev->setMaximumWidth(kSCENE_SIZE / 10);
+  connect(button_prev, SIGNAL(clicked()), this, SLOT(buttonPreviousFrame()));
+  layout->addWidget(button_prev, 5, 0, Qt::AlignRight);
+  lbl_frame_num = new QLabel(QString::number(frame_num), this);
+  layout->addWidget(lbl_frame_num, 5, 1, Qt::AlignCenter);
+  button_next = new QPushButton(">", this);
+  button_next->setMaximumWidth(kSCENE_SIZE / 10);
+  connect(button_next, SIGNAL(clicked()), this, SLOT(buttonNextFrame()));
+  layout->addWidget(button_next, 5, 2, Qt::AlignLeft);
+
+  /* Path label */
+  QLabel* lbl_initial = new QLabel("Filename: " + initial_filename, this);
+  lbl_initial->setWordWrap(true);
+  layout->addWidget(lbl_initial, 0, 3, 1, 4);
+
+  /* Horizontal width control */
+  QLabel* width_lbl_1 = new QLabel("Horizontal", this);
+  layout->addWidget(width_lbl_1, 1, 3);
+  cbox_width_from = new QComboBox(this);
+  fillDropDown(cbox_width_from);
+  connect(cbox_width_from, SIGNAL(currentIndexChanged(int)), 
+          this, SLOT(comboWidthChanged(int)));
+  layout->addWidget(cbox_width_from, 1, 4);
+  QLabel* width_lbl_2 = new QLabel("TO", this);
+  layout->addWidget(width_lbl_2, 1, 5, Qt::AlignHCenter);
+  cbox_width_to = new QComboBox(this);
+  fillDropDown(cbox_width_to, cbox_width_from->currentText());
+  connect(cbox_width_to, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(editObjectChanged(int)));
+  layout->addWidget(cbox_width_to, 1, 6);
+
+  /* Vertical height control */
+  QLabel* height_lbl_1 = new QLabel("Vertical", this);
+  layout->addWidget(height_lbl_1, 2, 3);
+  cbox_height_from = new QComboBox(this);
+  fillDropDown(cbox_height_from);
+  connect(cbox_height_from, SIGNAL(currentIndexChanged(int)), 
+          this, SLOT(comboHeightChanged(int)));
+  layout->addWidget(cbox_height_from, 2, 4);
+  QLabel* height_lbl_2 = new QLabel("TO", this);
+  layout->addWidget(height_lbl_2, 2, 5, Qt::AlignHCenter);
+  cbox_height_to = new QComboBox(this);
+  fillDropDown(cbox_height_to, cbox_height_from->currentText());
+  connect(cbox_height_to, SIGNAL(currentIndexChanged(int)), 
+          this, SLOT(editObjectChanged(int)));
+  layout->addWidget(cbox_height_to, 2, 6);
+
+  /* Number of frames */
+  QLabel* lbl_num = new QLabel("Number of Frames", this);
+  layout->addWidget(lbl_num, 3, 3, 1, 2);
+  num_spinner = new QSpinBox(this);
+  num_spinner->setMinimum(1);
+  num_spinner->setMaximum(99);
+  connect(num_spinner, SIGNAL(valueChanged(int)),
+          this, SLOT(editObjectChanged(int)));
+  layout->addWidget(num_spinner, 3, 5, 1, 2);
+
+  /* Result label */
+  lbl_result = new QLabel("Result:", this);
+  layout->addWidget(lbl_result, 4, 3, 1, 4);
+
+  /* Buttons at bottom */
+  QPushButton* button_trim = new QPushButton("Trim", this);
+  connect(button_trim, SIGNAL(clicked()), this, SLOT(buttonTrim()));
+  layout->addWidget(button_trim, 5, 4);
+  QPushButton* button_ok = new QPushButton("Ok", this);
+  connect(button_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
+  layout->addWidget(button_ok, 5, 5);
+  QPushButton* button_cancel = new QPushButton("Cancel", this);
+  connect(button_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
+  layout->addWidget(button_cancel, 5, 6);
+
+  /* Dialog control */
+  setLayout(layout);
+  setWindowTitle("Sprite Matrix Edit");
+}
+
+/*
+ * Description: Takes a combo box and fills it with all the letters from the
+ *              passed in starting letter to 'Z'. It will clear the combo box
+ *              prior to the add.
+ *
+ * Inputs: QComboBox* box - the combo box to edit. Can't be NULL
+ *         QString starting_letter - the first letter. Default to 'A'.
+ * Output: none
+ */
 void MatrixDialog::fillDropDown(QComboBox* box, QString starting_letter)
 {
+  if(starting_letter.size() == 1 && starting_letter.at(0).isUpper())
+  {
+    box->blockSignals(true);
+
+    /* Empty the existing combo box */
+    QString previous_selected = box->currentText();
+    while(box->count() > 0)
+      box->removeItem(0);
+
+    /* Get the range */
+    int start = starting_letter.at(0).unicode();
+    int end = QChar('Z').unicode();
+    
+    /* Loop through them all */
+    for(int i = start; i <= end; i++)
+      box->addItem(QString(QChar(i)));
+
+    /* Try and set the item back to where it was */
+    int index = box->findText(previous_selected);
+    if(index >= 0)
+      box->setCurrentIndex(index);
+
+    box->blockSignals(false);
+  }
+}
   
+/*
+ * Description: Updates the scene matrix and prints an image of it for 
+ *              rendering in the dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::updateScene()
+{
+  /* Update the scene with the new path */
+  QString result_file = getResultFile();
+  matrix.addPath(initial_path + result_file, 0, 0, true);
+
+  /* Paint the image */
+  matrix.clearSelection();
+  matrix.setSceneRect(matrix.itemsBoundingRect());
+  QImage image(matrix.sceneRect().size().toSize(), QImage::Format_ARGB32);
+  image.fill(Qt::transparent);
+  if(!image.isNull())
+  {
+    QPainter painter(&image);
+    matrix.render(&painter);
+    if(image.width() > kSCENE_SIZE || image.height() > kSCENE_SIZE)
+    {
+      QImage scaled_image = image.scaled(kSCENE_SIZE, kSCENE_SIZE, 
+                                         Qt::KeepAspectRatio);
+      lbl_scene->setPixmap(QPixmap::fromImage(scaled_image));
+    }
+    else
+    {
+      lbl_scene->setPixmap(QPixmap::fromImage(image));
+    }
+  }
+
+  /* Update result string */
+  lbl_result->setText("Result: " + result_file);
+
+  /* Update dialog */
+  update();
 }
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
+  
+/*
+ * Description: Button trigger called on cancel click. Only closes the dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonCancel()
+{
+  close();
+}
 
 /*
-void FrameDialog::deleteFrame()
+ * Description: Button trigger called on next frame click. Shifts the viewing
+ *              frame of the matrix to the next one, if within range of the
+ *              spin box.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonNextFrame()
 {
-  QMessageBox::StandardButton ret;
-  ret = QMessageBox::warning(this, tr("Application"),
-                             tr("Are you sure you want to delete this frame?"),
-                             QMessageBox::Yes | QMessageBox::Cancel);
-  if(ret == QMessageBox::Yes)
+  if(frame_num < (num_spinner->value() - 1))
   {
-    sprite_working->deleteFrame(framenumber);
-    *sprite_original = *sprite_working;
-    finishSave();
-    close();
+    frame_num++;
+    matrix.setActiveFrame(frame_num);
+    button_prev->setEnabled(true);
+
+    if(frame_num == (num_spinner->value() - 1))
+      button_next->setDisabled(true);
+
+    /* Update label and scene */
+    lbl_frame_num->setText(QString::number(frame_num));
+    updateScene();
   }
 }
 
-void FrameDialog::finishSave()
+/*
+ * Description: Button trigger called on ok click. Emits matrixSuccess signal 
+ *              (necessary for determining if the data is good) and then closes
+ *              the dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonOk()
 {
-  *sprite_original = *sprite_working;
+  //buttonTrim();
+  emit matrixSuccess();
+  close();
 }
 
-void FrameDialog::replaceFrame()
+/*
+ * Description: Button trigger called on prev frame click. Shifts the viewing
+ *              frame of the matrix to the previous one, if greater than 0.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonPreviousFrame()
 {
-  QString filename = QFileDialog::getOpenFileName(this,
-                                   tr("Select A Frame To Replace This"),
-                                   sprite_working->getPath(framenumber),
-                                   tr("Image Files (*.png)"));
-  if(filename != "")
+  if(frame_num > 0)
   {
-    sprite_working->setFramePath(framenumber,filename);
-    framelabel->update();
+    frame_num--;
+    matrix.setActiveFrame(frame_num);
+    button_next->setEnabled(true);
+
+    if(frame_num == 0)
+      button_prev->setDisabled(true);
+
+    /* Update label and scene */
+    lbl_frame_num->setText(QString::number(frame_num));
+    updateScene();
   }
 }
 
-void FrameDialog::setHorizontalFlip(bool toggle)
+/*
+ * Description: Button trigger called on trim click. This cleans up the matrix
+ *              and removes all frames on all sides that completely blank and
+ *              also removes frames that have no data in them. Prepares for 'ok'
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixDialog::buttonTrim()
 {
-  sprite_working->setHorizontalFlip(framenumber, toggle);
-  framelabel->update();
+  /* Get trimmed range of sprites */
+  QRect range = matrix.getTrimRect();
+
+  /* Update width */
+  int diff_x1 = range.x();
+  int diff_x2 = matrix.getWidth() - range.x() - range.width();
+  if(diff_x1 > 0)
+    cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + diff_x1);
+  if(diff_x2 > 0)
+    cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x2);
+
+  /* Update height */
+  int diff_y1 = range.y();
+  int diff_y2 = matrix.getHeight() - range.y() - range.height();
+  if(diff_y1 > 0)
+    cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
+                                      diff_y1);
+  if(diff_y2 > 0)
+    cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y2);
+
+  /* Update the spinbox with number of frames */
+  int num_frames = matrix.getTrimFrames();
+  if(num_spinner->value() > (num_frames + 1))
+    num_spinner->setValue(num_frames + 1);
 }
 
-void FrameDialog::setVerticalFlip(bool toggle)
+/*
+ * Description: Triggered if the combo height 'from' box is changed. Updates
+ *              the height 'to' box to only show applicable letters greater
+ *              than or equal to the 'from' box.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
+void MatrixDialog::comboHeightChanged(int)
 {
-  sprite_working->setVerticalFlip(framenumber, toggle);
-  framelabel->update();
+  fillDropDown(cbox_height_to, cbox_height_from->currentText());
+  updateScene();
 }
 
-void FrameDialog::set0()
+/*
+ * Description: Triggered if the combo width 'from' box is changed. Updates
+ *              the width 'to' box to only show applicable letters greater
+ *              than or equal to the 'from' box.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
+void MatrixDialog::comboWidthChanged(int)
 {
-  sprite_working->setFrameAngle(framenumber, 0);
-  framelabel->update();
+  fillDropDown(cbox_width_to, cbox_width_from->currentText());
+  updateScene();
 }
 
-void FrameDialog::set90()
+/*
+ * Description: Fires if any other edit object changes (the other two combo 
+ *              boxes or the spinner). Updates the scene and frames for spinner.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
+void MatrixDialog::editObjectChanged(int)
 {
-  sprite_working->setFrameAngle(framenumber, 90);
-  framelabel->update();
+  /* Update frame buttons if spinner has changed */
+  if(num_spinner->value() == 1)
+  {
+    frame_num = 0;
+    button_prev->setDisabled(true);
+    button_next->setDisabled(true);
+
+    /* Update label */
+    lbl_frame_num->setText(QString::number(frame_num));
+  }
+  else
+  {
+    if(frame_num >= num_spinner->value())
+      frame_num = num_spinner->value() - 1;
+
+    /* Previous button */
+    if(frame_num > 0)
+      button_prev->setEnabled(true);
+    else
+      button_prev->setDisabled(true);
+
+    /* Next button */
+    if(frame_num < (num_spinner->value() - 1))
+      button_next->setEnabled(true);
+    else
+      button_next->setDisabled(true);
+
+    /* Update label */
+    lbl_frame_num->setText(QString::number(frame_num));
+  }
+
+  /* Finally, update the scene with changes */
+  matrix.setActiveFrame(frame_num);
+  updateScene();
 }
 
-void FrameDialog::set180()
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/ 
+
+/*
+ * Description: Returns the result file of the matrix in the format of 
+ *              Univursa. This can be passed into EditorMatrix to load in the
+ *              frames. Eg. archy_[A-C][B-D]_D|2|.png
+ *
+ * Inputs: none
+ * Output: QString - the result file name
+ */
+QString MatrixDialog::getResultFile()
 {
-  sprite_working->setFrameAngle(framenumber, 180);
-  framelabel->update();
+  QString file = initial_filename;
+
+  if(cbox_height_from->isEnabled())
+  {
+    /* Initial string computation */
+    file.chop(QString("XX_D00.png").size());
+    QStringList file_set = initial_filename.split('_');
+
+    /* Get the width */
+    if(cbox_width_from->currentText() != cbox_width_to->currentText())
+      file += "[" + cbox_width_from->currentText() + "-" + 
+                    cbox_width_to->currentText() + "]"; 
+    else
+      file += cbox_width_from->currentText();
+
+    /* Get the height */
+    if(cbox_height_from->currentText() != cbox_height_to->currentText())
+      file += "[" + cbox_height_from->currentText() + "-" + 
+                    cbox_height_to->currentText() + "]";
+    else
+      file += cbox_height_from->currentText();
+    file += "_";
+
+    /* Get the frame count */
+    if(num_spinner->value() > 1)
+      file += QString(file_set.last().at(0)) + "|" + 
+              QString::number(num_spinner->value()) + "|.png";
+    else
+      file += file_set.last();
+  }
+
+  return file;
 }
 
-void FrameDialog::set270()
+/*
+ * Description: Returns the result path and file appended together, in the 
+ *              format of Univursa. This can be passed into EditorMatrix to load
+ *              in the frames. See getResultFile() for more info.
+ *
+ * Inputs: none
+ * Output: QString - the result path with file name
+ */
+QString MatrixDialog::getResultPath()
 {
-  sprite_working->setFrameAngle(framenumber, 270);
-  framelabel->update();
+  return initial_path + getResultFile();
 }
-*/

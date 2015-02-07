@@ -19,6 +19,7 @@
  */
 EditorSprite::EditorSprite(QString img_path) : QObject()
 {
+  active_frame = 0;
   mode = EditorEnumDb::STANDARD;
   name = "Default";
   sprite = new Sprite();
@@ -597,6 +598,32 @@ void EditorSprite::set270()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+  
+/*
+ * Description: Adds path to the tail end of the sprite stack. This also takes
+ *              the path and attempts to split it by the | delimiter. This will
+ *              indicate the number of frames it will be adding.
+ *
+ * Inputs: QString path - the path to try and split and add in
+ * Output: int - the number of frames added to the end
+ */
+int EditorSprite::addPath(QString path)
+{
+  int count = 0;
+
+  /* Only proceed if path is not empty */
+  if(!path.isEmpty())
+  {
+    QList<QString> path_set = splitPath(path);
+    count = path_set.size();
+    
+    /* Loop through all paths */
+    for(int i = 0; i < path_set.size(); i++)
+      setPath(frameCount(), path_set[i]);
+  }
+
+  return count;
+}
 
 /*
  * Description: Gets the frame count
@@ -606,6 +633,17 @@ void EditorSprite::set270()
 int EditorSprite::frameCount()
 {
   return frame_info.size();
+}
+  
+/*
+ * Description: Returns the active frame reference index (what will be painted).
+ *
+ * Inputs: none
+ * Output: int - the frame index
+ */
+int EditorSprite::getActiveFrameIndex()
+{
+  return active_frame;
 }
 
 /*
@@ -662,6 +700,24 @@ QImage EditorSprite::getImage(int frame_num)
   if(frame_num >= 0 && frame_num < frame_info.size())
     return frame_info[frame_num].image;
   return QImage();
+}
+  
+/*
+ * Description: Returns the last frame that has a valid frame index from the
+ *              end of the frame stack. -1 if none are valid.
+ *
+ * Inputs: none
+ * Output: int - last valid frame index. -1 if none
+ */
+int EditorSprite::getLastValidFrame()
+{
+  int last_valid = -1;
+
+  for(int i = 0; i < frame_info.size(); i++)
+    if(!frame_info[i].image.isNull())
+      last_valid = i;
+
+  return last_valid;
 }
 
 /*
@@ -797,6 +853,24 @@ bool EditorSprite::getVerticalFlip(int frame_num)
     return frame_info[frame_num].vflip;
   return false;
 }
+  
+/*
+ * Description: Returns true if all frames in the sprite are null images (not
+ *              valid paths).
+ *
+ * Inputs: none
+ * Output: bool - true if all are null and invalid. Otherwise false
+ */
+bool EditorSprite::isAllNull()
+{
+  bool all_null = true;
+
+  for(int i = 0; all_null && (i < frame_info.size()); i++)
+    if(!frame_info[i].image.isNull())
+      all_null = false;
+
+  return all_null;
+}
 
 /*
  * Description: Loads the game data from file.
@@ -851,45 +925,34 @@ void EditorSprite::load(XmlData data, int index)
   }
   else if(elements.front() == "path")
   {
-    /* Base element */
-    FrameInfo base;
-    base.path = "";
-    base.hflip = false;
-    base.vflip = false;
-    base.rotate90 = false;
-    base.rotate180 = false;
-    base.rotate270 = false;
+    /* Add the path(s) */
+    int start_point = frameCount();
+    addPath(EditorHelpers::getProjectDir() + QDir::separator() + 
+            QString::fromStdString(data.getDataString()));
+    int end_point = frameCount();
 
     /* Add adjustments */
     for(int i = 0; i < elements.size(); i++)
     {
-      if(elements[i] == "hf")
-        base.hflip = true;
-      else if(elements[i] == "vf")
-        base.vflip = true;
-      else if(elements[i] == "90")
-        base.rotate90 = true;
-      else if(elements[i] == "180")
-        base.rotate180 = true;
-      else if(elements[i] == "270")
-        base.rotate270 = true;
-    }
-
-    /* Get all paths and parse them all */
-    QString sep = "/";
-    QList<QString> path_set = splitPath(EditorHelpers::getProjectDir() + sep +
-                                  QString::fromStdString(data.getDataString()));
-    for(int i = 0; i < path_set.size(); i++)
-    {
-      frame_info.push_back(base);
-      frame_info.back().path = path_set[i];
-      frame_info.back().image = QImage(path_set[i]);
+      for(int j = start_point; j < end_point; j++)
+      {
+        if(elements[i] == "hf")
+          frame_info[j].hflip = true;
+        else if(elements[i] == "vf")
+          frame_info[j].vflip = true;
+        else if(elements[i] == "90")
+          frame_info[j].rotate90 = true;
+        else if(elements[i] == "180")
+          frame_info[j].rotate180 = true;
+        else if(elements[i] == "270")
+          frame_info[j].rotate270 = true;
+      }
     }
   }
 }
 
 /*
- * Description: Paints the top frame on the stack at the given QRect bound.
+ * Description: Paints the active frame on the stack at the given QRect bound.
  *
  * Inputs: QPainter* painter - the paint controller
  *         QRect rect - the bounding rectangle
@@ -901,7 +964,7 @@ bool EditorSprite::paint(QPainter* painter, QRect rect)
 }
 
 /*
- * Description: Paints the top frame on the stack at the given x, y and with
+ * Description: Paints the active frame on the stack at the given x, y and with
  *              the width and height.
  *
  * Inputs: QPainter* painter - the paint controller
@@ -913,7 +976,7 @@ bool EditorSprite::paint(QPainter* painter, QRect rect)
  */
 bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h)
 {
-  return paint(0, painter, x, y, w, h);
+  return paint(active_frame, painter, x, y, w, h);
 
 }
 
@@ -1023,6 +1086,19 @@ void EditorSprite::save(FileHandler* fh, bool game_only)
     fh->writeXmlElementEnd();
   }
 }
+  
+/*
+ * Description: Sets the active frame index. If out of range, no sprite will be
+ *              rendered but this call will still set it.
+ *
+ * Inputs: int index - the frame index num
+ * Output: none
+ */
+void EditorSprite::setActiveFrame(int index)
+{
+  if(index >= 0)
+    active_frame = index;
+}
 
 /*
  * Description: Sets the sprites id (backend)
@@ -1033,6 +1109,21 @@ void EditorSprite::setID(int id)
 {
   if(id >= 0 && id <= 65535)
     sprite->setId(id);
+}
+  
+/*
+ * Description: Sets the maximum number of frames to trim the sprite down to.
+ *
+ * Inputs: int count - the number of frames to keep
+ * Output: none
+ */
+void EditorSprite::setMaximumFrames(int count)
+{
+  if(count >= 0)
+  {
+    while(frameCount() > count)
+      frame_info.removeLast();
+  }
 }
 
 /*

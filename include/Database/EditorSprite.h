@@ -42,6 +42,9 @@ public:
   virtual ~EditorSprite();
 
 private:
+  /* The active frame number */
+  int active_frame;
+
   /* The view mode for the border */
   EditorEnumDb::Border mode; // TODO: What is this for??
 
@@ -149,8 +152,14 @@ signals:
   void spriteChanged();
 
 public:
+  /* Adds paths to the tail end of the sprite stack. Splits on | */
+  int addPath(QString path);
+
   /* Gets the current number of frames */
   int frameCount();
+
+  /* Returns the active frame index */
+  int getActiveFrameIndex();
 
   /* Sets the frame angle of a given frame */
   int getFrameAngle(int frame_num);
@@ -163,6 +172,9 @@ public:
 
   /* Gets the image path */
   QImage getImage(int frame_num);
+
+  /* Gets the last valid frame index in the sprite stack. -1 if none */
+  int getLastValidFrame();
 
   /* Gets the user submitted name of the sprite */
   virtual QString getName();
@@ -185,6 +197,9 @@ public:
   /* Gets the frames vertical flip of a given frame */
   bool getVerticalFlip(int);
 
+  /* Returns true if all frames in the sprite are not valid paths (null imgs) */
+  bool isAllNull();
+
   /* Loads the game data */
   void load(XmlData data, int index);
 
@@ -197,8 +212,14 @@ public:
   /* Saves the game data */
   void save(FileHandler* fh, bool game_only = false);
 
+  /* Sets the active frame index */
+  void setActiveFrame(int index);
+  
   /* Sets the sprites id (Backend) */
   virtual void setID(int);
+
+  /* Trims the number of frames to this maximum */
+  void setMaximumFrames(int count);
 
   /* Sets the sprite path */
   void setPath(int index, QString path);
