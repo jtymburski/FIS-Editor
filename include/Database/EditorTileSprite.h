@@ -87,11 +87,11 @@ public:
   void setPassability(bool set_value);
   void setPassability(Direction dir, bool set_value);
 
-  /* Sets the rendering tile icons */
-  void setTileIcons(TileIcons* icons);
-
   /* Sets the render depth. 0 is the base up to max */
   bool setRenderDepth(uint8_t depth);
+   
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons); 
   
   /* Sets the visibility for control objects */
   void setVisibilityGrid(bool);

@@ -288,6 +288,18 @@ void EditorTileSprite::setPassability(Direction dir, bool set_value)
 }
 
 /*
+ * Description: Sets the render depth of the tile sprite. Range is 0 to 10.
+ *
+ * Inputs: uint8_t depth - the render depth
+ * Output: bool - true if set. false if out of range
+ */
+bool EditorTileSprite::setRenderDepth(uint8_t depth)
+{
+  return tile_sprite.setRenderDepth(depth);
+  update();
+}
+
+/*
  * Description: Sets the tile icons, for rendering purposes.
  *
  * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
@@ -299,18 +311,6 @@ void EditorTileSprite::setTileIcons(TileIcons* icons)
   update();
 }
 
-/*
- * Description: Sets the render depth of the tile sprite. Range is 0 to 10.
- *
- * Inputs: uint8_t depth - the render depth
- * Output: bool - true if set. false if out of range
- */
-bool EditorTileSprite::setRenderDepth(uint8_t depth)
-{
-  return tile_sprite.setRenderDepth(depth);
-  update();
-}
-  
 /*
  * Description: Sets the visibility of the grid in the sprite.
  *

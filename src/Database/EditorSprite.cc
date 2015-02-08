@@ -56,18 +56,27 @@ EditorSprite::~EditorSprite()
  *              sprite.
  *
  * Inputs: EditorSprite &source - the source to copy from
+ *         bool only_base - only the base data. i.e. no frame data
  * Output: none
  */
-void EditorSprite::copySelf(const EditorSprite &source)
+void EditorSprite::copySelf(const EditorSprite &source, bool only_base)
 {
-  mode = source.mode;
-  name = source.name;
+  /* Copy sprite specific data */
+  if(!only_base)
+  {
+    mode = source.mode;
+    name = source.name;
+    sprite->setId(source.sprite->getId());
+    frame_info = source.frame_info;
+  }
+
+  /* Copy base data */
+  int id = sprite->getId();
   if(sprite != NULL)
     delete sprite;
   sprite = new Sprite();
   *sprite = *source.sprite;
-  sprite->setId(source.sprite->getId());
-  frame_info = source.frame_info;
+  sprite->setId(id);
 }
 
 /*
@@ -624,7 +633,19 @@ int EditorSprite::addPath(QString path)
 
   return count;
 }
-  
+   
+/*
+ * Description: Copies only the base data for sprite and nothing related to 
+ *              the frames, ID, or rendering. 
+ *
+ * Inputs: const EditorSprite &source - the copy object
+ * Output: none
+ */
+void EditorSprite::copyBaseSprite(const EditorSprite &source)
+{
+  copySelf(source, true);
+}
+
 /*
  * Description: Deletes all frames in the sprite
  *

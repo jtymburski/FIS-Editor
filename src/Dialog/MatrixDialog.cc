@@ -391,7 +391,7 @@ void MatrixDialog::buttonNextFrame()
 void MatrixDialog::buttonOk()
 {
   //buttonTrim();
-  emit matrixSuccess();
+  emit matrixPlace(getResultPath(), isFlipHorizontal(), isFlipVertical());
   close();
 }
 
@@ -436,18 +436,41 @@ void MatrixDialog::buttonTrim()
   int diff_x1 = range.x();
   int diff_x2 = matrix.getWidth() - range.x() - range.width();
   if(diff_x1 > 0)
-    cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + diff_x1);
+  {
+    if(isFlipHorizontal())
+      cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x1);
+    else
+      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + 
+                                       diff_x1);
+  }
   if(diff_x2 > 0)
-    cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x2);
+  {
+    if(isFlipHorizontal())
+      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + 
+                                       diff_x2);
+    else
+      cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x2);
+  }
 
   /* Update height */
   int diff_y1 = range.y();
   int diff_y2 = matrix.getHeight() - range.y() - range.height();
   if(diff_y1 > 0)
-    cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
-                                      diff_y1);
+  {
+    if(isFlipVertical())
+      cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y1);
+    else
+      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
+                                        diff_y1);
+  }
   if(diff_y2 > 0)
-    cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y2);
+  {
+    if(isFlipVertical())
+      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
+                                        diff_y1);
+    else
+      cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y2);
+  }
 
   /* Update the spinbox with number of frames */
   int num_frames = matrix.getTrimFrames();

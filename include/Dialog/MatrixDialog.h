@@ -83,7 +83,7 @@ private:
  *===========================================================================*/
 signals:
   /* Finished processing signal */
-  void matrixSuccess();
+  void matrixPlace(QString result_path, bool hflip, bool vflip);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

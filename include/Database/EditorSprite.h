@@ -59,7 +59,7 @@ private:
 
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
-  void copySelf(const EditorSprite &source);
+  void copySelf(const EditorSprite &source, bool only_base = false);
 
   /* Get frame mods */
   QString getFrameMods(int index);
@@ -154,6 +154,9 @@ signals:
 public:
   /* Adds paths to the tail end of the sprite stack. Splits on | */
   int addPath(QString path);
+
+  /* Copies base sprite data - anything not frame related */
+  void copyBaseSprite(const EditorSprite &source);
 
   /* Deletes all frames */
   void deleteAllFrames();

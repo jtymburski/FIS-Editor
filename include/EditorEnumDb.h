@@ -48,6 +48,9 @@ public:
                     SPRITE_VIEW = 1
                    };
 
+  /* Sprite edit mode */
+  enum SpriteEditMode {SPRITE_FRAMES, SPRITE_DATA, SPRITE_ALL};
+
   /* Thing cursor for editing the scene */
   enum ThingCursor {THING_ADD, THING_REMOVE, 
                     THING_RENDER_PLUS, THING_RENDER_MINUS};

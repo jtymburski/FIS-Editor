@@ -22,8 +22,11 @@
 EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
 {
   active_sprite = NULL;
-  place_x = 0;
-  place_y = 0;
+  edit_all = NULL;
+  place_x = -1;
+  place_y = -1;
+  rightclick_sprite = NULL;
+  tile_icons = NULL;
 
   /* Increase height and width, if both are greater than 0 */
   if(width > 0 && height > 0)
@@ -38,6 +41,28 @@ EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
   setVisibilityGrid(true, true);
   setVisibilityPass(false, true);
   setVisibilityRender(false, true);
+
+  /* Set up the right click menu */
+  /*
+  rightclick_menu = new QMenu("Sprite Edit", this);
+  QAction* action_edit = new QAction("Edit Sprite", rightclick_menu);
+  rightclick_menu->addAction(action_edit);
+  QAction* action_view = new QAction("View Sprite", rightclick_menu);
+  rightclick_menu->addAction(action_view);
+  QAction* action_depth = new QAction("Render Depth", rightclick_menu);
+  rightclick_menu->addAction(action_depth);
+  QAction* action_pass_n = new QAction("Pass N", rightclick_menu);
+  action_pass_n->setCheckable(true);
+  rightclick_menu->addAction(action_pass_n);
+  QAction* action_pass_e = new QAction("Pass E", rightclick_menu);
+  action_pass_e->setCheckable(true);
+  rightclick_menu->addAction(action_pass_e);
+  QAction* action_pass_s = new QAction("Pass S", rightclick_menu);
+  action_pass_s->setCheckable(true);
+  rightclick_menu->addAction(action_pass_s);
+  QAction* action_pass_w = new QAction("Pass W", rightclick_menu);
+  action_pass_w->setCheckable(true);
+  */
 }
 
 /*
@@ -55,24 +80,26 @@ EditorMatrix::EditorMatrix(const EditorMatrix &source) : EditorMatrix()
  */
 EditorMatrix::~EditorMatrix()
 {
-  /* Clear the scene */
-  QList<QGraphicsItem*> item_list = items();
-  for(int i = 0; i < item_list.size(); i++)
-    removeItem(item_list[i]);
+  /* Delete the edit all sprite, if it exists */
+  if(edit_all != NULL)
+    delete edit_all;
+  edit_all = NULL;
 
-  /* Delete all the stored editor tile sprites */
-  for(int i = 0; i < matrix.size(); i++)
-    for(int j = 0; j < matrix[i].size(); j++)
-      delete matrix[i][j];
-  matrix.clear();
+  /* Remove all tile sprites */
+  removeAll();
 }
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
   
-/* Adds the frames to the selected active sprite */
-// TODO: Comment
+/*
+ * Description: Triggers the add frames to the active sprite. This emits
+ *              initMatrixPlace() to be connected by parent.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMatrix::addFramesOnActive()
 {
   /* Get the place X and Y, from the active sprite */
@@ -92,34 +119,86 @@ void EditorMatrix::addFramesOnActive()
  */
 void EditorMatrix::copySelf(const EditorMatrix &source)
 {
-  // TODO: Implementation
-  /* Copy data for this class */
-  //tile_sprite = source.tile_sprite;
+  /* Clean the scene first */
+  removeAll();
+
+  /* Make the matrix to size */
+  increaseWidth(source.getWidth());
+  increaseHeight(source.getHeight() - getHeight());
+
+  /* Make the matrixes equivalent */
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      *matrix[i][j] = *source.matrix[i][j];
 }
   
-/* Decrements the render depth on the active tile */
-// TODO: Comment
+/*
+ * Description: Decreases the render depth on the active tile by 1. 
+ *
+ * Inputs: none
+ * Output: bool - true if the depth decreased by 1. false if as low as possible
+ */
 bool EditorMatrix::decrementDepthOnActive()
 {
   return active_sprite->decrementRenderDepth();
 }
 
-/* Increments the render depth on the active tile */
-// TODO: Comment
+/*
+ * Description: Returns the first valid sprite. It attempts to find one with 
+ *              frames first. If there are none, returns first non-NULL sprite.
+ *              Otherwise, NULL.
+ *
+ * Inputs: none
+ * Output: EditorTileSprite* - the first valid sprite. NULL if not found
+ */
+EditorTileSprite* EditorMatrix::getValidSprite()
+{
+  EditorTileSprite* valid_sprite = NULL;
+
+  /* Loop through all first and try to find one with frames */
+  for(int i = 0; (valid_sprite == NULL) && (i < matrix.size()); i++)
+    for(int j = 0; j < (valid_sprite == NULL) && (matrix[i].size()); j++)
+      if(!matrix[i][j]->isAllNull())
+        valid_sprite = matrix[i][j];
+
+  /* If not, get the first valid sprite (non-NULL) */
+  if(valid_sprite == NULL)
+    if(matrix.size() > 0 && matrix.front().size() > 0)
+      valid_sprite = matrix.front().front();
+
+  return valid_sprite;
+}
+
+/*
+ * Description: Increases the render depth on the active tile by 1. 
+ *
+ * Inputs: none
+ * Output: bool - true if the depth increased by 1. false if as high as possible
+ */
 bool EditorMatrix::incrementDepthOnActive()
 {
   return active_sprite->incrementRenderDepth();
 }
 
-/* Removes the frames from the selected active sprite */
-// TODO: Comment
+/*
+ * Description: Removes all the frames in the sprite on the active hovered one.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMatrix::removeFramesOnActive()
 {
   active_sprite->deleteAllFrames();
 }
   
-/* Size manipulation on matrix */
-// TODO: Comment
+/*
+ * Description: Sets a new origin. This involves removes rows on the top and 
+ *              columns on the left to rebase the matrix.
+ *
+ * Inputs: int x - the new x of tile for origin
+ *         int y - the new y of tile for origin
+ * Output: bool - true if changed
+ */
 bool EditorMatrix::setNewOrigin(int x, int y)
 {
   if(x >= 0 && y >= 0)
@@ -161,8 +240,14 @@ bool EditorMatrix::setNewOrigin(int x, int y)
   return false;
 }
 
-/* Size manipulation on matrix */
-// TODO: Comment
+/*
+ * Description: Sets a new width and height for the matrix. This adds/removes
+ *              rows to the bottom and columns to the right.
+ *
+ * Inputs: int width - the new width of the matrix, in tiles
+ *         int height - the new height of the matrix, in tiles
+ * Output: bool - true if size adjusted
+ */
 bool EditorMatrix::setNewSize(int width, int height)
 {
   if(width >= 0 && height >= 0)
@@ -170,10 +255,14 @@ bool EditorMatrix::setNewSize(int width, int height)
     /* Fix the width */
     if(width < getWidth())
       decreaseWidth(getWidth() - width);
+    else if(width > getWidth())
+      increaseWidth(width - getWidth());
 
     /* Fix the height */
     if(height < getHeight())
       decreaseHeight(getHeight() - height);
+    else if(height > getHeight())
+      increaseHeight(height - getHeight());
 
     return true;
   }
@@ -184,8 +273,13 @@ bool EditorMatrix::setNewSize(int width, int height)
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Mouse move, press, and release events */
-// TODO: Comment
+/*
+ * Description: The mouse move event. This re-implemented off the base
+ *              QGraphicsScene and handles all hover events and pen control.
+ *
+ * Inputs: QGraphicsSceneMouseEvent* event - the mouse move event
+ * Output: none
+ */
 void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
   bool new_hover = false;
@@ -225,7 +319,13 @@ void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: The mouse press event. This re-implemented off the base
+ *              QGraphicsScene and handles all pen and right click control.
+ *
+ * Inputs: QGraphicsSceneMouseEvent* event - the mouse press event
+ * Output: none
+ */
 void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
   if(active_sprite != NULL)
@@ -245,12 +345,18 @@ void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
     /* Otherwise, show right click menu */
     else if(event->button() == Qt::RightButton)
     {
-      // TODO: Implementation
+      rightclick_sprite = active_sprite;
+      emit rightClick(rightclick_sprite);
     }
   }
 }
 
-// TODO: Comment
+/*
+ * Description: The mouse release event. This is currently not used.
+ *
+ * Inputs: QGraphicsSceneMouseEvent* event - the mouse release event
+ * Output: none
+ */
 void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
   (void)event;
@@ -259,20 +365,62 @@ void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-
-/* Matrix place sprite trigger */
-void EditorMatrix::matrixPlace(QString result_path)
+  
+/*
+ * Description: Called when the edit sprites dialog 'ok' button is pressed, 
+ *              which will copy the information to all sprites. This is called
+ *              after initiated by editAllSprites().
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMatrix::editSpritesOk()
 {
-  if(!result_path.isEmpty())
-    addPath(result_path, place_x, place_y);
+  if(edit_all != NULL)
+  {
+    /* Copy the base sprite for all sprites */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        matrix[i][j]->copyBaseSprite(*((EditorSprite*)edit_all));
+
+    /* Delete the edit sprite */
+    delete edit_all;
+    edit_all = NULL;
+  }
+}
+
+/*
+ * Description: Places a matrix at the place x and y location in class, with a
+ *              resulting path, horizontal flip, and vertical flip status.
+ *
+ * Inputs: QString result_path - the path to the set of sprites, as a matrix
+ *         bool hflip - are they all horizontally flipped?
+ *         bool vflip - are they all vertically flipped?
+ * Output: none
+ */
+void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
+{
+  if(!result_path.isEmpty() && place_x >= 0 && place_y >= 0)
+    addPath(result_path, place_x, place_y, hflip, vflip);
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
    
-/* Adds a path to the Editor Matrix. It can handle matrix format file names */
-// TODO: Comment
+/*
+ * Description: Adds path at x and y location. This separates the path into
+ *              root path and file name and passes the function on. See other
+ *              addPath() call for more info.
+ *
+ * Inputs: QString path - the path and filename of matrix sprite(s)
+ *         int x - the top left x location of the matrix of sprites
+ *         int y - the top left y location of the matrix of sprites
+ *         bool hflip - true if all the sprites should be horizontally flipped
+ *         bool vflip - true if all the sprites should be vertically flipped
+ *         bool reset - true if the entire matrix should be cleared first
+ * Output: bool - true if it was added
+ */
 bool EditorMatrix::addPath(QString path, int x, int y, bool hflip, 
                            bool vflip, bool reset)
 {
@@ -286,7 +434,21 @@ bool EditorMatrix::addPath(QString path, int x, int y, bool hflip,
   return false;
 }
 
-// TODO: Comment
+/*
+ * Description: Adds path at x and y location. This takes a root path, filename,
+ *              and horizontal flip, vertical flip. It puts the matrix of
+ *              sprites starting ata the x and y location in the matrix and will
+ *              reset it first if reset is set (empty the matrix).
+ *
+ * Inputs: QString root_path - the path to where the file is (needs to end in /)
+ *         QString file_name - the name of the sprite file
+ *         int x - the top left x location of the matrix of sprites
+ *         int y - the top left y location of the matrix of sprites
+ *         bool hflip - true if all the sprites should be horizontally flipped
+ *         bool vflip - true if all the sprites should be vertically flipped
+ *         bool reset - true if the entire matrix should be cleared first
+ * Output: bool - true if it was added
+ */
 bool EditorMatrix::addPath(QString root_path, QString file_name, 
                            int x, int y, bool hflip, bool vflip, bool reset)
 {
@@ -322,15 +484,25 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
   return false;
 }
 
-/* Cleans the scene. Used for when adding or removing from view */
-// TODO: Comment
-void EditorMatrix::cleanScene()
+/*
+ * Description: Cleans the scene. Used for when moving it to a new view. 
+ *
+ * Inputs: bool just_hover - true if just the hover events are cleaned
+ * Output: none
+ */
+void EditorMatrix::cleanScene(bool just_hover)
 {
   /* Clean-up the hover sprite, set by previous views */
   active_sprite = NULL;
   for(int i = 0; i < matrix.size(); i++)
     for(int j = 0; j < matrix[i].size(); j++)
       matrix[i][j]->setHover(false);
+
+  if(!just_hover)
+  {
+    /* Unset reference sprites */
+    rightclick_sprite = NULL;
+  }
 }
 
 /*
@@ -368,7 +540,7 @@ void EditorMatrix::decreaseHeight(int count)
     matrix.clear();
 
   /* Clean up the scene */
-  cleanScene();
+  cleanScene(false);
 }
 
 /*
@@ -407,11 +579,39 @@ void EditorMatrix::decreaseWidth(int count)
     matrix.clear();
 
   /* Clean up the scene */
-  cleanScene();
+  cleanScene(false);
 }
-  
-/* Returns the active frame index */
-// TODO: Comment
+ 
+/*
+ * Description: Called to get the EditorTileSprite that is used to edit all the
+ *              general settings of the sprite. Edit Pop-up should be connected
+ *              with editSpritesOk() to complete the copy.
+ *
+ * Inputs: none
+ * Output: EditorTileSprite* - the editing sprite to load in the pop-up
+ */
+EditorTileSprite* EditorMatrix::editAllSprites()
+{
+  /* Make sure the existing edit all sprite isn't null */
+  if(edit_all != NULL)
+    delete edit_all;
+  edit_all = NULL;
+
+  /* Get the first valid sprite and create the edit all sprite */
+  EditorTileSprite* valid_sprite = getValidSprite();
+  if(valid_sprite != NULL)
+    edit_all = new EditorTileSprite(*valid_sprite);
+
+  return edit_all;
+}
+
+/*
+ * Description: Returns the active frame index, which is being rendered on the
+ *              viewport. Default to 0 (the first frame).
+ *
+ * Inputs: none
+ * Output: int - frame index (0+)
+ */
 int EditorMatrix::getActiveFrameIndex()
 {
   return active_frame;
@@ -423,15 +623,33 @@ int EditorMatrix::getActiveFrameIndex()
  * Inputs: none
  * Output: int - height, in tile count
  */
-int EditorMatrix::getHeight()
+int EditorMatrix::getHeight() const
 {
   if(getWidth() > 0)
     return matrix.last().size();
   return 0;
 }
-   
-/* Gets trim values - rows, columns, and frames - that are unused */
-// TODO: Comment
+    
+/*
+ * Description: Returns the right clicked sprite. Stored the last time the
+ *              active sprite in the matrix was right clicked on.
+ *
+ * Inputs: none
+ * Output: EditorTileSprite* - the right clicked sprite
+ */
+EditorTileSprite* EditorMatrix::getRightClicked()
+{
+  return rightclick_sprite;
+}
+
+/*
+ * Description: Returns the highest number of frames that are valid and set in
+ *              a sprite in the entire matrix. Used to trim off excess frames.
+ *
+ * Inputs: bool largest - true to roof at largest. false to roof at smallest but
+ *                        valid
+ * Output: int - number of frames
+ */
 int EditorMatrix::getTrimFrames(bool largest)
 {
   int ref_index = -1;
@@ -459,7 +677,13 @@ int EditorMatrix::getTrimFrames(bool largest)
   return ref_index;
 }
 
-// TODO: Comment
+/*
+ * Description: Returns a rect that doesn't include empty rows or columns on all
+ *              sides. Used to trim the edges of sprites with no frames set.
+ *
+ * Inputs: none
+ * Output: QRect - the rect of valid sprites in the matrix
+ */
 QRect EditorMatrix::getTrimRect()
 {
   QVector<QVector<int>> matrix_null;
@@ -554,20 +778,34 @@ QRect EditorMatrix::getTrimRect()
   return QRect(x1, y1, x2 - x1, y2 - y1);
 }
 
-/* Gets the visibility for control objects */
-// TODO: Comment
+/*
+ * Description: Returns if the grid is visible in the matrix.
+ *
+ * Inputs: none
+ * Output: bool - true if grid is visible
+ */
 bool EditorMatrix::getVisibilityGrid()
 {
   return visible_grid;
 }
 
-// TODO: Comment
+/*
+ * Description: Returns if the passability is visible.
+ *
+ * Inputs: none
+ * Output: bool - true if passability is visible
+ */
 bool EditorMatrix::getVisibilityPass()
 {
   return visible_passability;
 }
 
-// TODO: Comment
+/*
+ * Description: Returns if the render depth number is visible.
+ *
+ * Inputs: none
+ * Output: bool - true if the render depth is visible
+ */
 bool EditorMatrix::getVisibilityRender()
 {
   return visible_render;
@@ -579,7 +817,7 @@ bool EditorMatrix::getVisibilityRender()
  * Inputs: none
  * Output: int - width, in tile count
  */
-int EditorMatrix::getWidth()
+int EditorMatrix::getWidth() const
 {
   return matrix.size();
 }
@@ -608,13 +846,21 @@ void EditorMatrix::increaseHeight(int count)
   /* Otherwise, just add to each column */
   else
   {
+    /* Get a valid sprite */
+    EditorTileSprite* valid_sprite = getValidSprite();
+
     for(int i = 0; i < matrix.size(); i++)
     {
       int height = matrix[i].size();
 
       for(int j = 0; j < count; j++)
       {
-        matrix[i].push_back(new EditorTileSprite(i, height + j));
+        if(valid_sprite != NULL)
+          matrix[i].push_back(new EditorTileSprite(*valid_sprite));
+        else
+          matrix[i].push_back(new EditorTileSprite());
+        matrix[i].last()->setX(i);
+        matrix[i].last()->setY(height + j);
         addItem(matrix[i].last());
       }
     }
@@ -627,7 +873,7 @@ void EditorMatrix::increaseHeight(int count)
   setVisibilityRender(visible_render, true);
   
   /* Clean up the scene */
-  cleanScene();
+  cleanScene(true);
 }
 
 /*
@@ -645,6 +891,9 @@ void EditorMatrix::increaseWidth(int count)
   if(height <= 0)
     height = 1;
 
+  /* Get a valid sprite */
+  EditorTileSprite* valid_sprite = getValidSprite();
+
   /* Go through and add to the width */
   for(int i = 0; i < count; i++)
   {
@@ -653,7 +902,12 @@ void EditorMatrix::increaseWidth(int count)
     int width = getWidth();
     for(int j = 0; j < height; j++)
     {
-      col.push_back(new EditorTileSprite(width, j));
+      if(valid_sprite != NULL)
+        col.push_back(new EditorTileSprite(*valid_sprite));
+      else
+        col.push_back(new EditorTileSprite());
+      col.last()->setX(width);
+      col.last()->setY(j);
       addItem(col.last());
     }
 
@@ -663,16 +917,46 @@ void EditorMatrix::increaseWidth(int count)
 
   /* Update painting visibility */
   setActiveFrame(active_frame, true);
+  setTileIcons(tile_icons);
   setVisibilityGrid(visible_grid, true);
   setVisibilityPass(visible_passability, true);
   setVisibilityRender(visible_render, true);
 
   /* Clean up the scene */
-  cleanScene();
+  cleanScene(true);
 }
-   
-/* Sets the active frame for all sprites in the matrix */
-// TODO: Comment
+    
+/*
+ * Description: Removes all frames from the matrix.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMatrix::removeAll()
+{
+  active_sprite = NULL;
+  rightclick_sprite = NULL;
+
+  /* Clear the scene */
+  QList<QGraphicsItem*> item_list = items();
+  for(int i = 0; i < item_list.size(); i++)
+    removeItem(item_list[i]);
+
+  /* Delete all the stored editor tile sprites */
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      delete matrix[i][j];
+  matrix.clear();
+}
+
+/*
+ * Description: Sets the active frame index number. If forced, it sets it even
+ *              if it equals the one in the class already.
+ *
+ * Inputs: int index - the frame index
+ *         bool force - true if its set even if the class is already set
+ * Output: none
+ */
 void EditorMatrix::setActiveFrame(int index, bool force)
 {
   if(index >= 0 && (index != active_frame || force))
@@ -686,15 +970,24 @@ void EditorMatrix::setActiveFrame(int index, bool force)
   }
 }
 
-/* Sets the cursor mode */
-// TODO: Comment
+/*
+ * Description: Sets the cursor mode of the matrix pen.
+ *
+ * Inputs: EditorEnumDb::ThingCursor mode - the pen mode
+ * Output: none
+ */
 void EditorMatrix::setCursorMode(EditorEnumDb::ThingCursor mode)
 {
   cursor_mode = mode;
 }
   
-/* Sets if all tiles should be horizontally or vertically flipped */
-// TODO: Comment
+/*
+ * Description: Sets all sprites in the matrix to either be horizontally flipped
+ *              or not.
+ *
+ * Inputs: bool flip - true if they should be flipped. false if reset
+ * Output: none
+ */
 void EditorMatrix::setFlipHorizontal(bool flip)
 {
   for(int i = 0; i < matrix.size(); i++)
@@ -702,7 +995,13 @@ void EditorMatrix::setFlipHorizontal(bool flip)
       matrix[i][j]->setHorizontalFlips(flip);
 }
 
-// TODO: Comment
+/*
+ * Description: Sets all sprites in the matrix to either be vertically flipped
+ *              or not.
+ *
+ * Inputs: bool flip - true if they should be flipped. false if reset
+ * Output: none
+ */
 void EditorMatrix::setFlipVertical(bool flip)
 {
   for(int i = 0; i < matrix.size(); i++)
@@ -710,8 +1009,29 @@ void EditorMatrix::setFlipVertical(bool flip)
       matrix[i][j]->setVerticalFlips(flip);
 }
 
-/* Sets the visibility for control objects */
-// TODO: Comment
+/*
+ * Description: Sets the tile icons, for rendering purposes.
+ *
+ * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
+ * Output: none
+ */
+void EditorMatrix::setTileIcons(TileIcons* icons)
+{
+  tile_icons = icons;
+
+  for(int i = 0; i < matrix.size(); i++)
+    for(int j = 0; j < matrix[i].size(); j++)
+      matrix[i][j]->setTileIcons(icons);
+}
+
+/*
+ * Description: Sets the visibility of the grid in all tiles. If forced, it sets
+ *              it even if the tile has it already set.
+ *
+ * Inputs: bool visible - true if grid should be visible
+ *         bool force - true if the setting should be forced
+ * Output: none
+ */
 void EditorMatrix::setVisibilityGrid(bool visible, bool force)
 {
   if(visible != visible_grid || force)
@@ -725,7 +1045,14 @@ void EditorMatrix::setVisibilityGrid(bool visible, bool force)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Sets the visibility of the passability in all tiles. If forced, 
+ *              it sets it even if the tile has it already set.
+ *
+ * Inputs: bool visible - true if passability should be visible
+ *         bool force - true if the setting should be forced
+ * Output: none
+ */
 void EditorMatrix::setVisibilityPass(bool visible, bool force)
 {
   if(visible != visible_passability || force)
@@ -739,7 +1066,14 @@ void EditorMatrix::setVisibilityPass(bool visible, bool force)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Sets the visibility of the render depth in all tiles. If forced, 
+ *              it sets it even if the tile has it already set.
+ *
+ * Inputs: bool visible - true if render depth should be visible
+ *         bool force - true if the setting should be forced
+ * Output: none
+ */
 void EditorMatrix::setVisibilityRender(bool visible, bool force)
 {
   if(visible != visible_render || force)
@@ -753,12 +1087,18 @@ void EditorMatrix::setVisibilityRender(bool visible, bool force)
   }
 }
 
-/* Trims the scene  (removes excess sprites and frames) */
-// TODO: Comment
+/*
+ * Description: Trims the matrix of sprites with no valid frames in it on the
+ *              edges. If only_se is set, it only trims width and height and
+ *              doesn't change the origin (left and top).
+ *
+ * Inputs: bool only_se - true if only the south and east sides are trimmed
+ * Output: none
+ */
 void EditorMatrix::trim(bool only_se)
 {
   /* Clean the scene */
-  cleanScene();
+  cleanScene(true);
 
   /* Get trimmed rect */
   QRect trim_rect = getTrimRect();

@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+//#include <QMenu>
 #include <QVector>
 
 #include "Database/EditorTileSprite.h"
@@ -40,6 +41,9 @@ private:
   /* Cursor type */
   EditorEnumDb::ThingCursor cursor_mode;
 
+  /* The edit all tile sprite */
+  EditorTileSprite* edit_all;
+
   /* The structure of tiles in the matrix */
   QVector<QVector<EditorTileSprite*>> matrix;
 
@@ -47,6 +51,15 @@ private:
   int place_x;
   int place_y;
 
+  /* Right click menu on matrix */
+  //QMenu* rightclick_menu;
+
+  /* Right clicked sprite */
+  EditorTileSprite* rightclick_sprite;
+  
+  /* The rendering tile icons */
+  TileIcons* tile_icons;
+  
   /* Visibility painting control */
   bool visible_grid;
   bool visible_passability;
@@ -64,6 +77,9 @@ private:
 
   /* Decrements the render depth on the active tile */
   bool decrementDepthOnActive();
+
+  /* Gets the first valid sprite */
+  EditorTileSprite* getValidSprite();
 
   /* Increments the render depth on the active tile */
   bool incrementDepthOnActive();
@@ -91,12 +107,18 @@ signals:
   /* Triggers a parent class to start matrix place process */ 
   void initMatrixPlace();
 
+  /* Triggers the right click on the matrix */
+  void rightClick(EditorTileSprite* clicked);
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Triggered after edit all sprites is ok */
+  void editSpritesOk();
+
   /* Matrix place sprite trigger */
-  void matrixPlace(QString result_path);
+  void matrixPlace(QString result_path, bool hflip, bool vflip);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -109,17 +131,23 @@ public:
                bool hflip = false, bool vflip = false, bool reset = false);
 
   /* Cleans the scene. Used for when adding or removing from view */
-  void cleanScene();
+  void cleanScene(bool just_hover = false);
 
   /* Decrease the width and height, by the count factor */
   void decreaseHeight(int count = 1);
   void decreaseWidth(int count = 1);
 
+  /* Called by parent to edit all sprites. Returns generic edit sprite */
+  EditorTileSprite* editAllSprites();
+  
   /* Returns the active frame index */
   int getActiveFrameIndex();
 
   /* Returns the height of the matrix */
-  int getHeight();
+  int getHeight() const;
+
+  /* Returns the right clicked sprite */
+  EditorTileSprite* getRightClicked();
 
   /* Gets trim values - rows, columns, and frames - that are unused */
   int getTrimFrames(bool largest = true);
@@ -131,12 +159,15 @@ public:
   bool getVisibilityRender();
 
   /* Returns the width of the matrix */
-  int getWidth();
+  int getWidth() const;
 
   /* Increase the width and height, by the count factor */
   void increaseHeight(int count = 1);
   void increaseWidth(int count = 1);
- 
+
+  /* Removes all sprites */
+  void removeAll();
+
   /* Sets the active frame for all sprites in the matrix */
   void setActiveFrame(int index, bool force = false);
 
@@ -146,7 +177,10 @@ public:
   /* Sets if all tiles should be horizontally or vertically flipped */
   void setFlipHorizontal(bool flip);
   void setFlipVertical(bool flip);
-
+  
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons); 
+  
   /* Sets the visibility for control objects */
   void setVisibilityGrid(bool visible, bool force = false);
   void setVisibilityPass(bool visible, bool force = false);

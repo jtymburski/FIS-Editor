@@ -28,10 +28,13 @@ class SpriteDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  SpriteDialog(QWidget *parent = NULL,
-                       EditorSprite *working = NULL,
-                       QString path = "", int subsequent = 0,
-                       bool creation = true);
+  SpriteDialog(QWidget *parent = NULL, EditorSprite *working = NULL,
+               QString path = "", int subsequent = 0, bool creation = true,
+               EditorEnumDb::SpriteEditMode mode = EditorEnumDb::SPRITE_ALL);
+
+  /* Destructor function */
+  ~SpriteDialog();
+
 private:
   /* Sliders that correspond to the various parameters of the sprite */
   QSlider* brightness_input;
@@ -50,7 +53,6 @@ private:
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-
 protected:
   /* Custom close event */
   void closeEvent(QCloseEvent *);
@@ -58,7 +60,6 @@ protected:
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-
 public slots:
   /* destroys the current working sprite */
   void destroyWorkingSprite();
@@ -69,7 +70,6 @@ public slots:
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
-
 signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);

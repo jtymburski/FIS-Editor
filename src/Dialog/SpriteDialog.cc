@@ -15,10 +15,16 @@
 /*
  * Description: Constructor function
  *
- * Input: Parent, editor sprite to work on, image path
+ * Input: QWidget* parent - parent class widget in QT
+ *        EditorSprite* working - the working sprite to edit
+ *        QString p - the path string
+ *        int subsequent - number of subsequent frames
+ *        bool creation - true if it's a new sprite
+ *        EditorEnumDb::SpriteEditMode mode - the editing mode. default all
  */
 SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
-                           int subsequent, bool creation)
+                           int subsequent, bool creation, 
+                           EditorEnumDb::SpriteEditMode mode)
             : QDialog(parent)
 {
   /* Sets the working sprite and appropriate paths */
@@ -76,6 +82,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   frame_scrollwrapper = new QScrollArea();
   frame_list = new FrameList(this,working_sprite);
   frame_scrollwrapper->setWidget(frame_list);
+  frame_scrollwrapper->setAlignment(Qt::AlignCenter);
   frame_scrollwrapper->setFixedHeight(105);
   frame_scrollwrapper->setMaximumWidth(446);
   frame_scrollwrapper->setBackgroundRole(QPalette::Base);
@@ -267,6 +274,41 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
             SIGNAL(sendUpEditorSprite(EditorSprite*)));
   }
   connect(working_sprite,SIGNAL(spriteChanged()),frame_list,SLOT(update()));
+
+  /* Set disabled, based on mode */
+  if(mode == EditorEnumDb::SPRITE_FRAMES)
+  {
+    brightness_input->setDisabled(true);
+    opacity_input->setDisabled(true);
+    red_input->setDisabled(true);
+    blue_input->setDisabled(true);
+    green_input->setDisabled(true);
+    time_input->setDisabled(true);
+    direction_input->setDisabled(true);
+    rotation_input->setDisabled(true);
+  }
+  else if(mode == EditorEnumDb::SPRITE_DATA)
+  {
+    rotate0->setDisabled(true);
+    rotate90->setDisabled(true);
+    rotate180->setDisabled(true);
+    rotate270->setDisabled(true);
+    flipH->setDisabled(true);
+    flipV->setDisabled(true);
+    resetFlip->setDisabled(true);
+   
+    frame_list->setDisabled(true);
+  }
+}
+  
+/*
+ * Description: Destructor function
+ */
+SpriteDialog::~SpriteDialog()
+{
+  if(working_sprite != NULL)
+    delete working_sprite;
+  working_sprite = NULL;
 }
 
 /*============================================================================
