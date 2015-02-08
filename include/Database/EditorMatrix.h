@@ -23,7 +23,7 @@ class EditorMatrix : public QGraphicsScene
   Q_OBJECT
 public:
   /* Constructor function */
-  EditorMatrix(int width = 0, int height = 0);
+  EditorMatrix(int width = 0, int height = 0, bool black_back = false);
 
   /* Copy constructor */
   EditorMatrix(const EditorMatrix &source);

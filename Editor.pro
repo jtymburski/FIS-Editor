@@ -53,11 +53,13 @@ SOURCES += \
     src/Dialog/FrameView.cc \
     src/Dialog/MatrixDialog.cc \
     src/Dialog/SpriteDialog.cc \
+    src/Dialog/ThingDialog.cc \
     src/View/GameView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
     src/View/MapRender.cc \
     src/View/MapView.cc \
+    src/View/MatrixView.cc \
     src/View/RawImage.cc \
     src/View/RawImageList.cc \
     src/View/RawImageView.cc \
@@ -71,6 +73,8 @@ SOURCES += \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
+    ../Project/src/Game/Map/MapThing.cc \
+    ../Project/src/Game/Map/SpriteMatrix.cc \
     ../Project/src/Game/Map/Tile.cc \
     ../Project/src/Game/Map/TileSprite.cc \
     ../Project/src/Game/Player/Action.cc \
@@ -113,11 +117,13 @@ HEADERS += \
     include/Dialog/FrameView.h \
     include/Dialog/MatrixDialog.h \
     include/Dialog/SpriteDialog.h \
+    include/Dialog/ThingDialog.h \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
     include/View/MapRender.h \
     include/View/MapView.h \
+    include/View/MatrixView.h \
     include/View/RawImage.h \
     include/View/RawImageList.h \
     include/View/RawImageView.h \
@@ -133,6 +139,8 @@ HEADERS += \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
+    ../Project/include/Game/Map/MapThing.h \
+    ../Project/include/Game/Map/SpriteMatrix.h \
     ../Project/include/Game/Map/Tile.h \
     ../Project/include/Game/Map/TileSprite.h \
     ../Project/include/Game/Battle/AIModule.h \

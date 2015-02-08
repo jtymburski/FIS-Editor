@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: SpriteToolbox
+ * Class Name: SpriteView
  * Date Created: November 14, 2013
  * Inheritance: QWidget
  * Description: The side toolbar that gives access to sprites.
  ******************************************************************************/
-#ifndef SpriteView_H
-#define SpriteView_H
+#ifndef SPRITEVIEW_H
+#define SPRITEVIEW_H
 
 #include <QDialog>
 #include <QGroupBox>
@@ -29,7 +29,7 @@ class SpriteView : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  SpriteView(QWidget* parent = 0);
+  SpriteView(QWidget* parent = NULL);
 
   /* Destructor function */
   ~SpriteView();
@@ -93,4 +93,4 @@ public:
   /* Sets the editor map, which contains the data needed */
   void setEditorMap(EditorMap* map);
 };
-#endif // SpriteView_H
+#endif // SPRITEVIEW_H

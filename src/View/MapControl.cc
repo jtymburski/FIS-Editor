@@ -8,6 +8,9 @@
 #include "View/MapControl.h"
 #include <QDebug>
 
+// TODO: TESTING - REMOVE
+#include "Dialog/ThingDialog.h"
+
 MapControl::MapControl(QWidget *parent): QWidget(parent)
 {
   editing_map = NULL;
@@ -235,8 +238,13 @@ void MapControl::duplicateSubMap()
 void MapControl::importSubMap()
 {
   // TODO: Future
-  QMessageBox::information(this, "Notification",
-                           "Coming soon to a production near you!");
+  //QMessageBox::information(this, "Notification",
+  //                         "Coming soon to a production near you!");
+
+  EditorThing* thing = new EditorThing(1, "Bob", "DESCRIP HERE");
+  thing->getMatrix()->addPath("/home/jordan/Programming/FBS/Univursa/Project/sprites/Map/Map_Things/Arcadius/arcy32_A[A-B]_D|3|.png");
+  ThingDialog* dialog = new ThingDialog(thing, this);
+  dialog->show();
 }
 
 /* Item check change */

@@ -18,8 +18,10 @@
  *
  * Inputs: int width - the width of the scene, in tiles
  *         int height - the height of the scene, in tiles
+ *         bool black_back - if true, set the background to black
  */
-EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
+EditorMatrix::EditorMatrix(int width, int height, bool black_back)
+            : QGraphicsScene()
 {
   active_sprite = NULL;
   edit_all = NULL;
@@ -63,6 +65,10 @@ EditorMatrix::EditorMatrix(int width, int height) : QGraphicsScene()
   QAction* action_pass_w = new QAction("Pass W", rightclick_menu);
   action_pass_w->setCheckable(true);
   */
+
+  /* Sets the background to be black */
+  if(black_back)
+    setBackgroundBrush(QBrush(Qt::black));
 }
 
 /*
