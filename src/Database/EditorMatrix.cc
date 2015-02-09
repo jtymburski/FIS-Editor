@@ -44,28 +44,6 @@ EditorMatrix::EditorMatrix(int width, int height, bool black_back)
   setVisibilityPass(false, true);
   setVisibilityRender(false, true);
 
-  /* Set up the right click menu */
-  /*
-  rightclick_menu = new QMenu("Sprite Edit", this);
-  QAction* action_edit = new QAction("Edit Sprite", rightclick_menu);
-  rightclick_menu->addAction(action_edit);
-  QAction* action_view = new QAction("View Sprite", rightclick_menu);
-  rightclick_menu->addAction(action_view);
-  QAction* action_depth = new QAction("Render Depth", rightclick_menu);
-  rightclick_menu->addAction(action_depth);
-  QAction* action_pass_n = new QAction("Pass N", rightclick_menu);
-  action_pass_n->setCheckable(true);
-  rightclick_menu->addAction(action_pass_n);
-  QAction* action_pass_e = new QAction("Pass E", rightclick_menu);
-  action_pass_e->setCheckable(true);
-  rightclick_menu->addAction(action_pass_e);
-  QAction* action_pass_s = new QAction("Pass S", rightclick_menu);
-  action_pass_s->setCheckable(true);
-  rightclick_menu->addAction(action_pass_s);
-  QAction* action_pass_w = new QAction("Pass W", rightclick_menu);
-  action_pass_w->setCheckable(true);
-  */
-
   /* Sets the background to be black */
   if(black_back)
     setBackgroundBrush(QBrush(Qt::black));
@@ -163,7 +141,7 @@ EditorTileSprite* EditorMatrix::getValidSprite()
 
   /* Loop through all first and try to find one with frames */
   for(int i = 0; (valid_sprite == NULL) && (i < matrix.size()); i++)
-    for(int j = 0; j < (valid_sprite == NULL) && (matrix[i].size()); j++)
+    for(int j = 0; (valid_sprite == NULL) && (j < matrix[i].size()); j++)
       if(!matrix[i][j]->isAllNull())
         valid_sprite = matrix[i][j];
 
@@ -195,6 +173,7 @@ bool EditorMatrix::incrementDepthOnActive()
 void EditorMatrix::removeFramesOnActive()
 {
   active_sprite->deleteAllFrames();
+  active_sprite->update();
 }
   
 /*
@@ -386,8 +365,13 @@ void EditorMatrix::editSpritesOk()
   {
     /* Copy the base sprite for all sprites */
     for(int i = 0; i < matrix.size(); i++)
+    {
       for(int j = 0; j < matrix[i].size(); j++)
+      {
         matrix[i][j]->copyBaseSprite(*((EditorSprite*)edit_all));
+        matrix[i][j]->update();
+      }
+    }
 
     /* Delete the edit sprite */
     delete edit_all;
@@ -509,6 +493,13 @@ void EditorMatrix::cleanScene(bool just_hover)
     /* Unset reference sprites */
     rightclick_sprite = NULL;
   }
+
+  /* Set the size of the scene */
+  if(matrix.size() > 0)
+    setSceneRect(0, 0, matrix.size() * EditorHelpers::getTileSize(),
+                 matrix.front().size() * EditorHelpers::getTileSize());
+  else
+    setSceneRect(0, 0, 0, 0);
 }
 
 /*
@@ -524,7 +515,7 @@ void EditorMatrix::decreaseHeight(int count)
   /* Deletion limit control */
   bool clear_array = false;
   int max = count;
-  if(matrix.size() > 0 && max > matrix.front().size())
+  if(matrix.size() > 0 && max >= matrix.front().size())
   {
     max = matrix.front().size();
     clear_array = true;
@@ -562,7 +553,7 @@ void EditorMatrix::decreaseWidth(int count)
   /* Deletion limit control */
   bool clear_array = false;
   int max = count;
-  if(max > matrix.size())
+  if(max >= matrix.size())
   {
     max = matrix.size();
     clear_array = true;
@@ -865,6 +856,7 @@ void EditorMatrix::increaseHeight(int count)
           matrix[i].push_back(new EditorTileSprite(*valid_sprite));
         else
           matrix[i].push_back(new EditorTileSprite());
+        matrix[i].last()->deleteAllFrames();
         matrix[i].last()->setX(i);
         matrix[i].last()->setY(height + j);
         addItem(matrix[i].last());
@@ -874,6 +866,7 @@ void EditorMatrix::increaseHeight(int count)
 
   /* Update painting visibility */
   setActiveFrame(active_frame, true);
+  setTileIcons(tile_icons);
   setVisibilityGrid(visible_grid, true);
   setVisibilityPass(visible_passability, true);
   setVisibilityRender(visible_render, true);
@@ -912,6 +905,7 @@ void EditorMatrix::increaseWidth(int count)
         col.push_back(new EditorTileSprite(*valid_sprite));
       else
         col.push_back(new EditorTileSprite());
+      col.last()->deleteAllFrames();
       col.last()->setX(width);
       col.last()->setY(j);
       addItem(col.last());

@@ -17,12 +17,17 @@
     <file>images/icons/32_copy.png</file>
     <file>images/icons/32_cut.png</file>
     <file>images/icons/32_database.png</file>
+    <file>images/icons/32_depth_down.png</file>
+    <file>images/icons/32_depth_up.png</file>
     <file>images/icons/32_eraser.png</file>
     <file>images/icons/32_export.png</file>
     <file>images/icons/32_eye.png</file>
     <file>images/icons/32_fill.png</file>
+    <file>images/icons/32_grid.png</file>
+    <file>images/icons/32_layers.png</file>
     <file>images/icons/32_load.png</file>
     <file>images/icons/32_lock.png</file>
+    <file>images/icons/32_minus.png</file>
     <file>images/icons/32_new.png</file>
     <file>images/icons/32_passA.png</file>
     <file>images/icons/32_passE.png</file>
@@ -32,10 +37,13 @@
     <file>images/icons/32_paste.png</file>
     <file>images/icons/32_pencil.png</file>
     <file>images/icons/32_play.png</file>
+    <file>images/icons/32_plus.png</file>
     <file>images/icons/32_rect_fill.png</file>
     <file>images/icons/32_redo.png</file>
+    <file>images/icons/32_render_vis.png</file>
     <file>images/icons/32_save_as.png</file>
     <file>images/icons/32_save.png</file>
+    <file>images/icons/32_settings.png</file>
     <file>images/icons/32_undo.png</file>
     <file>images/icons/32_zoom_in.png</file>
     <file>images/icons/32_zoom_out.png</file>

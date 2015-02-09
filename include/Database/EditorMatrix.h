@@ -11,7 +11,6 @@
 #include <QFileDialog>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
-//#include <QMenu>
 #include <QVector>
 
 #include "Database/EditorTileSprite.h"
@@ -50,9 +49,6 @@ private:
   /* Placement location - the active sprite when clicked */
   int place_x;
   int place_y;
-
-  /* Right click menu on matrix */
-  //QMenu* rightclick_menu;
 
   /* Right clicked sprite */
   EditorTileSprite* rightclick_sprite;

@@ -16,15 +16,138 @@
 MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
-  this->matrix = matrix;
+  this->matrix = NULL;
+  matrix_dialog = NULL;
+  sprite_dialog = NULL;
+  int icon_size = 24;
 
   /* Layout setup */
   QGridLayout* layout = new QGridLayout(this);
   layout->setSizeConstraint(QLayout::SetFixedSize);
 
   /* Set up the view */
-  matrix_view = new QGraphicsView(matrix, this);
-  layout->addWidget(matrix_view, 0, 0);
+  matrix_view = new QGraphicsView(this);
+  int size = EditorHelpers::getTileSize() * 5 +
+             EditorHelpers::getTileSize() / 2;
+  matrix_view->setMinimumSize(size, size);
+  matrix_view->setMaximumSize(size, size);
+  layout->addWidget(matrix_view, 1, 1, 10, 10);
+
+  /* Set up view push buttons */
+  button_view_grid = new QPushButton(this);
+  button_view_grid->setCheckable(true);
+  button_view_grid->setChecked(true);
+  button_view_grid->setIcon(QIcon(":/images/icons/32_grid.png"));
+  button_view_grid->setIconSize(QSize(icon_size,icon_size));
+  connect(button_view_grid, SIGNAL(toggled(bool)),
+          this, SLOT(buttonViewGrid(bool)));
+  layout->addWidget(button_view_grid, 0, 1);
+  button_view_pass = new QPushButton(this);
+  button_view_pass->setCheckable(true);
+  button_view_pass->setIcon(QIcon(":/images/icons/32_passA.png"));
+  button_view_pass->setIconSize(QSize(icon_size,icon_size));
+  connect(button_view_pass, SIGNAL(toggled(bool)),
+          this, SLOT(buttonViewPass(bool)));
+  layout->addWidget(button_view_pass, 0, 2);
+  button_view_render = new QPushButton(this);
+  button_view_render->setCheckable(true);
+  button_view_render->setIcon(QIcon(":/images/icons/32_render_vis.png"));
+  button_view_render->setIconSize(QSize(icon_size,icon_size));
+  connect(button_view_render, SIGNAL(toggled(bool)),
+          this, SLOT(buttonViewRender(bool)));
+  layout->addWidget(button_view_render, 0, 3);
+
+  /* Set up the pen push buttons */
+  button_pen_place = new QPushButton(this);
+  button_pen_place->setCheckable(true);
+  button_pen_place->setChecked(true);
+  button_pen_place->setAutoExclusive(true);
+  button_pen_place->setIcon(QIcon(":/images/icons/32_pencil.png"));
+  button_pen_place->setIconSize(QSize(icon_size,icon_size));
+  connect(button_pen_place, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+  layout->addWidget(button_pen_place, 1, 0);
+  button_pen_erase = new QPushButton(this);
+  button_pen_erase->setCheckable(true);
+  button_pen_erase->setAutoExclusive(true);
+  button_pen_erase->setIcon(QIcon(":/images/icons/32_eraser.png"));
+  button_pen_erase->setIconSize(QSize(icon_size,icon_size));
+  connect(button_pen_erase, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+  layout->addWidget(button_pen_erase, 2, 0);
+  button_pen_plus = new QPushButton(this);
+  button_pen_plus->setCheckable(true);
+  button_pen_plus->setAutoExclusive(true);
+  button_pen_plus->setIcon(QIcon(":/images/icons/32_depth_up.png"));
+  button_pen_plus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_pen_plus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+  layout->addWidget(button_pen_plus, 3, 0);
+  button_pen_minus = new QPushButton(this);
+  button_pen_minus->setCheckable(true);
+  button_pen_minus->setAutoExclusive(true);
+  button_pen_minus->setIcon(QIcon(":/images/icons/32_depth_down.png"));
+  button_pen_minus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_pen_minus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+  layout->addWidget(button_pen_minus, 4, 0);
+
+  /* Sprite setting button */
+  button_sprite_edit = new QPushButton(this);
+  button_sprite_edit->setIcon(QIcon(":/images/icons/32_settings.png"));
+  button_sprite_edit->setIconSize(QSize(icon_size,icon_size));
+  connect(button_sprite_edit, SIGNAL(clicked()),
+          this, SLOT(buttonSpriteEdit()));
+  layout->addWidget(button_sprite_edit, 0, 10);
+
+  /* Increase/decrease width buttons */
+  QPushButton* button_width_minus = new QPushButton(this);
+  button_width_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
+  button_width_minus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_width_minus, SIGNAL(clicked()),
+          this, SLOT(buttonWidthDecrease()));
+  layout->addWidget(button_width_minus, 11, 9);
+  QPushButton* button_width_plus = new QPushButton(this);
+  button_width_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
+  button_width_plus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_width_plus, SIGNAL(clicked()),
+          this, SLOT(buttonWidthIncrease()));
+  layout->addWidget(button_width_plus, 11, 10);
+
+  /* Increase/decrease height buttons */
+  QPushButton* button_height_minus = new QPushButton(this);
+  button_height_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
+  button_height_minus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_height_minus, SIGNAL(clicked()),
+          this, SLOT(buttonHeightDecrease()));
+  layout->addWidget(button_height_minus, 9, 11);
+  QPushButton* button_height_plus = new QPushButton(this);
+  button_height_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
+  button_height_plus->setIconSize(QSize(icon_size,icon_size));
+  connect(button_height_plus, SIGNAL(clicked()),
+          this, SLOT(buttonHeightIncrease()));
+  layout->addWidget(button_height_plus, 10, 11);
+
+  /* Set up the right click menu */
+  rightclick_menu = new QMenu("Sprite Edit", this);
+  QAction* action_edit = new QAction("Edit Sprite", rightclick_menu);
+  rightclick_menu->addAction(action_edit);
+  QAction* action_view = new QAction("View Sprite", rightclick_menu);
+  rightclick_menu->addAction(action_view);
+  QAction* action_depth = new QAction("Render Depth", rightclick_menu);
+  rightclick_menu->addAction(action_depth);
+  QAction* action_pass_n = new QAction("Pass N", rightclick_menu);
+  action_pass_n->setCheckable(true);
+  rightclick_menu->addAction(action_pass_n);
+  QAction* action_pass_e = new QAction("Pass E", rightclick_menu);
+  action_pass_e->setCheckable(true);
+  rightclick_menu->addAction(action_pass_e);
+  QAction* action_pass_s = new QAction("Pass S", rightclick_menu);
+  action_pass_s->setCheckable(true);
+  rightclick_menu->addAction(action_pass_s);
+  QAction* action_pass_w = new QAction("Pass W", rightclick_menu);
+  action_pass_w->setCheckable(true);
+  rightclick_menu->addAction(action_pass_w);
+  rightclick_menu->hide();
+
+  /* Sets the matrix */
+  setMatrix(matrix);
 }
 
 /* Destructor function */
@@ -32,6 +155,157 @@ MatrixView::~MatrixView()
 {
   matrix_view->setScene(NULL);
   matrix = NULL;
+}
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+
+/* Height control */
+void MatrixView::buttonHeightDecrease()
+{
+  if(matrix != NULL)
+  {
+    matrix->decreaseHeight();
+    if(matrix->getWidth() == 0)
+      button_sprite_edit->setDisabled(true);
+  }
+}
+
+/* Height control */
+void MatrixView::buttonHeightIncrease()
+{
+  if(matrix != NULL)
+  {
+    matrix->increaseHeight();
+    if(matrix->getWidth() > 0)
+      button_sprite_edit->setEnabled(true);
+  }
+}
+
+/* Pen click trigger */
+void MatrixView::buttonPen(bool checked)
+{
+  if(checked && matrix != NULL)
+  {
+    if(button_pen_place->isChecked())
+      matrix->setCursorMode(EditorEnumDb::THING_ADD);
+    else if(button_pen_erase->isChecked())
+      matrix->setCursorMode(EditorEnumDb::THING_REMOVE);
+    else if(button_pen_plus->isChecked())
+      matrix->setCursorMode(EditorEnumDb::THING_RENDER_PLUS);
+    else if(button_pen_minus->isChecked())
+      matrix->setCursorMode(EditorEnumDb::THING_RENDER_MINUS);
+  }
+}
+
+/* General sprite edit trigger */
+void MatrixView::buttonSpriteEdit()
+{
+  /* Instantiate the edit */
+  if(matrix != NULL)
+  {
+    /* Close and delete the dialog if button pressed */
+    if(sprite_dialog != NULL)
+    {
+      sprite_dialog->hide();
+      disconnect(sprite_dialog, SIGNAL(ok()), matrix, SLOT(editSpritesOk()));
+      delete sprite_dialog;
+      sprite_dialog = NULL;
+    }
+
+    /* Try to grab the sprite - if not null, open dialog */
+    EditorSprite* sprite = matrix->editAllSprites();
+    if(sprite != NULL)
+    {
+      sprite_dialog = new SpriteDialog(this, sprite, "", 0, false,
+                                       EditorEnumDb::SPRITE_DATA);
+      connect(sprite_dialog, SIGNAL(ok()), matrix, SLOT(editSpritesOk()));
+      sprite_dialog->show();
+    }
+  }
+}
+
+/* View button triggers */
+void MatrixView::buttonViewGrid(bool checked)
+{
+  if(matrix != NULL)
+    matrix->setVisibilityGrid(checked);
+}
+
+/* View button triggers */
+void MatrixView::buttonViewPass(bool checked)
+{
+  if(matrix != NULL)
+    matrix->setVisibilityPass(checked);
+}
+
+/* View button triggers */
+void MatrixView::buttonViewRender(bool checked)
+{
+  if(matrix != NULL)
+    matrix->setVisibilityRender(checked);
+}
+
+/* Width control */
+void MatrixView::buttonWidthDecrease()
+{
+  if(matrix != NULL)
+  {
+    matrix->decreaseWidth();
+    if(matrix->getWidth() == 0)
+      button_sprite_edit->setDisabled(true);
+  }
+}
+
+/* Width control */
+void MatrixView::buttonWidthIncrease()
+{
+  if(matrix != NULL)
+  {
+    matrix->increaseWidth();
+    if(matrix->getWidth() > 0)
+      button_sprite_edit->setEnabled(true);
+  }
+}
+
+/* Place matrix control start */
+void MatrixView::initMatrixPlace()
+{
+  QString path = QFileDialog::getOpenFileName(this,
+                                              tr("Select a matrix sprite"),
+                                              EditorHelpers::getSpriteDir(),
+                                              tr("Image Files (*.png)"));
+  if(path != "" && matrix != NULL)
+  {
+
+    /* Close and delete the dialog if button pressed */
+    if(matrix_dialog != NULL)
+    {
+      matrix_dialog->hide();
+      disconnect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
+                 matrix, SLOT(matrixPlace(QString, bool, bool)));
+      delete matrix_dialog;
+      matrix_dialog = NULL;
+    }
+
+    /* Open the matrix dialog and connect it */
+    matrix_dialog = new MatrixDialog(path, this);
+    connect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
+            matrix, SLOT(matrixPlace(QString, bool, bool)));
+    matrix_dialog->show();
+  }
+}
+
+/* Right click on sprite trigger */
+void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
+{
+  if(sprite != NULL)
+  {
+    // TODO: ENABLE AND DISABLE SOME CONTROL BASED ON TILE
+
+    rightclick_menu->exec(QCursor::pos());
+  }
 }
 
 /*============================================================================
@@ -47,7 +321,43 @@ EditorMatrix* MatrixView::getMatrix()
 /* Sets a different matrix to the active view */
 void MatrixView::setMatrix(EditorMatrix* matrix)
 {
+  /* If existing matrix is not NULL, disconnect */
+  if(this->matrix != NULL)
+  {
+    disconnect(matrix, SIGNAL(initMatrixPlace()),
+               this, SLOT(initMatrixPlace()));
+    disconnect(matrix, SIGNAL(rightClick(EditorTileSprite*)),
+               this, SLOT(rightClickTrigger(EditorTileSprite*)));
+  }
+
+  /* Clean up matrix and set it in the view */
+  matrix->cleanScene(false);
   matrix_view->setScene(matrix);
   this->matrix = matrix;
-  update();
+
+  /* Configure the widget for the new matrix */
+  if(matrix != NULL)
+  {
+    /* Set the pen */
+    buttonPen(true);
+
+    /* Set the view control */
+    buttonViewGrid(button_view_grid->isChecked());
+    buttonViewPass(button_view_pass->isChecked());
+    buttonViewRender(button_view_render->isChecked());
+
+    /* Sprite edit initial control */
+    if(matrix->getWidth() > 0)
+      button_sprite_edit->setEnabled(true);
+    else
+      button_sprite_edit->setDisabled(true);
+
+    /* Matrix creation by pen connection */
+    connect(matrix, SIGNAL(initMatrixPlace()),
+            this, SLOT(initMatrixPlace()));
+
+    /* Matrix right click menu on tile */
+    connect(matrix, SIGNAL(rightClick(EditorTileSprite*)),
+            this, SLOT(rightClickTrigger(EditorTileSprite*)));
+  }
 }

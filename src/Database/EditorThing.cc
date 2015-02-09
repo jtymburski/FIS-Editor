@@ -21,7 +21,7 @@
  */
 EditorThing::EditorThing(int id, QString name, QString description)
 {
-  matrix = new EditorMatrix(0, 0, true);
+  matrix = new EditorMatrix(1, 1, false);//true);
 
   /* Load data */
   setID(id);
@@ -151,6 +151,19 @@ void EditorThing::setID(int id)
 void EditorThing::setName(QString name)
 {
   thing.setName(name.toStdString());
+}
+
+/*
+ * Description: Sets the tile icons, for rendering purposes.
+ *
+ * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
+ * Output: none
+ */
+void EditorThing::setTileIcons(TileIcons* icons)
+{
+  tile_icons = icons;
+  if(matrix != NULL)
+    matrix->setTileIcons(tile_icons);
 }
 
 /*============================================================================

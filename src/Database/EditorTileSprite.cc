@@ -26,6 +26,8 @@
 EditorTileSprite::EditorTileSprite(int x, int y, QString img_path)
                 : QGraphicsItem(), EditorSprite(img_path)
 {
+  setAcceptHoverEvents(true);
+
   /* Class control */
   hovered = false;
   tile_icons = NULL;
@@ -101,9 +103,11 @@ QRectF EditorTileSprite::boundingRect() const
 bool EditorTileSprite::decrementRenderDepth()
 {
   uint8_t render_depth = getRenderDepth();
+  bool success = false;
   if(render_depth > 0)
-    return setRenderDepth(render_depth - 1);
-  return false;
+    success = setRenderDepth(render_depth - 1);
+  update();
+  return success;
 
 }
 
@@ -161,7 +165,9 @@ int EditorTileSprite::getY()
  */
 bool EditorTileSprite::incrementRenderDepth()
 {
-  return setRenderDepth(getRenderDepth() + 1);
+  bool success = setRenderDepth(getRenderDepth() + 1);
+  update();
+  return success;
 }
 
 /*
@@ -177,13 +183,17 @@ void EditorTileSprite::paint(QPainter* painter,
   int size = EditorHelpers::getTileSize();
   QRect bound(x_pos * size, y_pos * size, size, size);
 
+  /* Render the background */
+  painter->fillRect(x_pos * size, y_pos * size, size, size,
+                    QColor(0, 0, 0, 64));
+
   /* Render the sprite */
   EditorSprite::paint(painter, bound);
 
   /* Render the grid */
   if(visible_grid)
   {
-    painter->setPen(QColor(255, 255, 255, 128));
+    painter->setPen(QColor(255, 0, 0, 128));
     painter->drawRect(1 + (x_pos * size), 1 + (y_pos * size),
                       size - 2, size - 2);
   }
@@ -192,7 +202,7 @@ void EditorTileSprite::paint(QPainter* painter,
   if(hovered)
   {
     painter->fillRect(x_pos * size + 1, y_pos * size + 1, size - 2, size - 2,
-                      QColor(200, 200, 200, 128));
+                      QColor(0, 0, 200, 64));
   }
 
   /* Render the passability */
@@ -234,13 +244,20 @@ void EditorTileSprite::paint(QPainter* painter,
   /* Render the render depth value */
   if(visible_render)
   {
+    /* Black background for render value */
+    painter->fillRect(x_pos * size + 1, y_pos * size + 1, size - 2, size - 2,
+                      QColor(0, 0, 0, 128));
+
+    /* Paint the text */
     QFont font;
     font.setBold(true);
     font.setPointSize(14);
     painter->setFont(font);
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(Qt::white);
-    painter->drawText(bound, Qt::AlignCenter, 
+    painter->setBrush(Qt::black);
+    painter->setBackground(Qt::red);
+    painter->drawText(bound, Qt::AlignCenter,
                       QString::number(getRenderDepth()));
   }
 }

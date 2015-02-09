@@ -31,6 +31,9 @@ private:
   /* The actual thing for in game */
   MapThing thing;
 
+  /* The rendering tile icons */
+  TileIcons* tile_icons;
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -65,6 +68,9 @@ public:
 
   /* Sets the user submitted name */
   virtual void setName(QString name);
+
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

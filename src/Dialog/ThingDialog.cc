@@ -31,6 +31,9 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
   else
     matrix_view = new MatrixView(NULL, this);
   layout->addWidget(matrix_view, 0, 0);
+
+  /* Dialog control */
+  setWindowTitle("Thing Edit");
 }
 
 /* Destructor function */
