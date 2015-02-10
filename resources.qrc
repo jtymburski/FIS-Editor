@@ -14,6 +14,7 @@
     <file>images/pass_S.png</file>
     <file>images/pass_W.png</file>
 
+    <file>images/icons/32_collapse.png</file>
     <file>images/icons/32_copy.png</file>
     <file>images/icons/32_cut.png</file>
     <file>images/icons/32_database.png</file>
@@ -29,6 +30,7 @@
     <file>images/icons/32_lock.png</file>
     <file>images/icons/32_minus.png</file>
     <file>images/icons/32_new.png</file>
+    <file>images/icons/32_pass_vis.png</file>
     <file>images/icons/32_passA.png</file>
     <file>images/icons/32_passE.png</file>
     <file>images/icons/32_passN.png</file>

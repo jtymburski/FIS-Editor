@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QGraphicsView>
 #include <QGridLayout>
+#include <QInputDialog>
 #include <QMenu>
 #include <QPushButton>
 #include <QWidget>
@@ -30,9 +31,23 @@ public:
   ~MatrixView();
 
 private:
+  /* Depth control action right click */
+  QAction* action_depth;
+
+  /* The action control for the right click */
+  QAction* action_pass_e;
+  QAction* action_pass_n;
+  QAction* action_pass_s;
+  QAction* action_pass_w;
+
+  /* Frame control for viewing */
+  QPushButton* button_frame_next;
+  QPushButton* button_frame_prev;
+
   /* Pen control buttons */
   QPushButton* button_pen_erase;
   QPushButton* button_pen_minus;
+  QPushButton* button_pen_pass;
   QPushButton* button_pen_place;
   QPushButton* button_pen_plus;
 
@@ -43,6 +58,9 @@ private:
   QPushButton* button_view_grid;
   QPushButton* button_view_pass;
   QPushButton* button_view_render;
+
+  /* Frame number in matrix */
+  QLabel* lbl_frame_num;
 
   /* The matrix being displayed */
   EditorMatrix* matrix;
@@ -60,9 +78,33 @@ private:
   SpriteDialog* sprite_dialog;
 
 /*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Sets the active viewing frame */
+  bool setActiveFrame(int index);
+
+/*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Active sprite passability control */
+  void actionPassabilityEast(bool set);
+  void actionPassabilityNorth(bool set);
+  void actionPassabilitySouth(bool set);
+  void actionPassabilityWest(bool set);
+
+  /* Action render depth editor */
+  void actionRenderDepth();
+
+  /* Actions for sprite control and view */
+  void actionSpriteEdit();
+  void actionSpriteView();
+
+  /* Frame view control */
+  void buttonFrameNext();
+  void buttonFramePrev();
+
   /* Height control */
   void buttonHeightDecrease();
   void buttonHeightIncrease();
@@ -72,6 +114,9 @@ public slots:
 
   /* General sprite edit trigger */
   void buttonSpriteEdit();
+
+  /* Trim the matrix */
+  void buttonTrim();
 
   /* View button triggers */
   void buttonViewGrid(bool checked);
@@ -84,6 +129,9 @@ public slots:
 
   /* Place matrix control start */
   void initMatrixPlace();
+
+  /* Matrix was changed */
+  void matrixChanged();
 
   /* Right click on sprite trigger */
   void rightClickTrigger(EditorTileSprite* sprite);

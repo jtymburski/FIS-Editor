@@ -68,6 +68,9 @@ private:
   /* Adds the frames to the selected active sprite */
   void addFramesOnActive();
 
+  /* Changes the thing passability on active tile, as per bool - all dirs */
+  void changePassOnActive(bool passable = true);
+
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMatrix &source);
 
@@ -79,6 +82,9 @@ private:
 
   /* Increments the render depth on the active tile */
   bool incrementDepthOnActive();
+
+  /* Updates mouse location on scene, based on point */
+  bool mouseUpdate(QPointF point);
 
   /* Removes the frames from the selected active sprite */
   void removeFramesOnActive();
@@ -102,6 +108,9 @@ protected:
 signals:
   /* Triggers a parent class to start matrix place process */ 
   void initMatrixPlace();
+
+  /* Matrix changes */
+  void matrixChange();
 
   /* Triggers the right click on the matrix */
   void rightClick(EditorTileSprite* clicked);

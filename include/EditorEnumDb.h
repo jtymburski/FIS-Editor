@@ -53,7 +53,8 @@ public:
 
   /* Thing cursor for editing the scene */
   enum ThingCursor {THING_ADD, THING_REMOVE, 
-                    THING_RENDER_PLUS, THING_RENDER_MINUS};
+                    THING_RENDER_PLUS, THING_RENDER_MINUS,
+                    THING_PASS_ALL};
 
   /* Enum For View Mode */
   enum ViewMode {MAPVIEW = 0,

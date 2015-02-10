@@ -13,6 +13,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -45,10 +46,25 @@ private:
   FrameList* frame_list;
   QScrollArea* frame_scrollwrapper;
 
+  /* Direction combo box */
+  QComboBox* direction_input;
+
+  /* Time input Line edit */
+  QLineEdit* rotation_input;
+  QLineEdit* time_input;
+
   /* The current sprite that is being altered/created by the dialog */
   EditorSprite *original_sprite;
   EditorSprite *working_sprite;
   bool creation_mode;
+
+/*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Sets the data sliders and frames in the dialog, based on the working
+   * sprite */
+  void setToWorking();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -63,6 +79,9 @@ protected:
 public slots:
   /* destroys the current working sprite */
   void destroyWorkingSprite();
+
+  /* Set sprite values to default */
+  void setToDefault();
 
   /* Updates the current working sprite */
   void updateWorkingSprite();

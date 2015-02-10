@@ -95,6 +95,18 @@ void EditorMatrix::addFramesOnActive()
 }
 
 /*
+ * Description: Changes the passability in all directions on the active sprite
+ *              tile to the passed in value
+ *
+ * Inputs: bool passable - should the tile be passable?
+ * Output: none
+ */
+void EditorMatrix::changePassOnActive(bool passable)
+{
+  active_sprite->setPassability(passable);
+}
+
+/*
  * Description: Copies all data from source editor matrix to this editor
  *              matrix.
  *
@@ -114,6 +126,8 @@ void EditorMatrix::copySelf(const EditorMatrix &source)
   for(int i = 0; i < matrix.size(); i++)
     for(int j = 0; j < matrix[i].size(); j++)
       *matrix[i][j] = *source.matrix[i][j];
+
+  emit matrixChange();
 }
   
 /*
@@ -165,6 +179,43 @@ bool EditorMatrix::incrementDepthOnActive()
 }
 
 /*
+ * Description: Updates the mouse location on the scene for hover and click
+ *              events using a point, the cursor point.
+ *
+ * Inputs: QPointF point - the mouse location
+ * Output: bool - true if the active sprite has changed
+ */
+bool EditorMatrix::mouseUpdate(QPointF point)
+{
+  bool new_hover = false;
+
+  /* Check if left the current sprite */
+  if(active_sprite != NULL)
+  {
+    QRectF bound = active_sprite->boundingRect();
+    if(!bound.contains(point))
+    {
+      active_sprite->setHover(false);
+      active_sprite = NULL;
+    }
+  }
+
+  /* Check which sprite it's hovering on now */
+  if(active_sprite == NULL)
+  {
+    QGraphicsItem* hover_item = itemAt(point, QTransform());
+    if(hover_item != NULL)
+    {
+      active_sprite = (EditorTileSprite*)hover_item;
+      active_sprite->setHover(true);
+      new_hover = true;
+    }
+  }
+
+  return new_hover;
+}
+
+/*
  * Description: Removes all the frames in the sprite on the active hovered one.
  *
  * Inputs: none
@@ -174,6 +225,7 @@ void EditorMatrix::removeFramesOnActive()
 {
   active_sprite->deleteAllFrames();
   active_sprite->update();
+  emit matrixChange();
 }
   
 /*
@@ -267,40 +319,28 @@ bool EditorMatrix::setNewSize(int width, int height)
  */
 void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-  bool new_hover = false;
-
-  /* Check if left the current sprite */
-  if(active_sprite != NULL)
-  {
-    QRectF bound = active_sprite->boundingRect();
-    if(!bound.contains(event->scenePos()))
-    {
-      active_sprite->setHover(false);
-      active_sprite = NULL;
-    }
-  }
-
-  /* Check which sprite it's hovering on now */
-  if(active_sprite == NULL)
-  {
-    QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
-    if(hover_item != NULL)
-    {
-      active_sprite = (EditorTileSprite*)hover_item;
-      active_sprite->setHover(true);
-      new_hover = true;
-    }
-  }
+  /* Update mouse location */
+  bool new_hover = mouseUpdate(event->scenePos());
 
   /* If a new hover tile, check if a button is pressed and trigger click */
-  if(new_hover && (event->buttons() & Qt::LeftButton))
+  if(new_hover)
   {
-    if(cursor_mode == EditorEnumDb::THING_REMOVE)
-      removeFramesOnActive();
-    else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
-      incrementDepthOnActive();
-    else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
-      decrementDepthOnActive();
+    if(event->buttons() & Qt::LeftButton)
+    {
+      if(cursor_mode == EditorEnumDb::THING_REMOVE)
+        removeFramesOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
+        incrementDepthOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
+        decrementDepthOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
+        changePassOnActive(true);
+    }
+    else if(event->buttons() & Qt::RightButton)
+    {
+      if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
+        changePassOnActive(false);
+    }
   }
 }
 
@@ -313,6 +353,9 @@ void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
  */
 void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+  /* Update mouse location */
+  mouseUpdate(event->scenePos());
+
   if(active_sprite != NULL)
   {
     /* If left click, utilize the cursors */
@@ -326,12 +369,21 @@ void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
         incrementDepthOnActive();
       else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
         decrementDepthOnActive();
+      else if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
+        changePassOnActive(true);
     }
     /* Otherwise, show right click menu */
     else if(event->button() == Qt::RightButton)
     {
-      rightclick_sprite = active_sprite;
-      emit rightClick(rightclick_sprite);
+      if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
+      {
+        changePassOnActive(false);
+      }
+      else
+      {
+        rightclick_sprite = active_sprite;
+        emit rightClick(rightclick_sprite);
+      }
     }
   }
 }
@@ -391,7 +443,10 @@ void EditorMatrix::editSpritesOk()
 void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
 {
   if(!result_path.isEmpty() && place_x >= 0 && place_y >= 0)
+  {
     addPath(result_path, place_x, place_y, hflip, vflip);
+    emit matrixChange();
+  }
 }
 
 /*============================================================================
@@ -460,15 +515,13 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
 
     /* Go through paths and add them */
     for(uint16_t i = 0; i < name_set.size(); i++)
-    {
       for(uint16_t j = 0; j < name_set[i].size(); j++)
-      {
         matrix[x + i][y + j]->addPath(root_path + 
-                                      QString::fromStdString(name_set[i][j]));
-        matrix[x + i][y + j]->setHorizontalFlips(hflip);
-        matrix[x + i][y + j]->setVerticalFlips(vflip);
-      }
-    }
+                                      QString::fromStdString(name_set[i][j]),
+                                      hflip, vflip);
+
+    emit matrixChange();
+    return true;
   }
 
   return false;
@@ -538,6 +591,7 @@ void EditorMatrix::decreaseHeight(int count)
 
   /* Clean up the scene */
   cleanScene(false);
+  emit matrixChange();
 }
 
 /*
@@ -577,6 +631,7 @@ void EditorMatrix::decreaseWidth(int count)
 
   /* Clean up the scene */
   cleanScene(false);
+  emit matrixChange();
 }
  
 /*
@@ -725,7 +780,7 @@ QRect EditorMatrix::getTrimRect()
 
   /* Parse the right columns to see if optimizations can be made */
   valid = true;
-  for(int i = x2 - 1; i >= x1; i--)
+  for(int i = x2 - 1; valid && (i >= x1); i--)
   {
     bool all_null = true;
 
@@ -757,7 +812,7 @@ QRect EditorMatrix::getTrimRect()
 
   /* Parse the bottom rows to see if optimizations can be made */
   valid = true;
-  for(int i = y2 - 1; i >= y1; i--)
+  for(int i = y2 - 1; valid && (i >= y1); i--)
   {
     bool all_null = true;
 
@@ -857,6 +912,8 @@ void EditorMatrix::increaseHeight(int count)
         else
           matrix[i].push_back(new EditorTileSprite());
         matrix[i].last()->deleteAllFrames();
+        matrix[i].last()->setPassability(false);
+        matrix[i].last()->setRenderDepth(0);
         matrix[i].last()->setX(i);
         matrix[i].last()->setY(height + j);
         addItem(matrix[i].last());
@@ -873,6 +930,7 @@ void EditorMatrix::increaseHeight(int count)
   
   /* Clean up the scene */
   cleanScene(true);
+  emit matrixChange();
 }
 
 /*
@@ -906,6 +964,8 @@ void EditorMatrix::increaseWidth(int count)
       else
         col.push_back(new EditorTileSprite());
       col.last()->deleteAllFrames();
+      col.last()->setPassability(false);
+      col.last()->setRenderDepth(0);
       col.last()->setX(width);
       col.last()->setY(j);
       addItem(col.last());
@@ -924,6 +984,7 @@ void EditorMatrix::increaseWidth(int count)
 
   /* Clean up the scene */
   cleanScene(true);
+  emit matrixChange();
 }
     
 /*
@@ -947,6 +1008,8 @@ void EditorMatrix::removeAll()
     for(int j = 0; j < matrix[i].size(); j++)
       delete matrix[i][j];
   matrix.clear();
+
+  emit matrixChange();
 }
 
 /*
@@ -965,8 +1028,13 @@ void EditorMatrix::setActiveFrame(int index, bool force)
 
     /* Loop through all tile sprites and update */
     for(int i = 0; i < matrix.size(); i++)
+    {
       for(int j = 0; j < matrix[i].size(); j++)
+      {
         matrix[i][j]->setActiveFrame(index);
+        matrix[i][j]->update();
+      }
+    }
   }
 }
 
@@ -1116,6 +1184,10 @@ void EditorMatrix::trim(bool only_se)
   for(int i = 0; i < matrix.size(); i++)
     for(int j = 0; j < matrix[i].size(); j++)
       matrix[i][j]->setMaximumFrames(frame_count);
+
+  /* Clean matrix and emit change */
+  cleanScene();
+  emit matrixChange();
 }
 
 /*============================================================================

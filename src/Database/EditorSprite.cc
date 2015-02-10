@@ -614,9 +614,11 @@ void EditorSprite::set270()
  *              indicate the number of frames it will be adding.
  *
  * Inputs: QString path - the path to try and split and add in
+ *         bool hflip - horizontally flip all sprites added
+ *         bool vflip - vertically flip all sprites added
  * Output: int - the number of frames added to the end
  */
-int EditorSprite::addPath(QString path)
+int EditorSprite::addPath(QString path, bool hflip, bool vflip)
 {
   int count = 0;
 
@@ -628,7 +630,11 @@ int EditorSprite::addPath(QString path)
     
     /* Loop through all paths */
     for(int i = 0; i < path_set.size(); i++)
+    {
       setPath(frameCount(), path_set[i]);
+      frame_info.last().hflip = hflip;
+      frame_info.last().vflip = vflip;
+    }
   }
 
   return count;

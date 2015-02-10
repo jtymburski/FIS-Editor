@@ -95,8 +95,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   brightness_input->setTickInterval(1);
   brightness_input->setMinimum(0);
   brightness_input->setMaximum(510);
-  brightness_input->setSliderPosition(
-        static_cast<int>(working_sprite->getSprite()->getBrightness()*255));
   connect(brightness_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setBrightness(int)));
   layout->addWidget(brightness_input,2,1,1,2);
@@ -112,7 +110,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   opacity_input->setTickInterval(1);
   opacity_input->setMinimum(0);
   opacity_input->setMaximum(100);
-  opacity_input->setSliderPosition(working_sprite->getSprite()->getOpacity());
   connect(opacity_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setOpacity(int)));
   layout->addWidget(opacity_input,3,1,1,2);
@@ -128,7 +125,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   red_input->setTickInterval(1);
   red_input->setMinimum(0);
   red_input->setMaximum(255);
-  red_input->setSliderPosition(working_sprite->getSprite()->getColorRed());
   connect(red_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorRed(int)));
   layout->addWidget(red_input,4,1,1,2);
@@ -144,7 +140,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   green_input->setTickInterval(1);
   green_input->setMinimum(0);
   green_input->setMaximum(255);
-  green_input->setSliderPosition(working_sprite->getSprite()->getColorGreen());
   connect(green_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorGreen(int)));
   layout->addWidget(green_input,5,1,1,2);
@@ -160,7 +155,6 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   blue_input->setTickInterval(1);
   blue_input->setMinimum(0);
   blue_input->setMaximum(255);
-  blue_input->setSliderPosition(working_sprite->getSprite()->getColorBlue());
   connect(blue_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setColorBlue(int)));
   layout->addWidget(blue_input,6,1,1,2);
@@ -172,9 +166,8 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   /* Animation time input */
   QLabel* time_label = new QLabel("Animation Time:");
   layout->addWidget(time_label,7,0);
-  QLineEdit* time_input = new QLineEdit(QString::number(working_sprite->
-                                                        getSprite()->
-                                                        getAnimationTime()));
+  time_input = new QLineEdit(QString::number(working_sprite->getSprite()->
+                                                           getAnimationTime()));
   time_input->setInputMask("99999");
   time_input->setMaximumWidth(99);
   connect(time_input,SIGNAL(textChanged(QString)),
@@ -186,13 +179,9 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   /* Directional input */
   QLabel* direction_label = new QLabel("Direction:");
   layout->addWidget(direction_label,8,0);
-  QComboBox* direction_input = new QComboBox();
+  direction_input = new QComboBox();
   direction_input->addItem("Forward");
   direction_input->addItem("Reverse");
-  if(working_sprite->getSprite()->isDirectionForward())
-    direction_input->setCurrentIndex(0);
-  else
-    direction_input->setCurrentIndex(1);
   connect(direction_input,SIGNAL(currentIndexChanged(int)),
           working_sprite,SLOT(setDirection(int)));
   layout->addWidget(direction_input,8,1);
@@ -200,9 +189,8 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   /* Rotation input */
   QLabel* rotation_label = new QLabel("Rotation:");
   layout->addWidget(rotation_label,9,0);
-  QLineEdit* rotation_input = new QLineEdit(QString::number(working_sprite->
-                                                            getSprite()->
-                                                            getRotation()));
+  rotation_input = new QLineEdit(QString::number(working_sprite->getSprite()->
+                                                                getRotation()));
   rotation_input->setInputMask("999");
   rotation_input->setMaximumWidth(99);
   connect(rotation_input,SIGNAL(textChanged(QString)),
@@ -251,17 +239,25 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   layout->addItem(item2, 12,0,1,4);
 
   /* Ok button */
+  QHBoxLayout* button_layout = new QHBoxLayout();
   QPushButton* ok = new QPushButton("Ok",this);
   ok->setDefault(true);
   ok->setFixedWidth(100);
-  layout->addWidget(ok,13,0,1,2,Qt::AlignCenter);
+  button_layout->addWidget(ok);
   connect(ok,SIGNAL(clicked()),this,SLOT(updateWorkingSprite()));
 
   /* Cancel button */
   QPushButton* cancel = new QPushButton("Cancel",this);
   cancel->setFixedWidth(100);
-  layout->addWidget(cancel,13,2,1,2,Qt::AlignCenter);
+  button_layout->addWidget(cancel);
   connect(cancel,SIGNAL(clicked()),this,SLOT(destroyWorkingSprite()));
+
+  /* Default button */
+  QPushButton* default_btn = new QPushButton("Default",this);
+  default_btn->setFixedWidth(100);
+  button_layout->addWidget(default_btn);
+  connect(default_btn, SIGNAL(clicked()), this, SLOT(setToDefault()));
+  layout->addLayout(button_layout, 13, 0, 1, 4, Qt::AlignCenter);
 
   /* Set Layout */
   layout->setVerticalSpacing(10);
@@ -274,6 +270,9 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
             SIGNAL(sendUpEditorSprite(EditorSprite*)));
   }
   connect(working_sprite,SIGNAL(spriteChanged()),frame_list,SLOT(update()));
+
+  /* Set up the sliders and inputs */
+  setToWorking();
 
   /* Set disabled, based on mode */
   if(mode == EditorEnumDb::SPRITE_FRAMES)
@@ -312,6 +311,46 @@ SpriteDialog::~SpriteDialog()
 }
 
 /*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: Set the working control for base sprite values to the working
+ *              sprite values. Used on initial construction and updating.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void SpriteDialog::setToWorking()
+{
+  /* Brightness setup */
+  brightness_input->setSliderPosition(
+        static_cast<int>(working_sprite->getSprite()->getBrightness()*255));
+
+  /* Opacity setup */
+  opacity_input->setSliderPosition(working_sprite->getSprite()->getOpacity());
+
+  /* Red green blue control setup */
+  red_input->setSliderPosition(working_sprite->getSprite()->getColorRed());
+  green_input->setSliderPosition(working_sprite->getSprite()->getColorGreen());
+  blue_input->setSliderPosition(working_sprite->getSprite()->getColorBlue());
+
+  /* Time input setup */
+  time_input->setText(QString::number(working_sprite->getSprite()->
+                                      getAnimationTime()));
+
+  /* Direction control setup */
+  if(working_sprite->getSprite()->isDirectionForward())
+    direction_input->setCurrentIndex(0);
+  else
+    direction_input->setCurrentIndex(1);
+
+  /* Rotation input setup */
+  rotation_input->setText(QString::number(working_sprite->getSprite()->
+                                                                getRotation()));
+}
+
+/*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
@@ -319,6 +358,7 @@ SpriteDialog::~SpriteDialog()
  * Description: The custom close event for saving changes
  *
  * Inputs: The event passed
+ * Output: none
  */
 void SpriteDialog::closeEvent(QCloseEvent *event)
 {
@@ -335,6 +375,9 @@ void SpriteDialog::closeEvent(QCloseEvent *event)
 
 /*
  * Description: Destroys the working sprite
+ *
+ * Inputs: none
+ * Output: none
  */
 void SpriteDialog::destroyWorkingSprite()
 {
@@ -345,7 +388,25 @@ void SpriteDialog::destroyWorkingSprite()
 }
 
 /*
+ * Description: Sets the sprite back to default settings for the base values.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void SpriteDialog::setToDefault()
+{
+  EditorSprite* default_sprite = new EditorSprite();
+  working_sprite->copyBaseSprite(*default_sprite);
+  setToWorking();
+  update();
+  delete default_sprite;
+}
+
+/*
  * Description: Emits the sprite with the new changes and closes the dialog
+ *
+ * Inputs: none
+ * Output: none
  */
 void SpriteDialog::updateWorkingSprite()
 {

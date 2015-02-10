@@ -153,7 +153,7 @@ signals:
 
 public:
   /* Adds paths to the tail end of the sprite stack. Splits on | */
-  int addPath(QString path);
+  int addPath(QString path, bool hflip = false, bool vflip = false);
 
   /* Copies base sprite data - anything not frame related */
   void copyBaseSprite(const EditorSprite &source);

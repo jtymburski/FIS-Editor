@@ -206,7 +206,8 @@ void EditorTileSprite::paint(QPainter* painter,
   }
 
   /* Render the passability */
-  if(visible_passability && tile_icons != NULL && getRenderDepth() == 0)
+  if(visible_passability && tile_icons != NULL &&
+     getRenderDepth() == 0 && frameCount() > 0)
   {
     /* North Passability */
     if(getPassability(Direction::NORTH))
@@ -249,16 +250,19 @@ void EditorTileSprite::paint(QPainter* painter,
                       QColor(0, 0, 0, 128));
 
     /* Paint the text */
-    QFont font;
-    font.setBold(true);
-    font.setPointSize(14);
-    painter->setFont(font);
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(Qt::white);
-    painter->setBrush(Qt::black);
-    painter->setBackground(Qt::red);
-    painter->drawText(bound, Qt::AlignCenter,
-                      QString::number(getRenderDepth()));
+    if(frameCount() > 0)
+    {
+      QFont font;
+      font.setBold(true);
+      font.setPointSize(14);
+      painter->setFont(font);
+      painter->setRenderHint(QPainter::Antialiasing);
+      painter->setPen(Qt::white);
+      painter->setBrush(Qt::black);
+      painter->setBackground(Qt::red);
+      painter->drawText(bound, Qt::AlignCenter,
+                        QString::number(getRenderDepth()));
+    }
   }
 }
   
