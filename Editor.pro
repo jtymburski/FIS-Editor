@@ -36,6 +36,7 @@ SOURCES += \
     src/Database/EditorBubby.cc \
     src/Database/EditorCategory.cc \
     src/Database/EditorEquipment.cc \
+    src/Database/EditorEvent.cc \
     src/Database/EditorItem.cc \
     src/Database/EditorMap.cc \
     src/Database/EditorMatrix.cc \
@@ -54,6 +55,7 @@ SOURCES += \
     src/Dialog/MatrixDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/ThingDialog.cc \
+    src/View/EventView.cc \
     src/View/GameView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
@@ -99,6 +101,7 @@ HEADERS += \
     include/Database/EditorBubby.h \
     include/Database/EditorCategory.h \
     include/Database/EditorEquipment.h \
+    include/Database/EditorEvent.h \
     include/Database/EditorItem.h \
     include/Database/EditorMap.h \
     include/Database/EditorMatrix.h \
@@ -118,6 +121,7 @@ HEADERS += \
     include/Dialog/MatrixDialog.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/ThingDialog.h \
+    include/View/EventView.h \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \

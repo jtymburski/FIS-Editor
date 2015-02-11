@@ -29,13 +29,20 @@ EditorThing::EditorThing(int id, QString name, QString description)
   setDescription(description);
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorThing &source - the source thing to copy
+ */
 EditorThing::EditorThing(const EditorThing &source) : EditorThing()
 {
   copySelf(source);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 EditorThing::~EditorThing()
 {
   delete matrix;
@@ -72,6 +79,23 @@ void EditorThing::copySelf(const EditorThing &source)
 QString EditorThing::getDescription()
 {
   return QString::fromStdString(thing.getDescription());
+}
+
+/*
+ * Description: Returns the dialog image, as a ptr, stored in the thing for
+ *              manipulation by an outside source. This should always contain
+ *              at most one frame.
+ *
+ * Inputs: none
+ * Output: none
+ */
+EditorSprite* EditorThing::getDialogImage()
+{
+  /* Make sure only one frame is in the dialog image */
+  while(dialog_image.frameCount() > 1)
+    dialog_image.deleteFrame(dialog_image.frameCount() - 1);
+
+  return &dialog_image;
 }
 
 /*
@@ -118,7 +142,18 @@ QString EditorThing::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
-  
+
+/*
+ * Description: Returns if the thing is visible when displayed in game.
+ *
+ * Inputs: none
+ * Output: bool - true if visible when the game is running
+ */
+bool EditorThing::isVisible()
+{
+  return thing.isVisible();
+}
+
 /*
  * Description: Sets the description of the thing.
  *
@@ -128,6 +163,22 @@ QString EditorThing::getNameList()
 void EditorThing::setDescription(QString description)
 {
   thing.setDescription(description.toStdString());
+}
+
+/*
+ * Description: Sets the dialog image, based on the path, for the thing.
+ *
+ * Inputs: QString path - the path for the dialog image
+ * Output: none
+ */
+void EditorThing::setDialogImage(QString path)
+{
+  /* Make sure the image is empty and ready for the new path */
+  while(dialog_image.frameCount() > 0)
+    dialog_image.deleteFrame(dialog_image.frameCount() - 1);
+
+  /* Set the new path to the base index */
+  dialog_image.setPath(0, path);
 }
 
 /*
@@ -164,6 +215,17 @@ void EditorThing::setTileIcons(TileIcons* icons)
   tile_icons = icons;
   if(matrix != NULL)
     matrix->setTileIcons(tile_icons);
+}
+
+/*
+ * Description: Sets the thing visibility when rendering in the game.
+ *
+ * Inputs: bool visible - true if it should be visible
+ * Output: none
+ */
+void EditorThing::setVisibility(bool visible)
+{
+  thing.setVisibility(visible);
 }
 
 /*============================================================================

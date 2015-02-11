@@ -8,6 +8,8 @@
 #include "View/MapControl.h"
 #include <QDebug>
 
+#include "View/EventView.h"
+
 MapControl::MapControl(QWidget *parent): QWidget(parent)
 {
   editing_map = NULL;
@@ -235,8 +237,15 @@ void MapControl::duplicateSubMap()
 void MapControl::importSubMap()
 {
   // TODO: Future
-  QMessageBox::information(this, "Notification",
-                           "Coming soon to a production near you!");
+  //QMessageBox::information(this, "Notification",
+  //                         "Coming soon to a production near you!");
+
+  QDialog* dialog = new QDialog(this);
+  EventView* event_view = new EventView(NULL, dialog);
+  QVBoxLayout* layout = new QVBoxLayout(dialog);
+  layout->addWidget(event_view, 0, Qt::AlignCenter);
+  dialog->setLayout(layout);
+  dialog->show();
 }
 
 /* Item check change */

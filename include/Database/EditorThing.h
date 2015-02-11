@@ -9,6 +9,7 @@
 #define EDITORTHING_H
 
 #include "Database/EditorMatrix.h"
+#include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
 #include "Game/Map/MapThing.h"
 
@@ -25,6 +26,9 @@ public:
   virtual ~EditorThing();
 
 private:
+  /* The frame displayed in a dialog when interacting with the thing */
+  EditorSprite dialog_image;
+
   /* The view matrix */
   EditorMatrix* matrix;
 
@@ -48,6 +52,9 @@ public:
   /* Gets the description of the thing */
   QString getDescription();
 
+  /* Returns the dialog image for the thing */
+  EditorSprite* getDialogImage();
+
   /* Gets the ID for the thing */
   virtual int getID();
 
@@ -60,8 +67,14 @@ public:
   /* Gets the proper formatted name and ID for listing */
   virtual QString getNameList();
 
+  /* Returns if the thing is visible */
+  bool isVisible();
+
   /* Sets the description of the thing */
   void setDescription(QString description);
+
+  /* Sets the dialog image, with the path */
+  void setDialogImage(QString path);
 
   /* Sets the thing id (Backend) */
   virtual void setID(int id);
@@ -71,6 +84,9 @@ public:
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
+
+  /* Sets the visibility of the thing */
+  void setVisibility(bool visible);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
