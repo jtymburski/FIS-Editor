@@ -8,6 +8,7 @@
 #include "View/MapControl.h"
 #include <QDebug>
 
+#include "Database/EditorEvent.h"
 #include "View/EventView.h"
 
 MapControl::MapControl(QWidget *parent): QWidget(parent)
@@ -240,6 +241,7 @@ void MapControl::importSubMap()
   //QMessageBox::information(this, "Notification",
   //                         "Coming soon to a production near you!");
 
+  // TODO: REMOVE - TESTING - Dialog for events
   QDialog* dialog = new QDialog(this);
   EventView* event_view = new EventView(NULL, dialog);
   QVBoxLayout* layout = new QVBoxLayout(dialog);

@@ -9,7 +9,7 @@
 #ifndef EDITOREVENT_H
 #define EDITOREVENT_H
 
-#include <QString>
+#include <QStringList>
 #include <QVector>
 
 #include "Game/EventHandler.h"
@@ -22,6 +22,9 @@ public:
 
   /* Constructor function - with input event */
   EditorEvent(Event event);
+
+  /* Copy constructor */
+  EditorEvent(const EditorEvent &source);
 
   /* Destructor function */
   ~EditorEvent();
@@ -40,16 +43,31 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Creates the layout and widgets for this controller */
-  //void createLayout();
+  /* Follows the path to the conversation and generates it if necessary.
+   * Multi-function to act as get and create */
+  Conversation* convoManipulator(QString index, bool generate = false,
+                                 bool before = false, bool break_tree = false);
+
+  /* Copy function, to be called by a copy or equal operator constructor */
+  void copySelf(const EditorEvent &source);
+
+  /* A recursive parser through conversation set to find equivalent address */
+  QString recursiveConversationFind(Conversation* ref, Conversation* convo,
+                                    QString index = "1");
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Deletes conversation element */
+  bool deleteConversation(QString index);
+
   /* Returns an individual conversation, based on the index */
   Conversation* getConversation();
-  Conversation* getConversation(QString index);
+  Conversation* getConversation(QString index, bool before = false);
+
+  /* Returns the conversation index */
+  QString getConversationIndex(Conversation* convo);
 
   /* Returns the event */
   Event* getEvent();
@@ -77,8 +95,10 @@ public:
   int getTeleportY();
 
   /* Insert conversations at index control points. Fails if invalid point */
-  bool insertConversationAfter(QString index, Conversation convo);
-  bool insertConversationBefore(QString index, Conversation convo);
+  bool insertConversationAfter(QString index, Conversation convo,
+                               bool option_node = false);
+  bool insertConversationBefore(QString index, Conversation convo,
+                                bool option_node = false);
 
   /* Sets the conversation at the index */
   bool setConversation(QString index, Conversation convo);
@@ -103,6 +123,25 @@ public:
 
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id, int section_id, int x, int y);
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
+public:
+  /* The copy operator */
+  EditorEvent& operator= (const EditorEvent &source);
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Creates conversations used for insertion */
+  static Conversation createConversation(QString text, int id, Event event);
+  static Conversation createConversation(QString text, int id, Event event,
+                                        QVector<QPair<QString, Event>> options);
+
+  /* Prints the conversation */
+  static void printConversation(Conversation* convo, QString index = "1");
 };
 
 #endif // EDITOREVENT_H
