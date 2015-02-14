@@ -695,6 +695,59 @@ EditorTileSprite* EditorMatrix::getRightClicked()
 }
 
 /*
+ * Description: Returns an image snapshot of the scene without any grid,
+ *              passability, or render depths. Can pass in a width and height
+ *              to scale the pixmap down.
+ *
+ * Inputs: int width - the max width of the pixmap
+ *         int height - the max height of the pixmap
+ * Output: QPixmap - the resulting pixmap
+ */
+QPixmap EditorMatrix::getSnapshot(int width, int height)
+{
+  /* Disable all visibility */
+  bool visible_grid = this->visible_grid;
+  bool visible_passability = this->visible_passability;
+  bool visible_render = this->visible_render;
+  setVisibilityGrid(false, true);
+  setVisibilityPass(false, true);
+  setVisibilityRender(false, true);
+
+  /* Set-up the scene */
+  QPixmap final_pixmap;
+  cleanScene();
+  clearSelection();
+  setSceneRect(itemsBoundingRect());
+  QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
+  image.fill(Qt::transparent);
+
+  /* If the image is NULL, attempt to scale */
+  if(!image.isNull())
+  {
+    QPainter painter(&image);
+    render(&painter);
+    if((width > 0 && image.width() > width) ||
+       (height > 0 && image.height() > height))
+    {
+      QImage scaled_image = image.scaled(width, height,
+                                         Qt::KeepAspectRatio);
+      final_pixmap = QPixmap::fromImage(scaled_image);
+    }
+    else
+    {
+      final_pixmap = QPixmap::fromImage(image);
+    }
+  }
+
+  /* Re-enable visibility */
+  setVisibilityGrid(visible_grid, true);
+  setVisibilityPass(visible_passability, true);
+  setVisibilityRender(visible_render, true);
+
+  return final_pixmap;
+}
+
+/*
  * Description: Returns the highest number of frames that are valid and set in
  *              a sprite in the entire matrix. Used to trim off excess frames.
  *

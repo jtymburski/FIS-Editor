@@ -159,10 +159,10 @@ public:
   EditorSkill* clone();
 
   /* Returns the ID of the skill */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the skill */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the skill for listing */
   virtual QString getNameList();

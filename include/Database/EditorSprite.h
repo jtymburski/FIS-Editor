@@ -70,6 +70,9 @@ protected:
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
 
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Adds a frame to the top of the sequence */
   void addHead(QString path);
@@ -151,6 +154,9 @@ public slots:
 signals:
   void spriteChanged();
 
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Adds paths to the tail end of the sprite stack. Splits on | */
   int addPath(QString path, bool hflip = false, bool vflip = false);
@@ -174,7 +180,7 @@ public:
   bool getHorizontalFlip(int frame_num);
 
   /* Gets the ID for the sprite */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Gets the image path */
   QImage getImage(int frame_num);
@@ -183,7 +189,7 @@ public:
   int getLastValidFrame();
 
   /* Gets the user submitted name of the sprite */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Gets the proper formatted name and ID for listing */
   virtual QString getNameList();

@@ -15,10 +15,10 @@ public:
   virtual ~EditorTemplate() {}
 
   /* Returns the ID of the editor object */
-  virtual int getID() = 0;
+  virtual int getID() const = 0;
 
   /* Returns the name of the editor object */
-  virtual QString getName() = 0;
+  virtual QString getName() const = 0;
 
   /* Returns the ID and name of the object for listing */
   virtual QString getNameList() = 0;

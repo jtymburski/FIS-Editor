@@ -45,10 +45,10 @@ public:
   EditorEquipment* clone();
 
   /* Returns the ID of the equipment */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the equipment */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the equipment for listing */
   virtual QString getNameList();

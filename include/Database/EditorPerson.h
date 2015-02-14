@@ -45,10 +45,10 @@ public:
   EditorPerson* clone();
 
   /* Returns the ID of the person */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the person */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the person for listing */
   virtual QString getNameList();

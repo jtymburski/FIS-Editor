@@ -252,13 +252,13 @@ EditorSkillset* EditorSkillset::clone()
 }
 
 /* Returns the ID of the skillset */
-int EditorSkillset::getID()
+int EditorSkillset::getID() const
 {
   return id;
 }
 
 /* Returns the name of the skillset */
-QString EditorSkillset::getName()
+QString EditorSkillset::getName() const
 {
   return name;
 }

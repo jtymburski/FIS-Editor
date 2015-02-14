@@ -51,13 +51,13 @@ EditorParty* EditorParty::clone()
 }
 
 /* Returns the ID of the party */
-int EditorParty::getID()
+int EditorParty::getID() const
 {
   return party.getID();
 }
 
 /* Returns the name of the party */
-QString EditorParty::getName()
+QString EditorParty::getName() const
 {
   return name;
 }

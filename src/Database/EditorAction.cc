@@ -1191,13 +1191,13 @@ EditorAction* EditorAction::clone()
 }
 
 /* Returns the ID of the Action */
-int EditorAction::getID()
+int EditorAction::getID() const
 {
   return working.getID();
 }
 
 /* Returns the name of the item */
-QString EditorAction::getName()
+QString EditorAction::getName() const
 {
   return name;
 }

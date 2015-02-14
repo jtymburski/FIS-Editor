@@ -45,7 +45,8 @@ public:
 
   /* Map view mode */
   enum MapViewMode {RAW_VIEW = 0,
-                    SPRITE_VIEW = 1
+                    SPRITE_VIEW = 1,
+                    THING_VIEW = 2
                    };
 
   /* Sprite edit mode */

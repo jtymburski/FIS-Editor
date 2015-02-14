@@ -47,10 +47,10 @@ public:
   EditorParty* clone();
 
   /* Returns the ID of the party */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the party */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the party for listing */
   virtual QString getNameList();

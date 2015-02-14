@@ -22,7 +22,6 @@ EditorEvent::EditorEvent()
 {
   conversation = NULL;
   event = handler.createBlankEvent();
-  //createLayout();
 }
 
 /*
@@ -33,6 +32,8 @@ EditorEvent::EditorEvent()
 EditorEvent::EditorEvent(Event event) : EditorEvent()
 {
   this->event = event;
+  if(event.classification == EventClassifier::STARTCONVO)
+    conversation = event.convo;
 }
 
 /*
@@ -50,9 +51,6 @@ EditorEvent::EditorEvent(const EditorEvent &source) : EditorEvent()
  */
 EditorEvent::~EditorEvent()
 {
-  /* Delete the conversation, if one exists */
-  if(conversation != NULL)
-    delete conversation;
   conversation = NULL;
 }
 
@@ -177,25 +175,8 @@ Conversation* EditorEvent::convoManipulator(QString index, bool generate,
  */
 void EditorEvent::copySelf(const EditorEvent &source)
 {
-  /* Copy the event */
-  event.classification = source.event.classification;
-  event.convo = source.event.convo;
-  event.ints = source.event.ints;
-  event.strings = source.event.strings;
-
-  /* If convo, do the proper copy */
-  if(conversation != NULL)
-    delete conversation;
-  if(event.classification == EventClassifier::STARTCONVO)
-  {
-    conversation = new Conversation;
-    conversation->action_event = source.event.convo->action_event;
-    conversation->category = source.event.convo->category;
-    conversation->next = source.event.convo->next;
-    conversation->text = source.event.convo->text;
-    conversation->thing_id = source.event.convo->thing_id;
-    event.convo = conversation;
-  }
+  event = copyEvent(source.event);
+  conversation = event.convo;
 }
 
 /*
@@ -683,9 +664,9 @@ void EditorEvent::setEventBlank()
 bool EditorEvent::setEventConversation(Conversation* convo)
 {
   /* Check the existing conversation */
-  if(conversation != NULL)
-    delete conversation;
-  conversation = NULL;
+  if(event.convo != NULL)
+    delete event.convo;
+  event.convo = NULL;
 
   /* Create the new conversation */
   event = handler.createConversationEvent(convo);
@@ -809,6 +790,37 @@ EditorEvent& EditorEvent::operator= (const EditorEvent &source)
 /*============================================================================
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Copies a past in event and returns the copied version as source.
+ *              Function that calls it is in charge of deleting conversation,
+ *              if that's been generated.
+ *
+ * Inputs: Event source - the event struct to copy
+ * Output: Event - the copied event
+ */
+Event EditorEvent::copyEvent(Event source)
+{
+  /* Copy the event */
+  Event event;
+  event.classification = source.classification;
+  event.convo = source.convo;
+  event.ints = source.ints;
+  event.strings = source.strings;
+
+  /* If convo, do the proper copy */
+  if(event.classification == EventClassifier::STARTCONVO)
+  {
+    event.convo = new Conversation;
+    event.convo->action_event = source.convo->action_event;
+    event.convo->category = source.convo->category;
+    event.convo->next = source.convo->next;
+    event.convo->text = source.convo->text;
+    event.convo->thing_id = source.convo->thing_id;
+  }
+
+  return event;
+}
 
 /*
  * Description: Public static function. Creates a conversatioin with a given

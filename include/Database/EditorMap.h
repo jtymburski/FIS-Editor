@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Class Name: EditorMap
  * Date Created: December 27, 2014
- * Inheritance: QWidget
- * Description: Editor Map
+ * Inheritance: EditorTemplate
+ * Description: The map interface to connect and edit in the editor
  ******************************************************************************/
 #ifndef EDITORMAP_H
 #define EDITORMAP_H
@@ -18,6 +18,7 @@
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
+#include "Database/EditorThing.h"
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
@@ -62,12 +63,18 @@ private:
   /* The set of sub-maps */
   QVector<SubMapInfo*> sub_maps;
 
+  /* The map things */
+  QVector<EditorThing*> things;
+
   /* Rendering tile icons */
   TileIcons* tile_icons;
 
   /*------------------- Constants -----------------------*/
   const static int kUNSET_ID; /* The unset ID */
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
@@ -84,14 +91,18 @@ protected:
   void saveSubMap(FileHandler* fh, bool game_only,
                   SubMapInfo* map, bool first = false);
 
-public slots:
 signals:
+public slots:
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Returns the active layers in a string */
   QString getActiveLayers(int map_index, int x, int y);
 
   /* Returns the ID of the map set */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the stored map information */
   SubMapInfo* getMap(int id);
@@ -102,12 +113,13 @@ public:
   QVector<SubMapInfo*> getMaps();
 
   /* Returns the name of the map set */
-  virtual QString getName();
+  virtual QString getName() const;
   virtual QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();
   int getNextSpriteID();
+  int getNextThingID();
 
   /* Return stored sprite information */
   EditorSprite* getSprite(int id);
@@ -115,6 +127,13 @@ public:
   int getSpriteCount();
   int getSpriteIndex(int id);
   QVector<EditorSprite*> getSprites();
+
+  /* Return stored thing information */
+  EditorThing* getThing(int id);
+  EditorThing* getThingByIndex(int index);
+  int getThingCount();
+  int getThingIndex(int id);
+  QVector<EditorThing*> getThings();
 
   /* Returns the tile icons */
   TileIcons* getTileIcons();
@@ -137,6 +156,9 @@ public:
 
   /* Sets a sprite */
   int setSprite(EditorSprite* sprite);
+
+  /* Sets a thing in the map */
+  int setThing(EditorThing* thing);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
@@ -161,11 +183,20 @@ public:
   bool unsetSpriteByIndex(int index);
   void unsetSprites();
 
-/* Operator functions */
+  /* Unset thing(s) */
+  bool unsetThing(int id);
+  bool unsetThingByIndex(int index);
+  void unsetThings();
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   EditorMap& operator= (const EditorMap &source);
 
-/* Public static functions */
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Creates the map size and name dialog */
   static QDialog* createMapDialog(QWidget* parent,

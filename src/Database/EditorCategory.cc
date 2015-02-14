@@ -48,13 +48,13 @@ EditorCategory* EditorCategory::clone()
 }
 
 /* Returns the ID of the category */
-int EditorCategory::getID()
+int EditorCategory::getID() const
 {
   return category.getID();
 }
 
 /* Returns the name of the category */
-QString EditorCategory::getName()
+QString EditorCategory::getName() const
 {
   return QString::fromStdString(category.getName());
 }

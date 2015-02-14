@@ -48,13 +48,13 @@ EditorPerson* EditorPerson::clone()
 }
 
 /* Returns the ID of the person */
-int EditorPerson::getID()
+int EditorPerson::getID() const
 {
   return person.getGameID();
 }
 
 /* Returns the name of the person */
-QString EditorPerson::getName()
+QString EditorPerson::getName() const
 {
   return QString::fromStdString(person.getName());
 }

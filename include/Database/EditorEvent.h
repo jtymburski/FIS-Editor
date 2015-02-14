@@ -135,6 +135,9 @@ public:
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Copies the past in event */
+  static Event copyEvent(Event source);
+
   /* Creates conversations used for insertion */
   static Conversation createConversation(QString text, int id, Event event);
   static Conversation createConversation(QString text, int id, Event event,

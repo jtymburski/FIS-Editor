@@ -212,13 +212,13 @@ EditorItem* EditorItem::clone()
 }
 
 /* Returns the ID of the item */
-int EditorItem::getID()
+int EditorItem::getID() const
 {
   return item.getGameID();
 }
 
 /* Returns the name of the item */
-QString EditorItem::getName()
+QString EditorItem::getName() const
 {
   return QString::fromStdString(item.getName());
 }

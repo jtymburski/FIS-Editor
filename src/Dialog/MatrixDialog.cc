@@ -301,25 +301,7 @@ void MatrixDialog::updateScene()
                  button_flip_h->isChecked(), button_flip_v->isChecked(), true);
 
   /* Paint the image */
-  matrix.clearSelection();
-  matrix.setSceneRect(matrix.itemsBoundingRect());
-  QImage image(matrix.sceneRect().size().toSize(), QImage::Format_ARGB32);
-  image.fill(Qt::transparent);
-  if(!image.isNull())
-  {
-    QPainter painter(&image);
-    matrix.render(&painter);
-    if(image.width() > kSCENE_SIZE || image.height() > kSCENE_SIZE)
-    {
-      QImage scaled_image = image.scaled(kSCENE_SIZE, kSCENE_SIZE, 
-                                         Qt::KeepAspectRatio);
-      lbl_scene->setPixmap(QPixmap::fromImage(scaled_image));
-    }
-    else
-    {
-      lbl_scene->setPixmap(QPixmap::fromImage(image));
-    }
-  }
+  lbl_scene->setPixmap(matrix.getSnapshot(kSCENE_SIZE, kSCENE_SIZE));
 
   /* Update result string */
   lbl_result->setText("Result: " + result_file);

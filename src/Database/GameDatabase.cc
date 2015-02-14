@@ -7,9 +7,6 @@
 #include "Database/GameDatabase.h"
 #include <QDebug>
 
-// TODO: TESTING - REMOVE
-#include "Dialog/ThingDialog.h"
-
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {
   /* Clear out variables */
@@ -495,14 +492,8 @@ void GameDatabase::duplicateResource()
 void GameDatabase::importResource()
 {
   // TODO: Future
-  //QMessageBox::information(this, "Notification",
-  //                         "Coming soon to a production near you!");
-
-  // TODO: Remove - testing
-  EditorThing* thing = new EditorThing(1, "Bob", "DESCRIP HERE");
-  thing->setTileIcons(&tile_icons);
-  ThingDialog* dialog = new ThingDialog(thing, this);
-  dialog->show();
+  QMessageBox::information(this, "Notification",
+                           "Coming soon to a production near you!");
 }
 
 /* Right click list menu on bottom list */

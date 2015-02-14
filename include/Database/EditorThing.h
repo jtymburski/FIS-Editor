@@ -17,7 +17,8 @@ class EditorThing : public EditorTemplate
 {
 public:
   /* Constructor function */
-  EditorThing(int id = -1, QString name = "", QString description = "");
+  EditorThing(int id = -1, QString name = "Default Thing",
+              QString description = "");
 
   /* Copy constructor */
   EditorThing(const EditorThing &source);
@@ -28,6 +29,9 @@ public:
 private:
   /* The frame displayed in a dialog when interacting with the thing */
   EditorSprite dialog_image;
+
+  /* The event handler */
+  EventHandler event_handler;
 
   /* The view matrix */
   EditorMatrix* matrix;
@@ -50,31 +54,37 @@ protected:
  *===========================================================================*/
 public:
   /* Gets the description of the thing */
-  QString getDescription();
+  QString getDescription() const;
 
   /* Returns the dialog image for the thing */
   EditorSprite* getDialogImage();
 
+  /* Returns the event object of the thing */
+  Event getEvent() const;
+
   /* Gets the ID for the thing */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the matrix in the thing class */
   EditorMatrix* getMatrix();
 
   /* Gets the user submitted name of the thing */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Gets the proper formatted name and ID for listing */
   virtual QString getNameList();
 
   /* Returns if the thing is visible */
-  bool isVisible();
+  bool isVisible() const;
 
   /* Sets the description of the thing */
   void setDescription(QString description);
 
   /* Sets the dialog image, with the path */
   void setDialogImage(QString path);
+
+  /* Sets the interaction event */
+  void setEvent(Event event);
 
   /* Sets the thing id (Backend) */
   virtual void setID(int id);

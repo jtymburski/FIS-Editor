@@ -96,10 +96,10 @@ public:
   EditorSkillset* clone();
 
   /* Returns the ID of the skillset */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the skillset */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the skillset for listing */
   virtual QString getNameList();

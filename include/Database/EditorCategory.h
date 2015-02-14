@@ -45,10 +45,10 @@ public:
   EditorCategory* clone();
 
   /* Returns the ID of the category */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the category */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the category for listing */
   virtual QString getNameList();

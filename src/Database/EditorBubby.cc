@@ -48,13 +48,13 @@ EditorBubby* EditorBubby::clone()
 }
 
 /* Returns the ID of the bubby */
-int EditorBubby::getID()
+int EditorBubby::getID() const
 {
   return bubby.getGameID();
 }
 
 /* Returns the name of the bubby */
-QString EditorBubby::getName()
+QString EditorBubby::getName() const
 {
   return QString::fromStdString(bubby.getName());
 }

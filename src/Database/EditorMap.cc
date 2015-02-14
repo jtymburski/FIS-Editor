@@ -2,7 +2,7 @@
  * Class Name: EditorMap
  * Date Created: December 27, 2014
  * Inheritance: QWidget
- * Description: Editor Map
+ * Description: The map interface to connect and edit in the editor
  ******************************************************************************/
 #include "Database/EditorMap.h"
 #include <QDebug>
@@ -10,12 +10,16 @@
 /* Constant Implementation - see header file for descriptions */
 const int EditorMap::kUNSET_ID = -1;
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
 /*
  * Description: The set-up constructor
  *
  * Inputs: none
  */
-EditorMap::EditorMap()//QWidget *parent) : QWidget(parent)
+EditorMap::EditorMap()
 {
   id = kUNSET_ID;
   name = "";
@@ -44,8 +48,13 @@ EditorMap::EditorMap(int id, QString name, int width, int height,
     setMap(0, "MAIN", width, height);
 }
 
-/* Copy constructor */
-EditorMap::EditorMap(const EditorMap &source)
+/*
+ * Description: The copy constructor for copying all data from a source copy
+ *              class.
+ *
+ * Inputs: const EditorMap &source - the source to copy the data from
+ */
+EditorMap::EditorMap(const EditorMap &source) : EditorMap()
 {
   copySelf(source);
 }
@@ -63,14 +72,30 @@ EditorMap::~EditorMap()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Adds tile sprite data */
+/*
+ * Description: Adds tile sprite data to the file handler from the selected sub
+ *              map index in the layer.
+ *
+ * Inputs: FileHandler* fh - the file handling control pointer
+ *         int index - index of the sub-map
+ *         EditorEnumDb::Layer layer - the layer to insert the data into
+ * Output: none
+ */
 void EditorMap::addTileSpriteData(FileHandler* fh, int index,
                                   EditorEnumDb::Layer layer)
 {
   addTileSpriteData(fh, sub_maps[index], layer);
 }
 
-/* Adds tile sprite data */
+/*
+ * Description: Adds tile sprite data to the file handler from the selected sub
+ *              map in the layer.
+ *
+ * Inputs: FileHandler* fh - the file handling control pointer
+ *         SubMapInfo* map - the sub map reference pointer
+ *         EditorEnumDb::Layer layer - the layer to insert the data into
+ * Output: none
+ */
 void EditorMap::addTileSpriteData(FileHandler* fh, SubMapInfo* map,
                                   EditorEnumDb::Layer layer)
 {
@@ -135,7 +160,13 @@ void EditorMap::addTileSpriteData(FileHandler* fh, SubMapInfo* map,
   }
 }
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor thing to this editor
+ *              thing.
+ *
+ * Inputs: EditorThing &source - the source to copy from
+ * Output: none
+ */
 void EditorMap::copySelf(const EditorMap &source)
 {
   /* Add const values */
@@ -177,7 +208,15 @@ void EditorMap::copySelf(const EditorMap &source)
   }
 }
 
-/* Loads sub-map info */
+/*
+ * Description: Loads the sub-map info from the xml data and index of the data
+ *              stack.
+ *
+ * Inputs: SubMapInfo* map - the sub-map info to load data into
+ *         XmlData data - the current xml data to load in
+ *         int index - the offset index into the data stack
+ * Output: none
+ */
 void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
@@ -263,7 +302,6 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   }
 }
 
-/* Saves the sub-map */
 /*
  * Description: Saves the sub map pointer passed in to the file handler. If
  *              game only, some parts are skipped. If first, it makes the
@@ -371,7 +409,7 @@ QString EditorMap::getActiveLayers(int map_index, int x, int y)
  * Inputs: none
  * Output: int - map id. Less than 0 if unset
  */
-int EditorMap::getID()
+int EditorMap::getID() const
 {
   return id;
 }
@@ -464,7 +502,7 @@ QVector<SubMapInfo*> EditorMap::getMaps()
  * Inputs: none
  * Output: QString - the string of the map
  */
-QString EditorMap::getName()
+QString EditorMap::getName() const
 {
   return name;
 }
@@ -536,6 +574,34 @@ int EditorMap::getNextSpriteID()
 }
 
 /*
+ * Description: Returns the next available thing ID that can be used for a new
+ *              thing.
+ *
+ * Inputs: none
+ * Output: int - the id to use
+ */
+int EditorMap::getNextThingID()
+{
+  bool found = false;
+  int id = 0;
+
+  for(int i = 0; !found && (i < things.size()); i++)
+  {
+    if(things[i]->getID() != i)
+    {
+      id = i;
+      found = true;
+    }
+  }
+
+  /* If nothing found, just make it the last ID + 1 */
+  if(!found && things.size() > 0)
+    id = things.last()->getID() + 1;
+
+  return id;
+}
+
+/*
  * Description: Returns the sprite with the corresponding ID.
  *
  * Inputs: int id - the id of the sprite to get
@@ -599,6 +665,72 @@ int EditorMap::getSpriteIndex(int id)
 QVector<EditorSprite*> EditorMap::getSprites()
 {
   return sprites;
+}
+
+/*
+ * Description: Returns the thing with the corresponding ID.
+ *
+ * Inputs: int id - the id of the thing to get
+ * Output: EditorThing* - the pointer to match the ID. NULL if not found.
+ */
+EditorThing* EditorMap::getThing(int id)
+{
+  if(id >= 0)
+    for(int i = 0; i < things.size(); i++)
+      if(things[i]->getID() == id)
+        return things[i];
+  return NULL;
+}
+
+/*
+ * Description: Returns the thing at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ * Output: EditorThing* - the pointer to match the index. NULL if out of range
+ */
+EditorThing* EditorMap::getThingByIndex(int index)
+{
+  if(index >= 0 && index < things.size())
+    return things[index];
+  return NULL;
+}
+
+/*
+ * Description: Returns the number of things in the list.
+ *
+ * Inputs: none
+ * Output: int - the number of things in the map set
+ */
+int EditorMap::getThingCount()
+{
+  return things.size();
+}
+
+/*
+ * Description: Returns the index in the list of things of the matching id.
+ *              Less than 0 if none match.
+ *
+ * Inputs: int id - the id to find the index for
+ * Output: int - the index of the thing. Less than 0 if nothing matches
+ */
+int EditorMap::getThingIndex(int id)
+{
+  if(id >= 0)
+    for(int i = 0; i < things.size(); i++)
+      if(things[i]->getID() == id)
+        return i;
+  return -1;
+}
+
+/*
+ * Description: Returns the list of all things in the editor map
+ *
+ * Inputs: none
+ * Output: QVector<EditorThing*> - list of all things
+ */
+QVector<EditorThing*> EditorMap::getThings()
+{
+  return things;
 }
 
 /*
@@ -892,6 +1024,58 @@ int EditorMap::setSprite(EditorSprite* sprite)
 }
 
 /*
+ * Description: Sets the thing in the set within the editor map. If a thing,
+ *              already exists with the ID, it deletes the existing one.
+ *
+ * Inputs: EditorThing* thing - the new thing to set in
+ * Output: int - the index if set. If < 0, it is not set.
+ */
+int EditorMap::setThing(EditorThing* thing)
+{
+  if(thing != NULL && thing->getID() >= 0)
+  {
+    bool found = false;
+    int index = -1;
+    bool near = false;
+
+    /* Find if the ID exists */
+    for(int i = 0; !found && !near && (i < things.size()); i++)
+    {
+      if(things[i]->getID() == thing->getID())
+      {
+        index = i;
+        found = true;
+      }
+      else if(things[i]->getID() > thing->getID())
+      {
+        index = i;
+        near = true;
+      }
+    }
+
+    /* If found, modify the index with the new information */
+    if(found)
+    {
+      unsetThingByIndex(index);
+      things.insert(index, thing);
+    }
+    else if(near)
+    {
+      things.insert(index, thing);
+    }
+    else
+    {
+      things.append(thing);
+      index = things.size() - 1;
+    }
+
+    return index;
+  }
+
+  return -1;
+}
+
+/*
  * Description: Sets the rendering tile icons reference for painting.
  *
  * Inputs: TileIcons* icons - the icons to render on the map
@@ -1059,20 +1243,63 @@ bool EditorMap::unsetSpriteByIndex(int index)
  */
 void EditorMap::unsetSprites()
 {
-  for(int i = 0; i < sprites.size(); i++)
+  while(sprites.size() > 0)
+    unsetSpriteByIndex(0);
+  sprites.clear();
+}
+
+/*
+ * Description: Unset the thing within the list that correspond to the ID.
+ *
+ * Inputs: int id - the thing id
+ * Output: bool - was a thing deleted?
+ */
+bool EditorMap::unsetThing(int id)
+{
+  int index = getThingIndex(id);
+  return unsetThingByIndex(index);
+}
+
+/*
+ * Description: Unset the thing within the list that correspond to the index.
+ *
+ * Inputs: int index - the thing index corresponder
+ * Output: bool - was a thing deleted?
+ */
+bool EditorMap::unsetThingByIndex(int index)
+{
+  if(index >= 0 && index < things.size())
   {
-    /* Remove all sprites related to this index from all tiles */
-    for(int i = 0; i < sub_maps.size(); i++)
-    {
-      for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
-        for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
-          sub_maps[i]->tiles[j][k]->unplace(sprites[i]);
-    }
+    /* Remove all things related to this index from all tiles */
+    // TODO: Revise for thing
+    //for(int i = 0; i < sub_maps.size(); i++)
+    //{
+    //  for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+    //    for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+    //      sub_maps[i]->tiles[j][k]->unplace(things[index]);
+    //}
 
     /* Finally, delete the sprite */
-    delete sprites[i];
+    delete things[index];
+    things.remove(index);
+
+    return true;
   }
-  sprites.clear();
+
+  return false;
+}
+
+/*
+ * Description: Unsets all map things within the EditorMap set.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::unsetThings()
+{
+  while(things.size() > 0)
+    unsetThingByIndex(0);
+  things.clear();
 }
 
 /*============================================================================

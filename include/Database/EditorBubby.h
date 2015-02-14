@@ -45,10 +45,10 @@ public:
   EditorBubby* clone();
 
   /* Returns the ID of the bubby */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the bubby */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the bubby for listing */
   virtual QString getNameList();

@@ -67,6 +67,7 @@ SOURCES += \
     src/View/RawImageView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
+    src/View/ThingView.cc \
     ../Project/src/FileHandler.cc \
     ../Project/src/Frame.cc \
     ../Project/src/Helpers.cc \
@@ -133,6 +134,7 @@ HEADERS += \
     include/View/RawImageView.h \
     include/View/SpriteView.h \
     include/View/SpriteViewList.h \
+    include/View/ThingView.h \
     ../Project/include/EnumDb.h \
     ../Project/include/EnumFlags.h \
     ../Project/include/FileHandler.h \

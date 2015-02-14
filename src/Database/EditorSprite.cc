@@ -722,7 +722,7 @@ bool EditorSprite::getHorizontalFlip(int frame_num)
  * Input: none
  * Output: int - the id of the sprite
  */
-int EditorSprite::getID()
+int EditorSprite::getID() const
 {
   return sprite->getId();
 }
@@ -764,7 +764,7 @@ int EditorSprite::getLastValidFrame()
  *
  * Output: The sprites name
  */
-QString EditorSprite::getName()
+QString EditorSprite::getName() const
 {
   return name;
 }

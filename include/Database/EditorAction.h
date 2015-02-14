@@ -314,10 +314,10 @@ public:
   EditorAction* clone();
 
   /* Returns the ID of the Action */
-  virtual int getID();
+  virtual int getID() const;
 
   /* Returns the name of the item */
-  virtual QString getName();
+  virtual QString getName() const;
 
   /* Returns the name of the item for listing */
   virtual QString getNameList();

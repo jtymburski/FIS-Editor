@@ -154,6 +154,9 @@ public:
   /* Returns the right clicked sprite */
   EditorTileSprite* getRightClicked();
 
+  /* Returns a snapshot of the scene */
+  QPixmap getSnapshot(int width = -1, int height = -1);
+
   /* Gets trim values - rows, columns, and frames - that are unused */
   int getTrimFrames(bool largest = true);
   QRect getTrimRect();

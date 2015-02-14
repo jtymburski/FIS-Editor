@@ -519,13 +519,13 @@ EditorSkill* EditorSkill::clone()
 }
 
 /* Returns the ID of the skill */
-int EditorSkill::getID()
+int EditorSkill::getID() const
 {
   return id;
 }
 
 /* Returns the name of the skill */
-QString EditorSkill::getName()
+QString EditorSkill::getName() const
 {
   return name;
 }

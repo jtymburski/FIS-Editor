@@ -49,13 +49,13 @@ EditorEquipment* EditorEquipment::clone()
 }
 
 /* Returns the ID of the equipment */
-int EditorEquipment::getID()
+int EditorEquipment::getID() const
 {
   return equipment.getGameID();
 }
 
 /* Returns the name of the equipment */
-QString EditorEquipment::getName()
+QString EditorEquipment::getName() const
 {
   return QString::fromStdString(equipment.getName());
 }

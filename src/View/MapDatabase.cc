@@ -13,7 +13,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   view_top = new QListWidget(this);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Raw Images" << "Sprites";
+  items << "Raw Images" << "Sprites" << "Things";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   view_top->setMaximumHeight(100);
@@ -23,6 +23,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   /* Sets up the various views */
   view_raw = new RawImageView(this);
   view_sprite = new SpriteView(this);
+  view_thing = new ThingView(this);
 
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
@@ -48,6 +49,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(view_top);
   layout->addWidget(view_raw);
   layout->addWidget(view_sprite);
+  layout->addWidget(view_thing);
   layout->addLayout(hlayout);
   updateSelected(EditorEnumDb::RAW_VIEW);
 }
@@ -57,8 +59,6 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
  */
 MapDatabase::~MapDatabase()
 {
-  delete view_raw;
-  delete view_sprite;
 }
 
 /*============================================================================
@@ -68,33 +68,41 @@ MapDatabase::~MapDatabase()
 // TODO: Comment
 void MapDatabase::buttonDelete()
 {
-  /* Sprite control */
+  /* Delete button control to visible widget */
   if(view_sprite->isVisible())
     view_sprite->deleteSprite();
+  else if(view_thing->isVisible())
+    view_thing->deleteThing();
 }
 
 // TODO: Comment
 void MapDatabase::buttonDuplicate()
 {
-  /* Sprite control */
+  /* Duplicate button control to visible widget */
   if(view_sprite->isVisible())
     view_sprite->duplicateSprite();
+  else if(view_thing->isVisible())
+    view_thing->duplicateThing();
 }
 
 // TODO: Comment
 void MapDatabase::buttonImport()
 {
-  /* Sprite control */
+  /* Import button control to visible widget */
   if(view_sprite->isVisible())
     view_sprite->importSprite();
+  else if(view_thing->isVisible())
+    view_thing->importThing();
 }
 
 // TODO: Comment
 void MapDatabase::buttonNew()
 {
-  /* Sprite control */
+  /* New button control to visible widget */
   if(view_sprite->isVisible())
     view_sprite->newSprite();
+  else if(view_thing->isVisible())
+    view_thing->newThing();
 }
 
 /* Updates based on selected index */
@@ -111,6 +119,7 @@ void MapDatabase::updateSelected(int index)
   {
     view_raw->show();
     view_sprite->hide();
+    view_thing->hide();
 
     /* Raw view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -122,6 +131,13 @@ void MapDatabase::updateSelected(int index)
   {
     view_raw->hide();
     view_sprite->show();
+    view_thing->hide();
+  }
+  else if(index == EditorEnumDb::THING_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->show();
   }
 }
 
@@ -139,9 +155,17 @@ SpriteView* MapDatabase::getSpriteView()
   return view_sprite;
 }
 
+ThingView* MapDatabase::getThingView()
+{
+  return view_thing;
+}
+
 /* Sets the map editor */
 void MapDatabase::setMapEditor(EditorMap* editing_map)
 {
   /* Add the sprites */
   view_sprite->setEditorMap(editing_map);
+
+  /* Add to the thing view */
+  view_thing->setEditorMap(editing_map);
 }
