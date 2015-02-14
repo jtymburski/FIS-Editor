@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Class Name: MatrixView
  * Date Created: February 8, 2015
- * Inheritance: QWidget
+ * Inheritance: QFrame
  * Description: The view controller that takes a matrix and allows for control
  *              and viewing of it.
  ******************************************************************************/
@@ -13,7 +13,7 @@
  *===========================================================================*/
 
 /* Constructor Function */
-MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QWidget(parent)
+MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
 {
   /* Initialize variables */
   this->matrix = NULL;
@@ -198,6 +198,10 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QWidget(parent)
           this, SLOT(actionPassabilityWest(bool)));
   rightclick_menu->addAction(action_pass_w);
   rightclick_menu->hide();
+
+  /* Configure parent widget */
+  setFrameStyle(QFrame::Panel);
+  setLineWidth(1);
 
   /* Sets the matrix */
   setMatrix(matrix);

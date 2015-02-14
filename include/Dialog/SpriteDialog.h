@@ -57,6 +57,7 @@ private:
   EditorSprite *original_sprite;
   EditorSprite *working_sprite;
   bool creation_mode;
+  EditorEnumDb::SpriteEditMode mode;
 
 /*============================================================================
  * PRIVATE FUNCTIONS

@@ -1174,7 +1174,10 @@ void EditorSprite::setPath(int index, QString path)
 {
   FrameInfo info;
   info.path = path;
-  info.image = QImage(path);
+  if(path.isEmpty())
+    info.image = QImage();
+  else
+    info.image = QImage(path);
   info.hflip = false;
   info.vflip = false;
   info.rotate90 = false;

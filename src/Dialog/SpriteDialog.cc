@@ -275,6 +275,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   setToWorking();
 
   /* Set disabled, based on mode */
+  this->mode = mode;
   if(mode == EditorEnumDb::SPRITE_FRAMES)
   {
     brightness_input->setDisabled(true);
@@ -298,6 +299,9 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
    
     frame_list->setDisabled(true);
   }
+
+  /* Dialog control */
+  setWindowTitle("Sprite Edit");
 }
   
 /*
@@ -396,7 +400,13 @@ void SpriteDialog::destroyWorkingSprite()
 void SpriteDialog::setToDefault()
 {
   EditorSprite* default_sprite = new EditorSprite();
-  working_sprite->copyBaseSprite(*default_sprite);
+  if(mode == EditorEnumDb::SPRITE_ALL || mode == EditorEnumDb::SPRITE_DATA)
+    working_sprite->copyBaseSprite(*default_sprite);
+  if(mode == EditorEnumDb::SPRITE_ALL || mode == EditorEnumDb::SPRITE_FRAMES)
+  {
+    working_sprite->set0();
+    working_sprite->resetFlips();
+  }
   setToWorking();
   update();
   delete default_sprite;

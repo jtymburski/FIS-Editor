@@ -25,6 +25,10 @@ EditorThing::EditorThing(int id, QString name, QString description)
   matrix = new EditorMatrix(1, 1, false);
   thing.setEventHandler(&event_handler);
 
+  /* Make sure there's one frame in the sprite */
+  if(dialog_image.frameCount() == 0)
+    dialog_image.setPath(0, "");
+
   /* Load data */
   setID(id);
   setName(name);

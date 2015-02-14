@@ -57,6 +57,9 @@ private:
   /* Frame information */
   QVector<FrameInfo> frame_info;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSprite &source, bool only_base = false);
@@ -69,6 +72,12 @@ protected:
 
   /* Returns a transformed image */
   QPixmap transformPixmap(int index, int w, int h);
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  void spriteChanged();
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -150,9 +159,6 @@ public slots:
 
   /* Sets all of the sprites frames to 270 deg rotation */
   void set270();
-
-signals:
-  void spriteChanged();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

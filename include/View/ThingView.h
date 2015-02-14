@@ -57,6 +57,9 @@ private:
   /* Opens the thing editing dialog */
   void editThing();
 
+  /* Refreshes the info in the lower half of the widget */
+  void updateInfo();
+
   /* Refreshes the editor thing list in the view */
   void updateList();
 
@@ -64,40 +67,24 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
-  /* Sets up the painting of all selected files */
-  //void paintEvent(QPaintEvent *);
-
-  /* Views Frames */
-  //void mouseDoubleClickEvent(QMouseEvent *e);
 
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Sends up the Editor Sprite */
-  //void sendUpEditorSprite(EditorSprite* sprite);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Adds an Editor Sprite to the toolbox */
-  //void addEditorSprite(EditorSprite* e);
-
   /* The current row changes in the list widget */
-  void currentRowChanged(int index);
-
-  /* Opens the sprite editing dialog */
-  //void editSprite();
+  void currentRowChanged(int);
 
   /* An item in the list was double clicked */
   void itemDoubleClicked(QListWidgetItem*);
 
-  /* Updates the sprite list */
-  //void updateList();
-
-  /* Views the frame sequence */
-  //void viewFrameSequence();
+  /* Updates the thing sidebar */
+  void updateThings();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

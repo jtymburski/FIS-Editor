@@ -92,9 +92,42 @@ void ThingView::editThing()
   if(thing_dialog != NULL)
     delete thing_dialog;
   thing_dialog = new ThingDialog(current, this);
-  // TODO: Connect once the thing pop-up is complete
-  //connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+  connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
   thing_dialog->show();
+}
+
+/* Refreshes the info in the lower half of the widget */
+// TODO: Comment
+void ThingView::updateInfo()
+{
+  if(editor_map != NULL)
+  {
+    /* Blank the labels */
+    lbl_id->setText("ID:");
+    lbl_image->setPixmap(QPixmap());
+    lbl_name->setText("Name:");
+    lbl_size->setText("Size:  |  Frames:");
+
+    EditorThing* thing = getSelected();
+    if(thing != NULL)
+    {
+      /* Set the labels */
+      lbl_id->setText("ID: " + QString::number(thing->getID()));
+      lbl_name->setText("Name: " + thing->getName());
+
+      /* If matrix is valid, set the remaining info */
+      if(thing->getMatrix() != NULL)
+      {
+        lbl_image->setPixmap(thing->getMatrix()->getSnapshot(250, 250));
+        lbl_size->setText("Size: " +
+                      QString::number(thing->getMatrix()->getWidth()) +
+                      "W x " +
+                      QString::number(thing->getMatrix()->getHeight()) +
+                      "H  |  Frames: " +
+                      QString::number(thing->getMatrix()->getTrimFrames() + 1));
+      }
+    }
+  }
 }
 
 /*
@@ -116,6 +149,7 @@ void ThingView::updateList()
   }
 
   thing_list->setCurrentRow(index);
+  updateInfo();
   update();
 }
 
@@ -124,42 +158,21 @@ void ThingView::updateList()
  *===========================================================================*/
 
 /* The current row changes in the list widget */
-void ThingView::currentRowChanged(int index)
+void ThingView::currentRowChanged(int)
 {
-  if(editor_map != NULL)
-  {
-    /* Blank the labels */
-    lbl_id->setText("ID:");
-    lbl_image->setPixmap(QPixmap());
-    lbl_name->setText("Name:");
-    lbl_size->setText("Size:");
-
-    EditorThing* thing = editor_map->getThingByIndex(index);
-    if(thing != NULL)
-    {
-      /* Set the labels */
-      lbl_id->setText("ID: " + QString::number(thing->getID()));
-      lbl_name->setText("Name: " + thing->getName());
-
-      /* If matrix is valid, set the remaining info */
-      if(thing->getMatrix() != NULL)
-      {
-        lbl_image->setPixmap(thing->getMatrix()->getSnapshot(lbl_image->width(),
-                                                          lbl_image->height()));
-        lbl_size->setText("Size: " +
-                          QString::number(thing->getMatrix()->getWidth()) +
-                          "W x " +
-                          QString::number(thing->getMatrix()->getHeight()) +
-                          "H");
-      }
-    }
-  }
+  updateInfo();
 }
 
 /* An item in the list was double clicked */
 void ThingView::itemDoubleClicked(QListWidgetItem*)
 {
   editThing();
+}
+
+/* Updates the thing sidebar */
+void ThingView::updateThings()
+{
+  updateList();
 }
 
 /*============================================================================

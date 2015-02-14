@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Class Name: MatrixView
  * Date Created: February 8, 2015
- * Inheritance: QWidget
+ * Inheritance: QFrame
  * Description: The view controller that takes a matrix and allows for control
  *              and viewing of it.
  ******************************************************************************/
@@ -9,18 +9,18 @@
 #define MATRIXVIEW_H
 
 #include <QFileDialog>
+#include <QFrame>
 #include <QGraphicsView>
 #include <QGridLayout>
 #include <QInputDialog>
 #include <QMenu>
 #include <QPushButton>
-#include <QWidget>
 
 #include "Database/EditorMatrix.h"
 #include "Dialog/MatrixDialog.h"
 #include "Dialog/SpriteDialog.h"
 
-class MatrixView : public QWidget
+class MatrixView : public QFrame
 {
   Q_OBJECT
 public:

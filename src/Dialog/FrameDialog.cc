@@ -107,6 +107,9 @@ FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
 
     setLayout(layout);
   }
+
+  /* Dialog control */
+  setWindowTitle("Frame Edit");
 }
 
 /*
@@ -143,6 +146,7 @@ void FrameDialog::deleteFrame()
 void FrameDialog::finishSave()
 {
   *sprite_original = *sprite_working;
+  emit ok();
 }
 
 /*

@@ -12,6 +12,7 @@
 #include <QGridLayout>
 
 #include "Database/EditorThing.h"
+#include "View/EventView.h"
 #include "View/MatrixView.h"
 
 class ThingDialog : public QDialog
@@ -25,6 +26,23 @@ public:
   ~ThingDialog();
 
 private:
+  /* The visible control box */
+  QComboBox* box_visible;
+
+  /* Event view and control */
+  EditorEvent* event_ctrl;
+  EventView* event_view;
+
+  /* The frame control dialog */
+  FrameDialog* frame_dialog;
+
+  /* The frame image */
+  QLabel* lbl_frame_img;
+
+  /* The line edit for thing data */
+  QLineEdit* line_description;
+  QLineEdit* line_name;
+
   /* Matrix view and control */
   MatrixView* matrix_view;
 
@@ -33,11 +51,21 @@ private:
   EditorThing* thing_working;
 
 /*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Creates the layout - only called on initial construction */
+  void createLayout();
+
+  /* Updates the objects with the thing data */
+  void updateData();
+
+/*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
   /* Custom close event */
-  void closeEvent(QCloseEvent *);
+  void closeEvent(QCloseEvent* event);
 
 /*============================================================================
  * SIGNALS
@@ -50,11 +78,20 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Destroys the current working sprite */
-  //void destroyWorkingSprite();
+  /* Button control triggers */
+  void buttonCancel();
+  void buttonFrameEdit();
+  void buttonOk();
 
-  /* Updates the current working sprite */
-  //void updateWorkingSprite();
+  /* Changed text in line edits */
+  void changedDescription(QString description);
+  void changedName(QString name);
+
+  /* Update the frame for the thing */
+  void updateFrame();
+
+  /* Visibility status changed */
+  void visibilityChanged(int index);
 };
 
 #endif // THINGDIALOG_H
