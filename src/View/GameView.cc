@@ -13,6 +13,12 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
 {
   view_map = new MapView(this);
   addWidget(view_map);
+  connect(view_map, SIGNAL(updateEventObjects()),
+          this, SIGNAL(updateEventObjects()));
+  connect(this, SIGNAL(updatedItems(QVector<QString>)),
+          view_map, SIGNAL(updatedItems(QVector<QString>)));
+  connect(this, SIGNAL(updatedMaps(QVector<QString>)),
+          view_map, SIGNAL(updatedMaps(QVector<QString>)));
 
   view_person = new QWidget(this);
   null_person = view_person;

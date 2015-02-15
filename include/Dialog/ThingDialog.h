@@ -50,6 +50,9 @@ private:
   EditorThing* thing_original;
   EditorThing* thing_working;
 
+  /* Waiting for sub-map data */
+  bool waiting_for_submap;
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
@@ -74,6 +77,9 @@ signals:
   /* Ok pressed */
   void ok();
 
+  /* Select tile trigger */
+  void selectTile(EditorEnumDb::MapViewMode view);
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -87,11 +93,24 @@ public slots:
   void changedDescription(QString description);
   void changedName(QString name);
 
+  /* Select tile trigger */
+  void selectTile();
+
   /* Update the frame for the thing */
   void updateFrame();
 
   /* Visibility status changed */
   void visibilityChanged(int index);
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Returns the event view widget */
+  EventView* getEventView();
+
+  /* Update the selected tile for the thing */
+  void updateSelectedTile(int id, int x, int y);
 };
 
 #endif // THINGDIALOG_H

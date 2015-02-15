@@ -238,16 +238,8 @@ void MapControl::duplicateSubMap()
 void MapControl::importSubMap()
 {
   // TODO: Future
-  //QMessageBox::information(this, "Notification",
-  //                         "Coming soon to a production near you!");
-
-  // TODO: REMOVE - TESTING - Dialog for events
-  QDialog* dialog = new QDialog(this);
-  EventView* event_view = new EventView(NULL, dialog);
-  QVBoxLayout* layout = new QVBoxLayout(dialog);
-  layout->addWidget(event_view, 0, Qt::AlignCenter);
-  dialog->setLayout(layout);
-  dialog->show();
+  QMessageBox::information(this, "Notification",
+                           "Coming soon to a production near you!");
 }
 
 /* Item check change */

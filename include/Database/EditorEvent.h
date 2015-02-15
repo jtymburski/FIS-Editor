@@ -110,19 +110,20 @@ public:
   bool setEventConversation(Conversation* convo = NULL);
 
   /* Sets the event to give item */
-  bool setEventGiveItem(int id, int count);
+  bool setEventGiveItem(int id = 0, int count = 1);
 
   /* Sets the event to notification text */
-  bool setEventNotification(QString notification);
+  bool setEventNotification(QString notification = "Blank");
 
   /* Sets the event to start battle */
   bool setEventStartBattle();
 
   /* Sets the event to start map */
-  bool setEventStartMap(int id);
+  bool setEventStartMap(int id = 0);
 
   /* Sets the event to teleport a thing */
-  bool setEventTeleport(int thing_id, int section_id, int x, int y);
+  bool setEventTeleport(int thing_id = 0, int section_id = 0,
+                        int x = 0, int y = 0);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

@@ -16,8 +16,10 @@
 ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
-  /* Set-up the thing set - copied to working for changes */
   frame_dialog = NULL;
+  waiting_for_submap = false;
+
+  /* Set-up the thing set - copied to working for changes */
   thing_original = edit_thing;
   thing_working = new EditorThing();
   if(thing_original != NULL)
@@ -110,6 +112,7 @@ void ThingDialog::createLayout()
   event_ctrl = new EditorEvent(thing_working->getEvent());
   event_view = new EventView(event_ctrl, this);
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
+  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* Matrix View */
   matrix_view = new MatrixView(thing_working->getMatrix(), this);
@@ -186,6 +189,7 @@ void ThingDialog::buttonOk()
   if(thing_original != NULL)
   {
     *thing_original = *thing_working;
+    thing_original->setEvent(*event_ctrl->getEvent());
     emit ok();
     close();
   }
@@ -218,6 +222,14 @@ void ThingDialog::updateFrame()
   }
 }
 
+/* Select tile trigger */
+void ThingDialog::selectTile()
+{
+  waiting_for_submap = true;
+  hide();
+  emit selectTile(EditorEnumDb::THING_VIEW);
+}
+
 /* Visibility status changed */
 void ThingDialog::visibilityChanged(int index)
 {
@@ -225,4 +237,22 @@ void ThingDialog::visibilityChanged(int index)
     thing_working->setVisibility(true);
   else if(index == 0)
     thing_working->setVisibility(false);
+}
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Returns the event view widget */
+EventView* ThingDialog::getEventView()
+{
+  return event_view;
+}
+
+/* Update the selected tile for the thing */
+void ThingDialog::updateSelectedTile(int id, int x, int y)
+{
+  waiting_for_submap = false;
+  show();
+  event_view->updateSelectedTile(id, x, y);
 }

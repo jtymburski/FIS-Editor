@@ -32,8 +32,15 @@ private:
   QPushButton* button_import;
   QPushButton* button_new;
 
+  /* The editing map for the database */
+  EditorMap* editing_map;
+
   /* Layout */
   QVBoxLayout* layout;
+
+  /* Last thing mode to call update */
+  EditorEnumDb::MapViewMode mode_for_data;
+  EditorEnumDb::MapViewMode mode_for_tile;
 
   /* The Views */
   RawImageView* view_raw;
@@ -45,10 +52,19 @@ protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
-  /* Emits to parent when selected to deselect all others */
-//  void chosen(int);
+  /* Select tile trigger to map render */
+  void selectTile();
 
+  /* Updates event objects in this class */
+  void updateEventObjects();
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Button clicks */
   void buttonDelete();
@@ -56,9 +72,25 @@ public slots:
   void buttonImport();
   void buttonNew();
 
+  /* Fills thing with data */
+  void fillWithData(EditorEnumDb::MapViewMode view);
+
+  /* Select a tile trigger - to the map render */
+  void selectTile(EditorEnumDb::MapViewMode view);
+
+  /* Sends the selected tile to the appropriate thing pop-up */
+  void sendSelectedTile(int id, int x, int y);
+
+  /* Updated data from higher up in the stack */
+  void updatedItems(QVector<QString> items);
+  void updatedMaps(QVector<QString> maps);
+
   /* Updates based on selected index */
   void updateSelected(int index);
 
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Returns the views */
   RawImageView* getRawView();

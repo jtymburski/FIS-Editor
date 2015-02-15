@@ -109,6 +109,7 @@ public:
   SubMapInfo* getMapByIndex(int index);
   int getMapCount();
   int getMapIndex(int id);
+  QVector<QString> getMapList();
   QString getMapNameList(int index);
   QVector<SubMapInfo*> getMaps();
 
@@ -133,6 +134,7 @@ public:
   EditorThing* getThingByIndex(int index);
   int getThingCount();
   int getThingIndex(int id);
+  QVector<QString> getThingList();
   QVector<EditorThing*> getThings();
 
   /* Returns the tile icons */

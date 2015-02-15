@@ -154,10 +154,13 @@ void FrameDialog::finishSave()
  */
 void FrameDialog::replaceFrame()
 {
+  QString path = sprite_working->getPath(framenumber);
+  if(path.isEmpty())
+    path = EditorHelpers::getSpriteDir();
+
   QString filename = QFileDialog::getOpenFileName(this,
                                    tr("Select A Frame To Replace This"),
-                                   sprite_working->getPath(framenumber),
-                                   tr("Image Files (*.png)"));
+                                   path, tr("Image Files (*.png)"));
   if(filename != "")
   {
     sprite_working->setFramePath(framenumber,filename);

@@ -72,6 +72,11 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Triggers the update the data of objects for use in events */
+  void fillWithData(EditorEnumDb::MapViewMode view);
+
+  /* Triggers for the select tile on the given view mode */
+  void selectTile(EditorEnumDb::MapViewMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -110,5 +115,14 @@ public:
 
   /* Sets the editor map, which contains the data needed */
   void setEditorMap(EditorMap* map);
+
+  /* Updates list in thing dialog, needed for event control */
+  void updateListItems(QVector<QString> list);
+  void updateListMaps(QVector<QString> list);
+  void updateListSubmaps(QVector<QString> list);
+  void updateListThings(QVector<QString> list);
+
+  /* Update the selected tile for the thing */
+  void updateSelectedTile(int id, int x, int y);
 };
 #endif // THINGVIEW_H

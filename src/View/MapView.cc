@@ -80,6 +80,12 @@ void MapView::recursiveFill(int x, int y, EditorEnumDb::Layer layer,
 void MapView::setupLeftBar()
 {
   map_database = new MapDatabase(this);
+  connect(map_database, SIGNAL(updateEventObjects()),
+          this, SIGNAL(updateEventObjects()));
+  connect(this, SIGNAL(updatedItems(QVector<QString>)),
+          map_database, SLOT(updatedItems(QVector<QString>)));
+  connect(this, SIGNAL(updatedMaps(QVector<QString>)),
+          map_database, SLOT(updatedMaps(QVector<QString>)));
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
@@ -126,6 +132,9 @@ void MapView::setupMapView()//int x, int y)
           this, SLOT(passSet(EditorTile*)));
   connect(map_render, SIGNAL(passUnset(EditorTile*)),
           this, SLOT(passUnset(EditorTile*)));
+  connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
+          map_database, SLOT(sendSelectedTile(int,int,int)));
+  connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
 }
 
 /*

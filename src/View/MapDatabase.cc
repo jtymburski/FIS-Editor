@@ -9,6 +9,10 @@
 
 MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
 {
+  editing_map = NULL;
+  mode_for_data = EditorEnumDb::RAW_VIEW;
+  mode_for_tile = EditorEnumDb::RAW_VIEW;
+
   /* Top view */
   view_top = new QListWidget(this);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -28,6 +32,10 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
+  connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
+  connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
 
   /* Push buttons at the bottom of the layout */
   button_delete = new QPushButton("Delete", this);
@@ -105,6 +113,66 @@ void MapDatabase::buttonNew()
     view_thing->newThing();
 }
 
+/* Fills thing with data */
+void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
+{
+  if(editing_map != NULL)
+  {
+    /* Set who called the update */
+    mode_for_data = view;
+
+    /* Update things */
+    if(view == EditorEnumDb::THING_VIEW)
+    {
+      view_thing->updateListSubmaps(editing_map->getMapList());
+
+      // TODO: REVISE - this isn't supposed to be base things but actual map
+      //                things
+      view_thing->updateListThings(editing_map->getThingList());
+    }
+
+    /* Emit signal to get other lists (items and maps) */
+    emit updateEventObjects();
+  }
+}
+
+/* Select a tile trigger - to the map render */
+void MapDatabase::selectTile(EditorEnumDb::MapViewMode view)
+{
+  if(editing_map != NULL)
+  {
+    mode_for_tile = view;
+    emit selectTile();
+  }
+}
+
+/* Sends the selected tile to the appropriate thing pop-up */
+void MapDatabase::sendSelectedTile(int id, int x, int y)
+{
+  if(mode_for_tile == EditorEnumDb::THING_VIEW)
+  {
+    view_thing->updateSelectedTile(id, x, y);
+  }
+}
+
+/* Updated data from higher up in the stack */
+void MapDatabase::updatedItems(QVector<QString> items)
+{
+  if(mode_for_data == EditorEnumDb::THING_VIEW)
+  {
+    view_thing->updateListItems(items);
+  }
+}
+
+/* Updated data from higher up in the stack */
+void MapDatabase::updatedMaps(QVector<QString> maps)
+{
+  if(mode_for_data == EditorEnumDb::THING_VIEW)
+  {
+    view_thing->updateListMaps(maps);
+  }
+}
+
 /* Updates based on selected index */
 void MapDatabase::updateSelected(int index)
 {
@@ -163,6 +231,8 @@ ThingView* MapDatabase::getThingView()
 /* Sets the map editor */
 void MapDatabase::setMapEditor(EditorMap* editing_map)
 {
+  this->editing_map = editing_map;
+
   /* Add the sprites */
   view_sprite->setEditorMap(editing_map);
 

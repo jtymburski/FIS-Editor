@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -21,6 +22,7 @@
 #include <QVBoxLayout>
 
 #include "Database/EditorEvent.h"
+#include "Database/GameDatabase.h"
 
 class EventView : public QFrame
 {
@@ -39,22 +41,31 @@ private:
   /* The conversation event - convo tree */
   QTreeWidget* convo_tree;
 
+  /* Game database */
+  GameDatabase* database;
+
   /* The connected event - original and working version */
   EditorEvent* event;
 
   /* Give item event control widgets */
   QSpinBox* item_count;
-  QLineEdit* item_name;
+  QComboBox* item_name;
+
+  /* The list of objects used in possible events */
+  QVector<QString> list_items;
+  QVector<QString> list_maps;
+  QVector<QString> list_submaps;
+  QVector<QString> list_things;
 
   /* Switch maps event - map name view box */
-  QLineEdit* map_name;
+  QComboBox* map_name;
 
   /* Notification event text edit box */
   QTextEdit* notification_edit;
 
   /* Teleport event - view text boxes for map location and thing */
   QLineEdit* tele_map;
-  QLineEdit* tele_thing;
+  QComboBox* tele_thing;
 
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;
@@ -70,6 +81,13 @@ private:
   void setLayoutData();
 
 /*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Select tile trigger */
+  void selectTile();
+
+/*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
@@ -77,18 +95,21 @@ public slots:
   void categoryChanged(int index);
 
   /* The change map button press */
-  void changeMapPressed();
+  void changeMapChanged(int index);
 
   /* The give item event slot changes */
   void giveCountChanged(int index);
-  void giveItemPressed();
+  void giveItemChanged(int index);
 
   /* The notification event text changes */
   void notificationTextChanged();
 
+  /* Resize the QTreeWidget for the items */
+  void resizeTree(QTreeWidgetItem*);
+
   /* The teleport event button presses */
   void teleportMapPressed();
-  void teleportThingPressed();
+  void teleportThingChanged(int index);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -97,8 +118,23 @@ public:
   /* Returns the event */
   EditorEvent* getEvent();
 
+  /* Returns the list of objects, used for event creation */
+  QVector<QString> getListItems();
+  QVector<QString> getListMaps();
+  QVector<QString> getListSubmaps();
+  QVector<QString> getListThings();
+
   /* Sets the editor event */
   void setEvent(EditorEvent* event);
+
+  /* Sets the list of objects, used for event creation */
+  void setListItems(QVector<QString> items);
+  void setListMaps(QVector<QString> maps);
+  void setListSubmaps(QVector<QString> sub_maps);
+  void setListThings(QVector<QString> things);
+
+  /* Update the selected tile for the thing */
+  void updateSelectedTile(int id, int x, int y);
 };
 
 #endif // EVENTVIEW_H

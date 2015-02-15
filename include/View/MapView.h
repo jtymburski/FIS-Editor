@@ -101,7 +101,15 @@ private:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Passes the editor sprite up */
   void sendUpEditorSprite(EditorSprite* e);
+
+  /* Updated data to pass into map database */
+  void updatedItems(QVector<QString> items);
+  void updatedMaps(QVector<QString> maps);
+
+  /* Updates event objects in the map database class */
+  void updateEventObjects();
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

@@ -66,8 +66,15 @@ Application::Application(QWidget* parent)
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
 
+  /* Connections between game view and game database */
   connect(game_view,SIGNAL(nameChange(QString)),game_database,
           SLOT(updateBottomListName(QString)));
+  connect(game_view, SIGNAL(updateEventObjects()),
+          game_database, SLOT(updateEventObjects()));
+  connect(game_database, SIGNAL(updatedItems(QVector<QString>)),
+          game_view, SIGNAL(updatedItems(QVector<QString>)));
+  connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
+          game_view, SIGNAL(updatedMaps(QVector<QString>)));
 
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");

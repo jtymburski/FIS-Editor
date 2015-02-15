@@ -90,10 +90,19 @@ void ThingView::editThing()
 
   /* Delete the old and create the new dialog */
   if(thing_dialog != NULL)
+  {
+    disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
+    disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
     delete thing_dialog;
+  }
   thing_dialog = new ThingDialog(current, this);
   connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
+  connect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+          this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
   thing_dialog->show();
+
+  emit fillWithData(EditorEnumDb::THING_VIEW);
 }
 
 /* Refreshes the info in the lower half of the widget */
@@ -259,4 +268,39 @@ void ThingView::setEditorMap(EditorMap* map)
 {
   editor_map = map;
   updateList();
+}
+
+/* Updates list in thing dialog, needed for event control */
+void ThingView::updateListItems(QVector<QString> list)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->getEventView()->setListItems(list);
+}
+
+/* Updates list in thing dialog, needed for event control */
+void ThingView::updateListMaps(QVector<QString> list)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->getEventView()->setListMaps(list);
+}
+
+/* Updates list in thing dialog, needed for event control */
+void ThingView::updateListThings(QVector<QString> list)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->getEventView()->setListThings(list);
+}
+
+/* Update the selected tile for the thing */
+void ThingView::updateListSubmaps(QVector<QString> list)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->getEventView()->setListSubmaps(list);
+}
+
+/* Update the selected tile for the thing */
+void ThingView::updateSelectedTile(int id, int x, int y)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->updateSelectedTile(id, x, y);
 }

@@ -55,6 +55,17 @@ protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
 
+signals:
+  /* Emits upon name change to game object */
+  void nameChange(QString);
+
+  /* Updated data to pass into map database */
+  void updatedItems(QVector<QString> items);
+  void updatedMaps(QVector<QString> maps);
+
+  /* Updates event objects in the map database class */
+  void updateEventObjects();
+
 public slots:
   /* Loads the image with a valid given path */
 //  void loadSprite(QString path);
@@ -80,11 +91,6 @@ public slots:
   void setViewMode(EditorEnumDb::ViewMode);
 
   //void deactivateCurrentView();
-
-signals:
-  /* Emits to parent when selected to deselect all others */
-//  void chosen(int);
-  void nameChange(QString);
 
 public:
   /* Refresh View */

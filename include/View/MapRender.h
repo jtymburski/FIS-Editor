@@ -45,6 +45,9 @@ private:
   /* The rendering map */
   SubMapInfo* map;
 
+  /* In tile select mode */
+  bool tile_select;
+
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
 
@@ -72,10 +75,16 @@ signals:
   /* Sends the tile position to the map status bar */
   void sendCurrentPosition(int,int);
 
+  /* Sends the selected tile to the thing pop-up */
+  void sendSelectedTile(int id, int x, int y);
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Select a tile trigger */
+  void selectTile();
+
   /* Sets the rendering sub-map */
   void setRenderingMap(SubMapInfo* map);
 

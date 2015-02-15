@@ -472,6 +472,22 @@ int EditorMap::getMapIndex(int id)
 }
 
 /*
+ * Description: Returns the list of maps in the format "ID: NAME"
+ *
+ * Inputs: none
+ * Output: QVector<QString> - the list of strings of each sub-map.
+ */
+QVector<QString> EditorMap::getMapList()
+{
+  QVector<QString> list;
+
+  for(int i = 0; i < sub_maps.size(); i++)
+    list.push_back(QString::number(sub_maps[i]->id) + ": " + sub_maps[i]->name);
+
+  return list;
+}
+
+/*
  * Description: Returns the name plus ID for the sub-map at the index
  *
  * Inputs: int index - the sub-map name index
@@ -720,6 +736,25 @@ int EditorMap::getThingIndex(int id)
       if(things[i]->getID() == id)
         return i;
   return -1;
+}
+
+/*
+ * Description: Returns a list of all things in the format of a HEADER row
+ *              with the following rows as "ID: NAME".
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things
+ */
+QVector<QString> EditorMap::getThingList()
+{
+  QVector<QString> stack;
+  stack.push_back("MAP THINGS");
+
+  /* Go through all things and add them to the list */
+  for(int i = 0; i < things.size(); i++)
+    stack.push_back(things[i]->getNameList());
+
+  return stack;
 }
 
 /*

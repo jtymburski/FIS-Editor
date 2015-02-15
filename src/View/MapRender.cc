@@ -28,6 +28,7 @@ MapRender::MapRender(QWidget* parent,
   active_tile = NULL;
   setCursorMode(cursor);
   map = NULL;
+  tile_select = false;
 
   /* Sets the background to be black */
   setBackgroundBrush(QBrush(Qt::black));
@@ -119,9 +120,14 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
   /* If click, proceed to trigger item click for normal pens */
   if(event->button() == Qt::LeftButton)
   {
-    if(cursor_mode == EditorEnumDb::BASIC ||
-       cursor_mode == EditorEnumDb::ERASER ||
-       cursor_mode == EditorEnumDb::FILL)
+    if(tile_select)
+    {
+      emit sendSelectedTile(map->id, active_tile->getX(), active_tile->getY());
+      tile_select = false;
+    }
+    else if(cursor_mode == EditorEnumDb::BASIC ||
+            cursor_mode == EditorEnumDb::ERASER ||
+            cursor_mode == EditorEnumDb::FILL)
       emit itemClick(active_tile);
     else if(cursor_mode == EditorEnumDb::BLOCKPLACE)
     {
@@ -179,6 +185,12 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
+
+/* Select a tile trigger */
+void MapRender::selectTile()
+{
+  tile_select = true;
+}
 
 /* Sets the rendering sub-map */
 void MapRender::setRenderingMap(SubMapInfo* map)

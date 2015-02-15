@@ -671,6 +671,23 @@ void GameDatabase::updateBottomListName(QString str)
   modifyBottomList(view_top->currentRow());
 }
 
+/* Updates event objects in the map database class */
+// TODO: Comment
+void GameDatabase::updateEventObjects()
+{
+  /* List of Items */
+  QVector<QString> item_list;
+  for(int i = 0; i < data_item.size(); i++)
+    item_list.push_back(data_item[i]->getNameList());
+  emit updatedItems(item_list);
+
+  /* List of maps */
+  QVector<QString> map_list;
+  for(int i = 0; i < data_map.size(); i++)
+    map_list.push_back(data_map[i]->getNameList());
+  emit updatedMaps(map_list);
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

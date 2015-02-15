@@ -89,6 +89,25 @@ private:
   QListWidget* view_top;
 
 protected:
+
+signals:
+  void changeAction(EditorAction* action);
+  void changeBattleclass(EditorCategory* battle_class);
+  void changeBubby(EditorBubby* bubby);
+  void changeEquipment(EditorEquipment* equipment);
+  void changeItem(EditorItem* item);
+  void changeMap(EditorMap* map);
+  void changeMode(EditorEnumDb::ViewMode);
+  void changeParty(EditorParty* party);
+  void changePerson(EditorPerson* person);
+  void changeRace(EditorCategory* race);
+  void changeSkill(EditorSkill* skill);
+  void changeSkillset(EditorSkillset* skill_set);
+
+  /* Updated data to pass into map database */
+  void updatedItems(QVector<QString> items);
+  void updatedMaps(QVector<QString> maps);
+
 public slots:
   /* Creates a new map, from the dialog */
   void createNewMap();
@@ -120,19 +139,8 @@ public slots:
   /* Updates the bottom list -> when a name changes */
   void updateBottomListName(QString str);
 
-signals:
-  void changeAction(EditorAction* action);
-  void changeBattleclass(EditorCategory* battle_class);
-  void changeBubby(EditorBubby* bubby);
-  void changeEquipment(EditorEquipment* equipment);
-  void changeItem(EditorItem* item);
-  void changeMap(EditorMap* map);
-  void changeMode(EditorEnumDb::ViewMode);
-  void changeParty(EditorParty* party);
-  void changePerson(EditorPerson* person);
-  void changeRace(EditorCategory* race);
-  void changeSkill(EditorSkill* skill);
-  void changeSkillset(EditorSkillset* skill_set);
+  /* Updates event objects in the map database class */
+  void updateEventObjects();
 
 public:
   /* Delete the game */
