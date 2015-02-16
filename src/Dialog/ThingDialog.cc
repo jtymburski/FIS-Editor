@@ -23,12 +23,28 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
   thing_original = edit_thing;
   thing_working = new EditorThing();
   if(thing_original != NULL)
+  {
     *thing_working = *thing_original;
+    event_ctrl = new EditorEvent(
+                           EventHandler::copyEvent(thing_original->getEvent()));
+  }
+  else
+  {
+    event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+  }
 
   /* Layout setup */
   createLayout();
   updateData();
   updateFrame();
+
+  // TODO: TESTING - REMOVE
+  Conversation test;
+  test.action_event = EventHandler::createEventTemplate();
+  test.text = "HI";
+  test.thing_id = 1;
+  convo_dialog = new ConvoDialog(&test, false, this);
+  //convo_dialog->show();
 }
 
 /* Destructor function */
@@ -109,7 +125,6 @@ void ThingDialog::createLayout()
   layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
-  event_ctrl = new EditorEvent(thing_working->getEvent());
   event_view = new EventView(event_ctrl, this);
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
   connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
@@ -149,6 +164,7 @@ void ThingDialog::updateData()
 /* Custom close event */
 void ThingDialog::closeEvent(QCloseEvent* event)
 {
+  event_ctrl->setEventBlank();
   if(thing_working != NULL)
     delete thing_working;
   thing_working = NULL;
@@ -190,6 +206,7 @@ void ThingDialog::buttonOk()
   {
     *thing_original = *thing_working;
     thing_original->setEvent(*event_ctrl->getEvent());
+    event_ctrl->setEventBlank(false);
     emit ok();
     close();
   }

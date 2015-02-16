@@ -23,7 +23,7 @@
 EditorThing::EditorThing(int id, QString name, QString description)
 {
   matrix = new EditorMatrix(1, 1, false);
-  thing.setEventHandler(&event_handler);
+  event = EventHandler::createEventTemplate();
 
   /* Make sure there's one frame in the sprite */
   if(dialog_image.frameCount() == 0)
@@ -51,6 +51,7 @@ EditorThing::EditorThing(const EditorThing &source) : EditorThing()
  */
 EditorThing::~EditorThing()
 {
+  EventHandler::deleteEvent(event);
   delete matrix;
   matrix = NULL;
 }
@@ -70,7 +71,7 @@ void EditorThing::copySelf(const EditorThing &source)
 {
   /* Copy the thing data */
   setDescription(source.getDescription());
-  setEvent(EditorEvent::copyEvent(source.getEvent()));
+  setEvent(EventHandler::copyEvent(source.getEvent()));
   setID(source.getID());
   setName(source.getName());
   setVisibility(source.isVisible());
@@ -123,7 +124,7 @@ EditorSprite* EditorThing::getDialogImage()
  */
 Event EditorThing::getEvent() const
 {
-  return thing.getInteraction();
+  return event;
 }
 
 /*
@@ -217,7 +218,8 @@ void EditorThing::setDialogImage(QString path)
  */
 void EditorThing::setEvent(Event event)
 {
-  thing.setInteraction(event);
+  this->event = EventHandler::deleteEvent(this->event);
+  this->event = event;
 }
 
 /*

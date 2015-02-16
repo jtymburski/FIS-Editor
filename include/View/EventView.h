@@ -35,6 +35,10 @@ public:
   ~EventView();
 
 private:
+  /* Right click actions that can be disabled */
+  QAction* action_delete;
+  QAction* action_option;
+
   /* The category of the event view */
   QComboBox* combo_category;
 
@@ -63,6 +67,10 @@ private:
   /* Notification event text edit box */
   QTextEdit* notification_edit;
 
+  /* Right click menu on conversation dialog */
+  QString rightclick_index;
+  QMenu* rightclick_menu;
+
   /* Teleport event - view text boxes for map location and thing */
   QLineEdit* tele_map;
   QComboBox* tele_thing;
@@ -77,8 +85,18 @@ private:
   /* Creates the layout and widgets for this controller */
   void createLayout();
 
+  /* Returns the convesation item, based on the index, of the tree widget */
+  QTreeWidgetItem* getConvo(QString base_index);
+
+  /* Returns the conversation index of the tree widget */
+  QString getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent = NULL);
+
   /* Set layout data */
   void setLayoutData();
+
+  /* Update conversation data */
+  void updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
+                       bool option = false);
 
 /*============================================================================
  * SIGNALS
@@ -97,6 +115,9 @@ public slots:
   /* The change map button press */
   void changeMapChanged(int index);
 
+  /* The convo menu requested - on right click */
+  void convoMenuRequested(QPoint point);
+
   /* The give item event slot changes */
   void giveCountChanged(int index);
   void giveItemChanged(int index);
@@ -106,6 +127,13 @@ public slots:
 
   /* Resize the QTreeWidget for the items */
   void resizeTree(QTreeWidgetItem*);
+
+  /* The right click slots, for conversation */
+  void rightClickDelete();
+  void rightClickEdit();
+  void rightClickInsertAfter();
+  void rightClickInsertBefore();
+  void rightClickInsertOption();
 
   /* The teleport event button presses */
   void teleportMapPressed();

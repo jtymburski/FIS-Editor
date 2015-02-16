@@ -51,6 +51,7 @@ EditorEvent::EditorEvent(const EditorEvent &source) : EditorEvent()
  */
 EditorEvent::~EditorEvent()
 {
+  setEventBlank();
   conversation = NULL;
 }
 
@@ -175,7 +176,7 @@ Conversation* EditorEvent::convoManipulator(QString index, bool generate,
  */
 void EditorEvent::copySelf(const EditorEvent &source)
 {
-  event = copyEvent(source.event);
+  event = EventHandler::copyEvent(source.event);
   conversation = event.convo;
 }
 
@@ -218,9 +219,9 @@ QString EditorEvent::recursiveConversationFind(Conversation* ref,
  *              call will only execute if the current event is CONVO.
  *
  * Inputs: QString index - the index to the conversation node
- * Output: bool - true if deleted
+ * Output: QString - the resulting index after. Blank if failed
  */
-bool EditorEvent::deleteConversation(QString index)
+QString EditorEvent::deleteConversation(QString index)
 {
   if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
   {
@@ -238,16 +239,39 @@ bool EditorEvent::deleteConversation(QString index)
         current->next.clear();
         current->text = "";
         current->thing_id = -2;
+        return index;
       }
       else
       {
         QStringList split = index.split(".");
+
+        /* Find new index */
+        QString result_index = "";
+        if(previous->next.size() > 1)
+        {
+          if(split.last() == "1")
+            result_index = index;
+          else
+          {
+            for(int i = 0; i < split.size() - 1; i++)
+              result_index += split[i] + ".";
+            result_index += QString::number(split.last().toInt() - 1);
+          }
+        }
+        else
+        {
+          for(int i = 0; i < split.size() - 1; i++)
+            result_index += split[i] + ".";
+          result_index.chop(1);
+        }
+
+        /* Erase element */
         previous->next.erase(previous->next.begin() + split.last().toInt() - 1);
+        return result_index;
       }
-      return true;
     }
   }
-  return false;
+  return "";
 }
 
 /*
@@ -451,10 +475,10 @@ int EditorEvent::getTeleportY()
  * Inputs: QString index - the index reference node for where to insert after
  *         Conversation convo - the inserting conversation struct
  *         bool option_node - true if the convo node has children
- * Output: bool - true if successful insertion
+ * Output: QString - the resulting index. Blank if failed
  */
-bool EditorEvent::insertConversationAfter(QString index, Conversation convo,
-                                          bool option_node)
+QString EditorEvent::insertConversationAfter(QString index, Conversation convo,
+                                             bool option_node)
 {
   if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
   {
@@ -477,7 +501,7 @@ bool EditorEvent::insertConversationAfter(QString index, Conversation convo,
 
           /* Append the new to the existing */
           ref->next.push_back(convo);
-          return true;
+          return (index + ".1");
         }
       }
       /* Not an option node */
@@ -490,6 +514,7 @@ bool EditorEvent::insertConversationAfter(QString index, Conversation convo,
         if(ref->next.size() > 1)
         {
           ref->next.push_back(convo);
+          return (index + "." + QString::number(ref->next.size()));
         }
         /* Normal node */
         else
@@ -498,13 +523,12 @@ bool EditorEvent::insertConversationAfter(QString index, Conversation convo,
             convo.next.push_back(ref->next.front());
           ref->next.clear();
           ref->next.push_back(convo);
+          return (index + ".1");
         }
-
-        return true;
       }
     }
   }
-  return false;
+  return "";
 }
 
 /*
@@ -517,10 +541,10 @@ bool EditorEvent::insertConversationAfter(QString index, Conversation convo,
  * Inputs: QString index - the index reference node for where to insert before
  *         Conversation convo - the inserting conversation struct
  *         bool option_node - true if the convo node has children
- * Output: bool - true if successful insertion
+ * Output: QString - the resulting index. Blank if failed
  */
-bool EditorEvent::insertConversationBefore(QString index, Conversation convo,
-                                           bool option_node)
+QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
+                                              bool option_node)
 {
   if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
   {
@@ -565,7 +589,7 @@ bool EditorEvent::insertConversationBefore(QString index, Conversation convo,
             /* Append the new to the existing */
             ref->next.push_back(convo);
           }
-          return true;
+          return index;
         }
       }
       /* Not an option node */
@@ -608,11 +632,11 @@ bool EditorEvent::insertConversationBefore(QString index, Conversation convo,
           ref->next.push_back(convo);
         }
 
-        return true;
+        return index;
       }
     }
   }
-  return false;
+  return "";
 }
 
 /*
@@ -645,11 +669,13 @@ bool EditorEvent::setConversation(QString index, Conversation convo)
 /*
  * Description: Sets the event in the class to the blank unused event.
  *
- * Inputs: none
+ * Inputs: bool delete_event - delete existing event. default true
  * Output: none
  */
-void EditorEvent::setEventBlank()
+void EditorEvent::setEventBlank(bool delete_event)
 {
+  if(delete_event)
+    event = EventHandler::deleteEvent(event);
   event = handler.createBlankEvent();
 }
 
@@ -663,14 +689,77 @@ void EditorEvent::setEventBlank()
  */
 bool EditorEvent::setEventConversation(Conversation* convo)
 {
-  /* Check the existing conversation */
-  if(event.convo != NULL)
-    delete event.convo;
-  event.convo = NULL;
-
   /* Create the new conversation */
+  event = EventHandler::deleteEvent(event);
   event = handler.createConversationEvent(convo);
+  event.convo->text = "First Entry.";
   conversation = event.convo;
+  //return true;
+
+  // TODO: TESTING - REMOVE
+  Event blank_event = EventHandler::createEventTemplate();
+  Conversation* conv = event.convo;
+  conv->text = "This is the initial conversation point that will start it. ";
+  conv->text += "How can this continue? It must pursue to complete ";
+  conv->text += "embodiment. Ok, maybe I'll just keep typing until I break ";
+  conv->text += "the entire compiler.";
+  conv->thing_id = 0;
+  Conversation convo2;
+  convo2.category = DialogCategory::TEXT;
+  convo2.action_event = blank_event;
+  convo2.text = "Pass the chips please.";
+  convo2.thing_id = 24;
+  Conversation test1, test2, test3, test4, test5;
+  test1.category = DialogCategory::TEXT;
+  test1.action_event = blank_event;
+  test1.text = "This is a test to see how data runs. The line will split ";
+  test1.text += "once unless it is an option based selection in which case ";
+  test1.text += "it will restrict.";
+  test1.thing_id = 3;
+  test2.category = DialogCategory::TEXT;
+  test2.action_event = blank_event;
+  test2.text = "This is a no man case. See what happens!! Ok, this is the ";
+  test2.text += "too long case where the lines never cease to exist and the ";
+  test2.text += "points aren't for real. I'm feeling a bit hungry though ";
+  test2.text += "so I don't know if I'll have the stamina to clean up this ";
+  test2.text += "case in all it's glory. Repeat: ";
+  test2.text += test2.text;
+  test2.text += test2.text;
+  test2.thing_id = 2;
+  test2.next.push_back(test1);
+  test3.category = DialogCategory::TEXT;
+  test3.action_event = blank_event;//event_handler->createStartBattleEvent();
+  test3.text = "Back to finish off with a clean case with a couple of lines.";
+  test3.text += " So this requires me to write a bunch of BS to try and fill";
+  test3.text += " these lines.";
+  test3.text += test3.text;
+  test3.text += test3.text;
+  test3.thing_id = 1003;
+  test3.next.push_back(test2);
+  test4.category = DialogCategory::TEXT;
+  test4.action_event = blank_event;
+  test4.text = "Option 1 - This goes on and on and on and on and on and ";
+  test4.text += "lorem ipsum. This is way too long to be an option. Loser";
+  test4.thing_id = -1;
+  test4.next.push_back(test2);
+  test5.category = DialogCategory::TEXT;
+  test5.action_event = blank_event;
+  test5.text = "Option 2";
+  test5.thing_id = -1;
+  test5.next.push_back(test3);
+  test1.next.push_back(test4);
+  test1.next.push_back(test5);
+  test4.text = "Option 3";
+  test1.next.push_back(test4);
+  test5.text = "Option 4";
+  test1.next.push_back(test5);
+  test4.text = "Option 5";
+  test1.next.push_back(test4);
+  test5.text = "Option 6";
+  test1.next.push_back(test5);
+  convo2.next.push_back(test1);
+  conv->next.push_back(convo2);
+
   return true;
 }
 
@@ -687,6 +776,7 @@ bool EditorEvent::setEventGiveItem(int id, int count)
 {
   if(id >= 0 && count > 0)
   {
+    event = EventHandler::deleteEvent(event);
     event = handler.createGiveItemEvent(id, count);
     return true;
   }
@@ -704,6 +794,7 @@ bool EditorEvent::setEventNotification(QString notification)
 {
   if(!notification.isEmpty())
   {
+    event = EventHandler::deleteEvent(event);
     event = handler.createNotificationEvent(notification.toStdString());
     return true;
   }
@@ -720,6 +811,7 @@ bool EditorEvent::setEventNotification(QString notification)
  */
 bool EditorEvent::setEventStartBattle()
 {
+  event = EventHandler::deleteEvent(event);
   event = handler.createStartBattleEvent();
   return true;
 }
@@ -736,6 +828,7 @@ bool EditorEvent::setEventStartMap(int id)
 {
   if(id >= 0)
   {
+    event = EventHandler::deleteEvent(event);
     event = handler.createStartMapEvent(id);
     return true;
   }
@@ -756,6 +849,7 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y)
 {
   if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
   {
+    event = EventHandler::deleteEvent(event);
     event = handler.createTeleportEvent(thing_id, x, y, section_id);
     return true;
   }
@@ -792,34 +886,68 @@ EditorEvent& EditorEvent::operator= (const EditorEvent &source)
  *===========================================================================*/
 
 /*
- * Description: Copies a past in event and returns the copied version as source.
- *              Function that calls it is in charge of deleting conversation,
- *              if that's been generated.
+ * Description: Converts the conversation index generated in EventView ("4.5.4")
+ *              to the standardized conversation index, as required by this
+ *              class ("1.1.1.1.5.1.1.1.1")
  *
- * Inputs: Event source - the event struct to copy
- * Output: Event - the copied event
+ * Inputs: QString index - the base simplified index
+ * Output: QString - the expanded index, for use in this class for reference
  */
-Event EditorEvent::copyEvent(Event source)
+QString EditorEvent::convertConversationIndex(QString index)
 {
-  /* Copy the event */
-  Event event;
-  event.classification = source.classification;
-  event.convo = source.convo;
-  event.ints = source.ints;
-  event.strings = source.strings;
+  QStringList list = index.split('.');
+  QString result = "";
 
-  /* If convo, do the proper copy */
-  if(event.classification == EventClassifier::STARTCONVO)
+  /* Loop through the split list */
+  for(int i = 0; i < list.size(); i++)
   {
-    event.convo = new Conversation;
-    event.convo->action_event = source.convo->action_event;
-    event.convo->category = source.convo->category;
-    event.convo->next = source.convo->next;
-    event.convo->text = source.convo->text;
-    event.convo->thing_id = source.convo->thing_id;
+    /* If not head, add separator */
+    if(i != 0)
+      result += ".";
+
+    if(i % 2 == 0)
+    {
+      int num = list[i].toInt();
+      for(int j = 0; j < num; j++)
+      {
+        if(j != 0)
+          result += ".1";
+        else
+          result += "1";
+      }
+    }
+    else
+    {
+      result += list[i];
+    }
   }
 
-  return event;
+  return result;
+}
+
+/*
+ * Description: Checks if the passed in base index (4.5.4 format) and how many
+ *              children the item has and returns if it could become an option.
+ *
+ * Inputs: QString base_index - the base index (non-simplified form)
+ *         int child_count - the number of children the index has
+ * Output: bool - true if it could be an option
+ */
+bool EditorEvent::couldBeOption(QString base_index, int child_count)
+{
+  if(!base_index.isEmpty())
+  {
+    /* Only valid if not an option */
+    QStringList list = base_index.split('.');
+    if(list.size() % 2 == 1)
+    {
+      /* Only valid if not the first in the stack */
+      if(list.last() != "1" && child_count <= 1)
+        return true;
+    }
+  }
+
+  return false;
 }
 
 /*

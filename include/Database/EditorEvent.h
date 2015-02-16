@@ -60,7 +60,7 @@ private:
  *===========================================================================*/
 public:
   /* Deletes conversation element */
-  bool deleteConversation(QString index);
+  QString deleteConversation(QString index);
 
   /* Returns an individual conversation, based on the index */
   Conversation* getConversation();
@@ -95,16 +95,16 @@ public:
   int getTeleportY();
 
   /* Insert conversations at index control points. Fails if invalid point */
-  bool insertConversationAfter(QString index, Conversation convo,
-                               bool option_node = false);
-  bool insertConversationBefore(QString index, Conversation convo,
-                                bool option_node = false);
+  QString insertConversationAfter(QString index, Conversation convo,
+                                  bool option_node = false);
+  QString insertConversationBefore(QString index, Conversation convo,
+                                   bool option_node = false);
 
   /* Sets the conversation at the index */
   bool setConversation(QString index, Conversation convo);
 
   /* Sets the event to default / blank */
-  void setEventBlank();
+  void setEventBlank(bool delete_event = true);
 
   /* Sets the conversation event */
   bool setEventConversation(Conversation* convo = NULL);
@@ -136,8 +136,11 @@ public:
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Copies the past in event */
-  static Event copyEvent(Event source);
+  /* Converts the conversation index to usable form */
+  static QString convertConversationIndex(QString index);
+
+  /* Using the base index, the conversation could be an option (convert true) */
+  static bool couldBeOption(QString base_index, int child_count);
 
   /* Creates conversations used for insertion */
   static Conversation createConversation(QString text, int id, Event event);

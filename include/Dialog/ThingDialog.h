@@ -12,6 +12,7 @@
 #include <QGridLayout>
 
 #include "Database/EditorThing.h"
+#include "Dialog/ConvoDialog.h"
 #include "View/EventView.h"
 #include "View/MatrixView.h"
 
@@ -28,6 +29,8 @@ public:
 private:
   /* The visible control box */
   QComboBox* box_visible;
+
+  ConvoDialog* convo_dialog;
 
   /* Event view and control */
   EditorEvent* event_ctrl;

@@ -118,16 +118,19 @@ void EditorMatrix::copySelf(const EditorMatrix &source)
   /* Clean the scene first */
   removeAll();
 
-  /* Make the matrix to size */
-  increaseWidth(source.getWidth());
-  increaseHeight(source.getHeight() - getHeight());
+  if(source.getWidth() > 0 && source.getHeight() > 0)
+  {
+    /* Make the matrix to size */
+    increaseWidth(source.getWidth());
+    increaseHeight(source.getHeight() - getHeight());
 
-  /* Make the matrixes equivalent */
-  for(int i = 0; i < matrix.size(); i++)
-    for(int j = 0; j < matrix[i].size(); j++)
-      *matrix[i][j] = *source.matrix[i][j];
+    /* Make the matrixes equivalent */
+    for(int i = 0; i < matrix.size(); i++)
+      for(int j = 0; j < matrix[i].size(); j++)
+        *matrix[i][j] = *source.matrix[i][j];
 
-  emit matrixChange();
+    emit matrixChange();
+  }
 }
   
 /*

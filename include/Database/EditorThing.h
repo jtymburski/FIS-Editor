@@ -30,8 +30,8 @@ private:
   /* The frame displayed in a dialog when interacting with the thing */
   EditorSprite dialog_image;
 
-  /* The event handler */
-  EventHandler event_handler;
+  /* The event */
+  Event event;
 
   /* The view matrix */
   EditorMatrix* matrix;

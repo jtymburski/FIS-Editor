@@ -49,6 +49,7 @@ SOURCES += \
     src/Database/EditorTile.cc \
     src/Database/EditorTileSprite.cc \
     src/Database/GameDatabase.cc \
+    src/Dialog/ConvoDialog.cc \
     src/Dialog/FrameDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
@@ -116,6 +117,7 @@ HEADERS += \
     include/Database/EditorTile.h \
     include/Database/EditorTileSprite.h \
     include/Database/GameDatabase.h \
+    include/Dialog/ConvoDialog.h \
     include/Dialog/FrameDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
