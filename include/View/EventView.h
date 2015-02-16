@@ -29,7 +29,8 @@ class EventView : public QFrame
   Q_OBJECT
 public:
   /* Constructor function */
-  EventView(EditorEvent* event, QWidget* parent = NULL);
+  EventView(EditorEvent* event, QWidget* parent = NULL,
+            bool conversation_enabled = true);
 
   /* Destructor function */
   ~EventView();
@@ -83,7 +84,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the layout and widgets for this controller */
-  void createLayout();
+  void createLayout(bool conversation_enabled = true);
 
   /* Returns the convesation item, based on the index, of the tree widget */
   QTreeWidgetItem* getConvo(QString base_index);
@@ -102,6 +103,9 @@ private:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Edit conversation trigger */
+  void editConversation(Conversation* convo, bool is_option);
+
   /* Select tile trigger */
   void selectTile();
 
@@ -114,6 +118,9 @@ public slots:
 
   /* The change map button press */
   void changeMapChanged(int index);
+
+  /* Conversation item double clicked trigger */
+  void convoDoubleClick(QTreeWidgetItem*, int);
 
   /* The convo menu requested - on right click */
   void convoMenuRequested(QPoint point);
@@ -138,6 +145,9 @@ public slots:
   /* The teleport event button presses */
   void teleportMapPressed();
   void teleportThingChanged(int index);
+
+  /* Update the layout trigger */
+  void updateConversation();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

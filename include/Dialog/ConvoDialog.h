@@ -66,7 +66,7 @@ private:
  *===========================================================================*/
 protected:
   /* Custom close event */
-  void closeEvent(QCloseEvent* event);
+  void closeEvent(QCloseEvent*);
 
 /*============================================================================
  * SIGNALS
@@ -88,7 +88,7 @@ public slots:
  *===========================================================================*/ 
 public:
   /* Returns the event view in the pop-up */
-  void getEventView();
+  EventView* getEventView();
   
   /* Returns the list of objects, used for event creation */
   QVector<QString> getListThings();

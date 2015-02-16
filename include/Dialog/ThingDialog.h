@@ -30,6 +30,7 @@ private:
   /* The visible control box */
   QComboBox* box_visible;
 
+  /* The conversation dialog */
   ConvoDialog* convo_dialog;
 
   /* Event view and control */
@@ -54,6 +55,7 @@ private:
   EditorThing* thing_working;
 
   /* Waiting for sub-map data */
+  bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -96,8 +98,12 @@ public slots:
   void changedDescription(QString description);
   void changedName(QString name);
 
+  /* Edit conversation trigger */
+  void editConversation(Conversation* convo, bool is_option);
+
   /* Select tile trigger */
   void selectTile();
+  void selectTileConvo();
 
   /* Update the frame for the thing */
   void updateFrame();

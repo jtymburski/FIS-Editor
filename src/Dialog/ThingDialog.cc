@@ -16,6 +16,7 @@
 ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
+  convo_dialog = NULL;
   frame_dialog = NULL;
   waiting_for_submap = false;
 
@@ -37,14 +38,6 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
   createLayout();
   updateData();
   updateFrame();
-
-  // TODO: TESTING - REMOVE
-  Conversation test;
-  test.action_event = EventHandler::createEventTemplate();
-  test.text = "HI";
-  test.thing_id = 1;
-  convo_dialog = new ConvoDialog(&test, false, this);
-  //convo_dialog->show();
 }
 
 /* Destructor function */
@@ -127,6 +120,8 @@ void ThingDialog::createLayout()
   /* Event View */
   event_view = new EventView(event_ctrl, this);
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
+  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+          this, SLOT(editConversation(Conversation*,bool)));
   connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* Matrix View */
@@ -224,6 +219,32 @@ void ThingDialog::changedName(QString name)
   thing_working->setName(name);
 }
 
+/* Edit conversation trigger */
+void ThingDialog::editConversation(Conversation* convo, bool is_option)
+{
+  if(convo_dialog != NULL)
+  {
+    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+               this, SLOT(selectTileConvo()));
+    disconnect(convo_dialog, SIGNAL(success()),
+               event_view, SLOT(updateConversation()));
+    delete convo_dialog;
+  }
+  convo_dialog = NULL;
+
+  /* Create the new conversation dialog */
+  convo_dialog = new ConvoDialog(convo, is_option, this);
+  convo_dialog->setListThings(getEventView()->getListThings());
+  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
+  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+  convo_dialog->getEventView()->setListSubmaps(getEventView()->getListSubmaps());
+  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+          this, SLOT(selectTileConvo()));
+  connect(convo_dialog, SIGNAL(success()),
+          event_view, SLOT(updateConversation()));
+  convo_dialog->show();
+}
+
 /* Update the frame for the thing */
 void ThingDialog::updateFrame()
 {
@@ -242,9 +263,21 @@ void ThingDialog::updateFrame()
 /* Select tile trigger */
 void ThingDialog::selectTile()
 {
+  waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile(EditorEnumDb::THING_VIEW);
+}
+
+/* Select tile trigger - for convo dialog */
+void ThingDialog::selectTileConvo()
+{
+  if(convo_dialog != NULL)
+  {
+    selectTile();
+    waiting_convo = true;
+    convo_dialog->hide();
+  }
 }
 
 /* Visibility status changed */
@@ -269,7 +302,18 @@ EventView* ThingDialog::getEventView()
 /* Update the selected tile for the thing */
 void ThingDialog::updateSelectedTile(int id, int x, int y)
 {
-  waiting_for_submap = false;
-  show();
-  event_view->updateSelectedTile(id, x, y);
+  if(waiting_for_submap)
+  {
+    waiting_for_submap = false;
+    show();
+    if(waiting_convo)
+    {
+      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+      convo_dialog->show();
+    }
+    else
+    {
+      event_view->updateSelectedTile(id, x, y);
+    }
+  }
 }

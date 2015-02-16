@@ -13,7 +13,9 @@
  *===========================================================================*/
 
 /* Constructor function */
-EventView::EventView(EditorEvent* event, QWidget* parent) : QFrame(parent)
+EventView::EventView(EditorEvent* event, QWidget* parent,
+                     bool conversation_enabled)
+         : QFrame(parent)
 {
   /* Initialize variables */
   database = NULL;
@@ -21,7 +23,7 @@ EventView::EventView(EditorEvent* event, QWidget* parent) : QFrame(parent)
   rightclick_index = "";
 
   /* Create the layout */
-  createLayout();
+  createLayout(conversation_enabled);
 
   /* Set the event */
   setEvent(event);
@@ -39,7 +41,7 @@ EventView::~EventView()
  *===========================================================================*/
 
 /* Creates the layout and widgets for this controller */
-void EventView::createLayout()
+void EventView::createLayout(bool conversation_enabled)
 {
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -56,6 +58,7 @@ void EventView::createLayout()
   combo_category->addItem("Execute Battle");
   combo_category->addItem("Switch Maps");
   combo_category->addItem("Teleport Thing");
+  if(conversation_enabled)
   combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
           this, SLOT(categoryChanged(int)));
@@ -141,42 +144,48 @@ void EventView::createLayout()
   layout_tele->addWidget(tele_thing, 1, 1);
 
   /* Widget for conversation control */
-  QWidget* widget_convo = new QWidget(this);
-  convo_tree = new QTreeWidget(this);
-  convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  convo_tree->setMinimumWidth(320);
-  convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  convo_tree->header()->hide();
-  connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
-          this, SLOT(resizeTree(QTreeWidgetItem*)));
-  connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
-          this, SLOT(resizeTree(QTreeWidgetItem*)));
-  connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
-          this, SLOT(convoMenuRequested(QPoint)));
-  QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
-  layout_convo->addWidget(convo_tree, 0, Qt::AlignCenter);
+  QWidget* widget_convo;
+  if(conversation_enabled)
+  {
+    widget_convo = new QWidget(this);
+    convo_tree = new QTreeWidget(this);
+    convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+    convo_tree->setMinimumWidth(320);
+    convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    convo_tree->header()->hide();
+    connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
+            this, SLOT(resizeTree(QTreeWidgetItem*)));
+    connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
+            this, SLOT(resizeTree(QTreeWidgetItem*)));
+    connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(convoMenuRequested(QPoint)));
+    connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+            this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
+    QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
+    layout_convo->addWidget(convo_tree, 0, Qt::AlignCenter);
 
-  /* Right click menu control */
-  rightclick_menu = new QMenu("Convo Edit", this);
-  QAction* action_edit = new QAction("Edit", rightclick_menu);
-  connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
-  rightclick_menu->addAction(action_edit);
-  QAction* action_before = new QAction("Insert Before", rightclick_menu);
-  connect(action_before, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertBefore()));
-  rightclick_menu->addAction(action_before);
-  QAction* action_after = new QAction("Insert After", rightclick_menu);
-  connect(action_after, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertAfter()));
-  rightclick_menu->addAction(action_after);
-  action_option = new QAction("Insert Option", rightclick_menu);
-  connect(action_option, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertOption()));
-  rightclick_menu->addAction(action_option);
-  action_delete = new QAction("Delete", rightclick_menu);
-  connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
-  rightclick_menu->addAction(action_delete);
-  rightclick_menu->hide();
+    /* Right click menu control */
+    rightclick_menu = new QMenu("Convo Edit", this);
+    QAction* action_edit = new QAction("Edit", rightclick_menu);
+    connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
+    rightclick_menu->addAction(action_edit);
+    QAction* action_before = new QAction("Insert Before", rightclick_menu);
+    connect(action_before, SIGNAL(triggered()),
+            this, SLOT(rightClickInsertBefore()));
+    rightclick_menu->addAction(action_before);
+    QAction* action_after = new QAction("Insert After", rightclick_menu);
+    connect(action_after, SIGNAL(triggered()),
+            this, SLOT(rightClickInsertAfter()));
+    rightclick_menu->addAction(action_after);
+    action_option = new QAction("Insert Option", rightclick_menu);
+    connect(action_option, SIGNAL(triggered()),
+            this, SLOT(rightClickInsertOption()));
+    rightclick_menu->addAction(action_option);
+    action_delete = new QAction("Delete", rightclick_menu);
+    connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
+    rightclick_menu->addAction(action_delete);
+    rightclick_menu->hide();
+  }
 
   /* Stacked widget for housing all the different views for categories */
   view_stack = new QStackedWidget(this);
@@ -186,7 +195,8 @@ void EventView::createLayout()
   view_stack->addWidget(widget_battle);
   view_stack->addWidget(widget_map);
   view_stack->addWidget(widget_teleport);
-  view_stack->addWidget(widget_convo);
+  if(conversation_enabled)
+    view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
   /* Configure parent widget */
@@ -357,7 +367,7 @@ void EventView::setLayoutData()
 
       /* Attempt to find the thing in the combo box */
       int index = -1;
-      for(int i = 0; i < list_things.size(); i++)
+      for(int i = 0; (index < 0) && (i < list_things.size()); i++)
       {
         QStringList set = list_things[i].split(":");
         if(set.size() == 2)
@@ -397,7 +407,16 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
     item = new QTreeWidgetItem(parent);
   else
     item = new QTreeWidgetItem(convo_tree);
-  item->setText(0, QString::fromStdString(ref->text));
+
+  /* Generate the text */
+  QString text = "";
+  if(ref->action_event.classification != EventClassifier::NOEVENT)
+    text += "@";
+  if(option)
+    item->setText(0, text + QString::fromStdString(ref->text));
+  else
+    item->setText(0, text + QString::number(ref->thing_id) + ": " +
+                     QString::fromStdString(ref->text));
 
   /* Change the parent, if relevant for the next */
   if(ref->next.size() > 1)
@@ -480,10 +499,20 @@ void EventView::changeMapChanged(int index)
   }
 }
 
+/* Conversation item double clicked trigger */
+void EventView::convoDoubleClick(QTreeWidgetItem*, int)
+{
+  QTreeWidgetItem* selected = convo_tree->currentItem();
+  if(selected != NULL)
+  {
+    rightclick_index = getConvoIndex(selected);
+    rightClickEdit();
+  }
+}
+
 /* The convo menu requested - on right click */
 void EventView::convoMenuRequested(QPoint point)
 {
-  // TODO
   QTreeWidgetItem* clicked_item = convo_tree->itemAt(point);
   if(clicked_item != NULL)
   {
@@ -506,8 +535,6 @@ void EventView::convoMenuRequested(QPoint point)
       rightclick_index = base_index;
       rightclick_menu->exec(QCursor::pos());
     }
-
-    // EXECUTE - POSSIBLY STORE INDEX?? OR ITEM
   }
 }
 
@@ -605,7 +632,18 @@ void EventView::rightClickEdit()
 {
   if(!rightclick_index.isEmpty())
   {
-    // TODO
+    QString index = EditorEvent::convertConversationIndex(rightclick_index);
+    Conversation* ref = event->getConversation(index);
+    if(ref != NULL)
+    {
+      /* Determine if it's an option */
+      bool is_option = false;
+      QStringList list = rightclick_index.split(".");
+      if(list.size() % 2 == 0)
+        is_option = true;
+
+      emit editConversation(ref, is_option);
+    }
   }
 
   rightclick_index = "";
@@ -616,7 +654,7 @@ void EventView::rightClickInsertAfter()
 {
   if(!rightclick_index.isEmpty())
   {
-    Conversation after;
+    Conversation after = EventHandler::createEmptyConversation();
     after.text = "New Entry - After";
     QString index = EditorEvent::convertConversationIndex(rightclick_index);
     QString new_index = event->insertConversationAfter(index, after);
@@ -637,7 +675,7 @@ void EventView::rightClickInsertBefore()
 {
   if(!rightclick_index.isEmpty())
   {
-    Conversation before;
+    Conversation before = EventHandler::createEmptyConversation();
     before.text = "New Entry - Before";
     QString index = EditorEvent::convertConversationIndex(rightclick_index);
     QString new_index = event->insertConversationBefore(index, before);
@@ -668,7 +706,7 @@ void EventView::rightClickInsertOption()
       new_index += "2";
 
       /* Set the new conversation option */
-      Conversation option;
+      Conversation option = EventHandler::createEmptyConversation();
       option.text = "New Entry - Option";
       event->setConversation(new_index, option);
       setLayoutData();
@@ -703,6 +741,17 @@ void EventView::teleportThingChanged(int index)
     if(list.size() == 2)
       event->setEventTeleport(list.front().toInt(), event->getTeleportSection(),
                               event->getTeleportX(), event->getTeleportY());
+  }
+}
+
+/* Update the layout trigger */
+void EventView::updateConversation()
+{
+  if(event->getEventType() == EventClassifier::STARTCONVO)
+  {
+    QString index = getConvoIndex(convo_tree->currentItem());
+    setLayoutData();
+    convo_tree->setCurrentItem(getConvo(index));
   }
 }
 
