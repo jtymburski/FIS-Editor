@@ -43,7 +43,8 @@ public:
   static QString getLayerString(EditorEnumDb::Layer layer);
 
   /* Returns the list string, taking an id and name */
-  static QString getListString(int id, QString name);
+  static QString getListString(int id, QString name,
+                               int base_id = -1, bool higher_cap = false);
 
   /* Converts the string into passability values */
   static void getPassability(QString str, bool &north, bool &east,

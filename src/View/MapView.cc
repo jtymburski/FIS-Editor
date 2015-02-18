@@ -285,7 +285,7 @@ void MapView::setCurrentTile(int x, int y)
     /* The active layer section */
     mapsize.append("          ");
     QString active_layer = "Layers: ";
-    active_layer += editing_map->getActiveLayers(
+    active_layer += editing_map->getSetLayers(
                                        map_control->getCurrentMapIndex(), x, y);
     mapsize.append(active_layer);
   }

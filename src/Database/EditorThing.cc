@@ -22,8 +22,11 @@
  */
 EditorThing::EditorThing(int id, QString name, QString description)
 {
+  base = NULL;
   matrix = new EditorMatrix(1, 1, false);
   event = EventHandler::createEventTemplate();
+  x = 0;
+  y = 0;
 
   /* Make sure there's one frame in the sprite */
   if(dialog_image.frameCount() == 0)
@@ -51,6 +54,7 @@ EditorThing::EditorThing(const EditorThing &source) : EditorThing()
  */
 EditorThing::~EditorThing()
 {
+  base = NULL;
   EventHandler::deleteEvent(event);
   delete matrix;
   matrix = NULL;
@@ -70,6 +74,7 @@ EditorThing::~EditorThing()
 void EditorThing::copySelf(const EditorThing &source)
 {
   /* Copy the thing data */
+  setBase(source.getBase());
   setDescription(source.getDescription());
   setEvent(EventHandler::copyEvent(source.getEvent()));
   setID(source.getID());
@@ -87,7 +92,18 @@ void EditorThing::copySelf(const EditorThing &source)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-   
+
+/*
+ * Description: Returns the base thing. Default to NULL.
+ *
+ * Inputs: none
+ * Output: EditorThing* - the base thing reference pointer
+ */
+EditorThing* EditorThing::getBase() const
+{
+  return base;
+}
+
 /*
  * Description: Returns the editor description string.
  *
@@ -109,11 +125,18 @@ QString EditorThing::getDescription() const
  */
 EditorSprite* EditorThing::getDialogImage()
 {
-  /* Make sure only one frame is in the dialog image */
-  while(dialog_image.frameCount() > 1)
-    dialog_image.deleteFrame(dialog_image.frameCount() - 1);
+  if(base != NULL)
+  {
+    return base->getDialogImage();
+  }
+  else
+  {
+    /* Make sure only one frame is in the dialog image */
+    while(dialog_image.frameCount() > 1)
+      dialog_image.deleteFrame(dialog_image.frameCount() - 1);
 
-  return &dialog_image;
+    return &dialog_image;
+  }
 }
 
 /*
@@ -124,6 +147,8 @@ EditorSprite* EditorThing::getDialogImage()
  */
 Event EditorThing::getEvent() const
 {
+  if(base != NULL)
+    return base->event;
   return event;
 }
 
@@ -146,6 +171,8 @@ int EditorThing::getID() const
  */
 EditorMatrix* EditorThing::getMatrix()
 {
+  if(base != NULL)
+    return base->matrix;
   return matrix;
 }
 
@@ -169,7 +196,35 @@ QString EditorThing::getName() const
  */
 QString EditorThing::getNameList()
 {
-  return EditorHelpers::getListString(getID(), getName());
+  int base_id = -1;
+  if(base != NULL)
+    base_id = base->getID();
+
+  return EditorHelpers::getListString(getID(), getName(), base_id, true);
+}
+
+/*
+ * Description: Returns the X coordinate for the top left of the thing
+ *              (in tile units)
+ *
+ * Inputs: none
+ * Output: int - the x location in tile units
+ */
+int EditorThing::getX()
+{
+  return x;
+}
+
+/*
+ * Description: Returns the Y coordinate for the top left of the thing
+ *              (in tile units)
+ *
+ * Inputs: none
+ * Output: int - the y location in tile units
+ */
+int EditorThing::getY()
+{
+  return y;
 }
 
 /*
@@ -180,7 +235,29 @@ QString EditorThing::getNameList()
  */
 bool EditorThing::isVisible() const
 {
+  if(base != NULL)
+    return base->isVisible();
   return thing.isVisible();
+}
+
+/*
+ * Description: Sets the base thing object for the thing. It will be used for
+ *              visual representation and when set, also sets the name and
+ *              description (which can be changed later).
+ *
+ * Inputs: EditorThing* thing - the base thing object
+ * Output: none
+ */
+void EditorThing::setBase(EditorThing* thing)
+{
+  base = thing;
+
+  /* Sets the name and description initially to what the base is */
+  if(base != NULL)
+  {
+    setName(base->getName());
+    setDescription(base->getDescription());
+  }
 }
 
 /*
@@ -267,6 +344,40 @@ void EditorThing::setTileIcons(TileIcons* icons)
 void EditorThing::setVisibility(bool visible)
 {
   thing.setVisibility(visible);
+}
+
+/*
+ * Description: Sets the X coordinate of the top left of the thing (in tile
+ *              units).
+ *
+ * Inputs: int x - the x coordinate of the top left
+ * Output: bool - true if the x was set
+ */
+bool EditorThing::setX(int x)
+{
+  if(x >= 0)
+  {
+    this->x = x;
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the Y coordinate of the top left of the thing (in tile
+ *              units).
+ *
+ * Inputs: int y - the Y coordinate of the top left
+ * Output: bool - true if the y was set
+ */
+bool EditorThing::setY(int y)
+{
+  if(y >= 0)
+  {
+    this->y = y;
+    return true;
+  }
+  return false;
 }
 
 /*============================================================================

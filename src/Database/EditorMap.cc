@@ -381,29 +381,6 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
  *===========================================================================*/
 
 /*
- * Description: Returns the active layers in the given tile, in comma delimited
- *              string format.
- *
- * Inputs: int map_index - the index of the sub-map
- *         int x - the x coordinate of the tile
- *         int y - the y coordinate of the tile
- * Output: QString - the comma delimited string format: B,E,L1, etc
- */
-QString EditorMap::getActiveLayers(int map_index, int x, int y)
-{
-  if(map_index >= 0 && map_index < sub_maps.size())
-  {
-    if(x >= 0 && x < sub_maps[map_index]->tiles.size() &&
-       y >= 0 && y < sub_maps[map_index]->tiles[x].size())
-    {
-      return sub_maps[map_index]->tiles[x][y]->getActiveLayers();
-    }
-  }
-
-  return "";
-}
-
-/*
  * Description: Returns the ID of the editor map.
  *
  * Inputs: none
@@ -601,9 +578,9 @@ int EditorMap::getNextThingID()
   bool found = false;
   int id = 0;
 
-  for(int i = 0; !found && (i < things.size()); i++)
+  for(int i = 0; !found && (i < base_things.size()); i++)
   {
-    if(things[i]->getID() != i)
+    if(base_things[i]->getID() != i)
     {
       id = i;
       found = true;
@@ -611,10 +588,33 @@ int EditorMap::getNextThingID()
   }
 
   /* If nothing found, just make it the last ID + 1 */
-  if(!found && things.size() > 0)
-    id = things.last()->getID() + 1;
+  if(!found && base_things.size() > 0)
+    id = base_things.last()->getID() + 1;
 
   return id;
+}
+
+/*
+ * Description: Returns the active layers in the given tile, in comma delimited
+ *              string format.
+ *
+ * Inputs: int map_index - the index of the sub-map
+ *         int x - the x coordinate of the tile
+ *         int y - the y coordinate of the tile
+ * Output: QString - the comma delimited string format: B,E,L1, etc
+ */
+QString EditorMap::getSetLayers(int map_index, int x, int y)
+{
+  if(map_index >= 0 && map_index < sub_maps.size())
+  {
+    if(x >= 0 && x < sub_maps[map_index]->tiles.size() &&
+       y >= 0 && y < sub_maps[map_index]->tiles[x].size())
+    {
+      return sub_maps[map_index]->tiles[x][y]->getActiveLayers();
+    }
+  }
+
+  return "";
 }
 
 /*
@@ -692,9 +692,9 @@ QVector<EditorSprite*> EditorMap::getSprites()
 EditorThing* EditorMap::getThing(int id)
 {
   if(id >= 0)
-    for(int i = 0; i < things.size(); i++)
-      if(things[i]->getID() == id)
-        return things[i];
+    for(int i = 0; i < base_things.size(); i++)
+      if(base_things[i]->getID() == id)
+        return base_things[i];
   return NULL;
 }
 
@@ -706,8 +706,8 @@ EditorThing* EditorMap::getThing(int id)
  */
 EditorThing* EditorMap::getThingByIndex(int index)
 {
-  if(index >= 0 && index < things.size())
-    return things[index];
+  if(index >= 0 && index < base_things.size())
+    return base_things[index];
   return NULL;
 }
 
@@ -719,7 +719,7 @@ EditorThing* EditorMap::getThingByIndex(int index)
  */
 int EditorMap::getThingCount()
 {
-  return things.size();
+  return base_things.size();
 }
 
 /*
@@ -732,8 +732,8 @@ int EditorMap::getThingCount()
 int EditorMap::getThingIndex(int id)
 {
   if(id >= 0)
-    for(int i = 0; i < things.size(); i++)
-      if(things[i]->getID() == id)
+    for(int i = 0; i < base_things.size(); i++)
+      if(base_things[i]->getID() == id)
         return i;
   return -1;
 }
@@ -751,8 +751,8 @@ QVector<QString> EditorMap::getThingList()
   stack.push_back("MAP THINGS");
 
   /* Go through all things and add them to the list */
-  for(int i = 0; i < things.size(); i++)
-    stack.push_back(things[i]->getNameList());
+  for(int i = 0; i < base_things.size(); i++)
+    stack.push_back(base_things[i]->getNameList());
 
   return stack;
 }
@@ -765,7 +765,7 @@ QVector<QString> EditorMap::getThingList()
  */
 QVector<EditorThing*> EditorMap::getThings()
 {
-  return things;
+  return base_things;
 }
 
 /*
@@ -1074,14 +1074,14 @@ int EditorMap::setThing(EditorThing* thing)
     bool near = false;
 
     /* Find if the ID exists */
-    for(int i = 0; !found && !near && (i < things.size()); i++)
+    for(int i = 0; !found && !near && (i < base_things.size()); i++)
     {
-      if(things[i]->getID() == thing->getID())
+      if(base_things[i]->getID() == thing->getID())
       {
         index = i;
         found = true;
       }
-      else if(things[i]->getID() > thing->getID())
+      else if(base_things[i]->getID() > thing->getID())
       {
         index = i;
         near = true;
@@ -1092,16 +1092,16 @@ int EditorMap::setThing(EditorThing* thing)
     if(found)
     {
       unsetThingByIndex(index);
-      things.insert(index, thing);
+      base_things.insert(index, thing);
     }
     else if(near)
     {
-      things.insert(index, thing);
+      base_things.insert(index, thing);
     }
     else
     {
-      things.append(thing);
-      index = things.size() - 1;
+      base_things.append(thing);
+      index = base_things.size() - 1;
     }
 
     return index;
@@ -1303,7 +1303,7 @@ bool EditorMap::unsetThing(int id)
  */
 bool EditorMap::unsetThingByIndex(int index)
 {
-  if(index >= 0 && index < things.size())
+  if(index >= 0 && index < base_things.size())
   {
     /* Remove all things related to this index from all tiles */
     // TODO: Revise for thing
@@ -1315,8 +1315,8 @@ bool EditorMap::unsetThingByIndex(int index)
     //}
 
     /* Finally, delete the sprite */
-    delete things[index];
-    things.remove(index);
+    delete base_things[index];
+    base_things.remove(index);
 
     return true;
   }
@@ -1332,9 +1332,9 @@ bool EditorMap::unsetThingByIndex(int index)
  */
 void EditorMap::unsetThings()
 {
-  while(things.size() > 0)
+  while(base_things.size() > 0)
     unsetThingByIndex(0);
-  things.clear();
+  base_things.clear();
 }
 
 /*============================================================================

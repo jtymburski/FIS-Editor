@@ -16,9 +16,24 @@
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
+#include "Database/EditorThing.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
 #include "Game/Map/Tile.h"
+
+class EditorTile;
+
+/* Struct for handling hover information */
+struct HoverInfo
+{
+  EditorEnumDb::Layer active_layer;
+  EditorEnumDb::CursorMode active_cursor;
+
+  EditorSprite* active_sprite;
+  EditorThing* active_thing;
+
+  EditorTile* hover_tile;
+};
 
 /* Struct for frame option storage */
 struct TileRenderInfo
@@ -27,6 +42,7 @@ struct TileRenderInfo
   bool visible;
 };
 
+/* Editor Tile Class */
 class EditorTile : public QGraphicsItem
 {
 public:
@@ -45,13 +61,18 @@ public:
 
 private:
   /* Is the item hovered */
+  HoverInfo* hover_info;
   bool hovered;
+  bool hovered_invalid;
 
-  /*Editor Sprite layers */
+  /* Editor Sprite layers */
   TileRenderInfo layer_base;
   TileRenderInfo layer_enhancer;
   QList<TileRenderInfo> layers_lower;
   QList<TileRenderInfo> layers_upper;
+
+  /* Things on the tile */
+  QList<EditorThing*> things;
 
   /* The Tile that will be placed into Univursa.exe */
   Tile tile;

@@ -54,20 +54,46 @@ QString EditorHelpers::getLayerString(EditorEnumDb::Layer layer)
  *
  * Inputs: int id - the id of the object
  *         QString name - the name of the object
+ *         int base_id - the base object id, if one exists. default invalid
+ *         bool higher_cap - raise the max from 999 to 99999 (things)
  * Output: QString - the combined string in the format "000: sssssssss"
  */
-QString EditorHelpers::getListString(int id, QString name)
+QString EditorHelpers::getListString(int id, QString name,
+                                     int base_id, bool higher_cap)
 {
   QString title = "";
 
   if(id >= 0)
   {
-    /* Append modifiers */
+    /* Check if the base id is relevant and add it to the front */
+    if(base_id >= 0)
+    {
+      /* Append actual id */
+      if(base_id < 10000)
+        title += "0";
+      if(base_id < 1000)
+        title += "0";
+      if(base_id < 100)
+        title += "0";
+      if(base_id < 10)
+        title += "0";
+      title += QString::number(base_id) + "(";
+    }
+
+    /* Append actual id */
+    if(id < 10000)
+      title += "0";
+    if(id < 1000)
+      title += "0";
     if(id < 100)
       title += "0";
     if(id < 10)
       title += "0";
     title += QString::number(id);
+
+    /* Append closing brace, if base id is relevant */
+    if(base_id >= 0)
+      title += ")";
 
     /* Add the name */
     title += ": " + name;

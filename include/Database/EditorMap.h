@@ -30,6 +30,8 @@ struct SubMapInfo
   int id;
   QString name;
   QVector<QVector<EditorTile*>> tiles;
+
+  QVector<EditorThing*> things;
 };
 
 class EditorMap : public EditorTemplate
@@ -51,6 +53,13 @@ public:
   virtual ~EditorMap();
 
 private:
+  /* Active references in the map - used when displaying a map */
+  HoverInfo active_info;
+  int active_submap;
+
+  /* The base map things */
+  QVector<EditorThing*> base_things;
+
   /* The map set ID */
   int id;
 
@@ -62,9 +71,6 @@ private:
 
   /* The set of sub-maps */
   QVector<SubMapInfo*> sub_maps;
-
-  /* The map things */
-  QVector<EditorThing*> things;
 
   /* Rendering tile icons */
   TileIcons* tile_icons;
@@ -98,9 +104,6 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the active layers in a string */
-  QString getActiveLayers(int map_index, int x, int y);
-
   /* Returns the ID of the map set */
   virtual int getID() const;
 
@@ -121,6 +124,9 @@ public:
   int getNextMapID();
   int getNextSpriteID();
   int getNextThingID();
+
+  /* Returns the set layers in a string */
+  QString getSetLayers(int map_index, int x, int y);
 
   /* Return stored sprite information */
   EditorSprite* getSprite(int id);

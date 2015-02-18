@@ -27,6 +27,9 @@ public:
   virtual ~EditorThing();
 
 private:
+  /* A base thing object */
+  EditorThing* base;
+
   /* The frame displayed in a dialog when interacting with the thing */
   EditorSprite dialog_image;
 
@@ -42,6 +45,10 @@ private:
   /* The rendering tile icons */
   TileIcons* tile_icons;
 
+  /* The X/Y position of the thing */
+  int x;
+  int y;
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -53,6 +60,9 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Gets the base thing of the thing */
+  EditorThing* getBase() const;
+
   /* Gets the description of the thing */
   QString getDescription() const;
 
@@ -74,8 +84,15 @@ public:
   /* Gets the proper formatted name and ID for listing */
   virtual QString getNameList();
 
+  /* Returns the x and y coordinate of the thing */
+  int getX();
+  int getY();
+
   /* Returns if the thing is visible */
   bool isVisible() const;
+
+  /* Sets the base reference thing */
+  void setBase(EditorThing* thing);
 
   /* Sets the description of the thing */
   void setDescription(QString description);
@@ -97,6 +114,10 @@ public:
 
   /* Sets the visibility of the thing */
   void setVisibility(bool visible);
+
+  /* Sets the x and y coordinate of the thing */
+  bool setX(int x);
+  bool setY(int y);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
