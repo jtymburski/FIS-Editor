@@ -69,10 +69,13 @@ QString EditorHelpers::getListString(int id, QString name,
     if(base_id >= 0)
     {
       /* Append actual id */
-      if(base_id < 10000)
-        title += "0";
-      if(base_id < 1000)
-        title += "0";
+      if(higher_cap)
+      {
+        if(base_id < 10000)
+          title += "0";
+        if(base_id < 1000)
+          title += "0";
+      }
       if(base_id < 100)
         title += "0";
       if(base_id < 10)
@@ -81,10 +84,13 @@ QString EditorHelpers::getListString(int id, QString name,
     }
 
     /* Append actual id */
-    if(id < 10000)
-      title += "0";
-    if(id < 1000)
-      title += "0";
+    if(higher_cap)
+    {
+      if(id < 10000)
+        title += "0";
+      if(id < 1000)
+        title += "0";
+    }
     if(id < 100)
       title += "0";
     if(id < 10)

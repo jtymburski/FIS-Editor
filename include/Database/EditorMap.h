@@ -97,6 +97,9 @@ protected:
   void saveSubMap(FileHandler* fh, bool game_only,
                   SubMapInfo* map, bool first = false);
 
+  /* Updates the tiles that contain the hover information struct */
+  //void updateHoverTiles(); // TODO: MAYBE?
+
 signals:
 public slots:
 
@@ -104,6 +107,19 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Clears the hover information - called on first initiation of map */
+  void clearHoverInfo(); // TODO
+
+  /* Click trigger on tile in map */
+  void clickTrigger(); // TODO
+
+  /* Returns current references for lists in map */
+  int getCurrentSpriteIndex(); // TODO
+  int getCurrentThingIndex(); // TODO
+
+  /* Returns the hover information */
+  HoverInfo* getHoverInfo(); // TODO
+
   /* Returns the ID of the map set */
   virtual int getID() const;
 
@@ -151,6 +167,15 @@ public:
 
   /* Saves the map */
   void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
+
+  /* Sets the current references for the selected sprite(s) or thing(s) */
+  bool setCurrentSprite(int index); // TODO
+  bool setCurrentThing(int index); // TODO
+
+  /* Sets the hover information */
+  void setHoverCursor(EditorEnumDb::CursorMode cursor); // TODO
+  void setHoverLayer(EditorEnumDb::Layer layer); // TODO
+  void setHoverTile(EditorTile* tile); // TODO
 
   /* Sets the ID of the map set */
   virtual void setID(int id);

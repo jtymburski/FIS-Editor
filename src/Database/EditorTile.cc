@@ -10,6 +10,7 @@
 /* Constant Implementation - see header file for descriptions */
 const uint8_t EditorTile::kLOWER_COUNT_MAX = 5;
 const uint8_t EditorTile::kMAX_ITEMS = 20;
+const uint8_t EditorTile::kRENDER_DEPTH = 10;
 const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
 
 /*============================================================================
@@ -37,8 +38,10 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   /* Layer control */
   TileRenderInfo temp;
   temp.sprite = NULL;
+  temp.thing = NULL;
   temp.visible = true;
 
+  /* Prep editor sprites in tile */
   layer_base.sprite = NULL;
   layer_base.visible = true;
   layer_enhancer.sprite = NULL;
@@ -48,6 +51,11 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   for(int i = 0; i < kUPPER_COUNT_MAX; i++)
     layers_upper.push_back(temp);
 
+  /* Prep editor things in tile */
+  for(uint8_t i = 0; i < kRENDER_DEPTH; i++)
+    things.push_back(temp);
+
+  /* Set tile icons */
   setTileIcons(icons);
 }
 
@@ -178,6 +186,17 @@ Tile* EditorTile::getGameTile()
 }
 
 /*
+ * Description: Returns the hover information for the tile.
+ *
+ * Inputs: none
+ * Output: HoverInfo* - hover information struct reference. do not delete.
+ */
+HoverInfo* EditorTile::getHoverInfo()
+{
+  return hover_info;
+}
+
+/*
  * Description: Returns the passability at the indicated layer in the
  *              indicated direction.
  *
@@ -264,6 +283,15 @@ bool EditorTile::getPassabilityVisible(Direction direction)
   return passable;
 }
 
+/* Returns the map thing pointer(s) for the generic thing */
+// TODO: Comment
+EditorThing* EditorTile::getThing(int render_level)
+{
+  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+    return things[render_level].thing;
+  return NULL;
+}
+
 /*
  * Description: Returns the visibility of the passed in layer.
  *
@@ -297,6 +325,15 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
   else if(layer == EditorEnumDb::UPPER5)
     return layers_upper[4].visible;
   return true;
+}
+
+/* Returns layer visibility */
+// TODO: Comment
+bool EditorTile::getVisibilityThing(int render_level)
+{
+  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+    return things[render_level].visible;
+  return false;
 }
 
 /*
@@ -399,24 +436,35 @@ EditorSprite* EditorTile::getSprite(EditorEnumDb::Layer layer)
  * Description: Paints the tile
  *
  * Input: Required fields, mostly unused
+ * Output: none
  */
+// TODO: Update for new render information
 void EditorTile::paint(QPainter *painter,
                         const QStyleOptionGraphicsItem*, QWidget*)
 {
   int size = EditorHelpers::getTileSize();
   QRect bound(x_pos * size, y_pos * size, size, size);
 
-  /* Render the tile sprites */
+  /* Render the base */
   if(layer_base.visible && layer_base.sprite != NULL)
     layer_base.sprite->paint(painter, bound);
 
+  /* Render the enhancer */
   if(layer_enhancer.visible && layer_enhancer.sprite !=NULL)
     layer_enhancer.sprite->paint(painter, bound);
 
+  /* Render the lower */
   for(int i = 0; i < layers_lower.size(); i++)
     if(layers_lower[i].visible && layers_lower[i].sprite != NULL)
       layers_lower[i].sprite->paint(painter, bound);
 
+  /* Render the map things */
+  for(int i = 0; i < things.size(); i++)
+  {
+    //if(things)
+  }
+
+  /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].visible && layers_upper[i].sprite != NULL)
       layers_upper[i].sprite->paint(painter, bound);
@@ -469,6 +517,21 @@ void EditorTile::paint(QPainter *painter,
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->nopassW);
   }
+}
+
+/*
+ * Description: Places the currently selected sprite onto the active map layer.
+ *              Only relevant if the tile is currently being hovered and the
+ *              hover information has been set.
+ *
+ * Inputs: none
+ * Output: bool - true if the sprite was changed
+ */
+bool EditorTile::place()
+{
+  if(hovered && hover_info != NULL)
+    return place(hover_info->active_layer, hover_info->active_sprite);
+  return false;
 }
 
 /*
@@ -556,15 +619,53 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite,
  * Description: Sets the hover state of the QGraphicsItem.
  *
  * Inputs: bool hover - is it being hovered on?
+ *         bool hover_invalid - is the hovering tile un-setable (default false)
  * Output: none
  */
-void EditorTile::setHover(bool hover)
+void EditorTile::setHover(bool hover, bool hover_invalid)
 {
   hovered = hover;
+  hovered_invalid = hover_invalid;
   update();
 }
 
-/* Sets the passability based on layer and direction */
+/*
+ * Description: Sets the hover info of the tile - pointer reference from
+ *              EditorMap (this class will not delete it)
+ *
+ * Inputs: HoverInfo* new_info - a struct with the hover information
+ * Output: none
+ */
+void EditorTile::setHoverInfo(HoverInfo* new_info)
+{
+  hover_info = new_info;
+  update();
+}
+
+/*
+ * Description: Sets the combined hover status and hover information.
+ *
+ * Inputs: bool hover - is it being hovered on?
+ *         bool hover_invalid - is the hovering tile un-setable (default false)
+ *         HoverInfo* new_info - a struct with the hover information
+ * Output: none
+ */
+void EditorTile::setHoverInfo(bool hover, bool hover_invalid,
+                              HoverInfo* new_info)
+{
+  setHover(hover, hover_invalid);
+  setHoverInfo(new_info);
+}
+
+/*
+ * Description: Sets the passability of the passed in layer and the selected
+ *              direction.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to update the passability for
+ *         Direction direction - the direction to manipulate
+ *         bool passable - is that direction and layer passable??
+ * Output: none
+ */
 void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
                                 bool passable)
 {
@@ -598,6 +699,21 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
       break;
   }
   update();
+}
+
+/* Sets the thing sprite pointer, stored within the class */
+// TODO: Comment
+bool EditorTile::setThing(EditorThing* thing, int render_level)
+{
+  if(thing != NULL && render_level >= 0 && render_level < kRENDER_DEPTH)
+  {
+    unsetThing(render_level);
+    things[render_level].thing = thing;
+    update();
+
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -705,6 +821,26 @@ void EditorTile::setVisibilityPass(bool toggle)
 {
   visible_passability = toggle;
   update();
+}
+
+/* Sets the various layer visibilities */
+// TODO: Comment
+void EditorTile::setVisibilityThing(bool visible)
+{
+  for(int i = 0; i < things.size(); i++)
+    things[i].visible = visible;
+}
+
+/* Sets the various layer visibilities */
+// TODO: Comment
+bool EditorTile::setVisibilityThing(int render_level, bool visible)
+{
+  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+  {
+    things[render_level].visible = visible;
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -830,6 +966,49 @@ void EditorTile::unplace(EditorSprite* sprite)
     }
   }
 
+  update();
+}
+
+/* Unsets the stored thing pointer(s) */
+// TODO: Comment
+bool EditorTile::unsetThing(EditorThing* thing)
+{
+  for(int i = 0; i < things.size(); i++)
+  {
+    if(things[i].thing == thing)
+    {
+      things[i].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/* Unsets the stored thing pointer(s) */
+// TODO: Comment
+bool EditorTile::unsetThing(int render_level)
+{
+  if(render_level >= 0 && render_level < things.size())
+  {
+    if(things[render_level].thing != NULL)
+    {
+      things[render_level].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/* Unsets the stored thing pointer(s) */
+// TODO: Comment
+void EditorTile::unsetThings()
+{
+  for(int i = 0; i < things.size(); i++)
+    things[i].thing = NULL;
   update();
 }
 

@@ -778,7 +778,7 @@ QString EditorSprite::getName() const
  */
 QString EditorSprite::getNameList()
 {
-  return EditorHelpers::getListString(getID(), getName());
+  return EditorHelpers::getListString(getID(), getName(), -1, true);
 }
 
 /*

@@ -39,6 +39,7 @@ struct HoverInfo
 struct TileRenderInfo
 {
   EditorSprite* sprite;
+  EditorThing* thing;
   bool visible;
 };
 
@@ -72,7 +73,7 @@ private:
   QList<TileRenderInfo> layers_upper;
 
   /* Things on the tile */
-  QList<EditorThing*> things;
+  QList<TileRenderInfo> things;
 
   /* The Tile that will be placed into Univursa.exe */
   Tile tile;
@@ -90,13 +91,19 @@ private:
   /*------------------- Constants -----------------------*/
   const static uint8_t kLOWER_COUNT_MAX; /* The max number of lower layers */
   const static uint8_t kMAX_ITEMS; /* The max number of items stored */
+  const static uint8_t kRENDER_DEPTH; /* The max render depth */
   const static uint8_t kUPPER_COUNT_MAX; /* The max number of upper layers */
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorTile &source);
 
-public slots:
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
@@ -107,6 +114,9 @@ public:
   /* Gets the tile for editing */
   Tile* getGameTile();
 
+  /* Gets the hover information */
+  HoverInfo* getHoverInfo();
+
   /* Returns the passability based on layer and direction */
   bool getPassability(EditorEnumDb::Layer layer, Direction direction);
 
@@ -116,8 +126,12 @@ public:
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
 
+  /* Returns the map thing pointer(s) for the generic thing */
+  EditorThing* getThing(int render_level);
+
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);
+  bool getVisibilityThing(int render_level);
 
   /* Returns grid and passability visibility */
   bool getVisibilityGrid();
@@ -135,15 +149,24 @@ public:
              QWidget* widget = NULL);
 
   /* Function to place a current sprite on the maps active layer */
+  bool place();
   bool place(EditorEnumDb::Layer layer, EditorSprite* sprite,
              bool load = false);
 
   /* Sets the hover state */
-  void setHover(bool);
+  void setHover(bool hover, bool hover_invalid = false);
+
+  /* Sets the hover information - from editor map */
+  void setHoverInfo(HoverInfo* new_info);
+  void setHoverInfo(bool hover, bool hover_invalid = false,
+                    HoverInfo* new_info = NULL);
 
   /* Sets the passability based on layer and direction */
   void setPassability(EditorEnumDb::Layer layer, Direction direction,
                       bool passable);
+
+  /* Sets the thing sprite pointer, stored within the class */
+  bool setThing(EditorThing* thing, int render_level);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
@@ -153,6 +176,8 @@ public:
   void setVisibilityBase(bool);
   void setVisibilityEnhancer(bool);
   bool setVisibilityLower(int, bool);
+  void setVisibilityThing(bool visible);
+  bool setVisibilityThing(int render_level, bool visible);
   bool setVisibilityUpper(int, bool);
 
   /* Sets the grid visibility */
@@ -163,7 +188,14 @@ public:
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
 
-/* Operator functions */
+  /* Unsets the stored thing pointer(s) */
+  bool unsetThing(EditorThing* thing);
+  bool unsetThing(int render_level);
+  void unsetThings();
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   /* The copy operator */
   EditorTile& operator= (const EditorTile &source);
