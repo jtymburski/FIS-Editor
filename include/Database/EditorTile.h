@@ -166,7 +166,7 @@ public:
                       bool passable);
 
   /* Sets the thing sprite pointer, stored within the class */
-  bool setThing(EditorThing* thing, int render_level);
+  bool setThing(EditorThing* thing);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);

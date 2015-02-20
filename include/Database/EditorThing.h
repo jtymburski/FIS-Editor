@@ -91,12 +91,10 @@ public:
   /* Returns if the thing is visible */
   bool isVisible() const;
 
-  /* Paint the thing */
-  // TODO: QPainter* painter, int offset_x, int offset_y, QRect bound??
-  //bool paint(QPainter* painter, QRect rect);
-  //bool paint(QPainter* painter, int x, int y, int w, int h);
-  //bool paint(int index, QPainter* painter, QRect rect);
-  //bool paint(int index, QPainter* painter, int x, int y, int w, int h);
+  /* Paint a sprite in the thing */
+  bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
+  bool paint(int frame_index, QPainter* painter, QRect rect,
+             int offset_x = 0, int offset_y = 0);
 
   /* Sets the base reference thing */
   void setBase(EditorThing* thing);

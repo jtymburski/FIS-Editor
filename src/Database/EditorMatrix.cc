@@ -684,7 +684,23 @@ int EditorMatrix::getHeight() const
     return matrix.last().size();
   return 0;
 }
-    
+
+/*
+ * Description: Returns the render depth of the sprite at the x and y location
+ *              in the matrix.
+ *
+ * Inputs: int x - the x tile location in matrix (0 is left col)
+ *         int y - the y tile location in matrix (0 is top row)
+ * Output: int - render depth of the sprite (-1 is invalid)
+ */
+int EditorMatrix::getRenderDepth(int x, int y)
+{
+  EditorTileSprite* sprite = getSprite(x, y);
+  if(sprite != NULL)
+    return sprite->getRenderDepth();
+  return -1;
+}
+
 /*
  * Description: Returns the right clicked sprite. Stored the last time the
  *              active sprite in the matrix was right clicked on.
@@ -748,6 +764,20 @@ QPixmap EditorMatrix::getSnapshot(int width, int height)
   setVisibilityRender(visible_render, true);
 
   return final_pixmap;
+}
+
+/*
+ * Description: Returns the sprite at the x and y location in the matrix.
+ *
+ * Inputs: int x - the x tile location in matrix (0 is left col)
+ *         int y - the y tile location in matrix (0 is top row)
+ * Output: EditorTileSprite* - the sprite reference (NULL is invalid)
+ */
+EditorTileSprite* EditorMatrix::getSprite(int x, int y)
+{
+  if(x >= 0 && x < getWidth() && y >= 0 && y < getHeight())
+    return matrix[x][y];
+  return NULL;
 }
 
 /*
@@ -1042,7 +1072,49 @@ void EditorMatrix::increaseWidth(int count)
   cleanScene(true);
   emit matrixChange();
 }
-    
+
+/*
+ * Description: Paint the active frame in the matrix into the bounding box.
+ *              The offset x and y is the sprite in the matrix offset from the
+ *              top left.
+ *
+ * Inputs: QPainter* painter - the reference paint controller
+ *         QRect rect - the bounding box of the rendering frame
+ *         int offset_x - the offset from left of the sprite in matrix
+ *         int offset_y - the offset from top of the sprite in matrix
+ * Output: bool - true if the sprite was rendered
+ */
+bool EditorMatrix::paint(QPainter* painter, QRect rect,
+                         int offset_x, int offset_y)
+{
+  return paint(active_frame, painter, rect, offset_x, offset_y);
+}
+
+/*
+ * Description: Paint the frame index in the matrix into the bounding box.
+ *              The offset x and y is the sprite in the matrix offset from the
+ *              top left.
+ *
+ * Inputs: int frame_index - the index of the frame to render (0 for base)
+ *         QPainter* painter - the reference paint controller
+ *         QRect rect - the bounding box of the rendering frame
+ *         int offset_x - the offset from left of the sprite in matrix
+ *         int offset_y - the offset from top of the sprite in matrix
+ * Output: bool - true if the sprite was rendered
+ */
+bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
+                         int offset_x, int offset_y)
+{
+  if(offset_x >= 0 && offset_x < getWidth() &&
+     offset_y >= 0 && offset_y < getHeight() &&
+     matrix[offset_x][offset_y] != NULL)
+  {
+    EditorSprite* paint_sprite = matrix[offset_x][offset_y];
+    return paint_sprite->paint(frame_index, painter, rect);
+  }
+  return false;
+}
+
 /*
  * Description: Removes all frames from the matrix.
  *

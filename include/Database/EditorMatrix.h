@@ -151,11 +151,17 @@ public:
   /* Returns the height of the matrix */
   int getHeight() const;
 
+  /* Returns the render depth at the x and y location in the matrix */
+  int getRenderDepth(int x, int y);
+
   /* Returns the right clicked sprite */
   EditorTileSprite* getRightClicked();
 
   /* Returns a snapshot of the scene */
   QPixmap getSnapshot(int width = -1, int height = -1);
+
+  /* Returns the editor sprite at the x and y location in the matrix */
+  EditorTileSprite* getSprite(int x, int y);
 
   /* Gets trim values - rows, columns, and frames - that are unused */
   int getTrimFrames(bool largest = true);
@@ -172,6 +178,11 @@ public:
   /* Increase the width and height, by the count factor */
   void increaseHeight(int count = 1);
   void increaseWidth(int count = 1);
+
+  /* Paint a single sprite in the matrix */
+  bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
+  bool paint(int frame_index, QPainter* painter, QRect rect,
+             int offset_x = 0, int offset_y = 0);
 
   /* Removes all sprites */
   void removeAll();

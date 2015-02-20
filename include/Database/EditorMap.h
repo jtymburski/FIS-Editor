@@ -76,6 +76,11 @@ private:
   TileIcons* tile_icons;
 
   /*------------------- Constants -----------------------*/
+  const static int kBASE_ID_IOS; /* The instant base ID for MapIOs */
+  const static int kBASE_ID_ITEMS; /* The instant base ID for items */
+  const static int kBASE_ID_PERSON; /* The instant base ID for persons */
+  const static int kBASE_ID_NPC; /* The instant base ID for npcs */
+  const static int kBASE_ID_THING; /* The base thing ID */
   const static int kUNSET_ID; /* The unset ID */
 
 /*============================================================================
@@ -139,7 +144,7 @@ public:
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();
   int getNextSpriteID();
-  int getNextThingID();
+  int getNextThingID(bool from_sub = false);
 
   /* Returns the set layers in a string */
   QString getSetLayers(int map_index, int x, int y);
@@ -152,12 +157,12 @@ public:
   QVector<EditorSprite*> getSprites();
 
   /* Return stored thing information */
-  EditorThing* getThing(int id);
-  EditorThing* getThingByIndex(int index);
-  int getThingCount();
-  int getThingIndex(int id);
-  QVector<QString> getThingList();
-  QVector<EditorThing*> getThings();
+  EditorThing* getThing(int id, int sub_map = -1);
+  EditorThing* getThingByIndex(int index, int sub_map = -1);
+  int getThingCount(int sub_map = -1);
+  int getThingIndex(int id, int sub_map = -1);
+  QVector<QString> getThingList(int sub_map = -1, bool all_submaps = false);
+  QVector<EditorThing*> getThings(int sub_map = -1);
 
   /* Returns the tile icons */
   TileIcons* getTileIcons();
@@ -191,7 +196,7 @@ public:
   int setSprite(EditorSprite* sprite);
 
   /* Sets a thing in the map */
-  int setThing(EditorThing* thing);
+  int setThing(EditorThing* thing, int sub_map = -1);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
@@ -217,9 +222,9 @@ public:
   void unsetSprites();
 
   /* Unset thing(s) */
-  bool unsetThing(int id);
-  bool unsetThingByIndex(int index);
-  void unsetThings();
+  bool unsetThing(int id, bool from_sub = false);
+  bool unsetThingByIndex(int index, int sub_map = -1);
+  void unsetThings(bool from_sub = false);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

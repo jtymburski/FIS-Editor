@@ -241,6 +241,45 @@ bool EditorThing::isVisible() const
 }
 
 /*
+ * Description: Paint the active frame in the matrix into the bounding box.
+ *              The offset x and y is the sprite in the matrix offset from the
+ *              top left.
+ *
+ * Inputs: QPainter* painter - the reference paint controller
+ *         QRect rect - the bounding box of the rendering frame
+ *         int offset_x - the offset from left of the sprite in matrix
+ *         int offset_y - the offset from top of the sprite in matrix
+ * Output: bool - true if the sprite was rendered
+ */
+bool EditorThing::paint(QPainter* painter, QRect rect,
+                        int offset_x, int offset_y)
+{
+  if(getMatrix() != NULL)
+    return getMatrix()->paint(painter, rect, offset_x, offset_y);
+  return false;
+}
+
+/*
+ * Description: Paint the frame index in the matrix into the bounding box.
+ *              The offset x and y is the sprite in the matrix offset from the
+ *              top left.
+ *
+ * Inputs: int frame_index - the index of the frame to render (0 for base)
+ *         QPainter* painter - the reference paint controller
+ *         QRect rect - the bounding box of the rendering frame
+ *         int offset_x - the offset from left of the sprite in matrix
+ *         int offset_y - the offset from top of the sprite in matrix
+ * Output: bool - true if the sprite was rendered
+ */
+bool EditorThing::paint(int frame_index, QPainter* painter, QRect rect,
+                        int offset_x, int offset_y)
+{
+  if(getMatrix() != NULL)
+    return getMatrix()->paint(frame_index, painter, rect, offset_x, offset_y);
+  return false;
+}
+
+/*
  * Description: Sets the base thing object for the thing. It will be used for
  *              visual representation and when set, also sets the name and
  *              description (which can be changed later).

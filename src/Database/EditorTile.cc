@@ -283,8 +283,13 @@ bool EditorTile::getPassabilityVisible(Direction direction)
   return passable;
 }
 
-/* Returns the map thing pointer(s) for the generic thing */
-// TODO: Comment
+/*
+ * Description: Returns the map thing pointer for the thing at the rendering
+ *              level.
+ *
+ * Inputs: int render_level - the render level inside the tile
+ * Output: EditorThing* - the thing at the render level
+ */
 EditorThing* EditorTile::getThing(int render_level)
 {
   if(render_level >= 0 && render_level < kRENDER_DEPTH)
@@ -327,8 +332,12 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
   return true;
 }
 
-/* Returns layer visibility */
-// TODO: Comment
+/*
+ * Description: Returns the visibility of the thing render level
+ *
+ * Inputs: int render_level - the render level to acquire the visibility
+ * Output: bool - true if the thing layer is visible
+ */
 bool EditorTile::getVisibilityThing(int render_level)
 {
   if(render_level >= 0 && render_level < kRENDER_DEPTH)
@@ -461,7 +470,9 @@ void EditorTile::paint(QPainter *painter,
   /* Render the map things */
   for(int i = 0; i < things.size(); i++)
   {
-    //if(things)
+    if(things[i].visible && things[i].thing != NULL)
+      things[i].thing->paint(0, painter, bound, x_pos - things[i].thing->getX(),
+                             y_pos - things[i].thing->getY());
   }
 
   /* Render the upper */
@@ -701,17 +712,33 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
   update();
 }
 
-/* Sets the thing sprite pointer, stored within the class */
-// TODO: Comment
-bool EditorTile::setThing(EditorThing* thing, int render_level)
+/*
+ * Description: Sets the thing sprite pointer, stored within the class.
+ *
+ * Inputs: EditorThing* thing - the thing to add to the tile (uses the internal
+ *                              render depth and position)
+ * Output: bool - true if the thing is set
+ */
+bool EditorTile::setThing(EditorThing* thing)
 {
-  if(thing != NULL && render_level >= 0 && render_level < kRENDER_DEPTH)
+  if(thing != NULL)
   {
-    unsetThing(render_level);
-    things[render_level].thing = thing;
-    update();
-
-    return true;
+    /* Determine the x, y in the matrix */
+    int x =  x_pos - thing->getX();
+    int y = y_pos - thing->getY();
+    if(x >= 0 && x < thing->getMatrix()->getWidth() &&
+       y >= 0 && y < thing->getMatrix()->getHeight())
+    {
+      /* Determine the render level */
+      int render_level = thing->getMatrix()->getRenderDepth(x, y);
+      if(render_level >= 0 && render_level < kRENDER_DEPTH)
+      {
+        /* Set the new thing */
+        things[render_level].thing = thing;
+        update();
+        return true;
+      }
+    }
   }
   return false;
 }
@@ -823,16 +850,25 @@ void EditorTile::setVisibilityPass(bool toggle)
   update();
 }
 
-/* Sets the various layer visibilities */
-// TODO: Comment
+/*
+ * Description: Sets the visibility of all layers of the thing.
+ *
+ * Inputs: bool visible - true if the thing layers are visible
+ * Output: none
+ */
 void EditorTile::setVisibilityThing(bool visible)
 {
   for(int i = 0; i < things.size(); i++)
     things[i].visible = visible;
 }
 
-/* Sets the various layer visibilities */
-// TODO: Comment
+/*
+ * Description: Sets the visibility of the render level of the things in tile.
+ *
+ * Inputs: int render_level - the render level to modify the visibility
+ *         bool visible - true if the render level should be visible
+ * Output: bool - true if the visibility was set
+ */
 bool EditorTile::setVisibilityThing(int render_level, bool visible)
 {
   if(render_level >= 0 && render_level < kRENDER_DEPTH)
@@ -969,8 +1005,13 @@ void EditorTile::unplace(EditorSprite* sprite)
   update();
 }
 
-/* Unsets the stored thing pointer(s) */
-// TODO: Comment
+/*
+ * Description: Unsets the thing pointer in the tile. Searches through all
+ *              render levels and removes it if the pointer is found.
+ *
+ * Inputs: EditorThing* thing - the thing to remove from the tile
+ * Output: bool - true if the thing was found and removed
+ */
 bool EditorTile::unsetThing(EditorThing* thing)
 {
   for(int i = 0; i < things.size(); i++)
@@ -986,8 +1027,12 @@ bool EditorTile::unsetThing(EditorThing* thing)
   return false;
 }
 
-/* Unsets the stored thing pointer(s) */
-// TODO: Comment
+/*
+ * Description: Unsets the thing pointer in the tile at the render level.
+ *
+ * Inputs: int render_level - the render depth to remove the thing from
+ * Output: bool - true if a thing was removed at the passed depth
+ */
 bool EditorTile::unsetThing(int render_level)
 {
   if(render_level >= 0 && render_level < things.size())
@@ -1003,8 +1048,12 @@ bool EditorTile::unsetThing(int render_level)
   return false;
 }
 
-/* Unsets the stored thing pointer(s) */
-// TODO: Comment
+/*
+ * Description: Unsets the things in all render levels.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorTile::unsetThings()
 {
   for(int i = 0; i < things.size(); i++)

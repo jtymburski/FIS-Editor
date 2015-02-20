@@ -8,6 +8,11 @@
 #include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
+const int EditorMap::kBASE_ID_IOS = 30000;
+const int EditorMap::kBASE_ID_ITEMS = 40000;
+const int EditorMap::kBASE_ID_PERSON = 0;
+const int EditorMap::kBASE_ID_NPC = 10000;
+const int EditorMap::kBASE_ID_THING = 20000;
 const int EditorMap::kUNSET_ID = -1;
 
 /*============================================================================
@@ -570,26 +575,57 @@ int EditorMap::getNextSpriteID()
  * Description: Returns the next available thing ID that can be used for a new
  *              thing.
  *
- * Inputs: none
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
  * Output: int - the id to use
  */
-int EditorMap::getNextThingID()
+int EditorMap::getNextThingID(bool from_sub)
 {
   bool found = false;
   int id = 0;
 
-  for(int i = 0; !found && (i < base_things.size()); i++)
+  /* If not from sub map, check base for base ID */
+  if(!from_sub)
   {
-    if(base_things[i]->getID() != i)
+    for(int i = 0; !found && (i < base_things.size()); i++)
     {
-      id = i;
-      found = true;
+      if(base_things[i]->getID() != i)
+      {
+        id = i;
+        found = true;
+      }
     }
-  }
 
-  /* If nothing found, just make it the last ID + 1 */
-  if(!found && base_things.size() > 0)
-    id = base_things.last()->getID() + 1;
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && base_things.size() > 0)
+      id = base_things.last()->getID() + 1;
+  }
+  /* Otherwise, check the sub-maps for available ID */
+  else
+  {
+    /* Compile the IDs of all things in all sub-maps */
+    QVector<int> id_list;
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->things.size(); j++)
+        id_list.push_back(sub_maps[i]->things[j]->getID());
+
+    /* Sort the list */
+    qSort(id_list);
+
+    /* Find the next available ID */
+    id = kBASE_ID_THING;
+    for(int i = 0; !found && (i < id_list.size()); i++)
+    {
+      if(id_list[i] != (kBASE_ID_THING + i))
+      {
+        id = (kBASE_ID_THING + i);
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && id_list.size() > 0)
+      id = id_list.last() + 1;
+  }
 
   return id;
 }
@@ -687,14 +723,29 @@ QVector<EditorSprite*> EditorMap::getSprites()
  * Description: Returns the thing with the corresponding ID.
  *
  * Inputs: int id - the id of the thing to get
+ *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: EditorThing* - the pointer to match the ID. NULL if not found.
  */
-EditorThing* EditorMap::getThing(int id)
+EditorThing* EditorMap::getThing(int id, int sub_map)
 {
   if(id >= 0)
-    for(int i = 0; i < base_things.size(); i++)
-      if(base_things[i]->getID() == id)
-        return base_things[i];
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_things.size(); i++)
+        if(base_things[i]->getID() == id)
+          return base_things[i];
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->things.size(); i++)
+        if(sub_maps[sub_map]->things[i]->getID() == id)
+          return sub_maps[sub_map]->things[i];
+    }
+  }
+
   return NULL;
 }
 
@@ -702,24 +753,41 @@ EditorThing* EditorMap::getThing(int id)
  * Description: Returns the thing at the corresponding index in the list.
  *
  * Inputs: int index - the index in the array (0 to size - 1)
+ *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: EditorThing* - the pointer to match the index. NULL if out of range
  */
-EditorThing* EditorMap::getThingByIndex(int index)
+EditorThing* EditorMap::getThingByIndex(int index, int sub_map)
 {
-  if(index >= 0 && index < base_things.size())
-    return base_things[index];
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_things.size())
+      return base_things[index];
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->things.size())
+      return sub_maps[sub_map]->things[index];
+  }
   return NULL;
 }
 
 /*
  * Description: Returns the number of things in the list.
  *
- * Inputs: none
+ * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
  * Output: int - the number of things in the map set
  */
-int EditorMap::getThingCount()
+int EditorMap::getThingCount(int sub_map)
 {
-  return base_things.size();
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+    return base_things.size();
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+    return sub_maps[sub_map]->things.size();
+  return 0;
 }
 
 /*
@@ -727,14 +795,28 @@ int EditorMap::getThingCount()
  *              Less than 0 if none match.
  *
  * Inputs: int id - the id to find the index for
+ *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: int - the index of the thing. Less than 0 if nothing matches
  */
-int EditorMap::getThingIndex(int id)
+int EditorMap::getThingIndex(int id, int sub_map)
 {
   if(id >= 0)
-    for(int i = 0; i < base_things.size(); i++)
-      if(base_things[i]->getID() == id)
-        return i;
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_things.size(); i++)
+        if(base_things[i]->getID() == id)
+          return i;
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->things.size(); i++)
+        if(sub_maps[sub_map]->things[i]->getID() == id)
+          return i;
+    }
+  }
   return -1;
 }
 
@@ -742,17 +824,39 @@ int EditorMap::getThingIndex(int id)
  * Description: Returns a list of all things in the format of a HEADER row
  *              with the following rows as "ID: NAME".
  *
- * Inputs: none
+ * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
  * Output: QVector<QString> - list of all things
  */
-QVector<QString> EditorMap::getThingList()
+QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps)
 {
   QVector<QString> stack;
   stack.push_back("MAP THINGS");
 
-  /* Go through all things and add them to the list */
-  for(int i = 0; i < base_things.size(); i++)
-    stack.push_back(base_things[i]->getNameList());
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all things and add them to the list */
+    for(int i = 0; i < base_things.size(); i++)
+      stack.push_back(base_things[i]->getNameList());
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->things.size(); j++)
+        stack.push_back(sub_maps[i]->things[j]->getNameList());
+  }
 
   return stack;
 }
@@ -760,12 +864,25 @@ QVector<QString> EditorMap::getThingList()
 /*
  * Description: Returns the list of all things in the editor map
  *
- * Inputs: none
+ * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
  * Output: QVector<EditorThing*> - list of all things
  */
-QVector<EditorThing*> EditorMap::getThings()
+QVector<EditorThing*> EditorMap::getThings(int sub_map)
 {
-  return base_things;
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    return base_things;
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    return sub_maps[sub_map]->things;
+  }
+
+  /* Otherwise, return blank list */
+  QVector<EditorThing*> blank_list;
+  return blank_list;
 }
 
 /*
@@ -1063,9 +1180,10 @@ int EditorMap::setSprite(EditorSprite* sprite)
  *              already exists with the ID, it deletes the existing one.
  *
  * Inputs: EditorThing* thing - the new thing to set in
+ *         int sub_map - the sub-map to set the things for (<0 is base)
  * Output: int - the index if set. If < 0, it is not set.
  */
-int EditorMap::setThing(EditorThing* thing)
+int EditorMap::setThing(EditorThing* thing, int sub_map)
 {
   if(thing != NULL && thing->getID() >= 0)
   {
@@ -1073,40 +1191,84 @@ int EditorMap::setThing(EditorThing* thing)
     int index = -1;
     bool near = false;
 
-    /* Find if the ID exists */
-    for(int i = 0; !found && !near && (i < base_things.size()); i++)
+    /* If sub map id is less than 0, work with base thing */
+    if(sub_map < 0)
     {
-      if(base_things[i]->getID() == thing->getID())
+      /* Find if the ID exists */
+      for(int i = 0; !found && !near && (i < base_things.size()); i++)
       {
-        index = i;
-        found = true;
+        if(base_things[i]->getID() == thing->getID())
+        {
+          index = i;
+          found = true;
+        }
+        else if(base_things[i]->getID() > thing->getID())
+        {
+          index = i;
+          near = true;
+        }
       }
-      else if(base_things[i]->getID() > thing->getID())
-      {
-        index = i;
-        near = true;
-      }
-    }
 
-    /* If found, modify the index with the new information */
-    if(found)
-    {
-      unsetThingByIndex(index);
-      base_things.insert(index, thing);
+      /* If found, modify the index with the new information */
+      if(found)
+      {
+        unsetThingByIndex(index);
+        base_things.insert(index, thing);
+      }
+      else if(near)
+      {
+        base_things.insert(index, thing);
+      }
+      else
+      {
+        base_things.append(thing);
+        index = base_things.size() - 1;
+      }
     }
-    else if(near)
+    /* Otherwise, work with the sub id */
+    else if(sub_map < sub_maps.size())
     {
-      base_things.insert(index, thing);
-    }
-    else
-    {
-      base_things.append(thing);
-      index = base_things.size() - 1;
+      /* Check to make sure the thing could be added */
+      int x_start = thing->getX();
+      int y_start = thing->getY();
+      int x_end = x_start + thing->getMatrix()->getWidth();
+      int y_end = y_start + thing->getMatrix()->getHeight();
+      if(x_start >= 0 && x_end <= sub_maps[sub_map]->tiles.size() &&
+         y_start >= 0 && y_end <= sub_maps[sub_map]->tiles[x_start].size())
+      {
+        /* First remove the existing id, if one exists */
+        unsetThing(thing->getID(), true);
+
+        /* Now insert into the proper location in the thing stack in the map */
+        for(int i = 0; !near && (i < sub_maps[sub_map]->things.size()); i++)
+        {
+          if(sub_maps[sub_map]->things[i]->getID() > thing->getID())
+          {
+            index = i;
+            near = true;
+          }
+        }
+
+        /* If near, insert at index. Otherwise, append */
+        if(near)
+        {
+          sub_maps[sub_map]->things.insert(index, thing);
+        }
+        else
+        {
+          sub_maps[sub_map]->things.append(thing);
+          index = sub_maps[sub_map]->things.size() - 1;
+        }
+
+        /* Add to tile */
+        for(int i = x_start; i < x_end; i++)
+          for(int j = y_start; j < y_end; j++)
+            sub_maps[sub_map]->tiles[i][j]->setThing(thing);
+      }
     }
 
     return index;
   }
-
   return -1;
 }
 
@@ -1207,6 +1369,11 @@ bool EditorMap::unsetMapByIndex(int index)
 {
   if(index >= 0 && index < sub_maps.size())
   {
+    /* Delete all things from sub-map */
+    while(sub_maps[index]->things.size() > 0)
+      unsetThingByIndex(0, index);
+
+    /* Delete the sub-map */
     delete sub_maps[index];
     sub_maps.remove(index);
 
@@ -1287,38 +1454,90 @@ void EditorMap::unsetSprites()
  * Description: Unset the thing within the list that correspond to the ID.
  *
  * Inputs: int id - the thing id
+ *         bool from_sub - true if it should be unset in sub-maps instead
  * Output: bool - was a thing deleted?
  */
-bool EditorMap::unsetThing(int id)
+bool EditorMap::unsetThing(int id, bool from_sub)
 {
-  int index = getThingIndex(id);
-  return unsetThingByIndex(index);
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    int index = getThingIndex(id);
+    return unsetThingByIndex(index);
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    bool deleted = false;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      int index = getThingIndex(id, i);
+      deleted |= unsetThingByIndex(index, i);
+    }
+
+    return deleted;
+  }
 }
 
 /*
  * Description: Unset the thing within the list that correspond to the index.
  *
  * Inputs: int index - the thing index corresponder
+ *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: bool - was a thing deleted?
  */
-bool EditorMap::unsetThingByIndex(int index)
+bool EditorMap::unsetThingByIndex(int index, int sub_map)
 {
-  if(index >= 0 && index < base_things.size())
+  if(sub_map < 0)
   {
-    /* Remove all things related to this index from all tiles */
-    // TODO: Revise for thing
-    //for(int i = 0; i < sub_maps.size(); i++)
-    //{
-    //  for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
-    //    for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
-    //      sub_maps[i]->tiles[j][k]->unplace(things[index]);
-    //}
+    if(index >= 0 && index < base_things.size())
+    {
+      /* Remove all things related to this index - sub things */
+      for(int i = 0; i < sub_maps.size(); i++)
+      {
+        for(int j = 0; j < sub_maps[i]->things.size(); j++)
+        {
+          if(sub_maps[i]->things[j]->getBase() != NULL &&
+             sub_maps[i]->things[j]->getBase()->getID() ==
+             base_things[index]->getID())
+          {
+            unsetThingByIndex(j, i);
+            j--;
+          }
+        }
+      }
 
-    /* Finally, delete the sprite */
-    delete base_things[index];
-    base_things.remove(index);
+      /* Finally, delete the thing */
+      delete base_things[index];
+      base_things.remove(index);
 
-    return true;
+      return true;
+    }
+  }
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->things.size())
+    {
+      EditorThing* ref = sub_maps[sub_map]->things[index];
+
+      /* Remove the instances from tiles */
+      for(int i = ref->getX(); i < ref->getMatrix()->getWidth() &&
+                               i < sub_maps[sub_map]->tiles.size(); i++)
+      {
+        for(int j = ref->getY(); j < ref->getMatrix()->getHeight() &&
+                                 j < sub_maps[sub_map]->tiles[i].size(); j++)
+        {
+          sub_maps[sub_map]->tiles[i][j]->unsetThing(ref);
+        }
+      }
+
+      /* Finally, delete the thing */
+      delete ref;
+      sub_maps[sub_map]->things.remove(index);
+
+      return true;
+    }
   }
 
   return false;
@@ -1327,14 +1546,28 @@ bool EditorMap::unsetThingByIndex(int index)
 /*
  * Description: Unsets all map things within the EditorMap set.
  *
- * Inputs: none
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
  * Output: none
  */
-void EditorMap::unsetThings()
+void EditorMap::unsetThings(bool from_sub)
 {
-  while(base_things.size() > 0)
-    unsetThingByIndex(0);
-  base_things.clear();
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    while(base_things.size() > 0)
+      unsetThingByIndex(0);
+    base_things.clear();
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      while(sub_maps[i]->things.size() > 0)
+        unsetThingByIndex(0, i);
+      sub_maps[i]->things.clear();
+    }
+  }
 }
 
 /*============================================================================
