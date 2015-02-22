@@ -33,17 +33,20 @@ public:
 
 private:
   /* Active Hover tile */
-  EditorTile* active_tile;
+  //EditorTile* active_tile;
 
   /* Block data */
   QPointF block_origin;
   bool block_erase;
 
   /* Cursor type */
-  EditorEnumDb::CursorMode cursor_mode;
+  //EditorEnumDb::CursorMode cursor_mode;
+
+  /* The editing map */
+  EditorMap* editing_map;
 
   /* The rendering map */
-  SubMapInfo* map;
+  //SubMapInfo* map; // TODO: REMOVE??
 
   /* In tile select mode */
   bool tile_select;
@@ -86,24 +89,33 @@ public slots:
   void selectTile();
 
   /* Sets the rendering sub-map */
-  void setRenderingMap(SubMapInfo* map);
+  //void setRenderingMap(SubMapInfo* map); // TODO: REMOVE?? MODIFY??
+
+  /* Update the rendering sub-map */
+  void updateRenderingMap();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
   /* Returns the active tile */
-  EditorTile* getActiveTile();
+  //EditorTile* getActiveTile();
+
+  /* Returns the map being edited */
+  EditorMap* getMapEditor();
 
   /* Returns the width and height */
   int getMapHeight();
   int getMapWidth();
 
   /* Returns the rendering sub-map */
-  SubMapInfo* getRenderingMap();
+  //SubMapInfo* getRenderingMap(); // TODO: REMOVE?? MODIFY??
 
   /* Sets the cursor mode */
-  void setCursorMode(EditorEnumDb::CursorMode mode);
+  //void setCursorMode(EditorEnumDb::CursorMode mode);
+
+  /* Sets the map being edited */
+  void setMapEditor(EditorMap* editor);
 
   /* Update the entire scene */
   void updateAll();

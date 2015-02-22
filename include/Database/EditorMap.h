@@ -55,7 +55,7 @@ public:
 private:
   /* Active references in the map - used when displaying a map */
   HoverInfo active_info;
-  int active_submap;
+  SubMapInfo* active_submap;
 
   /* The base map things */
   QVector<EditorThing*> base_things;
@@ -103,7 +103,7 @@ protected:
                   SubMapInfo* map, bool first = false);
 
   /* Updates the tiles that contain the hover information struct */
-  //void updateHoverTiles(); // TODO: MAYBE?
+  bool updateHoverThing(bool unset = false);
 
 signals:
 public slots:
@@ -113,17 +113,19 @@ public slots:
  *===========================================================================*/
 public:
   /* Clears the hover information - called on first initiation of map */
-  void clearHoverInfo(); // TODO
+  void clearHoverInfo();
 
   /* Click trigger on tile in map */
-  void clickTrigger(); // TODO
+  void clickTrigger();
 
   /* Returns current references for lists in map */
-  int getCurrentSpriteIndex(); // TODO
-  int getCurrentThingIndex(); // TODO
+  SubMapInfo* getCurrentMap();
+  int getCurrentMapIndex();
+  int getCurrentSpriteIndex();
+  int getCurrentThingIndex();
 
   /* Returns the hover information */
-  HoverInfo* getHoverInfo(); // TODO
+  HoverInfo* getHoverInfo();
 
   /* Returns the ID of the map set */
   virtual int getID() const;
@@ -174,13 +176,14 @@ public:
   void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
-  bool setCurrentSprite(int index); // TODO
-  bool setCurrentThing(int index); // TODO
+  bool setCurrentMap(int index);
+  bool setCurrentSprite(int index);
+  bool setCurrentThing(int index);
 
   /* Sets the hover information */
-  void setHoverCursor(EditorEnumDb::CursorMode cursor); // TODO
-  void setHoverLayer(EditorEnumDb::Layer layer); // TODO
-  void setHoverTile(EditorTile* tile); // TODO
+  void setHoverCursor(EditorEnumDb::CursorMode cursor);
+  void setHoverLayer(EditorEnumDb::Layer layer);
+  void setHoverTile(EditorTile* tile);
 
   /* Sets the ID of the map set */
   virtual void setID(int id);

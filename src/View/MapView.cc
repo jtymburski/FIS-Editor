@@ -122,8 +122,8 @@ void MapView::setupMapView()//int x, int y)
   /* Connections */
   connect(map_render, SIGNAL(sendCurrentPosition(int,int)),
           this, SLOT(setCurrentTile(int,int)));
-  connect(map_control, SIGNAL(addMap(SubMapInfo*)),
-          map_render, SLOT(setRenderingMap(SubMapInfo*)));
+  connect(map_control, SIGNAL(updateMap()),
+          map_render, SLOT(updateRenderingMap()));
   connect(map_render, SIGNAL(itemClick(EditorTile*)),
           this, SLOT(itemClick(EditorTile*)));
   connect(map_render, SIGNAL(itemMassClick(QList<EditorTile*>,bool)),
@@ -181,7 +181,7 @@ void MapView::itemClick(EditorTile* tile)
     {
       if(selected != tile->getSprite(layer))
         recursiveFill(tile->getX(), tile->getY(), layer,
-                      tile->getSprite(layer), map_render->getRenderingMap());
+                      tile->getSprite(layer), editing_map->getCurrentMap());
     }
   }
 }
@@ -319,6 +319,8 @@ MapRender* MapView::getMapEditorView()
 void MapView::setCursorMode(EditorEnumDb::CursorMode mode)
 {
   cursor_mode = mode;
+  if(editing_map != NULL)
+    editing_map->setHoverCursor(mode);
 
   /* Update the map render, with the appropriate settings */
   if(mode == EditorEnumDb::BLOCKPLACE)
@@ -327,14 +329,14 @@ void MapView::setCursorMode(EditorEnumDb::CursorMode mode)
     map_render_view->setDragMode(QGraphicsView::NoDrag);
 
   /* Pass along to scene */
-  map_render->setCursorMode(mode);
+  //map_render->setCursorMode(mode); // TODO: REMOVE
 }
 
 /* Sets the map being edited */
 void MapView::setMapEditor(EditorMap* editor)
 {
   /* Remove connections to the old map */
-  map_render->setRenderingMap(NULL);
+  map_render->setMapEditor(NULL);
   map_control->setMapEditor(NULL);
   map_database->setMapEditor(NULL);
   setDisabled(true);
@@ -348,7 +350,12 @@ void MapView::setMapEditor(EditorMap* editor)
     /* Un-disable view */
     setDisabled(false);
 
+    /* Set up editing map */
+    editing_map->clearHoverInfo();
+    editing_map->setHoverCursor(cursor_mode);
+
     /* Connect the Map Control and Database panel */
+    map_render->setMapEditor(editing_map);
     map_database->setMapEditor(editing_map);
     map_control->setMapEditor(editing_map);
 

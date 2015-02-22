@@ -14,7 +14,6 @@
 MapControl::MapControl(QWidget *parent): QWidget(parent)
 {
   editing_map = NULL;
-  current_map = NULL;
   mapsize_dialog = NULL;
 
   QVBoxLayout* main_layout = new QVBoxLayout(this);
@@ -37,7 +36,7 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   /* Sets up the active layer actions, makes them checkable and adds them to
      an action group which allows only one to be active at a time */ 
   list_top = new QListWidget(this);
-  for(int i = 0; i < (int)EditorEnumDb::INVALID; i++)
+  for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
   {
     QListWidgetItem* item = new QListWidgetItem(
                EditorHelpers::getLayerString((EditorEnumDb::Layer)i), list_top);
@@ -48,6 +47,8 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   main_layout->addWidget(list_top);
   connect(list_top, SIGNAL(itemChanged(QListWidgetItem*)),
           this, SLOT(itemCheckChanged(QListWidgetItem*)));
+  connect(list_top, SIGNAL(currentRowChanged(int)),
+          this, SLOT(layerChanged(int)));
 
   /* Sets up the second list widget with the leveles of visibility */
   list_middle = new QListWidget(this);
@@ -109,8 +110,8 @@ void MapControl::selectSubMap(int index)
     SubMapInfo* selected = editing_map->getMapByIndex(index);
     if(selected != NULL)
     {
-      current_map = selected;
-      emit addMap(current_map);
+      editing_map->setCurrentMap(index);
+      emit updateMap();
       updateMapList();
     }
   }
@@ -129,12 +130,11 @@ void MapControl::updateMapList(int selected)
   /* Fill the data */
   if(editing_map != NULL)
   {
+    /* Set the bold index */
+    bold_index = editing_map->getCurrentMapIndex();
+
     for(int i = 0; i < editing_map->getMapCount(); i++)
-    {
       list_set << editing_map->getMapNameList(i);
-      if(editing_map->getMapByIndex(i) == current_map)
-        bold_index = i;
-    }
 
     /* Set up the bottom view */
     QFont font;
@@ -198,10 +198,10 @@ void MapControl::deleteSubMap()
       bottom = true;
 
     /* Delete the sub-map */
-    if(editing_map->getMapByIndex(index) == current_map)
+    if(index == editing_map->getCurrentMapIndex())
     {
-      emit addMap(NULL);
-      current_map = NULL;
+      editing_map->setCurrentMap(-1);
+      emit updateMap();
     }
     editing_map->unsetMapByIndex(index);
 
@@ -247,6 +247,13 @@ void MapControl::itemCheckChanged(QListWidgetItem* item)
 {
   EditorEnumDb::Layer layer = (EditorEnumDb::Layer)list_top->row(item);
   editing_map->setVisibility(layer, item->checkState() == Qt::Checked);
+}
+
+/* Selected layer changed */
+void MapControl::layerChanged(int current_row)
+{
+  if(editing_map != NULL)
+    editing_map->setHoverLayer((EditorEnumDb::Layer)current_row);
 }
 
 /* Right click list menu on bottom list */
@@ -364,8 +371,8 @@ void MapControl::resizeSubMap()
 
   /* Update list, and view if applicable */
   updateMapList();
-  if(info == current_map)
-    emit addMap(current_map);
+  if(info == editing_map->getCurrentMap())
+    emit updateMap();
 }
 
 /* Resize trigger from the menu */
@@ -428,7 +435,7 @@ void MapControl::updateBottomRow(int current_row)
 /* Get the current sub-map */
 SubMapInfo* MapControl::getCurrentMap()
 {
-  return current_map;
+  return editing_map->getCurrentMap();
 }
 
 /* Returns the current map index */
@@ -470,7 +477,7 @@ EditorEnumDb::Layer MapControl::getSelectedLayer()
 /* Returns the visibility setting of the checked boxes in the top list */
 bool MapControl::getVisibility(EditorEnumDb::Layer layer)
 {
-  if(layer != EditorEnumDb::INVALID)
+  if(layer != EditorEnumDb::NO_LAYER)
     return (list_top->item((int)layer)->checkState() == Qt::Checked);
   return false;
 }
@@ -479,7 +486,6 @@ bool MapControl::getVisibility(EditorEnumDb::Layer layer)
 void MapControl::setMapEditor(EditorMap* editor)
 {
   editing_map = NULL;
-  current_map = NULL;
   list_bottom->setCurrentRow(-1);
 
   // TODO: Clean-up processing...if necessary
@@ -491,8 +497,11 @@ void MapControl::setMapEditor(EditorMap* editor)
     editing_map->setVisibilityGrid(getGridToggle());
     editing_map->setVisibilityPass(getPassabilityToggle());
 
+    /* Update layer */
+    editing_map->setHoverLayer(getSelectedLayer());
+
     /* Update visibility of all layers */
-    for(int i = 0; i < (int)EditorEnumDb::INVALID; i++)
+    for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
       editing_map->setVisibility((EditorEnumDb::Layer)i,
                                  getVisibility((EditorEnumDb::Layer)i));
 

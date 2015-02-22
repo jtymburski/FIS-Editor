@@ -454,6 +454,19 @@ void EditorTile::paint(QPainter *painter,
   int size = EditorHelpers::getTileSize();
   QRect bound(x_pos * size, y_pos * size, size, size);
 
+  /* Determine if it's a hover thing - special state */
+  int diff_x = 0;
+  int diff_y = 0;
+  bool hover_thing = false;
+  if(hover_info->active_thing != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::THING)
+  {
+    diff_x = x_pos - hover_info->hover_tile->getX();
+    diff_y = y_pos - hover_info->hover_tile->getY();
+    hover_thing = true;
+  }
+
   /* Render the base */
   if(layer_base.visible && layer_base.sprite != NULL)
     layer_base.sprite->paint(painter, bound);
@@ -475,6 +488,10 @@ void EditorTile::paint(QPainter *painter,
                              y_pos - things[i].thing->getY());
   }
 
+  /* If hover thing is true, render it */
+  if(hover_thing)
+    hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
+
   /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].visible && layers_upper[i].sprite != NULL)
@@ -489,8 +506,19 @@ void EditorTile::paint(QPainter *painter,
   }
   if(hovered)
   {
+    QColor color(200, 200, 200, 128);
+    if(hover_thing)
+    {
+      EditorMatrix* matrix = hover_info->active_thing->getMatrix();
+
+      if(hovered_invalid ||
+         getThing(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
     painter->fillRect(x_pos * size + 1, y_pos * size + 1, size - 2, size - 2,
-                      QColor(200, 200, 200, 128));
+                      color);
   }
 
   /* Render the passability */

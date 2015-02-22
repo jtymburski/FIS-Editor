@@ -19,7 +19,7 @@ public:
 
   /* Enum for cursor mode */
   enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL,PASS_ALL,
-                   PASS_N,PASS_E,PASS_S,PASS_W};
+                   PASS_N,PASS_E,PASS_S,PASS_W,NO_CURSOR};
 
   /* Enum for type of FrameView */
   enum FrameViewType {FRAME,HEAD,TAIL,MIDPOINT,VIEWONLY};
@@ -40,7 +40,7 @@ public:
               UPPER3 = 12,
               UPPER4 = 13,
               UPPER5 = 14,
-              INVALID = 15
+              NO_LAYER = 15
              };
 
   /* Map view mode */

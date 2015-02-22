@@ -167,8 +167,10 @@ void ThingView::updateList()
  *===========================================================================*/
 
 /* The current row changes in the list widget */
-void ThingView::currentRowChanged(int)
+void ThingView::currentRowChanged(int index)
 {
+  if(editor_map != NULL)
+    editor_map->setCurrentThing(index);
   updateInfo();
 }
 

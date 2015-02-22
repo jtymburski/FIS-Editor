@@ -25,9 +25,10 @@ MapRender::MapRender(QWidget* parent,
          : QGraphicsScene(parent)
 {
   /* Data init */
-  active_tile = NULL;
-  setCursorMode(cursor);
-  map = NULL;
+  //active_tile = NULL;
+  //setCursorMode(cursor);
+  editing_map = NULL;
+  //map = NULL;
   tile_select = false;
 
   /* Sets the background to be black */
@@ -40,7 +41,8 @@ MapRender::MapRender(QWidget* parent,
 MapRender::~MapRender()
 {
   /* Clear out the rendering map */
-  setRenderingMap(NULL);
+  setMapEditor(NULL);
+  //setRenderingMap(NULL);
 }
 
 /*============================================================================
@@ -56,56 +58,60 @@ MapRender::~MapRender()
  */
 void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-  bool new_hover = false;
-
-  /* Check if left the current tile */
-  if(active_tile != NULL)
+  if(editing_map != NULL)
   {
-    QRectF bound = active_tile->boundingRect();
-    if(!bound.contains(event->scenePos()))
-    {
-      active_tile->setHover(false);
-      active_tile = NULL;
-    }
-  }
+    bool new_hover = false;
+    EditorTile* active_tile = editing_map->getHoverInfo()->hover_tile;
 
-  /* Check which tile it's hovering on now */
-  if(active_tile == NULL)
-  {
-    QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
-    if(hover_item != NULL)
+    /* Check if left the current tile */
+    if(active_tile != NULL)
     {
-      active_tile = (EditorTile*)hover_item;
-      active_tile->setHover(true);
-      new_hover = true;
-      emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
+      QRectF bound = active_tile->boundingRect();
+      if(!bound.contains(event->scenePos()))
+      {
+        editing_map->setHoverTile(NULL);
+        active_tile = NULL;
+      }
     }
-    else
-    {
-      emit sendCurrentPosition(-1, -1);
-    }
-  }
 
-  /* If a new hover tile, check if a button is pressed and trigger item click */
-  if(new_hover && (event->buttons() & Qt::LeftButton ||
-                   event->buttons() & Qt::RightButton))
-  {
-    if(cursor_mode == EditorEnumDb::BASIC ||
-       cursor_mode == EditorEnumDb::ERASER)
+    /* Check which tile it's hovering on now */
+    if(active_tile == NULL)
     {
-      emit itemClick(active_tile);
-    }
-    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
-             cursor_mode == EditorEnumDb::PASS_N ||
-             cursor_mode == EditorEnumDb::PASS_E ||
-             cursor_mode == EditorEnumDb::PASS_S ||
-             cursor_mode == EditorEnumDb::PASS_W)
-    {
-      if(event->buttons() & Qt::LeftButton)
-        emit passSet(active_tile);
+      QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
+      if(hover_item != NULL)
+      {
+        active_tile = (EditorTile*)hover_item;
+        editing_map->setHoverTile(active_tile);
+        new_hover = true;
+        emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
+      }
       else
-        emit passUnset(active_tile);
+      {
+        emit sendCurrentPosition(-1, -1);
+      }
     }
+
+//  /* If a new hover tile, check if a button is pressed and trigger item click */
+//  if(new_hover && (event->buttons() & Qt::LeftButton ||
+//                   event->buttons() & Qt::RightButton))
+//  {
+//    if(cursor_mode == EditorEnumDb::BASIC ||
+//       cursor_mode == EditorEnumDb::ERASER)
+//    {
+//      emit itemClick(active_tile);
+//    }
+//    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+//             cursor_mode == EditorEnumDb::PASS_N ||
+//             cursor_mode == EditorEnumDb::PASS_E ||
+//             cursor_mode == EditorEnumDb::PASS_S ||
+//             cursor_mode == EditorEnumDb::PASS_W)
+//    {
+//      if(event->buttons() & Qt::LeftButton)
+//        emit passSet(active_tile);
+//      else
+//        emit passUnset(active_tile);
+//    }
+//  }
   }
 }
 
@@ -117,69 +123,69 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
  */
 void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-  /* If click, proceed to trigger item click for normal pens */
-  if(event->button() == Qt::LeftButton)
-  {
-    if(tile_select)
-    {
-      emit sendSelectedTile(map->id, active_tile->getX(), active_tile->getY());
-      tile_select = false;
-    }
-    else if(cursor_mode == EditorEnumDb::BASIC ||
-            cursor_mode == EditorEnumDb::ERASER ||
-            cursor_mode == EditorEnumDb::FILL)
-      emit itemClick(active_tile);
-    else if(cursor_mode == EditorEnumDb::BLOCKPLACE)
-    {
-      block_origin = event->scenePos().toPoint();
-      block_erase = false;
-    }
-    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
-             cursor_mode == EditorEnumDb::PASS_N ||
-             cursor_mode == EditorEnumDb::PASS_E ||
-             cursor_mode == EditorEnumDb::PASS_S ||
-             cursor_mode == EditorEnumDb::PASS_W)
-    {
-      emit passSet(active_tile);
-    }
-  }
-  else if(event->button() == Qt::RightButton)
-  {
-    if(cursor_mode == EditorEnumDb::BLOCKPLACE)
-    {
-      block_origin = event->scenePos();
-      block_erase = true;
-    }
-    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
-             cursor_mode == EditorEnumDb::PASS_N ||
-             cursor_mode == EditorEnumDb::PASS_E ||
-             cursor_mode == EditorEnumDb::PASS_S ||
-             cursor_mode == EditorEnumDb::PASS_W)
-    {
-      emit passUnset(active_tile);
-    }
-  }
+//  /* If click, proceed to trigger item click for normal pens */
+//  if(event->button() == Qt::LeftButton)
+//  {
+//    if(tile_select)
+//    {
+//      emit sendSelectedTile(map->id, active_tile->getX(), active_tile->getY());
+//      tile_select = false;
+//    }
+//    else if(cursor_mode == EditorEnumDb::BASIC ||
+//            cursor_mode == EditorEnumDb::ERASER ||
+//            cursor_mode == EditorEnumDb::FILL)
+//      emit itemClick(active_tile);
+//    else if(cursor_mode == EditorEnumDb::BLOCKPLACE)
+//    {
+//      block_origin = event->scenePos().toPoint();
+//      block_erase = false;
+//    }
+//    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+//             cursor_mode == EditorEnumDb::PASS_N ||
+//             cursor_mode == EditorEnumDb::PASS_E ||
+//             cursor_mode == EditorEnumDb::PASS_S ||
+//             cursor_mode == EditorEnumDb::PASS_W)
+//    {
+//      emit passSet(active_tile);
+//    }
+//  }
+//  else if(event->button() == Qt::RightButton)
+//  {
+//    if(cursor_mode == EditorEnumDb::BLOCKPLACE)
+//    {
+//      block_origin = event->scenePos();
+//      block_erase = true;
+//    }
+//    else if(cursor_mode == EditorEnumDb::PASS_ALL ||
+//             cursor_mode == EditorEnumDb::PASS_N ||
+//             cursor_mode == EditorEnumDb::PASS_E ||
+//             cursor_mode == EditorEnumDb::PASS_S ||
+//             cursor_mode == EditorEnumDb::PASS_W)
+//    {
+//      emit passUnset(active_tile);
+//    }
+//  }
 }
 
 /* Mouse release event */
 void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-  /* If click release, and block place, proceed */
-  if(cursor_mode == EditorEnumDb::BLOCKPLACE)
-  {
-    if((event->button() == Qt::LeftButton && !block_erase) ||
-       (event->button() == Qt::RightButton && block_erase))
-    {
-      QRectF rect = EditorHelpers::normalizePoints(block_origin,
-                                                   event->scenePos());
-      QList<QGraphicsItem*> item_set =
-                                    items(rect, Qt::IntersectsItemBoundingRect);
-      QList<EditorTile*> tile_set;
-      for(int i = 0; i < item_set.size(); i++)
-        tile_set.push_back((EditorTile*)item_set[i]);
-      emit itemMassClick(tile_set, block_erase);
-    }
-  }
+//  /* If click release, and block place, proceed */
+//  if(cursor_mode == EditorEnumDb::BLOCKPLACE)
+//  {
+//    if((event->button() == Qt::LeftButton && !block_erase) ||
+//       (event->button() == Qt::RightButton && block_erase))
+//    {
+//      QRectF rect = EditorHelpers::normalizePoints(block_origin,
+//                                                   event->scenePos());
+//      QList<QGraphicsItem*> item_set =
+//                                    items(rect, Qt::IntersectsItemBoundingRect);
+//      QList<EditorTile*> tile_set;
+//      for(int i = 0; i < item_set.size(); i++)
+//        tile_set.push_back((EditorTile*)item_set[i]);
+//      emit itemMassClick(tile_set, block_erase);
+//    }
+//  }
 }
 
 /*============================================================================
@@ -193,27 +199,53 @@ void MapRender::selectTile()
 }
 
 /* Sets the rendering sub-map */
-void MapRender::setRenderingMap(SubMapInfo* map)
-{
-  /* Remove services from active tile */
-  if(active_tile != NULL)
-  {
-    active_tile->setHover(false);
-    active_tile = NULL;
-  }
+//void MapRender::setRenderingMap(SubMapInfo* map)
+//{
+//  /* Remove services from active tile */
+//  if(active_tile != NULL)
+//  {
+//    active_tile->setHover(false);
+//    active_tile = NULL;
+//  }
 
+//  /* Clean up the existing list */
+//  QList<QGraphicsItem*> existing_items = items();
+//  for(int i = 0; i < existing_items.size(); i++)
+//    removeItem(existing_items[i]);
+//  setSceneRect(0, 0, 0, 0);
+
+//  /* Set the new map */
+//  this->map = map;
+
+//  /* Add in the new map info */
+//  if(map != NULL)
+//  {
+//    /* Add tiles */
+//    for(int i = 0; i < map->tiles.size(); i++)
+//      for(int j = 0; j < map->tiles[i].size(); j++)
+//        addItem(map->tiles[i][j]);
+
+//    /* Set the size of the map scene */
+//    if(map->tiles.size() > 0)
+//      setSceneRect(0, 0, map->tiles.size() * EditorHelpers::getTileSize(),
+//                   map->tiles.front().size() * EditorHelpers::getTileSize());
+//  }
+//}
+
+/* Update the rendering sub-map */
+void MapRender::updateRenderingMap()
+{
   /* Clean up the existing list */
   QList<QGraphicsItem*> existing_items = items();
   for(int i = 0; i < existing_items.size(); i++)
     removeItem(existing_items[i]);
   setSceneRect(0, 0, 0, 0);
 
-  /* Set the new map */
-  this->map = map;
-
   /* Add in the new map info */
-  if(map != NULL)
+  if(editing_map != NULL && editing_map->getCurrentMap() != NULL)
   {
+    SubMapInfo* map = editing_map->getCurrentMap();
+
     /* Add tiles */
     for(int i = 0; i < map->tiles.size(); i++)
       for(int j = 0; j < map->tiles[i].size(); j++)
@@ -231,9 +263,15 @@ void MapRender::setRenderingMap(SubMapInfo* map)
  *===========================================================================*/
 
 /* Returns the active tile */
-EditorTile* MapRender::getActiveTile()
+//EditorTile* MapRender::getActiveTile()
+//{
+//  return active_tile;
+//}
+
+/* Returns the map being edited */
+EditorMap* MapRender::getMapEditor()
 {
-  return active_tile;
+  return editing_map;
 }
 
 /*
@@ -243,8 +281,9 @@ EditorTile* MapRender::getActiveTile()
  */
 int MapRender::getMapHeight()
 {
-  if(map != NULL && map->tiles.size() > 0)
-    return map->tiles.front().size();
+  if(editing_map != NULL && editing_map->getCurrentMap() != NULL &&
+     editing_map->getCurrentMap()->tiles.size() > 0)
+    return editing_map->getCurrentMap()->tiles.front().size();
   return 0;
 }
 
@@ -255,25 +294,35 @@ int MapRender::getMapHeight()
  */
 int MapRender::getMapWidth()
 {
-  if(map != NULL)
-    return map->tiles.size();
+  if(editing_map != NULL && editing_map->getCurrentMap() != NULL)
+    return editing_map->getCurrentMap()->tiles.size();
   return 0;
 }
 
 /* Returns the rendering sub-map */
-SubMapInfo* MapRender::getRenderingMap()
-{
-  return map;
-}
+//SubMapInfo* MapRender::getRenderingMap()
+//{
+//  return map;
+//}
 
 /*
  * Description: Sets the cursor mode
  *
  * Input: Cursor mode
  */
-void MapRender::setCursorMode(EditorEnumDb::CursorMode mode)
+//void MapRender::setCursorMode(EditorEnumDb::CursorMode mode)
+//{
+//  cursor_mode = mode;
+//}
+
+/* Sets the map being edited */
+void MapRender::setMapEditor(EditorMap* editor)
 {
-  cursor_mode = mode;
+  /* Set the map */
+  editing_map = editor;
+
+  /* Update the rendering map */
+  updateRenderingMap();
 }
 
 /* Update the entire scene */

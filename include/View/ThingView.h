@@ -83,7 +83,7 @@ signals:
  *===========================================================================*/
 public slots:
   /* The current row changes in the list widget */
-  void currentRowChanged(int);
+  void currentRowChanged(int index);
 
   /* An item in the list was double clicked */
   void itemDoubleClicked(QListWidgetItem*);

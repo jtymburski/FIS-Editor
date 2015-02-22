@@ -64,6 +64,9 @@ public slots:
   /* Updates the sprite list */
   void updateList();
 
+  /* Update selected sprite */
+  void updateSelected(int current_row);
+
   /* Views the frame sequence */
   void viewFrameSequence();
 

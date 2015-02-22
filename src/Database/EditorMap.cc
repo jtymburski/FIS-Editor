@@ -29,6 +29,8 @@ EditorMap::EditorMap()
   id = kUNSET_ID;
   name = "";
   tile_icons = NULL;
+
+  clearHoverInfo();
 }
 
 /*
@@ -192,7 +194,10 @@ void EditorMap::copySelf(const EditorMap &source)
     {
       QVector<EditorTile*> row;
       for(int k = 0; k < source.sub_maps[i]->tiles[j].size(); k++)
+      {
         row.push_back(new EditorTile(*source.sub_maps[i]->tiles[j][k]));
+        row.last()->setHoverInfo(&active_info);
+      }
       sub_maps.last()->tiles.push_back(row);
     }
 
@@ -201,7 +206,7 @@ void EditorMap::copySelf(const EditorMap &source)
     {
       for(int k = 0; k < sub_maps.last()->tiles[j].size(); k++)
       {
-        for(int m = 0; m < EditorEnumDb::INVALID; m++)
+        for(int m = 0; m < EditorEnumDb::NO_LAYER; m++)
         {
           EditorTile* tile = sub_maps.last()->tiles[j][k];
           EditorSprite* sprite = tile->getSprite((EditorEnumDb::Layer)m);
@@ -381,9 +386,164 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
   fh->writeXmlElementEnd();
 }
 
+/* Updates the tiles that contain the hover information struct */
+// TODO: Comment
+bool EditorMap::updateHoverThing(bool unset)
+{
+  /* Pre-checks to determine if this is valid to execute */
+  if(active_submap != NULL &&
+     active_info.active_cursor == EditorEnumDb::BASIC &&
+     active_info.active_layer == EditorEnumDb::THING &&
+     active_info.active_thing != NULL && active_info.hover_tile != NULL)
+  {
+    SubMapInfo* map = active_submap;
+    EditorMatrix* ref = active_info.active_thing->getMatrix();
+    int hover_x = active_info.hover_tile->getX();
+    int hover_y = active_info.hover_tile->getY();
+    int hover_w = hover_x + ref->getWidth();
+    int hover_h = hover_y + ref->getHeight();
+
+    /* If unset, the hover is being removed from the tiles */
+    if(unset)
+    {
+      /* Go through and unset hover on all */
+      for(int i = hover_x; (i < hover_w && i < map->tiles.size()); i++)
+      {
+        for(int j = hover_y; (j < hover_h && j < map->tiles[i].size()); j++)
+        {
+          map->tiles[i][j]->setHover(false);
+        }
+      }
+
+      /* Re-set on base hover tile */
+      active_info.hover_tile->setHover(true);
+    }
+    /* Otherwise, it is being added */
+    else
+    {
+      /* Check if it would be valid */
+      bool invalid = false;
+      if((hover_w > map->tiles.size()) ||
+         (hover_h > map->tiles[hover_x].size()))
+      {
+        invalid = true;
+      }
+
+      /* Go through and set hover on all */
+      for(int i = hover_x; (i < hover_w && i < map->tiles.size()); i++)
+      {
+        for(int j = hover_y; (j < hover_h &&
+                              j < map->tiles[i].size()); j++)
+        {
+          map->tiles[i][j]->setHover(true, invalid);
+        }
+      }
+    }
+
+    return true;
+  }
+  return false;
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/* Clears the hover information - called on first initiation of map */
+// TODO: Comment
+void EditorMap::clearHoverInfo()
+{
+  active_info.active_cursor = EditorEnumDb::NO_CURSOR;
+  active_info.active_layer = EditorEnumDb::NO_LAYER;
+  active_info.active_sprite = NULL;
+  active_info.active_thing = NULL;
+  active_info.hover_tile = NULL;
+
+  /* Clear the active hover on all tiles in all sub-maps */
+  /* Not necessary, I think */
+  //for(int i = 0; i < sub_maps.size(); i++)
+  //  for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+  //    for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+  //      sub_maps[i]->tiles[j][k]->setHover(false);
+
+  active_submap = NULL;
+}
+
+/* Click trigger on tile in map */
+// TODO: Comment
+void EditorMap::clickTrigger()
+{
+  qDebug() << "CLICKED";
+  // TODO: Implementation
+}
+
+/* Returns current references for lists in map */
+// TODO: Comment
+SubMapInfo* EditorMap::getCurrentMap()
+{
+  return active_submap;
+}
+
+/* Returns sub-map index for the active sub-map */
+// TODO: Comment
+int EditorMap::getCurrentMapIndex()
+{
+  /* Ensure the active map isn't null */
+  if(active_submap != NULL)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+      if(sub_maps[i] == active_submap)
+        return i;
+
+    /* If sub-map not found, it doesn't exist -> nullify it */
+    setCurrentMap(-1);
+  }
+
+  return -1;
+}
+
+/* Returns current references for lists in map */
+// TODO: Comment
+int EditorMap::getCurrentSpriteIndex()
+{
+  /* Ensure the active sprite isn't null */
+  if(active_info.active_sprite != NULL)
+  {
+    for(int i = 0; i < sprites.size(); i++)
+      if(sprites[i] == active_info.active_sprite)
+        return i;
+
+    /* If sprite not found, it doesn't exist -> nullify it */
+    setCurrentSprite(-1);
+  }
+
+  return -1;
+}
+
+/* Returns current references for lists in map */
+// TODO: Comment
+int EditorMap::getCurrentThingIndex()
+{
+  /* Ensure the active thing isn't null */
+  if(active_info.active_thing != NULL)
+  {
+    for(int i = 0; i < base_things.size(); i++)
+      if(base_things[i] == active_info.active_thing)
+        return i;
+
+    /* thing not found, it doesn't exist -> nullify it */
+    setCurrentMap(-1);
+  }
+
+  return -1;
+}
+
+/* Returns the hover information */
+// TODO: Comment
+HoverInfo* EditorMap::getHoverInfo()
+{
+  return &active_info;
+}
 
 /*
  * Description: Returns the ID of the editor map.
@@ -986,6 +1146,130 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
   }
 }
 
+/* Sets the current references for the selected sprite(s) or thing(s) */
+// TODO: Comment
+bool EditorMap::setCurrentMap(int index)
+{
+  if(index >= -1 && index < sub_maps.size())
+  {
+    /* If index is -1, unset the current sub-map */
+    if(index == -1)
+      active_submap = NULL;
+    /* Otherwise, index is in valid range of sub-map set */
+    else
+      active_submap = sub_maps[index];
+
+    /* Clear out the hover info */
+    active_info.hover_tile = NULL;
+
+    /* Clear the new sub-map hover tiles */
+    if(active_submap != NULL)
+      for(int i = 0; i < sub_maps[index]->tiles.size(); i++)
+        for(int j = 0; j < sub_maps[index]->tiles[i].size(); j++)
+          sub_maps[index]->tiles[i][j]->setHover(false);
+
+    return true;
+  }
+  return false;
+}
+
+/* Sets the current references for the selected sprite(s) or thing(s) */
+/* -1 unselects */
+// TODO: Comment
+bool EditorMap::setCurrentSprite(int index)
+{
+  if(index >= -1 && index < sprites.size())
+  {
+    /* If index is -1, unset the current sprite */
+    if(index == -1)
+      active_info.active_sprite = NULL;
+    /* Otherwise, index is in valid range of sprite set */
+    else
+      active_info.active_sprite = sprites[index];
+
+    /* If the tile in the active info isn't null, update it */
+    if(active_info.hover_tile != NULL)
+      active_info.hover_tile->update();
+
+    return true;
+  }
+  return false;
+}
+
+/* Sets the current references for the selected sprite(s) or thing(s) */
+/* -1 unselects */
+// TODO: Comment
+bool EditorMap::setCurrentThing(int index)
+{
+  if(index >= -1 && index < base_things.size())
+  {
+    /* Unset the hover, if relevant */
+    updateHoverThing(true);
+
+    /* If index is -1, unset the current thing */
+    if(index == -1)
+      active_info.active_thing = NULL;
+    /* Otherwise, index is in valid range of base thing set */
+    else
+      active_info.active_thing = base_things[index];
+
+    /* Set the hover, if relevant */
+    updateHoverThing();
+
+    return true;
+  }
+  return false;
+}
+
+/* Sets the hover information */
+// TODO: Comment
+void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
+{
+  /* First, unset hover if relevant */
+  updateHoverThing(true);
+
+  /* Set the cursor */
+  active_info.active_cursor = cursor;
+
+  /* Try and set hover, if relevant */
+  if(!updateHoverThing() && active_info.hover_tile != NULL)
+    active_info.hover_tile->update();
+}
+
+/* Sets the hover information */
+// TODO: Comment
+void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
+{
+  /* First, unset hover if relevant */
+  updateHoverThing(true);
+
+  /* Set the layer */
+  active_info.active_layer = layer;
+
+  /* Try and set hover, if relevant */
+  if(!updateHoverThing() && active_info.hover_tile != NULL)
+    active_info.hover_tile->update();
+}
+
+/* Sets the hover information */
+// TODO: Comment
+void EditorMap::setHoverTile(EditorTile* tile)
+{
+  /* First, unset hover if relevant */
+  updateHoverThing(true);
+
+  /* Set the hover tile */
+  if(active_info.hover_tile != NULL)
+    active_info.hover_tile->setHover(false);
+  active_info.hover_tile = tile;
+  if(active_info.hover_tile != NULL)
+    active_info.hover_tile->setHover(true);
+
+  /* Try and set hover, if relevant */
+  if(!updateHoverThing() && active_info.hover_tile != NULL)
+    active_info.hover_tile->update();
+}
+
 /*
  * Description: Sets the ID of the editor map. Must be less than 0, which will
  *              then unset it.
@@ -1069,7 +1353,7 @@ int EditorMap::setMap(int id, QString name,
     bool pass = ref_tile->getVisibilityPass();
     setVisibilityGrid(grid);
     setVisibilityPass(pass);
-    for(int i = 0; i < (int)EditorEnumDb::INVALID; i++)
+    for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
       setVisibility((EditorEnumDb::Layer)i,
                     ref_tile->getVisibility((EditorEnumDb::Layer)i));
 
@@ -1100,7 +1384,10 @@ int EditorMap::setMap(int id, QString name, int width, int height)
       QVector<EditorTile*> row;
 
       for(int j = 0; j < height; j++)
+      {
         row.push_back(new EditorTile(i, j, tile_icons));
+        row.last()->setHoverInfo(&active_info);
+      }
 
       tiles.push_back(row);
     }
@@ -1672,6 +1959,7 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map,
       {
         row.push_back(new EditorTile(i, j, icons));
         *row.last() = *copy_map->tiles[i][j];
+        row.last()->setHoverInfo(copy_map->tiles[i][j]->getHoverInfo());
       }
 
       new_map->tiles.push_back(row);

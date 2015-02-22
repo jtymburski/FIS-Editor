@@ -26,7 +26,7 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
   bottom_view->setMinimumHeight(150);
   editor_sprite_list = new SpriteViewList(this);
   connect(editor_sprite_list,SIGNAL(currentRowChanged(int)),
-          this,SLOT(update()));
+          this,SLOT(updateSelected(int)));
   connect(editor_sprite_list, SIGNAL(editSprite()), this, SLOT(editSprite()));
   connect(editor_sprite_list, SIGNAL(viewFrameSequence()),
           this, SLOT(viewFrameSequence()));
@@ -164,6 +164,15 @@ void SpriteView::updateList()
   update();
 }
 
+/* Update selected sprite */
+void SpriteView::updateSelected(int current_row)
+{
+  if(editor_map != NULL)
+    editor_map->setCurrentSprite(current_row);
+
+  update();
+}
+
 /* Views the frame sequence */
 void SpriteView::viewFrameSequence()
 {
@@ -240,12 +249,11 @@ bool SpriteView::duplicateSprite()
 /* Get current sprite */
 EditorSprite* SpriteView::getSelected()
 {
-  int index = editor_sprite_list->currentRow();
   EditorSprite* sprite = NULL;
 
   /* Check the validity */
   if(editor_map != NULL)
-    sprite = editor_map->getSpriteByIndex(index);
+    sprite = editor_map->getSpriteByIndex(editor_map->getCurrentSpriteIndex());
 
   return sprite;
 }

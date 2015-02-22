@@ -32,9 +32,6 @@ private:
   /* Bottom delete button */
   QPushButton* button_delete;
 
-  /* The current sub-map being edited */
-  SubMapInfo* current_map;
-
   /* The editing map */
   EditorMap* editing_map;
 
@@ -82,6 +79,9 @@ public slots:
   /* Item check change */
   void itemCheckChanged(QListWidgetItem* item);
 
+  /* Selected layer changed */
+  void layerChanged(int current_row);
+
   /* Right click list menu on bottom list */
   void listMenuRequested(const QPoint & pos);
 
@@ -109,7 +109,7 @@ public slots:
 
 signals:
   /* Signal for setting the sub-map in the rendering space */
-  void addMap(SubMapInfo*);
+  void updateMap();
 
 public:
   /* Get the current sub-map */
