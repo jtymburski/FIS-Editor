@@ -118,6 +118,9 @@ public:
   /* Returns the event view widget */
   EventView* getEventView();
 
+  /* Sets the working thing to the original */
+  void updateOriginal();
+
   /* Update the selected tile for the thing */
   void updateSelectedTile(int id, int x, int y);
 };

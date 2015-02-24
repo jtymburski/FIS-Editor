@@ -49,30 +49,6 @@ MapView::~MapView()
  *===========================================================================*/
 
 /*
- * Description: Recursively fills all of the similar adjoining tiles with the
- *              selected sprite
- *
- * Inputs: x and y positions for the tile, and target(the tile's ID)
- *         and replacement (New sprite) id numbers
- */
-void MapView::recursiveFill(int x, int y, EditorEnumDb::Layer layer,
-                            EditorSprite* target, SubMapInfo* map)
-{
-  if(x >= 0 && y >= 0 && x < map->tiles.size() && y < map->tiles[x].size() &&
-     map->tiles[x][y]->getSprite(layer) == target)
-  {
-    /* Place sprite */
-    map->tiles[x][y]->place(layer,map_database->getSpriteView()->getSelected());
-
-    /* Recursively proceed */
-    recursiveFill(x + 1, y, layer, target, map);
-    recursiveFill(x - 1, y, layer, target, map);
-    recursiveFill(x, y + 1, layer, target, map);
-    recursiveFill(x, y - 1, layer, target, map);
-  }
-}
-
-/*
  * Description: Sets up the sidebar
  *
  * Inputs: none
@@ -124,14 +100,6 @@ void MapView::setupMapView()//int x, int y)
           this, SLOT(setCurrentTile(int,int)));
   connect(map_control, SIGNAL(updateMap()),
           map_render, SLOT(updateRenderingMap()));
-  connect(map_render, SIGNAL(itemClick(EditorTile*)),
-          this, SLOT(itemClick(EditorTile*)));
-  connect(map_render, SIGNAL(itemMassClick(QList<EditorTile*>,bool)),
-          this, SLOT(itemMassClick(QList<EditorTile*>,bool)));
-  connect(map_render, SIGNAL(passSet(EditorTile*)),
-          this, SLOT(passSet(EditorTile*)));
-  connect(map_render, SIGNAL(passUnset(EditorTile*)),
-          this, SLOT(passUnset(EditorTile*)));
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
           map_database, SLOT(sendSelectedTile(int,int,int)));
   connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
@@ -159,103 +127,6 @@ void MapView::setupRightBar()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Adds things/sprites to tile, based on pens */
-void MapView::itemClick(EditorTile* tile)
-{
-  // TODO: Future. Determine what is selected - sprites, things, etc.
-  EditorSprite* selected = map_database->getSpriteView()->getSelected();
-  EditorEnumDb::Layer layer = map_control->getSelectedLayer();
-
-  /* Only proceed if selection is valid */
-  if(selected != NULL && tile != NULL)
-  {
-    if(cursor_mode == EditorEnumDb::BASIC)
-    {
-      tile->place(layer, selected);
-    }
-    else if(cursor_mode == EditorEnumDb::ERASER)
-    {
-      tile->unplace(layer);
-    }
-    else if(cursor_mode == EditorEnumDb::FILL)
-    {
-      if(selected != tile->getSprite(layer))
-        recursiveFill(tile->getX(), tile->getY(), layer,
-                      tile->getSprite(layer), editing_map->getCurrentMap());
-    }
-  }
-}
-
-/* Mass add/delete of rect of tiles */
-void MapView::itemMassClick(QList<EditorTile*> tiles, bool erase)
-{
-  EditorSprite* selected = map_database->getSpriteView()->getSelected();
-  EditorEnumDb::Layer layer = map_control->getSelectedLayer();
-
-  /* Only proceed if selection is valid */
-  if(selected != NULL)
-  {
-    if(cursor_mode == EditorEnumDb::BLOCKPLACE)
-    {
-      for(int i = 0; i < tiles.size(); i++)
-      {
-        if(erase)
-          tiles[i]->unplace(layer);
-        else
-          tiles[i]->place(layer, selected);
-      }
-    }
-  }
-}
-
-/* Passability set and unset on given tile */
-void MapView::passSet(EditorTile* tile)
-{
-  if(tile != NULL)
-  {
-    if(cursor_mode == EditorEnumDb::PASS_N ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::NORTH, true);
-    if(cursor_mode == EditorEnumDb::PASS_E ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::EAST, true);
-    if(cursor_mode == EditorEnumDb::PASS_S ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::SOUTH, true);
-    if(cursor_mode == EditorEnumDb::PASS_W ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::WEST, true);
-  }
-}
-
-/* Passability set and unset on given tile */
-void MapView::passUnset(EditorTile* tile)
-{
-  if(tile != NULL)
-  {
-    if(cursor_mode == EditorEnumDb::PASS_N ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::NORTH, false);
-    if(cursor_mode == EditorEnumDb::PASS_E ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::EAST, false);
-    if(cursor_mode == EditorEnumDb::PASS_S ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::SOUTH, false);
-    if(cursor_mode == EditorEnumDb::PASS_W ||
-       cursor_mode == EditorEnumDb::PASS_ALL)
-      tile->setPassability(map_control->getSelectedLayer(),
-                           Direction::WEST, false);
-  }
-}
-
 /*
  * Description: Sets the position into the status bar
  *
@@ -266,17 +137,17 @@ void MapView::setCurrentTile(int x, int y)
   map_data->clearMessage();
 
   /* Adds the total map data to the status bar */
-  QString mapsize = "Map Size: ";
+  QString mapsize = "Map: ";
   mapsize.append(QString::number(map_render->getMapWidth()));
   mapsize.append(",");
   mapsize.append(QString::number(map_render->getMapHeight()));
-  mapsize.append("          ");
+  mapsize.append(" | ");
 
   /* Adds the tile coordinate information to the status bar */
   if(x!=-1 || y!=-1)
   {
     /* The position section */
-    QString coordinates = "Position: X:";
+    QString coordinates = "X:";
     coordinates.append(QString::number(x));
     coordinates.append(", Y:");
     coordinates.append(QString::number(y));

@@ -183,6 +183,15 @@ void ThingView::itemDoubleClicked(QListWidgetItem*)
 /* Updates the thing sidebar */
 void ThingView::updateThings()
 {
+  /* Update the thing in the pop-up */
+  if(thing_dialog != NULL)
+  {
+    editor_map->thingRemoveFromTiles();
+    thing_dialog->updateOriginal();
+    editor_map->thingAddToTiles();
+  }
+
+  /* Update the list in the view */
   updateList();
 }
 

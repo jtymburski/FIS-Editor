@@ -10,7 +10,6 @@
 /* Constant Implementation - see header file for descriptions */
 const uint8_t EditorTile::kLOWER_COUNT_MAX = 5;
 const uint8_t EditorTile::kMAX_ITEMS = 20;
-const uint8_t EditorTile::kRENDER_DEPTH = 10;
 const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
 
 /*============================================================================
@@ -52,7 +51,7 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
     layers_upper.push_back(temp);
 
   /* Prep editor things in tile */
-  for(uint8_t i = 0; i < kRENDER_DEPTH; i++)
+  for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
     things.push_back(temp);
 
   /* Set tile icons */
@@ -125,6 +124,55 @@ void EditorTile::copySelf(const EditorTile &source)
   }
 }
 
+/*
+ * Description: Returns if there is a valid hover sprite, the active layer is
+ *              a sprite layer, and the placing pen is a sprite placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover sprite should be shown
+ */
+bool EditorTile::isHoverSprite()
+{
+  if(hovered && hover_info->active_sprite != NULL &&
+     (hover_info->active_cursor == EditorEnumDb::BASIC ||
+      hover_info->active_cursor == EditorEnumDb::FILL ||
+      hover_info->active_cursor == EditorEnumDb::BLOCKPLACE) &&
+     (hover_info->active_layer == EditorEnumDb::BASE ||
+      hover_info->active_layer == EditorEnumDb::ENHANCER ||
+      hover_info->active_layer == EditorEnumDb::LOWER1 ||
+      hover_info->active_layer == EditorEnumDb::LOWER2 ||
+      hover_info->active_layer == EditorEnumDb::LOWER3 ||
+      hover_info->active_layer == EditorEnumDb::LOWER4 ||
+      hover_info->active_layer == EditorEnumDb::LOWER5 ||
+      hover_info->active_layer == EditorEnumDb::UPPER1 ||
+      hover_info->active_layer == EditorEnumDb::UPPER2 ||
+      hover_info->active_layer == EditorEnumDb::UPPER3 ||
+      hover_info->active_layer == EditorEnumDb::UPPER4 ||
+      hover_info->active_layer == EditorEnumDb::UPPER5))
+  {
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Returns if there is a valid hover thing, the active layer is
+ *              a thing layer, and the placing pen is a thing placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover thing should be shown
+ */
+bool EditorTile::isHoverThing()
+{
+  if(hover_info->hover_tile != NULL && hover_info->active_thing != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::THING)
+  {
+    return true;
+  }
+  return false;
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -152,16 +200,33 @@ QString EditorTile::getActiveLayers()
 {
   QString layer_string = "";
 
-  /* Make the string */
+  /* Get base info, if relevant */
   if(layer_base.sprite != NULL)
     layer_string += "B(" + QString::number(layer_base.sprite->getID()) + "),";
+
+  /* Get enhancer info, if relevant */
   if(layer_enhancer.sprite != NULL)
     layer_string += "E(" + QString::number(layer_enhancer.sprite->getID())
                  + "),";
+
+  /* Get lower info, if relevant */
   for(int i = 0; i < layers_lower.size(); i++)
     if(layers_lower[i].sprite != NULL)
       layer_string += "L" + QString::number(i + 1) + "("
                    + QString::number(layers_lower[i].sprite->getID()) + "),";
+
+  /* Get thing info, if relevant */
+  for(int i = 0; i < things.size(); i++)
+    if(things[i].thing != NULL)
+      layer_string += "MT" + QString::number(i + 1) + "("
+                   + QString::number(things[i].thing->getID()) + "),";
+
+  for(int i = 0; i < layers_lower.size(); i++)
+    if(layers_lower[i].sprite != NULL)
+      layer_string += "L" + QString::number(i + 1) + "("
+                   + QString::number(layers_lower[i].sprite->getID()) + "),";
+
+  /* Get upper info, if relevant */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].sprite != NULL)
       layer_string += "U" + QString::number(i + 1) + "("
@@ -226,6 +291,9 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
     case EditorEnumDb::LOWER5:
       return tile.getLowerPassability(4, direction);
       break;
+    case EditorEnumDb::THING:
+      return getPassabilityThing(direction);
+      break;
     case EditorEnumDb::ENHANCER:
     case EditorEnumDb::UPPER1:
     case EditorEnumDb::UPPER2:
@@ -258,6 +326,29 @@ int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
 }
 
 /*
+ * Description: Returns the passability of the thing(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityThing(Direction direction)
+{
+  EditorThing* thing = things[0].thing;
+
+  if(thing != NULL)
+  {
+    EditorTileSprite* sprite = thing->getMatrix()->getSprite(
+                                getX() - thing->getX(), getY() - thing->getY());
+    if(sprite != NULL)
+    {
+      return sprite->getPassability(direction);
+    }
+  }
+  return true;
+}
+
+/*
  * Description: Returns passability based on visible layers and a direction.
  *
  * Inputs: Direction direction - the direction trying to exit.
@@ -279,6 +370,8 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::LOWER4, direction);
   if(layers_lower[4].visible)
     passable &= getPassability(EditorEnumDb::LOWER5, direction);
+  if(things[0].visible)
+    passable &= getPassability(EditorEnumDb::THING, direction);
 
   return passable;
 }
@@ -292,7 +385,7 @@ bool EditorTile::getPassabilityVisible(Direction direction)
  */
 EditorThing* EditorTile::getThing(int render_level)
 {
-  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
     return things[render_level].thing;
   return NULL;
 }
@@ -340,7 +433,7 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
  */
 bool EditorTile::getVisibilityThing(int render_level)
 {
-  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
     return things[render_level].visible;
   return false;
 }
@@ -457,28 +550,52 @@ void EditorTile::paint(QPainter *painter,
   /* Determine if it's a hover thing - special state */
   int diff_x = 0;
   int diff_y = 0;
-  bool hover_thing = false;
-  if(hover_info->active_thing != NULL &&
-     hover_info->active_cursor == EditorEnumDb::BASIC &&
-     hover_info->active_layer == EditorEnumDb::THING)
+  bool hover_sprite = isHoverSprite();
+  bool hover_thing = isHoverThing();
+  if(hover_thing)
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
-    hover_thing = true;
   }
 
   /* Render the base */
-  if(layer_base.visible && layer_base.sprite != NULL)
-    layer_base.sprite->paint(painter, bound);
+  if(layer_base.visible &&
+     (!hovered || hover_info->active_layer != EditorEnumDb::BASE ||
+      hover_info->active_cursor != EditorEnumDb::ERASER))
+  {
+    if(hover_sprite && hover_info->active_layer == EditorEnumDb::BASE)
+      hover_info->active_sprite->paint(painter, bound);
+    else if(layer_base.sprite != NULL)
+      layer_base.sprite->paint(painter, bound);
+  }
 
   /* Render the enhancer */
-  if(layer_enhancer.visible && layer_enhancer.sprite !=NULL)
-    layer_enhancer.sprite->paint(painter, bound);
+  if(layer_enhancer.visible &&
+     (!hovered || hover_info->active_layer != EditorEnumDb::ENHANCER ||
+      hover_info->active_cursor != EditorEnumDb::ERASER))
+  {
+    if(hover_sprite && hover_info->active_layer == EditorEnumDb::ENHANCER)
+      hover_info->active_sprite->paint(painter, bound);
+    else if(layer_enhancer.sprite != NULL)
+      layer_enhancer.sprite->paint(painter, bound);
+  }
 
   /* Render the lower */
   for(int i = 0; i < layers_lower.size(); i++)
-    if(layers_lower[i].visible && layers_lower[i].sprite != NULL)
-      layers_lower[i].sprite->paint(painter, bound);
+  {
+    EditorEnumDb::Layer layer =
+                           (EditorEnumDb::Layer)((int)EditorEnumDb::LOWER1 + i);
+
+    if(layers_lower[i].visible &&
+       (!hovered || hover_info->active_layer != layer ||
+        hover_info->active_cursor != EditorEnumDb::ERASER))
+    {
+      if(hover_sprite && hover_info->active_layer == layer)
+        hover_info->active_sprite->paint(painter, bound);
+      else if(layers_lower[i].sprite != NULL)
+        layers_lower[i].sprite->paint(painter, bound);
+    }
+  }
 
   /* Render the map things */
   for(int i = 0; i < things.size(); i++)
@@ -494,8 +611,20 @@ void EditorTile::paint(QPainter *painter,
 
   /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
-    if(layers_upper[i].visible && layers_upper[i].sprite != NULL)
-      layers_upper[i].sprite->paint(painter, bound);
+  {
+    EditorEnumDb::Layer layer =
+                           (EditorEnumDb::Layer)((int)EditorEnumDb::UPPER1 + i);
+
+    if(layers_upper[i].visible &&
+       (!hovered || hover_info->active_layer != layer ||
+        hover_info->active_cursor != EditorEnumDb::ERASER))
+    {
+      if(hover_sprite && hover_info->active_layer == layer)
+        hover_info->active_sprite->paint(painter, bound);
+      else if(layers_upper[i].sprite != NULL)
+        layers_upper[i].sprite->paint(painter, bound);
+    }
+  }
 
   /* Render the grid */
   if(visible_grid)
@@ -697,6 +826,21 @@ void EditorTile::setHoverInfo(bool hover, bool hover_invalid,
 }
 
 /*
+ * Description: Sets the passability of the passed in layer in all directions.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to update the passability for
+ *         bool passable - is that layer passable??
+ * Output: none
+ */
+void EditorTile::setPassability(EditorEnumDb::Layer layer, bool passable)
+{
+  setPassability(layer, Direction::NORTH, passable);
+  setPassability(layer, Direction::EAST, passable);
+  setPassability(layer, Direction::SOUTH, passable);
+  setPassability(layer, Direction::WEST, passable);
+}
+
+/*
  * Description: Sets the passability of the passed in layer and the selected
  *              direction.
  *
@@ -759,7 +903,7 @@ bool EditorTile::setThing(EditorThing* thing)
     {
       /* Determine the render level */
       int render_level = thing->getMatrix()->getRenderDepth(x, y);
-      if(render_level >= 0 && render_level < kRENDER_DEPTH)
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
       {
         /* Set the new thing */
         things[render_level].thing = thing;
@@ -805,6 +949,8 @@ void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
     setVisibilityLower(3, visible);
   else if(layer == EditorEnumDb::LOWER5)
     setVisibilityLower(4, visible);
+  else if(layer == EditorEnumDb::THING)
+    setVisibilityThing(visible);
   else if(layer == EditorEnumDb::UPPER1)
     setVisibilityUpper(0, visible);
   else if(layer == EditorEnumDb::UPPER2)
@@ -888,6 +1034,7 @@ void EditorTile::setVisibilityThing(bool visible)
 {
   for(int i = 0; i < things.size(); i++)
     things[i].visible = visible;
+  update();
 }
 
 /*
@@ -899,7 +1046,7 @@ void EditorTile::setVisibilityThing(bool visible)
  */
 bool EditorTile::setVisibilityThing(int render_level, bool visible)
 {
-  if(render_level >= 0 && render_level < kRENDER_DEPTH)
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
   {
     things[render_level].visible = visible;
     return true;

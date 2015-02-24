@@ -79,10 +79,6 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Recursively fill all similar adjoining tiles with the selected sprite */
-  void recursiveFill(int x, int y, EditorEnumDb::Layer layer,
-                     EditorSprite* target, SubMapInfo* map);
-
   /* Sets up the database bar */
   void setupLeftBar();
 
@@ -115,16 +111,6 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Adds item, as dictated by parent classes, to the tile */
-  void itemClick(EditorTile* tile);
-
-  /* Mass add/delete of rect of tiles */
-  void itemMassClick(QList<EditorTile*> tiles, bool erase);
-
-  /* Passability set and unset on given tile */
-  void passSet(EditorTile* tile);
-  void passUnset(EditorTile* tile);
-
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
 

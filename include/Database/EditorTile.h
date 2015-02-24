@@ -91,7 +91,6 @@ private:
   /*------------------- Constants -----------------------*/
   const static uint8_t kLOWER_COUNT_MAX; /* The max number of lower layers */
   const static uint8_t kMAX_ITEMS; /* The max number of items stored */
-  const static uint8_t kRENDER_DEPTH; /* The max render depth */
   const static uint8_t kUPPER_COUNT_MAX; /* The max number of upper layers */
 
 /*============================================================================
@@ -100,6 +99,10 @@ private:
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorTile &source);
+
+  /* Determine if hovering sprite or thing in tile */
+  bool isHoverSprite();
+  bool isHoverThing();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -122,6 +125,9 @@ public:
 
   /* Returns a number between 0 and 15 for what the passability is */
   int getPassabilityNum(EditorEnumDb::Layer layer);
+
+  /* Returns the passability of the thing */
+  bool getPassabilityThing(Direction direction);
 
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
@@ -162,6 +168,7 @@ public:
                     HoverInfo* new_info = NULL);
 
   /* Sets the passability based on layer and direction */
+  void setPassability(EditorEnumDb::Layer layer, bool passable);
   void setPassability(EditorEnumDb::Layer layer, Direction direction,
                       bool passable);
 

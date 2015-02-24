@@ -316,6 +316,9 @@ void MapControl::resizeSubMap()
     if(list_bottom->currentRow() != 0)
       info->name = name;
 
+    /* Remove all things for processing */
+    editing_map->thingRemoveFromTiles();
+
     /* If smaller, delete tiles on width */
     if(info->tiles.size() > width)
     {
@@ -334,7 +337,10 @@ void MapControl::resizeSubMap()
         QVector<EditorTile*> row;
 
         for(int j = 0; j < info->tiles.front().size(); j++)
+        {
           row.push_back(new EditorTile(i, j, editing_map->getTileIcons()));
+          row.last()->setHoverInfo(editing_map->getHoverInfo());
+        }
 
         info->tiles.push_back(row);
       }
@@ -358,10 +364,16 @@ void MapControl::resizeSubMap()
       for(int i = 0; i < info->tiles.size(); i++)
       {
         for(int j = info->tiles[i].size(); j < height; j++)
+        {
           info->tiles[i].push_back(new EditorTile(
                                             i, j, editing_map->getTileIcons()));
+          info->tiles[i].last()->setHoverInfo(editing_map->getHoverInfo());
+        }
       }
     }
+
+    /* Add all things back for processing */
+    editing_map->thingAddToTiles();
   }
 
   /* Finally, close the dialog */

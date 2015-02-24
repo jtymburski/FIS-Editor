@@ -197,14 +197,8 @@ void ThingDialog::buttonFrameEdit()
 /* Button control triggers */
 void ThingDialog::buttonOk()
 {
-  if(thing_original != NULL)
-  {
-    *thing_original = *thing_working;
-    thing_original->setEvent(*event_ctrl->getEvent());
-    event_ctrl->setEventBlank(false);
-    emit ok();
-    close();
-  }
+  emit ok();
+  close();
 }
 
 /* Changed text in line edits */
@@ -297,6 +291,16 @@ void ThingDialog::visibilityChanged(int index)
 EventView* ThingDialog::getEventView()
 {
   return event_view;
+}
+
+/* Sets the working thing to the original */
+void ThingDialog::updateOriginal()
+{
+  if(thing_original != NULL)
+  {
+    *thing_original = *thing_working;
+    thing_original->setEvent(*event_ctrl->getEvent());
+  }
 }
 
 /* Update the selected tile for the thing */

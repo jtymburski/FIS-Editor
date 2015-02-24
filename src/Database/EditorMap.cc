@@ -26,6 +26,7 @@ const int EditorMap::kUNSET_ID = -1;
  */
 EditorMap::EditorMap()
 {
+  active_submap = NULL;
   id = kUNSET_ID;
   name = "";
   tile_icons = NULL;
@@ -78,6 +79,42 @@ EditorMap::~EditorMap()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
+
+/* Attempts to add thing to the current sub-map */
+// TODO: Comment
+bool EditorMap::addThing(EditorThing* thing)
+{
+  int x = thing->getX();
+  int y = thing->getY();
+  int w = thing->getMatrix()->getWidth();
+  int h = thing->getMatrix()->getHeight();
+
+  /* Check if thing can be placed */
+  bool valid = false;
+  if(x >= 0 && y >= 0 && (x+w) <= active_submap->tiles.size() &&
+     (y+h) <= active_submap->tiles[x].size())
+  {
+    valid = true;
+
+    /* Check each tile */
+    for(int i = 0; i < w; i++)
+      for(int j = 0; j < h; j++)
+        if(active_submap->tiles[x+i][y+j]->getThing(
+                        thing->getMatrix()->getRenderDepth(i, j)) != NULL)
+          valid = false;
+  }
+
+  /* If valid, place thing */
+  if(valid)
+  {
+    /* Add the thing to tiles */
+    for(int i = x; i < (w+x); i++)
+      for(int j = y; j < (h+y); j++)
+        active_submap->tiles[i][j]->setThing(thing);
+  }
+
+  return valid;
+}
 
 /*
  * Description: Adds tile sprite data to the file handler from the selected sub
@@ -312,6 +349,49 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   }
 }
 
+/* Recursively erase all similar adjoining tiles */
+// TODO: Comment
+void EditorMap::recursiveErase(int x, int y, EditorEnumDb::Layer layer,
+                               EditorSprite* target, SubMapInfo* map)
+{
+  if(x >= 0 && y >= 0 && x < map->tiles.size() && y < map->tiles[x].size() &&
+     map->tiles[x][y]->getSprite(layer) == target && target != NULL)
+  {
+    /* Un-place sprite */
+    map->tiles[x][y]->unplace(layer);
+
+    /* Recursively proceed */
+    recursiveErase(x + 1, y, layer, target, map);
+    recursiveErase(x - 1, y, layer, target, map);
+    recursiveErase(x, y + 1, layer, target, map);
+    recursiveErase(x, y - 1, layer, target, map);
+  }
+}
+
+/*
+ * Description: Recursively fills all of the similar adjoining tiles with the
+ *              selected sprite
+ *
+ * Inputs: x and y positions for the tile, and target(the tile's ID)
+ *         and replacement (New sprite) id numbers
+ */
+void EditorMap::recursiveFill(int x, int y, EditorEnumDb::Layer layer,
+                            EditorSprite* target, SubMapInfo* map)
+{
+  if(x >= 0 && y >= 0 && x < map->tiles.size() && y < map->tiles[x].size() &&
+     map->tiles[x][y]->getSprite(layer) == target)
+  {
+    /* Place sprite */
+    map->tiles[x][y]->place(layer, active_info.active_sprite);
+
+    /* Recursively proceed */
+    recursiveFill(x + 1, y, layer, target, map);
+    recursiveFill(x - 1, y, layer, target, map);
+    recursiveFill(x, y + 1, layer, target, map);
+    recursiveFill(x, y - 1, layer, target, map);
+  }
+}
+
 /*
  * Description: Saves the sub map pointer passed in to the file handler. If
  *              game only, some parts are skipped. If first, it makes the
@@ -476,52 +556,111 @@ void EditorMap::clickTrigger(bool single, bool right_click)
   EditorEnumDb::CursorMode cursor = active_info.active_cursor;
   EditorEnumDb::Layer layer = active_info.active_layer;
 
-  /* Check on the layer - base sprite */
-  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
-     layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
-     layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
-     layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
-     layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
-     layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
+  /* Make sure there's a hover sprite */
+  if(active_info.hover_tile != NULL)
   {
-    /* Check cursor */
-    if(cursor == EditorEnumDb::BASIC)
+    /* Check on the layer - base sprite */
+    if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
+       layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
+       layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
+       layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
+       layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
+       layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
     {
+      EditorSprite* sprite = active_info.active_sprite;
 
+      /* ---- BASIC PLACE CURSOR ---- */
+      if(cursor == EditorEnumDb::BASIC && sprite != NULL)
+      {
+        active_info.hover_tile->place(layer, sprite);
+      }
+      /* ---- ERASER CURSOR ---- */
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        EditorTile* tile = active_info.hover_tile;
+
+        if(right_click)
+          recursiveErase(tile->getX(), tile->getY(), layer,
+                         tile->getSprite(layer), active_submap);
+        else
+          active_info.hover_tile->unplace(layer);
+      }
+      /* ---- FILL CURSOR ---- */
+      else if(single && cursor == EditorEnumDb::FILL && sprite != NULL &&
+              sprite != active_info.hover_tile->getSprite(layer))
+      {
+        EditorTile* tile = active_info.hover_tile;
+
+        recursiveFill(tile->getX(), tile->getY(), layer,
+                      tile->getSprite(layer), active_submap);
+      }
+      /* ---- ALL PASSABILITY CURSOR ---- */
+      else if(cursor == EditorEnumDb::PASS_ALL)
+      {
+        active_info.hover_tile->setPassability(layer, !right_click);
+      }
+      /* ---- NORTH PASSABILITY CURSOR ---- */
+      else if(cursor == EditorEnumDb::PASS_N)
+      {
+        active_info.hover_tile->setPassability(layer, Direction::NORTH,
+                                               !right_click);
+      }
+      /* ---- EAST PASSABILITY CURSOR ---- */
+      else if(cursor == EditorEnumDb::PASS_E)
+      {
+        active_info.hover_tile->setPassability(layer, Direction::EAST,
+                                               !right_click);
+      }
+      /* ---- SOUTH PASSABILITY CURSOR ---- */
+      else if(cursor == EditorEnumDb::PASS_S)
+      {
+        active_info.hover_tile->setPassability(layer, Direction::SOUTH,
+                                               !right_click);
+      }
+      /* ---- WEST PASSABILITY CURSOR ---- */
+      else if(cursor == EditorEnumDb::PASS_W)
+      {
+        active_info.hover_tile->setPassability(layer, Direction::WEST,
+                                               !right_click);
+      }
     }
-    else if(cursor == EditorEnumDb::ERASER)
+    /* Check on the layer - thing */
+    else if(layer == EditorEnumDb::THING)
     {
+      /* Check cursor */
+      if(cursor == EditorEnumDb::BASIC && active_info.active_thing != NULL)
+      {
+        /* Create the thing */
+        int id = getNextThingID(true);
+        EditorThing* new_thing = new EditorThing(id);
+        new_thing->setBase(active_info.active_thing);
+        new_thing->setX(active_info.hover_tile->getX());
+        new_thing->setY(active_info.hover_tile->getY());
 
-    }
-    else if(single && cursor == EditorEnumDb::FILL)
-    {
+        /* Attempt to place */
+        if(addThing(new_thing))
+          active_submap->things.push_back(new_thing);
+        else
+          delete new_thing;
 
-    }
-    else if(cursor == EditorEnumDb::PASS_ALL ||
-            cursor == EditorEnumDb::PASS_N ||
-            cursor == EditorEnumDb::PASS_E ||
-            cursor == EditorEnumDb::PASS_S ||
-            cursor == EditorEnumDb::PASS_W)
-    {
+        // TODO: UPDATE VIEW WITH NEW THING - SIDE BAR
+      }
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        int max = Helpers::getRenderDepth();
 
+        /* Loop through all to find the top thing */
+        EditorThing* found = NULL;
+        for(int i = max - 1; found == NULL && i >= 0; i--)
+          if(active_info.hover_tile->getThing(i) != NULL)
+            found = active_info.hover_tile->getThing(i);
+
+        /* If found, remove from tiles and delete */
+        if(found != NULL)
+          unsetThing(found->getID(), true);
+      }
     }
   }
-  /* Check on the layer - thing */
-  else if(layer == EditorEnumDb::THING)
-  {
-    /* Check cursor */
-    if(cursor == EditorEnumDb::BASIC)
-    {
-
-    }
-    else if(cursor == EditorEnumDb::ERASER)
-    {
-
-    }
-  }
-
-  qDebug() << "CLICKED - SINGLE";
-  // TODO: Implementation
 }
 
 /* Click trigger on tile in map */
@@ -531,23 +670,33 @@ void EditorMap::clickTrigger(QList<EditorTile*> tiles, bool erase)
   EditorEnumDb::CursorMode cursor = active_info.active_cursor;
   EditorEnumDb::Layer layer = active_info.active_layer;
 
-  /* Check on the layer - base sprite */
-  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
-     layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
-     layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
-     layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
-     layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
-     layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
+  /* Make sure there's a hover sprite */
+  if(active_info.hover_tile != NULL)
   {
-    /* Check cursor */
-    if(cursor == EditorEnumDb::BLOCKPLACE)
+    /* Check on the layer - base sprite */
+    if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
+       layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
+       layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
+       layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
+       layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
+       layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
     {
-
+      /* Check cursor - only block palce for group of tiles */
+      if(cursor == EditorEnumDb::BLOCKPLACE)
+      {
+        for(int i = 0; i < tiles.size(); i++)
+        {
+          if(tiles[i] != NULL)
+          {
+            if(erase)
+              tiles[i]->unplace(layer);
+            else
+              tiles[i]->place(layer, active_info.active_sprite);
+          }
+        }
+      }
     }
   }
-
-  qDebug() << "CLICKED - MULTIPLE";
-  // TODO: Implementation
 }
 
 /* Returns current references for lists in map */
@@ -1693,6 +1842,46 @@ void EditorMap::setVisibilityPass(bool visible)
         sub_maps[i]->tiles[j][k]->setVisibilityPass(visible);
 }
 
+/* Thing processing for updating with the new data */
+// TODO: Comment
+void EditorMap::thingAddToTiles()
+{
+  if(active_submap != NULL)
+  {
+    for(int i = 0; i < active_submap->things.size(); i++)
+    {
+      if(!addThing(active_submap->things[i]))
+      {
+        delete active_submap->things[i];
+        active_submap->things.remove(i);
+        i--;
+      }
+    }
+  }
+}
+
+/* Thing processing for updating with the new data */
+// TODO: Comment
+void EditorMap::thingRemoveFromTiles()
+{
+  if(active_submap != NULL)
+  {
+    for(int i = 0; i < active_submap->things.size(); i++)
+    {
+      EditorThing* thing = active_submap->things[i];
+      int x = thing->getX();
+      int y = thing->getY();
+      int w = thing->getMatrix()->getWidth();
+      int h = thing->getMatrix()->getHeight();
+
+      for(int j = 0; j < w; j++)
+        for(int k = 0; k < h; k++)
+          active_submap->tiles[x+j][y+k]->
+                           unsetThing(thing->getMatrix()->getRenderDepth(j, k));
+    }
+  }
+}
+
 /*
  * Description: Updates all tiles and forces a paint
  *
@@ -1752,8 +1941,8 @@ bool EditorMap::unsetMapByIndex(int index)
  */
 void EditorMap::unsetMaps()
 {
-  for(int i = 0; i < sub_maps.size(); i++)
-    delete sub_maps[i];
+  while(sub_maps.size() > 0)
+    unsetMapByIndex(0);
   sub_maps.clear();
 }
 
@@ -1882,10 +2071,12 @@ bool EditorMap::unsetThingByIndex(int index, int sub_map)
       EditorThing* ref = sub_maps[sub_map]->things[index];
 
       /* Remove the instances from tiles */
-      for(int i = ref->getX(); i < ref->getMatrix()->getWidth() &&
-                               i < sub_maps[sub_map]->tiles.size(); i++)
+      int x = ref->getX();
+      int y = ref->getY();
+      for(int i = x; i < (ref->getMatrix()->getWidth() + x) &&
+                     i < sub_maps[sub_map]->tiles.size(); i++)
       {
-        for(int j = ref->getY(); j < ref->getMatrix()->getHeight() &&
+        for(int j = y; j < (ref->getMatrix()->getHeight() + y) &&
                                  j < sub_maps[sub_map]->tiles[i].size(); j++)
         {
           sub_maps[sub_map]->tiles[i][j]->unsetThing(ref);

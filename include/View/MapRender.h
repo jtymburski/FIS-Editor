@@ -57,6 +57,9 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* General event processing */
+  bool event(QEvent *event);
+
   /* Mouse move events */
   void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -66,14 +69,6 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Adds item, as dictated by parent classes, to the tile */
-  //void itemClick(EditorTile* tile); // GOOD
-  //void itemMassClick(QList<EditorTile*> tiles, bool erase);
-
-  /* Sets and unsets passability on tile */
-  //void passSet(EditorTile* tile);
-  //void passUnset(EditorTile* tile);
-
   /* Sends the tile position to the map status bar */
   void sendCurrentPosition(int,int);
 
@@ -87,9 +82,6 @@ public slots:
   /* Select a tile trigger */
   void selectTile();
 
-  /* Sets the rendering sub-map */
-  //void setRenderingMap(SubMapInfo* map); // TODO: REMOVE?? MODIFY??
-
   /* Update the rendering sub-map */
   void updateRenderingMap();
 
@@ -97,21 +89,12 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the active tile */
-  //EditorTile* getActiveTile();
-
   /* Returns the map being edited */
   EditorMap* getMapEditor();
 
   /* Returns the width and height */
   int getMapHeight();
   int getMapWidth();
-
-  /* Returns the rendering sub-map */
-  //SubMapInfo* getRenderingMap(); // TODO: REMOVE?? MODIFY??
-
-  /* Sets the cursor mode */
-  //void setCursorMode(EditorEnumDb::CursorMode mode);
 
   /* Sets the map being edited */
   void setMapEditor(EditorMap* editor);

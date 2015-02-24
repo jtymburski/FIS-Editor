@@ -87,6 +87,9 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Attempts to add thing to the current sub-map */
+  bool addThing(EditorThing* thing);
+
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
   void addTileSpriteData(FileHandler* fh, SubMapInfo* map,
@@ -97,6 +100,14 @@ protected:
 
   /* Loads sub-map info */
   void loadSubMap(SubMapInfo* map, XmlData data, int index);
+
+  /* Recursively erase all similar adjoining tiles */
+  void recursiveErase(int x, int y, EditorEnumDb::Layer layer,
+                      EditorSprite* target, SubMapInfo* map);
+
+  /* Recursively fill all similar adjoining tiles with the selected sprite */
+  void recursiveFill(int x, int y, EditorEnumDb::Layer layer,
+                     EditorSprite* target, SubMapInfo* map);
 
   /* Saves the sub-map */
   void saveSubMap(FileHandler* fh, bool game_only,
@@ -211,6 +222,10 @@ public:
   /* Set grid and passability visibility */
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);
+
+  /* Thing processing for updating with the new data */
+  void thingAddToTiles();
+  void thingRemoveFromTiles();
 
   /* Update all tiles */
   void updateAll();

@@ -21,6 +21,7 @@
 class MapControl : public QWidget
 {
   Q_OBJECT
+
 public:
   /* Constructor Function */
   MapControl(QWidget* parent = NULL);
@@ -56,6 +57,9 @@ private:
   /* The stored resize index */
   int resize_index;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Select the sub-map, by index */
   void selectSubMap(int index);
@@ -63,6 +67,16 @@ protected:
   /* Updates list at the bottom right for maps selected */
   void updateMapList(int selected = -1);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Signal for setting the sub-map in the rendering space */
+  void updateMap();
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Creates the new Sub-Map, as instantiated from dialog */
   void createNewSubMap();
@@ -107,10 +121,9 @@ public slots:
   /* Update map row on bottom list */
   void updateBottomRow(int current_row);
 
-signals:
-  /* Signal for setting the sub-map in the rendering space */
-  void updateMap();
-
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Get the current sub-map */
   SubMapInfo* getCurrentMap();
