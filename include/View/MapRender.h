@@ -25,8 +25,7 @@ class MapRender : public QGraphicsScene
 
 public:
   /* Constructor function */
-  MapRender(QWidget* parent = NULL,
-            EditorEnumDb::CursorMode cursor = EditorEnumDb::BASIC);
+  MapRender(QWidget* parent = NULL);
 
   /* Destructor function */
   ~MapRender();
@@ -68,12 +67,12 @@ protected:
  *===========================================================================*/
 signals:
   /* Adds item, as dictated by parent classes, to the tile */
-  void itemClick(EditorTile* tile); // GOOD
-  void itemMassClick(QList<EditorTile*> tiles, bool erase);
+  //void itemClick(EditorTile* tile); // GOOD
+  //void itemMassClick(QList<EditorTile*> tiles, bool erase);
 
   /* Sets and unsets passability on tile */
-  void passSet(EditorTile* tile);
-  void passUnset(EditorTile* tile);
+  //void passSet(EditorTile* tile);
+  //void passUnset(EditorTile* tile);
 
   /* Sends the tile position to the map status bar */
   void sendCurrentPosition(int,int);

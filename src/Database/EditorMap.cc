@@ -471,9 +471,82 @@ void EditorMap::clearHoverInfo()
 
 /* Click trigger on tile in map */
 // TODO: Comment
-void EditorMap::clickTrigger()
+void EditorMap::clickTrigger(bool single, bool right_click)
 {
-  qDebug() << "CLICKED";
+  EditorEnumDb::CursorMode cursor = active_info.active_cursor;
+  EditorEnumDb::Layer layer = active_info.active_layer;
+
+  /* Check on the layer - base sprite */
+  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
+     layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
+     layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
+     layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
+     layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
+     layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
+  {
+    /* Check cursor */
+    if(cursor == EditorEnumDb::BASIC)
+    {
+
+    }
+    else if(cursor == EditorEnumDb::ERASER)
+    {
+
+    }
+    else if(single && cursor == EditorEnumDb::FILL)
+    {
+
+    }
+    else if(cursor == EditorEnumDb::PASS_ALL ||
+            cursor == EditorEnumDb::PASS_N ||
+            cursor == EditorEnumDb::PASS_E ||
+            cursor == EditorEnumDb::PASS_S ||
+            cursor == EditorEnumDb::PASS_W)
+    {
+
+    }
+  }
+  /* Check on the layer - thing */
+  else if(layer == EditorEnumDb::THING)
+  {
+    /* Check cursor */
+    if(cursor == EditorEnumDb::BASIC)
+    {
+
+    }
+    else if(cursor == EditorEnumDb::ERASER)
+    {
+
+    }
+  }
+
+  qDebug() << "CLICKED - SINGLE";
+  // TODO: Implementation
+}
+
+/* Click trigger on tile in map */
+// TODO: Comment
+void EditorMap::clickTrigger(QList<EditorTile*> tiles, bool erase)
+{
+  EditorEnumDb::CursorMode cursor = active_info.active_cursor;
+  EditorEnumDb::Layer layer = active_info.active_layer;
+
+  /* Check on the layer - base sprite */
+  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
+     layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
+     layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
+     layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
+     layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
+     layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
+  {
+    /* Check cursor */
+    if(cursor == EditorEnumDb::BLOCKPLACE)
+    {
+
+    }
+  }
+
+  qDebug() << "CLICKED - MULTIPLE";
   // TODO: Implementation
 }
 

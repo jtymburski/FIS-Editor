@@ -20,15 +20,11 @@
  * Input: a pointer to the Editor Sprite Toolbox,
  *        the parent widget, and the dimensions of the map
  */
-MapRender::MapRender(QWidget* parent,
-                     EditorEnumDb::CursorMode cursor)
+MapRender::MapRender(QWidget* parent)
          : QGraphicsScene(parent)
 {
   /* Data init */
-  //active_tile = NULL;
-  //setCursorMode(cursor);
   editing_map = NULL;
-  //map = NULL;
   tile_select = false;
 
   /* Sets the background to be black */
@@ -42,7 +38,6 @@ MapRender::~MapRender()
 {
   /* Clear out the rendering map */
   setMapEditor(NULL);
-  //setRenderingMap(NULL);
 }
 
 /*============================================================================
@@ -91,6 +86,14 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
       }
     }
 
+    /* If a new hover tile, execute the click */
+    if(new_hover && (event->buttons() & Qt::LeftButton ||
+                     event->buttons() & Qt::RightButton) &&
+       editing_map->getHoverInfo()->active_cursor != EditorEnumDb::BLOCKPLACE)
+    {
+      editing_map->clickTrigger(false, event->buttons() & Qt::RightButton);
+    }
+
 //  /* If a new hover tile, check if a button is pressed and trigger item click */
 //  if(new_hover && (event->buttons() & Qt::LeftButton ||
 //                   event->buttons() & Qt::RightButton))
@@ -123,6 +126,43 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
  */
 void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+  /* Ensure editing map is valid */
+  if(editing_map != NULL && editing_map->getHoverInfo()->hover_tile != NULL)
+  {
+    /* If click, proceed to trigger item click */
+    if(tile_select)
+    {
+      emit sendSelectedTile(editing_map->getCurrentMap()->id,
+                            editing_map->getHoverInfo()->hover_tile->getX(),
+                            editing_map->getHoverInfo()->hover_tile->getY());
+      tile_select = false;
+    }
+    else if(event->button() == Qt::LeftButton)
+    {
+      if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
+      {
+        block_origin = event->scenePos().toPoint();
+        block_erase = false;
+      }
+      else
+      {
+        editing_map->clickTrigger();
+      }
+    }
+    else if(event->button() == Qt::RightButton)
+    {
+      if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
+      {
+        block_origin = event->scenePos().toPoint();
+        block_erase = true;
+      }
+      else
+      {
+        editing_map->clickTrigger(true, true);
+      }
+    }
+  }
+
 //  /* If click, proceed to trigger item click for normal pens */
 //  if(event->button() == Qt::LeftButton)
 //  {
@@ -170,22 +210,26 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 /* Mouse release event */
 void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-//  /* If click release, and block place, proceed */
-//  if(cursor_mode == EditorEnumDb::BLOCKPLACE)
-//  {
-//    if((event->button() == Qt::LeftButton && !block_erase) ||
-//       (event->button() == Qt::RightButton && block_erase))
-//    {
-//      QRectF rect = EditorHelpers::normalizePoints(block_origin,
-//                                                   event->scenePos());
-//      QList<QGraphicsItem*> item_set =
-//                                    items(rect, Qt::IntersectsItemBoundingRect);
-//      QList<EditorTile*> tile_set;
-//      for(int i = 0; i < item_set.size(); i++)
-//        tile_set.push_back((EditorTile*)item_set[i]);
-//      emit itemMassClick(tile_set, block_erase);
-//    }
-//  }
+  /* Ensure editing map is valid */
+  if(editing_map != NULL && editing_map->getHoverInfo()->hover_tile != NULL)
+  {
+    /* If click release, and block place, proceed */
+    if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
+    {
+      if((event->button() == Qt::LeftButton && !block_erase) ||
+         (event->button() == Qt::RightButton && block_erase))
+      {
+        QRectF rect = EditorHelpers::normalizePoints(block_origin,
+                                                     event->scenePos());
+        QList<QGraphicsItem*> item_set =
+                                      items(rect, Qt::IntersectsItemBoundingRect);
+        QList<EditorTile*> tile_set;
+        for(int i = 0; i < item_set.size(); i++)
+          tile_set.push_back((EditorTile*)item_set[i]);
+        editing_map->clickTrigger(tile_set, block_erase);
+      }
+    }
+  }
 }
 
 /*============================================================================

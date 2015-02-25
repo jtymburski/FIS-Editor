@@ -116,7 +116,8 @@ public:
   void clearHoverInfo();
 
   /* Click trigger on tile in map */
-  void clickTrigger();
+  void clickTrigger(bool single = true, bool right_click = false);
+  void clickTrigger(QList<EditorTile*> tiles, bool erase);
 
   /* Returns current references for lists in map */
   SubMapInfo* getCurrentMap();
