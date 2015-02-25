@@ -12,7 +12,13 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor Function */
+/*
+ * Description: Primary constructor function. Sets up the layout, with a given
+ *              matrix.
+ *
+ * Inputs: EditorMatrix* matrix - the matrix to display in the view
+ *         QWidget* parent - parent widget
+ */
 MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
 {
   /* Initialize variables */
@@ -207,7 +213,9 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   setMatrix(matrix);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 MatrixView::~MatrixView()
 {
   matrix_view->setScene(NULL);
@@ -218,7 +226,15 @@ MatrixView::~MatrixView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Sets the active viewing frame */
+/*
+ * Description: Sets the active frame index for displaying which snapshot of
+ *              the thing is visible. Also, controls enabling/disabling
+ *              the control buttons at the bottom for going forward and
+ *              backward (depending on the number of frames available).
+ *
+ * Inputs: int index - the new frame index
+ * Output: bool - true if the end of the frame list is reached
+ */
 bool MatrixView::setActiveFrame(int index)
 {
   int min = 0;
@@ -257,7 +273,14 @@ bool MatrixView::setActiveFrame(int index)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-/* Active sprite passability control */
+
+/*
+ * Description: Slot which sets the passability in the east direction. Connected
+ *              to the right click menu east passability toggle.
+ *
+ * Inputs: bool set - true if passability should be enabled. false otherwise.
+ * Output: none
+ */
 void MatrixView::actionPassabilityEast(bool set)
 {
   if(matrix != NULL)
@@ -268,7 +291,13 @@ void MatrixView::actionPassabilityEast(bool set)
   }
 }
 
-/* Active sprite passability control */
+/*
+ * Description: Slot which sets the passability in the north direction.
+ *              Connected to the right click menu north passability toggle.
+ *
+ * Inputs: bool set - true if passability should be enabled. false otherwise.
+ * Output: none
+ */
 void MatrixView::actionPassabilityNorth(bool set)
 {
   if(matrix != NULL)
@@ -279,7 +308,13 @@ void MatrixView::actionPassabilityNorth(bool set)
   }
 }
 
-/* Active sprite passability control */
+/*
+ * Description: Slot which sets the passability in the south direction.
+ *              Connected to the right click menu south passability toggle.
+ *
+ * Inputs: bool set - true if passability should be enabled. false otherwise.
+ * Output: none
+ */
 void MatrixView::actionPassabilitySouth(bool set)
 {
   if(matrix != NULL)
@@ -290,7 +325,13 @@ void MatrixView::actionPassabilitySouth(bool set)
   }
 }
 
-/* Active sprite passability control */
+/*
+ * Description: Slot which sets the passability in the west direction.
+ *              Connected to the right click menu west passability toggle.
+ *
+ * Inputs: bool set - true if passability should be enabled. false otherwise.
+ * Output: none
+ */
 void MatrixView::actionPassabilityWest(bool set)
 {
   if(matrix != NULL)
@@ -301,7 +342,14 @@ void MatrixView::actionPassabilityWest(bool set)
   }
 }
 
-/* Action render depth editor */
+/*
+ * Description: Slot which sets the render depth of the matrix tile. Connected
+ *              to the right click menu and opens up a QInputDialog to enter
+ *              the new render depth.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::actionRenderDepth()
 {
   if(matrix != NULL)
@@ -319,7 +367,13 @@ void MatrixView::actionRenderDepth()
   }
 }
 
-/* Actions for sprite control and view */
+/*
+ * Description: Slot which opens up the edit sprite dialog for the individual
+ *              matrix tile sprite. Connected to the right click menu.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::actionSpriteEdit()
 {
   if(matrix != NULL)
@@ -346,7 +400,13 @@ void MatrixView::actionSpriteEdit()
   }
 }
 
-/* Actions for sprite control and view */
+/*
+ * Description: Slot which opens up a QDialog with the view of each frame in
+ *              the matrix tile. Connected to the right click menu.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::actionSpriteView()
 {
   if(matrix != NULL)
@@ -378,21 +438,39 @@ void MatrixView::actionSpriteView()
   }
 }
 
-/* Frame view control */
+/*
+ * Description: The button which shifts the frames of the matrix to the next to
+ *              be displayed.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonFrameNext()
 {
   if(matrix != NULL)
     setActiveFrame(matrix->getActiveFrameIndex() + 1);
 }
 
-/* Frame view control */
+/*
+ * Description: The button which shifts the frames of the matrix to the
+ *              previous to be displayed.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonFramePrev()
 {
   if(matrix != NULL)
     setActiveFrame(matrix->getActiveFrameIndex() - 1);
 }
 
-/* Height control */
+/*
+ * Description: The button which triggers to decrease the height of the matrix
+ *              by one tile sprite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonHeightDecrease()
 {
   if(matrix != NULL)
@@ -403,7 +481,13 @@ void MatrixView::buttonHeightDecrease()
   }
 }
 
-/* Height control */
+/*
+ * Description: The button which triggers to increase the height of the matrix
+ *              by one tile sprite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonHeightIncrease()
 {
   if(matrix != NULL)
@@ -414,7 +498,13 @@ void MatrixView::buttonHeightIncrease()
   }
 }
 
-/* Pen click trigger */
+/*
+ * Description: Triggers on any of the 5 pen buttons being pressed and sets
+ *              the current cursor mode.
+ *
+ * Inputs: bool checked - true if the button has been pressed
+ * Output: none
+ */
 void MatrixView::buttonPen(bool checked)
 {
   if(checked && matrix != NULL)
@@ -432,7 +522,13 @@ void MatrixView::buttonPen(bool checked)
   }
 }
 
-/* General sprite edit trigger */
+/*
+ * Description: The button which triggers to edit the settings for all sprites
+ *              in the matrix (such as opacity, brightness, etc).
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonSpriteEdit()
 {
   /* Instantiate the edit */
@@ -460,35 +556,65 @@ void MatrixView::buttonSpriteEdit()
   }
 }
 
-/* Trim the matrix */
+/*
+ * Description: Button which triggers a matrix trim and cleans up all tile
+ *              rows and columns on all edges.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonTrim()
 {
   if(matrix != NULL)
     matrix->trim(false);
 }
 
-/* View button triggers */
+/*
+ * Description: Button to toggle if the grid is visible in the matrix view.
+ *
+ * Inputs: bool checked - true if the grid is visible
+ * Output: none
+ */
 void MatrixView::buttonViewGrid(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityGrid(checked);
 }
 
-/* View button triggers */
+/*
+ * Description: Button to toggle if the passability is visible in the matrix
+ *              view. This is only visible if the render depth is 0 on the
+ *              tile.
+ *
+ * Inputs: bool checked - true if the passability is visible
+ * Output: none
+ */
 void MatrixView::buttonViewPass(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityPass(checked);
 }
 
-/* View button triggers */
+/*
+ * Description: Button to toggle if the render depth is visible in the matrix
+ *              view.
+ *
+ * Inputs: bool checked - true if the render depth is visible
+ * Output: none
+ */
 void MatrixView::buttonViewRender(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityRender(checked);
 }
 
-/* Width control */
+/*
+ * Description: The button which triggers to decrease the width of the matrix
+ *              by one tile sprite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonWidthDecrease()
 {
   if(matrix != NULL)
@@ -499,7 +625,13 @@ void MatrixView::buttonWidthDecrease()
   }
 }
 
-/* Width control */
+/*
+ * Description: The button which triggers to increase the width of the matrix
+ *              by one tile sprite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::buttonWidthIncrease()
 {
   if(matrix != NULL)
@@ -510,7 +642,13 @@ void MatrixView::buttonWidthIncrease()
   }
 }
 
-/* Place matrix control start */
+/*
+ * Description: Initializes a matrix place dialog at the given selected tile
+ *              with the path from the QFileDialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::initMatrixPlace()
 {
   QString path = QFileDialog::getOpenFileName(this,
@@ -538,16 +676,27 @@ void MatrixView::initMatrixPlace()
   }
 }
 
-/* Matrix was changed */
+/*
+ * Description: Triggers if the matrix is changed to set the new active frame
+ *              index.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MatrixView::matrixChanged()
 {
   if(matrix != NULL)
-  {
     setActiveFrame(matrix->getActiveFrameIndex());
-  }
 }
 
-/* Right click on sprite trigger */
+/*
+ * Description: Right click trigger on the editor tile sprite. Sets up the
+ *              menu with the proper action settings and then executes the
+ *              menu.
+ *
+ * Inputs: EditorTileSprite* sprite - the sprite which was right clicked on
+ * Output: none
+ */
 void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
 {
   if(sprite != NULL)
@@ -588,14 +737,25 @@ void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  
-/* Returns the matrix being viewed */
+
+/*
+ * Description: Returns the matrix which is being displayed.
+ *
+ * Inputs: none
+ * Output: EditorMatrix* - the editor matrix class
+ */
 EditorMatrix* MatrixView::getMatrix()
 {
   return matrix;
 }
 
-/* Sets a different matrix to the active view */
+/*
+ * Description: Sets the matrix in the view to the new editor matrix. It also
+ *              sets up all the proper visibility settings.
+ *
+ * Inputs: EditorMatrix* matrix - the matrix to be used. NULL resets the view.
+ * Output: none
+ */
 void MatrixView::setMatrix(EditorMatrix* matrix)
 {
   /* If existing matrix is not NULL, disconnect */

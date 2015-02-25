@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Class Name: EditorMap
  * Date Created: December 27, 2014
- * Inheritance: QWidget
+ * Inheritance: QObject, EditorTemplate
  * Description: The map interface to connect and edit in the editor
  ******************************************************************************/
 #include "Database/EditorMap.h"
@@ -24,7 +24,7 @@ const int EditorMap::kUNSET_ID = -1;
  *
  * Inputs: none
  */
-EditorMap::EditorMap()
+EditorMap::EditorMap() : QObject()
 {
   active_submap = NULL;
   id = kUNSET_ID;
@@ -538,6 +538,7 @@ void EditorMap::clearHoverInfo()
   active_info.active_sprite = NULL;
   active_info.active_thing = NULL;
   active_info.hover_tile = NULL;
+  active_info.selected_thing = QRect();
 
   /* Clear the active hover on all tiles in all sub-maps */
   /* Not necessary, I think */
@@ -639,11 +640,15 @@ void EditorMap::clickTrigger(bool single, bool right_click)
 
         /* Attempt to place */
         if(addThing(new_thing))
+        {
           active_submap->things.push_back(new_thing);
+          emit thingInstanceChanged();
+          setHoverThing(-1);
+        }
         else
+        {
           delete new_thing;
-
-        // TODO: UPDATE VIEW WITH NEW THING - SIDE BAR
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
@@ -1383,12 +1388,16 @@ bool EditorMap::setCurrentMap(int index)
 
     /* Clear out the hover info */
     active_info.hover_tile = NULL;
+    active_info.selected_thing = QRect();
 
     /* Clear the new sub-map hover tiles */
     if(active_submap != NULL)
       for(int i = 0; i < sub_maps[index]->tiles.size(); i++)
         for(int j = 0; j < sub_maps[index]->tiles[i].size(); j++)
           sub_maps[index]->tiles[i][j]->setHover(false);
+
+    /* Trigger thing instance update */
+    emit thingInstanceChanged();
 
     return true;
   }
@@ -1471,6 +1480,40 @@ void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)
     active_info.hover_tile->update();
+}
+
+/* Sets the hover information */
+// TODO: Comment
+bool EditorMap::setHoverThing(int id)
+{
+  /* First clear the existing one */
+  QRect existing = active_info.selected_thing;
+  active_info.selected_thing = QRect();
+
+  /* Then, set the new one */
+  if(active_submap != NULL)
+  {
+    /* First, update the old tiles to remove line */
+    for(int i = 0; i < existing.width(); i++)
+      for(int j = 0; j < existing.height(); j++)
+        active_submap->tiles[existing.x() + i][existing.y() + j]->update();
+
+    /* Next, try and get the new thing */
+    EditorThing* thing = getThing(id, active_submap->id);
+    if(thing != NULL)
+    {
+      active_info.selected_thing = QRect(thing->getX(), thing->getY(),
+                                         thing->getMatrix()->getWidth(),
+                                         thing->getMatrix()->getHeight());
+      for(int i = 0; i < active_info.selected_thing.width(); i++)
+        for(int j = 0; j < active_info.selected_thing.height(); j++)
+          active_submap->tiles[thing->getX() + i][thing->getY() + j]->update();
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /* Sets the hover information */
@@ -1866,6 +1909,9 @@ void EditorMap::thingRemoveFromTiles()
 {
   if(active_submap != NULL)
   {
+    /* Clear selection */
+    setHoverThing(-1);
+
     for(int i = 0; i < active_submap->things.size(); i++)
     {
       EditorThing* thing = active_submap->things[i];
@@ -2086,6 +2132,10 @@ bool EditorMap::unsetThingByIndex(int index, int sub_map)
       /* Finally, delete the thing */
       delete ref;
       sub_maps[sub_map]->things.remove(index);
+
+      /* Update list */
+      emit thingInstanceChanged();
+      setHoverThing(-1);
 
       return true;
     }

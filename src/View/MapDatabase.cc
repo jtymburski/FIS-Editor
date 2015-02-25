@@ -20,7 +20,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   items << "Raw Images" << "Sprites" << "Things";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
-  view_top->setMaximumHeight(100);
+  view_top->setMaximumHeight(60);
   connect(view_top, SIGNAL(currentRowChanged(int)),
           this, SLOT(updateSelected(int)));
 

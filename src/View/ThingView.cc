@@ -63,9 +63,30 @@ void ThingView::createLayout()
           this, SLOT(itemDoubleClicked(QListWidgetItem*)));
   layout->addWidget(thing_list, 1);
 
+  /* The instances widget */
+  QLabel* lbl_instances = new QLabel("Instances:", this);
+  layout->addWidget(lbl_instances, 0);
+  thing_instances = new QListWidget(this);
+  thing_instances->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(thing_instances, SIGNAL(customContextMenuRequested(QPoint)),
+          this, SLOT(instanceMenu(QPoint)));
+  connect(thing_instances, SIGNAL(currentRowChanged(int)),
+          this, SLOT(instanceRowChanged(int)));
+  layout->addWidget(thing_instances, 1);
+
+  /* Right click menu control */
+  rightclick_menu = new QMenu("Thing Edit", this);
+  QAction* edit_thing = new QAction("Edit", rightclick_menu);
+  connect(edit_thing, SIGNAL(triggered()), this, SLOT(editInstance()));
+  QAction* delete_thing = new QAction("Delete", rightclick_menu);
+  connect(delete_thing, SIGNAL(triggered()), this, SLOT(deleteInstance()));
+  rightclick_menu->addAction(edit_thing);
+  rightclick_menu->addAction(delete_thing);
+  rightclick_menu->hide();
+
   /* Image label */
   lbl_image = new QLabel(this);
-  lbl_image->setMinimumSize(250, 250);
+  lbl_image->setMinimumSize(200, 200);
   lbl_image->setAlignment(Qt::AlignCenter);
   lbl_image->setStyleSheet("border: 1px solid black");
   layout->addWidget(lbl_image, 0, Qt::AlignHCenter);
@@ -84,9 +105,11 @@ void ThingView::createLayout()
 }
 
 /* Opens the thing editing dialog */
-void ThingView::editThing()
+void ThingView::editThing(EditorThing* sub_thing)
 {
   EditorThing* current = getSelected();
+  if(sub_thing != NULL)
+    current = sub_thing;
 
   /* Delete the old and create the new dialog */
   if(thing_dialog != NULL)
@@ -127,7 +150,7 @@ void ThingView::updateInfo()
       /* If matrix is valid, set the remaining info */
       if(thing->getMatrix() != NULL)
       {
-        lbl_image->setPixmap(thing->getMatrix()->getSnapshot(250, 250));
+        lbl_image->setPixmap(thing->getMatrix()->getSnapshot(200, 200));
         lbl_size->setText("Size: " +
                       QString::number(thing->getMatrix()->getWidth()) +
                       "W x " +
@@ -149,12 +172,17 @@ void ThingView::updateList()
 {
   int index = thing_list->currentRow();
 
+  /* Set up the base list */
   thing_list->clear();
   if(editor_map != NULL)
   {
+    /* Set up the base list */
     for(int i = 0; i < editor_map->getThingCount(); i++)
       thing_list->addItem(editor_map->getThingByIndex(i)->getNameList());
     editor_map->updateAll();
+
+    /* Set up the instances list */
+    thingInstanceUpdate();
   }
 
   thing_list->setCurrentRow(index);
@@ -174,10 +202,93 @@ void ThingView::currentRowChanged(int index)
   updateInfo();
 }
 
+/* Delete thing instance */
+void ThingView::deleteInstance()
+{
+  if(thing_instances->currentItem() != NULL)
+  {
+    QString text = thing_instances->currentItem()->text();
+
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting thing instance: " + text);
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
+    {
+      int index = getInstanceID(text);
+      editor_map->unsetThing(index, true);
+    }
+  }
+}
+
+/* Edit thing instance */
+void ThingView::editInstance()
+{
+  if(thing_instances->currentItem() != NULL)
+  {
+    int id = getInstanceID(thing_instances->currentItem()->text());
+
+    EditorThing* thing = editor_map->getThing(
+                                           id, editor_map->getCurrentMap()->id);
+    if(thing != NULL)
+    {
+      editThing(thing);
+    }
+  }
+}
+
+/* Instance menu trigger */
+void ThingView::instanceMenu(const QPoint & pos)
+{
+  QListWidgetItem* item = thing_instances->itemAt(pos);
+  if(item != NULL)
+    rightclick_menu->exec(QCursor::pos());
+}
+
+/* Instance of thing row changed */
+void ThingView::instanceRowChanged(int index)
+{
+  if(index >= 0 && editor_map != NULL)
+  {
+    int thing_index = getInstanceID(thing_instances->currentItem()->text());
+    if(editor_map->setHoverThing(thing_index))
+      emit ensureVisible(editor_map->getHoverInfo()->selected_thing);
+  }
+}
+
 /* An item in the list was double clicked */
 void ThingView::itemDoubleClicked(QListWidgetItem*)
 {
   editThing();
+}
+
+/* Update thing instances in view */
+void ThingView::thingInstanceUpdate()
+{
+  thing_instances->blockSignals(true);
+  thing_instances->clearSelection();
+  thing_instances->clearFocus();
+  thing_instances->clear();
+
+  if(editor_map != NULL)
+  {
+    /* Set up the instances list */
+    int sub_index = editor_map->getCurrentMapIndex();
+    if(sub_index >= 0)
+    {
+      for(int i = 0; i < editor_map->getThingCount(sub_index); i++)
+      {
+        thing_instances->addItem(
+                      editor_map->getThingByIndex(i, sub_index)->getNameList());
+      }
+      thing_instances->sortItems();
+    }
+  }
+
+  thing_instances->clearSelection();
+  thing_instances->clearFocus();
+  thing_instances->blockSignals(false);
 }
 
 /* Updates the thing sidebar */
@@ -277,7 +388,23 @@ void ThingView::newThing()
 /* Sets the editor map, which contains the data needed */
 void ThingView::setEditorMap(EditorMap* map)
 {
+  /* If existing editor map is not NULL, undo */
+  if(editor_map != NULL)
+  {
+    disconnect(editor_map, SIGNAL(thingInstanceChanged()),
+               this, SLOT(thingInstanceUpdate()));
+  }
+
   editor_map = map;
+
+  /* If new map is not NULL, reconnect */
+  if(editor_map != NULL)
+  {
+    connect(editor_map, SIGNAL(thingInstanceChanged()),
+            this, SLOT(thingInstanceUpdate()));
+  }
+
+  /* Finally, update list */
   updateList();
 }
 
@@ -314,4 +441,25 @@ void ThingView::updateSelectedTile(int id, int x, int y)
 {
   if(thing_dialog != NULL)
     thing_dialog->updateSelectedTile(id, x, y);
+}
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+
+/* Returns the instance ID */
+int ThingView::getInstanceID(QString text)
+{
+  /* Split to find the number */
+  QStringList front = text.split('(');
+  if(front.size() == 2)
+  {
+    QStringList back = front.back().split(')');
+    if(back.size() == 2)
+    {
+      return back.front().toInt();
+    }
+  }
+
+  return -1;
 }

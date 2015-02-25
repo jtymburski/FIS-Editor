@@ -111,6 +111,9 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Ensures the following rect is visible in scene */
+  void ensureVisible(QRect rect);
+
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
 

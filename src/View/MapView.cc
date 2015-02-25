@@ -62,6 +62,8 @@ void MapView::setupLeftBar()
           map_database, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           map_database, SLOT(updatedMaps(QVector<QString>)));
+  connect(map_database->getThingView(), SIGNAL(ensureVisible(QRect)),
+          this, SLOT(ensureVisible(QRect)));
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
@@ -126,6 +128,19 @@ void MapView::setupRightBar()
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
+
+/* Ensures the following rect is visible in scene */
+void MapView::ensureVisible(QRect rect)
+{
+  if(map_render_view != NULL)
+  {
+    float factor = kZOOM_STATES[zoom_state] * EditorHelpers::getTileSize();
+    QRectF converted(rect.x() * factor, rect.y() * factor,
+                     rect.width() * factor, rect.height() * factor);
+
+    map_render_view->ensureVisible(converted, 0, 0);
+  }
+}
 
 /*
  * Description: Sets the position into the status bar

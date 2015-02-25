@@ -13,6 +13,7 @@
 #include <QList>
 #include <QMenu>
 #include <QPainter>
+#include <QRect>
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
@@ -33,6 +34,7 @@ struct HoverInfo
   EditorThing* active_thing;
 
   EditorTile* hover_tile;
+  QRect selected_thing;
 };
 
 /* Struct for frame option storage */

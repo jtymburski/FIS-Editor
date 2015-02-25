@@ -29,7 +29,7 @@ class EventView : public QFrame
   Q_OBJECT
 public:
   /* Constructor function */
-  EventView(EditorEvent* event, QWidget* parent = NULL,
+  EventView(EditorEvent* event = NULL, QWidget* parent = NULL,
             bool conversation_enabled = true);
 
   /* Destructor function */

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Class Name: EditorMap
  * Date Created: December 27, 2014
- * Inheritance: EditorTemplate
+ * Inheritance: QObject, EditorTemplate
  * Description: The map interface to connect and edit in the editor
  ******************************************************************************/
 #ifndef EDITORMAP_H
@@ -11,10 +11,10 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QObject>
 #include <QPushButton>
 #include <QString>
 #include <QVector>
-#include <QWidget>
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
@@ -34,9 +34,9 @@ struct SubMapInfo
   QVector<EditorThing*> things;
 };
 
-class EditorMap : public EditorTemplate
+class EditorMap : public QObject, public EditorTemplate
 {
-//  Q_OBJECT
+  Q_OBJECT
 public:
   /* Constructor Function */
   EditorMap();//QWidget* parent = NULL);
@@ -116,7 +116,13 @@ protected:
   /* Updates the tiles that contain the hover information struct */
   bool updateHoverThing(bool unset = false);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
+  /* Thing instant changed */
+  void thingInstanceChanged();
+
 public slots:
 
 /*============================================================================
@@ -195,6 +201,7 @@ public:
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
   void setHoverLayer(EditorEnumDb::Layer layer);
+  bool setHoverThing(int id);
   void setHoverTile(EditorTile* tile);
 
   /* Sets the ID of the map set */

@@ -63,7 +63,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the layout - only called on initial construction */
-  void createLayout();
+  void createLayout(bool instance = false);
 
   /* Updates the objects with the thing data */
   void updateData();

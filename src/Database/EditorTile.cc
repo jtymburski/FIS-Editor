@@ -629,9 +629,34 @@ void EditorTile::paint(QPainter *painter,
   /* Render the grid */
   if(visible_grid)
   {
+    QRect rect(bound.x() + 1, bound.y() + 1,
+                      bound.width() - 2, bound.height() - 2);
     painter->setPen(QColor(255, 255, 255, 128));
-    painter->drawRect(1 + (x_pos * size), 1 + (y_pos * size),
-                      size - 2, size - 2);
+    painter->drawRect(rect);
+
+    // TODO: REMOVE - TESTING
+    int x1 = hover_info->selected_thing.x();
+    int y1 = hover_info->selected_thing.y();
+    int x2 = x1 + hover_info->selected_thing.width() - 1;
+    int y2 = y1 + hover_info->selected_thing.height() - 1;
+
+    /* Draw border */
+    if(x_pos >= x1 && x_pos <= x2 && y_pos >= y1 && y_pos <= y2)
+    {
+      painter->setPen(QColor(255, 255, 0, 255));
+      if(x_pos == x1)
+        painter->drawLine(rect.x(), rect.y(),
+                          rect.x(), rect.y() + rect.height());
+      if(x_pos == x2)
+        painter->drawLine(rect.x() + rect.width(), rect.y(),
+                          rect.x() + rect.width(), rect.y() + rect.height());
+      if(y_pos == y1)
+        painter->drawLine(rect.x(), rect.y(),
+                          rect.x() + rect.width(), rect.y());
+      if(y_pos == y2)
+        painter->drawLine(rect.x(), rect.y() + rect.height(),
+                          rect.x() + rect.width(), rect.y() + rect.height());
+    }
   }
   if(hovered)
   {

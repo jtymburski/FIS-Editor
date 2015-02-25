@@ -35,7 +35,7 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
   }
 
   /* Layout setup */
-  createLayout();
+  createLayout(edit_thing->getBase() != NULL);
   updateData();
   updateFrame();
 }
@@ -61,7 +61,7 @@ ThingDialog::~ThingDialog()
  *===========================================================================*/
 
 /* Creates the layout - only called on initial construction */
-void ThingDialog::createLayout()
+void ThingDialog::createLayout(bool instance)
 {
   /* Layout setup */
   QGridLayout* layout = new QGridLayout(this);
@@ -114,11 +114,15 @@ void ThingDialog::createLayout()
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
   btn_frame_click->setMaximumSize(30, 30);
+  if(instance)
+    btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
   layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
   event_view = new EventView(event_ctrl, this);
+  if(instance)
+    event_view->setDisabled(true);
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
   connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
@@ -126,6 +130,8 @@ void ThingDialog::createLayout()
 
   /* Matrix View */
   matrix_view = new MatrixView(thing_working->getMatrix(), this);
+  if(instance)
+    matrix_view->setDisabled(true);
   layout->addWidget(matrix_view, 4, 4, 4, 4);
 
   /* The button control */

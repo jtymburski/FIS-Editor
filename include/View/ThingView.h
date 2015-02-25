@@ -38,10 +38,14 @@ private:
   QLabel* lbl_name;
   QLabel* lbl_size;
 
+  /* Right click menu on instance list */
+  QMenu* rightclick_menu;
+
   /* The thing dialog for editing */
   ThingDialog* thing_dialog;
 
   /* The list of things in the view */
+  QListWidget* thing_instances;
   QListWidget* thing_list;
 
 /*============================================================================
@@ -55,7 +59,7 @@ private:
   void createLayout();
 
   /* Opens the thing editing dialog */
-  void editThing();
+  void editThing(EditorThing* sub_thing = NULL);
 
   /* Refreshes the info in the lower half of the widget */
   void updateInfo();
@@ -72,6 +76,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Signals map rendering view to ensure the following rect is visible */
+  void ensureVisible(QRect rect);
+
   /* Triggers the update the data of objects for use in events */
   void fillWithData(EditorEnumDb::MapViewMode view);
 
@@ -85,8 +92,23 @@ public slots:
   /* The current row changes in the list widget */
   void currentRowChanged(int index);
 
+  /* Delete thing instance */
+  void deleteInstance();
+
+  /* Edit thing instance */
+  void editInstance();
+
+  /* Instance menu trigger */
+  void instanceMenu(const QPoint & pos);
+
+  /* Instance of thing row changed */
+  void instanceRowChanged(int index);
+
   /* An item in the list was double clicked */
   void itemDoubleClicked(QListWidgetItem*);
+
+  /* Update thing instances in view */
+  void thingInstanceUpdate();
 
   /* Updates the thing sidebar */
   void updateThings();
@@ -124,5 +146,12 @@ public:
 
   /* Update the selected tile for the thing */
   void updateSelectedTile(int id, int x, int y);
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Returns the instance ID */
+  static int getInstanceID(QString text);
 };
 #endif // THINGVIEW_H

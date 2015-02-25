@@ -59,7 +59,7 @@ void EventView::createLayout(bool conversation_enabled)
   combo_category->addItem("Switch Maps");
   combo_category->addItem("Teleport Thing");
   if(conversation_enabled)
-  combo_category->addItem("Conversation");
+    combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
           this, SLOT(categoryChanged(int)));
   layout->addWidget(combo_category, 0, Qt::AlignCenter);
@@ -386,12 +386,12 @@ void EventView::setLayoutData()
     }
 
     /* Enable the widget */
-    setEnabled(true);
+    combo_category->setEnabled(true);
   }
   else
   {
     combo_category->setCurrentIndex(0);
-    setDisabled(true);
+    combo_category->setDisabled(true);
   }
 }
 
