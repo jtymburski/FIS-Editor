@@ -1073,6 +1073,13 @@ void EditorMatrix::increaseWidth(int count)
   emit matrixChange();
 }
 
+/* Loads the matrix data */
+// TODO: Comment
+void EditorMatrix::load(XmlData data, int index)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Paint the active frame in the matrix into the bounding box.
  *              The offset x and y is the sprite in the matrix offset from the
@@ -1138,6 +1145,47 @@ void EditorMatrix::removeAll()
   matrix.clear();
 
   emit matrixChange();
+}
+
+/* Saves the matrix data */
+// TODO: Comment
+void EditorMatrix::save(FileHandler* fh, bool game_only)
+{
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("sprites");
+
+    // TODO: SAVE THE INDIVIDUAL PATHS
+    QVector<QVector<QVector<QPair<QString,QString>>>> set;
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      QVector<QVector<QPair<QString,QString>>> row_set;
+      for(int j = 0; j < matrix[i].size(); j++)
+        row_set.push_back(matrix[i][j]->getPathSet());
+      set.push_back(row_set);
+    }
+//    for(int i = 0; i < set.size(); i++)
+//    {
+//      for(int j = 0; j < set[i].size(); j++)
+//      {
+//        qDebug() << i << "," << j;
+//        for(int k = 0; k < set[i][j].size(); k++)
+//          qDebug() << set[i][j][k].second;
+//        qDebug() << "--";
+//      }
+//    }
+
+    /* Save the sprite data */
+    EditorTileSprite* sprite = getValidSprite();
+    if(sprite != NULL)
+    {
+      fh->writeXmlElement("sprite");
+      sprite->save(fh, game_only, true);
+      fh->writeXmlElementEnd();
+    }
+
+    fh->writeXmlElementEnd();
+  }
 }
 
 /*

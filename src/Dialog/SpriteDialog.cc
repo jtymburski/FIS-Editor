@@ -109,7 +109,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   opacity_input = new QSlider(Qt::Horizontal);
   opacity_input->setTickInterval(1);
   opacity_input->setMinimum(0);
-  opacity_input->setMaximum(100);
+  opacity_input->setMaximum(255);
   connect(opacity_input,SIGNAL(valueChanged(int)),
           working_sprite,SLOT(setOpacity(int)));
   layout->addWidget(opacity_input,3,1,1,2);

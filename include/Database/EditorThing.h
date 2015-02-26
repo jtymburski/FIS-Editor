@@ -83,6 +83,7 @@ public:
 
   /* Gets the proper formatted name and ID for listing */
   virtual QString getNameList();
+  QString getNameList(bool shortened);
 
   /* Returns the x and y coordinate of the thing */
   int getX();
@@ -91,10 +92,16 @@ public:
   /* Returns if the thing is visible */
   bool isVisible() const;
 
+  /* Loads the thing data */
+  void load(XmlData data, int index);
+
   /* Paint a sprite in the thing */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
   bool paint(int frame_index, QPainter* painter, QRect rect,
              int offset_x = 0, int offset_y = 0);
+
+  /* Saves the thing data */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference thing */
   void setBase(EditorThing* thing);

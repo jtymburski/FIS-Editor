@@ -181,7 +181,8 @@ public:
   EditorThing* getThingByIndex(int index, int sub_map = -1);
   int getThingCount(int sub_map = -1);
   int getThingIndex(int id, int sub_map = -1);
-  QVector<QString> getThingList(int sub_map = -1, bool all_submaps = false);
+  QVector<QString> getThingList(int sub_map = -1, bool all_submaps = false,
+                                bool shortened = false);
   QVector<EditorThing*> getThings(int sub_map = -1);
 
   /* Returns the tile icons */

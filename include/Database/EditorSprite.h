@@ -203,6 +203,9 @@ public:
   /* Gets the sprite path */
   QString getPath(int frame_num);
 
+  /* Gets the simplified path set */
+  QVector<QPair<QString,QString>> getPathSet();
+
   /* Returns the modified pixmap */
   QPixmap getPixmap(int index, int w, int h);
 
@@ -218,7 +221,7 @@ public:
   /* Returns true if all frames in the sprite are not valid paths (null imgs) */
   bool isAllNull();
 
-  /* Loads the game data */
+  /* Loads the sprite data */
   void load(XmlData data, int index);
 
   /* Paint the base sprite */
@@ -227,8 +230,8 @@ public:
   bool paint(int index, QPainter* painter, QRect rect);
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
 
-  /* Saves the game data */
-  void save(FileHandler* fh, bool game_only = false);
+  /* Saves the sprite data */
+  void save(FileHandler* fh, bool game_only = false, bool core_only = false);
 
   /* Sets the active frame index */
   void setActiveFrame(int index);

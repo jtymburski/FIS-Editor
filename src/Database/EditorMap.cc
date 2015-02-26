@@ -80,8 +80,14 @@ EditorMap::~EditorMap()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Attempts to add thing to the current sub-map */
-// TODO: Comment
+/*
+ * Description: Attempts to add the thing to the current sub-map. Thing needs
+ *              to be given an x and y start location prior to calling this
+ *              function.
+ *
+ * Inputs: EditorThing* thing - the thing to attempt to add
+ * Output: bool - true if the thing was added (does not delete if fails)
+ */
 bool EditorMap::addThing(EditorThing* thing)
 {
   int x = thing->getX();
@@ -349,8 +355,18 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   }
 }
 
-/* Recursively erase all similar adjoining tiles */
-// TODO: Comment
+/*
+ * Description: Recursively erases all similar adjoining tiles, based on the
+ *              target sprite. Stops when either the sprite is not equivalent
+ *              or the end of the map is reached.
+ *
+ * Inputs: int x - the x tile location
+ *         int y - the y tile location
+ *         EditorEnumDb::Layer layer - the relevant layer to check
+ *         EditorSprite* target - the target sprite that must be equal
+ *         SubMapInfo* map - the sub-map to erase from
+ * Output: none
+ */
 void EditorMap::recursiveErase(int x, int y, EditorEnumDb::Layer layer,
                                EditorSprite* target, SubMapInfo* map)
 {
@@ -466,8 +482,14 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
   fh->writeXmlElementEnd();
 }
 
-/* Updates the tiles that contain the hover information struct */
-// TODO: Comment
+/*
+ * Description: Updates the tiles that contain the hover information with the
+ *              relevant thing. If unset is false, it sets it to display.
+ *              Otherwise, it unsets it and stops it from displaying
+ *
+ * Inputs: bool unset - unset the hover thing?
+ * Output: bool - true if the hover thing was updated
+ */
 bool EditorMap::updateHoverThing(bool unset)
 {
   /* Pre-checks to determine if this is valid to execute */
@@ -529,8 +551,14 @@ bool EditorMap::updateHoverThing(bool unset)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Clears the hover information - called on first initiation of map */
-// TODO: Comment
+/*
+ * Description: Clears the hover information for the editor map. Called on
+ *              initial construction and each time the editor map is laoded in
+ *              as the dispaly map.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMap::clearHoverInfo()
 {
   active_info.active_cursor = EditorEnumDb::NO_CURSOR;
@@ -540,18 +568,20 @@ void EditorMap::clearHoverInfo()
   active_info.hover_tile = NULL;
   active_info.selected_thing = QRect();
 
-  /* Clear the active hover on all tiles in all sub-maps */
-  /* Not necessary, I think */
-  //for(int i = 0; i < sub_maps.size(); i++)
-  //  for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
-  //    for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
-  //      sub_maps[i]->tiles[j][k]->setHover(false);
-
+  /* Clean the active submap */
   active_submap = NULL;
 }
 
-/* Click trigger on tile in map */
-// TODO: Comment
+/*
+ * Description: This is the click trigger, passed in by the map rendering
+ *              engine. If it's a single executing task (fill), single is true
+ *              If it's right click, right_click is true.
+ *
+ * Inputs: bool single - was this triggered by a click? false if holding click
+ *                       and changing hover tile
+ *         bool right_click - true if the trigger was a right click
+ * Output: none
+ */
 void EditorMap::clickTrigger(bool single, bool right_click)
 {
   EditorEnumDb::CursorMode cursor = active_info.active_cursor;
@@ -668,8 +698,15 @@ void EditorMap::clickTrigger(bool single, bool right_click)
   }
 }
 
-/* Click trigger on tile in map */
-// TODO: Comment
+/*
+ * Description: Click trigger from executing a rectangle select pen.
+ *              Passes in all tiles that were below the rect. Erase is true
+ *              if it was a right to left rect. Otherwise, place active sprite.
+ *
+ * Inputs: QList<EditorTile*> tiles - the tile stack under the rect
+ *         bool erase - true if the rect is an erase block
+ * Output: none
+ */
 void EditorMap::clickTrigger(QList<EditorTile*> tiles, bool erase)
 {
   EditorEnumDb::CursorMode cursor = active_info.active_cursor;
@@ -704,15 +741,25 @@ void EditorMap::clickTrigger(QList<EditorTile*> tiles, bool erase)
   }
 }
 
-/* Returns current references for lists in map */
-// TODO: Comment
+/*
+ * Description: Returns the current sub-map being rendered. Controlled by
+ *              MapControl class.
+ *
+ * Inputs: none
+ * Output: SubMapInfo* - the sub-map struct pointer
+ */
 SubMapInfo* EditorMap::getCurrentMap()
 {
   return active_submap;
 }
 
-/* Returns sub-map index for the active sub-map */
-// TODO: Comment
+/*
+ * Description: Returns the current sub-map index being rendered. Controlled by
+ *              MapControl class.
+ *
+ * Inputs: none
+ * Output: int - index in the sub-map stack. -1 if not set
+ */
 int EditorMap::getCurrentMapIndex()
 {
   /* Ensure the active map isn't null */
@@ -729,8 +776,13 @@ int EditorMap::getCurrentMapIndex()
   return -1;
 }
 
-/* Returns current references for lists in map */
-// TODO: Comment
+/*
+ * Description: Returns the current selected sprite index in the list of
+ *              sprites. On click, this is the sprite that is placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the sprite stack
+ */
 int EditorMap::getCurrentSpriteIndex()
 {
   /* Ensure the active sprite isn't null */
@@ -747,8 +799,14 @@ int EditorMap::getCurrentSpriteIndex()
   return -1;
 }
 
-/* Returns current references for lists in map */
-// TODO: Comment
+/*
+ * Description: Returns the current selected base thing in the list of things.
+ *              On click, if the layer and pen is correct, this is the thing
+ *              that instantized and then placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the thing stack
+ */
 int EditorMap::getCurrentThingIndex()
 {
   /* Ensure the active thing isn't null */
@@ -765,8 +823,13 @@ int EditorMap::getCurrentThingIndex()
   return -1;
 }
 
-/* Returns the hover information */
-// TODO: Comment
+/*
+ * Description: Returns the hover information of the current map. Contains all
+ *              relevant data, such as hover tile, hover thing, sprite, etc.
+ *
+ * Inputs: none
+ * Output: HoverInfo* - ref to hover info struct
+ */
 HoverInfo* EditorMap::getHoverInfo()
 {
   return &active_info;
@@ -1213,9 +1276,12 @@ int EditorMap::getThingIndex(int id, int sub_map)
  *
  * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
  *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
  * Output: QVector<QString> - list of all things
  */
-QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps)
+QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
+                                         bool shortened)
 {
   QVector<QString> stack;
   stack.push_back("MAP THINGS");
@@ -1242,7 +1308,7 @@ QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps)
     /* Go through the maps and add them to the list */
     for(int i = start; i <= end; i++)
       for(int j = 0; j < sub_maps[i]->things.size(); j++)
-        stack.push_back(sub_maps[i]->things[j]->getNameList());
+        stack.push_back(sub_maps[i]->things[j]->getNameList(shortened));
   }
 
   return stack;
@@ -1357,6 +1423,10 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
     for(int i = 0; i < sprites.size(); i++)
       sprites[i]->save(fh, game_only);
 
+    /* Add things */
+    for(int i = 0; i < base_things.size(); i++)
+      base_things[i]->save(fh, game_only);
+
     /* Save all maps if sub_index is out of range */
     if(sub_index <= 0 || sub_index >= sub_maps.size())
     {
@@ -1373,8 +1443,13 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
   }
 }
 
-/* Sets the current references for the selected sprite(s) or thing(s) */
-// TODO: Comment
+/*
+ * Description: Sets the current sub-map, based on the index in the stack.
+ *              Passing in -1 unsets the active submap (to NULL).
+ *
+ * Inputs: int index - sub-map index in the list of sub-maps
+ * Output: bool - true if the active submap was changed
+ */
 bool EditorMap::setCurrentMap(int index)
 {
   if(index >= -1 && index < sub_maps.size())
@@ -1404,9 +1479,14 @@ bool EditorMap::setCurrentMap(int index)
   return false;
 }
 
-/* Sets the current references for the selected sprite(s) or thing(s) */
-/* -1 unselects */
-// TODO: Comment
+/*
+ * Description: Sets the current sprite, based on the index in the stack.
+ *              Passing in -1 unsets the active sprite (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - sprite index in the list of map sprites
+ * Output: bool - true if the active sprite was changed
+ */
 bool EditorMap::setCurrentSprite(int index)
 {
   if(index >= -1 && index < sprites.size())
@@ -1427,9 +1507,14 @@ bool EditorMap::setCurrentSprite(int index)
   return false;
 }
 
-/* Sets the current references for the selected sprite(s) or thing(s) */
-/* -1 unselects */
-// TODO: Comment
+/*
+ * Description: Sets the current thing, based on the index in the stack.
+ *              Passing in -1 unsets the active thing (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - sprite index in the list of map things
+ * Output: bool - true if the active thing was changed
+ */
 bool EditorMap::setCurrentThing(int index)
 {
   if(index >= -1 && index < base_things.size())
@@ -1452,8 +1537,12 @@ bool EditorMap::setCurrentThing(int index)
   return false;
 }
 
-/* Sets the hover information */
-// TODO: Comment
+/*
+ * Description: Sets the current cursor mode, for the hover tile.
+ *
+ * Inputs: EditorEnumDb::CursorMode cursor - the active cursor enum
+ * Output: none
+ */
 void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
 {
   /* First, unset hover if relevant */
@@ -1467,8 +1556,13 @@ void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
     active_info.hover_tile->update();
 }
 
-/* Sets the hover information */
-// TODO: Comment
+/*
+ * Description: Sets the current layer, for the hover tile, as controlled by
+ *              MapControl.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the active layer enum
+ * Output: none
+ */
 void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
 {
   /* First, unset hover if relevant */
@@ -1482,8 +1576,13 @@ void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
     active_info.hover_tile->update();
 }
 
-/* Sets the hover information */
-// TODO: Comment
+/*
+ * Description: Sets the hover thing, being flagged when selecting an instance
+ *              in the list in ThingView.
+ *
+ * Inputs: int id - the id of the thing instance
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
 bool EditorMap::setHoverThing(int id)
 {
   /* First clear the existing one */
@@ -1516,8 +1615,15 @@ bool EditorMap::setHoverThing(int id)
   return false;
 }
 
-/* Sets the hover information */
-// TODO: Comment
+/*
+ * Description: Sets the hovering tile. If the pen is place and on thing layer,
+ *              it hovers to the size of the placing thing. Otherwise, just
+ *              a single tile. Always unsets the previous hovered tiles prior
+ *              to proceeding.
+ *
+ * Inputs: EditorTile* tile - the new hover tile
+ * Output: none
+ */
 void EditorMap::setHoverTile(EditorTile* tile)
 {
   /* First, unset hover if relevant */
@@ -1885,8 +1991,16 @@ void EditorMap::setVisibilityPass(bool visible)
         sub_maps[i]->tiles[j][k]->setVisibilityPass(visible);
 }
 
-/* Thing processing for updating with the new data */
-// TODO: Comment
+/*
+ * Description: Re-adds all sub-map things to tiles. This is called after
+ *              calling thingRemoveFromTiles(), processing the thing, and then
+ *              re-calling. Any thing instances that can't be re-added are
+ *              deleted and removed from the list.
+ * TODO: FUTURE - warn about things being removed??
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMap::thingAddToTiles()
 {
   if(active_submap != NULL)
@@ -1903,8 +2017,15 @@ void EditorMap::thingAddToTiles()
   }
 }
 
-/* Thing processing for updating with the new data */
-// TODO: Comment
+/*
+ * Description: Removes all sub-map things from tiles. This is called before
+ *              processing thing changes, and then calling thingAddToTiles().
+ *              Just removes the things from the tiles but still stored into
+ *              memory.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMap::thingRemoveFromTiles()
 {
   if(active_submap != NULL)

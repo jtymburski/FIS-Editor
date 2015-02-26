@@ -179,6 +179,9 @@ public:
   void increaseHeight(int count = 1);
   void increaseWidth(int count = 1);
 
+  /* Loads the matrix data */
+  void load(XmlData data, int index);
+
   /* Paint a single sprite in the matrix */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
   bool paint(int frame_index, QPainter* painter, QRect rect,
@@ -186,6 +189,9 @@ public:
 
   /* Removes all sprites */
   void removeAll();
+
+  /* Saves the matrix data */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the active frame for all sprites in the matrix */
   void setActiveFrame(int index, bool force = false);

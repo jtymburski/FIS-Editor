@@ -12,7 +12,13 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor function */
+/*
+ * Description: Constructor function for thing dialog. Takes an editing thing
+ *              and a parent widget. Pop-up constructed using editor thing.
+ *
+ * Inputs: EditorThing* edit_thing - the thing to edit the data for
+ *         QWidget* parent - the parent widget
+ */
 ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
@@ -40,7 +46,9 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
   updateFrame();
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 ThingDialog::~ThingDialog()
 {
   thing_original = NULL;
@@ -60,7 +68,12 @@ ThingDialog::~ThingDialog()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Creates the layout - only called on initial construction */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: bool instance - is the thing an instance (has a base thing)
+ * Output: none
+ */
 void ThingDialog::createLayout(bool instance)
 {
   /* Layout setup */
@@ -90,6 +103,8 @@ void ThingDialog::createLayout(bool instance)
   box_visible = new QComboBox(this);
   box_visible->addItem("False");
   box_visible->addItem("True");
+  if(instance)
+    box_visible->setDisabled(true);
   connect(box_visible, SIGNAL(currentIndexChanged(int)),
           this, SLOT(visibilityChanged(int)));
   layout->addWidget(box_visible, 2, 1);
@@ -147,7 +162,13 @@ void ThingDialog::createLayout(bool instance)
   setWindowTitle("Thing Edit");
 }
 
-/* Updates the objects with the thing data */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::updateData()
 {
   line_description->setText(thing_working->getDescription());
@@ -162,7 +183,13 @@ void ThingDialog::updateData()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
   
-/* Custom close event */
+/*
+ * Description: The re-implementation of the close event for the dialog. Cleans
+ *              up the existing thing references and deletes memory.
+ *
+ * Inputs: QCloseEvent* event - the close event (accepted after clean-up)
+ * Output: none
+ */
 void ThingDialog::closeEvent(QCloseEvent* event)
 {
   event_ctrl->setEventBlank();
@@ -177,13 +204,25 @@ void ThingDialog::closeEvent(QCloseEvent* event)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the cancel button. Just closes the dialog and
+ *              doesn't save the changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::buttonCancel()
 {
   close();
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the frame edit button. This is triggered for
+ *              the thing dialog. Opens the FrameDialog class.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::buttonFrameEdit()
 {
   /* Delete the dialog, if it exists */
@@ -200,26 +239,52 @@ void ThingDialog::buttonFrameEdit()
   frame_dialog->show();
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the ok button. Emits ok prior to closing the
+ *              dialog. The ok gets handled by the widget parent, which
+ *              updates the visible things on map prior to accepting changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::buttonOk()
 {
   emit ok();
   close();
 }
 
-/* Changed text in line edits */
+/*
+ * Description: Slot triggered on the text edit field being changed, which
+ *              updates the description.
+ *
+ * Inputs: QString description - the new description
+ * Output: none
+ */
 void ThingDialog::changedDescription(QString description)
 {
   thing_working->setDescription(description);
 }
 
-/* Changed text in line edits */
+/*
+ * Description: Slot triggered on the text edit field being changed, which
+ *              updates the name.
+ *
+ * Inputs: QString name - the new thing name
+ * Output: none
+ */
 void ThingDialog::changedName(QString name)
 {
   thing_working->setName(name);
 }
 
-/* Edit conversation trigger */
+/*
+ * Description: Edits the current conversation instance trigger. Triggered
+ *              from EventView. Required to lock out the pop-up.
+ *
+ * Inputs: Conversation* convo - the conversation segment to edit
+ *         bool is_option - true if the segment is an option
+ * Output: none
+ */
 void ThingDialog::editConversation(Conversation* convo, bool is_option)
 {
   if(convo_dialog != NULL)
@@ -245,7 +310,13 @@ void ThingDialog::editConversation(Conversation* convo, bool is_option)
   convo_dialog->show();
 }
 
-/* Update the frame for the thing */
+/*
+ * Description: Updates the frame dialog image in the pop-up. Scales the image
+ *              to fit inside a fixed label.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::updateFrame()
 {
   QImage original = thing_working->getDialogImage()->getImage(0);
@@ -260,7 +331,13 @@ void ThingDialog::updateFrame()
   }
 }
 
-/* Select tile trigger */
+/*
+ * Description: Triggers the select tile dialog for the pop-up. This hides the
+ *              pop-up and waits for a tile to be selected on the map render.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::selectTile()
 {
   waiting_convo = false;
@@ -269,7 +346,14 @@ void ThingDialog::selectTile()
   emit selectTile(EditorEnumDb::THING_VIEW);
 }
 
-/* Select tile trigger - for convo dialog */
+/*
+ * Description: Triggers the select tile dialog for the conversation in the
+ *              event view in the pop-up. This hides the pop-up and waits for a
+ *              tile to be selected on the map render.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::selectTileConvo()
 {
   if(convo_dialog != NULL)
@@ -280,7 +364,13 @@ void ThingDialog::selectTileConvo()
   }
 }
 
-/* Visibility status changed */
+/*
+ * Description: The drop down for visibility of the thing changed slot. This
+ *              updates the visibility in the working thing.
+ *
+ * Inputs: int index - index in the dropdown (only two, true or false)
+ * Output: none
+ */
 void ThingDialog::visibilityChanged(int index)
 {
   if(index == 1)
@@ -293,13 +383,25 @@ void ThingDialog::visibilityChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the event view widget */
+/*
+ * Description: Returns the event view within the thing dialog.
+ *
+ * Inputs: none
+ * Output: EventView* - the event view widget for the current thing
+ */
 EventView* ThingDialog::getEventView()
 {
   return event_view;
 }
 
-/* Sets the working thing to the original */
+/*
+ * Description: Updates the original thing with the working data. Called after
+ *              the emit ok() is triggered. Will not change anything if there
+ *              is no original thing set (or it's NULL).
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingDialog::updateOriginal()
 {
   if(thing_original != NULL)
@@ -309,7 +411,17 @@ void ThingDialog::updateOriginal()
   }
 }
 
-/* Update the selected tile for the thing */
+/*
+ * Description: Updates the dialog with the tile which was selected on the
+ *              sub-map. This shows the pop-up and updates the event with the
+ *              new location. If it was triggered from the embedded event view,
+ *              it passes the updated location to it.
+ *
+ * Inputs: int id - the ID of the sub-map
+ *         int x - the x tile location in the sub-map
+ *         int y - the y tile location in the sub-map
+ * Output: none
+ */
 void ThingDialog::updateSelectedTile(int id, int x, int y)
 {
   if(waiting_for_submap)

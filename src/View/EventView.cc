@@ -12,7 +12,14 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor function */
+/*
+ * Description: Constructor function for instantiating the event view with an
+ *              EditorEvent and a parent widget.
+ *
+ * Inputs: EditorEvent* event - the event controller for the Event from handler
+ *         QWidget* parent - the parent widget
+ *         bool conversation_enabled - is the conversation option available??
+ */
 EventView::EventView(EditorEvent* event, QWidget* parent,
                      bool conversation_enabled)
          : QFrame(parent)
@@ -29,7 +36,9 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
   setEvent(event);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 EventView::~EventView()
 {
   disconnect(combo_category, SIGNAL(currentIndexChanged(int)),
@@ -40,7 +49,12 @@ EventView::~EventView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Creates the layout and widgets for this controller */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: bool conversation_enabled - is the conversation widget enabled?
+ * Output: none
+ */
 void EventView::createLayout(bool conversation_enabled)
 {
   /* Layout */
@@ -207,7 +221,14 @@ void EventView::createLayout(bool conversation_enabled)
   setMinimumSize(352, 192);
 }
 
-/* Returns the convesation item, based on the index, of the tree widget */
+/*
+ * Description: Returns the conversation item based on the base index. This
+ *              parses the tree to find the item. The base index is in the
+ *              form: 1.5.7, not 1.5.1.1.1.1.1.1.1.
+ *
+ * Inputs: QString base_index - the base index representation of the segment
+ * Output: QTreeWidgetItem* - the found corresponding item. NULL if failed.
+ */
 QTreeWidgetItem* EventView::getConvo(QString base_index)
 {
   QTreeWidgetItem* item = NULL;
@@ -231,7 +252,17 @@ QTreeWidgetItem* EventView::getConvo(QString base_index)
   return item;
 }
 
-/* Returns the conversation index of the tree widget */
+/*
+ * Description: Returns the conversation index of the reference item
+ *              corresponding to the parent item. This is a recursive call and
+ *              by taking an item in the widget, and NULL parent, it searches
+ *              the entire tree and returns the base index of the item. Opposite
+ *              call of getConvo().
+ *
+ * Inputs: QTreeWidgetItem* ref - the reference searching for
+ *         QTreeWidgetItem* parent - the previous call reference
+ * Output: QString - the resulting base index
+ */
 QString EventView::getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent)
 {
   /* If parent is NULL, start at head element of list */
@@ -272,7 +303,13 @@ QString EventView::getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent)
   return "";
 }
 
-/* Set layout data */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::setLayoutData()
 {
   if(event != NULL)
@@ -395,7 +432,16 @@ void EventView::setLayoutData()
   }
 }
 
-/* Update conversation data */
+/*
+ * Description: Updates the convo tree with the new conversation reference,
+ *              a parent widget item, and if this convo should be an option.
+ *
+ * Inputs: Conversation* ref - the reference conversation to update
+ *         QTreeWidgetItem* parent - the parent widget that the item is being
+ *                                   added to.
+ *         bool option - true if the convo is an option
+ * Output: none
+ */
 void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
                                 bool option)
 {
@@ -440,10 +486,16 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-/* Category changed */
+/*
+ * Description: Slot which triggers when the category drop down changes.
+ *              Switches the view and changes the type of event.
+ *
+ * Inputs: int index - the index in the combo box
+ * Output: none
+ */
 void EventView::categoryChanged(int index)
 {
-//  /* Message box - warning of change */
+//  /* Message box - warning of change - tried and caused problems */
 //  QMessageBox msg_box;
 //  msg_box.setInformativeText("Are you sure you want to change event?");
 //  msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -488,7 +540,12 @@ void EventView::categoryChanged(int index)
 //  }
 }
 
-/* The change map button press */
+/*
+ * Description: Triggers when the change map index combo box is changed.
+ *
+ * Inputs: int index - the index in the change map combo box
+ * Output: none
+ */
 void EventView::changeMapChanged(int index)
 {
   if(index >= 0 && index < list_maps.size())
@@ -499,7 +556,14 @@ void EventView::changeMapChanged(int index)
   }
 }
 
-/* Conversation item double clicked trigger */
+/*
+ * Description: Slot which triggers when a conversation segment is double
+ *              clicked. Initializes the edit of the segment (ConvoDialog).
+ *
+ * Inputs: QTreeWidgetItem* - not used
+ *         int - not used
+ * Output: none
+ */
 void EventView::convoDoubleClick(QTreeWidgetItem*, int)
 {
   QTreeWidgetItem* selected = convo_tree->currentItem();
@@ -510,7 +574,13 @@ void EventView::convoDoubleClick(QTreeWidgetItem*, int)
   }
 }
 
-/* The convo menu requested - on right click */
+/*
+ * Description: Slot which triggers when a conversation segment is right
+ *              clicked. Opens the manipulation menu.
+ *
+ * Inputs: QPoint point - where the right click was triggered
+ * Output: none
+ */
 void EventView::convoMenuRequested(QPoint point)
 {
   QTreeWidgetItem* clicked_item = convo_tree->itemAt(point);
@@ -538,13 +608,25 @@ void EventView::convoMenuRequested(QPoint point)
   }
 }
 
-/* The give item event slot changes */
+/*
+ * Description: Slot which triggers when the give item count widget in the give
+ *              item event is changed. Updates the event
+ *
+ * Inputs: int index - the count value
+ * Output: none
+ */
 void EventView::giveCountChanged(int index)
 {
   event->setEventGiveItem(event->getGiveItemID(), index);
 }
 
-/* The give item event slot changes */
+/*
+ * Description: Slot which triggers when the give item ID changes in the combo
+ *              box. Updates the event
+ *
+ * Inputs: int index - the index in the combo box
+ * Output: none
+ */
 void EventView::giveItemChanged(int index)
 {
   if(index >= 0 && index < list_items.size())
@@ -555,19 +637,39 @@ void EventView::giveItemChanged(int index)
   }
 }
 
-/* The notification event text changes */
+/*
+ * Description: Slot which triggers when the notification text in the edit
+ *              text box is manipulated. Updates the event.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::notificationTextChanged()
 {
   event->setEventNotification(notification_edit->toPlainText());
 }
 
-/* Resize the QTreeWidget for the items */
+/*
+ * Description: Slot which triggers anytime the tree is expanded or collapsed.
+ *              Forces an auto resize on the widget to make the conversation
+ *              scrollable.
+ *
+ * Inputs: QTreeWidgetItem* - not used
+ * Output: none
+ */
 void EventView::resizeTree(QTreeWidgetItem*)
 {
   convo_tree->resizeColumnToContents(0);
 }
 
-/* The right click slots, for conversation */
+/*
+ * Description: Slot which triggers when the delete option is selected from the
+ *              conversation right click menu. Removes the current conversation
+ *              index and all children. Warns through pop-up prior to execution
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::rightClickDelete()
 {
   if(!rightclick_index.isEmpty())
@@ -627,7 +729,14 @@ void EventView::rightClickDelete()
   rightclick_index = "";
 }
 
-/* The right click slots, for conversation */
+/*
+ * Description: Slot which triggers when the edit option is selected from the
+ *              conversation right click menu. Takes the current conversation
+ *              segment and triggers a conversation edit (handled by parent).
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::rightClickEdit()
 {
   if(!rightclick_index.isEmpty())
@@ -649,7 +758,14 @@ void EventView::rightClickEdit()
   rightclick_index = "";
 }
 
-/* The right click slots, for conversation */
+/*
+ * Description: Slot which triggers an insert after when it's selected from the
+ *              conversation right click menu. Creates a new segment and inserts
+ *              it after the selected.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::rightClickInsertAfter()
 {
   if(!rightclick_index.isEmpty())
@@ -670,7 +786,14 @@ void EventView::rightClickInsertAfter()
   rightclick_index = "";
 }
 
-/* The right click slots, for conversation */
+/*
+ * Description: Slot which triggers an insert before when it's selected from the
+ *              conversation right click menu. Creates a new segment and inserts
+ *              it before the selected.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::rightClickInsertBefore()
 {
   if(!rightclick_index.isEmpty())
@@ -689,7 +812,15 @@ void EventView::rightClickInsertBefore()
   rightclick_index = "";
 }
 
-/* The right click slots, for conversation */
+/*
+ * Description: Slot which triggers an insert option when it's selected from the
+ *              conversation right click menu. Creates a new segment and inserts
+ *              it as an option on the current. If the current has children,
+ *              the first child becomes an option and this becomes the second.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::rightClickInsertOption()
 {
   if(!rightclick_index.isEmpty())
@@ -726,13 +857,26 @@ void EventView::rightClickInsertOption()
   rightclick_index = "";
 }
 
-/* The teleport event button presses */
+/*
+ * Description: Slot which triggers when the select tile on map is pressed.
+ *              Triggers selectTile() which is picked up by the parent and
+ *              triggers a hide and then select tile before re-showing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::teleportMapPressed()
 {
   emit selectTile();
 }
 
-/* The teleport event button presses */
+/*
+ * Description: Slot which triggers when the teleport thing combo box is
+ *              changed. Updates the event with the new thing information.
+ *
+ * Inputs: int index - the index in the combo box of the element
+ * Output: none
+ */
 void EventView::teleportThingChanged(int index)
 {
   if(index >= 0 && index < list_things.size())
@@ -744,7 +888,13 @@ void EventView::teleportThingChanged(int index)
   }
 }
 
-/* Update the layout trigger */
+/*
+ * Description: Updates the conversation after an edit. Attempts to maintain
+ *              the same index after execution.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::updateConversation()
 {
   if(event->getEventType() == EventClassifier::STARTCONVO)
@@ -759,36 +909,68 @@ void EventView::updateConversation()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the event */
+/*
+ * Description: Returns the editor event which is being manipulated by the
+ *              widget.
+ *
+ * Inputs: none
+ * Output: EditorEvent* - pointer to the event being edited
+ */
 EditorEvent* EventView::getEvent()
 {
   return event;
 }
-/* Returns the list of objects, used for event creation */
+
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
 QVector<QString> EventView::getListItems()
 {
   return list_items;
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
 QVector<QString> EventView::getListMaps()
 {
   return list_maps;
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
 QVector<QString> EventView::getListSubmaps()
 {
   return list_submaps;
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
 QVector<QString> EventView::getListThings()
 {
   return list_things;
 }
 
-/* Sets the editor event */
+/*
+ * Description: Sets the event being edited by the event view.
+ *
+ * Inputs: EditorEvent* event - the new reference event to edit
+ * Output: none
+ */
 void EventView::setEvent(EditorEvent* event)
 {
   /* If existing event isn't NULL, finish connection */
@@ -802,7 +984,12 @@ void EventView::setEvent(EditorEvent* event)
   setLayoutData();
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
 void EventView::setListItems(QVector<QString> items)
 {
   list_items = items;
@@ -814,7 +1001,12 @@ void EventView::setListItems(QVector<QString> items)
   item_name->blockSignals(false);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
 void EventView::setListMaps(QVector<QString> maps)
 {
   list_maps = maps;
@@ -826,14 +1018,24 @@ void EventView::setListMaps(QVector<QString> maps)
   map_name->blockSignals(false);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
 void EventView::setListSubmaps(QVector<QString> sub_maps)
 {
   list_submaps = sub_maps;
   setLayoutData();
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
 void EventView::setListThings(QVector<QString> things)
 {
   list_things = things;
@@ -845,7 +1047,16 @@ void EventView::setListThings(QVector<QString> things)
   tele_thing->blockSignals(false);
 }
 
-/* Update the selected tile for the thing */
+/*
+ * Description: Updates the dialog with the tile which was selected on the
+ *              sub-map. This shows the pop-up and updates the event with the
+ *              new location.
+ *
+ * Inputs: int id - the ID of the sub-map
+ *         int x - the x tile location in the sub-map
+ *         int y - the y tile location in the sub-map
+ * Output: none
+ */
 void EventView::updateSelectedTile(int id, int x, int y)
 {
   if(event != NULL)

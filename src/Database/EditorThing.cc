@@ -189,7 +189,8 @@ QString EditorThing::getName() const
 
 /*
  * Description: Returns the formatted name and ID for listing. It's in the
- *              format: "XXX: sssssssssssss"
+ *              format: "XXX: sssssssssssss" unless has base it's in
+ *              "BASEID(ID): NAME"
  *
  * Inputs: none
  * Output: QString - the name for a list
@@ -201,6 +202,21 @@ QString EditorThing::getNameList()
     base_id = base->getID();
 
   return EditorHelpers::getListString(getID(), getName(), base_id, true);
+}
+
+/*
+ * Description: Returns the formatted name and ID for listing. It's in the
+ *              format: "XXX: sssssssssssss" unless has base it's in
+ *              "BASEID(ID): NAME"
+ *
+ * Inputs: none
+ * Output: QString - the name for a list
+ */
+QString EditorThing::getNameList(bool shortened)
+{
+  if(shortened)
+    return EditorHelpers::getListString(getID(), getName(), -1, true);
+  return getNameList();
 }
 
 /*
@@ -240,6 +256,13 @@ bool EditorThing::isVisible() const
   return thing.isVisible();
 }
 
+/* Loads the thing data */
+// TODO: Comment
+void EditorThing::load(XmlData data, int index)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Paint the active frame in the matrix into the bounding box.
  *              The offset x and y is the sprite in the matrix offset from the
@@ -277,6 +300,49 @@ bool EditorThing::paint(int frame_index, QPainter* painter, QRect rect,
   if(getMatrix() != NULL)
     return getMatrix()->paint(frame_index, painter, rect, offset_x, offset_y);
   return false;
+}
+
+/* Saves the thing data */
+// TODO: Comment
+void EditorThing::save(FileHandler* fh, bool game_only)
+{
+  EditorThing default_thing;
+
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("thing", "id", getID());
+
+    /* Depending on if base or not, write different data */
+    if(base != NULL)
+    {
+      /* Write base settings */
+      fh->writeXmlData("base", base->getID());
+      QString startpoint = QString::number(getX()) + "," +
+                           QString::number(getY());
+      fh->writeXmlData("startpoint", startpoint.toStdString());
+
+      /* Check the name and description, if it's different from base */
+      if(base->getName() != getName())
+        fh->writeXmlData("name", getName().toStdString());
+      if(base->getDescription() != getDescription())
+        fh->writeXmlData("description", getDescription().toStdString());
+    }
+    else
+    {
+      /* Write the core thing data */
+      fh->writeXmlData("name", getName().toStdString());
+      fh->writeXmlData("description", getDescription().toStdString());
+      if(default_thing.isVisible() != isVisible())
+        fh->writeXmlData("visible", isVisible());
+
+      /* Matrix save */
+      matrix->save(fh, game_only);
+
+      // TODO: EVENT SAVE
+    }
+
+    fh->writeXmlElementEnd();
+  }
 }
 
 /*

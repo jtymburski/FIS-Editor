@@ -796,6 +796,41 @@ QString EditorSprite::getPath(int frame_num)
 }
 
 /*
+ * Description: Returns the set of paths as a simplified representation of the
+ *              frames within the sprite. The stack includes a string pair
+ *              where the first is the frame delimiter (what simplifications it
+ *              has) and the second is the actual path.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - the returned path vector
+ */
+QVector<QPair<QString,QString>> EditorSprite::getPathSet()
+{
+  QVector<QPair<QString,QString>> frame_stack;
+
+  /* Try to execute a smart parse first */
+  int index = getSmartCount();
+  if(index > 0)
+  {
+    QString png = ".png";
+    QString sep = "|";
+    QString base_path = EditorHelpers::trimPath(frame_info.front().path);
+    base_path = base_path.left(base_path.size() - png.size() - 2);
+    base_path += sep + QString::number(index) + sep + png;
+    frame_stack.push_back(QPair<QString,QString>(getFrameMods(0), base_path));
+  }
+
+  /* Finally, proceed to add all remaining tiles */
+  for(int i = index; i < frame_info.size(); i++)
+  {
+    frame_stack.push_back(QPair<QString,QString>(getFrameMods(i),
+                                EditorHelpers::trimPath(frame_info[i].path)));
+  }
+
+  return frame_stack;
+}
+
+/*
  * Description: Returns the pixmap of the given frame index scaled with the
  *              sprite settings.
  *
@@ -1054,7 +1089,7 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
     qreal old_opacity = painter->opacity();
 
     /* Paint pixmap */
-    painter->setOpacity(getOpacity() / 100.0);
+    painter->setOpacity(getOpacity() / 255.0);
     painter->drawPixmap(bound, transformPixmap(index, w, h));
 
     /* Restore values */
@@ -1071,9 +1106,10 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  *
  * Inputs: FileHandler* fh - the saving file handler
  *         bool game_only - true if you only want game relevant data, not editor
+ *         bool core_only - true if only core data. No frame data
  * Output: none
  */
-void EditorSprite::save(FileHandler* fh, bool game_only)
+void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
 {
   QString base_path = EditorHelpers::getSpriteDir();
   base_path = base_path.left(base_path.indexOf("/sprites"));
@@ -1106,20 +1142,12 @@ void EditorSprite::save(FileHandler* fh, bool game_only)
     //fh->writeXmlData("sound", NULL); // TODO
 
     /* Write frame data */
-    int index = getSmartCount();
-    if(index > 0)
+    if(!core_only)
     {
-      QString png = ".png";
-      QString sep = "|";
-      QString base_path = EditorHelpers::trimPath(frame_info.front().path);
-      base_path = base_path.left(base_path.size() - png.size() - 2);
-      base_path += sep + QString::number(index) + sep + png;
-      fh->writeXmlData(getFrameMods(0).toStdString(), base_path.toStdString());
-    }
-    for(int i = index; i < frame_info.size(); i++)
-    {
-      fh->writeXmlData(getFrameMods(i).toStdString(), EditorHelpers::trimPath(
-                                             frame_info[i].path).toStdString());
+      QVector<QPair<QString,QString>> frame_set = getPathSet();
+      for(int i = 0; i < frame_set.size(); i++)
+        fh->writeXmlData(frame_set[i].first.toStdString(),
+                         frame_set[i].second.toStdString());
     }
 
     fh->writeXmlElementEnd();

@@ -128,7 +128,7 @@ void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
 
       // TODO: REVISE - this isn't supposed to be base things but actual map
       //                things
-      QVector<QString> thing_list = editing_map->getThingList();
+      QVector<QString> thing_list = editing_map->getThingList(0, true, true);
       thing_list.push_front("0: Player");
       view_thing->updateListThings(thing_list);
     }

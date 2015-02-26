@@ -13,7 +13,15 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor Function */
+/*
+ * Description: Constructor function for the conversation dialog. Takes a
+ *              conversation pointer, a bool if it's an option, and the parent.
+ *              Only allows editing one instance of a conversation (one entry).
+ *
+ * Inputs: Conversation* edit_convo - the reference conversation segment
+ *         bool is_option - is the segment an option in a list?
+ *         QWidget* parent - the parent widget
+ */
 ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option, 
                          QWidget* parent)
            : QDialog(parent)
@@ -40,7 +48,9 @@ ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
   updateData();
 }
 
-/* Destructor Function */
+/*
+ * Description: Destructor function
+ */
 ConvoDialog::~ConvoDialog()
 {
   event_view->setEvent(NULL);
@@ -52,7 +62,12 @@ ConvoDialog::~ConvoDialog()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Creates the dialog */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: bool is_option - is the segment conversation an option?
+ * Output: none
+ */
 void ConvoDialog::createDialog(bool is_option)
 {
   /* Layout */
@@ -87,7 +102,13 @@ void ConvoDialog::createDialog(bool is_option)
   setWindowTitle("Conversation Edit");
 }
 
-/* Fill with data */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ConvoDialog::updateData()
 {
   text_box->setPlainText(QString::fromStdString(convo_working.text));
@@ -110,7 +131,13 @@ void ConvoDialog::updateData()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Custom close event */
+/*
+ * Description: The re-implementation of the close event for the dialog. Cleans
+ *              up the existing conversation references.
+ *
+ * Inputs: QCloseEvent* - not used
+ * Output: none
+ */
 void ConvoDialog::closeEvent(QCloseEvent*)
 {
   convo_original = NULL;
@@ -120,14 +147,27 @@ void ConvoDialog::closeEvent(QCloseEvent*)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
-/* Button triggers */
+
+/*
+ * Description: Button slot on the cancel button. Just closes the dialog and
+ *              doesn't save the changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ConvoDialog::buttonCancel()
 {
   close();
 }
 
-/* Button triggers */
+/*
+ * Description: Button slot on the ok button. Copies the data into the original
+ *              conversation reference and updates the list; then closes the
+ *              dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ConvoDialog::buttonOk()
 {
   if(convo_original != NULL)
@@ -148,20 +188,37 @@ void ConvoDialog::buttonOk()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/ 
-  
-/* Returns the event view in the pop-up */
+
+/*
+ * Description: Returns the event view within the conversation dialog.
+ *
+ * Inputs: none
+ * Output: EventView* - the event view widget for the current convo segment
+ */
 EventView* ConvoDialog::getEventView()
 {
   return event_view;
 }
-  
-/* Returns the list of objects, used for event creation */
+
+/*
+ * Description: Returns the list of things that are being used in the event view
+ *              of the dialog (for teleport events).
+ *
+ * Inputs: none
+ * Output: QVector<QString> - the list of things as string with "ID: NAME"
+ */
 QVector<QString> ConvoDialog::getListThings()
 {
   return list_things;
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of things that are being used in the event view
+ *              of the dialog (for teleport events). Updates the event view.
+ *
+ * Inputs: QVector<QString> things - the list of things
+ * Output: none
+ */
 void ConvoDialog::setListThings(QVector<QString> things)
 {
   list_things = things;
