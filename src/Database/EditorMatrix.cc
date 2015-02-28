@@ -1155,25 +1155,132 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
   {
     fh->writeXmlElement("sprites");
 
-    // TODO: SAVE THE INDIVIDUAL PATHS
+    /* Get parsing information */
     QVector<QVector<QVector<QPair<QString,QString>>>> set;
+    QVector<QVector<bool>> skip_set;
     for(int i = 0; i < matrix.size(); i++)
     {
       QVector<QVector<QPair<QString,QString>>> row_set;
+      QVector<bool> row_skip;
       for(int j = 0; j < matrix[i].size(); j++)
+      {
         row_set.push_back(matrix[i][j]->getPathSet());
+        row_skip.push_back(false);
+      }
       set.push_back(row_set);
+      skip_set.push_back(row_skip);
     }
-//    for(int i = 0; i < set.size(); i++)
-//    {
-//      for(int j = 0; j < set[i].size(); j++)
-//      {
-//        qDebug() << i << "," << j;
-//        for(int k = 0; k < set[i][j].size(); k++)
-//          qDebug() << set[i][j][k].second;
-//        qDebug() << "--";
-//      }
-//    }
+
+    /* Parse the matrix for simplifications */
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      for(int j = 0; j < matrix[i].size(); j++)
+      {
+        /* Determine if the base frame could be optimized */
+        if(set[i][j].size() == 1 && !skip_set[i][j])
+        {
+          /* Check if the file name is the standard structure */
+          QList<QString> root_stack =
+                     EditorHelpers::getValidFileSplit(set[i][j].front().second);
+          if(root_stack.size() > 0)
+          {
+            /* Info on root for comparing */
+            QString back = "_" + root_stack.at(3) + root_stack.at(4);
+            int frames = matrix[i][j]->frameCount();
+            int height = 1;
+            int letter_a = root_stack.at(1).at(0).unicode();
+            int letter_b = root_stack.at(2).at(0).unicode();
+            QString front = root_stack.at(0) + "_";
+            int width = 1;
+
+            /* First try to find the length of the equivalent col */
+            bool finished = false;
+            for(int k = j + 1; !finished && k < matrix[i].size(); k++)
+            {
+              QString path = front + QString(QChar(letter_a)) +
+                                     QString(QChar(letter_b + k - j)) + back;
+              if(matrix[i][k]->frameCount() != frames ||
+                 set[i][k].size() != 1 ||
+                 set[i][k].front().second != path ||
+                 set[i][k].front().first != set[i][j].front().first)
+              {
+                finished = true;
+              }
+              else
+              {
+                height = k - j + 1;
+              }
+            }
+
+            /* Using the height, determine the number of rows */
+            finished = false;
+            for(int k = i + 1; !finished && k < matrix.size(); k++)
+            {
+              for(int l = 0; l < height; l++)
+              {
+                QString path = front + QString(QChar(letter_a + k - i)) +
+                                       QString(QChar(letter_b + l)) + back;
+                if(matrix[k][j+l]->frameCount() != frames ||
+                   set[k][j+l].size() != 1 ||
+                   set[k][j+l].front().second != path ||
+                   set[k][j+l].front().first != set[i][j].front().first)
+                {
+                  finished = true;
+                }
+              }
+              if(!finished)
+                width++;
+            }
+
+            /* If the width and height are valid, add the path */
+            if(width > 1 || height > 1)
+            {
+              /* Assemble the range and path */
+              QString path = front;
+              QString range = "";
+              if(width > 1)
+              {
+                range += QString::number(i) + "-" +
+                         QString::number(i + width - 1) + ",";
+                path += "[" + QString(QChar(letter_a)) + "-" +
+                        QString(QChar(letter_a + width - 1)) + "]";
+              }
+              else
+              {
+                range += QString::number(i) + ",";
+                path += QString(QChar(letter_a));
+              }
+              if(height > 1)
+              {
+                range += QString::number(j) + "-" +
+                         QString::number(j + height - 1);
+                path += "[" + QString(QChar(letter_b)) + "-" +
+                        QString(QChar(letter_b + height - 1)) + "]";
+              }
+              else
+              {
+                range += QString::number(j);
+                path += QString(QChar(letter_b));
+              }
+              path += back;
+
+              /* Write data */
+              fh->writeXmlElement("multiple", "range", range.toStdString());
+              fh->writeXmlData(set[i][j].front().first.toStdString(),
+                               path.toStdString());
+              fh->writeXmlElementEnd();
+
+              /* Flag which tiles have been added */
+              for(int x = 0; x < width; x++)
+                for(int y = 0; y < height; y++)
+                  skip_set[i+x][j+y] = true;
+            }
+          }
+        }
+      }
+    }
+
+    // TODO: PICK UP ALL REMAINING TILES AND PASSABILITY
 
     /* Save the sprite data */
     EditorTileSprite* sprite = getValidSprite();

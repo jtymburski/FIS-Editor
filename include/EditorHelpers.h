@@ -67,6 +67,9 @@ public:
   /* Returns the tile rendering width and height */
   static int getTileSize();
 
+  /* Returns the valid file split */
+  static QList<QString> getValidFileSplit(QString file, bool* base = NULL);
+
   /* Normalize two points to top left and bottom right and return rect */
   static QRectF normalizePoints(QPointF point1, QPointF point2);
 

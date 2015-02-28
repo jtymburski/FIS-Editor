@@ -70,9 +70,9 @@ MatrixDialog::~MatrixDialog()
 void MatrixDialog::checkFilename()
 {
   /* Initial split */
-  QString file = initial_filename;
-  file.chop(QString(".png").size());
-  QStringList file_split = file.split('_');
+  bool base;
+  QList<QString> stack = EditorHelpers::getValidFileSplit(initial_filename,
+                                                          &base);
 
   /* Start with all elements disabled */
   button_prev->setDisabled(true);
@@ -83,56 +83,47 @@ void MatrixDialog::checkFilename()
   cbox_width_to->setDisabled(true);
   num_spinner->setDisabled(true);
 
-  /* Ensure there are at least enough elements */
-  if(file_split.size() >= 3)
+  /* Ensure there are some elements */
+  if(stack.size() > 0)
   {
-    QString last = file_split.last();
-    QString second_last = file_split.at(file_split.size() - 2);
+    /* Enable combo boxes */
+    cbox_height_from->setEnabled(true);
+    cbox_height_to->setEnabled(true);
+    cbox_width_from->setEnabled(true);
+    cbox_width_to->setEnabled(true);
 
-    /* Check that the last and second last sections meet the standard */
-    if(last.size() == 3 && second_last.size() == 2 && 
-       second_last.at(0).isUpper() && second_last.at(1).isUpper() && 
-       last.at(0).isUpper() && last.at(1).isDigit() && last.at(2).isDigit())
+    /* Disable signals */
+    cbox_height_from->blockSignals(true);
+    cbox_height_to->blockSignals(true);
+    cbox_width_from->blockSignals(true);
+    cbox_width_to->blockSignals(true);
+
+    /* Choose the full range and then update scene and trim */
+    cbox_height_from->setCurrentIndex(0);
+    cbox_height_to->setCurrentIndex(cbox_height_to->count() - 1);
+    cbox_width_from->setCurrentIndex(0);
+    cbox_width_to->setCurrentIndex(cbox_width_to->count() - 1);
+    updateScene();
+    buttonTrim();
+
+    /* Check if both digits are 0 (base frame */
+    if(base)
     {
-      /* Enable combo boxes */
-      cbox_height_from->setEnabled(true);
-      cbox_height_to->setEnabled(true);
-      cbox_width_from->setEnabled(true);
-      cbox_width_to->setEnabled(true);
-
-      /* Disable signals */
-      cbox_height_from->blockSignals(true);
-      cbox_height_to->blockSignals(true);
-      cbox_width_from->blockSignals(true);
-      cbox_width_to->blockSignals(true);
-
-      /* Choose the full range and then update scene and trim */
-      cbox_height_from->setCurrentIndex(0);
-      cbox_height_to->setCurrentIndex(cbox_height_to->count() - 1);
-      cbox_width_from->setCurrentIndex(0);
-      cbox_width_to->setCurrentIndex(cbox_width_to->count() - 1);
-      updateScene();
+      /* If they are, set a slightly higher value and trim */
+      num_spinner->setEnabled(true);
+      num_spinner->setValue(10);
       buttonTrim();
-
-      /* Check if both digits are 0 (base frame */
-      if(last.at(1).digitValue() == 0 && last.at(2).digitValue() == 0)
-      {
-        /* If they are, set a slightly higher value and trim */
-        num_spinner->setEnabled(true);
-        num_spinner->setValue(10);
-        buttonTrim();
-      }
-      else
-      {
-        updateScene();
-      }
-
-      /* Enable signals */
-      cbox_height_from->blockSignals(false);
-      cbox_height_to->blockSignals(false);
-      cbox_width_from->blockSignals(false);
-      cbox_width_to->blockSignals(false);
     }
+    else
+    {
+      updateScene();
+    }
+
+    /* Enable signals */
+    cbox_height_from->blockSignals(false);
+    cbox_height_to->blockSignals(false);
+    cbox_width_from->blockSignals(false);
+    cbox_width_to->blockSignals(false);
   }
 }
 

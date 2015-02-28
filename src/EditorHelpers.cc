@@ -263,6 +263,70 @@ int EditorHelpers::getTileSize()
 }
 
 /*
+ * Description: Returns a file split on the standard sprite path, if the file
+ *              matches the defined design sprite file. Order is as follows:
+ *              EG - C/bler/test/bler_AA_A00.png
+ *              1 - C/bler/test/bler
+ *              2 - A
+ *              3 - A
+ *              4 - A00
+ *              5 - .png
+ * Note: If list is empty, the path didn't meet the designed file structure
+ *
+ * Inputs: QString file - the file or path name
+ *         bool* base - is this sprite a base (e.g. A00, not A01)
+ * Output: QList<QString> - the stack of the split, as defined above
+ */
+QList<QString> EditorHelpers::getValidFileSplit(QString file, bool* base)
+{
+  QList<QString> stack;
+  if(base != NULL)
+    *base = false;
+
+  /* Ensure that the file ends with png */
+  QString tail = ".png";
+  if(file.endsWith(tail))
+  {
+    file.chop(tail.size());
+    QStringList file_split = file.split('_');
+
+    /* Ensure there are at least enough elements */
+    if(file_split.size() >= 3)
+    {
+      QString last = file_split.last();
+      QString second_last = file_split.at(file_split.size() - 2);
+
+      /* Check that the last and second last sections meet the standard */
+      if(((last.size() == 3 && last.at(0).isUpper() &&
+           last.at(1).isDigit() && last.at(2).isDigit()) ||
+          (last.size() == 4 && last.at(0).isUpper() && last.at(1) == '|' &&
+           last.at(2).isDigit() && last.at(3) == '|')) &&
+         second_last.size() == 2 &&
+         second_last.at(0).isUpper() && second_last.at(1).isUpper())
+      {
+        /* Load in the string to the stack */
+        stack.push_back(file_split.front());
+        for(int i = 1; i < file_split.size() - 2; i++)
+          stack.last().push_back("_" + file_split[i]);
+        stack.push_back(second_last.at(0));
+        stack.push_back(second_last.at(1));
+        stack.push_back(last);
+        stack.push_back(tail);
+
+        /* Check if both digits are 0 (base frame */
+        if(last.at(1).digitValue() == 0 && last.at(2).digitValue() == 0 &&
+           base != NULL)
+        {
+          *base = true;
+        }
+      }
+    }
+  }
+
+  return stack;
+}
+
+/*
  * Description: Normalize two points to create an entirely positive rect that
  *              corresponds to the two points using QRectF.
  *
