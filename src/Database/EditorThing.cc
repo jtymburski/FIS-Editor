@@ -256,11 +256,62 @@ bool EditorThing::isVisible() const
   return thing.isVisible();
 }
 
-/* Loads the thing data */
-// TODO: Comment
+/*
+ * Description: Loads the thing data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorThing::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  QString element = QString::fromStdString(data.getElement(index));
+
+  /* Parse elements */
+  if(element == "description")
+  {
+    setDescription(QString::fromStdString(data.getDataString()));
+  }
+  else if(element == "event")
+  {
+    EditorEvent edit_event(event);
+    edit_event.load(data, index + 1);
+    if(edit_event.getEvent() != NULL)
+      event = *edit_event.getEvent();
+  }
+  else if(element == "image")
+  {
+    dialog_image.deleteAllFrames();
+    dialog_image.setPath(0, EditorHelpers::getProjectDir() +
+              QDir::separator() + QString::fromStdString(data.getDataString()));
+  }
+  else if(element == "name")
+  {
+    setName(QString::fromStdString(data.getDataString()));
+  }
+  else if(element == "rendermatrix")
+  {
+    matrix->load(data, index);
+  }
+  else if(element == "sprites")
+  {
+    matrix->load(data, index + 1);
+  }
+  else if(element == "startpoint")
+  {
+    QString set = QString::fromStdString(data.getDataString());
+    QStringList split = set.split(",");
+    if(split.size() == 2 && split.front().toInt() >= 0 &&
+                            split.back().toInt() >= 0)
+    {
+      setX(split.front().toInt());
+      setY(split.back().toInt());
+    }
+  }
+  else if(element == "visible")
+  {
+    setVisibility(data.getDataBool());
+  }
 }
 
 /*
@@ -315,7 +366,7 @@ void EditorThing::save(FileHandler* fh, bool game_only)
 
   if(fh != NULL)
   {
-    fh->writeXmlElement("thing", "id", getID());
+    fh->writeXmlElement("mapthing", "id", getID());
 
     /* Depending on if base or not, write different data */
     if(base != NULL)
@@ -339,6 +390,11 @@ void EditorThing::save(FileHandler* fh, bool game_only)
       fh->writeXmlData("description", getDescription().toStdString());
       if(default_thing.isVisible() != isVisible())
         fh->writeXmlData("visible", isVisible());
+
+      /* Save the dialog image */
+      if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
+        fh->writeXmlData("image",
+                EditorHelpers::trimPath(dialog_image.getPath(0)).toStdString());
 
       /* Matrix save */
       matrix->save(fh, game_only);

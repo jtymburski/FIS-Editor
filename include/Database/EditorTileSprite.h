@@ -86,6 +86,7 @@ public:
   /* Sets the passability */
   void setPassability(bool set_value);
   void setPassability(Direction dir, bool set_value);
+  void setPassability(QString pass_str);
 
   /* Sets the render depth. 0 is the base up to max */
   bool setRenderDepth(uint8_t depth);

@@ -1073,11 +1073,155 @@ void EditorMatrix::increaseWidth(int count)
   emit matrixChange();
 }
 
-/* Loads the matrix data */
-// TODO: Comment
+/*
+ * Description: Loads the matrix data from the XML struct and offset index. Uses
+ *              existing functions in game EventHandler class.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorMatrix::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  QString element = QString::fromStdString(data.getElement(index));
+
+  /* Parse elements */
+  if(element == "multiple")
+  {
+    /* Parse the range from the multiple */
+    QString range = QString::fromStdString(data.getKeyValue(index));
+    QStringList xy_range = range.split(",");
+    if(xy_range.size() == 2)
+    {
+      QStringList x_range = xy_range.front().split("-");
+      QStringList y_range = xy_range.back().split("-");
+      if(x_range.size() >= 1 && y_range.size() >= 1)
+      {
+        int x = x_range.front().toInt();
+        int x_end = x_range.back().toInt();
+        int y = y_range.front().toInt();
+        int y_end = y_range.back().toInt();
+
+        /* Determine type of multiple */
+        QString second_elem = QString::fromStdString(data.getElement(index+1));
+        QStringList element_list = second_elem.split("_");
+        if(element_list.front() == "path")
+        {
+          /* Determine flips */
+          bool hflip = false;
+          bool vflip = false;
+          if(element_list.contains("hf"))
+            hflip = true;
+          if(element_list.contains("vf"))
+            vflip = true;
+
+          /* Add path */
+          addPath(EditorHelpers::getProjectDir() + QDir::separator() +
+                  QString::fromStdString(data.getDataString()),
+                  x, y, hflip, vflip);
+        }
+        else if(second_elem == "passability")
+        {
+          /* Ensure matrix is large enough */
+          if(getWidth() <= x_end || getHeight() <= y_end)
+          {
+            increaseWidth(x_end - getWidth() + 1);
+            increaseHeight(y_end - getHeight() + 1);
+          }
+
+          /* Loop through and add passabilities */
+          for(int i = x; i < x_end; i++)
+            for(int j = y; j < y_end; j++)
+              matrix[i][j]->setPassability(
+                                  QString::fromStdString(data.getDataString()));
+        }
+      }
+    }
+  }
+  else if(element == "rendermatrix")
+  {
+    /* Get the matrix */
+    QString set = QString::fromStdString(data.getDataString());
+    QStringList split = set.split(".");
+    if(split.size() > 0)
+    {
+      QList<QList<int>> render_depths;
+
+      for(int i = 0; i < split.size(); i++)
+      {
+        QStringList split_2 = split[i].split(",");
+        if(split_2.size() > 0)
+        {
+          /* Make sure new matrix is large enough */
+          while(render_depths.size() < split_2.size())
+            render_depths.push_back(QList<int>());
+
+          /* Add depths */
+          for(int j = 0; j < split_2.size(); j++)
+            render_depths[j].push_back(split_2[j].toInt());
+        }
+      }
+
+      /* Ensure matrix is large enough */
+      if(getWidth() < render_depths.size() ||
+         getHeight() < render_depths.front().size())
+      {
+        increaseWidth(render_depths.size() - getWidth());
+        increaseHeight(render_depths.front().size() - getHeight());
+      }
+
+      /* Add render depths to matrix */
+      for(int i = 0; i < render_depths.size(); i++)
+        for(int j = 0; j < render_depths[i].size(); j++)
+          matrix[i][j]->setRenderDepth(render_depths[i][j]);
+    }
+  }
+  else if(element == "sprite")
+  {
+    EditorTileSprite* sprite = editAllSprites();
+    sprite->load(data, index + 1);
+    editSpritesOk();
+  }
+  else if(element == "x" && data.getElement(index + 1) == "y")
+  {
+    int x = QString::fromStdString(data.getKeyValue(index)).toInt();
+    int y = QString::fromStdString(data.getKeyValue(index + 1)).toInt();
+
+    if(x >= 0 && y >= 0)
+    {
+      /* Determine type of element */
+      QString define_elem = QString::fromStdString(data.getElement(index+2));
+      QStringList element_list = define_elem.split("_");
+      if(element_list.front() == "path")
+      {
+        /* Determine flips */
+        bool hflip = false;
+        bool vflip = false;
+        if(element_list.contains("hf"))
+          hflip = true;
+        if(element_list.contains("vf"))
+          vflip = true;
+
+        /* Add path */
+        addPath(EditorHelpers::getProjectDir() + QDir::separator() +
+                QString::fromStdString(data.getDataString()),
+                x, y, hflip, vflip);
+      }
+      else if(define_elem == "passability")
+      {
+        /* Ensure matrix is large enough */
+        if(getWidth() <= x || getHeight() <= y)
+        {
+          increaseWidth(x - getWidth() + 1);
+          increaseHeight(y - getHeight() + 1);
+        }
+
+        /* Set passability */
+        matrix[x][y]->setPassability(
+                                  QString::fromStdString(data.getDataString()));
+      }
+    }
+  }
 }
 
 /*
@@ -1191,6 +1335,8 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
           {
             /* Info on root for comparing */
             QString back = "_" + root_stack.at(3) + root_stack.at(4);
+            bool dir_x_for = true;
+            bool dir_y_for = true;
             int frames = matrix[i][j]->frameCount();
             int height = 1;
             int letter_a = root_stack.at(1).at(0).unicode();
@@ -1202,8 +1348,24 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
             bool finished = false;
             for(int k = j + 1; !finished && k < matrix[i].size(); k++)
             {
-              QString path = front + QString(QChar(letter_a)) +
-                                     QString(QChar(letter_b + k - j)) + back;
+              /* Determine if it's forward or backwards if first run */
+              if(k == (j + 1))
+              {
+                QString test_path = front + QString(QChar(letter_a)) +
+                                    QString(QChar(letter_b - k + j)) + back;
+                if(set[i][k].size() == 1 &&
+                   set[i][k].front().second == test_path)
+                  dir_y_for = false;
+              }
+
+              /* Proceed to check path */
+              QString path = front;
+              if(dir_y_for)
+                path += QString(QChar(letter_a)) +
+                        QString(QChar(letter_b + k - j)) + back;
+              else
+                path += QString(QChar(letter_a)) +
+                        QString(QChar(letter_b - k + j)) + back;
               if(matrix[i][k]->frameCount() != frames ||
                  set[i][k].size() != 1 ||
                  set[i][k].front().second != path ||
@@ -1223,8 +1385,26 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
             {
               for(int l = 0; l < height; l++)
               {
-                QString path = front + QString(QChar(letter_a + k - i)) +
-                                       QString(QChar(letter_b + l)) + back;
+                /* Determine if it's forward or backwards if first run */
+                if(k == (i + 1) && l == 0)
+                {
+                  QString test_path = front + QString(QChar(letter_a - k + i)) +
+                                              QString(QChar(letter_b)) + back;
+                  if(set[k][j].size() == 1 &&
+                     set[k][j].front().second == test_path)
+                    dir_x_for = false;
+                }
+
+                /* Proceed to check path */
+                QString path = front;
+                if(dir_x_for)
+                  path += QString(QChar(letter_a + k - i));
+                else
+                  path += QString(QChar(letter_a - k + i));
+                if(dir_y_for)
+                  path += QString(QChar(letter_b + l)) + back;
+                else
+                  path += QString(QChar(letter_b - l)) + back;
                 if(matrix[k][j+l]->frameCount() != frames ||
                    set[k][j+l].size() != 1 ||
                    set[k][j+l].front().second != path ||
@@ -1247,8 +1427,12 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
               {
                 range += QString::number(i) + "-" +
                          QString::number(i + width - 1) + ",";
-                path += "[" + QString(QChar(letter_a)) + "-" +
-                        QString(QChar(letter_a + width - 1)) + "]";
+                if(dir_x_for)
+                  path += "[" + QString(QChar(letter_a)) + "-" +
+                          QString(QChar(letter_a + width - 1)) + "]";
+                else
+                  path += "[" + QString(QChar(letter_a)) + "-" +
+                          QString(QChar(letter_a - width + 1)) + "]";
               }
               else
               {
@@ -1259,8 +1443,12 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
               {
                 range += QString::number(j) + "-" +
                          QString::number(j + height - 1);
-                path += "[" + QString(QChar(letter_b)) + "-" +
-                        QString(QChar(letter_b + height - 1)) + "]";
+                if(dir_y_for)
+                  path += "[" + QString(QChar(letter_b)) + "-" +
+                          QString(QChar(letter_b + height - 1)) + "]";
+                else
+                  path += "[" + QString(QChar(letter_b)) + "-" +
+                          QString(QChar(letter_b - height + 1)) + "]";
               }
               else
               {

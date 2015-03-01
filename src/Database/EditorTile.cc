@@ -221,11 +221,6 @@ QString EditorTile::getActiveLayers()
       layer_string += "MT" + QString::number(i + 1) + "("
                    + QString::number(things[i].thing->getID()) + "),";
 
-  for(int i = 0; i < layers_lower.size(); i++)
-    if(layers_lower[i].sprite != NULL)
-      layer_string += "L" + QString::number(i + 1) + "("
-                   + QString::number(layers_lower[i].sprite->getID()) + "),";
-
   /* Get upper info, if relevant */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].sprite != NULL)

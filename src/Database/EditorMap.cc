@@ -353,6 +353,11 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       parse++;
     }
   }
+  else if(element == "mapthing")
+  {
+    // TODO: Implementation
+    qDebug() << "INSTANCE THING";
+  }
 }
 
 /*
@@ -477,6 +482,10 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
   fh->writeXmlElement("upper", "index", "4");
   addTileSpriteData(fh, map, EditorEnumDb::UPPER5);
   fh->writeXmlElementEnd();
+
+  /* Add things */
+  for(int i = 0; i < map->things.size(); i++)
+    map->things[i]->save(fh, game_only);
 
   /* End element */
   fh->writeXmlElementEnd();
@@ -1378,6 +1387,22 @@ void EditorMap::load(XmlData data, int index)
 
     /* Continue to parse the data in the sprite */
     sprite->load(data, index + 1);
+  }
+  else if(data.getElement(index) == "mapthing" && data.getKey(index) == "id")
+  {
+    int thing_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorThing* thing = getThing(thing_id);
+
+    /* Create new thing if it doesn't exist */
+    if(thing == NULL)
+    {
+      thing = new EditorThing(thing_id);
+      thing->setTileIcons(getTileIcons());
+      setThing(thing);
+    }
+
+    /* Continue to parse the data in the thing */
+    thing->load(data, index + 1);
   }
   else if(data.getElement(index) == "main" ||
           (data.getElement(index) == "section" && data.getKey(index) == "id"))

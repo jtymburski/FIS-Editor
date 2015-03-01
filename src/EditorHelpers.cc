@@ -472,7 +472,7 @@ QList<QPair<QString,QString>> EditorHelpers::rectilinearSplit(
 
 /*
  * Description: Trims a path and removes the project directory portion from
- *              the head of it.
+ *              the head of it, if it exists.
  *
  * Inputs: QString path - the path to clean-up
  * Output: QString - the resulting cleaned-up path without project directory

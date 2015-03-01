@@ -679,11 +679,17 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
   return "";
 }
 
-/* Loads the event data */
-// TODO: Comment
+/*
+ * Description: Loads the event data from the XML struct and offset index. Uses
+ *              existing functions in game EventHandler class.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorEvent::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  event = handler.updateEvent(event, data, index, 0);
 }
 
 /*

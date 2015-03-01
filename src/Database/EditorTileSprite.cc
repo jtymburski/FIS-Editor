@@ -309,6 +309,30 @@ void EditorTileSprite::setPassability(Direction dir, bool set_value)
 }
 
 /*
+ * Description: Sets the passability to false prior to loading in a comma
+ *              delimited string of all passability directions that should be
+ *              true.
+ *
+ * Inputs: QString pass_str - comma delimited passable directions (N,E,S,W)
+ * Output: none
+ */
+void EditorTileSprite::setPassability(QString pass_str)
+{
+  /* Get the values for the string */
+  bool north = false;
+  bool east = false;
+  bool south = false;
+  bool west = false;
+  EditorHelpers::getPassability(pass_str, north, east, south, west);
+
+  /* Set the values */
+  setPassability(Direction::NORTH, north);
+  setPassability(Direction::EAST, east);
+  setPassability(Direction::SOUTH, south);
+  setPassability(Direction::WEST, west);
+}
+
+/*
  * Description: Sets the render depth of the tile sprite. Range is 0 to 10.
  *
  * Inputs: uint8_t depth - the render depth
