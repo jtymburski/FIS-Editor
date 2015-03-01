@@ -819,6 +819,10 @@ void GameDatabase::load(FileHandler* fh)
     } while(!done);
   }
 
+  /* Clean up the maps */
+  for(int i = 0; i < data_map.size(); i++)
+    data_map[i]->thingAddToTiles(true);
+
   /* Update the view */
   int index = view_top->currentRow();
   if(index == 0)

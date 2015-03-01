@@ -88,24 +88,28 @@ EditorMap::~EditorMap()
  * Inputs: EditorThing* thing - the thing to attempt to add
  * Output: bool - true if the thing was added (does not delete if fails)
  */
-bool EditorMap::addThing(EditorThing* thing)
+bool EditorMap::addThing(EditorThing* thing, SubMapInfo* map)
 {
   int x = thing->getX();
   int y = thing->getY();
   int w = thing->getMatrix()->getWidth();
   int h = thing->getMatrix()->getHeight();
 
+  /* Ensure map isn't null */
+  if(map == NULL)
+    map = active_submap;
+
   /* Check if thing can be placed */
   bool valid = false;
-  if(x >= 0 && y >= 0 && (x+w) <= active_submap->tiles.size() &&
-     (y+h) <= active_submap->tiles[x].size())
+  if(x >= 0 && y >= 0 && (x+w) <= map->tiles.size() &&
+     (y+h) <= map->tiles[x].size())
   {
     valid = true;
 
     /* Check each tile */
     for(int i = 0; i < w; i++)
       for(int j = 0; j < h; j++)
-        if(active_submap->tiles[x+i][y+j]->getThing(
+        if(map->tiles[x+i][y+j]->getThing(
                         thing->getMatrix()->getRenderDepth(i, j)) != NULL)
           valid = false;
   }
@@ -116,7 +120,7 @@ bool EditorMap::addThing(EditorThing* thing)
     /* Add the thing to tiles */
     for(int i = x; i < (w+x); i++)
       for(int j = y; j < (h+y); j++)
-        active_submap->tiles[i][j]->setThing(thing);
+        map->tiles[i][j]->setThing(thing);
   }
 
   return valid;
@@ -273,18 +277,22 @@ void EditorMap::copySelf(const EditorMap &source)
 void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
+  /* -------------- NAME -------------- */
   if(element == "name")
   {
     map->name = QString::fromStdString(data.getDataString());
   }
+  /* -------------- WIDTH -------------- */
   else if(element == "width")
   {
     setMap(map->id, map->name, data.getDataInteger(),map->tiles.front().size());
   }
+  /* -------------- HEIGHT -------------- */
   else if(element == "height")
   {
     setMap(map->id, map->name, map->tiles.size(), data.getDataInteger());
   }
+  /* -------------- TILES -------------- */
   else if((element == "base" || element == "enhancer" ||
            element == "lower" || element == "upper") &&
           data.getElement(index + 1) == "x" &&
@@ -353,10 +361,65 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       parse++;
     }
   }
+  /* -------------- MAP THING -------------- */
   else if(element == "mapthing")
   {
-    // TODO: Implementation
-    qDebug() << "INSTANCE THING";
+    int thing_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorThing* thing = getThing(thing_id, map->id);
+
+    /* Create new thing if it doesn't exist */
+    if(thing == NULL)
+    {
+      thing = new EditorThing(thing_id);
+      thing->setTileIcons(getTileIcons());
+
+      /* Find insertion location */
+      int index = -1;
+      bool near = false;
+      for(int i = 0; !near && (i < map->things.size()); i++)
+      {
+        if(map->things[i]->getID() > thing->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If near, insert at index. Otherwise, append */
+      if(near)
+        map->things.insert(index, thing);
+      else
+        map->things.append(thing);
+    }
+
+    /* Continue to parse the data in the thing */
+    QString element = QString::fromStdString(data.getElement(index + 1));
+    if(element == "base")
+    {
+      /* Get name and desc. if it has been changed */
+      EditorThing default_thing;
+      QString default_name = "";
+      QString default_desc = "";
+      if(default_thing.getName() != thing->getName())
+        default_name = thing->getName();
+      if(default_thing.getDescription() != thing->getDescription())
+        default_desc = thing->getDescription();
+
+      /* Set the base */
+      EditorThing* base_thing = getThing(data.getDataInteger());
+      if(base_thing != NULL)
+      {
+        thing->setBase(base_thing);
+        if(default_name != "")
+          thing->setName(default_name);
+        if(default_desc != "")
+          thing->setDescription(default_desc);
+      }
+    }
+    else
+    {
+      thing->load(data, index + 1);
+    }
   }
 }
 
@@ -2023,20 +2086,40 @@ void EditorMap::setVisibilityPass(bool visible)
  *              deleted and removed from the list.
  * TODO: FUTURE - warn about things being removed??
  *
- * Inputs: none
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
  * Output: none
  */
-void EditorMap::thingAddToTiles()
+void EditorMap::thingAddToTiles(bool update_all)
 {
-  if(active_submap != NULL)
+  /* Update all sub-maps - used for loading */
+  if(update_all)
   {
-    for(int i = 0; i < active_submap->things.size(); i++)
+    for(int i = 0; i < sub_maps.size(); i++)
     {
-      if(!addThing(active_submap->things[i]))
+      for(int j = 0; j < sub_maps[i]->things.size(); j++)
       {
-        delete active_submap->things[i];
-        active_submap->things.remove(i);
-        i--;
+        if(!addThing(sub_maps[i]->things[j], sub_maps[i]))
+        {
+          delete sub_maps[i]->things[j];
+          sub_maps[i]->things.remove(j);
+          j--;
+        }
+      }
+    }
+  }
+  /* Or just the active one */
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->things.size(); i++)
+      {
+        if(!addThing(active_submap->things[i]))
+        {
+          delete active_submap->things[i];
+          active_submap->things.remove(i);
+          i--;
+        }
       }
     }
   }

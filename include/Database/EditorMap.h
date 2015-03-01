@@ -88,7 +88,7 @@ private:
  *===========================================================================*/
 protected:
   /* Attempts to add thing to the current sub-map */
-  bool addThing(EditorThing* thing);
+  bool addThing(EditorThing* thing, SubMapInfo* map = NULL);
 
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
@@ -232,7 +232,7 @@ public:
   void setVisibilityPass(bool);
 
   /* Thing processing for updating with the new data */
-  void thingAddToTiles();
+  void thingAddToTiles(bool update_all = false);
   void thingRemoveFromTiles();
 
   /* Update all tiles */
