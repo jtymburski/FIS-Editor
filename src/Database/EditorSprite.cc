@@ -1106,7 +1106,8 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  *
  * Inputs: FileHandler* fh - the saving file handler
  *         bool game_only - true if you only want game relevant data, not editor
- *         bool core_only - true if only core data. No frame data
+ *         bool core_only - true if only core data. No frame data, names, or
+ *                          wrapper
  * Output: none
  */
 void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
@@ -1117,10 +1118,11 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
 
   if(fh != NULL)
   {
-    fh->writeXmlElement("sprite", "id", getID());
+    if(!core_only)
+      fh->writeXmlElement("sprite", "id", getID());
 
     /* Write sprite data */
-    if(!game_only)
+    if(!game_only && !core_only)
       fh->writeXmlData("name", getName().toStdString());
     if(default_sprite.getAnimationTime() != getAnimationTime())
       fh->writeXmlData("animation", getAnimationTime().toInt());
@@ -1148,9 +1150,9 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
       for(int i = 0; i < frame_set.size(); i++)
         fh->writeXmlData(frame_set[i].first.toStdString(),
                          frame_set[i].second.toStdString());
-    }
 
-    fh->writeXmlElementEnd();
+      fh->writeXmlElementEnd();
+    }
   }
 }
   

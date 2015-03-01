@@ -55,6 +55,7 @@ ThingDialog::~ThingDialog()
 
   /* Delete event controller */
   event_view->setEvent(NULL);
+  event_ctrl->setEventBlank();
   delete event_ctrl;
   event_ctrl = NULL;
 
@@ -250,6 +251,7 @@ void ThingDialog::buttonFrameEdit()
 void ThingDialog::buttonOk()
 {
   emit ok();
+  event_ctrl->setEventBlank(false);
   close();
 }
 

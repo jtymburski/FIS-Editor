@@ -51,7 +51,7 @@ EditorEvent::EditorEvent(const EditorEvent &source) : EditorEvent()
  */
 EditorEvent::~EditorEvent()
 {
-  setEventBlank();
+  setEventBlank(false);
   conversation = NULL;
 }
 
@@ -207,6 +207,46 @@ QString EditorEvent::recursiveConversationFind(Conversation* ref,
   }
 
   return "";
+}
+
+/*
+ * Description: Recursive save of the conversation. Takes a conversation ref
+ *              and starting index with file handling pointer and parses
+ *              all embedded conversations from there. Default call with just
+ *              FH pointer will use the base conversation in class.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         Conversation* convo - the starting convo, default to NULL
+ *         QString index - the starting index of the starting convo, default "1"
+ * Output: none
+ */
+void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
+                                   QString index)
+{
+  /* If conversation is NULL, load in base conversation */
+  if(convo == NULL)
+    convo = event.convo;
+
+  /* Proceed if not NULL */
+  if(convo != NULL)
+  {
+    fh->writeXmlElement("conversation", "id", index.toStdString());
+
+    /* Conversation Data */
+    fh->writeXmlData("text", convo->text);
+    fh->writeXmlData("id", convo->thing_id);
+    if(convo->action_event.classification != EventClassifier::NOEVENT)
+    {
+      EditorEvent convo_event(convo->action_event);
+      convo_event.save(fh);
+    }
+
+    fh->writeXmlElementEnd();
+
+    /* Go to the next conversations */
+    for(uint16_t i = 0; i < convo->next.size(); i++)
+      saveConversation(fh, &convo->next[i], index + "." + QString::number(i+1));
+  }
 }
 
 /*============================================================================
@@ -639,6 +679,83 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
   return "";
 }
 
+/* Loads the event data */
+// TODO: Comment
+void EditorEvent::load(XmlData data, int index)
+{
+  // TODO: Implementation
+}
+
+/*
+ * Description: Saves the event data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
+void EditorEvent::save(FileHandler* fh, bool game_only)
+{
+  (void)game_only;
+
+  if(fh != NULL)
+  {
+    fh->writeXmlElement("event");
+
+    /* -- GIVE ITEM EVENT -- */
+    if(event.classification == EventClassifier::GIVEITEM)
+    {
+      fh->writeXmlElement("giveitem");
+
+      /* Data */
+      fh->writeXmlData("id", getGiveItemID());
+      fh->writeXmlData("count", getGiveItemCount());
+
+      fh->writeXmlElementEnd();
+    }
+    /* -- NOTIFICATION EVENT -- */
+    else if(event.classification == EventClassifier::NOTIFICATION)
+    {
+      fh->writeXmlData("notification", getNotification().toStdString());
+    }
+    /* -- EXECUTE BATTLE EVENT -- */
+    else if(event.classification == EventClassifier::RUNBATTLE)
+    {
+      fh->writeXmlData("startbattle", "blank");
+    }
+    /* -- EXECUTE MAP EVENT -- */
+    else if(event.classification == EventClassifier::RUNMAP)
+    {
+      fh->writeXmlElement("startmap");
+
+      /* Data */
+      fh->writeXmlData("id", getStartMapID());
+
+      fh->writeXmlElementEnd();
+    }
+    /* -- START CONVERSATION EVENT -- */
+    else if(event.classification == EventClassifier::STARTCONVO)
+    {
+      saveConversation(fh);
+    }
+    /* -- TELEPORT THING EVENT -- */
+    else if(event.classification == EventClassifier::TELEPORTTHING)
+    {
+      fh->writeXmlElement("teleportthing");
+
+      /* Data */
+      fh->writeXmlData("x", getTeleportX());
+      fh->writeXmlData("y", getTeleportY());
+      fh->writeXmlData("section", getTeleportSection());
+      if(getTeleportThingID() != 0)
+        fh->writeXmlData("id", getTeleportThingID());
+
+      fh->writeXmlElementEnd();
+    }
+
+    fh->writeXmlElementEnd();
+  }
+}
+
 /*
  * Description: Sets the conversation for the passed in index, which replaces
  *              all the data in that node only. If the index doesn't exist,
@@ -694,72 +811,6 @@ bool EditorEvent::setEventConversation(Conversation* convo)
   event = handler.createConversationEvent(convo);
   event.convo->text = "First Entry.";
   conversation = event.convo;
-  //return true;
-
-  // TODO: TESTING - REMOVE
-  Event blank_event = EventHandler::createEventTemplate();
-  Conversation* conv = event.convo;
-  conv->text = "This is the initial conversation point that will start it. ";
-  conv->text += "How can this continue? It must pursue to complete ";
-  conv->text += "embodiment. Ok, maybe I'll just keep typing until I break ";
-  conv->text += "the entire compiler.";
-  conv->thing_id = 0;
-  Conversation convo2;
-  convo2.category = DialogCategory::TEXT;
-  convo2.action_event = blank_event;
-  convo2.text = "Pass the chips please.";
-  convo2.thing_id = 24;
-  Conversation test1, test2, test3, test4, test5;
-  test1.category = DialogCategory::TEXT;
-  test1.action_event = blank_event;
-  test1.text = "This is a test to see how data runs. The line will split ";
-  test1.text += "once unless it is an option based selection in which case ";
-  test1.text += "it will restrict.";
-  test1.thing_id = 3;
-  test2.category = DialogCategory::TEXT;
-  test2.action_event = blank_event;
-  test2.text = "This is a no man case. See what happens!! Ok, this is the ";
-  test2.text += "too long case where the lines never cease to exist and the ";
-  test2.text += "points aren't for real. I'm feeling a bit hungry though ";
-  test2.text += "so I don't know if I'll have the stamina to clean up this ";
-  test2.text += "case in all it's glory. Repeat: ";
-  test2.text += test2.text;
-  test2.text += test2.text;
-  test2.thing_id = 2;
-  test2.next.push_back(test1);
-  test3.category = DialogCategory::TEXT;
-  test3.action_event = blank_event;//event_handler->createStartBattleEvent();
-  test3.text = "Back to finish off with a clean case with a couple of lines.";
-  test3.text += " So this requires me to write a bunch of BS to try and fill";
-  test3.text += " these lines.";
-  test3.text += test3.text;
-  test3.text += test3.text;
-  test3.thing_id = 1003;
-  test3.next.push_back(test2);
-  test4.category = DialogCategory::TEXT;
-  test4.action_event = blank_event;
-  test4.text = "Option 1 - This goes on and on and on and on and on and ";
-  test4.text += "lorem ipsum. This is way too long to be an option. Loser";
-  test4.thing_id = -1;
-  test4.next.push_back(test2);
-  test5.category = DialogCategory::TEXT;
-  test5.action_event = blank_event;
-  test5.text = "Option 2";
-  test5.thing_id = -1;
-  test5.next.push_back(test3);
-  test1.next.push_back(test4);
-  test1.next.push_back(test5);
-  test4.text = "Option 3";
-  test1.next.push_back(test4);
-  test5.text = "Option 4";
-  test1.next.push_back(test5);
-  test4.text = "Option 5";
-  test1.next.push_back(test4);
-  test5.text = "Option 6";
-  test1.next.push_back(test5);
-  convo2.next.push_back(test1);
-  conv->next.push_back(convo2);
-
   return true;
 }
 

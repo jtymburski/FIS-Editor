@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QVector>
 
+#include "FileHandler.h"
 #include "Game/EventHandler.h"
 
 class EditorEvent
@@ -54,6 +55,10 @@ private:
   /* A recursive parser through conversation set to find equivalent address */
   QString recursiveConversationFind(Conversation* ref, Conversation* convo,
                                     QString index = "1");
+
+  /* Saves the conversation - recursive call */
+  void saveConversation(FileHandler* fh, Conversation* convo = NULL,
+                        QString index = "1");
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -99,6 +104,12 @@ public:
                                   bool option_node = false);
   QString insertConversationBefore(QString index, Conversation convo,
                                    bool option_node = false);
+
+  /* Loads the event data */
+  void load(XmlData data, int index);
+
+  /* Saves the event data */
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the conversation at the index */
   bool setConversation(QString index, Conversation convo);

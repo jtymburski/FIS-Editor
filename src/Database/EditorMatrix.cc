@@ -1147,8 +1147,13 @@ void EditorMatrix::removeAll()
   emit matrixChange();
 }
 
-/* Saves the matrix data */
-// TODO: Comment
+/*
+ * Description: Saves the matrix data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorMatrix::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
@@ -1280,7 +1285,54 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
       }
     }
 
-    // TODO: PICK UP ALL REMAINING TILES AND PASSABILITY
+    /* Loop through matrix and add paths and passability remaining */
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      for(int j = 0; j < matrix[i].size(); j++)
+      {
+        /* Ensure there is at least one valid frame */
+        if(matrix[i][j]->frameCount() != 0)
+        {
+          /* Do check for both to see if elements should be written */
+          bool passability = matrix[i][j]->getRenderDepth() == 0 &&
+                             (matrix[i][j]->getPassability(Direction::NORTH) ||
+                              matrix[i][j]->getPassability(Direction::EAST) ||
+                              matrix[i][j]->getPassability(Direction::SOUTH) ||
+                              matrix[i][j]->getPassability(Direction::WEST));
+          bool path = !skip_set[i][j];
+
+          /* Add element, if relevant */
+          if(path || passability)
+          {
+            fh->writeXmlElement("x", "index", i);
+            fh->writeXmlElement("y", "index", j);
+          }
+
+          /* Adds paths */
+          if(path)
+            for(int k = 0; k < set[i][j].size(); k++)
+              fh->writeXmlData(set[i][j][k].first.toStdString(),
+                               set[i][j][k].second.toStdString());
+
+          /* Add passability */
+          if(passability)
+            fh->writeXmlData("passability",
+                             EditorHelpers::getPassabilityStr(
+                                matrix[i][j]->getPassability(Direction::NORTH),
+                                matrix[i][j]->getPassability(Direction::EAST),
+                                matrix[i][j]->getPassability(Direction::SOUTH),
+                                matrix[i][j]->getPassability(Direction::WEST))
+                                                                .toStdString());
+
+          /* Close element, if relevant */
+          if(path || passability)
+          {
+            fh->writeXmlElementEnd();
+            fh->writeXmlElementEnd();
+          }
+        }
+      }
+    }
 
     /* Save the sprite data */
     EditorTileSprite* sprite = getValidSprite();
@@ -1292,6 +1344,24 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
     }
 
     fh->writeXmlElementEnd();
+
+    /* Save the render matrix */
+    QString render_matrix = "";
+    if(matrix.size() > 0)
+    {
+      for(int j = 0; j < matrix.front().size(); j++)
+      {
+        for(int i = 0; i < matrix.size(); i++)
+          render_matrix.push_back(
+                         QString::number(matrix[i][j]->getRenderDepth()) + ",");
+        if(render_matrix.endsWith(","))
+          render_matrix.chop(1);
+        render_matrix += ".";
+      }
+      if(render_matrix.endsWith("."))
+        render_matrix.chop(1);
+    }
+    fh->writeXmlData("rendermatrix", render_matrix.toStdString());
   }
 }
 

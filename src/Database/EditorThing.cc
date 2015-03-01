@@ -302,8 +302,13 @@ bool EditorThing::paint(int frame_index, QPainter* painter, QRect rect,
   return false;
 }
 
-/* Saves the thing data */
-// TODO: Comment
+/*
+ * Description: Saves the thing data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorThing::save(FileHandler* fh, bool game_only)
 {
   EditorThing default_thing;
@@ -338,7 +343,9 @@ void EditorThing::save(FileHandler* fh, bool game_only)
       /* Matrix save */
       matrix->save(fh, game_only);
 
-      // TODO: EVENT SAVE
+      /* Event save */
+      EditorEvent edit_event(getEvent());
+      edit_event.save(fh, game_only);
     }
 
     fh->writeXmlElementEnd();
