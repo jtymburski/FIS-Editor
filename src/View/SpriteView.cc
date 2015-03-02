@@ -206,7 +206,13 @@ void SpriteView::viewFrameSequence()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Deletes the selected sprite */
+/*
+ * Description: Deletes the selected sprite in the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: returns true if sprite deleted.
+ */
 bool SpriteView::deleteSprite()
 {
   EditorSprite* selected = getSelected();
@@ -230,7 +236,13 @@ bool SpriteView::deleteSprite()
   return success;
 }
 
-/* Duplicates the selected sprite */
+/*
+ * Description: Duplicates the selected sprite in the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: bool - returns true if sprite was duplicated.
+ */
 bool SpriteView::duplicateSprite()
 {
   EditorSprite* selected = getSelected();
@@ -246,7 +258,12 @@ bool SpriteView::duplicateSprite()
   return false;
 }
 
-/* Get current sprite */
+/*
+ * Description: Returns which sprite is selected in the base list.
+ *
+ * Inputs: none
+ * Output: EditorThing* - selected sprite. NULL if none selected
+ */
 EditorSprite* SpriteView::getSelected()
 {
   EditorSprite* sprite = NULL;
@@ -258,13 +275,24 @@ EditorSprite* SpriteView::getSelected()
   return sprite;
 }
 
-/* Gets the editor map */
+/*
+ * Description: Returns the editor map, which contains all things and instances.
+ *
+ * Inputs: none
+ * Output: EditorMap* - pointer to the editor map. NULL if none set.
+ */
 EditorMap* SpriteView::getEditorMap()
 {
   return editor_map;
 }
 
-/* Imports a sprite from another file */
+/*
+ * Description: Imports a new sprite into the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SpriteView::importSprite()
 {
   // TODO: Future
@@ -272,7 +300,14 @@ void SpriteView::importSprite()
                            "Coming soon to a production near you!");
 }
 
-/* Creates a new blank sprite */
+/*
+ * Description: Creates a new sprite into the base list. Triggered by
+ *              parent. Proceeds to call edit on the new sprite and opens
+ *              SpriteDialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SpriteView::newSprite()
 {
   EditorSprite* new_sprite = new EditorSprite();
@@ -280,7 +315,13 @@ void SpriteView::newSprite()
   editSprite();
 }
 
-/* Sets the editor map, which contains the data needed */
+/*
+ * Description: Sets the control editor map. This contains the things, sprites
+ *              and all data relevant to display.
+ *
+ * Inputs: EditorMap* map - the map to use for control
+ * Output: none
+ */
 void SpriteView::setEditorMap(EditorMap* map)
 {
   editor_map = map;

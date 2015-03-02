@@ -12,7 +12,13 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor Function */
+/*
+ * Description: Constructor function. Creates the thing view, which is the
+ *              side bar within the left map database. Controls things (bases
+ *              and instances).
+ *
+ * Inputs: QWidget* parent - the parent widget
+ */
 ThingView::ThingView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
@@ -23,7 +29,9 @@ ThingView::ThingView(QWidget* parent) : QWidget(parent)
   createLayout();
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 ThingView::~ThingView()
 {
 
@@ -33,7 +41,13 @@ ThingView::~ThingView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Adds an editor thing to the stack */
+/*
+ * Description: Adds thing to the base list. Triggered by the "new thing"
+ *              press. The ID is the next available.
+ *
+ * Inputs: EditorThing* thing - the new thing to add (ID not set yet)
+ * Output: none
+ */
 void ThingView::addThing(EditorThing* thing)
 {
   if(editor_map != NULL)
@@ -49,7 +63,12 @@ void ThingView::addThing(EditorThing* thing)
   }
 }
 
-/* Creates the layout - only called on initial construction */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::createLayout()
 {
   /* Layout */
@@ -104,7 +123,13 @@ void ThingView::createLayout()
   layout->addWidget(lbl_size, 0, Qt::AlignHCenter);
 }
 
-/* Opens the thing editing dialog */
+/*
+ * Description: Opens the edit thing dialog, on an existing thing in the list
+ *              (either base or instance).
+ *
+ * Inputs: EditorThing* sub_thing - the thing to edit
+ * Output: none
+ */
 void ThingView::editThing(EditorThing* sub_thing)
 {
   EditorThing* current = getSelected();
@@ -128,8 +153,12 @@ void ThingView::editThing(EditorThing* sub_thing)
   emit fillWithData(EditorEnumDb::THING_VIEW);
 }
 
-/* Refreshes the info in the lower half of the widget */
-// TODO: Comment
+/*
+ * Description: Updates the info in the QT widgets within the view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::updateInfo()
 {
   if(editor_map != NULL)
@@ -194,7 +223,13 @@ void ThingView::updateList()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-/* The current row changes in the list widget */
+/*
+ * Description: Slot which triggers when the top list changes. Updates the
+ *              selected thing.
+ *
+ * Inputs: int index - the new index in the list
+ * Output: none
+ */
 void ThingView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
@@ -202,7 +237,13 @@ void ThingView::currentRowChanged(int index)
   updateInfo();
 }
 
-/* Delete thing instance */
+/*
+ * Description: Slot which triggers when an instance is deleted, from a right
+ *              click select on the instance.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::deleteInstance()
 {
   if(thing_instances->currentItem() != NULL)
@@ -222,7 +263,13 @@ void ThingView::deleteInstance()
   }
 }
 
-/* Edit thing instance */
+/*
+ * Description: Slot which triggers when an instance is edited, from a right
+ *              click select on the instance. Opens up edit dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::editInstance()
 {
   if(thing_instances->currentItem() != NULL)
@@ -238,7 +285,13 @@ void ThingView::editInstance()
   }
 }
 
-/* Instance menu trigger */
+/*
+ * Description: Slot which triggers a right click menu when an instance is
+ *              right clicked within the list. Offers delete and edit actions.
+ *
+ * Inputs: const QPoint & pos - the position right clicked in widget
+ * Output: none
+ */
 void ThingView::instanceMenu(const QPoint & pos)
 {
   QListWidgetItem* item = thing_instances->itemAt(pos);
@@ -246,7 +299,13 @@ void ThingView::instanceMenu(const QPoint & pos)
     rightclick_menu->exec(QCursor::pos());
 }
 
-/* Instance of thing row changed */
+/*
+ * Description: Slot which triggers when a row in the instance list of things
+ *              changes. This changes which thing is hovered on the map.
+ *
+ * Inputs: int index - the new index of the row in the list
+ * Output: none
+ */
 void ThingView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
@@ -257,13 +316,26 @@ void ThingView::instanceRowChanged(int index)
   }
 }
 
-/* An item in the list was double clicked */
+/*
+ * Description: Slot which triggers when an item in the base list is double
+ *              clicked. Opens a pop-up for the thing to be edited.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void ThingView::itemDoubleClicked(QListWidgetItem*)
 {
   editThing();
 }
 
-/* Update thing instances in view */
+/*
+ * Description: Slot which triggers to update the instances in the view and
+ *              put them in the list. Triggers on change events, such as editing
+ *              and deleting instances, and on initial setup
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::thingInstanceUpdate()
 {
   thing_instances->blockSignals(true);
@@ -291,7 +363,14 @@ void ThingView::thingInstanceUpdate()
   thing_instances->blockSignals(false);
 }
 
-/* Updates the thing sidebar */
+/*
+ * Description: Slot which triggers to update a thing upeon completion by the
+ *              thing dialog (on ok()). This will also update all instances of
+ *              the object, deleting as necessary.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::updateThings()
 {
   /* Update the thing in the pop-up */
@@ -309,8 +388,14 @@ void ThingView::updateThings()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  
-/* Deletes the selected thing */
+
+/*
+ * Description: Deletes the selected thing in the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: bool - returns true if thing deleted.
+ */
 bool ThingView::deleteThing()
 {
   EditorThing* selected = getSelected();
@@ -334,7 +419,13 @@ bool ThingView::deleteThing()
   return success;
 }
 
-/* Duplicates the selected thing */
+/*
+ * Description: Duplicates the selected thing in the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: bool - returns true if thing was duplicated.
+ */
 bool ThingView::duplicateThing()
 {
   EditorThing* selected = getSelected();
@@ -350,7 +441,12 @@ bool ThingView::duplicateThing()
   return false;
 }
 
-/* Get current thing */
+/*
+ * Description: Returns which thing is selected in the base list.
+ *
+ * Inputs: none
+ * Output: EditorThing* - selected thing. NULL if none selected
+ */
 EditorThing* ThingView::getSelected()
 {
   int index = thing_list->currentRow();
@@ -363,13 +459,24 @@ EditorThing* ThingView::getSelected()
   return thing;
 }
 
-/* Gets the editor map */
+/*
+ * Description: Returns the editor map, which contains all things and instances.
+ *
+ * Inputs: none
+ * Output: EditorMap* - pointer to the editor map. NULL if none set.
+ */
 EditorMap* ThingView::getEditorMap()
 {
   return editor_map;
 }
 
-/* Imports a thing from another file */
+/*
+ * Description: Imports a new thing into the base list. Triggered by
+ *              parent.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::importThing()
 {
   // TODO: Future
@@ -377,7 +484,14 @@ void ThingView::importThing()
                            "Coming soon to a production near you!");
 }
 
-/* Creates a new blank thing */
+/*
+ * Description: Creates a new thing into the base list. Triggered by
+ *              parent. Proceeds to call edit on the new thing and opens
+ *              ThingDialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void ThingView::newThing()
 {
   EditorThing* new_thing = new EditorThing();
@@ -385,7 +499,13 @@ void ThingView::newThing()
   editThing();
 }
 
-/* Sets the editor map, which contains the data needed */
+/*
+ * Description: Sets the control editor map. This contains the things, sprites
+ *              and all data relevant to display.
+ *
+ * Inputs: EditorMap* map - the map to use for control
+ * Output: none
+ */
 void ThingView::setEditorMap(EditorMap* map)
 {
   /* If existing editor map is not NULL, undo */
@@ -408,35 +528,62 @@ void ThingView::setEditorMap(EditorMap* map)
   updateList();
 }
 
-/* Updates list in thing dialog, needed for event control */
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
 void ThingView::updateListItems(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListItems(list);
 }
 
-/* Updates list in thing dialog, needed for event control */
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
 void ThingView::updateListMaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListMaps(list);
 }
 
-/* Updates list in thing dialog, needed for event control */
-void ThingView::updateListThings(QVector<QString> list)
-{
-  if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListThings(list);
-}
-
-/* Update the selected tile for the thing */
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
 void ThingView::updateListSubmaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListSubmaps(list);
 }
 
-/* Update the selected tile for the thing */
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
+void ThingView::updateListThings(QVector<QString> list)
+{
+  if(thing_dialog != NULL)
+    thing_dialog->getEventView()->setListThings(list);
+}
+
+/*
+ * Description: Updates the event embedded in the thing dialog with the
+ *              selected tile. Used for event creation. Called by parent.
+ *
+ * Inputs: int id - the id of the sub-map
+ *         int x, y - the coordinates in the map
+ * Output: none
+ */
 void ThingView::updateSelectedTile(int id, int x, int y)
 {
   if(thing_dialog != NULL)
@@ -447,7 +594,12 @@ void ThingView::updateSelectedTile(int id, int x, int y)
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the instance ID */
+/*
+ * Description: Returns the instance ID from the text in the list.
+ *
+ * Inputs: QString text - list text for instances
+ * Output: int - the id of the thing. -1 if failed.
+ */
 int ThingView::getInstanceID(QString text)
 {
   /* Split to find the number */

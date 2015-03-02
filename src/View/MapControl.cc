@@ -84,8 +84,8 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   QHBoxLayout* button_layout2 = new QHBoxLayout();
   button_layout2->addWidget(new_submap);
   button_layout2->addWidget(button_delete);
-  button_layout2->addWidget(duplicate_submap);
   button_layout2->addWidget(import_submap);
+  button_layout2->addWidget(duplicate_submap);
   connect(new_submap, SIGNAL(clicked()), this, SLOT(newSubMap()));
   connect(button_delete, SIGNAL(clicked()), this, SLOT(deleteSubMap()));
   connect(duplicate_submap, SIGNAL(clicked()), this, SLOT(duplicateSubMap()));
