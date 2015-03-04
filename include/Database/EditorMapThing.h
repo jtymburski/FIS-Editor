@@ -1,34 +1,34 @@
 /*******************************************************************************
- * Class Name: EditorThing
+ * Class Name: EditorMapThing
  * Date Created: February 7, 2015
  * Inheritance: EditorTemplate
  * Description: The class for managing the interfacing with MapThing and filling
  *              it with data. The management pop-up is ThingDialog.
  ******************************************************************************/
-#ifndef EDITORTHING_H
-#define EDITORTHING_H
+#ifndef EDITORMAPTHING_H
+#define EDITORMAPTHING_H
 
 #include "Database/EditorMatrix.h"
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
 #include "Game/Map/MapThing.h"
 
-class EditorThing : public EditorTemplate
+class EditorMapThing : public EditorTemplate
 {
 public:
   /* Constructor function */
-  EditorThing(int id = -1, QString name = "Default Thing",
-              QString description = "");
+  EditorMapThing(int id = -1, QString name = "Default Thing",
+                 QString description = "");
 
   /* Copy constructor */
-  EditorThing(const EditorThing &source);
+  EditorMapThing(const EditorMapThing &source);
 
   /* Destructor function */
-  virtual ~EditorThing();
+  virtual ~EditorMapThing();
 
 private:
   /* A base thing object */
-  EditorThing* base;
+  EditorMapThing* base;
 
   /* The frame displayed in a dialog when interacting with the thing */
   EditorSprite dialog_image;
@@ -54,14 +54,14 @@ private:
  *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
-  void copySelf(const EditorThing &source);
+  void copySelf(const EditorMapThing &source, bool inc_matrix = true);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
   /* Gets the base thing of the thing */
-  EditorThing* getBase() const;
+  EditorMapThing* getBase() const;
 
   /* Gets the description of the thing */
   QString getDescription() const;
@@ -104,7 +104,7 @@ public:
   void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference thing */
-  void setBase(EditorThing* thing);
+  void setBase(EditorMapThing* thing);
 
   /* Sets the description of the thing */
   void setDescription(QString description);
@@ -136,7 +136,7 @@ public:
  *===========================================================================*/
 public:
   /* The copy operator */
-  EditorThing& operator= (const EditorThing &source);
+  EditorMapThing& operator= (const EditorMapThing &source);
 };
 
-#endif // EDITORTHING_H
+#endif // EDITORMAPTHING_H

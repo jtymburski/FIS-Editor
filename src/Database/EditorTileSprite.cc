@@ -157,7 +157,7 @@ int EditorTileSprite::getY()
 }
 
 /*
- * Description: Increments the render depth, if possible, by 1. Highest point is 
+ * Description: Increments the render depth, if possible, by 1. Highest point is
  *              10 (defined by Helpers.cc).
  *
  * Inputs: none

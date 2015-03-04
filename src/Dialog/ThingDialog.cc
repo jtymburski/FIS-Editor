@@ -19,7 +19,7 @@
  * Inputs: EditorThing* edit_thing - the thing to edit the data for
  *         QWidget* parent - the parent widget
  */
-ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
+ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
   convo_dialog = NULL;
@@ -28,7 +28,7 @@ ThingDialog::ThingDialog(EditorThing* edit_thing, QWidget* parent)
 
   /* Set-up the thing set - copied to working for changes */
   thing_original = edit_thing;
-  thing_working = new EditorThing();
+  thing_working = new EditorMapThing();
   if(thing_original != NULL)
   {
     *thing_working = *thing_original;
@@ -250,6 +250,10 @@ void ThingDialog::buttonFrameEdit()
  */
 void ThingDialog::buttonOk()
 {
+  /* Trim the matrix before accepting the sprites */
+  matrix_view->buttonTrim();
+
+  /* Proceed to ok() */
   emit ok();
   event_ctrl->setEventBlank(false);
   close();

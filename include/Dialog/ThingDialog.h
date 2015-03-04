@@ -11,7 +11,7 @@
 #include <QDialog>
 #include <QGridLayout>
 
-#include "Database/EditorThing.h"
+#include "Database/EditorMapThing.h"
 #include "Dialog/ConvoDialog.h"
 #include "View/EventView.h"
 #include "View/MatrixView.h"
@@ -21,7 +21,7 @@ class ThingDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  ThingDialog(EditorThing* edit_thing = NULL, QWidget* parent = NULL);
+  ThingDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = NULL);
 
   /* Destructor function */
   ~ThingDialog();
@@ -51,8 +51,8 @@ private:
   MatrixView* matrix_view;
 
   /* The working and original thing */
-  EditorThing* thing_original;
-  EditorThing* thing_working;
+  EditorMapThing* thing_original;
+  EditorMapThing* thing_working;
 
   /* Waiting for sub-map data */
   bool waiting_convo;

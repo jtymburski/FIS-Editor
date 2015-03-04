@@ -369,7 +369,8 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 
   // TODO : Replace this with some file loading
   setBaseAction(Action());
-  //setBaseAction(Action("509,INFLICT,2.5,PHYSICAL,POLAR.PRIMAL,ALLDEFBUFF,AMOUNT.0,,VITA,99"));
+  //setBaseAction(Action("509,INFLICT,2.5,PHYSICAL,POLAR.PRIMAL,ALLDEFBUFF,
+  //                      AMOUNT.0,,VITA,99"));
 
   /* Set name */
   name = "";

@@ -17,7 +17,7 @@
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
-#include "Database/EditorThing.h"
+#include "Database/EditorMapThing.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
 #include "Game/Map/Tile.h"
@@ -31,7 +31,7 @@ struct HoverInfo
   EditorEnumDb::CursorMode active_cursor;
 
   EditorSprite* active_sprite;
-  EditorThing* active_thing;
+  EditorMapThing* active_thing;
 
   EditorTile* hover_tile;
   QRect selected_thing;
@@ -41,7 +41,7 @@ struct HoverInfo
 struct TileRenderInfo
 {
   EditorSprite* sprite;
-  EditorThing* thing;
+  EditorMapThing* thing;
   bool visible;
 };
 
@@ -135,7 +135,7 @@ public:
   bool getPassabilityVisible(Direction direction);
 
   /* Returns the map thing pointer(s) for the generic thing */
-  EditorThing* getThing(int render_level);
+  EditorMapThing* getThing(int render_level);
 
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);
@@ -175,7 +175,7 @@ public:
                       bool passable);
 
   /* Sets the thing sprite pointer, stored within the class */
-  bool setThing(EditorThing* thing);
+  bool setThing(EditorMapThing* thing);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
@@ -198,7 +198,7 @@ public:
   void unplace(EditorSprite* sprite);
 
   /* Unsets the stored thing pointer(s) */
-  bool unsetThing(EditorThing* thing);
+  bool unsetThing(EditorMapThing* thing);
   bool unsetThing(int render_level);
   void unsetThings();
 

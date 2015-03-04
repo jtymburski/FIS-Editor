@@ -145,7 +145,8 @@ void EditorSkillset::setLevelBox(int row)
       working_skill_index -=1;
       deletion = false;
     }
-    level_edit->setText(QString::number(working_level_set.at(working_skill_index)));
+    level_edit->setText(QString::number(
+                                    working_level_set.at(working_skill_index)));
   }
 
 }

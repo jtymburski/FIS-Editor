@@ -88,7 +88,7 @@ EditorMap::~EditorMap()
  * Inputs: EditorThing* thing - the thing to attempt to add
  * Output: bool - true if the thing was added (does not delete if fails)
  */
-bool EditorMap::addThing(EditorThing* thing, SubMapInfo* map)
+bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map)
 {
   int x = thing->getX();
   int y = thing->getY();
@@ -365,12 +365,12 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   else if(element == "mapthing")
   {
     int thing_id = QString::fromStdString(data.getKeyValue(index)).toInt();
-    EditorThing* thing = getThing(thing_id, map->id);
+    EditorMapThing* thing = getThing(thing_id, map->id);
 
     /* Create new thing if it doesn't exist */
     if(thing == NULL)
     {
-      thing = new EditorThing(thing_id);
+      thing = new EditorMapThing(thing_id);
       thing->setTileIcons(getTileIcons());
 
       /* Find insertion location */
@@ -397,7 +397,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     if(element == "base")
     {
       /* Get name and desc. if it has been changed */
-      EditorThing default_thing;
+      EditorMapThing default_thing;
       QString default_name = "";
       QString default_desc = "";
       if(default_thing.getName() != thing->getName())
@@ -406,7 +406,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
         default_desc = thing->getDescription();
 
       /* Set the base */
-      EditorThing* base_thing = getThing(data.getDataInteger());
+      EditorMapThing* base_thing = getThing(data.getDataInteger());
       if(base_thing != NULL)
       {
         thing->setBase(base_thing);
@@ -735,7 +735,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       {
         /* Create the thing */
         int id = getNextThingID(true);
-        EditorThing* new_thing = new EditorThing(id);
+        EditorMapThing* new_thing = new EditorMapThing(id);
         new_thing->setBase(active_info.active_thing);
         new_thing->setX(active_info.hover_tile->getX());
         new_thing->setY(active_info.hover_tile->getY());
@@ -757,7 +757,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         int max = Helpers::getRenderDepth();
 
         /* Loop through all to find the top thing */
-        EditorThing* found = NULL;
+        EditorMapThing* found = NULL;
         for(int i = max - 1; found == NULL && i >= 0; i--)
           if(active_info.hover_tile->getThing(i) != NULL)
             found = active_info.hover_tile->getThing(i);
@@ -1248,7 +1248,7 @@ QVector<EditorSprite*> EditorMap::getSprites()
  *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: EditorThing* - the pointer to match the ID. NULL if not found.
  */
-EditorThing* EditorMap::getThing(int id, int sub_map)
+EditorMapThing* EditorMap::getThing(int id, int sub_map)
 {
   if(id >= 0)
   {
@@ -1278,7 +1278,7 @@ EditorThing* EditorMap::getThing(int id, int sub_map)
  *         int sub_map - the sub-map to get the things for (<0 is base)
  * Output: EditorThing* - the pointer to match the index. NULL if out of range
  */
-EditorThing* EditorMap::getThingByIndex(int index, int sub_map)
+EditorMapThing* EditorMap::getThingByIndex(int index, int sub_map)
 {
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -1392,7 +1392,7 @@ QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
  * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
  * Output: QVector<EditorThing*> - list of all things
  */
-QVector<EditorThing*> EditorMap::getThings(int sub_map)
+QVector<EditorMapThing*> EditorMap::getThings(int sub_map)
 {
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -1406,7 +1406,7 @@ QVector<EditorThing*> EditorMap::getThings(int sub_map)
   }
 
   /* Otherwise, return blank list */
-  QVector<EditorThing*> blank_list;
+  QVector<EditorMapThing*> blank_list;
   return blank_list;
 }
 
@@ -1454,12 +1454,12 @@ void EditorMap::load(XmlData data, int index)
   else if(data.getElement(index) == "mapthing" && data.getKey(index) == "id")
   {
     int thing_id = QString::fromStdString(data.getKeyValue(index)).toInt();
-    EditorThing* thing = getThing(thing_id);
+    EditorMapThing* thing = getThing(thing_id);
 
     /* Create new thing if it doesn't exist */
     if(thing == NULL)
     {
-      thing = new EditorThing(thing_id);
+      thing = new EditorMapThing(thing_id);
       thing->setTileIcons(getTileIcons());
       setThing(thing);
     }
@@ -1686,7 +1686,7 @@ bool EditorMap::setHoverThing(int id)
         active_submap->tiles[existing.x() + i][existing.y() + j]->update();
 
     /* Next, try and get the new thing */
-    EditorThing* thing = getThing(id, active_submap->id);
+    EditorMapThing* thing = getThing(id, active_submap->id);
     if(thing != NULL)
     {
       active_info.selected_thing = QRect(thing->getX(), thing->getY(),
@@ -1929,7 +1929,7 @@ int EditorMap::setSprite(EditorSprite* sprite)
  *         int sub_map - the sub-map to set the things for (<0 is base)
  * Output: int - the index if set. If < 0, it is not set.
  */
-int EditorMap::setThing(EditorThing* thing, int sub_map)
+int EditorMap::setThing(EditorMapThing* thing, int sub_map)
 {
   if(thing != NULL && thing->getID() >= 0)
   {
@@ -2143,7 +2143,7 @@ void EditorMap::thingRemoveFromTiles()
 
     for(int i = 0; i < active_submap->things.size(); i++)
     {
-      EditorThing* thing = active_submap->things[i];
+      EditorMapThing* thing = active_submap->things[i];
       int x = thing->getX();
       int y = thing->getY();
       int w = thing->getMatrix()->getWidth();
@@ -2343,7 +2343,7 @@ bool EditorMap::unsetThingByIndex(int index, int sub_map)
   {
     if(index >= 0 && index < sub_maps[sub_map]->things.size())
     {
-      EditorThing* ref = sub_maps[sub_map]->things[index];
+      EditorMapThing* ref = sub_maps[sub_map]->things[index];
 
       /* Remove the instances from tiles */
       int x = ref->getX();

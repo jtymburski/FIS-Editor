@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Class Name: EditorThing
+ * Class Name: EditorMapThing
  * Date Created: February 7, 2015
  * Inheritance: EditorTemplate
  * Description: The class for managing the interfacing with MapThing and filling
  *              it with data. The management pop-up is ThingDialog.
  ******************************************************************************/
 #include "Database/EditorEvent.h" /* Only needed for public static function */
-#include "Database/EditorThing.h"
+#include "Database/EditorMapThing.h"
 #include <QDebug>
 
 /*============================================================================
@@ -20,7 +20,7 @@
  *         QString name - the name of the thing
  *         QString description - the description of the thing
  */
-EditorThing::EditorThing(int id, QString name, QString description)
+EditorMapThing::EditorMapThing(int id, QString name, QString description)
 {
   base = NULL;
   matrix = new EditorMatrix(1, 1, false);
@@ -44,7 +44,7 @@ EditorThing::EditorThing(int id, QString name, QString description)
  *
  * Inputs: const EditorThing &source - the source thing to copy
  */
-EditorThing::EditorThing(const EditorThing &source) : EditorThing()
+EditorMapThing::EditorMapThing(const EditorMapThing &source) : EditorMapThing()
 {
   copySelf(source);
 }
@@ -52,7 +52,7 @@ EditorThing::EditorThing(const EditorThing &source) : EditorThing()
 /*
  * Description: Destructor function
  */
-EditorThing::~EditorThing()
+EditorMapThing::~EditorMapThing()
 {
   base = NULL;
   EventHandler::deleteEvent(event);
@@ -69,9 +69,10 @@ EditorThing::~EditorThing()
  *              thing.
  *
  * Inputs: EditorThing &source - the source to copy from
+ *         bool inc_matrix - include matrix data in save (false for children)
  * Output: none
  */
-void EditorThing::copySelf(const EditorThing &source)
+void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
 {
   /* Copy the thing data */
   setBase(source.getBase());
@@ -83,7 +84,8 @@ void EditorThing::copySelf(const EditorThing &source)
 
   /* Copy the visual data */
   dialog_image = source.dialog_image;
-  *matrix = *source.matrix;
+  if(inc_matrix)
+    *matrix = *source.matrix;
 
   /* Copy the control variables */
   setTileIcons(source.tile_icons);
@@ -99,7 +101,7 @@ void EditorThing::copySelf(const EditorThing &source)
  * Inputs: none
  * Output: EditorThing* - the base thing reference pointer
  */
-EditorThing* EditorThing::getBase() const
+EditorMapThing* EditorMapThing::getBase() const
 {
   return base;
 }
@@ -110,7 +112,7 @@ EditorThing* EditorThing::getBase() const
  * Inputs: none
  * Output: QString - the thing description
  */
-QString EditorThing::getDescription() const
+QString EditorMapThing::getDescription() const
 {
   return QString::fromStdString(thing.getDescription());
 }
@@ -123,7 +125,7 @@ QString EditorThing::getDescription() const
  * Inputs: none
  * Output: none
  */
-EditorSprite* EditorThing::getDialogImage()
+EditorSprite* EditorMapThing::getDialogImage()
 {
   if(base != NULL)
   {
@@ -145,7 +147,7 @@ EditorSprite* EditorThing::getDialogImage()
  * Inputs: none
  * Output: Event - the interaction event struct
  */
-Event EditorThing::getEvent() const
+Event EditorMapThing::getEvent() const
 {
   if(base != NULL)
     return base->event;
@@ -158,7 +160,7 @@ Event EditorThing::getEvent() const
  * Inputs: none
  * Output: int - the id of the editor thing
  */
-int EditorThing::getID() const
+int EditorMapThing::getID() const
 {
   return thing.getID();
 }
@@ -169,7 +171,7 @@ int EditorThing::getID() const
  * Inputs: none
  * Output: EditorMatrix* - the matrix sprite set
  */
-EditorMatrix* EditorThing::getMatrix()
+EditorMatrix* EditorMapThing::getMatrix()
 {
   if(base != NULL)
     return base->matrix;
@@ -182,7 +184,7 @@ EditorMatrix* EditorThing::getMatrix()
  * Inputs: none
  * Output: The name of the editor thing
  */
-QString EditorThing::getName() const
+QString EditorMapThing::getName() const
 {
   return QString::fromStdString(thing.getName());
 }
@@ -195,7 +197,7 @@ QString EditorThing::getName() const
  * Inputs: none
  * Output: QString - the name for a list
  */
-QString EditorThing::getNameList()
+QString EditorMapThing::getNameList()
 {
   int base_id = -1;
   if(base != NULL)
@@ -212,7 +214,7 @@ QString EditorThing::getNameList()
  * Inputs: none
  * Output: QString - the name for a list
  */
-QString EditorThing::getNameList(bool shortened)
+QString EditorMapThing::getNameList(bool shortened)
 {
   if(shortened)
     return EditorHelpers::getListString(getID(), getName(), -1, true);
@@ -226,7 +228,7 @@ QString EditorThing::getNameList(bool shortened)
  * Inputs: none
  * Output: int - the x location in tile units
  */
-int EditorThing::getX()
+int EditorMapThing::getX()
 {
   return x;
 }
@@ -238,7 +240,7 @@ int EditorThing::getX()
  * Inputs: none
  * Output: int - the y location in tile units
  */
-int EditorThing::getY()
+int EditorMapThing::getY()
 {
   return y;
 }
@@ -249,7 +251,7 @@ int EditorThing::getY()
  * Inputs: none
  * Output: bool - true if visible when the game is running
  */
-bool EditorThing::isVisible() const
+bool EditorMapThing::isVisible() const
 {
   if(base != NULL)
     return base->isVisible();
@@ -263,7 +265,7 @@ bool EditorThing::isVisible() const
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorThing::load(XmlData data, int index)
+void EditorMapThing::load(XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
 
@@ -325,7 +327,7 @@ void EditorThing::load(XmlData data, int index)
  *         int offset_y - the offset from top of the sprite in matrix
  * Output: bool - true if the sprite was rendered
  */
-bool EditorThing::paint(QPainter* painter, QRect rect,
+bool EditorMapThing::paint(QPainter* painter, QRect rect,
                         int offset_x, int offset_y)
 {
   if(getMatrix() != NULL)
@@ -345,7 +347,7 @@ bool EditorThing::paint(QPainter* painter, QRect rect,
  *         int offset_y - the offset from top of the sprite in matrix
  * Output: bool - true if the sprite was rendered
  */
-bool EditorThing::paint(int frame_index, QPainter* painter, QRect rect,
+bool EditorMapThing::paint(int frame_index, QPainter* painter, QRect rect,
                         int offset_x, int offset_y)
 {
   if(getMatrix() != NULL)
@@ -360,9 +362,9 @@ bool EditorThing::paint(int frame_index, QPainter* painter, QRect rect,
  *         bool game_only - true if the data should include game only relevant
  * Output: none
  */
-void EditorThing::save(FileHandler* fh, bool game_only)
+void EditorMapThing::save(FileHandler* fh, bool game_only)
 {
-  EditorThing default_thing;
+  EditorMapThing default_thing;
 
   if(fh != NULL)
   {
@@ -416,7 +418,7 @@ void EditorThing::save(FileHandler* fh, bool game_only)
  * Inputs: EditorThing* thing - the base thing object
  * Output: none
  */
-void EditorThing::setBase(EditorThing* thing)
+void EditorMapThing::setBase(EditorMapThing* thing)
 {
   base = thing;
 
@@ -434,7 +436,7 @@ void EditorThing::setBase(EditorThing* thing)
  * Inputs: QString description - the description text
  * Output: none
  */
-void EditorThing::setDescription(QString description)
+void EditorMapThing::setDescription(QString description)
 {
   thing.setDescription(description.toStdString());
 }
@@ -445,7 +447,7 @@ void EditorThing::setDescription(QString description)
  * Inputs: QString path - the path for the dialog image
  * Output: none
  */
-void EditorThing::setDialogImage(QString path)
+void EditorMapThing::setDialogImage(QString path)
 {
   /* Make sure the image is empty and ready for the new path */
   while(dialog_image.frameCount() > 0)
@@ -461,7 +463,7 @@ void EditorThing::setDialogImage(QString path)
  * Inputs: Event event - the event control struct, as generated by EditorEvent
  * Output: none
  */
-void EditorThing::setEvent(Event event)
+void EditorMapThing::setEvent(Event event)
 {
   this->event = EventHandler::deleteEvent(this->event);
   this->event = event;
@@ -473,7 +475,7 @@ void EditorThing::setEvent(Event event)
  * Inputs: int id - the thing id
  * Output: none
  */
-void EditorThing::setID(int id)
+void EditorMapThing::setID(int id)
 {
   if(id >= 0)
     thing.setID(id);
@@ -485,7 +487,7 @@ void EditorThing::setID(int id)
  * Inputs: QString name - the name text
  * Output: none
  */
-void EditorThing::setName(QString name)
+void EditorMapThing::setName(QString name)
 {
   thing.setName(name.toStdString());
 }
@@ -496,7 +498,7 @@ void EditorThing::setName(QString name)
  * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
  * Output: none
  */
-void EditorThing::setTileIcons(TileIcons* icons)
+void EditorMapThing::setTileIcons(TileIcons* icons)
 {
   tile_icons = icons;
   if(matrix != NULL)
@@ -509,7 +511,7 @@ void EditorThing::setTileIcons(TileIcons* icons)
  * Inputs: bool visible - true if it should be visible
  * Output: none
  */
-void EditorThing::setVisibility(bool visible)
+void EditorMapThing::setVisibility(bool visible)
 {
   thing.setVisibility(visible);
 }
@@ -521,7 +523,7 @@ void EditorThing::setVisibility(bool visible)
  * Inputs: int x - the x coordinate of the top left
  * Output: bool - true if the x was set
  */
-bool EditorThing::setX(int x)
+bool EditorMapThing::setX(int x)
 {
   if(x >= 0)
   {
@@ -538,7 +540,7 @@ bool EditorThing::setX(int x)
  * Inputs: int y - the Y coordinate of the top left
  * Output: bool - true if the y was set
  */
-bool EditorThing::setY(int y)
+bool EditorMapThing::setY(int y)
 {
   if(y >= 0)
   {
@@ -560,7 +562,7 @@ bool EditorThing::setY(int y)
  * Inputs: const EditorThing &source - the source class constructor
  * Output: EditorThing& - pointer to the copied class
  */
-EditorThing& EditorThing::operator= (const EditorThing &source)
+EditorMapThing& EditorMapThing::operator= (const EditorMapThing &source)
 {
   /* Check for self assignment */
   if(this == &source)

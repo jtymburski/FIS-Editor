@@ -329,7 +329,7 @@ int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
  */
 bool EditorTile::getPassabilityThing(Direction direction)
 {
-  EditorThing* thing = things[0].thing;
+  EditorMapThing* thing = things[0].thing;
 
   if(thing != NULL)
   {
@@ -378,7 +378,7 @@ bool EditorTile::getPassabilityVisible(Direction direction)
  * Inputs: int render_level - the render level inside the tile
  * Output: EditorThing* - the thing at the render level
  */
-EditorThing* EditorTile::getThing(int render_level)
+EditorMapThing* EditorTile::getThing(int render_level)
 {
   if(render_level >= 0 && render_level < Helpers::getRenderDepth())
     return things[render_level].thing;
@@ -911,7 +911,7 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
  *                              render depth and position)
  * Output: bool - true if the thing is set
  */
-bool EditorTile::setThing(EditorThing* thing)
+bool EditorTile::setThing(EditorMapThing* thing)
 {
   if(thing != NULL)
   {
@@ -1207,7 +1207,7 @@ void EditorTile::unplace(EditorSprite* sprite)
  * Inputs: EditorThing* thing - the thing to remove from the tile
  * Output: bool - true if the thing was found and removed
  */
-bool EditorTile::unsetThing(EditorThing* thing)
+bool EditorTile::unsetThing(EditorMapThing* thing)
 {
   for(int i = 0; i < things.size(); i++)
   {

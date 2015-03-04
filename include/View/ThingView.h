@@ -53,13 +53,13 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor thing to the editing map */
-  void addThing(EditorThing* thing);
+  void addThing(EditorMapThing* thing);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
   /* Opens the thing editing dialog */
-  void editThing(EditorThing* sub_thing = NULL);
+  void editThing(EditorMapThing* sub_thing = NULL);
 
   /* Refreshes the info in the lower half of the widget */
   void updateInfo();
@@ -124,7 +124,7 @@ public:
   bool duplicateThing();
 
   /* Get current thing */
-  EditorThing* getSelected();
+  EditorMapThing* getSelected();
 
   /* Gets the editor map */
   EditorMap* getEditorMap();

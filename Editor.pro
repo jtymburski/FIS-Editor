@@ -39,13 +39,14 @@ SOURCES += \
     src/Database/EditorEvent.cc \
     src/Database/EditorItem.cc \
     src/Database/EditorMap.cc \
+    src/Database/EditorMapPerson.cc \
+    src/Database/EditorMapThing.cc \
     src/Database/EditorMatrix.cc \
     src/Database/EditorParty.cc \
     src/Database/EditorPerson.cc \
     src/Database/EditorSkill.cc \
     src/Database/EditorSkillset.cc \
     src/Database/EditorSprite.cc \
-    src/Database/EditorThing.cc \
     src/Database/EditorTile.cc \
     src/Database/EditorTileSprite.cc \
     src/Database/GameDatabase.cc \
@@ -106,6 +107,8 @@ HEADERS += \
     include/Database/EditorEvent.h \
     include/Database/EditorItem.h \
     include/Database/EditorMap.h \
+    include/Database/EditorMapPerson.h \
+    include/Database/EditorMapThing.h \
     include/Database/EditorMatrix.h \
     include/Database/EditorParty.h \
     include/Database/EditorPerson.h \
@@ -113,7 +116,6 @@ HEADERS += \
     include/Database/EditorSkillset.h \
     include/Database/EditorSprite.h \
     include/Database/EditorTemplate.h \
-    include/Database/EditorThing.h \
     include/Database/EditorTile.h \
     include/Database/EditorTileSprite.h \
     include/Database/GameDatabase.h \

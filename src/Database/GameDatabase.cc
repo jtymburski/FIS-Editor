@@ -631,7 +631,8 @@ void GameDatabase::rowChange(int index)
       break;
     /* -- SKILL SET -- */
     case 7:
-      emit changeMode(EditorEnumDb::SKILLSETVIEW); // TODO: Move to modifySelection()
+      // TODO: Move to modifySelection()
+      emit changeMode(EditorEnumDb::SKILLSETVIEW);
 //      if(skillset_pair.size() != 0 && current_skillset_selection != -1)
 //      {
 //        current_name = &skillset_pair[current_skillset_selection]->first;
@@ -641,7 +642,8 @@ void GameDatabase::rowChange(int index)
       break;
     /* -- SKILL -- */
     case 8:
-      emit changeMode(EditorEnumDb::SKILLVIEW); // TODO: MOve to modifySelection()
+      // TODO: Move to modifySelection()
+      emit changeMode(EditorEnumDb::SKILLVIEW);
 //      if(skill_pair.size() != 0 && current_skill_selection != -1)
 //      {
 //        current_name = &skill_pair[current_skill_selection]->first;

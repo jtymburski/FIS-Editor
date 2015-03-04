@@ -18,7 +18,7 @@
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
-#include "Database/EditorThing.h"
+#include "Database/EditorMapThing.h"
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
@@ -31,7 +31,7 @@ struct SubMapInfo
   QString name;
   QVector<QVector<EditorTile*>> tiles;
 
-  QVector<EditorThing*> things;
+  QVector<EditorMapThing*> things;
 };
 
 class EditorMap : public QObject, public EditorTemplate
@@ -58,7 +58,7 @@ private:
   SubMapInfo* active_submap;
 
   /* The base map things */
-  QVector<EditorThing*> base_things;
+  QVector<EditorMapThing*> base_things;
 
   /* The map set ID */
   int id;
@@ -88,7 +88,7 @@ private:
  *===========================================================================*/
 protected:
   /* Attempts to add thing to the current sub-map */
-  bool addThing(EditorThing* thing, SubMapInfo* map = NULL);
+  bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL);
 
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
@@ -177,13 +177,13 @@ public:
   QVector<EditorSprite*> getSprites();
 
   /* Return stored thing information */
-  EditorThing* getThing(int id, int sub_map = -1);
-  EditorThing* getThingByIndex(int index, int sub_map = -1);
+  EditorMapThing* getThing(int id, int sub_map = -1);
+  EditorMapThing* getThingByIndex(int index, int sub_map = -1);
   int getThingCount(int sub_map = -1);
   int getThingIndex(int id, int sub_map = -1);
   QVector<QString> getThingList(int sub_map = -1, bool all_submaps = false,
                                 bool shortened = false);
-  QVector<EditorThing*> getThings(int sub_map = -1);
+  QVector<EditorMapThing*> getThings(int sub_map = -1);
 
   /* Returns the tile icons */
   TileIcons* getTileIcons();
@@ -219,7 +219,7 @@ public:
   int setSprite(EditorSprite* sprite);
 
   /* Sets a thing in the map */
-  int setThing(EditorThing* thing, int sub_map = -1);
+  int setThing(EditorMapThing* thing, int sub_map = -1);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);

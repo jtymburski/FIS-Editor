@@ -1676,7 +1676,7 @@ void EditorMatrix::setVisibilityPass(bool visible, bool force)
 }
 
 /*
- * Description: Sets the visibility of the render depth in all tiles. If forced, 
+ * Description: Sets the visibility of the render depth in all tiles. If forced,
  *              it sets it even if the tile has it already set.
  *
  * Inputs: bool visible - true if render depth should be visible

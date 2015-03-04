@@ -48,7 +48,7 @@ ThingView::~ThingView()
  * Inputs: EditorThing* thing - the new thing to add (ID not set yet)
  * Output: none
  */
-void ThingView::addThing(EditorThing* thing)
+void ThingView::addThing(EditorMapThing* thing)
 {
   if(editor_map != NULL)
   {
@@ -130,9 +130,9 @@ void ThingView::createLayout()
  * Inputs: EditorThing* sub_thing - the thing to edit
  * Output: none
  */
-void ThingView::editThing(EditorThing* sub_thing)
+void ThingView::editThing(EditorMapThing* sub_thing)
 {
-  EditorThing* current = getSelected();
+  EditorMapThing* current = getSelected();
   if(sub_thing != NULL)
     current = sub_thing;
 
@@ -169,7 +169,7 @@ void ThingView::updateInfo()
     lbl_name->setText("Name:");
     lbl_size->setText("Size:  |  Frames:");
 
-    EditorThing* thing = getSelected();
+    EditorMapThing* thing = getSelected();
     if(thing != NULL)
     {
       /* Set the labels */
@@ -276,7 +276,7 @@ void ThingView::editInstance()
   {
     int id = getInstanceID(thing_instances->currentItem()->text());
 
-    EditorThing* thing = editor_map->getThing(
+    EditorMapThing* thing = editor_map->getThing(
                                            id, editor_map->getCurrentMap()->id);
     if(thing != NULL)
     {
@@ -398,7 +398,7 @@ void ThingView::updateThings()
  */
 bool ThingView::deleteThing()
 {
-  EditorThing* selected = getSelected();
+  EditorMapThing* selected = getSelected();
   bool success = false;
 
   /* If valid, proceed deletion */
@@ -428,12 +428,12 @@ bool ThingView::deleteThing()
  */
 bool ThingView::duplicateThing()
 {
-  EditorThing* selected = getSelected();
+  EditorMapThing* selected = getSelected();
 
   /* If valid, proceed duplication */
   if(selected != NULL)
   {
-    EditorThing* new_thing = new EditorThing(*selected);
+    EditorMapThing* new_thing = new EditorMapThing(*selected);
     addThing(new_thing);
     return true;
   }
@@ -447,10 +447,10 @@ bool ThingView::duplicateThing()
  * Inputs: none
  * Output: EditorThing* - selected thing. NULL if none selected
  */
-EditorThing* ThingView::getSelected()
+EditorMapThing* ThingView::getSelected()
 {
   int index = thing_list->currentRow();
-  EditorThing* thing = NULL;
+  EditorMapThing* thing = NULL;
 
   /* Check the validity */
   if(editor_map != NULL)
@@ -494,7 +494,7 @@ void ThingView::importThing()
  */
 void ThingView::newThing()
 {
-  EditorThing* new_thing = new EditorThing();
+  EditorMapThing* new_thing = new EditorMapThing();
   addThing(new_thing);
   editThing();
 }
