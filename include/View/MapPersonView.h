@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Class Name: ThingView
- * Date Created: February 13, 2015
+ * Class Name: MapPersonView
+ * Date Created: March 6, 2015
  * Inheritance: QWidget
  * Description: The side toolbar in the map database that gives access to the
- *              map things.
+ *              map persons.
  ******************************************************************************/
-#ifndef THINGVIEW_H
-#define THINGVIEW_H
+#ifndef MAPPERSONVIEW_H
+#define MAPPERSONVIEW_H
 
 #include <QLabel>
 #include <QListWidget>
@@ -14,19 +14,18 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
-#include "Dialog/ThingDialog.h"
+//#include "Dialog/PersonDialog.h" // TODO: FUTURE
 #include "EditorHelpers.h"
-//#include "View/SpriteViewList.h"
 
-class ThingView : public QWidget
+class MapPersonView : public QWidget
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  ThingView(QWidget* parent = NULL);
+  MapPersonView(QWidget* parent = NULL);
 
   /* Destructor function */
-  ~ThingView();
+  ~MapPersonView();
 
 private:
   /* The current editing map */
@@ -38,33 +37,33 @@ private:
   QLabel* lbl_name;
   QLabel* lbl_size;
 
+  /* The person dialog for editing */
+  //PersonDialog* person_dialog; // TODO: FUTURE
+
+  /* The list of person in the view */
+  QListWidget* person_instances;
+  QListWidget* person_list;
+
   /* Right click menu on instance list */
   QMenu* rightclick_menu;
-
-  /* The thing dialog for editing */
-  ThingDialog* thing_dialog;
-
-  /* The list of things in the view */
-  QListWidget* thing_instances;
-  QListWidget* thing_list;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Adds an editor thing to the editing map */
-  void addThing(EditorMapThing* thing);
+  /* Adds an editor person to the editing map */
+  void addPerson(EditorMapPerson* person);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
-  /* Opens the thing editing dialog */
-  void editThing(EditorMapThing* sub_thing = NULL);
+  /* Opens the person editing dialog */
+  void editPerson(EditorMapPerson* sub_person = NULL);
 
   /* Refreshes the info in the lower half of the widget */
   void updateInfo();
 
-  /* Refreshes the editor thing list in the view */
+  /* Refreshes the editor person list in the view */
   void updateList();
 
 /*============================================================================
@@ -92,66 +91,59 @@ public slots:
   /* The current row changes in the list widget */
   void currentRowChanged(int index);
 
-  /* Delete thing instance */
+  /* Delete person instance */
   void deleteInstance();
 
-  /* Edit thing instance */
+  /* Edit person instance */
   void editInstance();
 
   /* Instance menu trigger */
   void instanceMenu(const QPoint & pos);
 
-  /* Instance of thing row changed */
+  /* Instance of person row changed */
   void instanceRowChanged(int index);
 
   /* An item in the list was double clicked */
   void itemDoubleClicked(QListWidgetItem*);
 
-  /* Update thing instances in view */
-  void thingInstanceUpdate();
+  /* Update person instances in view */
+  void personInstanceUpdate();
 
-  /* Updates the thing sidebar */
-  void updateThings();
+  /* Updates the person sidebar */
+  void updatePersons();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Deletes the selected thing */
-  bool deleteThing();
+  /* Deletes the selected person */
+  bool deletePerson();
 
-  /* Duplicates the selected thing */
-  bool duplicateThing();
+  /* Duplicates the selected person */
+  bool duplicatePerson();
 
-  /* Get current thing */
+  /* Get current person */
   EditorMapThing* getSelected();
 
   /* Gets the editor map */
   EditorMap* getEditorMap();
 
-  /* Imports a thing from another file */
-  void importThing();
+  /* Imports a person from another file */
+  void importPerson();
 
-  /* Creates a new blank thing */
-  void newThing();
+  /* Creates a new blank person */
+  void newPerson();
 
   /* Sets the editor map, which contains the data needed */
   void setEditorMap(EditorMap* map);
 
-  /* Updates list in thing dialog, needed for event control */
+  /* Updates list in person dialog, needed for event control */
   void updateListItems(QVector<QString> list);
   void updateListMaps(QVector<QString> list);
   void updateListSubmaps(QVector<QString> list);
   void updateListThings(QVector<QString> list);
 
-  /* Update the selected tile for the thing */
+  /* Update the selected tile for the person */
   void updateSelectedTile(int id, int x, int y);
-
-/*============================================================================
- * PUBLIC STATIC FUNCTIONS
- *===========================================================================*/
-public:
-  /* Returns the instance ID */
-  static int getInstanceID(QString text);
 };
-#endif // THINGVIEW_H
+#endif // MAPPERSONVIEW_H

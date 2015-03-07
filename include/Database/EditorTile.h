@@ -17,6 +17,7 @@
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
+#include "Database/EditorMapPerson.h"
 #include "Database/EditorMapThing.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
@@ -30,6 +31,7 @@ struct HoverInfo
   EditorEnumDb::Layer active_layer;
   EditorEnumDb::CursorMode active_cursor;
 
+  EditorMapPerson* active_person;
   EditorSprite* active_sprite;
   EditorMapThing* active_thing;
 

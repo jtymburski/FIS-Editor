@@ -41,7 +41,7 @@ ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
   }
 
   /* Layout setup */
-  createLayout(edit_thing->getBase() != NULL);
+  createLayout(edit_thing->getBaseThing() != NULL);
   updateData();
   updateFrame();
 }

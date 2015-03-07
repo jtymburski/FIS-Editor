@@ -56,12 +56,19 @@ protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMapThing &source, bool inc_matrix = true);
 
+  /* Sets the matrix in the class - this is used by children to utilize the
+   * printing of the thing */
+  bool setMatrix(EditorMatrix* matrix, bool first_call = false);
+
+  /* Unsets the matrix in the class - no deletion occurs */
+  void unsetMatrix();
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
   /* Gets the base thing of the thing */
-  EditorMapThing* getBase() const;
+  EditorMapThing* getBaseThing() const;
 
   /* Gets the description of the thing */
   QString getDescription() const;
@@ -104,7 +111,7 @@ public:
   void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference thing */
-  void setBase(EditorMapThing* thing);
+  virtual void setBase(EditorMapThing* thing);
 
   /* Sets the description of the thing */
   void setDescription(QString description);

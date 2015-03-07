@@ -9,6 +9,7 @@
 #define EDITORMAPPERSON_H
 
 #include "Database/EditorMapThing.h"
+#include "Game/Map/MapPerson.h"
 
 class EditorMapPerson : public EditorMapThing
 {
@@ -26,7 +27,14 @@ public:
 private:
   /* The set of thing matrixes for different grounds and directions */
   QList<QList<EditorMatrix*>> matrix_set;
-  
+
+  /* Reference person */
+  MapPerson person;
+
+  /* -------------------------- Constants ------------------------- */
+  const static uint8_t kTOTAL_DIRECTIONS; /* The max # of directions to move */
+  const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
@@ -48,7 +56,22 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public: 
- 
+  /* Gets the base person of the person */
+  EditorMapPerson* getBasePerson() const;
+
+  /* Returns the speed of the person */
+  uint16_t getSpeed() const;
+
+  /* Returns the state at the defined surface and direction */
+  EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
+                         Direction direction);
+
+  /* Sets the base reference person */
+  void setBase(EditorMapPerson* person);
+
+  /* Sets the speed of the person */
+  void setSpeed(uint16_t speed);
+
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/

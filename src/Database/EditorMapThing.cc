@@ -56,7 +56,8 @@ EditorMapThing::~EditorMapThing()
 {
   base = NULL;
   EventHandler::deleteEvent(event);
-  delete matrix;
+  if(matrix != NULL)
+    delete matrix;
   matrix = NULL;
 }
 
@@ -75,7 +76,7 @@ EditorMapThing::~EditorMapThing()
 void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
 {
   /* Copy the thing data */
-  setBase(source.getBase());
+  setBase(source.getBaseThing());
   setDescription(source.getDescription());
   setEvent(EventHandler::copyEvent(source.getEvent()));
   setID(source.getID());
@@ -91,6 +92,39 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   setTileIcons(source.tile_icons);
 }
 
+/*
+ * Description: Sets the matrix in the thing class. This is used by children
+ *              to utilize the painting and control of the thing.
+ *
+ * Inputs: EditorMatrix* matrix - the new matrix to use. Must be not NULL
+ *         bool first_call - is this the first time called? Delete thing matrix
+ * Output: bool - true if the matrix was set
+ */
+bool EditorMapThing::setMatrix(EditorMatrix* matrix, bool first_call)
+{
+  if(matrix != NULL)
+  {
+    /* If this is the first call, delete the thing matrix */
+    if(first_call)
+      delete this->matrix;
+
+    this->matrix = matrix;
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets the matrix in the class. No deletion occurs.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMapThing::unsetMatrix()
+{
+  matrix = NULL;
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -101,7 +135,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
  * Inputs: none
  * Output: EditorThing* - the base thing reference pointer
  */
-EditorMapThing* EditorMapThing::getBase() const
+EditorMapThing* EditorMapThing::getBaseThing() const
 {
   return base;
 }

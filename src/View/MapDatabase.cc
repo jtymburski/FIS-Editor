@@ -27,7 +27,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   /* Sets up the various views */
   view_raw = new RawImageView(this);
   view_sprite = new SpriteView(this);
-  view_thing = new ThingView(this);
+  view_thing = new MapThingView(this);
 
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
@@ -225,7 +225,7 @@ SpriteView* MapDatabase::getSpriteView()
   return view_sprite;
 }
 
-ThingView* MapDatabase::getThingView()
+MapThingView* MapDatabase::getThingView()
 {
   return view_thing;
 }

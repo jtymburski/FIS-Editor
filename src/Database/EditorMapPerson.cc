@@ -8,6 +8,10 @@
 #include "Database/EditorMapPerson.h"
 #include <QDebug>
 
+/* Constant Implementation - see header file for descriptions */
+const uint8_t EditorMapPerson::kTOTAL_DIRECTIONS = 4;
+const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -29,6 +33,7 @@ EditorMapPerson::EditorMapPerson(const EditorMapPerson &source)
 /* Destructor function */
 EditorMapPerson::~EditorMapPerson()
 {
+  unsetMatrix();
   deleteMatrixes();
 }
   
@@ -39,13 +44,34 @@ EditorMapPerson::~EditorMapPerson()
 /* Delete defines matrixes stored in class - called once at destruction */
 void EditorMapPerson::deleteMatrixes()
 {
-  // TODO
+  for(uint16_t i = 0; i < matrix_set.size(); i++)
+  {
+    for(uint16_t j = 0; j < matrix_set[i].size(); j++)
+    {
+      delete matrix_set[i][j];
+      matrix_set[i][j] = NULL;
+    }
+  }
+
+  matrix_set.clear();
 }
-  
+
 /* Initialize matrixes stored in class - called once at start */
 void EditorMapPerson::initializeMatrixes()
 {
-  // TODO
+  deleteMatrixes();
+
+  for(uint8_t i = 0; i < kTOTAL_SURFACES; i++)
+  {
+    QList<EditorMatrix*> row;
+
+    for(uint8_t j = 0; j < kTOTAL_DIRECTIONS; j++)
+      row.push_back(new EditorMatrix(1, 1));
+    matrix_set.push_back(row);
+  }
+
+  /* Set the initial frames in the thing */
+  setMatrix(getState(MapPerson::SurfaceClassifier::GROUND, Direction::SOUTH));
 }
   
 /*============================================================================
@@ -57,9 +83,81 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
 {
   EditorMapThing::copySelf(source, false);
   
-  // TODO: COPY PERSON DATA
+  /* Copy matrix data */
+  for(int i = 0; i < matrix_set.size(); i++)
+    for(int j = 0; j < matrix_set[i].size(); j++)
+      *matrix_set[i][j] = *source.matrix_set[i][j];
+
+  /* Person data */
+  setSpeed(source.getSpeed());
 }
-  
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
+
+/* Gets the base person of the person */
+EditorMapPerson* EditorMapPerson::getBasePerson() const
+{
+  if(getBaseThing() != NULL)
+    return (EditorMapPerson*)getBaseThing();
+  return NULL;
+}
+
+/* Returns the speed of the person */
+uint16_t EditorMapPerson::getSpeed() const
+{
+  return person.getSpeed();
+}
+
+/* Returns the state at the defined surface and direction */
+EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
+                                        Direction direction)
+{
+  int surface_index = static_cast<int>(surface);
+  int dir_index = MapPerson::dirToInt(direction);
+  EditorMapPerson* base = getBasePerson();
+
+  /* Check if it's a base and the frames from it should be used instead */
+  if(base != NULL)
+  {
+    if(surface_index >= 0 && dir_index >= 0 &&
+       surface_index < base->matrix_set.size() &&
+       dir_index < base->matrix_set[surface_index].size())
+    {
+      return base->matrix_set[surface_index][dir_index];
+    }
+  }
+  else
+  {
+    if(surface_index >= 0 && dir_index >= 0 &&
+       surface_index < matrix_set.size() &&
+       dir_index < matrix_set[surface_index].size())
+    {
+      return matrix_set[surface_index][dir_index];
+    }
+  }
+
+  return NULL;
+}
+
+/* Sets the base reference thing */
+void EditorMapPerson::setBase(EditorMapPerson* person)
+{
+  EditorMapThing* thing = NULL;
+
+  if(person != NULL)
+    thing = person;
+
+  EditorMapThing::setBase(thing);
+}
+
+/* Sets the speed of the person */
+void EditorMapPerson::setSpeed(uint16_t speed)
+{
+  person.setSpeed(speed);
+}
+
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/

@@ -13,7 +13,7 @@
 
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
-#include "View/ThingView.h"
+#include "View/MapThingView.h"
 
 class MapDatabase : public QWidget
 {
@@ -45,7 +45,7 @@ private:
   /* The Views */
   RawImageView* view_raw;
   SpriteView* view_sprite;
-  ThingView* view_thing;
+  MapThingView* view_thing;
   QListWidget* view_top;
 
 protected:
@@ -95,7 +95,7 @@ public:
   /* Returns the views */
   RawImageView* getRawView();
   SpriteView* getSpriteView();
-  ThingView* getThingView();
+  MapThingView* getThingView();
 
   /* Sets the map editor */
   void setMapEditor(EditorMap* editing_map);

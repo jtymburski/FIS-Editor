@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Class Name: ThingView
+ * Class Name: MapThingView
  * Date Created: February 13, 2015
  * Inheritance: QWidget
  * Description: The side toolbar in the map database that gives access to the
  *              map things.
  ******************************************************************************/
-#include "View/ThingView.h"
+#include "View/MapThingView.h"
 #include <QDebug>
 
 /*============================================================================
@@ -19,7 +19,7 @@
  *
  * Inputs: QWidget* parent - the parent widget
  */
-ThingView::ThingView(QWidget* parent) : QWidget(parent)
+MapThingView::MapThingView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
@@ -32,7 +32,7 @@ ThingView::ThingView(QWidget* parent) : QWidget(parent)
 /*
  * Description: Destructor function
  */
-ThingView::~ThingView()
+MapThingView::~MapThingView()
 {
 
 }
@@ -45,10 +45,10 @@ ThingView::~ThingView()
  * Description: Adds thing to the base list. Triggered by the "new thing"
  *              press. The ID is the next available.
  *
- * Inputs: EditorThing* thing - the new thing to add (ID not set yet)
+ * Inputs: EditorMapThing* thing - the new thing to add (ID not set yet)
  * Output: none
  */
-void ThingView::addThing(EditorMapThing* thing)
+void MapThingView::addThing(EditorMapThing* thing)
 {
   if(editor_map != NULL)
   {
@@ -69,7 +69,7 @@ void ThingView::addThing(EditorMapThing* thing)
  * Inputs: none
  * Output: none
  */
-void ThingView::createLayout()
+void MapThingView::createLayout()
 {
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -127,10 +127,10 @@ void ThingView::createLayout()
  * Description: Opens the edit thing dialog, on an existing thing in the list
  *              (either base or instance).
  *
- * Inputs: EditorThing* sub_thing - the thing to edit
+ * Inputs: EditorMapThing* sub_thing - the thing to edit
  * Output: none
  */
-void ThingView::editThing(EditorMapThing* sub_thing)
+void MapThingView::editThing(EditorMapThing* sub_thing)
 {
   EditorMapThing* current = getSelected();
   if(sub_thing != NULL)
@@ -159,7 +159,7 @@ void ThingView::editThing(EditorMapThing* sub_thing)
  * Inputs: none
  * Output: none
  */
-void ThingView::updateInfo()
+void MapThingView::updateInfo()
 {
   if(editor_map != NULL)
   {
@@ -197,7 +197,7 @@ void ThingView::updateInfo()
  * Inputs: none
  * Output: none
  */
-void ThingView::updateList()
+void MapThingView::updateList()
 {
   int index = thing_list->currentRow();
 
@@ -230,7 +230,7 @@ void ThingView::updateList()
  * Inputs: int index - the new index in the list
  * Output: none
  */
-void ThingView::currentRowChanged(int index)
+void MapThingView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
     editor_map->setCurrentThing(index);
@@ -244,7 +244,7 @@ void ThingView::currentRowChanged(int index)
  * Inputs: none
  * Output: none
  */
-void ThingView::deleteInstance()
+void MapThingView::deleteInstance()
 {
   if(thing_instances->currentItem() != NULL)
   {
@@ -270,7 +270,7 @@ void ThingView::deleteInstance()
  * Inputs: none
  * Output: none
  */
-void ThingView::editInstance()
+void MapThingView::editInstance()
 {
   if(thing_instances->currentItem() != NULL)
   {
@@ -292,7 +292,7 @@ void ThingView::editInstance()
  * Inputs: const QPoint & pos - the position right clicked in widget
  * Output: none
  */
-void ThingView::instanceMenu(const QPoint & pos)
+void MapThingView::instanceMenu(const QPoint & pos)
 {
   QListWidgetItem* item = thing_instances->itemAt(pos);
   if(item != NULL)
@@ -306,7 +306,7 @@ void ThingView::instanceMenu(const QPoint & pos)
  * Inputs: int index - the new index of the row in the list
  * Output: none
  */
-void ThingView::instanceRowChanged(int index)
+void MapThingView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -323,7 +323,7 @@ void ThingView::instanceRowChanged(int index)
  * Inputs: QListWidgetItem* - not used
  * Output: none
  */
-void ThingView::itemDoubleClicked(QListWidgetItem*)
+void MapThingView::itemDoubleClicked(QListWidgetItem*)
 {
   editThing();
 }
@@ -336,7 +336,7 @@ void ThingView::itemDoubleClicked(QListWidgetItem*)
  * Inputs: none
  * Output: none
  */
-void ThingView::thingInstanceUpdate()
+void MapThingView::thingInstanceUpdate()
 {
   thing_instances->blockSignals(true);
   thing_instances->clearSelection();
@@ -371,7 +371,7 @@ void ThingView::thingInstanceUpdate()
  * Inputs: none
  * Output: none
  */
-void ThingView::updateThings()
+void MapThingView::updateThings()
 {
   /* Update the thing in the pop-up */
   if(thing_dialog != NULL)
@@ -396,7 +396,7 @@ void ThingView::updateThings()
  * Inputs: none
  * Output: bool - returns true if thing deleted.
  */
-bool ThingView::deleteThing()
+bool MapThingView::deleteThing()
 {
   EditorMapThing* selected = getSelected();
   bool success = false;
@@ -426,7 +426,7 @@ bool ThingView::deleteThing()
  * Inputs: none
  * Output: bool - returns true if thing was duplicated.
  */
-bool ThingView::duplicateThing()
+bool MapThingView::duplicateThing()
 {
   EditorMapThing* selected = getSelected();
 
@@ -445,9 +445,9 @@ bool ThingView::duplicateThing()
  * Description: Returns which thing is selected in the base list.
  *
  * Inputs: none
- * Output: EditorThing* - selected thing. NULL if none selected
+ * Output: EditorMapThing* - selected thing. NULL if none selected
  */
-EditorMapThing* ThingView::getSelected()
+EditorMapThing* MapThingView::getSelected()
 {
   int index = thing_list->currentRow();
   EditorMapThing* thing = NULL;
@@ -465,7 +465,7 @@ EditorMapThing* ThingView::getSelected()
  * Inputs: none
  * Output: EditorMap* - pointer to the editor map. NULL if none set.
  */
-EditorMap* ThingView::getEditorMap()
+EditorMap* MapThingView::getEditorMap()
 {
   return editor_map;
 }
@@ -477,7 +477,7 @@ EditorMap* ThingView::getEditorMap()
  * Inputs: none
  * Output: none
  */
-void ThingView::importThing()
+void MapThingView::importThing()
 {
   // TODO: Future
   QMessageBox::information(this, "Notification",
@@ -492,7 +492,7 @@ void ThingView::importThing()
  * Inputs: none
  * Output: none
  */
-void ThingView::newThing()
+void MapThingView::newThing()
 {
   EditorMapThing* new_thing = new EditorMapThing();
   addThing(new_thing);
@@ -506,7 +506,7 @@ void ThingView::newThing()
  * Inputs: EditorMap* map - the map to use for control
  * Output: none
  */
-void ThingView::setEditorMap(EditorMap* map)
+void MapThingView::setEditorMap(EditorMap* map)
 {
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
@@ -534,7 +534,7 @@ void ThingView::setEditorMap(EditorMap* map)
  * Inputs: QVector<QString> - list of all items (for give item event)
  * Output: none
  */
-void ThingView::updateListItems(QVector<QString> list)
+void MapThingView::updateListItems(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListItems(list);
@@ -546,7 +546,7 @@ void ThingView::updateListItems(QVector<QString> list)
  * Inputs: QVector<QString> - list of all maps (for change map event)
  * Output: none
  */
-void ThingView::updateListMaps(QVector<QString> list)
+void MapThingView::updateListMaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListMaps(list);
@@ -558,7 +558,7 @@ void ThingView::updateListMaps(QVector<QString> list)
  * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void ThingView::updateListSubmaps(QVector<QString> list)
+void MapThingView::updateListSubmaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListSubmaps(list);
@@ -570,7 +570,7 @@ void ThingView::updateListSubmaps(QVector<QString> list)
  * Inputs: QVector<QString> - list of all things (for teleport event)
  * Output: none
  */
-void ThingView::updateListThings(QVector<QString> list)
+void MapThingView::updateListThings(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListThings(list);
@@ -584,7 +584,7 @@ void ThingView::updateListThings(QVector<QString> list)
  *         int x, y - the coordinates in the map
  * Output: none
  */
-void ThingView::updateSelectedTile(int id, int x, int y)
+void MapThingView::updateSelectedTile(int id, int x, int y)
 {
   if(thing_dialog != NULL)
     thing_dialog->updateSelectedTile(id, x, y);
@@ -600,7 +600,7 @@ void ThingView::updateSelectedTile(int id, int x, int y)
  * Inputs: QString text - list text for instances
  * Output: int - the id of the thing. -1 if failed.
  */
-int ThingView::getInstanceID(QString text)
+int MapThingView::getInstanceID(QString text)
 {
   /* Split to find the number */
   QStringList front = text.split('(');

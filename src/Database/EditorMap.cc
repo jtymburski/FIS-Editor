@@ -635,6 +635,7 @@ void EditorMap::clearHoverInfo()
 {
   active_info.active_cursor = EditorEnumDb::NO_CURSOR;
   active_info.active_layer = EditorEnumDb::NO_LAYER;
+  active_info.active_person = NULL;
   active_info.active_sprite = NULL;
   active_info.active_thing = NULL;
   active_info.hover_tile = NULL;
@@ -2322,8 +2323,8 @@ bool EditorMap::unsetThingByIndex(int index, int sub_map)
       {
         for(int j = 0; j < sub_maps[i]->things.size(); j++)
         {
-          if(sub_maps[i]->things[j]->getBase() != NULL &&
-             sub_maps[i]->things[j]->getBase()->getID() ==
+          if(sub_maps[i]->things[j]->getBaseThing() != NULL &&
+             sub_maps[i]->things[j]->getBaseThing()->getID() ==
              base_things[index]->getID())
           {
             unsetThingByIndex(j, i);

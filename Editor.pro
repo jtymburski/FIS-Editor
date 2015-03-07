@@ -62,6 +62,7 @@ SOURCES += \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
     src/View/MapRender.cc \
+    src/View/MapThingView.cc \
     src/View/MapView.cc \
     src/View/MatrixView.cc \
     src/View/RawImage.cc \
@@ -69,7 +70,6 @@ SOURCES += \
     src/View/RawImageView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
-    src/View/ThingView.cc \
     ../Project/src/FileHandler.cc \
     ../Project/src/Frame.cc \
     ../Project/src/Helpers.cc \
@@ -78,6 +78,7 @@ SOURCES += \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
+    ../Project/src/Game/Map/MapPerson.cc \
     ../Project/src/Game/Map/MapThing.cc \
     ../Project/src/Game/Map/SpriteMatrix.cc \
     ../Project/src/Game/Map/Tile.cc \
@@ -131,6 +132,7 @@ HEADERS += \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
     include/View/MapRender.h \
+    include/View/MapThingView.h \
     include/View/MapView.h \
     include/View/MatrixView.h \
     include/View/RawImage.h \
@@ -138,7 +140,6 @@ HEADERS += \
     include/View/RawImageView.h \
     include/View/SpriteView.h \
     include/View/SpriteViewList.h \
-    include/View/ThingView.h \
     ../Project/include/EnumDb.h \
     ../Project/include/EnumFlags.h \
     ../Project/include/FileHandler.h \
@@ -149,6 +150,7 @@ HEADERS += \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
+    ../Project/include/Game/Map/MapPerson.h \
     ../Project/include/Game/Map/MapThing.h \
     ../Project/include/Game/Map/SpriteMatrix.h \
     ../Project/include/Game/Map/Tile.h \
