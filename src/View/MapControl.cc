@@ -317,7 +317,7 @@ void MapControl::resizeSubMap()
       info->name = name;
 
     /* Remove all things for processing */
-    editing_map->thingRemoveFromTiles();
+    editing_map->tilesThingRemove();
 
     /* If smaller, delete tiles on width */
     if(info->tiles.size() > width)
@@ -373,7 +373,7 @@ void MapControl::resizeSubMap()
     }
 
     /* Add all things back for processing */
-    editing_map->thingAddToTiles();
+    editing_map->tilesThingAdd();
   }
 
   /* Finally, close the dialog */

@@ -60,7 +60,7 @@ private:
   SubMapInfo* active_submap;
 
   /* The base map things */
-  QVector<EditorMapThing*> base_persons;
+  QVector<EditorMapPerson*> base_persons;
   QVector<EditorMapThing*> base_things;
 
   /* The map set ID */
@@ -91,7 +91,7 @@ private:
  *===========================================================================*/
 protected:
   /* Attempts to add person to the current sub-map */
-  bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL); // TODO
+  bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL);
 
   /* Attempts to add thing to the current sub-map */
   bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL);
@@ -119,13 +119,19 @@ protected:
   void saveSubMap(FileHandler* fh, bool game_only,
                   SubMapInfo* map, bool first = false);
 
+  /* Sets the hover thing, based on the passed in rect */
+  bool setHoverThing(EditorMapThing* thing);
+
   /* Updates the tiles that contain the hover information struct */
-  bool updateHoverThing(bool unset = false); // TODO: NEW?? OR REVISE
+  bool updateHoverThing(bool unset = false);
 
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Person instant changed */
+  void personInstanceChanged();
+
   /* Thing instant changed */
   void thingInstanceChanged();
 
@@ -145,7 +151,7 @@ public:
   /* Returns current references for lists in map */
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
-  int getCurrentPersonIndex(); // TODO
+  int getCurrentPersonIndex();
   int getCurrentSpriteIndex();
   int getCurrentThingIndex();
 
@@ -170,18 +176,18 @@ public:
 
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();
-  int getNextPersonID(bool from_sub = false); // TODO
+  int getNextPersonID(bool from_sub = false);
   int getNextSpriteID();
   int getNextThingID(bool from_sub = false);
 
   /* Return stored person information */
-  EditorMapPerson* getPerson(int id, int sub_map = -1); // TODO
-  EditorMapPerson* getPersonByIndex(int index, int sub_map = -1); // TODO
-  int getPersonCount(int sub_map = -1); // TODO
-  int getPersonIndex(int id, int sub_map = -1); // TODO
+  EditorMapPerson* getPerson(int id, int sub_map = -1);
+  EditorMapPerson* getPersonByIndex(int index, int sub_map = -1);
+  int getPersonCount(int sub_map = -1);
+  int getPersonIndex(int id, int sub_map = -1);
   QVector<QString> getPersonList(int sub_map = -1, bool all_submaps = false,
-                                 bool shortened = false); // TODO
-  QVector<EditorMapPerson*> getPersons(int sub_map = -1); // TODO
+                                 bool shortened = false);
+  QVector<EditorMapPerson*> getPersons(int sub_map = -1);
 
   /* Returns the set layers in a string */
   QString getSetLayers(int map_index, int x, int y);
@@ -213,14 +219,14 @@ public:
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
   bool setCurrentMap(int index);
-  bool setCurrentPerson(int index); // TODO
+  bool setCurrentPerson(int index);
   bool setCurrentSprite(int index);
   bool setCurrentThing(int index);
 
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
   void setHoverLayer(EditorEnumDb::Layer layer);
-  bool setHoverPerson(int id); // TODO: NEW but combine with setHoverThing()
+  bool setHoverPerson(int id);
   bool setHoverThing(int id);
   void setHoverTile(EditorTile* tile);
 
@@ -235,7 +241,7 @@ public:
   virtual void setName(QString name);
 
   /* Sets a person in the map */
-  int setPerson(EditorMapPerson* person, int sub_map = -1); // TODO
+  int setPerson(EditorMapPerson* person, int sub_map = -1);
 
   /* Sets a sprite */
   int setSprite(EditorSprite* sprite);
@@ -254,8 +260,10 @@ public:
   void setVisibilityPass(bool);
 
   /* Thing processing for updating with the new data */
-  void thingAddToTiles(bool update_all = false); // TODO: REVISE??
-  void thingRemoveFromTiles(); // TODO: REVISE??
+  void tilesPersonAdd(bool update_all = false);
+  void tilesPersonRemove();
+  void tilesThingAdd(bool update_all = false);
+  void tilesThingRemove();
 
   /* Update all tiles */
   void updateAll();
@@ -266,9 +274,9 @@ public:
   void unsetMaps();
 
   /* Unset person(s) */
-  bool unsetPerson(int id, bool from_sub = false); // TODO
-  bool unsetPersonByIndex(int index, int sub_map = -1); // TODO
-  void unsetPersons(bool from_sub = false); // TODO
+  bool unsetPerson(int id, bool from_sub = false);
+  bool unsetPersonByIndex(int index, int sub_map = -1);
+  void unsetPersons(bool from_sub = false);
 
   /* Unset sprite(s) */
   bool unsetSprite(int id);

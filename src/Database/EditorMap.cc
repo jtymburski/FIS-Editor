@@ -81,11 +81,57 @@ EditorMap::~EditorMap()
  *===========================================================================*/
 
 /*
+ * Description: Attempts to add the person to the current sub-map. Person needs
+ *              to be given an x and y start location prior to calling this
+ *              function.
+ *
+ * Inputs: EditorMapPerson* person - the person to attempt to add
+ * Output: bool - true if the person was added (does not delete if fails)
+ */
+bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
+{
+  int x = person->getX();
+  int y = person->getY();
+  int w = person->getMatrix()->getWidth();
+  int h = person->getMatrix()->getHeight();
+
+  /* Ensure map isn't null */
+  if(map == NULL)
+    map = active_submap;
+
+  /* Check if person can be placed */
+  bool valid = false;
+  if(x >= 0 && y >= 0 && (x+w) <= map->tiles.size() &&
+     (y+h) <= map->tiles[x].size())
+  {
+    valid = true;
+
+    /* Check each tile */
+    for(int i = 0; i < w; i++)
+      for(int j = 0; j < h; j++)
+        if(map->tiles[x+i][y+j]->getPerson(
+                           person->getMatrix()->getRenderDepth(i, j)) != NULL)
+          valid = false;
+  }
+
+  /* If valid, place thing */
+  if(valid)
+  {
+    /* Add the thing to tiles */
+    for(int i = x; i < (w+x); i++)
+      for(int j = y; j < (h+y); j++)
+        map->tiles[i][j]->setPerson(person);
+  }
+
+  return valid;
+}
+
+/*
  * Description: Attempts to add the thing to the current sub-map. Thing needs
  *              to be given an x and y start location prior to calling this
  *              function.
  *
- * Inputs: EditorThing* thing - the thing to attempt to add
+ * Inputs: EditorMapThing* thing - the thing to attempt to add
  * Output: bool - true if the thing was added (does not delete if fails)
  */
 bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map)
@@ -262,6 +308,8 @@ void EditorMap::copySelf(const EditorMap &source)
         }
       }
     }
+
+    // TODO: MAP AND PERSON
   }
 }
 
@@ -555,23 +603,70 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
 }
 
 /*
+ * Description: Sets the hover thing, being flagged when selecting an instance
+ *              in the list in View.
+ *
+ * Inputs: EditorMapThing* thing - the thing to set as hover
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
+bool EditorMap::setHoverThing(EditorMapThing* thing)
+{
+  /* First clear the existing one */
+  QRect existing = active_info.selected_thing;
+  active_info.selected_thing = QRect();
+
+  /* Then, set the new one */
+  if(active_submap != NULL)
+  {
+    /* First, update the old tiles to remove line */
+    for(int i = 0; i < existing.width(); i++)
+      for(int j = 0; j < existing.height(); j++)
+        active_submap->tiles[existing.x() + i][existing.y() + j]->update();
+
+    /* Next, try and get the new thing */
+    if(thing != NULL)
+    {
+      active_info.selected_thing = QRect(thing->getX(), thing->getY(),
+                                         thing->getMatrix()->getWidth(),
+                                         thing->getMatrix()->getHeight());
+      for(int i = 0; i < active_info.selected_thing.width(); i++)
+        for(int j = 0; j < active_info.selected_thing.height(); j++)
+          active_submap->tiles[thing->getX() + i][thing->getY() + j]->update();
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
  * Description: Updates the tiles that contain the hover information with the
  *              relevant thing. If unset is false, it sets it to display.
- *              Otherwise, it unsets it and stops it from displaying
+ *              Otherwise, it unsets it and stops it from displaying. This works
+ *              for things and all children (person, etc)
  *
  * Inputs: bool unset - unset the hover thing?
  * Output: bool - true if the hover thing was updated
  */
 bool EditorMap::updateHoverThing(bool unset)
 {
+  /* Determine the thing to work with */
+  EditorMapThing* thing = NULL;
+  if(active_submap != NULL && active_info.hover_tile != NULL &&
+     active_info.active_cursor == EditorEnumDb::BASIC)
+  {
+    if(active_info.active_layer == EditorEnumDb::THING)
+      thing = active_info.active_thing;
+    else if(active_info.active_layer == EditorEnumDb::PERSON)
+      thing = active_info.active_person;
+  }
+
   /* Pre-checks to determine if this is valid to execute */
-  if(active_submap != NULL &&
-     active_info.active_cursor == EditorEnumDb::BASIC &&
-     active_info.active_layer == EditorEnumDb::THING &&
-     active_info.active_thing != NULL && active_info.hover_tile != NULL)
+  if(thing != NULL)
   {
     SubMapInfo* map = active_submap;
-    EditorMatrix* ref = active_info.active_thing->getMatrix();
+    EditorMatrix* ref = thing->getMatrix();
     int hover_x = active_info.hover_tile->getX();
     int hover_y = active_info.hover_tile->getY();
     int hover_w = hover_x + ref->getWidth();
@@ -770,6 +865,46 @@ void EditorMap::clickTrigger(bool single, bool right_click)
           unsetThing(found->getID(), true);
       }
     }
+    /* Check on the layer - person */
+    else if(layer == EditorEnumDb::PERSON)
+    {
+      /* Check cursor */
+      if(cursor == EditorEnumDb::BASIC && active_info.active_person != NULL)
+      {
+        /* Create the thing */
+        int id = getNextPersonID(true);
+        EditorMapPerson* new_person = new EditorMapPerson(id);
+        new_person->setBase(active_info.active_person);
+        new_person->setX(active_info.hover_tile->getX());
+        new_person->setY(active_info.hover_tile->getY());
+
+        /* Attempt to place */
+        if(addPerson(new_person))
+        {
+          active_submap->persons.push_back(new_person);
+          emit personInstanceChanged();
+          setHoverThing(-1);
+        }
+        else
+        {
+          delete new_person;
+        }
+      }
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        int max = Helpers::getRenderDepth();
+
+        /* Loop through all to find the top thing */
+        EditorMapPerson* found = NULL;
+        for(int i = max - 1; found == NULL && i >= 0; i--)
+          if(active_info.hover_tile->getPerson(i) != NULL)
+            found = active_info.hover_tile->getPerson(i);
+
+        /* If found, remove from tiles and delete */
+        if(found != NULL)
+          unsetPerson(found->getID(), true);
+      }
+    }
   }
 }
 
@@ -852,6 +987,30 @@ int EditorMap::getCurrentMapIndex()
 }
 
 /*
+ * Description: Returns the current selected base person in the list of persons.
+ *              On click, if the layer and pen is correct, this is the person
+ *              that instantized and then placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the person stack
+ */
+int EditorMap::getCurrentPersonIndex()
+{
+  /* Ensure the active person isn't null */
+  if(active_info.active_person != NULL)
+  {
+    for(int i = 0; i < base_persons.size(); i++)
+      if(base_persons[i] == active_info.active_person)
+        return i;
+
+    /* thing not found, it doesn't exist -> nullify it */
+    setCurrentPerson(-1);
+  }
+
+  return -1;
+}
+
+/*
  * Description: Returns the current selected sprite index in the list of
  *              sprites. On click, this is the sprite that is placed.
  *
@@ -892,7 +1051,7 @@ int EditorMap::getCurrentThingIndex()
         return i;
 
     /* thing not found, it doesn't exist -> nullify it */
-    setCurrentMap(-1);
+    setCurrentThing(-1);
   }
 
   return -1;
@@ -1069,6 +1228,65 @@ int EditorMap::getNextMapID()
 }
 
 /*
+ * Description: Returns the next available person ID that can be used for a new
+ *              person.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: int - the id to use
+ */
+int EditorMap::getNextPersonID(bool from_sub)
+{
+  bool found = false;
+  int id = 0;
+
+  /* If not from sub map, check base for base ID */
+  if(!from_sub)
+  {
+    for(int i = 0; !found && (i < base_persons.size()); i++)
+    {
+      if(base_persons[i]->getID() != i)
+      {
+        id = i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && base_persons.size() > 0)
+      id = base_persons.last()->getID() + 1;
+  }
+  /* Otherwise, check the sub-maps for available ID */
+  else
+  {
+    /* Compile the IDs of all persons in all sub-maps */
+    QVector<int> id_list;
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+        id_list.push_back(sub_maps[i]->persons[j]->getID());
+
+    /* Sort the list */
+    qSort(id_list);
+
+    /* Find the next available ID */
+    id = kBASE_ID_PERSON;
+    for(int i = 0; !found && (i < id_list.size()); i++)
+    {
+      if(id_list[i] != (id + i))
+      {
+        id += i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && id_list.size() > 0)
+      id = id_list.last() + 1;
+  }
+
+  return id;
+}
+
+/*
  * Description: Returns the next available sprite ID that can be used for a new
  *              sprite.
  *
@@ -1140,9 +1358,9 @@ int EditorMap::getNextThingID(bool from_sub)
     id = kBASE_ID_THING;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
-      if(id_list[i] != (kBASE_ID_THING + i))
+      if(id_list[i] != (id + i))
       {
-        id = (kBASE_ID_THING + i);
+        id += i;
         found = true;
       }
     }
@@ -1153,6 +1371,176 @@ int EditorMap::getNextThingID(bool from_sub)
   }
 
   return id;
+}
+
+/*
+ * Description: Returns the person with the corresponding ID.
+ *
+ * Inputs: int id - the id of the person to get
+ *         int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: EditorMapPerson* - the pointer to match the ID. NULL if not found.
+ */
+EditorMapPerson* EditorMap::getPerson(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_persons.size(); i++)
+        if(base_persons[i]->getID() == id)
+          return base_persons[i];
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->persons.size(); i++)
+        if(sub_maps[sub_map]->persons[i]->getID() == id)
+          return sub_maps[sub_map]->persons[i];
+    }
+  }
+
+  return NULL;
+}
+
+/*
+ * Description: Returns the person at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ *         int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: EditorMapPerson* - the pointer to match the index. NULL if out of
+ *                            range
+ */
+EditorMapPerson* EditorMap::getPersonByIndex(int index, int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_persons.size())
+      return base_persons[index];
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->persons.size())
+      return sub_maps[sub_map]->persons[index];
+  }
+  return NULL;
+}
+
+/*
+ * Description: Returns the number of persons in the list.
+ *
+ * Inputs: int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: int - the number of persons in the map set
+ */
+int EditorMap::getPersonCount(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+    return base_persons.size();
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+    return sub_maps[sub_map]->persons.size();
+  return 0;
+}
+
+/*
+ * Description: Returns the index in the list of persons of the matching id.
+ *              Less than 0 if none match.
+ *
+ * Inputs: int id - the id to find the index for
+ *         int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: int - the index of the person. Less than 0 if no person matches
+ */
+int EditorMap::getPersonIndex(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_persons.size(); i++)
+        if(base_persons[i]->getID() == id)
+          return i;
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->persons.size(); i++)
+        if(sub_maps[sub_map]->persons[i]->getID() == id)
+          return i;
+    }
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns a list of all persons in the format of a HEADER row
+ *              with the following rows as "ID: NAME".
+ *
+ * Inputs: int sub_map - the sub-map to get the persons for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
+ * Output: QVector<QString> - list of all persons
+ */
+QVector<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
+                                          bool shortened)
+{
+  QVector<QString> stack;
+  stack.push_back("MAP PERSONS");
+
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all persons and add them to the list */
+    for(int i = 0; i < base_persons.size(); i++)
+      stack.push_back(base_persons[i]->getNameList());
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+        stack.push_back(sub_maps[i]->persons[j]->getNameList(shortened));
+  }
+
+  return stack;
+}
+
+/*
+ * Description: Returns the list of all persons in the editor map
+ *
+ * Inputs: int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: QVector<EditorMapPerson*> - list of all persons
+ */
+QVector<EditorMapPerson*> EditorMap::getPersons(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    return base_persons;
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    return sub_maps[sub_map]->persons;
+  }
+
+  /* Otherwise, return blank list */
+  QVector<EditorMapPerson*> blank_list;
+  return blank_list;
 }
 
 /*
@@ -1249,7 +1637,7 @@ QVector<EditorSprite*> EditorMap::getSprites()
  *
  * Inputs: int id - the id of the thing to get
  *         int sub_map - the sub-map to get the things for (<0 is base)
- * Output: EditorThing* - the pointer to match the ID. NULL if not found.
+ * Output: EditorMapThing* - the pointer to match the ID. NULL if not found.
  */
 EditorMapThing* EditorMap::getThing(int id, int sub_map)
 {
@@ -1279,7 +1667,8 @@ EditorMapThing* EditorMap::getThing(int id, int sub_map)
  *
  * Inputs: int index - the index in the array (0 to size - 1)
  *         int sub_map - the sub-map to get the things for (<0 is base)
- * Output: EditorThing* - the pointer to match the index. NULL if out of range
+ * Output: EditorMapThing* - the pointer to match the index. NULL if out of
+ *                           range
  */
 EditorMapThing* EditorMap::getThingByIndex(int index, int sub_map)
 {
@@ -1393,7 +1782,7 @@ QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
  * Description: Returns the list of all things in the editor map
  *
  * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
- * Output: QVector<EditorThing*> - list of all things
+ * Output: QVector<EditorMapThing*> - list of all things
  */
 QVector<EditorMapThing*> EditorMap::getThings(int sub_map)
 {
@@ -1563,7 +1952,38 @@ bool EditorMap::setCurrentMap(int index)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
     /* Trigger thing instance update */
+    emit personInstanceChanged();
     emit thingInstanceChanged();
+
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the current person, based on the index in the stack.
+ *              Passing in -1 unsets the active person (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - sprite index in the list of map persons
+ * Output: bool - true if the active person was changed
+ */
+bool EditorMap::setCurrentPerson(int index)
+{
+  if(index >= -1 && index < base_persons.size())
+  {
+    /* Unset the hover, if relevant */
+    updateHoverThing(true);
+
+    /* If index is -1, unset the current person */
+    if(index == -1)
+      active_info.active_person = NULL;
+    /* Otherwise, index is in valid range of base person set */
+    else
+      active_info.active_person = base_persons[index];
+
+    /* Set the hover, if relevant */
+    updateHoverThing();
 
     return true;
   }
@@ -1668,41 +2088,30 @@ void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
 }
 
 /*
+ * Description: Sets the hover person, being flagged when selecting an instance
+ *              in the list in MapPersonView.
+ *
+ * Inputs: int id - the id of the person instance
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
+bool EditorMap::setHoverPerson(int id)
+{
+  if(active_submap != NULL)
+    return setHoverThing(getPerson(id, active_submap->id));
+  return false;
+}
+
+/*
  * Description: Sets the hover thing, being flagged when selecting an instance
- *              in the list in ThingView.
+ *              in the list in MapThingView.
  *
  * Inputs: int id - the id of the thing instance
  * Output: bool - true if the instance was changed (unsets the old regardless)
  */
 bool EditorMap::setHoverThing(int id)
 {
-  /* First clear the existing one */
-  QRect existing = active_info.selected_thing;
-  active_info.selected_thing = QRect();
-
-  /* Then, set the new one */
   if(active_submap != NULL)
-  {
-    /* First, update the old tiles to remove line */
-    for(int i = 0; i < existing.width(); i++)
-      for(int j = 0; j < existing.height(); j++)
-        active_submap->tiles[existing.x() + i][existing.y() + j]->update();
-
-    /* Next, try and get the new thing */
-    EditorMapThing* thing = getThing(id, active_submap->id);
-    if(thing != NULL)
-    {
-      active_info.selected_thing = QRect(thing->getX(), thing->getY(),
-                                         thing->getMatrix()->getWidth(),
-                                         thing->getMatrix()->getHeight());
-      for(int i = 0; i < active_info.selected_thing.width(); i++)
-        for(int j = 0; j < active_info.selected_thing.height(); j++)
-          active_submap->tiles[thing->getX() + i][thing->getY() + j]->update();
-
-      return true;
-    }
-  }
-
+    return setHoverThing(getThing(id, active_submap->id));
   return false;
 }
 
@@ -1870,6 +2279,103 @@ int EditorMap::setMap(int id, QString name, int width, int height)
 void EditorMap::setName(QString name)
 {
   this->name = name;
+}
+
+/*
+ * Description: Sets the person in the set within the editor map. If a person,
+ *              already exists with the ID, it deletes the existing one.
+ *
+ * Inputs: EditorMapPerson* person - the new person to set in
+ *         int sub_map - the sub-map to set the persons for (<0 is base)
+ * Output: int - the index if set. If < 0, it is not set.
+ */
+int EditorMap::setPerson(EditorMapPerson* person, int sub_map)
+{
+  if(person != NULL && person->getID() >= 0)
+  {
+    bool found = false;
+    int index = -1;
+    bool near = false;
+
+    /* If sub map id is less than 0, work with base person */
+    if(sub_map < 0)
+    {
+      /* Find if the ID exists */
+      for(int i = 0; !found && !near && (i < base_persons.size()); i++)
+      {
+        if(base_persons[i]->getID() == person->getID())
+        {
+          index = i;
+          found = true;
+        }
+        else if(base_persons[i]->getID() > person->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If found, modify the index with the new information */
+      if(found)
+      {
+        unsetPersonByIndex(index);
+        base_persons.insert(index, person);
+      }
+      else if(near)
+      {
+        base_persons.insert(index, person);
+      }
+      else
+      {
+        base_persons.append(person);
+        index = base_persons.size() - 1;
+      }
+    }
+    /* Otherwise, work with the sub id */
+    else if(sub_map < sub_maps.size())
+    {
+      /* Check to make sure the person could be added */
+      int x_start = person->getX();
+      int y_start = person->getY();
+      int x_end = x_start + person->getMatrix()->getWidth();
+      int y_end = y_start + person->getMatrix()->getHeight();
+      if(x_start >= 0 && x_end <= sub_maps[sub_map]->tiles.size() &&
+         y_start >= 0 && y_end <= sub_maps[sub_map]->tiles[x_start].size())
+      {
+        /* First remove the existing id, if one exists */
+        unsetPerson(person->getID(), true);
+
+        /* Now insert into the proper location in the person stack in the map */
+        for(int i = 0; !near && (i < sub_maps[sub_map]->persons.size()); i++)
+        {
+          if(sub_maps[sub_map]->persons[i]->getID() > person->getID())
+          {
+            index = i;
+            near = true;
+          }
+        }
+
+        /* If near, insert at index. Otherwise, append */
+        if(near)
+        {
+          sub_maps[sub_map]->persons.insert(index, person);
+        }
+        else
+        {
+          sub_maps[sub_map]->persons.append(person);
+          index = sub_maps[sub_map]->persons.size() - 1;
+        }
+
+        /* Add to tile */
+        for(int i = x_start; i < x_end; i++)
+          for(int j = y_start; j < y_end; j++)
+            sub_maps[sub_map]->tiles[i][j]->setPerson(person);
+      }
+    }
+
+    return index;
+  }
+  return -1;
 }
 
 /*
@@ -2083,8 +2589,86 @@ void EditorMap::setVisibilityPass(bool visible)
 }
 
 /*
+ * Description: Re-adds all sub-map persons to tiles. This is called after
+ *              calling tilesPersonRemove(), processing the person, and then
+ *              re-calling. Any person instances that can't be re-added are
+ *              deleted and removed from the list.
+ * TODO: FUTURE - warn about persons being removed??
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
+void EditorMap::tilesPersonAdd(bool update_all)
+{
+  /* Update all sub-maps - used for loading */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+      {
+        if(!addPerson(sub_maps[i]->persons[j], sub_maps[i]))
+        {
+          delete sub_maps[i]->persons[j];
+          sub_maps[i]->persons.remove(j);
+          j--;
+        }
+      }
+    }
+  }
+  /* Or just the active one */
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->persons.size(); i++)
+      {
+        if(!addPerson(active_submap->persons[i]))
+        {
+          delete active_submap->persons[i];
+          active_submap->persons.remove(i);
+          i--;
+        }
+      }
+    }
+  }
+}
+
+/*
+ * Description: Removes all sub-map persons from tiles. This is called before
+ *              processing person changes, and then calling tilesPersonAdd().
+ *              Just removes the persons from the tiles but still stored into
+ *              memory.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::tilesPersonRemove()
+{
+  if(active_submap != NULL)
+  {
+    /* Clear selection */
+    setHoverThing(-1);
+
+    for(int i = 0; i < active_submap->persons.size(); i++)
+    {
+      EditorMapPerson* person = active_submap->persons[i];
+      int x = person->getX();
+      int y = person->getY();
+      int w = person->getMatrix()->getWidth();
+      int h = person->getMatrix()->getHeight();
+
+      for(int j = 0; j < w; j++)
+        for(int k = 0; k < h; k++)
+          active_submap->tiles[x+j][y+k]->
+                         unsetPerson(person->getMatrix()->getRenderDepth(j, k));
+    }
+  }
+}
+
+/*
  * Description: Re-adds all sub-map things to tiles. This is called after
- *              calling thingRemoveFromTiles(), processing the thing, and then
+ *              calling tilesThingRemove(), processing the thing, and then
  *              re-calling. Any thing instances that can't be re-added are
  *              deleted and removed from the list.
  * TODO: FUTURE - warn about things being removed??
@@ -2092,7 +2676,7 @@ void EditorMap::setVisibilityPass(bool visible)
  * Inputs: bool update_all - true if updating all sub-maps or just active one
  * Output: none
  */
-void EditorMap::thingAddToTiles(bool update_all)
+void EditorMap::tilesThingAdd(bool update_all)
 {
   /* Update all sub-maps - used for loading */
   if(update_all)
@@ -2130,14 +2714,14 @@ void EditorMap::thingAddToTiles(bool update_all)
 
 /*
  * Description: Removes all sub-map things from tiles. This is called before
- *              processing thing changes, and then calling thingAddToTiles().
+ *              processing thing changes, and then calling tilesThingAdd().
  *              Just removes the things from the tiles but still stored into
  *              memory.
  *
  * Inputs: none
  * Output: none
  */
-void EditorMap::thingRemoveFromTiles()
+void EditorMap::tilesThingRemove()
 {
   if(active_submap != NULL)
   {
@@ -2222,6 +2806,132 @@ void EditorMap::unsetMaps()
   while(sub_maps.size() > 0)
     unsetMapByIndex(0);
   sub_maps.clear();
+}
+
+/*
+ * Description: Unset the person within the list that correspond to the ID.
+ *
+ * Inputs: int id - the person id
+ *         bool from_sub - true if it should be unset in sub-maps instead
+ * Output: bool - was a person deleted?
+ */
+bool EditorMap::unsetPerson(int id, bool from_sub)
+{
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    int index = getPersonIndex(id);
+    return unsetPersonByIndex(index);
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    bool deleted = false;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      int index = getPersonIndex(id, i);
+      deleted |= unsetPersonByIndex(index, i);
+    }
+
+    return deleted;
+  }
+}
+
+/*
+ * Description: Unset the person within the list that correspond to the index.
+ *
+ * Inputs: int index - the person index corresponder
+ *         int sub_map - the sub-map to get the persons for (<0 is base)
+ * Output: bool - was a person deleted?
+ */
+bool EditorMap::unsetPersonByIndex(int index, int sub_map)
+{
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_persons.size())
+    {
+      /* Remove all persons related to this index - sub persons */
+      for(int i = 0; i < sub_maps.size(); i++)
+      {
+        for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+        {
+          if(sub_maps[i]->persons[j]->getBaseThing() != NULL &&
+             sub_maps[i]->persons[j]->getBaseThing()->getID() ==
+             base_persons[index]->getID())
+          {
+            unsetPersonByIndex(j, i);
+            j--;
+          }
+        }
+      }
+
+      /* Finally, delete the person */
+      delete base_persons[index];
+      base_persons.remove(index);
+
+      return true;
+    }
+  }
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->persons.size())
+    {
+      EditorMapPerson* ref = sub_maps[sub_map]->persons[index];
+
+      /* Remove the instances from tiles */
+      int x = ref->getX();
+      int y = ref->getY();
+      for(int i = x; i < (ref->getMatrix()->getWidth() + x) &&
+                     i < sub_maps[sub_map]->tiles.size(); i++)
+      {
+        for(int j = y; j < (ref->getMatrix()->getHeight() + y) &&
+                                 j < sub_maps[sub_map]->tiles[i].size(); j++)
+        {
+          sub_maps[sub_map]->tiles[i][j]->unsetPerson(ref);
+        }
+      }
+
+      /* Finally, delete the person */
+      delete ref;
+      sub_maps[sub_map]->persons.remove(index);
+
+      /* Update list */
+      emit personInstanceChanged();
+      setHoverPerson(-1);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets all map persons within the EditorMap set.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: none
+ */
+void EditorMap::unsetPersons(bool from_sub)
+{
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    while(base_persons.size() > 0)
+      unsetPersonByIndex(0);
+    base_persons.clear();
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      while(sub_maps[i]->persons.size() > 0)
+        unsetPersonByIndex(0, i);
+      sub_maps[i]->persons.clear();
+    }
+  }
 }
 
 /*

@@ -1398,7 +1398,7 @@ bool EditorTile::unsetPerson(int render_level)
  * Inputs: none
  * Output: none
  */
-bool EditorTile::unsetPersons()
+void EditorTile::unsetPersons()
 {
   for(int i = 0; i < persons.size(); i++)
     persons[i].thing = NULL;

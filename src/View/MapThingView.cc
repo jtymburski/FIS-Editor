@@ -376,9 +376,9 @@ void MapThingView::updateThings()
   /* Update the thing in the pop-up */
   if(thing_dialog != NULL)
   {
-    editor_map->thingRemoveFromTiles();
+    editor_map->tilesThingRemove();
     thing_dialog->updateOriginal();
-    editor_map->thingAddToTiles();
+    editor_map->tilesThingAdd();
   }
 
   /* Update the list in the view */

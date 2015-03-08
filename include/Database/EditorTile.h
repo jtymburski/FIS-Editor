@@ -213,9 +213,9 @@ public:
   void unplace(EditorSprite* sprite);
 
   /* Unsets the stored person pointer(s) */
-  bool unsetPerson(EditorMapPerson* person); // TODO
-  bool unsetPerson(int render_level); // TODO
-  bool unsetPersons(); // TODO
+  bool unsetPerson(EditorMapPerson* person);
+  bool unsetPerson(int render_level);
+  void unsetPersons();
 
   /* Unsets the stored thing pointer(s) */
   bool unsetThing(EditorMapThing* thing);
