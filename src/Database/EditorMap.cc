@@ -635,9 +635,11 @@ void EditorMap::clearHoverInfo()
 {
   active_info.active_cursor = EditorEnumDb::NO_CURSOR;
   active_info.active_layer = EditorEnumDb::NO_LAYER;
+
   active_info.active_person = NULL;
   active_info.active_sprite = NULL;
   active_info.active_thing = NULL;
+
   active_info.hover_tile = NULL;
   active_info.selected_thing = QRect();
 

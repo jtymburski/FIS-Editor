@@ -33,8 +33,12 @@ QString EditorHelpers::getLayerString(EditorEnumDb::Layer layer)
     return "Item";
   else if(layer == EditorEnumDb::THING)
     return "Thing";
+  else if(layer == EditorEnumDb::IO)
+    return "Interactive Object";
   else if(layer == EditorEnumDb::PERSON)
     return "Person";
+  else if(layer == EditorEnumDb::NPC)
+    return "NPC";
   else if(layer == EditorEnumDb::UPPER1)
     return "Upper 1";
   else if(layer == EditorEnumDb::UPPER2)

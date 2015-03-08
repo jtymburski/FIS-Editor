@@ -77,6 +77,7 @@ private:
   QList<TileRenderInfo> layers_upper;
 
   /* Things on the tile */
+  QList<TileRenderInfo> persons;
   QList<TileRenderInfo> things;
 
   /* The Tile that will be placed into Univursa.exe */
@@ -105,6 +106,7 @@ protected:
   void copySelf(const EditorTile &source);
 
   /* Determine if hovering sprite or thing in tile */
+  bool isHoverPerson();
   bool isHoverSprite();
   bool isHoverThing();
 
@@ -130,11 +132,20 @@ public:
   /* Returns a number between 0 and 15 for what the passability is */
   int getPassabilityNum(EditorEnumDb::Layer layer);
 
+  /* Returns the passability of the person */
+  bool getPassabilityPerson(Direction direction);
+
   /* Returns the passability of the thing */
   bool getPassabilityThing(Direction direction);
 
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
+
+  /* Returns the map person pointer at the given render depth */
+  EditorMapPerson* getPerson(int render_level);
+
+  /* Returns the sprite based on layer and direction */
+  EditorSprite* getSprite(EditorEnumDb::Layer layer);
 
   /* Returns the map thing pointer(s) for the generic thing */
   EditorMapThing* getThing(int render_level);
@@ -150,9 +161,6 @@ public:
   /* Returns X and Y, in tile set */
   int getX();
   int getY();
-
-  /* Returns the sprite based on layer and direction */
-  EditorSprite* getSprite(EditorEnumDb::Layer layer);
 
   /* Painting function for Tile Wrapper */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
@@ -176,6 +184,9 @@ public:
   void setPassability(EditorEnumDb::Layer layer, Direction direction,
                       bool passable);
 
+  /* Sets the person sprite pointer, stored within the class */
+  bool setPerson(EditorMapPerson* person);
+
   /* Sets the thing sprite pointer, stored within the class */
   bool setThing(EditorMapThing* thing);
 
@@ -187,6 +198,8 @@ public:
   void setVisibilityBase(bool);
   void setVisibilityEnhancer(bool);
   bool setVisibilityLower(int, bool);
+  void setVisibilityPerson(bool visible);
+  bool setVisibilityPerson(int render_level, bool visible);
   void setVisibilityThing(bool visible);
   bool setVisibilityThing(int render_level, bool visible);
   bool setVisibilityUpper(int, bool);
@@ -198,6 +211,11 @@ public:
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
+
+  /* Unsets the stored person pointer(s) */
+  bool unsetPerson(EditorMapPerson* person); // TODO
+  bool unsetPerson(int render_level); // TODO
+  bool unsetPersons(); // TODO
 
   /* Unsets the stored thing pointer(s) */
   bool unsetThing(EditorMapThing* thing);

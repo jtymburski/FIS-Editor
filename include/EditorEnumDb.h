@@ -34,13 +34,15 @@ public:
               LOWER5 = 6,
               ITEM = 7,
               THING = 8,
-              PERSON = 9,
-              UPPER1 = 10,
-              UPPER2 = 11,
-              UPPER3 = 12,
-              UPPER4 = 13,
-              UPPER5 = 14,
-              NO_LAYER = 15
+              IO = 9,
+              PERSON = 10,
+              NPC = 11,
+              UPPER1 = 12,
+              UPPER2 = 13,
+              UPPER3 = 14,
+              UPPER4 = 15,
+              UPPER5 = 16,
+              NO_LAYER = 17
              };
 
   /* Map view mode */

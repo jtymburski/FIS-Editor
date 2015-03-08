@@ -50,7 +50,9 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   for(int i = 0; i < kUPPER_COUNT_MAX; i++)
     layers_upper.push_back(temp);
 
-  /* Prep editor things in tile */
+  /* Prep editor things in tile */\
+  for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
+    persons.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
     things.push_back(temp);
 
@@ -77,6 +79,10 @@ EditorTile::~EditorTile()
   layer_enhancer.sprite = NULL;
   layers_lower.clear();
   layers_upper.clear();
+
+  persons.clear();
+  things.clear();
+
   tile.clear();
 }
 
@@ -122,6 +128,26 @@ void EditorTile::copySelf(const EditorTile &source)
     layers_upper[i].sprite = source.layers_upper[i].sprite;
     layers_upper[i].visible = source.layers_upper[i].visible;
   }
+
+  // TODO: ADD THING AND PERSON
+}
+
+/*
+ * Description: Returns if there is a valid hover person, the active layer is
+ *              a person layer, and the placing pen is a person placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover person should be shown
+ */
+bool EditorTile::isHoverPerson()
+{
+  if(hover_info->hover_tile != NULL && hover_info->active_person != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::PERSON)
+  {
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -221,6 +247,12 @@ QString EditorTile::getActiveLayers()
       layer_string += "MT" + QString::number(i + 1) + "("
                    + QString::number(things[i].thing->getID()) + "),";
 
+  /* Get person info, if relevant */
+  for(int i = 0; i < persons.size(); i++)
+    if(persons[i].thing != NULL)
+      layer_string += "MP" + QString::number(i + 1) + "("
+                   + QString::number(persons[i].thing->getID()) + "),";
+
   /* Get upper info, if relevant */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].sprite != NULL)
@@ -289,6 +321,11 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
     case EditorEnumDb::THING:
       return getPassabilityThing(direction);
       break;
+    case EditorEnumDb::PERSON:
+      return getPassabilityPerson(direction);
+    case EditorEnumDb::NPC:
+    case EditorEnumDb::ITEM:
+    case EditorEnumDb::IO:
     case EditorEnumDb::ENHANCER:
     case EditorEnumDb::UPPER1:
     case EditorEnumDb::UPPER2:
@@ -318,6 +355,29 @@ int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
                                         getPassability(layer, Direction::EAST),
                                         getPassability(layer, Direction::SOUTH),
                                         getPassability(layer, Direction::WEST));
+}
+
+/*
+ * Description: Returns the passability of the person(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityPerson(Direction direction)
+{
+  EditorMapThing* person = persons[0].thing;
+
+  if(person != NULL)
+  {
+    EditorTileSprite* sprite = person->getMatrix()->getSprite(
+                              getX() - person->getX(), getY() - person->getY());
+    if(sprite != NULL)
+    {
+      return sprite->getPassability(direction);
+    }
+  }
+  return true;
 }
 
 /*
@@ -372,11 +432,77 @@ bool EditorTile::getPassabilityVisible(Direction direction)
 }
 
 /*
+ * Description: Returns the map person pointer for the person at the rendering
+ *              level.
+ *
+ * Inputs: int render_level - the render level inside the tile
+ * Output: EditorMapPerson* - the person at the render level
+ */
+EditorMapPerson* EditorTile::getPerson(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return (EditorMapPerson*)persons[render_level].thing;
+  return NULL;
+}
+
+/*
+ * Description: Returns the sprite at the indicated layer
+ *
+ * Inputs: EditorEnumDb::Layer - the layer to grab the sprite
+ * Output: EditorSprite* - the sprite pointer
+ */
+EditorSprite* EditorTile::getSprite(EditorEnumDb::Layer layer)
+{
+  switch(layer)
+  {
+    case EditorEnumDb::BASE:
+      return layer_base.sprite;
+      break;
+    case EditorEnumDb::ENHANCER:
+      return layer_enhancer.sprite;
+      break;
+    case EditorEnumDb::LOWER1:
+      return layers_lower[0].sprite;
+      break;
+    case EditorEnumDb::LOWER2:
+      return layers_lower[1].sprite;
+      break;
+    case EditorEnumDb::LOWER3:
+      return layers_lower[2].sprite;
+      break;
+    case EditorEnumDb::LOWER4:
+      return layers_lower[3].sprite;
+      break;
+    case EditorEnumDb::LOWER5:
+      return layers_lower[4].sprite;
+      break;
+    case EditorEnumDb::UPPER1:
+      return layers_upper[0].sprite;
+      break;
+    case EditorEnumDb::UPPER2:
+      return layers_upper[1].sprite;
+      break;
+    case EditorEnumDb::UPPER3:
+      return layers_upper[2].sprite;
+      break;
+    case EditorEnumDb::UPPER4:
+      return layers_upper[3].sprite;
+      break;
+    case EditorEnumDb::UPPER5:
+      return layers_upper[4].sprite;
+      break;
+    default:
+      break;
+  }
+  return NULL;
+}
+
+/*
  * Description: Returns the map thing pointer for the thing at the rendering
  *              level.
  *
  * Inputs: int render_level - the render level inside the tile
- * Output: EditorThing* - the thing at the render level
+ * Output: EditorMapThing* - the thing at the render level
  */
 EditorMapThing* EditorTile::getThing(int render_level)
 {
@@ -478,58 +604,6 @@ int EditorTile::getY()
 }
 
 /*
- * Description: Returns the sprite at the indicated layer
- *
- * Inputs: EditorEnumDb::Layer - the layer to grab the sprite
- * Output: EditorSprite* - the sprite pointer
- */
-EditorSprite* EditorTile::getSprite(EditorEnumDb::Layer layer)
-{
-  switch(layer)
-  {
-    case EditorEnumDb::BASE:
-      return layer_base.sprite;
-      break;
-    case EditorEnumDb::ENHANCER:
-      return layer_enhancer.sprite;
-      break;
-    case EditorEnumDb::LOWER1:
-      return layers_lower[0].sprite;
-      break;
-    case EditorEnumDb::LOWER2:
-      return layers_lower[1].sprite;
-      break;
-    case EditorEnumDb::LOWER3:
-      return layers_lower[2].sprite;
-      break;
-    case EditorEnumDb::LOWER4:
-      return layers_lower[3].sprite;
-      break;
-    case EditorEnumDb::LOWER5:
-      return layers_lower[4].sprite;
-      break;
-    case EditorEnumDb::UPPER1:
-      return layers_upper[0].sprite;
-      break;
-    case EditorEnumDb::UPPER2:
-      return layers_upper[1].sprite;
-      break;
-    case EditorEnumDb::UPPER3:
-      return layers_upper[2].sprite;
-      break;
-    case EditorEnumDb::UPPER4:
-      return layers_upper[3].sprite;
-      break;
-    case EditorEnumDb::UPPER5:
-      return layers_upper[4].sprite;
-      break;
-    default:
-      break;
-  }
-  return NULL;
-}
-
-/*
  * Description: Paints the tile
  *
  * Input: Required fields, mostly unused
@@ -545,9 +619,10 @@ void EditorTile::paint(QPainter *painter,
   /* Determine if it's a hover thing - special state */
   int diff_x = 0;
   int diff_y = 0;
+  bool hover_person = isHoverPerson();
   bool hover_sprite = isHoverSprite();
   bool hover_thing = isHoverThing();
-  if(hover_thing)
+  if(hover_thing || hover_person)
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
@@ -604,6 +679,19 @@ void EditorTile::paint(QPainter *painter,
   if(hover_thing)
     hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
 
+  /* Render the map persons */
+  for(int i = 0; i < persons.size(); i++)
+  {
+    if(persons[i].visible && persons[i].thing != NULL)
+      persons[i].thing->paint(0, painter, bound,
+                              x_pos - persons[i].thing->getX(),
+                              y_pos - persons[i].thing->getY());
+  }
+
+  /* If hover person is true, render it */
+  if(hover_person)
+    hover_info->active_person->paint(painter, bound, diff_x, diff_y);
+
   /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
   {
@@ -629,7 +717,7 @@ void EditorTile::paint(QPainter *painter,
     painter->setPen(QColor(255, 255, 255, 128));
     painter->drawRect(rect);
 
-    // TODO: REMOVE - TESTING
+    /* Thing border points */
     int x1 = hover_info->selected_thing.x();
     int y1 = hover_info->selected_thing.y();
     int x2 = x1 + hover_info->selected_thing.width() - 1;
@@ -905,10 +993,41 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
 }
 
 /*
+ * Description: Sets the person sprite pointer, stored within the class.
+ *
+ * Inputs: EditorMapPerson* person - the person to add to the tile (uses the
+ *                                   internal render depth and position)
+ * Output: bool - true if the person is set
+ */
+bool EditorTile::setPerson(EditorMapPerson* person)
+{
+  if(person != NULL)
+  {
+    /* Determine the x, y in the matrix */
+    int x =  x_pos - person->getX();
+    int y = y_pos - person->getY();
+    if(x >= 0 && x < person->getMatrix()->getWidth() &&
+       y >= 0 && y < person->getMatrix()->getHeight())
+    {
+      /* Determine the render level */
+      int render_level = person->getMatrix()->getRenderDepth(x, y);
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+      {
+        /* Set the new person */
+        persons[render_level].thing = person;
+        update();
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
  * Description: Sets the thing sprite pointer, stored within the class.
  *
- * Inputs: EditorThing* thing - the thing to add to the tile (uses the internal
- *                              render depth and position)
+ * Inputs: EditorMapThing* thing - the thing to add to the tile (uses the
+ *                                 internal render depth and position)
  * Output: bool - true if the thing is set
  */
 bool EditorTile::setThing(EditorMapThing* thing)
@@ -1042,6 +1161,36 @@ void EditorTile::setVisibilityPass(bool toggle)
 {
   visible_passability = toggle;
   update();
+}
+
+/*
+ * Description: Sets the visibility of all layers of the persons.
+ *
+ * Inputs: bool visible - true if the person layers are visible
+ * Output: none
+ */
+void EditorTile::setVisibilityPerson(bool visible)
+{
+  for(int i = 0; i < persons.size(); i++)
+    persons[i].visible = visible;
+  update();
+}
+
+/*
+ * Description: Sets the visibility of the render level of the person in tile.
+ *
+ * Inputs: int render_level - the render level to modify the visibility
+ *         bool visible - true if the render level should be visible
+ * Output: bool - true if the visibility was set
+ */
+bool EditorTile::setVisibilityPerson(int render_level, bool visible)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+  {
+    persons[render_level].visible = visible;
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -1197,6 +1346,62 @@ void EditorTile::unplace(EditorSprite* sprite)
     }
   }
 
+  update();
+}
+
+/*
+ * Description: Unsets the person pointer in the tile. Searches through all
+ *              render levels and removes it if the pointer is found.
+ *
+ * Inputs: Editorperson* person - the person to remove from the tile
+ * Output: bool - true if the person was found and removed
+ */
+bool EditorTile::unsetPerson(EditorMapPerson* person)
+{
+  for(int i = 0; i < persons.size(); i++)
+  {
+    if(persons[i].thing == person)
+    {
+      persons[i].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the person pointer in the tile at the render level.
+ *
+ * Inputs: int render_level - the render depth to remove the person from
+ * Output: bool - true if a person was removed at the passed depth
+ */
+bool EditorTile::unsetPerson(int render_level)
+{
+  if(render_level >= 0 && render_level < persons.size())
+  {
+    if(persons[render_level].thing != NULL)
+    {
+      persons[render_level].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the persons in all render levels.
+ *
+ * Inputs: none
+ * Output: none
+ */
+bool EditorTile::unsetPersons()
+{
+  for(int i = 0; i < persons.size(); i++)
+    persons[i].thing = NULL;
   update();
 }
 

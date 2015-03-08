@@ -90,6 +90,9 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Attempts to add person to the current sub-map */
+  bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL); // TODO
+
   /* Attempts to add thing to the current sub-map */
   bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL);
 
@@ -117,7 +120,7 @@ protected:
                   SubMapInfo* map, bool first = false);
 
   /* Updates the tiles that contain the hover information struct */
-  bool updateHoverThing(bool unset = false);
+  bool updateHoverThing(bool unset = false); // TODO: NEW?? OR REVISE
 
 /*============================================================================
  * SIGNALS
