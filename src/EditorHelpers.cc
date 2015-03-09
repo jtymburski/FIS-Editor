@@ -484,6 +484,7 @@ QList<QPair<QString,QString>> EditorHelpers::rectilinearSplit(
 QString EditorHelpers::trimPath(QString path)
 {
   QString ref_path = EditorHelpers::getProjectDir();
+  path = path.replace('\\', '/');
   int index = path.indexOf(ref_path);
 
   if(index == 0)
