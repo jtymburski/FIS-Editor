@@ -14,8 +14,9 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
-//#include "Dialog/PersonDialog.h" // TODO: FUTURE
+#include "Dialog/PersonDialog.h"
 #include "EditorHelpers.h"
+#include "View/MapThingView.h"
 
 class MapPersonView : public QWidget
 {
@@ -38,7 +39,7 @@ private:
   QLabel* lbl_size;
 
   /* The person dialog for editing */
-  //PersonDialog* person_dialog; // TODO: FUTURE
+  PersonDialog* person_dialog;
 
   /* The list of person in the view */
   QListWidget* person_instances;
@@ -123,7 +124,7 @@ public:
   bool duplicatePerson();
 
   /* Get current person */
-  EditorMapThing* getSelected();
+  EditorMapPerson* getSelected();
 
   /* Gets the editor map */
   EditorMap* getEditorMap();

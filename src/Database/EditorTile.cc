@@ -244,13 +244,13 @@ QString EditorTile::getActiveLayers()
   /* Get thing info, if relevant */
   for(int i = 0; i < things.size(); i++)
     if(things[i].thing != NULL)
-      layer_string += "MT" + QString::number(i + 1) + "("
+      layer_string += "MT" + QString::number(i) + "("
                    + QString::number(things[i].thing->getID()) + "),";
 
   /* Get person info, if relevant */
   for(int i = 0; i < persons.size(); i++)
     if(persons[i].thing != NULL)
-      layer_string += "MP" + QString::number(i + 1) + "("
+      layer_string += "MP" + QString::number(i) + "("
                    + QString::number(persons[i].thing->getID()) + "),";
 
   /* Get upper info, if relevant */
@@ -427,6 +427,8 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::LOWER5, direction);
   if(things[0].visible)
     passable &= getPassability(EditorEnumDb::THING, direction);
+  if(persons[0].visible)
+    passable &= getPassability(EditorEnumDb::PERSON, direction);
 
   return passable;
 }
@@ -667,26 +669,24 @@ void EditorTile::paint(QPainter *painter,
     }
   }
 
-  /* Render the map things */
-  for(int i = 0; i < things.size(); i++)
+  /* Render the things (and children) */
+  for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
   {
+    /* Paint the thing */
     if(things[i].visible && things[i].thing != NULL)
       things[i].thing->paint(0, painter, bound, x_pos - things[i].thing->getX(),
                              y_pos - things[i].thing->getY());
-  }
 
-  /* If hover thing is true, render it */
-  if(hover_thing)
-    hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
-
-  /* Render the map persons */
-  for(int i = 0; i < persons.size(); i++)
-  {
+    /* Paint the person */
     if(persons[i].visible && persons[i].thing != NULL)
       persons[i].thing->paint(0, painter, bound,
                               x_pos - persons[i].thing->getX(),
                               y_pos - persons[i].thing->getY());
   }
+
+  /* If hover thing is true, render it */
+  if(hover_thing)
+    hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
 
   /* If hover person is true, render it */
   if(hover_person)
@@ -744,12 +744,24 @@ void EditorTile::paint(QPainter *painter,
   if(hovered)
   {
     QColor color(200, 200, 200, 128);
+    /* -- HOVER THING CONTROL -- */
     if(hover_thing)
     {
       EditorMatrix* matrix = hover_info->active_thing->getMatrix();
 
       if(hovered_invalid ||
          getThing(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
+    /* -- HOVER PERSON CONTROL -- */
+    else if(hover_person)
+    {
+      EditorMatrix* matrix = hover_info->active_person->getMatrix();
+
+      if(hovered_invalid ||
+         getPerson(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);
@@ -1090,6 +1102,8 @@ void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
     setVisibilityLower(4, visible);
   else if(layer == EditorEnumDb::THING)
     setVisibilityThing(visible);
+  else if(layer == EditorEnumDb::PERSON)
+    setVisibilityPerson(visible);
   else if(layer == EditorEnumDb::UPPER1)
     setVisibilityUpper(0, visible);
   else if(layer == EditorEnumDb::UPPER2)

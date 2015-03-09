@@ -2856,8 +2856,8 @@ bool EditorMap::unsetPersonByIndex(int index, int sub_map)
       {
         for(int j = 0; j < sub_maps[i]->persons.size(); j++)
         {
-          if(sub_maps[i]->persons[j]->getBaseThing() != NULL &&
-             sub_maps[i]->persons[j]->getBaseThing()->getID() ==
+          if(sub_maps[i]->persons[j]->getBasePerson() != NULL &&
+             sub_maps[i]->persons[j]->getBasePerson()->getID() ==
              base_persons[index]->getID())
           {
             unsetPersonByIndex(j, i);

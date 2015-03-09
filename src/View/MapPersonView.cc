@@ -23,7 +23,7 @@ MapPersonView::MapPersonView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
-  //person_dialog = NULL; // TODO: FUTURE
+  person_dialog = NULL;
 
   /* Create the layout */
   createLayout();
@@ -41,8 +41,6 @@ MapPersonView::~MapPersonView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-// TODO: HERE
-
 /*
  * Description: Adds person to the base list. Triggered by the "new person"
  *              press. The ID is the next available.
@@ -55,13 +53,13 @@ void MapPersonView::addPerson(EditorMapPerson* person)
   if(editor_map != NULL)
   {
     /* Sets the id and puts the person in the library */
-    thing->setID(editor_map->getNextThingID());
-    thing->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setThing(thing);
+    person->setID(editor_map->getNextPersonID());
+    person->setTileIcons(editor_map->getTileIcons());
+    int index = editor_map->setPerson(person);
 
     /* Increments the id tracker and updates view */
     updateList();
-    thing_list->setCurrentRow(index);
+    person_list->setCurrentRow(index);
   }
 }
 
@@ -77,26 +75,26 @@ void MapPersonView::createLayout()
   QVBoxLayout* layout = new QVBoxLayout(this);
 
   /* The list widget */
-  thing_list = new QListWidget(this);
-  connect(thing_list, SIGNAL(currentRowChanged(int)),
+  person_list = new QListWidget(this);
+  connect(person_list, SIGNAL(currentRowChanged(int)),
           this, SLOT(currentRowChanged(int)));
-  connect(thing_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+  connect(person_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
           this, SLOT(itemDoubleClicked(QListWidgetItem*)));
-  layout->addWidget(thing_list, 1);
+  layout->addWidget(person_list, 1);
 
   /* The instances widget */
   QLabel* lbl_instances = new QLabel("Instances:", this);
   layout->addWidget(lbl_instances, 0);
-  thing_instances = new QListWidget(this);
-  thing_instances->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(thing_instances, SIGNAL(customContextMenuRequested(QPoint)),
+  person_instances = new QListWidget(this);
+  person_instances->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(person_instances, SIGNAL(customContextMenuRequested(QPoint)),
           this, SLOT(instanceMenu(QPoint)));
-  connect(thing_instances, SIGNAL(currentRowChanged(int)),
+  connect(person_instances, SIGNAL(currentRowChanged(int)),
           this, SLOT(instanceRowChanged(int)));
-  layout->addWidget(thing_instances, 1);
+  layout->addWidget(person_instances, 1);
 
   /* Right click menu control */
-  rightclick_menu = new QMenu("Thing Edit", this);
+  rightclick_menu = new QMenu("Person Edit", this);
   QAction* edit_thing = new QAction("Edit", rightclick_menu);
   connect(edit_thing, SIGNAL(triggered()), this, SLOT(editInstance()));
   QAction* delete_thing = new QAction("Delete", rightclick_menu);
@@ -126,33 +124,33 @@ void MapPersonView::createLayout()
 }
 
 /*
- * Description: Opens the edit thing dialog, on an existing thing in the list
+ * Description: Opens the edit person dialog, on an existing person in the list
  *              (either base or instance).
  *
- * Inputs: EditorThing* sub_thing - the thing to edit
+ * Inputs: EditorMapPerson* sub_person - the person to edit
  * Output: none
  */
-void MapPersonView::editThing(EditorMapThing* sub_thing)
+void MapPersonView::editPerson(EditorMapPerson* sub_person)
 {
-  EditorMapThing* current = getSelected();
-  if(sub_thing != NULL)
-    current = sub_thing;
+  EditorMapPerson* current = getSelected();
+  if(sub_person != NULL)
+    current = sub_person;
 
   /* Delete the old and create the new dialog */
-  if(thing_dialog != NULL)
+  if(person_dialog != NULL)
   {
-    disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
-    disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+    disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
+    disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
                this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-    delete thing_dialog;
+    delete person_dialog;
   }
-  thing_dialog = new ThingDialog(current, this);
-  connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
-  connect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+  person_dialog = new PersonDialog(current, this);
+  connect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
+  connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
           this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-  thing_dialog->show();
+  person_dialog->show();
 
-  emit fillWithData(EditorEnumDb::THING_VIEW);
+  emit fillWithData(EditorEnumDb::PERSON_VIEW);
 }
 
 /*
@@ -171,52 +169,52 @@ void MapPersonView::updateInfo()
     lbl_name->setText("Name:");
     lbl_size->setText("Size:  |  Frames:");
 
-    EditorMapThing* thing = getSelected();
-    if(thing != NULL)
+    EditorMapPerson* person = getSelected();
+    if(person != NULL)
     {
       /* Set the labels */
-      lbl_id->setText("ID: " + QString::number(thing->getID()));
-      lbl_name->setText("Name: " + thing->getName());
+      lbl_id->setText("ID: " + QString::number(person->getID()));
+      lbl_name->setText("Name: " + person->getName());
 
       /* If matrix is valid, set the remaining info */
-      if(thing->getMatrix() != NULL)
+      if(person->getMatrix() != NULL)
       {
-        lbl_image->setPixmap(thing->getMatrix()->getSnapshot(200, 200));
+        lbl_image->setPixmap(person->getMatrix()->getSnapshot(200, 200));
         lbl_size->setText("Size: " +
-                      QString::number(thing->getMatrix()->getWidth()) +
-                      "W x " +
-                      QString::number(thing->getMatrix()->getHeight()) +
-                      "H  |  Frames: " +
-                      QString::number(thing->getMatrix()->getTrimFrames() + 1));
+                    QString::number(person->getMatrix()->getWidth()) +
+                    "W x " +
+                    QString::number(person->getMatrix()->getHeight()) +
+                    "H  |  Frames: " +
+                    QString::number(person->getMatrix()->getTrimFrames() + 1));
       }
     }
   }
 }
 
 /*
- * Description: Refreshes the Editor Thing list.
+ * Description: Refreshes the Editor Person list.
  *
  * Inputs: none
  * Output: none
  */
 void MapPersonView::updateList()
 {
-  int index = thing_list->currentRow();
+  int index = person_list->currentRow();
 
   /* Set up the base list */
-  thing_list->clear();
+  person_list->clear();
   if(editor_map != NULL)
   {
     /* Set up the base list */
-    for(int i = 0; i < editor_map->getThingCount(); i++)
-      thing_list->addItem(editor_map->getThingByIndex(i)->getNameList());
+    for(int i = 0; i < editor_map->getPersonCount(); i++)
+      person_list->addItem(editor_map->getPersonByIndex(i)->getNameList());
     editor_map->updateAll();
 
     /* Set up the instances list */
-    thingInstanceUpdate();
+    personInstanceUpdate();
   }
 
-  thing_list->setCurrentRow(index);
+  person_list->setCurrentRow(index);
   updateInfo();
   update();
 }
@@ -227,7 +225,7 @@ void MapPersonView::updateList()
 
 /*
  * Description: Slot which triggers when the top list changes. Updates the
- *              selected thing.
+ *              selected person.
  *
  * Inputs: int index - the new index in the list
  * Output: none
@@ -235,7 +233,7 @@ void MapPersonView::updateList()
 void MapPersonView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
-    editor_map->setCurrentThing(index);
+    editor_map->setCurrentPerson(index);
   updateInfo();
 }
 
@@ -248,19 +246,19 @@ void MapPersonView::currentRowChanged(int index)
  */
 void MapPersonView::deleteInstance()
 {
-  if(thing_instances->currentItem() != NULL)
+  if(person_instances->currentItem() != NULL)
   {
-    QString text = thing_instances->currentItem()->text();
+    QString text = person_instances->currentItem()->text();
 
     /* Create warning about deleting */
     QMessageBox msg_box;
-    msg_box.setText("Deleting thing instance: " + text);
+    msg_box.setText("Deleting person instance: " + text);
     msg_box.setInformativeText("Are you sure?");
     msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     if(msg_box.exec() == QMessageBox::Yes)
     {
-      int index = getInstanceID(text);
-      editor_map->unsetThing(index, true);
+      int index = MapThingView::getInstanceID(text);
+      editor_map->unsetPerson(index, true);
     }
   }
 }
@@ -274,16 +272,15 @@ void MapPersonView::deleteInstance()
  */
 void MapPersonView::editInstance()
 {
-  if(thing_instances->currentItem() != NULL)
+  if(person_instances->currentItem() != NULL)
   {
-    int id = getInstanceID(thing_instances->currentItem()->text());
+    int id = MapThingView::getInstanceID(
+                                 person_instances->currentItem()->text());
 
-    EditorMapThing* thing = editor_map->getThing(
+    EditorMapPerson* person = editor_map->getPerson(
                                            id, editor_map->getCurrentMap()->id);
-    if(thing != NULL)
-    {
-      editThing(thing);
-    }
+    if(person != NULL)
+      editPerson(person);
   }
 }
 
@@ -296,14 +293,14 @@ void MapPersonView::editInstance()
  */
 void MapPersonView::instanceMenu(const QPoint & pos)
 {
-  QListWidgetItem* item = thing_instances->itemAt(pos);
+  QListWidgetItem* item = person_instances->itemAt(pos);
   if(item != NULL)
     rightclick_menu->exec(QCursor::pos());
 }
 
 /*
- * Description: Slot which triggers when a row in the instance list of things
- *              changes. This changes which thing is hovered on the map.
+ * Description: Slot which triggers when a row in the instance list of persons
+ *              changes. This changes which person is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
  * Output: none
@@ -312,22 +309,23 @@ void MapPersonView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
-    int thing_index = getInstanceID(thing_instances->currentItem()->text());
-    if(editor_map->setHoverThing(thing_index))
+    int person_id = MapThingView::getInstanceID(
+                                       person_instances->currentItem()->text());
+    if(editor_map->setHoverPerson(person_id))
       emit ensureVisible(editor_map->getHoverInfo()->selected_thing);
   }
 }
 
 /*
  * Description: Slot which triggers when an item in the base list is double
- *              clicked. Opens a pop-up for the thing to be edited.
+ *              clicked. Opens a pop-up for the person to be edited.
  *
  * Inputs: QListWidgetItem* - not used
  * Output: none
  */
 void MapPersonView::itemDoubleClicked(QListWidgetItem*)
 {
-  editThing();
+  editPerson();
 }
 
 /*
@@ -338,12 +336,12 @@ void MapPersonView::itemDoubleClicked(QListWidgetItem*)
  * Inputs: none
  * Output: none
  */
-void MapPersonView::thingInstanceUpdate()
+void MapPersonView::personInstanceUpdate()
 {
-  thing_instances->blockSignals(true);
-  thing_instances->clearSelection();
-  thing_instances->clearFocus();
-  thing_instances->clear();
+  person_instances->blockSignals(true);
+  person_instances->clearSelection();
+  person_instances->clearFocus();
+  person_instances->clear();
 
   if(editor_map != NULL)
   {
@@ -351,36 +349,36 @@ void MapPersonView::thingInstanceUpdate()
     int sub_index = editor_map->getCurrentMapIndex();
     if(sub_index >= 0)
     {
-      for(int i = 0; i < editor_map->getThingCount(sub_index); i++)
+      for(int i = 0; i < editor_map->getPersonCount(sub_index); i++)
       {
-        thing_instances->addItem(
-                      editor_map->getThingByIndex(i, sub_index)->getNameList());
+        person_instances->addItem(
+                    editor_map->getPersonByIndex(i, sub_index)->getNameList());
       }
-      thing_instances->sortItems();
+      person_instances->sortItems();
     }
   }
 
-  thing_instances->clearSelection();
-  thing_instances->clearFocus();
-  thing_instances->blockSignals(false);
+  person_instances->clearSelection();
+  person_instances->clearFocus();
+  person_instances->blockSignals(false);
 }
 
 /*
- * Description: Slot which triggers to update a thing upeon completion by the
- *              thing dialog (on ok()). This will also update all instances of
+ * Description: Slot which triggers to update a person upon completion by the
+ *              person dialog (on ok()). This will also update all instances of
  *              the object, deleting as necessary.
  *
  * Inputs: none
  * Output: none
  */
-void MapPersonView::updateThings()
+void MapPersonView::updatePersons()
 {
-  /* Update the thing in the pop-up */
-  if(thing_dialog != NULL)
+  /* Update the person in the pop-up */
+  if(person_dialog != NULL)
   {
-    editor_map->thingRemoveFromTiles();
-    thing_dialog->updateOriginal();
-    editor_map->thingAddToTiles();
+    editor_map->tilesPersonRemove();
+    person_dialog->updateOriginal();
+    editor_map->tilesPersonAdd();
   }
 
   /* Update the list in the view */
@@ -392,29 +390,29 @@ void MapPersonView::updateThings()
  *===========================================================================*/
 
 /*
- * Description: Deletes the selected thing in the base list. Triggered by
+ * Description: Deletes the selected person in the base list. Triggered by
  *              parent.
  *
  * Inputs: none
- * Output: bool - returns true if thing deleted.
+ * Output: bool - returns true if person deleted.
  */
-bool MapPersonView::deleteThing()
+bool MapPersonView::deletePerson()
 {
-  EditorMapThing* selected = getSelected();
+  EditorMapPerson* selected = getSelected();
   bool success = false;
 
   /* If valid, proceed deletion */
   if(selected != NULL)
   {
-    int index = thing_list->currentRow();
-    success = editor_map->unsetThingByIndex(index);
+    int index = person_list->currentRow();
+    success = editor_map->unsetPersonByIndex(index);
 
     /* If successfull, reset list */
     if(success)
     {
       updateList();
-      if(index >= thing_list->count())
-        thing_list->setCurrentRow(thing_list->count() - 1);
+      if(index >= person_list->count())
+        person_list->setCurrentRow(person_list->count() - 1);
     }
   }
 
@@ -422,21 +420,21 @@ bool MapPersonView::deleteThing()
 }
 
 /*
- * Description: Duplicates the selected thing in the base list. Triggered by
+ * Description: Duplicates the selected person in the base list. Triggered by
  *              parent.
  *
  * Inputs: none
- * Output: bool - returns true if thing was duplicated.
+ * Output: bool - returns true if person was duplicated.
  */
-bool MapPersonView::duplicateThing()
+bool MapPersonView::duplicatePerson()
 {
-  EditorMapThing* selected = getSelected();
+  EditorMapPerson* selected = getSelected();
 
   /* If valid, proceed duplication */
   if(selected != NULL)
   {
-    EditorMapThing* new_thing = new EditorMapThing(*selected);
-    addThing(new_thing);
+    EditorMapPerson* new_person = new EditorMapPerson(*selected);
+    addPerson(new_person);
     return true;
   }
 
@@ -444,25 +442,25 @@ bool MapPersonView::duplicateThing()
 }
 
 /*
- * Description: Returns which thing is selected in the base list.
+ * Description: Returns which person is selected in the base list.
  *
  * Inputs: none
- * Output: EditorThing* - selected thing. NULL if none selected
+ * Output: EditorMapPerson* - selected person. NULL if none selected
  */
-EditorMapThing* MapPersonView::getSelected()
+EditorMapPerson* MapPersonView::getSelected()
 {
-  int index = thing_list->currentRow();
-  EditorMapThing* thing = NULL;
+  int index = person_list->currentRow();
+  EditorMapPerson* person = NULL;
 
   /* Check the validity */
   if(editor_map != NULL)
-    thing = editor_map->getThingByIndex(index);
+    person = editor_map->getPersonByIndex(index);
 
-  return thing;
+  return person;
 }
 
 /*
- * Description: Returns the editor map, which contains all things and instances.
+ * Description: Returns the editor map, which contains all persons and instances
  *
  * Inputs: none
  * Output: EditorMap* - pointer to the editor map. NULL if none set.
@@ -473,13 +471,13 @@ EditorMap* MapPersonView::getEditorMap()
 }
 
 /*
- * Description: Imports a new thing into the base list. Triggered by
+ * Description: Imports a new person into the base list. Triggered by
  *              parent.
  *
  * Inputs: none
  * Output: none
  */
-void MapPersonView::importThing()
+void MapPersonView::importPerson()
 {
   // TODO: Future
   QMessageBox::information(this, "Notification",
@@ -487,22 +485,22 @@ void MapPersonView::importThing()
 }
 
 /*
- * Description: Creates a new thing into the base list. Triggered by
- *              parent. Proceeds to call edit on the new thing and opens
- *              ThingDialog.
+ * Description: Creates a new person into the base list. Triggered by
+ *              parent. Proceeds to call edit on the new person and opens
+ *              PersonDialog.
  *
  * Inputs: none
  * Output: none
  */
-void MapPersonView::newThing()
+void MapPersonView::newPerson()
 {
-  EditorMapThing* new_thing = new EditorMapThing();
-  addThing(new_thing);
-  editThing();
+  EditorMapPerson* new_person = new EditorMapPerson();
+  addPerson(new_person);
+  editPerson();
 }
 
 /*
- * Description: Sets the control editor map. This contains the things, sprites
+ * Description: Sets the control editor map. This contains the persons, sprites
  *              and all data relevant to display.
  *
  * Inputs: EditorMap* map - the map to use for control
@@ -513,8 +511,8 @@ void MapPersonView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
-    disconnect(editor_map, SIGNAL(thingInstanceChanged()),
-               this, SLOT(thingInstanceUpdate()));
+    disconnect(editor_map, SIGNAL(personInstanceChanged()),
+               this, SLOT(personInstanceUpdate()));
   }
 
   editor_map = map;
@@ -522,8 +520,8 @@ void MapPersonView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
-    connect(editor_map, SIGNAL(thingInstanceChanged()),
-            this, SLOT(thingInstanceUpdate()));
+    connect(editor_map, SIGNAL(personInstanceChanged()),
+            this, SLOT(personInstanceUpdate()));
   }
 
   /* Finally, update list */
@@ -538,8 +536,8 @@ void MapPersonView::setEditorMap(EditorMap* map)
  */
 void MapPersonView::updateListItems(QVector<QString> list)
 {
-  if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListItems(list);
+  if(person_dialog != NULL)
+    person_dialog->getEventView()->setListItems(list);
 }
 
 /*
@@ -550,8 +548,8 @@ void MapPersonView::updateListItems(QVector<QString> list)
  */
 void MapPersonView::updateListMaps(QVector<QString> list)
 {
-  if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListMaps(list);
+  if(person_dialog != NULL)
+    person_dialog->getEventView()->setListMaps(list);
 }
 
 /*
@@ -562,8 +560,8 @@ void MapPersonView::updateListMaps(QVector<QString> list)
  */
 void MapPersonView::updateListSubmaps(QVector<QString> list)
 {
-  if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListSubmaps(list);
+  if(person_dialog != NULL)
+    person_dialog->getEventView()->setListSubmaps(list);
 }
 
 /*
@@ -574,12 +572,12 @@ void MapPersonView::updateListSubmaps(QVector<QString> list)
  */
 void MapPersonView::updateListThings(QVector<QString> list)
 {
-  if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListThings(list);
+  if(person_dialog != NULL)
+    person_dialog->getEventView()->setListThings(list);
 }
 
 /*
- * Description: Updates the event embedded in the thing dialog with the
+ * Description: Updates the event embedded in the person dialog with the
  *              selected tile. Used for event creation. Called by parent.
  *
  * Inputs: int id - the id of the sub-map
@@ -588,32 +586,6 @@ void MapPersonView::updateListThings(QVector<QString> list)
  */
 void MapPersonView::updateSelectedTile(int id, int x, int y)
 {
-  if(thing_dialog != NULL)
-    thing_dialog->updateSelectedTile(id, x, y);
-}
-
-/*============================================================================
- * PUBLIC STATIC FUNCTIONS
- *===========================================================================*/
-
-/*
- * Description: Returns the instance ID from the text in the list.
- *
- * Inputs: QString text - list text for instances
- * Output: int - the id of the thing. -1 if failed.
- */
-int MapPersonView::getInstanceID(QString text)
-{
-  /* Split to find the number */
-  QStringList front = text.split('(');
-  if(front.size() == 2)
-  {
-    QStringList back = front.back().split(')');
-    if(back.size() == 2)
-    {
-      return back.front().toInt();
-    }
-  }
-
-  return -1;
+  if(person_dialog != NULL)
+    person_dialog->updateSelectedTile(id, x, y);
 }

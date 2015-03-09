@@ -55,12 +55,14 @@ SOURCES += \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
     src/Dialog/MatrixDialog.cc \
+    src/Dialog/PersonDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/ThingDialog.cc \
     src/View/EventView.cc \
     src/View/GameView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
+    src/View/MapPersonView.cc \
     src/View/MapRender.cc \
     src/View/MapThingView.cc \
     src/View/MapView.cc \
@@ -125,12 +127,14 @@ HEADERS += \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
     include/Dialog/MatrixDialog.h \
+    include/Dialog/PersonDialog.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/ThingDialog.h \
     include/View/EventView.h \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
+    include/View/MapPersonView.h \
     include/View/MapRender.h \
     include/View/MapThingView.h \
     include/View/MapView.h \

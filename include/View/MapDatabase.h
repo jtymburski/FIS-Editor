@@ -13,6 +13,7 @@
 
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
+#include "View/MapPersonView.h"
 #include "View/MapThingView.h"
 
 class MapDatabase : public QWidget
@@ -43,6 +44,7 @@ private:
   EditorEnumDb::MapViewMode mode_for_tile;
 
   /* The Views */
+  MapPersonView* view_person;
   RawImageView* view_raw;
   SpriteView* view_sprite;
   MapThingView* view_thing;
@@ -93,6 +95,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the views */
+  MapPersonView* getPersonView();
   RawImageView* getRawView();
   SpriteView* getSpriteView();
   MapThingView* getThingView();

@@ -16,7 +16,6 @@
 #include "Database/EditorMap.h"
 #include "Dialog/ThingDialog.h"
 #include "EditorHelpers.h"
-//#include "View/SpriteViewList.h"
 
 class MapThingView : public QWidget
 {

@@ -64,6 +64,8 @@ void MapView::setupLeftBar()
           map_database, SLOT(updatedMaps(QVector<QString>)));
   connect(map_database->getThingView(), SIGNAL(ensureVisible(QRect)),
           this, SLOT(ensureVisible(QRect)));
+  connect(map_database->getPersonView(), SIGNAL(ensureVisible(QRect)),
+          this, SLOT(ensureVisible(QRect)));
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
