@@ -126,6 +126,7 @@ public slots:
 
   /* Plays the current sub-map in the game */
   void play();
+  void playFinished(int);
 
   /* Save and save as action */
   void save();

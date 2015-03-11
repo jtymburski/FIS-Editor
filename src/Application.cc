@@ -88,6 +88,7 @@ Application::Application(QWidget* parent)
 
   /* Configure the run process */
   run_process.setWorkingDirectory(EditorHelpers::getProjectDir());
+  connect(&run_process, SIGNAL(finished(int)), this, SLOT(playFinished(int)));
 
   setStyleSheet("QMainWindow::separator { background: rgb(153, 153, 153); \
                                           width: 1px; height: 1px; }");
@@ -411,9 +412,12 @@ void Application::play()
     arg_list.push_back(play_file);
     run_process.start(exec_program, arg_list);
 
+    /* Disable app */
+    setDisabled(true);
+
     /* Finally, delete the file */
-    run_process.waitForFinished(1500);
-    QFile::remove(play_file);
+    //run_process.waitForFinished(3000);
+    //QFile::remove(play_file);
   }
   /* Otherwise, pop-up warning */
   else if(run_process.state() == QProcess::Running)
@@ -426,6 +430,15 @@ void Application::play()
     QMessageBox::information(this, "Can't Start!",
                              "No sub-map selected to test.");
   }
+}
+
+void Application::playFinished(int)
+{
+  QString play_file = EditorHelpers::getProjectDir() +
+                      "/../Editor/exports/xXx_TMP_xXx.utv";
+
+  setEnabled(true);
+  QFile::remove(play_file);
 }
 
 /* Save and save as action */
