@@ -26,6 +26,10 @@ PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
   frame_dialog = NULL;
   waiting_for_submap = false;
 
+  /* Matrix defaults */
+  matrix_direction = Direction::NORTH;
+  matrix_surface = MapPerson::GROUND;
+
   /* Set-up the thing set - copied to working for changes */
   person_original = edit_person;
   person_working = new EditorMapPerson();
@@ -118,14 +122,27 @@ void PersonDialog::createLayout(bool instance)
           this, SLOT(changedDescription(QString)));
   layout->addWidget(line_description, 3, 1, 1, 5);
 
+  /* The speed widget */
+  QLabel* lbl_speed = new QLabel("Speed:", this);
+  layout->addWidget(lbl_speed, 4, 0);
+  spin_speed = new QSpinBox(this);
+  spin_speed->setMinimum(0);
+  spin_speed->setMaximum(256);
+  if(instance)
+    spin_speed->setDisabled(true);
+  connect(spin_speed, SIGNAL(valueChanged(int)), this, SLOT(speedChanged(int)));
+  layout->addWidget(spin_speed, 4, 1);
+  lbl_speed_result = new QLabel("X ms/tile");
+  layout->addWidget(lbl_speed_result, 4, 2);
+
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 4, 0, 2, 1);
+  layout->addWidget(lbl_frame, 5, 0, 2, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 4, 1, 2, 3);
+  layout->addWidget(lbl_frame_img, 5, 1, 2, 3);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -133,31 +150,46 @@ void PersonDialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
+  layout->addWidget(btn_frame_click, 5, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
   event_view = new EventView(event_ctrl, this);
   if(instance)
     event_view->setDisabled(true);
-  layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
+  layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
   connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
   connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+
+  /* Matrix selection views */
+  QComboBox* box_ground = new QComboBox(this);
+  box_ground->addItem("Ground");
+  connect(box_ground, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(surfaceChange(QString)));
+  layout->addWidget(box_ground, 4, 4, 1, 2);
+  QComboBox* box_direction = new QComboBox(this);
+  box_direction->addItem("North");
+  box_direction->addItem("East");
+  box_direction->addItem("South");
+  box_direction->addItem("West");
+  connect(box_direction, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(directionChange(QString)));
+  layout->addWidget(box_direction, 4, 6, 1, 2);
 
   /* Matrix View */
   matrix_view = new MatrixView(person_working->getMatrix(), this);
   if(instance)
     matrix_view->setDisabled(true);
-  layout->addWidget(matrix_view, 4, 4, 4, 4);
+  layout->addWidget(matrix_view, 5, 4, 4, 4);
 
   /* The button control */
-  layout->setRowMinimumHeight(8, 15);
+  layout->setRowMinimumHeight(9, 15);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 9, 6);
+  layout->addWidget(btn_ok, 10, 6);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 9, 7);
+  layout->addWidget(btn_cancel, 10, 7);
 
   /* Dialog control */
   setWindowTitle("Person Edit");
@@ -178,12 +210,17 @@ void PersonDialog::updateData()
     box_visible->setCurrentIndex(1);
   else
     box_visible->setCurrentIndex(0);
+  spin_speed->setValue(person_working->getSpeed());
+
+  /* Update the matrix */
+  matrix_view->setMatrix(person_working->getState(matrix_surface,
+                                                  matrix_direction));
 }
 
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: The re-implementation of the close event for the dialog. Cleans
  *              up the existing person references and deletes memory.
@@ -283,6 +320,22 @@ void PersonDialog::changedName(QString name)
   person_working->setName(name);
 }
 
+/* Direction change for matrix */
+// TODO: Comment
+void PersonDialog::directionChange(QString text)
+{
+  if(text == "North")
+    matrix_direction = Direction::NORTH;
+  else if(text == "East")
+    matrix_direction = Direction::EAST;
+  else if(text == "South")
+    matrix_direction = Direction::SOUTH;
+  else if(text == "West")
+    matrix_direction = Direction::WEST;
+
+  updateData();
+}
+
 /*
  * Description: Edits the current conversation instance trigger. Triggered
  *              from EventView. Required to lock out the pop-up.
@@ -318,27 +371,6 @@ void PersonDialog::editConversation(Conversation* convo, bool is_option)
 }
 
 /*
- * Description: Updates the frame dialog image in the pop-up. Scales the image
- *              to fit inside a fixed label.
- *
- * Inputs: none
- * Output: none
- */
-void PersonDialog::updateFrame()
-{
-  QImage original = person_working->getDialogImage()->getImage(0);
-  if(original.width() > 200 || original.height() > 200)
-  {
-    QImage scaled_image = original.scaled(200, 200, Qt::KeepAspectRatio);
-    lbl_frame_img->setPixmap(QPixmap::fromImage(scaled_image));
-  }
-  else
-  {
-    lbl_frame_img->setPixmap(QPixmap::fromImage(original));
-  }
-}
-
-/*
  * Description: Triggers the select tile dialog for the pop-up. This hides the
  *              pop-up and waits for a tile to be selected on the map render.
  *
@@ -368,6 +400,49 @@ void PersonDialog::selectTileConvo()
     selectTile();
     waiting_convo = true;
     convo_dialog->hide();
+  }
+}
+
+/* Speed changed */
+// TODO: Comment
+void PersonDialog::speedChanged(int value)
+{
+  person_working->setSpeed(value);
+
+  if(value > 0)
+    lbl_speed_result->setText(QString::number(4096 / value) + " ms/tile");
+  else
+    lbl_speed_result->setText("0 ms/tile");
+}
+
+/* Surface change for matrix */
+// TODO: Comment
+void PersonDialog::surfaceChange(QString text)
+{
+  if(text == "Ground")
+    matrix_surface = MapPerson::GROUND;
+
+  updateData();
+}
+
+/*
+ * Description: Updates the frame dialog image in the pop-up. Scales the image
+ *              to fit inside a fixed label.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void PersonDialog::updateFrame()
+{
+  QImage original = person_working->getDialogImage()->getImage(0);
+  if(original.width() > 200 || original.height() > 200)
+  {
+    QImage scaled_image = original.scaled(200, 200, Qt::KeepAspectRatio);
+    lbl_frame_img->setPixmap(QPixmap::fromImage(scaled_image));
+  }
+  else
+  {
+    lbl_frame_img->setPixmap(QPixmap::fromImage(original));
   }
 }
 

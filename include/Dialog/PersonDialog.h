@@ -47,12 +47,22 @@ private:
   QLineEdit* line_description;
   QLineEdit* line_name;
 
+  /* Speed result label */
+  QLabel* lbl_speed_result;
+
+  /* Matrix control */
+  Direction matrix_direction;
+  MapPerson::SurfaceClassifier matrix_surface;
+
   /* Matrix view and control */
   MatrixView* matrix_view;
 
   /* The working and original person */
   EditorMapPerson* person_original;
   EditorMapPerson* person_working;
+
+  /* The speed control value */
+  QSpinBox* spin_speed;
 
   /* Waiting for sub-map data */
   bool waiting_convo;
@@ -98,12 +108,21 @@ public slots:
   void changedDescription(QString description);
   void changedName(QString name);
 
+  /* Direction change for matrix */
+  void directionChange(QString text);
+
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
 
   /* Select tile trigger */
   void selectTile();
   void selectTileConvo();
+
+  /* Speed changed */
+  void speedChanged(int value);
+
+  /* Surface change for matrix */
+  void surfaceChange(QString text);
 
   /* Update the frame for the thing */
   void updateFrame();
