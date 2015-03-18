@@ -230,6 +230,7 @@ void PersonDialog::updateData()
  */
 void PersonDialog::closeEvent(QCloseEvent* event)
 {
+  matrix_view->setMatrix(NULL);
   event_ctrl->setEventBlank();
   if(person_working != NULL)
     delete person_working;

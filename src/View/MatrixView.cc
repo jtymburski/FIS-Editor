@@ -761,11 +761,12 @@ void MatrixView::setMatrix(EditorMatrix* matrix)
   /* If existing matrix is not NULL, disconnect */
   if(this->matrix != NULL)
   {
-    disconnect(matrix, SIGNAL(initMatrixPlace()),
+    disconnect(this->matrix, SIGNAL(initMatrixPlace()),
                this, SLOT(initMatrixPlace()));
-    disconnect(matrix, SIGNAL(rightClick(EditorTileSprite*)),
+    disconnect(this->matrix, SIGNAL(rightClick(EditorTileSprite*)),
                this, SLOT(rightClickTrigger(EditorTileSprite*)));
-    disconnect(matrix, SIGNAL(matrixChange()), this, SLOT(matrixChanged()));
+    disconnect(this->matrix, SIGNAL(matrixChange()),
+               this, SLOT(matrixChanged()));
   }
 
   /* Clean up matrix and set it in the view */

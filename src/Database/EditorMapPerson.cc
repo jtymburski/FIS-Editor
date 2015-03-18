@@ -82,7 +82,7 @@ void EditorMapPerson::initializeMatrixes()
 void EditorMapPerson::copySelf(const EditorMapPerson &source)
 {
   EditorMapThing::copySelf(source, false);
-  
+
   /* Copy matrix data */
   for(int i = 0; i < matrix_set.size(); i++)
     for(int j = 0; j < matrix_set[i].size(); j++)

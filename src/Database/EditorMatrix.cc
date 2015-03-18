@@ -1721,7 +1721,7 @@ void EditorMatrix::trim(bool only_se)
     setNewOrigin(trim_rect.x(), trim_rect.y());
 
   /* Update number of frames */
-  int frame_count = getTrimFrames(false) + 1;
+  int frame_count = getTrimFrames(true) + 1;
   for(int i = 0; i < matrix.size(); i++)
     for(int j = 0; j < matrix[i].size(); j++)
       matrix[i][j]->setMaximumFrames(frame_count);
