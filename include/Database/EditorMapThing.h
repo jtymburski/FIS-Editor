@@ -100,7 +100,7 @@ public:
   bool isVisible() const;
 
   /* Loads the thing data */
-  void load(XmlData data, int index);
+  virtual void load(XmlData data, int index);
 
   /* Paint a sprite in the thing */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
@@ -108,7 +108,7 @@ public:
              int offset_x = 0, int offset_y = 0);
 
   /* Saves the thing data */
-  void save(FileHandler* fh, bool game_only = false);
+  virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference thing */
   virtual void setBase(EditorMapThing* thing);

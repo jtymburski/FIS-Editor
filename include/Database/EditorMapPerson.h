@@ -67,6 +67,12 @@ public:
                          Direction direction);
   QList<QList<EditorMatrix*>> getStates();
 
+  /* Loads the person data */
+  virtual void load(XmlData data, int index);
+
+  /* Saves the person data */
+  virtual void save(FileHandler* fh, bool game_only = false);
+
   /* Sets the base reference person */
   void setBase(EditorMapPerson* person);
 

@@ -469,6 +469,66 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       thing->load(data, index + 1);
     }
   }
+  /* -------------- MAP PERSON -------------- */
+  else if(element == "mapperson")
+  {
+    int person_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapPerson* person = getPerson(person_id, map->id);
+
+    /* Create new person if it doesn't exist */
+    if(person == NULL)
+    {
+      person = new EditorMapPerson(person_id);
+      person->setTileIcons(getTileIcons());
+
+      /* Find insertion location */
+      int index = -1;
+      bool near = false;
+      for(int i = 0; !near && (i < map->persons.size()); i++)
+      {
+        if(map->persons[i]->getID() > person->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If near, insert at index. Otherwise, append */
+      if(near)
+        map->persons.insert(index, person);
+      else
+        map->persons.append(person);
+    }
+
+    /* Continue to parse the data in the thing */
+    QString element = QString::fromStdString(data.getElement(index + 1));
+    if(element == "base")
+    {
+      /* Get name and desc. if it has been changed */
+      EditorMapPerson default_person;
+      QString default_name = "";
+      QString default_desc = "";
+      if(default_person.getName() != person->getName())
+        default_name = person->getName();
+      if(default_person.getDescription() != person->getDescription())
+        default_desc = person->getDescription();
+
+      /* Set the base */
+      EditorMapPerson* base_person = getPerson(data.getDataInteger());
+      if(base_person != NULL)
+      {
+        person->setBase(base_person);
+        if(default_name != "")
+          person->setName(default_name);
+        if(default_desc != "")
+          person->setDescription(default_desc);
+      }
+    }
+    else
+    {
+      person->load(data, index + 1);
+    }
+  }
 }
 
 /*
@@ -597,6 +657,10 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
   /* Add things */
   for(int i = 0; i < map->things.size(); i++)
     map->things[i]->save(fh, game_only);
+
+  /* Add persons */
+  for(int i = 0; i < map->persons.size(); i++)
+    map->persons[i]->save(fh, game_only);
 
   /* End element */
   fh->writeXmlElementEnd();
@@ -1859,6 +1923,22 @@ void EditorMap::load(XmlData data, int index)
     /* Continue to parse the data in the thing */
     thing->load(data, index + 1);
   }
+  else if(data.getElement(index) == "mapperson" && data.getKey(index) == "id")
+  {
+    int person_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapPerson* person = getPerson(person_id);
+
+    /* Create new person if it doesn't exist */
+    if(person == NULL)
+    {
+      person = new EditorMapPerson(person_id);
+      person->setTileIcons(getTileIcons());
+      setPerson(person);
+    }
+
+    /* Continue to parse the data in the person */
+    person->load(data, index + 1);
+  }
   else if(data.getElement(index) == "main" ||
           (data.getElement(index) == "section" && data.getKey(index) == "id"))
   {
@@ -1906,6 +1986,10 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
     /* Add things */
     for(int i = 0; i < base_things.size(); i++)
       base_things[i]->save(fh, game_only);
+
+    /* Add persons */
+    for(int i = 0; i < base_persons.size(); i++)
+      base_persons[i]->save(fh, game_only);
 
     /* Save all maps if sub_index is out of range */
     if(sub_index <= 0 || sub_index >= sub_maps.size())

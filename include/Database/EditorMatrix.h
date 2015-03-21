@@ -194,7 +194,8 @@ public:
   void removeAll();
 
   /* Saves the matrix data */
-  void save(FileHandler* fh, bool game_only = false);
+  void save(FileHandler* fh, bool game_only = false, bool no_render = false);
+  void saveRender(FileHandler* fh);
 
   /* Sets the active frame for all sprites in the matrix */
   void setActiveFrame(int index, bool force = false);

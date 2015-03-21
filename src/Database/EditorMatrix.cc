@@ -1328,9 +1328,10 @@ void EditorMatrix::removeAll()
  *
  * Inputs: FileHandler* fh - the file handling pointer
  *         bool game_only - true if the data should include game only relevant
+ *         bool no_render - include render data?
  * Output: none
  */
-void EditorMatrix::save(FileHandler* fh, bool game_only)
+void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
 {
   if(fh != NULL)
   {
@@ -1566,21 +1567,35 @@ void EditorMatrix::save(FileHandler* fh, bool game_only)
     fh->writeXmlElementEnd();
 
     /* Save the render matrix */
-    QString render_matrix = "";
-    if(matrix.size() > 0)
+    if(!no_render)
+      saveRender(fh);
+  }
+}
+
+/*
+ * Description: Saves the render matrix data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
+void EditorMatrix::saveRender(FileHandler* fh)
+{
+  QString render_matrix = "";
+  if(fh != NULL && matrix.size() > 0)
+  {
+    for(int j = 0; j < matrix.front().size(); j++)
     {
-      for(int j = 0; j < matrix.front().size(); j++)
-      {
-        for(int i = 0; i < matrix.size(); i++)
-          render_matrix.push_back(
-                         QString::number(matrix[i][j]->getRenderDepth()) + ",");
-        if(render_matrix.endsWith(","))
-          render_matrix.chop(1);
-        render_matrix += ".";
-      }
-      if(render_matrix.endsWith("."))
+      for(int i = 0; i < matrix.size(); i++)
+        render_matrix.push_back(
+                       QString::number(matrix[i][j]->getRenderDepth()) + ",");
+      if(render_matrix.endsWith(","))
         render_matrix.chop(1);
+      render_matrix += ".";
     }
+    if(render_matrix.endsWith("."))
+      render_matrix.chop(1);
+
     fh->writeXmlData("rendermatrix", render_matrix.toStdString());
   }
 }
