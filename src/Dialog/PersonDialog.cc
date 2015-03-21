@@ -73,6 +73,21 @@ PersonDialog::~PersonDialog()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
+/* Consolidate all the matrixes together */
+// TODO: Comment
+void PersonDialog::consolidateAll()
+{
+  EditorMatrix* matrix = matrix_view->getMatrix();
+  if(matrix != NULL)
+  {
+    QList<QList<EditorMatrix*>> matrix_set = person_working->getStates();
+    for(int i = 0; i < matrix_set.size(); i++)
+      for(int j = 0; j < matrix_set[i].size(); j++)
+        if(matrix_set[i][j] != matrix)
+          matrix_set[i][j]->rebase(matrix);
+  }
+}
+
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *
@@ -212,9 +227,12 @@ void PersonDialog::updateData()
     box_visible->setCurrentIndex(0);
   spin_speed->setValue(person_working->getSpeed());
 
-  /* Update the matrix */
+  /* Update all the matrixes */
+  consolidateAll();
+  bool enabled = matrix_view->isEnabled();
   matrix_view->setMatrix(person_working->getState(matrix_surface,
                                                   matrix_direction));
+  matrix_view->setEnabled(enabled);
 }
 
 /*============================================================================
@@ -289,7 +307,9 @@ void PersonDialog::buttonFrameEdit()
 void PersonDialog::buttonOk()
 {
   /* Trim the matrix before accepting the sprites */
-  matrix_view->buttonTrim();
+  EditorMatrix* matrix = matrix_view->getMatrix();
+  matrix->trim();
+  consolidateAll();
 
   /* Proceed to ok() */
   emit ok();

@@ -1267,6 +1267,38 @@ bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
 }
 
 /*
+ * Description: Rebase the matrix to match the passed in matrix. This conforms
+ *              the matrix size, the render depths for each tile sprite, and the
+ *              passability.
+ *
+ * Inputs: EditorMatrix* base_matrix - the matrix to match
+ * Output: bool - true if the matrix was matched
+ */
+bool EditorMatrix::rebase(EditorMatrix* base_matrix)
+{
+  if(base_matrix != NULL)
+  {
+    /* Set the size */
+    setNewSize(base_matrix->getWidth(), base_matrix->getHeight());
+
+    /* Conform the render depth and passability */
+    for(int i = 0; i < matrix.size(); i++)
+    {
+      for(int j = 0; j < matrix[i].size(); j++)
+      {
+        matrix[i][j]->setRenderDepth(
+                        base_matrix->matrix[i][j]->getRenderDepth());
+        matrix[i][j]->setPassability(
+                        base_matrix->matrix[i][j]->getPassability());
+      }
+    }
+
+    return true;
+  }
+  return false;
+}
+
+/*
  * Description: Removes all frames from the matrix.
  *
  * Inputs: none

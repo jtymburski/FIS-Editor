@@ -72,6 +72,9 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Consolidate all the matrixes together */
+  void consolidateAll();
+
   /* Creates the layout - only called on initial construction */
   void createLayout(bool instance = false);
 

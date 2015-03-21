@@ -98,6 +98,9 @@ public slots:
   /* Edit person instance */
   void editInstance();
 
+  /* Instance double clicked */
+  void instanceDoubleClicked(QListWidgetItem*);
+
   /* Instance menu trigger */
   void instanceMenu(const QPoint & pos);
 

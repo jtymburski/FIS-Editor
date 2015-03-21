@@ -23,6 +23,7 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
 {
   /* Initialize variables */
   this->matrix = NULL;
+  last_path = EditorHelpers::getSpriteDir();
   matrix_dialog = NULL;
   sprite_dialog = NULL;
   int icon_size = 24;
@@ -653,10 +654,11 @@ void MatrixView::initMatrixPlace()
 {
   QString path = QFileDialog::getOpenFileName(this,
                                               tr("Select a matrix sprite"),
-                                              EditorHelpers::getSpriteDir(),
+                                              last_path,
                                               tr("Image Files (*.png)"));
   if(path != "" && matrix != NULL)
   {
+    last_path = path;
 
     /* Close and delete the dialog if button pressed */
     if(matrix_dialog != NULL)

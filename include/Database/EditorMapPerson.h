@@ -65,12 +65,16 @@ public:
   /* Returns the state at the defined surface and direction */
   EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
                          Direction direction);
+  QList<QList<EditorMatrix*>> getStates();
 
   /* Sets the base reference person */
   void setBase(EditorMapPerson* person);
 
   /* Sets the speed of the person */
   void setSpeed(uint16_t speed);
+
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

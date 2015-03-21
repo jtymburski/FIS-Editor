@@ -64,6 +64,7 @@ public:
   bool decrementRenderDepth();
 
   /* Returns the passability */
+  QString getPassability();
   bool getPassability(Direction dir);
 
   /* Returns the render depth */

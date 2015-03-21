@@ -141,6 +141,12 @@ EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
   return NULL;
 }
 
+/* Returns all the matrix for all states */
+QList<QList<EditorMatrix*>> EditorMapPerson::getStates()
+{
+  return matrix_set;
+}
+
 /* Sets the base reference thing */
 void EditorMapPerson::setBase(EditorMapPerson* person)
 {
@@ -156,6 +162,21 @@ void EditorMapPerson::setBase(EditorMapPerson* person)
 void EditorMapPerson::setSpeed(uint16_t speed)
 {
   person.setSpeed(speed);
+}
+
+/*
+ * Description: Sets the tile icons, for rendering purposes.
+ *
+ * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
+ * Output: none
+ */
+void EditorMapPerson::setTileIcons(TileIcons* icons)
+{
+  for(int i = 0; i < matrix_set.size(); i++)
+    for(int j = 0; j < matrix_set[i].size(); j++)
+      matrix_set[i][j]->setTileIcons(icons);
+
+  EditorMapThing::setTileIcons(icons);
 }
 
 /*============================================================================

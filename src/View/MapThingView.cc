@@ -91,6 +91,8 @@ void MapThingView::createLayout()
           this, SLOT(instanceMenu(QPoint)));
   connect(thing_instances, SIGNAL(currentRowChanged(int)),
           this, SLOT(instanceRowChanged(int)));
+  connect(thing_instances, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(instanceDoubleClicked(QListWidgetItem*)));
   layout->addWidget(thing_instances, 1);
 
   /* Right click menu control */
@@ -283,6 +285,18 @@ void MapThingView::editInstance()
       editThing(thing);
     }
   }
+}
+
+/*
+ * Description: Instance list item double clicked. Just triggers the edit
+ *              instance action.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
+void MapThingView::instanceDoubleClicked(QListWidgetItem*)
+{
+  editInstance();
 }
 
 /*

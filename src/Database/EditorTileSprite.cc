@@ -111,6 +111,20 @@ bool EditorTileSprite::decrementRenderDepth()
 
 }
 
+/*
+ * Description: Returns the passability of all directions, in string format.
+ *
+ * Inputs: none
+ * Output: QString - comma delimited string of directions
+ */
+QString EditorTileSprite::getPassability()
+{
+  return EditorHelpers::getPassabilityStr(getPassability(Direction::NORTH),
+                                          getPassability(Direction::EAST),
+                                          getPassability(Direction::SOUTH),
+                                          getPassability(Direction::WEST));
+}
+
 /* 
  * Description: Returns the passability of a given direction.
  *

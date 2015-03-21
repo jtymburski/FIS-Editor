@@ -59,6 +59,9 @@ private:
   QPushButton* button_view_pass;
   QPushButton* button_view_render;
 
+  /* Last insert path */
+  QString last_path;
+
   /* Frame number in matrix */
   QLabel* lbl_frame_num;
 

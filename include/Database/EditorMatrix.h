@@ -187,6 +187,9 @@ public:
   bool paint(int frame_index, QPainter* painter, QRect rect,
              int offset_x = 0, int offset_y = 0);
 
+  /* Rebase the matrix to match the passed in matrix */
+  bool rebase(EditorMatrix* base_matrix);
+
   /* Removes all sprites */
   void removeAll();
 

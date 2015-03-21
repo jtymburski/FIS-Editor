@@ -129,7 +129,7 @@ public:
   virtual void setName(QString name);
 
   /* Sets the rendering tile icons */
-  void setTileIcons(TileIcons* icons);
+  virtual void setTileIcons(TileIcons* icons);
 
   /* Sets the visibility of the thing */
   void setVisibility(bool visible);

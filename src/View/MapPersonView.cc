@@ -91,6 +91,8 @@ void MapPersonView::createLayout()
           this, SLOT(instanceMenu(QPoint)));
   connect(person_instances, SIGNAL(currentRowChanged(int)),
           this, SLOT(instanceRowChanged(int)));
+  connect(person_instances, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(instanceDoubleClicked(QListWidgetItem*)));
   layout->addWidget(person_instances, 1);
 
   /* Right click menu control */
@@ -296,6 +298,18 @@ void MapPersonView::instanceMenu(const QPoint & pos)
   QListWidgetItem* item = person_instances->itemAt(pos);
   if(item != NULL)
     rightclick_menu->exec(QCursor::pos());
+}
+
+/*
+ * Description: Instance list item double clicked. Just triggers the edit
+ *              instance action.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
+void MapPersonView::instanceDoubleClicked(QListWidgetItem*)
+{
+  editInstance();
 }
 
 /*
