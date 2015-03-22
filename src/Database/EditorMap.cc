@@ -276,6 +276,14 @@ void EditorMap::copySelf(const EditorMap &source)
   for(int i = 0; i < source.sprites.size(); i++)
     sprites.push_back(new EditorSprite(*source.sprites[i]));
 
+  /* Add base things */
+  for(int i = 0; i < source.base_things.size(); i++)
+    base_things.push_back(new EditorMapThing(*source.base_things[i]));
+
+  /* Add base persons */
+  for(int i = 0; i < source.base_persons.size(); i++)
+    base_persons.push_back(new EditorMapPerson(*source.base_persons[i]));
+
   /* Add sub-maps */
   for(int i = 0; i < source.sub_maps.size(); i++)
   {
@@ -309,7 +317,23 @@ void EditorMap::copySelf(const EditorMap &source)
       }
     }
 
-    // TODO: MAP AND PERSON
+    /* Add instance map things */
+    for(int j = 0; j < source.sub_maps[i]->things.size(); j++)
+    {
+      EditorMapThing* t = new EditorMapThing(*source.sub_maps[i]->things[j]);
+      t->setX(source.sub_maps[i]->things[j]->getX());
+      t->setY(source.sub_maps[i]->things[j]->getY());
+      setThing(t, source.sub_maps[i]->id);
+    }
+
+    /* Add instance map persons */
+    for(int j = 0; j < source.sub_maps[i]->persons.size(); j++)
+    {
+      EditorMapPerson* p = new EditorMapPerson(*source.sub_maps[i]->persons[j]);
+      p->setX(source.sub_maps[i]->persons[j]->getX());
+      p->setY(source.sub_maps[i]->persons[j]->getY());
+      setPerson(p, source.sub_maps[i]->id);
+    }
   }
 }
 
@@ -1013,6 +1037,70 @@ void EditorMap::clickTrigger(QList<EditorTile*> tiles, bool erase)
       }
     }
   }
+}
+
+/*
+ * Description: Copies the sub-map information from a base map to a new map.
+ *              It does not copy the ID. It does not take ownership of newly
+ *              created tiles.
+ *
+ * Inputs: SubMapInfo* copy_map - the map to copy information from
+ *         SubMapInfo* new_map - the map to copy information to
+ *         TileIcons* icons - the icons to load into the tiles
+ * Output: bool - true if the info was copied
+ */
+bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
+{
+  if(copy_map != NULL && new_map != NULL)
+  {
+    new_map->name = copy_map->name;
+
+    /* Delete all tiles in the new map -> not relevant */
+    for(int i = 0; i < new_map->tiles.size(); i++)
+      for(int j = 0; j < new_map->tiles[i].size(); j++)
+        delete new_map->tiles[i][j];
+    new_map->tiles.clear();
+
+    /* Add a copy of all tiles in copy to new */
+    for(int i = 0; i < copy_map->tiles.size(); i++)
+    {
+      QVector<EditorTile*> row;
+
+      for(int j = 0; j < copy_map->tiles[i].size(); j++)
+      {
+        row.push_back(new EditorTile(i, j, tile_icons));
+        *row.last() = *copy_map->tiles[i][j];
+        row.last()->setHoverInfo(copy_map->tiles[i][j]->getHoverInfo());
+      }
+
+      new_map->tiles.push_back(row);
+    }
+
+    /* Add thing instances */
+    for(int i = 0; i < copy_map->things.size(); i++)
+    {
+      EditorMapThing* thing = new EditorMapThing();
+      *thing = *copy_map->things[i];
+      thing->setID(getNextThingID(true));
+      thing->setX(copy_map->things[i]->getX());
+      thing->setY(copy_map->things[i]->getY());
+      setThing(thing, new_map->id);
+    }
+
+    /* Add person instances */
+    for(int i = 0; i < copy_map->persons.size(); i++)
+    {
+      EditorMapPerson* person = new EditorMapPerson();
+      *person = *copy_map->persons[i];
+      person->setID(getNextPersonID(true));
+      person->setX(copy_map->persons[i]->getX());
+      person->setY(copy_map->persons[i]->getY());
+      setPerson(person, new_map->id);
+    }
+
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -3265,49 +3353,6 @@ QDialog* EditorMap::createMapDialog(QWidget* parent, QString title,
   layout->addWidget(ok,3,0,1,2);
 
   return mapsize_dialog;
-}
-
-/*
- * Description: Copies the sub-map information from a base map to a new map.
- *              It does not copy the ID. It does not take ownership of newly
- *              created tiles.
- *
- * Inputs: SubMapInfo* copy_map - the map to copy information from
- *         SubMapInfo* new_map - the map to copy information to
- *         TileIcons* icons - the icons to load into the tiles
- * Output: bool - true if the info was copied
- */
-bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map, 
-                           TileIcons* icons)
-{
-  if(copy_map != NULL && new_map != NULL)
-  {
-    new_map->name = copy_map->name;
-
-    /* Delete all tiles in the new map -> not relevant */
-    for(int i = 0; i < new_map->tiles.size(); i++)
-      for(int j = 0; j < new_map->tiles[i].size(); j++)
-        delete new_map->tiles[i][j];
-    new_map->tiles.clear();
-
-    /* Add a copy of all tiles in copy to new */
-    for(int i = 0; i < copy_map->tiles.size(); i++)
-    {
-      QVector<EditorTile*> row;
-
-      for(int j = 0; j < copy_map->tiles[i].size(); j++)
-      {
-        row.push_back(new EditorTile(i, j, icons));
-        *row.last() = *copy_map->tiles[i][j];
-        row.last()->setHoverInfo(copy_map->tiles[i][j]->getHoverInfo());
-      }
-
-      new_map->tiles.push_back(row);
-    }
-
-    return true;
-  }
-  return false;
 }
 
 /*

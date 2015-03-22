@@ -823,7 +823,10 @@ void GameDatabase::load(FileHandler* fh)
 
   /* Clean up the maps */
   for(int i = 0; i < data_map.size(); i++)
+  {
     data_map[i]->tilesThingAdd(true);
+    data_map[i]->tilesPersonAdd(true);
+  }
 
   /* Update the view */
   int index = view_top->currentRow();

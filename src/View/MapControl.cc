@@ -225,7 +225,7 @@ void MapControl::duplicateSubMap()
     /* Create new map */
     int map_index = editing_map->setMap(id, "TEMP", 1, 1);
     SubMapInfo* new_map = editing_map->getMapByIndex(map_index);
-    EditorMap::copySubMap(copy_map, new_map, editing_map->getTileIcons());
+    editing_map->copySubMap(copy_map, new_map);
     if(new_map->name == "MAIN")
       new_map->name += " duped";
 
@@ -318,6 +318,7 @@ void MapControl::resizeSubMap()
 
     /* Remove all things for processing */
     editing_map->tilesThingRemove();
+    editing_map->tilesPersonRemove();
 
     /* If smaller, delete tiles on width */
     if(info->tiles.size() > width)
@@ -374,6 +375,7 @@ void MapControl::resizeSubMap()
 
     /* Add all things back for processing */
     editing_map->tilesThingAdd();
+    editing_map->tilesPersonAdd();
   }
 
   /* Finally, close the dialog */

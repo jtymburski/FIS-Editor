@@ -148,6 +148,9 @@ public:
   void clickTrigger(bool single = true, bool right_click = false);
   void clickTrigger(QList<EditorTile*> tiles, bool erase);
 
+  /* Copies information, except ID, from one sub-map to another */
+  bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
+
   /* Returns current references for lists in map */
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
@@ -303,10 +306,6 @@ public:
                                   QString title = "New Map Details",
                                   QString name = "Awesomeland",
                                   int width = 0, int height = 0);
-
-  /* Copies information, except ID, from one sub-map to another */
-  static bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map, 
-                         TileIcons* icons);
 
   /* Returns the push button for the map dialog above. Will seg with others */
   static QPushButton* getDialogButton(QDialog* dialog);
