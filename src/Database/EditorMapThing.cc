@@ -42,7 +42,7 @@ EditorMapThing::EditorMapThing(int id, QString name, QString description)
  * Description: Copy constructor. Calls the blank constructor and then copies
  *              the data from the source.
  *
- * Inputs: const EditorThing &source - the source thing to copy
+ * Inputs: const EditorMapThing &source - the source thing to copy
  */
 EditorMapThing::EditorMapThing(const EditorMapThing &source) : EditorMapThing()
 {
@@ -69,7 +69,7 @@ EditorMapThing::~EditorMapThing()
  * Description: Copies all data from source editor thing to this editor
  *              thing.
  *
- * Inputs: EditorThing &source - the source to copy from
+ * Inputs: EditorMapThing &source - the source to copy from
  *         bool inc_matrix - include matrix data in save (false for children)
  * Output: none
  */
@@ -133,7 +133,7 @@ void EditorMapThing::unsetMatrix()
  * Description: Returns the base thing. Default to NULL.
  *
  * Inputs: none
- * Output: EditorThing* - the base thing reference pointer
+ * Output: EditorMapThing* - the base thing reference pointer
  */
 EditorMapThing* EditorMapThing::getBaseThing() const
 {
@@ -449,7 +449,7 @@ void EditorMapThing::save(FileHandler* fh, bool game_only)
  *              visual representation and when set, also sets the name and
  *              description (which can be changed later).
  *
- * Inputs: EditorThing* thing - the base thing object
+ * Inputs: EditorMapThing* thing - the base thing object
  * Output: none
  */
 void EditorMapThing::setBase(EditorMapThing* thing)
@@ -591,10 +591,10 @@ bool EditorMapThing::setY(int y)
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another
- *              EditorThing.
+ *              EditorMapThing.
  *
- * Inputs: const EditorThing &source - the source class constructor
- * Output: EditorThing& - pointer to the copied class
+ * Inputs: const EditorMapThing &source - the source class constructor
+ * Output: EditorMapThing& - pointer to the copied class
  */
 EditorMapThing& EditorMapThing::operator= (const EditorMapThing &source)
 {

@@ -15,6 +15,7 @@
 #include <QInputDialog>
 #include <QMenu>
 #include <QPushButton>
+#include <QTimer>
 
 #include "Database/EditorMatrix.h"
 #include "Dialog/MatrixDialog.h"
@@ -51,6 +52,9 @@ private:
   QPushButton* button_pen_place;
   QPushButton* button_pen_plus;
 
+  /* Play button */
+  QPushButton* button_play;
+
   /* Sprite edit control */
   QPushButton* button_sprite_edit;
 
@@ -73,6 +77,10 @@ private:
 
   /* The viewport for the matrix */
   QGraphicsView* matrix_view;
+
+  /* Playing status */
+  bool playing;
+  QTimer* playing_timer;
 
   /* Right click menu on matrix */
   QMenu* rightclick_menu;
@@ -104,6 +112,9 @@ public slots:
   void actionSpriteEdit();
   void actionSpriteView();
 
+  /* Next frame by animation timer */
+  void animateNext();
+
   /* Frame view control */
   void buttonFrameNext();
   void buttonFramePrev();
@@ -114,6 +125,9 @@ public slots:
 
   /* Pen click trigger */
   void buttonPen(bool checked);
+
+  /* Run animation button */
+  void buttonRunAnimation();
 
   /* General sprite edit trigger */
   void buttonSpriteEdit();
@@ -138,6 +152,10 @@ public slots:
 
   /* Right click on sprite trigger */
   void rightClickTrigger(EditorTileSprite* sprite);
+
+  /* Animation control */
+  void startAnimation();
+  void stopAnimation();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

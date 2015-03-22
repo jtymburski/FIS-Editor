@@ -106,6 +106,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Triggers on click */
+  void click();
+
   /* Triggers a parent class to start matrix place process */ 
   void initMatrixPlace();
 

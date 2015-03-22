@@ -358,6 +358,7 @@ void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
   /* Update mouse location */
   mouseUpdate(event->scenePos());
+  emit click();
 
   if(active_sprite != NULL)
   {

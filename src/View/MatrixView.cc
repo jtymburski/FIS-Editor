@@ -25,9 +25,15 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   this->matrix = NULL;
   last_path = EditorHelpers::getSpriteDir();
   matrix_dialog = NULL;
+  playing = false;
   sprite_dialog = NULL;
   int icon_size = 24;
   int button_size = icon_size + 6;
+
+  /* Set up the timer */
+  playing_timer = new QTimer(this);
+  playing_timer->setSingleShot(false);
+  connect(playing_timer, SIGNAL(timeout()), this, SLOT(animateNext()));
 
   /* Layout setup */
   QGridLayout* layout = new QGridLayout(this);
@@ -162,6 +168,12 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   layout->addWidget(button_trim, 11, 11);
 
   /* Scene control buttons */
+  button_play = new QPushButton(this);
+  button_play->setIcon(QIcon(":/images/icons/32_play.png"));
+  button_play->setIconSize(QSize(icon_size, icon_size));
+  button_play->setMaximumSize(button_size, button_size);
+  connect(button_play, SIGNAL(clicked()), this, SLOT(buttonRunAnimation()));
+  layout->addWidget(button_play, 11, 0);
   button_frame_prev = new QPushButton("<", this);
   button_frame_prev->setMaximumSize(button_size, button_size);
   connect(button_frame_prev, SIGNAL(clicked()), this, SLOT(buttonFramePrev()));
@@ -265,6 +277,13 @@ bool MatrixView::setActiveFrame(int index)
   else
     button_frame_next->setEnabled(true);
 
+  /* If both buttons are disabled, disable play button */
+  if(button_frame_prev->isEnabled() || button_frame_next->isEnabled())
+    button_play->setEnabled(true);
+  else
+    button_play->setEnabled(false);
+
+
   /* If it's min or max, return true - indicating end is reached */
   if(index == min || index == max)
     return true;
@@ -289,6 +308,8 @@ void MatrixView::actionPassabilityEast(bool set)
     EditorTileSprite* sprite = matrix->getRightClicked();
     if(sprite != NULL)
       sprite->setPassability(Direction::EAST, set);
+
+    stopAnimation();
   }
 }
 
@@ -306,6 +327,8 @@ void MatrixView::actionPassabilityNorth(bool set)
     EditorTileSprite* sprite = matrix->getRightClicked();
     if(sprite != NULL)
       sprite->setPassability(Direction::NORTH, set);
+
+    stopAnimation();
   }
 }
 
@@ -323,6 +346,8 @@ void MatrixView::actionPassabilitySouth(bool set)
     EditorTileSprite* sprite = matrix->getRightClicked();
     if(sprite != NULL)
       sprite->setPassability(Direction::SOUTH, set);
+
+    stopAnimation();
   }
 }
 
@@ -340,6 +365,8 @@ void MatrixView::actionPassabilityWest(bool set)
     EditorTileSprite* sprite = matrix->getRightClicked();
     if(sprite != NULL)
       sprite->setPassability(Direction::WEST, set);
+
+    stopAnimation();
   }
 }
 
@@ -364,6 +391,8 @@ void MatrixView::actionRenderDepth()
                                         sprite->getRenderDepth(), 0, 9, 1, &ok);
       if(ok)
         sprite->setRenderDepth(result);
+
+      stopAnimation();
     }
   }
 }
@@ -397,6 +426,8 @@ void MatrixView::actionSpriteEdit()
                                        EditorEnumDb::SPRITE_FRAMES);
       connect(sprite_dialog, SIGNAL(ok()), this, SLOT(matrixChanged()));
       sprite_dialog->show();
+
+      stopAnimation();
     }
   }
 }
@@ -436,6 +467,28 @@ void MatrixView::actionSpriteView()
       frames->setWindowTitle(tr("Sprite View"));
       frames->exec();
     }
+
+    stopAnimation();
+  }
+}
+
+/*
+ * Description: Animate to the next frame. Loops around when it reaches the
+ *              end.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixView::animateNext()
+{
+  if(button_frame_next->isEnabled())
+  {
+    buttonFrameNext();
+  }
+  else
+  {
+    while(button_frame_prev->isEnabled())
+      buttonFramePrev();
   }
 }
 
@@ -479,6 +532,8 @@ void MatrixView::buttonHeightDecrease()
     matrix->decreaseHeight();
     if(matrix->getWidth() == 0)
       button_sprite_edit->setDisabled(true);
+
+    stopAnimation();
   }
 }
 
@@ -496,6 +551,8 @@ void MatrixView::buttonHeightIncrease()
     matrix->increaseHeight();
     if(matrix->getWidth() > 0)
       button_sprite_edit->setEnabled(true);
+
+    stopAnimation();
   }
 }
 
@@ -520,7 +577,23 @@ void MatrixView::buttonPen(bool checked)
       matrix->setCursorMode(EditorEnumDb::THING_RENDER_MINUS);
     else if(button_pen_pass->isChecked())
       matrix->setCursorMode(EditorEnumDb::THING_PASS_ALL);
+
+    stopAnimation();
   }
+}
+
+/*
+ * Description: Runs the animation for the matrix (runs through each frame)
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixView::buttonRunAnimation()
+{
+  if(playing)
+    stopAnimation();
+  else
+    startAnimation();
 }
 
 /*
@@ -554,6 +627,8 @@ void MatrixView::buttonSpriteEdit()
       connect(sprite_dialog, SIGNAL(ok()), matrix, SLOT(editSpritesOk()));
       sprite_dialog->show();
     }
+
+    stopAnimation();
   }
 }
 
@@ -568,6 +643,8 @@ void MatrixView::buttonTrim()
 {
   if(matrix != NULL)
     matrix->trim(false);
+
+  stopAnimation();
 }
 
 /*
@@ -580,6 +657,8 @@ void MatrixView::buttonViewGrid(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityGrid(checked);
+
+  stopAnimation();
 }
 
 /*
@@ -594,6 +673,8 @@ void MatrixView::buttonViewPass(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityPass(checked);
+
+  stopAnimation();
 }
 
 /*
@@ -607,6 +688,8 @@ void MatrixView::buttonViewRender(bool checked)
 {
   if(matrix != NULL)
     matrix->setVisibilityRender(checked);
+
+  stopAnimation();
 }
 
 /*
@@ -623,6 +706,8 @@ void MatrixView::buttonWidthDecrease()
     matrix->decreaseWidth();
     if(matrix->getWidth() == 0)
       button_sprite_edit->setDisabled(true);
+
+    stopAnimation();
   }
 }
 
@@ -640,6 +725,8 @@ void MatrixView::buttonWidthIncrease()
     matrix->increaseWidth();
     if(matrix->getWidth() > 0)
       button_sprite_edit->setEnabled(true);
+
+    stopAnimation();
   }
 }
 
@@ -652,6 +739,8 @@ void MatrixView::buttonWidthIncrease()
  */
 void MatrixView::initMatrixPlace()
 {
+  stopAnimation();
+
   QString path = QFileDialog::getOpenFileName(this,
                                               tr("Select a matrix sprite"),
                                               last_path,
@@ -703,6 +792,8 @@ void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
 {
   if(sprite != NULL)
   {
+    stopAnimation();
+
     /* If render depth is 0, enable elements and set their checked state */
     if(sprite->getRenderDepth() == 0 && sprite->frameCount() > 0)
     {
@@ -733,6 +824,48 @@ void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
 
     /* Execute the right click menu at the cursor */
     rightclick_menu->exec(QCursor::pos());
+  }
+}
+
+/*
+ * Description: Starts the animation of the matrix. Triggered by play button.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixView::startAnimation()
+{
+  if(matrix != NULL && matrix->getSprite(0, 0) != NULL)
+  {
+    playing = true;
+    button_play->setIcon(QIcon(":/images/icons/32_stop.png"));
+
+    /* Set back to base */
+    while(button_frame_prev->isEnabled())
+      buttonFramePrev();
+
+    playing_timer->start(matrix->getSprite(0, 0)->getAnimationTime().toInt());
+  }
+}
+
+/*
+ * Description: Stops the animation of the matrix. Triggered by all button
+ *              triggers.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MatrixView::stopAnimation()
+{
+  if(matrix != NULL)
+  {
+    playing = false;
+    button_play->setIcon(QIcon(":/images/icons/32_play.png"));
+    playing_timer->stop();
+
+    /* Set back to base */
+    while(button_frame_prev->isEnabled())
+      buttonFramePrev();
   }
 }
 
@@ -769,9 +902,11 @@ void MatrixView::setMatrix(EditorMatrix* matrix)
                this, SLOT(rightClickTrigger(EditorTileSprite*)));
     disconnect(this->matrix, SIGNAL(matrixChange()),
                this, SLOT(matrixChanged()));
+    disconnect(this->matrix, SIGNAL(click()), this, SLOT(stopAnimation()));
   }
 
   /* Clean up matrix and set it in the view */
+  stopAnimation();
   this->matrix = matrix;
   matrix_view->setScene(matrix);
 
@@ -807,6 +942,9 @@ void MatrixView::setMatrix(EditorMatrix* matrix)
 
     /* Connect the matrix change update */
     connect(matrix, SIGNAL(matrixChange()), this, SLOT(matrixChanged()));
+
+    /* Animation stop */
+    connect(matrix, SIGNAL(click()), this, SLOT(stopAnimation()));
   }
   else
   {

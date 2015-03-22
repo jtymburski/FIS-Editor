@@ -17,21 +17,34 @@ const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
  
-/* Constructor function */
+/*
+ * Description: Main constructor function. All parameters have blank defaults.
+ *
+ * Inputs: int id - the id of the thing
+ *         QString name - the name of the thing
+ *         QString description - the description of the thing
+ */
 EditorMapPerson::EditorMapPerson(int id, QString name, QString description)
                : EditorMapThing(id, name, description)
 {
   initializeMatrixes();
 }
                 
-/* Copy constructor function */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorMapPerson &source - the source person to copy
+ */
 EditorMapPerson::EditorMapPerson(const EditorMapPerson &source)
                : EditorMapPerson()
 {
   copySelf(source);
 }
   
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 EditorMapPerson::~EditorMapPerson()
 {
   unsetMatrix();
@@ -42,7 +55,13 @@ EditorMapPerson::~EditorMapPerson()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Delete defines matrixes stored in class - called once at destruction */
+/*
+ * Description: Removes the base matrixes in the person. Only called on
+ *              destruction.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMapPerson::deleteMatrixes()
 {
   for(uint16_t i = 0; i < matrix_set.size(); i++)
@@ -57,7 +76,13 @@ void EditorMapPerson::deleteMatrixes()
   matrix_set.clear();
 }
 
-/* Initialize matrixes stored in class - called once at start */
+/*
+ * Description: Initializes the person with necessary direction and surface
+ *              matrixes. Only called on creation.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMapPerson::initializeMatrixes()
 {
   deleteMatrixes();
@@ -79,7 +104,13 @@ void EditorMapPerson::initializeMatrixes()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor person to this editor
+ *              person.
+ *
+ * Inputs: EditorMapPerson &source - the source to copy from
+ * Output: none
+ */
 void EditorMapPerson::copySelf(const EditorMapPerson &source)
 {
   EditorMapThing::copySelf(source, false);
@@ -97,7 +128,12 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Gets the base person of the person */
+/*
+ * Description: Returns the base person. Default to NULL.
+ *
+ * Inputs: none
+ * Output: EditorMapPerson* - the base person reference pointer
+ */
 EditorMapPerson* EditorMapPerson::getBasePerson() const
 {
   if(getBaseThing() != NULL)
@@ -105,13 +141,27 @@ EditorMapPerson* EditorMapPerson::getBasePerson() const
   return NULL;
 }
 
-/* Returns the speed of the person */
+/*
+ * Description: Returns the animation speed reference point for the movement
+ *              of the person.
+ *
+ * Inputs: none
+ * Output: uint16_t - speed ratio
+ */
 uint16_t EditorMapPerson::getSpeed() const
 {
   return person.getSpeed();
 }
 
-/* Returns the state at the defined surface and direction */
+/*
+ * Description: Returns the matrix that is connected with the surface
+ *              definition and the direction. Returns NULL if unset or
+ *              invalid.
+ *
+ * Inputs: SurfaceClassifier surface - the surface that the person is on
+ *         Direction direction - the direction moving in
+ * Output: EditorMatrix* - matrix reference, that defines the sprite data
+ */
 EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
                                         Direction direction)
 {
@@ -142,7 +192,13 @@ EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
   return NULL;
 }
 
-/* Returns all the matrix for all states */
+/*
+ * Description: Returns the complete 2D list of all editor matrixes, which
+ *              contain the editor tile sprites.
+ *
+ * Inputs: none
+ * Output: QList<QList<EditorMatrix*>> - stack of matrixes
+ */
 QList<QList<EditorMatrix*>> EditorMapPerson::getStates()
 {
   return matrix_set;
@@ -279,7 +335,14 @@ void EditorMapPerson::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Sets the base reference thing */
+/*
+ * Description: Sets the base thing object for the person. It will be used for
+ *              visual representation and when set, also sets the name and
+ *              description (which can be changed later).
+ *
+ * Inputs: EditorMapPerson* person - the base person object
+ * Output: none
+ */
 void EditorMapPerson::setBase(EditorMapPerson* person)
 {
   EditorMapThing* thing = NULL;
@@ -290,7 +353,13 @@ void EditorMapPerson::setBase(EditorMapPerson* person)
   EditorMapThing::setBase(thing);
 }
 
-/* Sets the speed of the person */
+/*
+ * Description: Sets the speed ratio of the person. Indicates how fast between
+ *              tiles to move.
+ *
+ * Inputs: uint16_t speed - the speed ratio
+ * Output: none
+ */
 void EditorMapPerson::setSpeed(uint16_t speed)
 {
   person.setSpeed(speed);
@@ -315,7 +384,14 @@ void EditorMapPerson::setTileIcons(TileIcons* icons)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorMapPerson.
+ *
+ * Inputs: const EditorMapPerson &source - the source class constructor
+ * Output: EditorMapPerson& - pointer to the copied class
+ */
 EditorMapPerson& EditorMapPerson::operator= (const EditorMapPerson &source)
 {
   /* Check for self assignment */

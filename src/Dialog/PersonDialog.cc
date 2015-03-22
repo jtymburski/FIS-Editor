@@ -73,8 +73,13 @@ PersonDialog::~PersonDialog()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Consolidate all the matrixes together */
-// TODO: Comment
+/*
+ * Description: Makes all matrixes have common sizes, render depths, and
+ *              passability. Passes call to rebase() in matrix.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void PersonDialog::consolidateAll()
 {
   EditorMatrix* matrix = matrix_view->getMatrix();
@@ -341,8 +346,13 @@ void PersonDialog::changedName(QString name)
   person_working->setName(name);
 }
 
-/* Direction change for matrix */
-// TODO: Comment
+/*
+ * Description: Change the direction in the drop down of the matrix being
+ *              viewed / edited.
+ *
+ * Inputs: QString text - text from direction drop down
+ * Output: none
+ */
 void PersonDialog::directionChange(QString text)
 {
   if(text == "North")
@@ -424,8 +434,13 @@ void PersonDialog::selectTileConvo()
   }
 }
 
-/* Speed changed */
-// TODO: Comment
+/*
+ * Description: Triggered when the speed changes in the data scroller. Updates
+ *              the information in the working person.
+ *
+ * Inputs: int value - the new speed ratio
+ * Output: none
+ */
 void PersonDialog::speedChanged(int value)
 {
   person_working->setSpeed(value);
@@ -436,8 +451,13 @@ void PersonDialog::speedChanged(int value)
     lbl_speed_result->setText("0 ms/tile");
 }
 
-/* Surface change for matrix */
-// TODO: Comment
+/*
+ * Description: Change the surface in the drop down of the matrix being
+ *              viewed / edited.
+ *
+ * Inputs: QString text - text from surface drop down
+ * Output: none
+ */
 void PersonDialog::surfaceChange(QString text)
 {
   if(text == "Ground")
