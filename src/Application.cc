@@ -412,12 +412,16 @@ void Application::play()
     arg_list.push_back(play_file);
     run_process.start(exec_program, arg_list);
 
-    /* Disable app */
-    setDisabled(true);
-
-    /* Finally, delete the file */
-    //run_process.waitForFinished(3000);
-    //QFile::remove(play_file);
+    /* If successfully run, disable app. Otherwise, failed to run */
+    if(run_process.waitForStarted(500))
+    {
+      setDisabled(true);
+    }
+    else
+    {
+      QMessageBox::information(this, "Failed to Start",
+                               "Executable failed to fork");
+    }
   }
   /* Otherwise, pop-up warning */
   else if(run_process.state() == QProcess::Running)
