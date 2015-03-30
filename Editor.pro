@@ -42,6 +42,7 @@ SOURCES += \
     src/Database/EditorMapPerson.cc \
     src/Database/EditorMapThing.cc \
     src/Database/EditorMatrix.cc \
+    src/Database/EditorNPCPath.cc \
     src/Database/EditorParty.cc \
     src/Database/EditorPerson.cc \
     src/Database/EditorSkill.cc \
@@ -80,6 +81,7 @@ SOURCES += \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
+    ../Project/src/Game/Map/MapNPC.cc \
     ../Project/src/Game/Map/MapPerson.cc \
     ../Project/src/Game/Map/MapThing.cc \
     ../Project/src/Game/Map/SpriteMatrix.cc \
@@ -113,6 +115,7 @@ HEADERS += \
     include/Database/EditorMapPerson.h \
     include/Database/EditorMapThing.h \
     include/Database/EditorMatrix.h \
+    include/Database/EditorNPCPath.h \
     include/Database/EditorParty.h \
     include/Database/EditorPerson.h \
     include/Database/EditorSkill.h \
@@ -154,6 +157,7 @@ HEADERS += \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
+    ../Project/include/Game/Map/MapNPC.h \
     ../Project/include/Game/Map/MapPerson.h \
     ../Project/include/Game/Map/MapThing.h \
     ../Project/include/Game/Map/SpriteMatrix.h \

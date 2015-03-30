@@ -24,7 +24,7 @@ const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
  */
 EditorTile::EditorTile(int x, int y, TileIcons* icons)
 {
-  setAcceptHoverEvents(true);
+  setAcceptHoverEvents(false);
 
   /* Class control */
   hovered = false;
@@ -94,7 +94,7 @@ EditorTile::~EditorTile()
  * Description: The copy function that is called by any copying methods in the
  *              class. Utilized by the copy constructor and the copy operator.
  *
- * Inputs: const EditorTile &source - the reference sprite class
+ * Inputs: const EditorTile &source - the reference tile class
  * Output: none
  */
 void EditorTile::copySelf(const EditorTile &source)

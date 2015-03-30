@@ -25,6 +25,21 @@ MapRender::MapRender(QWidget* parent)
 {
   /* Data init */
   editing_map = NULL;
+
+  /* TESTING: REMOVE */
+  test_path = new EditorNPCPath(1, 1);
+  test_path->appendNode(5, 5);
+  test_path->appendNode(10, 5);
+  test_path->appendNode(0, 8);
+
+  test_path_2 = new EditorNPCPath(3, 3);
+  test_path_2->appendNode(13, 13);
+  test_path_2->appendNode(4, 4);
+  test_path_2->appendNode(6, 1);
+  test_path_2->appendNode(3, 2);
+  test_path_2->setColorPreset(4);
+  test_path_2->setState(MapNPC::BACKANDFORTH);
+
   tile_select = false;
 
   /* Sets the background to be black */
@@ -104,6 +119,8 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     {
       editing_map->clickTrigger(false, event->buttons() & Qt::RightButton);
     }
+
+    QGraphicsScene::mouseMoveEvent(event);
   }
 }
 
@@ -211,6 +228,10 @@ void MapRender::updateRenderingMap()
     if(map->tiles.size() > 0)
       setSceneRect(0, 0, map->tiles.size() * EditorHelpers::getTileSize(),
                    map->tiles.front().size() * EditorHelpers::getTileSize());
+
+    /* TESTING: REMOVE */
+    addItem(test_path);
+    addItem(test_path_2);
   }
 }
 
