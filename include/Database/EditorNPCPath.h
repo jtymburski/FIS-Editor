@@ -42,11 +42,17 @@ private:
   /* Is the path hovered? */
   bool hovered;
 
+  /* Force interaction when within range? */
+  bool interact;
+
   /* List of path nodes */
   QList<Path> nodes;
 
   /* Sets the path state */
   MapNPC::NodeState state;
+
+  /* Tracking properties */
+  MapNPC::TrackingState tracking;
 
   /*------------------- Constants -----------------------*/
   const static uint8_t kBORDER_W; /* Border width around lines and rects */
@@ -116,11 +122,17 @@ public:
   /* Returns the state of the path */
   MapNPC::NodeState getState();
 
+  /* Returns the tracking state of the npc on the path */
+  MapNPC::TrackingState getTracking();
+
   /* Insert nodes at location */
   bool insertNodeAfter(int index, int x, int y, int delay = 0,
                        bool xy_flip = false);
   bool insertNodeBefore(int index, int x, int y, int delay = 0,
                         bool xy_flip = false);
+
+  /* Returns if the npc on path will force interaction */
+  bool isForcedInteraction();
 
   /* Returns if the path is hovered */
   bool isHovered();
@@ -133,11 +145,17 @@ public:
   bool setColor(int r, int g, int b, int a = kCOLOR_ALPHA);
   bool setColorPreset(int index);
 
+  /* Sets if the npc on path will force interaction */
+  void setForcedInteraction(bool forced);
+
   /* Sets if the path is hovered */
   void setHovered(bool hovered);
 
   /* Sets the path state */
   void setState(MapNPC::NodeState state);
+
+  /* Sets the tracking state of the npc on the path */
+  void setTracking(MapNPC::TrackingState tracking);
 
   /* Shape definition function - virtual */
   QPainterPath shape() const;

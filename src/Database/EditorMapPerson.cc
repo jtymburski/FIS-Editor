@@ -20,9 +20,9 @@ const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
 /*
  * Description: Main constructor function. All parameters have blank defaults.
  *
- * Inputs: int id - the id of the thing
- *         QString name - the name of the thing
- *         QString description - the description of the thing
+ * Inputs: int id - the id of the person
+ *         QString name - the name of the person
+ *         QString description - the description of the person
  */
 EditorMapPerson::EditorMapPerson(int id, QString name, QString description)
                : EditorMapThing(id, name, description)
@@ -336,7 +336,7 @@ void EditorMapPerson::save(FileHandler* fh, bool game_only)
 }
 
 /*
- * Description: Sets the base thing object for the person. It will be used for
+ * Description: Sets the base person object for the person. It will be used for
  *              visual representation and when set, also sets the name and
  *              description (which can be changed later).
  *

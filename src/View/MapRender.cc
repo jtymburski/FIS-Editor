@@ -28,7 +28,7 @@ MapRender::MapRender(QWidget* parent)
 
   /* TESTING: REMOVE */
   test_path = new EditorNPCPath(1, 1);
-  test_path->appendNode(5, 5);
+  test_path->appendNode(5, 5, 0, true);
   test_path->appendNode(10, 5);
   test_path->appendNode(0, 8);
 

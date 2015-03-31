@@ -135,8 +135,8 @@ public:
   void setVisibility(bool visible);
 
   /* Sets the x and y coordinate of the thing */
-  bool setX(int x);
-  bool setY(int y);
+  virtual bool setX(int x);
+  virtual bool setY(int y);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

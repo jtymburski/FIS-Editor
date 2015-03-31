@@ -50,7 +50,9 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   /* Initial values */
   setColorPreset(0);
   hovered = false;
+  interact = false;
   state = MapNPC::LOOPED;
+  tracking = MapNPC::NOTRACK;
 
   /* Set up base node, based on starting point */
   Path base_node;
@@ -94,8 +96,12 @@ EditorNPCPath::~EditorNPCPath()
 void EditorNPCPath::copySelf(const EditorNPCPath &source)
 {
   color = source.color;
+  interact = source.interact;
   nodes = source.nodes;
   state = source.state;
+  tracking = source.tracking;
+
+  update();
 }
 
 /*
@@ -535,14 +541,24 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev,
  */
 bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
 {
-  if(x >= 0 && y >= 0 && delay >= 0)
+  if(x >= 0 && y >= 0 && delay >= 0 && (state == MapNPC::LOOPED ||
+     state == MapNPC::BACKANDFORTH || state == MapNPC::RANDOMRANGE))
   {
     Path new_node;
     new_node.x = x;
     new_node.y = y;
     new_node.delay = delay;
-    new_node.xy_flip = xy_flip;
+    if(state == MapNPC::RANDOMRANGE)
+      new_node.xy_flip = false;
+    else
+      new_node.xy_flip = xy_flip;
 
+    /* Remove last node if random range */
+    if(state == MapNPC::RANDOMRANGE && nodes.size() >= 2)
+      while(nodes.size() >= 2)
+        nodes.removeLast();
+
+    /* Push back nodes and update */
     nodes.push_back(new_node);
     update();
     return true;
@@ -651,7 +667,10 @@ bool EditorNPCPath::editNode(int index, int x, int y, int delay, bool xy_flip)
     node->y = y;
     if(delay >= 0)
       node->delay = delay;
-    node->xy_flip = xy_flip;
+    if(state == MapNPC::RANDOMRANGE)
+      node->xy_flip = false;
+    else
+      node->xy_flip = xy_flip;
 
     update();
     return true;
@@ -816,6 +835,18 @@ MapNPC::NodeState EditorNPCPath::getState()
 }
 
 /*
+ * Description: Sets the tracking of the NPC node on the path, as per the enum
+ *              defined in the MapNPC::TrackingState.
+ *
+ * Inputs: none
+ * Output: MapNPC::TrackingState - the tracking state currently being used
+ */
+MapNPC::TrackingState EditorNPCPath::getTracking()
+{
+  return tracking;
+}
+
+/*
  * Description: Inserts a node with the passed in information after the passed
  *              in index.
  *
@@ -846,7 +877,7 @@ bool EditorNPCPath::insertNodeAfter(int index, int x, int y,
 bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
                                      int delay, bool xy_flip)
 {
-  if(index >= 1)
+  if(index >= 1 && (state == MapNPC::LOOPED || state == MapNPC::BACKANDFORTH))
   {
     if(index < nodes.size())
     {
@@ -858,6 +889,7 @@ bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
         new_node.delay = delay;
         new_node.xy_flip = xy_flip;
 
+        /* Insert the node */
         nodes.insert(index, new_node);
         update();
         return true;
@@ -870,6 +902,18 @@ bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
     }
   }
   return false;
+}
+
+/*
+ * Description: Returns if the npc on the path will force interaction, if
+ *              possible.
+ *
+ * Inputs: none
+ * Output: bool - true if the npc will force interaction
+ */
+bool EditorNPCPath::isForcedInteraction()
+{
+  return interact;
 }
 
 /*
@@ -901,8 +945,8 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
     Path* next = NULL;
     if(i < (nodes.size() - 1))
       next = &nodes[i+1];
-    else if(i == (nodes.size() - 1) && state == MapNPC::LOOPED &&
-            nodes.size() > 1)
+    else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
+            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
       next = &nodes.front();
 
     /* Paint the path between nodes */
@@ -916,13 +960,14 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
     Path* prev = NULL;
     if(i > 0)
       prev = &nodes[i-1];
-    else if(i == 0 && state == MapNPC::LOOPED && nodes.size() > 1)
+    else if(i == 0 && (state == MapNPC::LOOPED ||
+            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
       prev = &nodes.last();
     Path* next = NULL;
     if(i < (nodes.size() - 1))
       next = &nodes[i+1];
-    else if(i == (nodes.size() - 1) && state == MapNPC::LOOPED &&
-            nodes.size() > 1)
+    else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
+            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
       next = &nodes.front();
 
     /* Paint node rect */
@@ -969,6 +1014,21 @@ bool EditorNPCPath::setColorPreset(int index)
 }
 
 /*
+ * Description: Sets if the npc on path will force interaction.
+ *
+ * Inputs: bool forced - true if the npc should force interaction
+ * Output: none
+ */
+void EditorNPCPath::setForcedInteraction(bool forced)
+{
+  if(this->interact != forced)
+  {
+    this->interact = forced;
+    update();
+  }
+}
+
+/*
  * Description: Sets if the npc path is hovered (changes the border color)
  *
  * Inputs: bool hovered - is the path nodes hovered on?
@@ -994,6 +1054,40 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
   if(this->state != state)
   {
     this->state = state;
+
+    /* Update the node count depending on the state change */
+    if(state == MapNPC::RANDOMRANGE)
+    {
+      /* Clean up nodes - max is 2 */
+      while(nodes.size() > 2)
+        nodes.removeLast();
+
+      /* Loop through all and correct parsing direction */
+      for(int i = 0; i < nodes.size(); i++)
+        nodes[i].xy_flip = false;
+    }
+    else if(state == MapNPC::RANDOM || state == MapNPC::LOCKED)
+    {
+      while(nodes.size() > 1)
+        nodes.removeLast();
+    }
+
+    update();
+  }
+}
+
+/*
+ * Description: Sets the tracking state of the node set. This defines how the
+ *              npc will behave when a player is in the vicinity.
+ *
+ * Inputs: MapNPC::TrackingState tracking - the new tracking definition for NPC
+ * Output: none
+ */
+void EditorNPCPath::setTracking(MapNPC::TrackingState tracking)
+{
+  if(this->tracking != tracking)
+  {
+    this->tracking = tracking;
     update();
   }
 }
