@@ -25,21 +25,6 @@ MapRender::MapRender(QWidget* parent)
 {
   /* Data init */
   editing_map = NULL;
-
-  /* TESTING: REMOVE */
-  test_path = new EditorNPCPath(1, 1);
-  test_path->appendNode(5, 5, 0, true);
-  test_path->appendNode(10, 5);
-  test_path->appendNode(0, 8);
-
-  test_path_2 = new EditorNPCPath(3, 3);
-  test_path_2->appendNode(13, 13);
-  test_path_2->appendNode(4, 4);
-  test_path_2->appendNode(6, 1);
-  test_path_2->appendNode(3, 2);
-  test_path_2->setColorPreset(4);
-  test_path_2->setState(MapNPC::BACKANDFORTH);
-
   tile_select = false;
 
   /* Sets the background to be black */
@@ -99,7 +84,7 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if(active_tile == NULL)
     {
       QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
-      if(hover_item != NULL)
+      if(hover_item != NULL && hover_item->zValue() == 0)
       {
         active_tile = (EditorTile*)hover_item;
         editing_map->setHoverTile(active_tile);
@@ -199,6 +184,18 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/* NPC Path Add/Remove control */
+void MapRender::npcPathAdd(EditorNPCPath* path)
+{
+  addItem(path);
+}
+
+/* NPC Path Add/Remove control */
+void MapRender::npcPathRemove(EditorNPCPath* path)
+{
+  removeItem(path);
+}
+
 /* Select a tile trigger */
 void MapRender::selectTile()
 {
@@ -224,14 +221,14 @@ void MapRender::updateRenderingMap()
       for(int j = 0; j < map->tiles[i].size(); j++)
         addItem(map->tiles[i][j]);
 
+    /* Add npc paths */
+    for(int i = 0; i < map->npcs.size(); i++)
+      addItem(map->npcs[i]->getPath());
+
     /* Set the size of the map scene */
     if(map->tiles.size() > 0)
       setSceneRect(0, 0, map->tiles.size() * EditorHelpers::getTileSize(),
                    map->tiles.front().size() * EditorHelpers::getTileSize());
-
-    /* TESTING: REMOVE */
-    addItem(test_path);
-    addItem(test_path_2);
   }
 }
 
@@ -273,11 +270,29 @@ int MapRender::getMapWidth()
 /* Sets the map being edited */
 void MapRender::setMapEditor(EditorMap* editor)
 {
+  /* Signal disconnection */
+  if(editing_map != NULL)
+  {
+    disconnect(editing_map, SIGNAL(npcPathAdd(EditorNPCPath*)),
+               this, SLOT(npcPathAdd(EditorNPCPath*)));
+    disconnect(editing_map, SIGNAL(npcPathRemove(EditorNPCPath*)),
+               this, SLOT(npcPathRemove(EditorNPCPath*)));
+  }
+
   /* Set the map */
   editing_map = editor;
 
   /* Update the rendering map */
   updateRenderingMap();
+
+  /* Signal re-connection */
+  if(editing_map != NULL)
+  {
+    connect(editing_map, SIGNAL(npcPathAdd(EditorNPCPath*)),
+            this, SLOT(npcPathAdd(EditorNPCPath*)));
+    connect(editing_map, SIGNAL(npcPathRemove(EditorNPCPath*)),
+            this, SLOT(npcPathRemove(EditorNPCPath*)));
+  }
 }
 
 /* Update the entire scene */

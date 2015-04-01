@@ -11,6 +11,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMap>
 #include <QObject>
 #include <QPushButton>
 #include <QString>
@@ -18,6 +19,7 @@
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
+#include "Database/EditorMapNPC.h"
 #include "Database/EditorMapPerson.h"
 #include "Database/EditorMapThing.h"
 #include "Database/EditorTile.h"
@@ -31,8 +33,10 @@ struct SubMapInfo
   int id;
   QString name;
   QVector<QVector<EditorTile*>> tiles;
+  EditorNPCPath* path_top;
 
   QVector<EditorMapPerson*> persons;
+  QVector<EditorMapNPC*> npcs;
   QVector<EditorMapThing*> things;
 };
 
@@ -61,6 +65,7 @@ private:
 
   /* The base map things */
   QVector<EditorMapPerson*> base_persons;
+  QVector<EditorMapNPC*> base_npcs;
   QVector<EditorMapThing*> base_things;
 
   /* The map set ID */
@@ -78,6 +83,9 @@ private:
   /* Rendering tile icons */
   TileIcons* tile_icons;
 
+  /* Visibility status of path */
+  bool visible_path;
+
   /*------------------- Constants -----------------------*/
   const static int kBASE_ID_IOS; /* The instant base ID for MapIOs */
   const static int kBASE_ID_ITEMS; /* The instant base ID for items */
@@ -90,6 +98,9 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Attempts to add npc to the current sub-map */
+  bool addNPC(EditorMapNPC* npc, SubMapInfo* map = NULL);
+
   /* Attempts to add person to the current sub-map */
   bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL);
 
@@ -106,6 +117,9 @@ protected:
 
   /* Loads sub-map info */
   void loadSubMap(SubMapInfo* map, XmlData data, int index);
+
+  /* Re-color NPC paths (triggered on add) */
+  void recolorNPCPaths(SubMapInfo* map); // TODO
 
   /* Recursively erase all similar adjoining tiles */
   void recursiveErase(int x, int y, EditorEnumDb::Layer layer,
@@ -129,13 +143,25 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* NPC instant changed */
+  void npcInstanceChanged();
+
+  /* Path mods to the map */
+  void npcPathAdd(EditorNPCPath* path); // TODO
+  void npcPathRemove(EditorNPCPath* path); // TODO
+
   /* Person instant changed */
   void personInstanceChanged();
 
   /* Thing instant changed */
   void thingInstanceChanged();
 
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
 public slots:
+  /* Hover path changed */
+  void npcHoverPathChanged(EditorNPCPath* path);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -154,6 +180,7 @@ public:
   /* Returns current references for lists in map */
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
+  int getCurrentNPCIndex();
   int getCurrentPersonIndex();
   int getCurrentSpriteIndex();
   int getCurrentThingIndex();
@@ -179,9 +206,19 @@ public:
 
   /* Returns available IDs in the set. Useful for when creating a new one */
   int getNextMapID();
+  int getNextNPCID(bool from_sub = false);
   int getNextPersonID(bool from_sub = false);
   int getNextSpriteID();
   int getNextThingID(bool from_sub = false);
+
+  /* Return stored npc information */
+  EditorMapNPC* getNPC(int id, int sub_map = -1);
+  EditorMapNPC* getNPCByIndex(int index, int sub_map = -1);
+  int getNPCCount(int sub_map = -1);
+  int getNPCIndex(int id, int sub_map = -1);
+  QVector<QString> getNPCList(int sub_map = -1, bool all_submaps = false,
+                              bool shortened = false);
+  QVector<EditorMapNPC*> getNPCs(int sub_map = -1);
 
   /* Return stored person information */
   EditorMapPerson* getPerson(int id, int sub_map = -1);
@@ -222,6 +259,7 @@ public:
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
   bool setCurrentMap(int index);
+  bool setCurrentNPC(int index);
   bool setCurrentPerson(int index);
   bool setCurrentSprite(int index);
   bool setCurrentThing(int index);
@@ -229,6 +267,7 @@ public:
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
   void setHoverLayer(EditorEnumDb::Layer layer);
+  bool setHoverNPC(int id);
   bool setHoverPerson(int id);
   bool setHoverThing(int id);
   void setHoverTile(EditorTile* tile);
@@ -242,6 +281,9 @@ public:
 
   /* Sets the name of the map set */
   virtual void setName(QString name);
+
+  /* Sets a npc in the map */
+  int setNPC(EditorMapNPC* npc, int sub_map = -1);
 
   /* Sets a person in the map */
   int setPerson(EditorMapPerson* person, int sub_map = -1);
@@ -262,7 +304,12 @@ public:
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);
 
+  /* Sets visibility of npc paths */
+  void setVisibilityPaths(bool visible);
+
   /* Thing processing for updating with the new data */
+  void tilesNPCAdd(bool update_all = false);
+  void tilesNPCRemove();
   void tilesPersonAdd(bool update_all = false);
   void tilesPersonRemove();
   void tilesThingAdd(bool update_all = false);
@@ -275,6 +322,11 @@ public:
   bool unsetMap(int id);
   bool unsetMapByIndex(int index);
   void unsetMaps();
+
+  /* Unset npc(s) */
+  bool unsetNPC(int id, bool from_sub = false);
+  bool unsetNPCByIndex(int index, int sub_map = -1);
+  void unsetNPCs(bool from_sub = false);
 
   /* Unset person(s) */
   bool unsetPerson(int id, bool from_sub = false);

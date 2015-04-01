@@ -2,13 +2,13 @@
  * Class Name: EditorNPCPath
  * Date Created: March 29, 2015
  * Inheritance: QGraphicsItem
- * Description: A graphics item which represents the path of a map npc.
+ * Description: A graphics object which represents the path of a map npc.
  ******************************************************************************/
 #ifndef EDITORNPCPATH_H
 #define EDITORNPCPATH_H
 
 #include <QColor>
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 #include <QList>
 #include <QPainter>
 #include <QRect>
@@ -18,8 +18,9 @@
 #include "Game/Map/MapNPC.h"
 
 /* Editor NPC Path Class */
-class EditorNPCPath : public QGraphicsItem
+class EditorNPCPath : public QGraphicsObject
 {
+  Q_OBJECT
 public:
   /* Constructor Function */
   EditorNPCPath(int x = 0, int y = 0, int delay = 0, bool xy_flip = false);
@@ -36,8 +37,11 @@ public:
 
 private:
   /* Color of path */
-  QColor color;
+  int color_a;
+  int color_b;
+  int color_g;
   QList<QColor> color_presets;
+  int color_r;
 
   /* Is the path hovered? */
   bool hovered;
@@ -76,15 +80,23 @@ protected:
 
   /* Corner paint function */
   void paintCorner(QPainter* painter, int x, int y,
-                   Direction enter, Direction exit);
+                   Direction enter, Direction exit, QColor color);
 
   /* Line paint function */
-  void paintLine(QPainter* painter, int x1, int y1, int x2, int y2);
-  void paintLines(QPainter* painter, Path* curr, Path* next);
+  void paintLine(QPainter* painter, int x1, int y1, int x2, int y2,
+                 QColor color);
+  void paintLines(QPainter* painter, Path* curr, Path* next, QColor color);
 
   /* Node paint function */
   void paintNode(QPainter* painter, Path* prev, Path* curr, Path* next,
-                 int node_num = -1);
+                 QColor color, int node_num = -1);
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Triggers if the hover event was fired */
+  void hoverInit(EditorNPCPath* path);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

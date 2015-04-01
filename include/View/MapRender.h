@@ -17,7 +17,6 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
-#include "Database/EditorNPCPath.h" // TESTING: REMOVE
 #include "EnumDb.h"
 
 class MapRender : public QGraphicsScene
@@ -47,10 +46,6 @@ private:
 
   /* The rendering map */
   //SubMapInfo* map; // TODO: REMOVE??
-
-  /* TESTING: REMOVE */
-  EditorNPCPath* test_path;
-  EditorNPCPath* test_path_2;
 
   /* In tile select mode */
   bool tile_select;
@@ -84,6 +79,10 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* NPC Path Add/Remove control */
+  void npcPathAdd(EditorNPCPath* path);
+  void npcPathRemove(EditorNPCPath* path);
+
   /* Select a tile trigger */
   void selectTile();
 

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Class Name: EditorNPCPath
  * Date Created: March 29, 2015
- * Inheritance: QGraphicsItem
- * Description: A graphics item which represents the path of a map npc.
+ * Inheritance: QGraphicsObject
+ * Description: A graphics object which represents the path of a map npc.
  ******************************************************************************/
 #include "Database/EditorNPCPath.h"
 #include <QDebug>
@@ -28,9 +28,11 @@ const uint8_t EditorNPCPath::kRECT_W = 15;
  *         bool xy_flip - true next node goes y, then x. Otherwise, x then y
  */
 EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
+             : QGraphicsObject()
 {
   /* Initial settings */
   setAcceptHoverEvents(true);
+  setEnabled(true);
   setZValue(1);
 
   /* Set up color presets */
@@ -48,7 +50,11 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   color_presets.push_back(QColor(0, 128, 0, kCOLOR_ALPHA));
 
   /* Initial values */
-  setColorPreset(0);
+  color_r = 255;
+  color_g = 255;
+  color_b = 0;
+  color_a = kCOLOR_ALPHA;
+  //setColorPreset(0);
   hovered = false;
   interact = false;
   state = MapNPC::LOOPED;
@@ -95,7 +101,11 @@ EditorNPCPath::~EditorNPCPath()
  */
 void EditorNPCPath::copySelf(const EditorNPCPath &source)
 {
-  color = source.color;
+  color_r = source.color_r;
+  color_g = source.color_g;
+  color_b = source.color_b;
+  color_a = source.color_a;
+
   interact = source.interact;
   nodes = source.nodes;
   state = source.state;
@@ -129,6 +139,7 @@ QColor EditorNPCPath::getHoverColor()
 void EditorNPCPath::hoverEnterEvent(QGraphicsSceneHoverEvent*)
 {
   setHovered(true);
+  emit hoverInit(this);
 }
 
 /*
@@ -154,10 +165,11 @@ void EditorNPCPath::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
  *         int y - the y tile location for the corner
  *         Direction enter - the side of the tile the entering line comes from
  *         Direction exit - the side of the tile the exiting line leaves from
+ *         QColor color - the color to paint the colored portion of path
  * Output: none
  */
 void EditorNPCPath::paintCorner(QPainter* painter, int x, int y,
-                                Direction enter, Direction exit)
+                                Direction enter, Direction exit, QColor color)
 {
   int size = EditorHelpers::getTileSize();
   int line_w = kLINE_W + kBORDER_W;
@@ -210,7 +222,8 @@ void EditorNPCPath::paintCorner(QPainter* painter, int x, int y,
           (enter == Direction::WEST && exit == Direction::SOUTH))
   {
     /* West line */
-    painter->fillRect(start_x, start_y + delta_line, delta_line, kLINE_W, color);
+    painter->fillRect(start_x, start_y + delta_line, delta_line,
+                      kLINE_W, color);
     painter->fillRect(start_x, start_y + delta_line + kLINE_W, delta_line,
                       kBORDER_W, hover_color);
 
@@ -231,7 +244,8 @@ void EditorNPCPath::paintCorner(QPainter* painter, int x, int y,
                       kBORDER_W, delta_line + line_w, hover_color);
 
     /* West line */
-    painter->fillRect(start_x, start_y + delta_line, delta_line, kLINE_W, color);
+    painter->fillRect(start_x, start_y + delta_line, delta_line,
+                      kLINE_W, color);
     painter->fillRect(start_x, start_y + delta_line + kLINE_W, delta_line,
                       kBORDER_W, hover_color);
 
@@ -251,9 +265,11 @@ void EditorNPCPath::paintCorner(QPainter* painter, int x, int y,
  *         int y1 - the starting y tile point of the line
  *         int x2 - the ending x tile point of the line
  *         int y2 - the ending y tile point of the line
+ *         QColor color - the color to paint the colored portion of the path
  * Output: none
  */
-void EditorNPCPath::paintLine(QPainter* painter, int x1, int y1, int x2, int y2)
+void EditorNPCPath::paintLine(QPainter* painter, int x1, int y1, int x2, int y2,
+                              QColor color)
 {
   int line_w = kLINE_W + kBORDER_W;
   int size = EditorHelpers::getTileSize();
@@ -313,9 +329,11 @@ void EditorNPCPath::paintLine(QPainter* painter, int x1, int y1, int x2, int y2)
  * Inputs: QPainter* painter - the painting engine
  *         Path* curr - the current path node
  *         Path* next - the next path node
+ *         QColor color - the color to paint the colored portion of the path
  * Output: none
  */
-void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
+void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next,
+                               QColor color)
 {
   if(next != NULL)
   {
@@ -327,12 +345,12 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
     /* Paint the first line */
     if(delta_x != 0 && (!curr->xy_flip || delta_y == 0))
     {
-      paintLine(painter, curr->x, curr->y, next->x, curr->y);
+      paintLine(painter, curr->x, curr->y, next->x, curr->y, color);
       x_paint = true;
     }
     else if(delta_y != 0 && (curr->xy_flip || delta_x == 0))
     {
-      paintLine(painter, curr->x, curr->y, curr->x, next->y);
+      paintLine(painter, curr->x, curr->y, curr->x, next->y, color);
       y_paint = true;
     }
 
@@ -340,7 +358,7 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
     if(x_paint && delta_y != 0)
     {
       /* Paint line */
-      paintLine(painter, next->x, curr->y, next->x, next->y);
+      paintLine(painter, next->x, curr->y, next->x, next->y, color);
 
       /* Direction decision */
       Direction enter = Direction::WEST;
@@ -351,12 +369,12 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
         exit = Direction::NORTH;
 
       /* Paint corner */
-      paintCorner(painter, next->x, curr->y, enter, exit);
+      paintCorner(painter, next->x, curr->y, enter, exit, color);
     }
     else if(y_paint && delta_x != 0)
     {
       /* Paint line */
-      paintLine(painter, curr->x, next->y, next->x, next->y);
+      paintLine(painter, curr->x, next->y, next->x, next->y, color);
 
       /* Direction decision */
       Direction enter = Direction::NORTH;
@@ -367,7 +385,7 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
         exit = Direction::WEST;
 
       /* Paint corner */
-      paintCorner(painter, curr->x, next->y, enter, exit);
+      paintCorner(painter, curr->x, next->y, enter, exit, color);
     }
   }
 }
@@ -382,12 +400,13 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next)
  *         Path* prev - the previous path node
  *         Path* curr - the current path node
  *         Path* next - the next path node
+ *         QColor color - the color to paint the colored center of the node
  *         int node_num - the number of the node. Defaults to unused and paints
  *                        nothing
  * Output: none
  */
-void EditorNPCPath::paintNode(QPainter* painter, Path* prev,
-                              Path* curr, Path* next, int node_num)
+void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
+                              Path* next, QColor color, int node_num)
 {
   int size = EditorHelpers::getTileSize();
   int tile_x = curr->x * size;
@@ -520,7 +539,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev,
 
   /* Paint the node number */
   painter->setFont(QFont("Helvetica", 10, QFont::Bold));
-  painter->setPen(QColor(0, 0, 0));
+  painter->setPen(hover_color);
   if(node_num >= 0)
     painter->drawText(rect, Qt::AlignCenter, QString::number(node_num));
 }
@@ -574,46 +593,50 @@ bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
  */
 QRectF EditorNPCPath::boundingRect() const
 {
-  int min_x = -1;
-  int max_x = -1;
-  int min_y = -1;
-  int max_y = -1;
-
-  /* Find the lowest and highest x nodes */
-  for(int i = 0; i < nodes.size(); i++)
+  if(isEnabled())
   {
-    /* Check min */
-    if(min_x < 0 || nodes[i].x < min_x)
-      min_x = nodes[i].x;
+    int min_x = -1;
+    int max_x = -1;
+    int min_y = -1;
+    int max_y = -1;
 
-    /* Check max */
-    if(max_x < 0 || nodes[i].x > max_x)
-      max_x = nodes[i].x;
+    /* Find the lowest and highest x nodes */
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      /* Check min */
+      if(min_x < 0 || nodes[i].x < min_x)
+        min_x = nodes[i].x;
+
+      /* Check max */
+      if(max_x < 0 || nodes[i].x > max_x)
+        max_x = nodes[i].x;
+    }
+
+    /* Find the lowest and highest y nodes */
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      /* Check min */
+      if(min_y < 0 || nodes[i].y < min_y)
+        min_y = nodes[i].y;
+
+      /* Check max */
+      if(max_y < 0 || nodes[i].y > max_y)
+        max_y = nodes[i].y;
+    }
+
+    /* Calculate the bounding box */
+    int size = EditorHelpers::getTileSize();
+    int x = min_x * size;
+    int y = min_y * size;
+    int w = (max_x - min_x) * size;
+    if(w == 0)
+      w = size;
+    int h = (max_y - min_y) * size;
+    if(h == 0)
+      h = size;
+    return QRectF(x, y, w + size, h + size);
   }
-
-  /* Find the lowest and highest y nodes */
-  for(int i = 0; i < nodes.size(); i++)
-  {
-    /* Check min */
-    if(min_y < 0 || nodes[i].y < min_y)
-      min_y = nodes[i].y;
-
-    /* Check max */
-    if(max_y < 0 || nodes[i].y > max_y)
-      max_y = nodes[i].y;
-  }
-
-  /* Calculate the bounding box */
-  int size = EditorHelpers::getTileSize();
-  int x = min_x * size;
-  int y = min_y * size;
-  int w = (max_x - min_x) * size;
-  if(w == 0)
-    w = size;
-  int h = (max_y - min_y) * size;
-  if(h == 0)
-    h = size;
-  return QRectF(x, y, w + size, h + size);
+  return QRectF();
 }
 
 /*
@@ -686,7 +709,7 @@ bool EditorNPCPath::editNode(int index, int x, int y, int delay, bool xy_flip)
  */
 QColor EditorNPCPath::getColor()
 {
-  return color;
+  return QColor(color_r, color_g, color_b, color_a);
 }
 
 /*
@@ -938,40 +961,46 @@ bool EditorNPCPath::isHovered()
 void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*, 
                           QWidget*)
 {
-  /* Parse all paths */
-  for(int i = 0; i < nodes.size(); i++)
+  if(isEnabled())
   {
-    Path* curr = &nodes[i];
-    Path* next = NULL;
-    if(i < (nodes.size() - 1))
-      next = &nodes[i+1];
-    else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
-            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
-      next = &nodes.front();
+    /* Determine the color */
+    QColor color(color_r, color_g, color_b, color_a);
 
-    /* Paint the path between nodes */
-    paintLines(painter, curr, next);
-  }
+    /* Parse all paths */
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      Path* curr = &nodes[i];
+      Path* next = NULL;
+      if(i < (nodes.size() - 1))
+        next = &nodes[i+1];
+      else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
+              state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
+        next = &nodes.front();
 
-  /* Parse all nodes */
-  for(int i = 0; i < nodes.size(); i++)
-  {
-    Path* curr = &nodes[i];
-    Path* prev = NULL;
-    if(i > 0)
-      prev = &nodes[i-1];
-    else if(i == 0 && (state == MapNPC::LOOPED ||
-            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
-      prev = &nodes.last();
-    Path* next = NULL;
-    if(i < (nodes.size() - 1))
-      next = &nodes[i+1];
-    else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
-            state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
-      next = &nodes.front();
+      /* Paint the path between nodes */
+      paintLines(painter, curr, next, color);
+    }
 
-    /* Paint node rect */
-    paintNode(painter, prev, curr, next, i);
+    /* Parse all nodes */
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      Path* curr = &nodes[i];
+      Path* prev = NULL;
+      if(i > 0)
+        prev = &nodes[i-1];
+      else if(i == 0 && (state == MapNPC::LOOPED ||
+              state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
+        prev = &nodes.last();
+      Path* next = NULL;
+      if(i < (nodes.size() - 1))
+        next = &nodes[i+1];
+      else if(i == (nodes.size() - 1) && (state == MapNPC::LOOPED ||
+              state == MapNPC::RANDOMRANGE) && nodes.size() > 1)
+        next = &nodes.front();
+
+      /* Paint node rect */
+      paintNode(painter, prev, curr, next, color, i);
+    }
   }
 }
 
@@ -989,7 +1018,11 @@ bool EditorNPCPath::setColor(int r, int g, int b, int a)
   if(r >= 0 && r <= 255 && g >= 0 && g <= 255 &&
      b >= 0 && b <= 255 && a >= 0 && a <= 255)
   {
-    color.setRgb(r, g, b, a);
+    color_r = r;
+    color_g = g;
+    color_b = b;
+    color_a = a;
+
     update();
     return true;
   }
@@ -1007,7 +1040,11 @@ bool EditorNPCPath::setColorPreset(int index)
 {
   if(index >= 0 && index < color_presets.size())
   {
-    color = color_presets[index];
+    color_r = color_presets[index].red();
+    color_g = color_presets[index].green();
+    color_b = color_presets[index].blue();
+    color_a = color_presets[index].alpha();
+
     return true;
   }
   return false;
@@ -1104,19 +1141,23 @@ void EditorNPCPath::setTracking(MapNPC::TrackingState tracking)
 QPainterPath EditorNPCPath::shape() const
 {
   QPainterPath path;
-  int size = EditorHelpers::getTileSize();
-  int rect = kRECT_W + kLINE_W * 2;
-  int offset = (size - rect) / 2;
 
-  for(int i = 0; i < nodes.size(); i++)
+  /* Hover path only valid if path is enabled */
+  if(isEnabled())
   {
-    int x = nodes[i].x * size + offset;
-    int y = nodes[i].y * size + offset;
-    path.addRect(x, y, rect, rect);
+    int size = EditorHelpers::getTileSize();
+    int rect = kRECT_W + kLINE_W * 2;
+    int offset = (size - rect) / 2;
+
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      int x = nodes[i].x * size + offset;
+      int y = nodes[i].y * size + offset;
+      path.addRect(x, y, rect, rect);
+    }
+
+    // TODO: FUTURE - FOR LINES??
   }
-
-  // TODO: FUTURE - FOR LINES??
-
   return path;
 }
 

@@ -30,6 +30,7 @@ EditorMap::EditorMap() : QObject()
   id = kUNSET_ID;
   name = "";
   tile_icons = NULL;
+  visible_path = true;
 
   clearHoverInfo();
 }
@@ -72,13 +73,72 @@ EditorMap::EditorMap(const EditorMap &source) : EditorMap()
  */
 EditorMap::~EditorMap()
 {
-  unsetMaps();
+  /* Remove all things */
+  unsetThings();
+  unsetPersons();
+  unsetNPCs();
+
+  /* Remove all sprites */
   unsetSprites();
+
+  /* Finally, delete all maps */
+  unsetMaps();
 }
 
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Attempts to add the npc to the current sub-map. NPC needs
+ *              to be given an x and y start location prior to calling this
+ *              function.
+ *
+ * Inputs: EditorMapNPC* npc - the npc to attempt to add
+ * Output: bool - true if the npc was added (does not delete if fails)
+ */
+bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map)
+{
+  int x = npc->getX();
+  int y = npc->getY();
+  int w = npc->getMatrix()->getWidth();
+  int h = npc->getMatrix()->getHeight();
+
+  /* Ensure map isn't null. If not set, use active sub-map */
+  if(map == NULL)
+    map = active_submap;
+
+  /* Check if npc can be placed */
+  bool valid = false;
+  if(x >= 0 && y >= 0 && (x+w) <= map->tiles.size() &&
+     (y+h) <= map->tiles[x].size())
+  {
+    valid = true;
+
+    /* Check each tile */
+    for(int i = 0; i < w; i++)
+    {
+      for(int j = 0; j < h; j++)
+      {
+        int depth = npc->getMatrix()->getRenderDepth(i, j);
+
+        if(map->tiles[x+i][y+j]->getNPC(depth) != NULL ||
+           map->tiles[x+i][y+j]->getPerson(depth) != NULL)
+          valid = false;
+      }
+    }
+  }
+
+  /* If valid, place npc */
+  if(valid)
+  {
+    for(int i = x; i < (w+x); i++)
+      for(int j = y; j < (h+y); j++)
+        map->tiles[i][j]->setNPC(npc);
+  }
+
+  return valid;
+}
 
 /*
  * Description: Attempts to add the person to the current sub-map. Person needs
@@ -95,7 +155,7 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
   int w = person->getMatrix()->getWidth();
   int h = person->getMatrix()->getHeight();
 
-  /* Ensure map isn't null */
+  /* Ensure map isn't null. If not set, use active sub-map */
   if(map == NULL)
     map = active_submap;
 
@@ -108,16 +168,21 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
 
     /* Check each tile */
     for(int i = 0; i < w; i++)
+    {
       for(int j = 0; j < h; j++)
-        if(map->tiles[x+i][y+j]->getPerson(
-                           person->getMatrix()->getRenderDepth(i, j)) != NULL)
+      {
+        int depth = person->getMatrix()->getRenderDepth(i, j);
+
+        if(map->tiles[x+i][y+j]->getPerson(depth) != NULL ||
+           map->tiles[x+i][y+j]->getNPC(depth) != NULL)
           valid = false;
+      }
+    }
   }
 
-  /* If valid, place thing */
+  /* If valid, place person */
   if(valid)
   {
-    /* Add the thing to tiles */
     for(int i = x; i < (w+x); i++)
       for(int j = y; j < (h+y); j++)
         map->tiles[i][j]->setPerson(person);
@@ -284,6 +349,10 @@ void EditorMap::copySelf(const EditorMap &source)
   for(int i = 0; i < source.base_persons.size(); i++)
     base_persons.push_back(new EditorMapPerson(*source.base_persons[i]));
 
+  /* Add base npcs */
+  for(int i = 0; i < source.base_npcs.size(); i++)
+    base_npcs.push_back(new EditorMapNPC(*source.base_npcs[i]));
+
   /* Add sub-maps */
   for(int i = 0; i < source.sub_maps.size(); i++)
   {
@@ -291,6 +360,7 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.push_back(new SubMapInfo);
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
+    sub_maps.last()->path_top = NULL;
     for(int j = 0; j < source.sub_maps[i]->tiles.size(); j++)
     {
       QVector<EditorTile*> row;
@@ -333,6 +403,15 @@ void EditorMap::copySelf(const EditorMap &source)
       p->setX(source.sub_maps[i]->persons[j]->getX());
       p->setY(source.sub_maps[i]->persons[j]->getY());
       setPerson(p, source.sub_maps[i]->id);
+    }
+
+    /* Add instance map npcs */
+    for(int j = 0; j < source.sub_maps[i]->npcs.size(); j++)
+    {
+      EditorMapNPC* n = new EditorMapNPC(*source.sub_maps[i]->npcs[j]);
+      n->setX(source.sub_maps[i]->npcs[j]->getX());
+      n->setY(source.sub_maps[i]->npcs[j]->getY());
+      setNPC(n, source.sub_maps[i]->id);
     }
   }
 }
@@ -556,6 +635,38 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 }
 
 /*
+ * Description: Re-colors all the paths for each npc in the passed in sub-map.
+ *              This will sort the list by x coordinate + y coordinate from
+ *              least to greatest and then 1 by 1, assigns one of the 12
+ *              available colors.
+ *
+ * Inputs: SubMapInfo* map - the sub map to update the path colors for
+ * Output: none
+ */
+void EditorMap::recolorNPCPaths(SubMapInfo* map)
+{
+  QMap<int, EditorNPCPath*> sort_set;
+
+  /* Go through all npc paths and add to sort set */
+  for(int i = 0; i < map->npcs.size(); i++)
+    sort_set.insert(map->npcs[i]->getX() + map->npcs[i]->getY(),
+                    map->npcs[i]->getPath());
+
+  /* With the sorted list, go through and assign colors */
+  int color_index = 0;
+  QList<EditorNPCPath*> values = sort_set.values();
+  for(int i = 0; i < values.size(); i++)
+  {
+    values[i]->setColorPreset(color_index);
+
+    /* Increment color index and check range */
+    color_index++;
+    if(values[i]->getColorPresetCount() == color_index)
+      color_index = 0;
+  }
+}
+
+/*
  * Description: Recursively erases all similar adjoining tiles, based on the
  *              target sprite. Stops when either the sprite is not equivalent
  *              or the end of the map is reached.
@@ -748,6 +859,8 @@ bool EditorMap::updateHoverThing(bool unset)
       thing = active_info.active_thing;
     else if(active_info.active_layer == EditorEnumDb::PERSON)
       thing = active_info.active_person;
+    else if(active_info.active_layer == EditorEnumDb::NPC)
+      thing = active_info.active_npc;
   }
 
   /* Pre-checks to determine if this is valid to execute */
@@ -765,12 +878,8 @@ bool EditorMap::updateHoverThing(bool unset)
     {
       /* Go through and unset hover on all */
       for(int i = hover_x; (i < hover_w && i < map->tiles.size()); i++)
-      {
         for(int j = hover_y; (j < hover_h && j < map->tiles[i].size()); j++)
-        {
           map->tiles[i][j]->setHover(false);
-        }
-      }
 
       /* Re-set on base hover tile */
       active_info.hover_tile->setHover(true);
@@ -788,18 +897,40 @@ bool EditorMap::updateHoverThing(bool unset)
 
       /* Go through and set hover on all */
       for(int i = hover_x; (i < hover_w && i < map->tiles.size()); i++)
-      {
-        for(int j = hover_y; (j < hover_h &&
-                              j < map->tiles[i].size()); j++)
-        {
+        for(int j = hover_y; (j < hover_h && j < map->tiles[i].size()); j++)
           map->tiles[i][j]->setHover(true, invalid);
-        }
-      }
     }
 
     return true;
   }
   return false;
+}
+
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
+
+/*
+ * Description: Slot which fires each time the hover npc on the active sub-map
+ *              changes. This is used to change the rendering depth to push all
+ *              nodes of the hover path to the top.
+ *
+ * Inputs: EditorNPCPath* path - the hovered path reference
+ * Output: none
+ */
+void EditorMap::npcHoverPathChanged(EditorNPCPath* path)
+{
+  if(active_submap != NULL && path != NULL)
+  {
+    /* Set the top npc back to default */
+    if(active_submap->path_top != NULL)
+      active_submap->path_top->setZValue(1);
+    active_submap->path_top = NULL;
+
+    /* Set the new npc path as the top */
+    path->setZValue(2);
+    active_submap->path_top = path;
+  }
 }
 
 /*============================================================================
@@ -809,7 +940,7 @@ bool EditorMap::updateHoverThing(bool unset)
 /*
  * Description: Clears the hover information for the editor map. Called on
  *              initial construction and each time the editor map is laoded in
- *              as the dispaly map.
+ *              as the display map.
  *
  * Inputs: none
  * Output: none
@@ -819,6 +950,7 @@ void EditorMap::clearHoverInfo()
   active_info.active_cursor = EditorEnumDb::NO_CURSOR;
   active_info.active_layer = EditorEnumDb::NO_LAYER;
 
+  active_info.active_npc = NULL;
   active_info.active_person = NULL;
   active_info.active_sprite = NULL;
   active_info.active_thing = NULL;
@@ -945,8 +1077,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         /* Loop through all to find the top thing */
         EditorMapThing* found = NULL;
         for(int i = max - 1; found == NULL && i >= 0; i--)
-          if(active_info.hover_tile->getThing(i) != NULL)
-            found = active_info.hover_tile->getThing(i);
+          found = active_info.hover_tile->getThing(i);
 
         /* If found, remove from tiles and delete */
         if(found != NULL)
@@ -959,7 +1090,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       /* Check cursor */
       if(cursor == EditorEnumDb::BASIC && active_info.active_person != NULL)
       {
-        /* Create the thing */
+        /* Create the person */
         int id = getNextPersonID(true);
         EditorMapPerson* new_person = new EditorMapPerson(id);
         new_person->setBase(active_info.active_person);
@@ -982,15 +1113,53 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       {
         int max = Helpers::getRenderDepth();
 
-        /* Loop through all to find the top thing */
+        /* Loop through all to find the top person */
         EditorMapPerson* found = NULL;
         for(int i = max - 1; found == NULL && i >= 0; i--)
-          if(active_info.hover_tile->getPerson(i) != NULL)
-            found = active_info.hover_tile->getPerson(i);
+          found = active_info.hover_tile->getPerson(i);
 
         /* If found, remove from tiles and delete */
         if(found != NULL)
           unsetPerson(found->getID(), true);
+      }
+    }
+    /* Check on the layer - npc */
+    else if(layer == EditorEnumDb::NPC)
+    {
+      /* Check cursor */
+      if(cursor == EditorEnumDb::BASIC && active_info.active_npc != NULL)
+      {
+        /* Create the npc */
+        int id = getNextNPCID(true);
+        EditorMapNPC* new_npc = new EditorMapNPC(id);
+        new_npc->setBase(active_info.active_npc);
+        new_npc->setX(active_info.hover_tile->getX());
+        new_npc->setY(active_info.hover_tile->getY());
+
+        /* Attempt to place */
+        if(addNPC(new_npc))
+        {
+          active_submap->npcs.push_back(new_npc);
+          emit npcInstanceChanged();
+          setHoverThing(-1);
+        }
+        else
+        {
+          delete new_npc;
+        }
+      }
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        int max = Helpers::getRenderDepth();
+
+        /* Loop through all to find the top npc */
+        EditorMapNPC* found = NULL;
+        for(int i = max - 1; found == NULL && i >= 0; i--)
+          found = active_info.hover_tile->getNPC(i);
+
+        /* If found, remove from tiles and delete */
+        if(found != NULL)
+          unsetNPC(found->getID(), true);
       }
     }
   }
@@ -1079,8 +1248,7 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     /* Add thing instances */
     for(int i = 0; i < copy_map->things.size(); i++)
     {
-      EditorMapThing* thing = new EditorMapThing();
-      *thing = *copy_map->things[i];
+      EditorMapThing* thing = new EditorMapThing(*copy_map->things[i]);
       thing->setID(getNextThingID(true));
       thing->setX(copy_map->things[i]->getX());
       thing->setY(copy_map->things[i]->getY());
@@ -1090,12 +1258,21 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     /* Add person instances */
     for(int i = 0; i < copy_map->persons.size(); i++)
     {
-      EditorMapPerson* person = new EditorMapPerson();
-      *person = *copy_map->persons[i];
+      EditorMapPerson* person = new EditorMapPerson(*copy_map->persons[i]);
       person->setID(getNextPersonID(true));
       person->setX(copy_map->persons[i]->getX());
       person->setY(copy_map->persons[i]->getY());
       setPerson(person, new_map->id);
+    }
+
+    /* Add npc instances */
+    for(int i = 0; i < copy_map->npcs.size(); i++)
+    {
+      EditorMapNPC* npc = new EditorMapNPC(*copy_map->npcs[i]);
+      npc->setID(getNextNPCID(true));
+      npc->setX(copy_map->npcs[i]->getX());
+      npc->setY(copy_map->npcs[i]->getY());
+      setNPC(npc, new_map->id);
     }
 
     return true;
@@ -1139,6 +1316,30 @@ int EditorMap::getCurrentMapIndex()
 }
 
 /*
+ * Description: Returns the current selected base npc in the list of npcs.
+ *              On click, if the layer and pen is correct, this is the npc
+ *              that instantized and then placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the npc stack
+ */
+int EditorMap::getCurrentNPCIndex()
+{
+  /* Ensure the active npc isn't null */
+  if(active_info.active_npc != NULL)
+  {
+    for(int i = 0; i < base_npcs.size(); i++)
+      if(base_npcs[i] == active_info.active_npc)
+        return i;
+
+    /* NPC not found, it doesn't exist -> nullify it */
+    setCurrentNPC(-1);
+  }
+
+  return -1;
+}
+
+/*
  * Description: Returns the current selected base person in the list of persons.
  *              On click, if the layer and pen is correct, this is the person
  *              that instantized and then placed.
@@ -1155,7 +1356,7 @@ int EditorMap::getCurrentPersonIndex()
       if(base_persons[i] == active_info.active_person)
         return i;
 
-    /* thing not found, it doesn't exist -> nullify it */
+    /* Person not found, it doesn't exist -> nullify it */
     setCurrentPerson(-1);
   }
 
@@ -1380,6 +1581,65 @@ int EditorMap::getNextMapID()
 }
 
 /*
+ * Description: Returns the next available npc ID that can be used for a new
+ *              npc.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: int - the id to use
+ */
+int EditorMap::getNextNPCID(bool from_sub)
+{
+  bool found = false;
+  int id = 0;
+
+  /* If not from sub map, check base for base ID */
+  if(!from_sub)
+  {
+    for(int i = 0; !found && (i < base_npcs.size()); i++)
+    {
+      if(base_npcs[i]->getID() != i)
+      {
+        id = i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && base_npcs.size() > 0)
+      id = base_npcs.last()->getID() + 1;
+  }
+  /* Otherwise, check the sub-maps for available ID */
+  else
+  {
+    /* Compile the IDs of all npcs in all sub-maps */
+    QVector<int> id_list;
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+        id_list.push_back(sub_maps[i]->npcs[j]->getID());
+
+    /* Sort the list */
+    qSort(id_list);
+
+    /* Find the next available ID */
+    id = kBASE_ID_NPC;
+    for(int i = 0; !found && (i < id_list.size()); i++)
+    {
+      if(id_list[i] != (id + i))
+      {
+        id += i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && id_list.size() > 0)
+      id = id_list.last() + 1;
+  }
+
+  return id;
+}
+
+/*
  * Description: Returns the next available person ID that can be used for a new
  *              person.
  *
@@ -1523,6 +1783,176 @@ int EditorMap::getNextThingID(bool from_sub)
   }
 
   return id;
+}
+
+/*
+ * Description: Returns the npc with the corresponding ID.
+ *
+ * Inputs: int id - the id of the npc to get
+ *         int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: EditorMapNPC* - the pointer to match the ID. NULL if not found.
+ */
+EditorMapNPC* EditorMap::getNPC(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_npcs.size(); i++)
+        if(base_npcs[i]->getID() == id)
+          return base_npcs[i];
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->npcs.size(); i++)
+        if(sub_maps[sub_map]->npcs[i]->getID() == id)
+          return sub_maps[sub_map]->npcs[i];
+    }
+  }
+
+  return NULL;
+}
+
+/*
+ * Description: Returns the npc at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ *         int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: EditorMapNPC* - the pointer to match the index. NULL if out of
+ *                         range
+ */
+EditorMapNPC* EditorMap::getNPCByIndex(int index, int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_npcs.size())
+      return base_npcs[index];
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->npcs.size())
+      return sub_maps[sub_map]->npcs[index];
+  }
+  return NULL;
+}
+
+/*
+ * Description: Returns the number of npcs in the list.
+ *
+ * Inputs: int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: int - the number of npcs in the map set
+ */
+int EditorMap::getNPCCount(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+    return base_npcs.size();
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+    return sub_maps[sub_map]->npcs.size();
+  return 0;
+}
+
+/*
+ * Description: Returns the index in the list of npcs of the matching id.
+ *              Less than 0 if none match.
+ *
+ * Inputs: int id - the id to find the index for
+ *         int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: int - the index of the npc. Less than 0 if no npc matches
+ */
+int EditorMap::getNPCIndex(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_npcs.size(); i++)
+        if(base_npcs[i]->getID() == id)
+          return i;
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->npcs.size(); i++)
+        if(sub_maps[sub_map]->npcs[i]->getID() == id)
+          return i;
+    }
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns a list of all npcs in the format of a HEADER row
+ *              with the following rows as "ID: NAME".
+ *
+ * Inputs: int sub_map - the sub-map to get the npcs for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
+ * Output: QVector<QString> - list of all npcs
+ */
+QVector<QString> EditorMap::getNPCList(int sub_map, bool all_submaps,
+                                       bool shortened)
+{
+  QVector<QString> stack;
+  stack.push_back("MAP NPCS");
+
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all npcs and add them to the list */
+    for(int i = 0; i < base_npcs.size(); i++)
+      stack.push_back(base_npcs[i]->getNameList());
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+        stack.push_back(sub_maps[i]->npcs[j]->getNameList(shortened));
+  }
+
+  return stack;
+}
+
+/*
+ * Description: Returns the list of all npcs in the editor map
+ *
+ * Inputs: int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: QVector<EditorMapNPC*> - list of all npcs
+ */
+QVector<EditorMapNPC*> EditorMap::getNPCs(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    return base_npcs;
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    return sub_maps[sub_map]->npcs;
+  }
+
+  /* Otherwise, return blank list */
+  QVector<EditorMapNPC*> blank_list;
+  return blank_list;
 }
 
 /*
@@ -2057,8 +2487,6 @@ void EditorMap::load(XmlData data, int index)
  *         int sub_index - the sub map index to save
  * Output: none
  */
-// TODO: Once thing creation is done, need to have create temporary player
-//       for sub_map saving if one doesn't exist
 void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
 {
   if(fh != NULL)
@@ -2124,8 +2552,39 @@ bool EditorMap::setCurrentMap(int index)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
     /* Trigger thing instance update */
+    emit npcInstanceChanged();
     emit personInstanceChanged();
     emit thingInstanceChanged();
+
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the current npc, based on the index in the stack.
+ *              Passing in -1 unsets the active npc (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - thing index in the list of map npcs
+ * Output: bool - true if the active npc was changed
+ */
+bool EditorMap::setCurrentNPC(int index)
+{
+  if(index >= -1 && index < base_npcs.size())
+  {
+    /* Unset the hover, if relevant */
+    updateHoverThing(true);
+
+    /* If index is -1, unset the current npc */
+    if(index == -1)
+      active_info.active_npc = NULL;
+    /* Otherwise, index is in valid range of base npc set */
+    else
+      active_info.active_npc = base_npcs[index];
+
+    /* Set the hover, if relevant */
+    updateHoverThing();
 
     return true;
   }
@@ -2137,7 +2596,7 @@ bool EditorMap::setCurrentMap(int index)
  *              Passing in -1 unsets the active person (to NULL). This sprite is
  *              used in click placement.
  *
- * Inputs: int index - sprite index in the list of map persons
+ * Inputs: int index - thing index in the list of map persons
  * Output: bool - true if the active person was changed
  */
 bool EditorMap::setCurrentPerson(int index)
@@ -2195,7 +2654,7 @@ bool EditorMap::setCurrentSprite(int index)
  *              Passing in -1 unsets the active thing (to NULL). This sprite is
  *              used in click placement.
  *
- * Inputs: int index - sprite index in the list of map things
+ * Inputs: int index - thing index in the list of map things
  * Output: bool - true if the active thing was changed
  */
 bool EditorMap::setCurrentThing(int index)
@@ -2257,6 +2716,20 @@ void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)
     active_info.hover_tile->update();
+}
+
+/*
+ * Description: Sets the hover npc, being flagged when selecting an instance
+ *              in the list in MapNPCView.
+ *
+ * Inputs: int id - the id of the npc instance
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
+bool EditorMap::setHoverNPC(int id)
+{
+  if(active_submap != NULL)
+    return setHoverThing(getNPC(id, active_submap->id));
+  return false;
 }
 
 /*
@@ -2378,6 +2851,7 @@ int EditorMap::setMap(int id, QString name,
       info->id = id;
       info->name = name;
       info->tiles = tiles;
+      info->path_top = NULL;
 
       /* If near, insert the information into the index */
       if(near)
@@ -2451,6 +2925,110 @@ int EditorMap::setMap(int id, QString name, int width, int height)
 void EditorMap::setName(QString name)
 {
   this->name = name;
+}
+
+/*
+ * Description: Sets the npc in the set within the editor map. If a npc,
+ *              already exists with the ID, it deletes the existing one.
+ *
+ * Inputs: EditorMapNPC* npc - the new npc to set in
+ *         int sub_map - the sub-map to set the npcs for (<0 is base)
+ * Output: int - the index if set. If < 0, it is not set.
+ */
+int EditorMap::setNPC(EditorMapNPC* npc, int sub_map)
+{
+  if(npc != NULL && npc->getID() >= 0)
+  {
+    bool found = false;
+    int index = -1;
+    bool near = false;
+
+    /* If sub map id is less than 0, work with base npc */
+    if(sub_map < 0)
+    {
+      /* Find if the ID exists */
+      for(int i = 0; !found && !near && (i < base_npcs.size()); i++)
+      {
+        if(base_npcs[i]->getID() == npc->getID())
+        {
+          index = i;
+          found = true;
+        }
+        else if(base_npcs[i]->getID() > npc->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If found, modify the index with the new information */
+      if(found)
+      {
+        unsetNPCByIndex(index);
+        base_npcs.insert(index, npc);
+      }
+      else if(near)
+      {
+        base_npcs.insert(index, npc);
+      }
+      else
+      {
+        base_npcs.append(npc);
+        index = base_npcs.size() - 1;
+      }
+    }
+    /* Otherwise, work with the sub id */
+    else if(sub_map < sub_maps.size())
+    {
+      /* Check to make sure the npc could be added */
+      int x_start = npc->getX();
+      int y_start = npc->getY();
+      int x_end = x_start + npc->getMatrix()->getWidth();
+      int y_end = y_start + npc->getMatrix()->getHeight();
+      if(x_start >= 0 && x_end <= sub_maps[sub_map]->tiles.size() &&
+         y_start >= 0 && y_end <= sub_maps[sub_map]->tiles[x_start].size())
+      {
+        /* First remove the existing id, if one exists */
+        unsetNPC(npc->getID(), true);
+
+        /* Now insert into the proper location in the npc stack in the map */
+        for(int i = 0; !near && (i < sub_maps[sub_map]->npcs.size()); i++)
+        {
+          if(sub_maps[sub_map]->npcs[i]->getID() > npc->getID())
+          {
+            index = i;
+            near = true;
+          }
+        }
+
+        /* If near, insert at index. Otherwise, append */
+        if(near)
+        {
+          sub_maps[sub_map]->npcs.insert(index, npc);
+        }
+        else
+        {
+          sub_maps[sub_map]->npcs.append(npc);
+          index = sub_maps[sub_map]->npcs.size() - 1;
+        }
+
+        /* Update path colors and connect signals */
+        recolorNPCPaths(sub_maps[sub_map]);
+        connect(npc->getPath(), SIGNAL(hoverInit(EditorNPCPath*)),
+                this, SLOT(npcHoverPathChanged(EditorNPCPath*)));
+        if(sub_maps[sub_map] == active_submap)
+          emit npcPathAdd(npc->getPath());
+
+        /* Add to tiles */
+        for(int i = x_start; i < x_end; i++)
+          for(int j = y_start; j < y_end; j++)
+            sub_maps[sub_map]->tiles[i][j]->setNPC(npc);
+      }
+    }
+
+    return index;
+  }
+  return -1;
 }
 
 /*
@@ -2728,6 +3306,12 @@ void EditorMap::setVisibility(EditorEnumDb::Layer layer, bool visible)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
         sub_maps[i]->tiles[j][k]->setVisibility(layer, visible);
+
+  /* If layer is npc, pass visibility to paths as well */
+  // TODO: TEMP - this should eventually be handled by own enum and default to
+  //              NOT visible
+  if(layer == EditorEnumDb::NPC)
+      setVisibilityPaths(visible);
 }
 
 /*
@@ -2758,6 +3342,122 @@ void EditorMap::setVisibilityPass(bool visible)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
         sub_maps[i]->tiles[j][k]->setVisibilityPass(visible);
+}
+
+/*
+ * Description: Sets the visibility of all paths for npcs on all sub-map
+ *              tiles. Controlled by the map view.
+ *
+ * Inputs: bool visible - is the npc paths visible?
+ * Output: none
+ */
+void EditorMap::setVisibilityPaths(bool visible)
+{
+  if(visible_path != visible)
+  {
+    visible_path = visible;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+        sub_maps[i]->npcs[j]->getPath()->setEnabled(visible);
+  }
+}
+
+/*
+ * Description: Re-adds all sub-map npcs to tiles. This is called after
+ *              calling tilesNPCRemove(), processing the npc, and then
+ *              re-calling. Any npc instances that can't be re-added are
+ *              deleted and removed from the list.
+ * TODO: FUTURE - warn about npcs being removed??
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
+void EditorMap::tilesNPCAdd(bool update_all)
+{
+  /* Update all sub-maps - used for loading */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      /* Clear top path */
+      if(sub_maps[i]->path_top != NULL)
+        sub_maps[i]->path_top->setZValue(1);
+      sub_maps[i]->path_top = NULL;
+
+      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+      {
+        if(!addNPC(sub_maps[i]->npcs[j], sub_maps[i]))
+        {
+          /* Signal clean-up */
+          EditorNPCPath* path = sub_maps[i]->npcs[j]->getPath();
+          disconnect(path, SIGNAL(hoverInit(EditorNPCPath*)),
+                     this, SLOT(npcHoverPathChanged(EditorNPCPath*)));
+          emit npcPathRemove(path);
+
+          /* Delete npc */
+          delete sub_maps[i]->npcs[j];
+          sub_maps[i]->npcs.remove(j);
+          j--;
+        }
+      }
+    }
+  }
+  /* Or just the active one */
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->npcs.size(); i++)
+      {
+        if(!addNPC(active_submap->npcs[i]))
+        {
+          /* Signal clean-up */
+          EditorNPCPath* path = active_submap->npcs[i]->getPath();
+          disconnect(path, SIGNAL(hoverInit(EditorNPCPath*)),
+                     this, SLOT(npcHoverPathChanged(EditorNPCPath*)));
+          emit npcPathRemove(path);
+
+          /* Delete npc */
+          delete active_submap->npcs[i];
+          active_submap->npcs.remove(i);
+          i--;
+        }
+      }
+    }
+  }
+}
+
+/*
+ * Description: Removes all sub-map npcs from tiles. This is called before
+ *              processing npc changes, and then calling tilesNPCAdd().
+ *              Just removes the npcs from the tiles but still stored into
+ *              memory.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::tilesNPCRemove()
+{
+  if(active_submap != NULL)
+  {
+    /* Clear selection */
+    setHoverThing(-1);
+
+    for(int i = 0; i < active_submap->npcs.size(); i++)
+    {
+      EditorMapNPC* npc = active_submap->npcs[i];
+      int x = npc->getX();
+      int y = npc->getY();
+      int w = npc->getMatrix()->getWidth();
+      int h = npc->getMatrix()->getHeight();
+
+      for(int j = 0; j < w; j++)
+        for(int k = 0; k < h; k++)
+          active_submap->tiles[x+j][y+k]->
+                               unsetNPC(npc->getMatrix()->getRenderDepth(j, k));
+    }
+  }
 }
 
 /*
@@ -2978,6 +3678,140 @@ void EditorMap::unsetMaps()
   while(sub_maps.size() > 0)
     unsetMapByIndex(0);
   sub_maps.clear();
+}
+
+/*
+ * Description: Unset the npc within the list that correspond to the ID.
+ *
+ * Inputs: int id - the npc id
+ *         bool from_sub - true if it should be unset in sub-maps instead
+ * Output: bool - was a npc deleted?
+ */
+bool EditorMap::unsetNPC(int id, bool from_sub)
+{
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    int index = getNPCIndex(id);
+    return unsetNPCByIndex(index);
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    bool deleted = false;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      int index = getNPCIndex(id, i);
+      deleted |= unsetNPCByIndex(index, i);
+    }
+
+    return deleted;
+  }
+}
+
+/*
+ * Description: Unset the npc within the list that correspond to the index.
+ *
+ * Inputs: int index - the npc index corresponder
+ *         int sub_map - the sub-map to get the npcs for (<0 is base)
+ * Output: bool - was a npc deleted?
+ */
+bool EditorMap::unsetNPCByIndex(int index, int sub_map)
+{
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_npcs.size())
+    {
+      /* Remove all npcs related to this index - sub npcs */
+      for(int i = 0; i < sub_maps.size(); i++)
+      {
+        for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+        {
+          if(sub_maps[i]->npcs[j]->getBaseNPC() != NULL &&
+             sub_maps[i]->npcs[j]->getBaseNPC()->getID() ==
+             base_npcs[index]->getID())
+          {
+            unsetNPCByIndex(j, i);
+            j--;
+          }
+        }
+      }
+
+      /* Finally, delete the npc */
+      delete base_npcs[index];
+      base_npcs.remove(index);
+
+      return true;
+    }
+  }
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->npcs.size())
+    {
+      EditorMapNPC* ref = sub_maps[sub_map]->npcs[index];
+
+      /* Remove the instances from tiles */
+      int x = ref->getX();
+      int y = ref->getY();
+      for(int i = x; i < (ref->getMatrix()->getWidth() + x) &&
+                     i < sub_maps[sub_map]->tiles.size(); i++)
+      {
+        for(int j = y; j < (ref->getMatrix()->getHeight() + y) &&
+                                 j < sub_maps[sub_map]->tiles[i].size(); j++)
+        {
+          sub_maps[sub_map]->tiles[i][j]->unsetNPC(ref);
+        }
+      }
+
+      /* Check to make sure its path is not the head path and close signals */
+      if(sub_maps[sub_map]->path_top == ref->getPath())
+        sub_maps[sub_map]->path_top = NULL;
+      disconnect(ref->getPath(), SIGNAL(hoverInit(EditorNPCPath*)),
+                 this, SLOT(npcHoverPathChanged(EditorNPCPath*)));
+      if(sub_maps[sub_map] == active_submap)
+        emit npcPathRemove(ref->getPath());
+
+      /* Finally, delete the npc */
+      delete ref;
+      sub_maps[sub_map]->npcs.remove(index);
+
+      /* Update list */
+      emit npcInstanceChanged();
+      setHoverNPC(-1);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets all map npcs within the EditorMap set.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: none
+ */
+void EditorMap::unsetNPCs(bool from_sub)
+{
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    while(base_npcs.size() > 0)
+      unsetNPCByIndex(0);
+    base_npcs.clear();
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      while(sub_maps[i]->npcs.size() > 0)
+        unsetNPCByIndex(0, i);
+      sub_maps[i]->npcs.clear();
+    }
+  }
 }
 
 /*

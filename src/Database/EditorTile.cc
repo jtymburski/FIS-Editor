@@ -23,8 +23,9 @@ const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
  *        TileIcons* icons - the rendering tile icons. Default NULL
  */
 EditorTile::EditorTile(int x, int y, TileIcons* icons)
+          : QGraphicsItem()
 {
-  setAcceptHoverEvents(false);
+  setAcceptHoverEvents(true);
 
   /* Class control */
   hovered = false;
@@ -50,7 +51,9 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   for(int i = 0; i < kUPPER_COUNT_MAX; i++)
     layers_upper.push_back(temp);
 
-  /* Prep editor things in tile */\
+  /* Prep editor things in tile */
+  for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
+    npcs.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
     persons.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
@@ -80,6 +83,7 @@ EditorTile::~EditorTile()
   layers_lower.clear();
   layers_upper.clear();
 
+  npcs.clear();
   persons.clear();
   things.clear();
 
@@ -129,7 +133,25 @@ void EditorTile::copySelf(const EditorTile &source)
     layers_upper[i].visible = source.layers_upper[i].visible;
   }
 
-  // TODO: ADD THING AND PERSON
+  // TODO: ADD THING, PERSON, AND NPC
+}
+
+/*
+ * Description: Returns if there is a valid hover npc, the active layer is
+ *              a npc layer, and the placing pen is a npc placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover npc should be shown
+ */
+bool EditorTile::isHoverNPC()
+{
+  if(hover_info->hover_tile != NULL && hover_info->active_npc != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::NPC)
+  {
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -253,6 +275,12 @@ QString EditorTile::getActiveLayers()
       layer_string += "MP" + QString::number(i) + "("
                    + QString::number(persons[i].thing->getID()) + "),";
 
+  /* Get npc info, if relevant */
+  for(int i = 0; i < npcs.size(); i++)
+    if(npcs[i].thing != NULL)
+      layer_string += "MN" + QString::number(i) + "("
+                   + QString::number(npcs[i].thing->getID()) + "),";
+
   /* Get upper info, if relevant */
   for(int i = 0; i < layers_upper.size(); i++)
     if(layers_upper[i].sprite != NULL)
@@ -324,6 +352,7 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
     case EditorEnumDb::PERSON:
       return getPassabilityPerson(direction);
     case EditorEnumDb::NPC:
+      return getPassabilityNPC(direction);
     case EditorEnumDb::ITEM:
     case EditorEnumDb::IO:
     case EditorEnumDb::ENHANCER:
@@ -357,6 +386,21 @@ int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
                                         getPassability(layer, Direction::WEST));
 }
 
+/* Returns the passability of the npc */
+bool EditorTile::getPassabilityNPC(Direction direction)
+{
+  EditorMapThing* npc = npcs[0].thing;
+
+  if(npc != NULL)
+  {
+    EditorTileSprite* sprite = npc->getMatrix()->getSprite(
+                                    getX() - npc->getX(), getY() - npc->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
+}
+
 /*
  * Description: Returns the passability of the person(s) in the tile. Only
  *              relevant if the render depth is 0. Otherwise, true
@@ -373,9 +417,7 @@ bool EditorTile::getPassabilityPerson(Direction direction)
     EditorTileSprite* sprite = person->getMatrix()->getSprite(
                               getX() - person->getX(), getY() - person->getY());
     if(sprite != NULL)
-    {
       return sprite->getPassability(direction);
-    }
   }
   return true;
 }
@@ -396,9 +438,7 @@ bool EditorTile::getPassabilityThing(Direction direction)
     EditorTileSprite* sprite = thing->getMatrix()->getSprite(
                                 getX() - thing->getX(), getY() - thing->getY());
     if(sprite != NULL)
-    {
       return sprite->getPassability(direction);
-    }
   }
   return true;
 }
@@ -429,8 +469,24 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::THING, direction);
   if(persons[0].visible)
     passable &= getPassability(EditorEnumDb::PERSON, direction);
+  if(npcs[0].visible)
+    passable &= getPassability(EditorEnumDb::NPC, direction);
 
   return passable;
+}
+
+/*
+ * Description: Returns the map npc pointer for the npc at the rendering
+ *              level.
+ *
+ * Inputs: int render_level - the render level inside the tile
+ * Output: EditorMapNPC* - the npc at the render level
+ */
+EditorMapNPC* EditorTile::getNPC(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return (EditorMapNPC*)npcs[render_level].thing;
+  return NULL;
 }
 
 /*
@@ -549,6 +605,32 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
 }
 
 /*
+ * Description: Returns the visibility of the npc render level
+ *
+ * Inputs: int render_level - the render level to acquire the visibility
+ * Output: bool - true if the npc layer is visible
+ */
+bool EditorTile::getVisibilityNPC(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return npcs[render_level].visible;
+  return false;
+}
+
+/*
+ * Description: Returns the visibility of the person render level
+ *
+ * Inputs: int render_level - the render level to acquire the visibility
+ * Output: bool - true if the person layer is visible
+ */
+bool EditorTile::getVisibilityPerson(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return persons[render_level].visible;
+  return false;
+}
+
+/*
  * Description: Returns the visibility of the thing render level
  *
  * Inputs: int render_level - the render level to acquire the visibility
@@ -611,7 +693,6 @@ int EditorTile::getY()
  * Input: Required fields, mostly unused
  * Output: none
  */
-// TODO: Update for new render information
 void EditorTile::paint(QPainter *painter,
                         const QStyleOptionGraphicsItem*, QWidget*)
 {
@@ -621,10 +702,11 @@ void EditorTile::paint(QPainter *painter,
   /* Determine if it's a hover thing - special state */
   int diff_x = 0;
   int diff_y = 0;
+  bool hover_npc = isHoverNPC();
   bool hover_person = isHoverPerson();
   bool hover_sprite = isHoverSprite();
   bool hover_thing = isHoverThing();
-  if(hover_thing || hover_person)
+  if(hover_thing || hover_person || hover_npc)
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
@@ -682,6 +764,12 @@ void EditorTile::paint(QPainter *painter,
       persons[i].thing->paint(0, painter, bound,
                               x_pos - persons[i].thing->getX(),
                               y_pos - persons[i].thing->getY());
+
+    /* Paint the npc */
+    if(npcs[i].visible && npcs[i].thing != NULL)
+      npcs[i].thing->paint(0, painter, bound,
+                           x_pos - npcs[i].thing->getX(),
+                           y_pos - npcs[i].thing->getY());
   }
 
   /* If hover thing is true, render it */
@@ -691,6 +779,10 @@ void EditorTile::paint(QPainter *painter,
   /* If hover person is true, render it */
   if(hover_person)
     hover_info->active_person->paint(painter, bound, diff_x, diff_y);
+
+  /* If hover npc is true, render it */
+  if(hover_npc)
+    hover_info->active_npc->paint(painter, bound, diff_x, diff_y);
 
   /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
@@ -759,9 +851,20 @@ void EditorTile::paint(QPainter *painter,
     else if(hover_person)
     {
       EditorMatrix* matrix = hover_info->active_person->getMatrix();
+      int depth = matrix->getRenderDepth(diff_x, diff_y);
 
-      if(hovered_invalid ||
-         getPerson(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
+      if(hovered_invalid || getPerson(depth) != NULL || getNPC(depth) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
+    /* -- HOVER NPC CONTROL -- */
+    else if(hover_npc)
+    {
+      EditorMatrix* matrix = hover_info->active_npc->getMatrix();
+      int depth = matrix->getRenderDepth(diff_x, diff_y);
+
+      if(hovered_invalid || getPerson(depth) != NULL || getNPC(depth) != NULL)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);
@@ -1005,6 +1108,37 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
 }
 
 /*
+ * Description: Sets the npc sprite pointer, stored within the class.
+ *
+ * Inputs: EditorMapNPC* npc - the npc to add to the tile (uses the
+ *                             internal render depth and position)
+ * Output: bool - true if the npc is set
+ */
+bool EditorTile::setNPC(EditorMapNPC* npc)
+{
+  if(npc != NULL)
+  {
+    /* Determine the x, y in the matrix */
+    int x = x_pos - npc->getX();
+    int y = y_pos - npc->getY();
+    if(x >= 0 && x < npc->getMatrix()->getWidth() &&
+       y >= 0 && y < npc->getMatrix()->getHeight())
+    {
+      /* Determine the render level */
+      int render_level = npc->getMatrix()->getRenderDepth(x, y);
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+      {
+        /* Set the new npc */
+        npcs[render_level].thing = npc;
+        update();
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
  * Description: Sets the person sprite pointer, stored within the class.
  *
  * Inputs: EditorMapPerson* person - the person to add to the tile (uses the
@@ -1104,6 +1238,8 @@ void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
     setVisibilityThing(visible);
   else if(layer == EditorEnumDb::PERSON)
     setVisibilityPerson(visible);
+  else if(layer == EditorEnumDb::NPC)
+    setVisibilityNPC(visible);
   else if(layer == EditorEnumDb::UPPER1)
     setVisibilityUpper(0, visible);
   else if(layer == EditorEnumDb::UPPER2)
@@ -1161,6 +1297,36 @@ bool EditorTile::setVisibilityLower(int index, bool toggle)
   {
     layers_lower[index].visible = toggle;
     update();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the visibility of all layers of the npcs.
+ *
+ * Inputs: bool visible - true if the npc layers are visible
+ * Output: none
+ */
+void EditorTile::setVisibilityNPC(bool visible)
+{
+  for(int i = 0; i < npcs.size(); i++)
+    npcs[i].visible = visible;
+  update();
+}
+
+/*
+ * Description: Sets the visibility of the render level of the npc in tile.
+ *
+ * Inputs: int render_level - the render level to modify the visibility
+ *         bool visible - true if the render level should be visible
+ * Output: bool - true if the visibility was set
+ */
+bool EditorTile::setVisibilityNPC(int render_level, bool visible)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+  {
+    npcs[render_level].visible = visible;
     return true;
   }
   return false;
@@ -1364,10 +1530,66 @@ void EditorTile::unplace(EditorSprite* sprite)
 }
 
 /*
+ * Description: Unsets the npc pointer in the tile. Searches through all
+ *              render levels and removes it if the pointer is found.
+ *
+ * Inputs: EditorMapNPC* npc - the npc to remove from the tile
+ * Output: bool - true if the npc was found and removed
+ */
+bool EditorTile::unsetNPC(EditorMapNPC* npc)
+{
+  for(int i = 0; i < npcs.size(); i++)
+  {
+    if(npcs[i].thing == npc)
+    {
+      npcs[i].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the person pointer in the tile at the render level.
+ *
+ * Inputs: int render_level - the render depth to remove the person from
+ * Output: bool - true if a person was removed at the passed depth
+ */
+bool EditorTile::unsetNPC(int render_level)
+{
+  if(render_level >= 0 && render_level < npcs.size())
+  {
+    if(npcs[render_level].thing != NULL)
+    {
+      npcs[render_level].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the npcs in all render levels.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorTile::unsetNPCs()
+{
+  for(int i = 0; i < npcs.size(); i++)
+    npcs[i].thing = NULL;
+  update();
+}
+
+/*
  * Description: Unsets the person pointer in the tile. Searches through all
  *              render levels and removes it if the pointer is found.
  *
- * Inputs: Editorperson* person - the person to remove from the tile
+ * Inputs: EditorMapPerson* person - the person to remove from the tile
  * Output: bool - true if the person was found and removed
  */
 bool EditorTile::unsetPerson(EditorMapPerson* person)
@@ -1423,7 +1645,7 @@ void EditorTile::unsetPersons()
  * Description: Unsets the thing pointer in the tile. Searches through all
  *              render levels and removes it if the pointer is found.
  *
- * Inputs: EditorThing* thing - the thing to remove from the tile
+ * Inputs: EditorMapThing* thing - the thing to remove from the tile
  * Output: bool - true if the thing was found and removed
  */
 bool EditorTile::unsetThing(EditorMapThing* thing)

@@ -102,6 +102,8 @@ Application::Application(QWidget* parent)
  */
 Application::~Application()
 {
+  /* Clean up views before mass deletion */
+  game_view->getMapView()->getMapEditorView()->setMapEditor(NULL);
 }
 
 /*============================================================================
