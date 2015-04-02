@@ -99,13 +99,16 @@ private:
  *===========================================================================*/
 protected:
   /* Attempts to add npc to the current sub-map */
-  bool addNPC(EditorMapNPC* npc, SubMapInfo* map = NULL);
+  bool addNPC(EditorMapNPC* npc, SubMapInfo* map = NULL,
+              bool existing = true);
 
   /* Attempts to add person to the current sub-map */
-  bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL);
+  bool addPerson(EditorMapPerson* person, SubMapInfo* map = NULL,
+                 bool existing = true);
 
   /* Attempts to add thing to the current sub-map */
-  bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL);
+  bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL,
+                bool existing = true);
 
   /* Adds tile sprite data */
   void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
@@ -119,7 +122,7 @@ protected:
   void loadSubMap(SubMapInfo* map, XmlData data, int index);
 
   /* Re-color NPC paths (triggered on add) */
-  void recolorNPCPaths(SubMapInfo* map); // TODO
+  void recolorNPCPaths(SubMapInfo* map);
 
   /* Recursively erase all similar adjoining tiles */
   void recursiveErase(int x, int y, EditorEnumDb::Layer layer,

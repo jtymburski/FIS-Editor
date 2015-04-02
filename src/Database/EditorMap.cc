@@ -95,9 +95,11 @@ EditorMap::~EditorMap()
  *              function.
  *
  * Inputs: EditorMapNPC* npc - the npc to attempt to add
+ *         SubMapInfo* map - the map to add the npc to
+ *         bool existing - false if new npc. true otherwise
  * Output: bool - true if the npc was added (does not delete if fails)
  */
-bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map)
+bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map, bool existing)
 {
   int x = npc->getX();
   int y = npc->getY();
@@ -129,12 +131,28 @@ bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map)
     }
   }
 
-  /* If valid, place npc */
+  /* If valid, configure npc */
   if(valid)
   {
+    /* Tile placement */
     for(int i = x; i < (w+x); i++)
       for(int j = y; j < (h+y); j++)
         map->tiles[i][j]->setNPC(npc);
+
+    /* Add to stack and emit new signals */
+    if(!existing)
+    {
+      map->npcs.push_back(npc);
+      emit npcInstanceChanged();
+      setHoverThing(-1);
+
+      /* Update path colors and connect signals */
+      recolorNPCPaths(map);
+      connect(npc->getPath(), SIGNAL(hoverInit(EditorNPCPath*)),
+              this, SLOT(npcHoverPathChanged(EditorNPCPath*)));
+      if(map == active_submap)
+        emit npcPathAdd(npc->getPath());
+    }
   }
 
   return valid;
@@ -146,9 +164,12 @@ bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map)
  *              function.
  *
  * Inputs: EditorMapPerson* person - the person to attempt to add
+ *         SubMapInfo* map - the map to add the person to
+ *         bool existing - false if new person. true otherwise
  * Output: bool - true if the person was added (does not delete if fails)
  */
-bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
+bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map,
+                          bool existing)
 {
   int x = person->getX();
   int y = person->getY();
@@ -183,9 +204,18 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
   /* If valid, place person */
   if(valid)
   {
+    /* Add the person to tiles */
     for(int i = x; i < (w+x); i++)
       for(int j = y; j < (h+y); j++)
         map->tiles[i][j]->setPerson(person);
+
+    /* Add to stack and emit new signals */
+    if(!existing)
+    {
+      map->persons.push_back(person);
+      emit personInstanceChanged();
+      setHoverThing(-1);
+    }
   }
 
   return valid;
@@ -197,9 +227,11 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map)
  *              function.
  *
  * Inputs: EditorMapThing* thing - the thing to attempt to add
+ *         SubMapInfo* map - the map to add the thing to
+ *         bool existing - false if new thing. true otherwise
  * Output: bool - true if the thing was added (does not delete if fails)
  */
-bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map)
+bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
 {
   int x = thing->getX();
   int y = thing->getY();
@@ -232,6 +264,14 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map)
     for(int i = x; i < (w+x); i++)
       for(int j = y; j < (h+y); j++)
         map->tiles[i][j]->setThing(thing);
+
+    /* Add to stack and emit new signals */
+    if(!existing)
+    {
+      map->things.push_back(thing);
+      emit thingInstanceChanged();
+      setHoverThing(-1);
+    }
   }
 
   return valid;
@@ -649,8 +689,8 @@ void EditorMap::recolorNPCPaths(SubMapInfo* map)
 
   /* Go through all npc paths and add to sort set */
   for(int i = 0; i < map->npcs.size(); i++)
-    sort_set.insert(map->npcs[i]->getX() + map->npcs[i]->getY(),
-                    map->npcs[i]->getPath());
+    sort_set.insertMulti(map->npcs[i]->getX() + map->npcs[i]->getY(),
+                         map->npcs[i]->getPath());
 
   /* With the sorted list, go through and assign colors */
   int color_index = 0;
@@ -1058,17 +1098,9 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         new_thing->setX(active_info.hover_tile->getX());
         new_thing->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place */
-        if(addThing(new_thing))
-        {
-          active_submap->things.push_back(new_thing);
-          emit thingInstanceChanged();
-          setHoverThing(-1);
-        }
-        else
-        {
+        /* Attempt to place - if failed, delete */
+        if(!addThing(new_thing, NULL, false))
           delete new_thing;
-        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
@@ -1097,17 +1129,9 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         new_person->setX(active_info.hover_tile->getX());
         new_person->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place */
-        if(addPerson(new_person))
-        {
-          active_submap->persons.push_back(new_person);
-          emit personInstanceChanged();
-          setHoverThing(-1);
-        }
-        else
-        {
+        /* Attempt to place - if failed, delete */
+        if(!addPerson(new_person, NULL, false))
           delete new_person;
-        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
@@ -1136,16 +1160,15 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         new_npc->setX(active_info.hover_tile->getX());
         new_npc->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place */
-        if(addNPC(new_npc))
-        {
-          active_submap->npcs.push_back(new_npc);
-          emit npcInstanceChanged();
-          setHoverThing(-1);
-        }
+        /* Attempt to place - if failed, delete */
+        if(!addNPC(new_npc, NULL, false))
+          delete new_npc;
+        /* TODO: TESTING - REMOVE */
         else
         {
-          delete new_npc;
+          new_npc->getPath()->appendNode(new_npc->getX()+5, new_npc->getY());
+          new_npc->getPath()->appendNode(new_npc->getX()+10, new_npc->getY()+5);
+          new_npc->getPath()->appendNode(new_npc->getX()+1, new_npc->getY()+4);
         }
       }
       else if(cursor == EditorEnumDb::ERASER)

@@ -13,6 +13,7 @@
 
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
+#include "View/MapNPCView.h"
 #include "View/MapPersonView.h"
 #include "View/MapThingView.h"
 
@@ -44,6 +45,7 @@ private:
   EditorEnumDb::MapViewMode mode_for_tile;
 
   /* The Views */
+  MapNPCView* view_npc;
   MapPersonView* view_person;
   RawImageView* view_raw;
   SpriteView* view_sprite;
@@ -95,6 +97,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the views */
+  MapNPCView* getNPCView();
   MapPersonView* getPersonView();
   RawImageView* getRawView();
   SpriteView* getSpriteView();

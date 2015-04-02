@@ -50,11 +50,7 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   color_presets.push_back(QColor(0, 128, 0, kCOLOR_ALPHA));
 
   /* Initial values */
-  color_r = 255;
-  color_g = 255;
-  color_b = 0;
-  color_a = kCOLOR_ALPHA;
-  //setColorPreset(0);
+  setColorPreset(0);
   hovered = false;
   interact = false;
   state = MapNPC::LOOPED;
@@ -1045,6 +1041,7 @@ bool EditorNPCPath::setColorPreset(int index)
     color_b = color_presets[index].blue();
     color_a = color_presets[index].alpha();
 
+    update();
     return true;
   }
   return false;

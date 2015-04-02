@@ -17,7 +17,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   view_top = new QListWidget(this);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Raw Images" << "Sprites" << "Things" << "Persons";
+  items << "Raw Images" << "Sprites" << "Things" << "Persons" << "NPCs";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   view_top->setMaximumHeight(60);
@@ -29,6 +29,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   view_sprite = new SpriteView(this);
   view_thing = new MapThingView(this);
   view_person = new MapPersonView(this);
+  view_npc = new MapNPCView(this);
 
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
@@ -40,6 +41,10 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
   connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
+  connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
+  connect(view_npc, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
           this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
 
   /* Push buttons at the bottom of the layout */
@@ -64,6 +69,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(view_sprite);
   layout->addWidget(view_thing);
   layout->addWidget(view_person);
+  layout->addWidget(view_npc);
   layout->addLayout(hlayout);
   updateSelected(EditorEnumDb::RAW_VIEW);
 }
@@ -89,6 +95,8 @@ void MapDatabase::buttonDelete()
     view_thing->deleteThing();
   else if(view_person->isVisible())
     view_person->deletePerson();
+  else if(view_npc->isVisible())
+    view_npc->deleteNPC();
 }
 
 // TODO: Comment
@@ -101,6 +109,8 @@ void MapDatabase::buttonDuplicate()
     view_thing->duplicateThing();
   else if(view_person->isVisible())
     view_person->duplicatePerson();
+  else if(view_npc->isVisible())
+    view_npc->duplicateNPC();
 }
 
 // TODO: Comment
@@ -113,6 +123,8 @@ void MapDatabase::buttonImport()
     view_thing->importThing();
   else if(view_person->isVisible())
     view_person->importPerson();
+  else if(view_npc->isVisible())
+    view_npc->importNPC();
 }
 
 // TODO: Comment
@@ -125,6 +137,8 @@ void MapDatabase::buttonNew()
     view_thing->newThing();
   else if(view_person->isVisible())
     view_person->newPerson();
+  else if(view_npc->isVisible())
+    view_npc->newNPC();
 }
 
 /* Fills thing with data */
@@ -139,6 +153,7 @@ void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
     QVector<QString> thing_list = editing_map->getThingList(0, true, true);
     thing_list.push_front("0: Player");
     thing_list << editing_map->getPersonList(0, true, true);
+    thing_list << editing_map->getNPCList(0, true, true);
 
     /* Update things */
     if(view == EditorEnumDb::THING_VIEW)
@@ -151,6 +166,11 @@ void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
     {
       view_person->updateListSubmaps(editing_map->getMapList());
       view_person->updateListThings(thing_list);
+    }
+    else if(view == EditorEnumDb::NPC_VIEW)
+    {
+      view_npc->updateListSubmaps(editing_map->getMapList());
+      view_npc->updateListThings(thing_list);
     }
 
     /* Emit signal to get other lists (items and maps) */
@@ -179,6 +199,10 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
   {
     view_person->updateSelectedTile(id, x, y);
   }
+  else if(mode_for_tile == EditorEnumDb::NPC_VIEW)
+  {
+    view_npc->updateSelectedTile(id, x, y);
+  }
 }
 
 /* Updated data from higher up in the stack */
@@ -192,6 +216,10 @@ void MapDatabase::updatedItems(QVector<QString> items)
   {
     view_person->updateListItems(items);
   }
+  else if(mode_for_data == EditorEnumDb::NPC_VIEW)
+  {
+    view_npc->updateListItems(items);
+  }
 }
 
 /* Updated data from higher up in the stack */
@@ -204,6 +232,10 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
   else if(mode_for_data == EditorEnumDb::PERSON_VIEW)
   {
     view_person->updateListMaps(maps);
+  }
+  else if(mode_for_data == EditorEnumDb::NPC_VIEW)
+  {
+    view_npc->updateListMaps(maps);
   }
 }
 
@@ -223,6 +255,7 @@ void MapDatabase::updateSelected(int index)
     view_sprite->hide();
     view_thing->hide();
     view_person->hide();
+    view_npc->hide();
 
     /* Raw view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -236,6 +269,7 @@ void MapDatabase::updateSelected(int index)
     view_sprite->show();
     view_thing->hide();
     view_person->hide();
+    view_npc->hide();
   }
   else if(index == EditorEnumDb::THING_VIEW)
   {
@@ -243,6 +277,7 @@ void MapDatabase::updateSelected(int index)
     view_sprite->hide();
     view_thing->show();
     view_person->hide();
+    view_npc->hide();
   }
   else if(index == EditorEnumDb::PERSON_VIEW)
   {
@@ -250,12 +285,26 @@ void MapDatabase::updateSelected(int index)
     view_sprite->hide();
     view_thing->hide();
     view_person->show();
+    view_npc->hide();
+  }
+  else if(index == EditorEnumDb::NPC_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_person->hide();
+    view_npc->show();
   }
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+MapNPCView* MapDatabase::getNPCView()
+{
+  return view_npc;
+}
 
 MapPersonView* MapDatabase::getPersonView()
 {
@@ -290,4 +339,7 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the person view */
   view_person->setEditorMap(editing_map);
+
+  /* Add to the npc view */
+  view_npc->setEditorMap(editing_map);
 }
