@@ -35,6 +35,7 @@ private:
 
   /* The event */
   Event event;
+  bool event_base;
 
   /* The view matrix */
   EditorMatrix* matrix;
@@ -96,6 +97,9 @@ public:
   int getX();
   int getY();
 
+  /* Returns if the thing is using the base event */
+  bool isBaseEvent() const;
+
   /* Returns if the thing is visible */
   bool isVisible() const;
 
@@ -130,6 +134,9 @@ public:
 
   /* Sets the rendering tile icons */
   virtual void setTileIcons(TileIcons* icons);
+
+  /* Sets the class to use the base event, if relevant */
+  void setUseBaseEvent(bool use_base);
 
   /* Sets the visibility of the thing */
   void setVisibility(bool visible);

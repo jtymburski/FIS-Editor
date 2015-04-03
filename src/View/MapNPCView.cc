@@ -280,7 +280,12 @@ void MapNPCView::editInstance()
 
     EditorMapNPC* npc = editor_map->getNPC(id, editor_map->getCurrentMap()->id);
     if(npc != NULL)
-      editNPC(npc);
+    {
+      //editNPC(npc);
+
+      InstanceDialog* instance = new InstanceDialog(npc, this);
+      instance->show();
+    }
   }
 }
 

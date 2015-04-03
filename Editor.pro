@@ -53,12 +53,12 @@ SOURCES += \
     src/Database/EditorTileSprite.cc \
     src/Database/GameDatabase.cc \
     src/Dialog/ConvoDialog.cc \
+    src/Dialog/InstanceDialog.cc \
     src/Dialog/FrameDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
     src/Dialog/MatrixDialog.cc \
     src/Dialog/PersonDialog.cc \
-    src/Dialog/PersonInstDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/ThingDialog.cc \
     src/View/EventView.cc \
@@ -130,12 +130,12 @@ HEADERS += \
     include/Database/EditorTileSprite.h \
     include/Database/GameDatabase.h \
     include/Dialog/ConvoDialog.h \
+    include/Dialog/InstanceDialog.h \
     include/Dialog/FrameDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
     include/Dialog/MatrixDialog.h \
     include/Dialog/PersonDialog.h \
-    include/Dialog/PersonInstDialog.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/ThingDialog.h \
     include/View/EventView.h \

@@ -282,7 +282,12 @@ void MapPersonView::editInstance()
     EditorMapPerson* person = editor_map->getPerson(
                                            id, editor_map->getCurrentMap()->id);
     if(person != NULL)
-      editPerson(person);
+    {
+      //editPerson(person);
+
+      InstanceDialog* instance = new InstanceDialog(person, this);
+      instance->show();
+    }
   }
 }
 

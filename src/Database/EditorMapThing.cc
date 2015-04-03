@@ -25,6 +25,7 @@ EditorMapThing::EditorMapThing(int id, QString name, QString description)
   base = NULL;
   matrix = new EditorMatrix(1, 1, false);
   event = EventHandler::createEventTemplate();
+  event_base = true;
   x = 0;
   y = 0;
 
@@ -78,6 +79,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   /* Copy the thing data */
   setBase(source.getBaseThing());
   setDescription(source.getDescription());
+  event_base = source.event_base;
   setEvent(EventHandler::copyEvent(source.getEvent()));
   setID(source.getID());
   setName(source.getName());
@@ -183,7 +185,7 @@ EditorSprite* EditorMapThing::getDialogImage()
  */
 Event EditorMapThing::getEvent() const
 {
-  if(base != NULL)
+  if(base != NULL && event_base)
     return base->event;
   return event;
 }
@@ -277,6 +279,18 @@ int EditorMapThing::getX()
 int EditorMapThing::getY()
 {
   return y;
+}
+
+/*
+ * Description: Returns if the event returned by getEvent() is the event from
+ *              the base class. Only possible if getBaseThing() is not NULL.
+ *
+ * Inputs: none
+ * Output: bool - true if the event is the base event
+ */
+bool EditorMapThing::isBaseEvent() const
+{
+  return (base != NULL) && (event_base);
 }
 
 /*
@@ -418,6 +432,13 @@ void EditorMapThing::save(FileHandler* fh, bool game_only)
         fh->writeXmlData("name", getName().toStdString());
       if(base->getDescription() != getDescription())
         fh->writeXmlData("description", getDescription().toStdString());
+
+      /* Event save, if relevant (isBaseEvent() is true) */
+      if(event_base)
+      {
+        EditorEvent edit_event(getEvent());
+        edit_event.save(fh, game_only);
+      }
     }
     else
     {
@@ -459,6 +480,8 @@ void EditorMapThing::setBase(EditorMapThing* thing)
   /* Sets the name and description initially to what the base is */
   if(base != NULL)
   {
+    event_base = true;
+
     setName(base->getName());
     setDescription(base->getDescription());
   }
@@ -537,6 +560,20 @@ void EditorMapThing::setTileIcons(TileIcons* icons)
   tile_icons = icons;
   if(matrix != NULL)
     matrix->setTileIcons(tile_icons);
+}
+
+/*
+ * Description: Instructs the class to use the base event, if there is a base
+ *              reference class being used. If set true, the event is returned
+ *              from the base class. Otherwise, this class holds the relevant
+ *              event.
+ *
+ * Inputs: bool use_base - true to use the event from the base class
+ * Output: none
+ */
+void EditorMapThing::setUseBaseEvent(bool use_base)
+{
+  event_base = use_base;
 }
 
 /*

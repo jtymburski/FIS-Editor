@@ -282,7 +282,11 @@ void MapThingView::editInstance()
                                            id, editor_map->getCurrentMap()->id);
     if(thing != NULL)
     {
-      editThing(thing);
+      // TODO: FIX
+      //editThing(thing);
+
+      InstanceDialog* instance = new InstanceDialog(thing, this);
+      instance->show();
     }
   }
 }

@@ -14,6 +14,7 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
+#include "Dialog/InstanceDialog.h"
 #include "Dialog/ThingDialog.h"
 #include "EditorHelpers.h"
 

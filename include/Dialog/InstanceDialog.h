@@ -1,78 +1,76 @@
 /*******************************************************************************
- * Class Name: PersonInstDialog
+ * Class Name: InstanceDialog
  * Date Created: April 1, 2015
  * Inheritance: QDialog
- * Description: The dialog that displays the map person instant and the 
+ * Description: The dialog that displays the map thing instant and the
  *              information related to it. Allows manipulation of the data. 
  *              It also contains the path information used for map npcs.
  ******************************************************************************/
-#ifndef PERSONINSTDIALOG_H
-#define PERSONINSTDIALOG_H
+#ifndef INSTANCEDIALOG_H
+#define INSTANCEDIALOG_H
 
 #include <QCloseEvent>
 #include <QDialog>
 #include <QGridLayout>
 
 #include "Database/EditorMapNPC.h"
-#include "Database/EditorMapPerson.h"
 #include "Dialog/ConvoDialog.h"
 #include "View/EventView.h"
 
-class PersonInstDialog : public QDialog
+class InstanceDialog : public QDialog
 {
   Q_OBJECT
 public:
   /* Constructor function */
-  PersonInstDialog(EditorMapPerson* edit_person = NULL, QWidget* parent = NULL);
-  PersonInstDialog(EditorMapNPC* edit_npc = NULL, QWidget* parent = NULL);
+  InstanceDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = NULL);
+  InstanceDialog(EditorMapPerson* edit_person, QWidget* parent = NULL);
+  InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent = NULL);
 
   /* Destructor function */
-  ~PersonInstDialog();
+  ~InstanceDialog();
 
 private:
-  /* The visible control box */
-  //QComboBox* box_visible;
+  /* Check boxes for base event and interaction control */
+  QCheckBox* box_base_event;
+  QCheckBox* box_interaction;
+
+  /* Button for triggering node edit */
+  QPushButton* btn_edit_nodes;
+
+  /* Combo box control for algorithms and tracking */
+  QComboBox* combo_algorithm;
+  QComboBox* combo_tracking;
 
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
+
+  /* Description text box */
+  QTextEdit* edit_description;
 
   /* Event view and control */
   EditorEvent* event_ctrl;
   EventView* event_view;
 
-  /* The frame control dialog */
-  //FrameDialog* frame_dialog;
-
-  /* Returns if the thing is an npc */
-  bool is_npc;
-
-  /* The frame image */
-  //QLabel* lbl_frame_img;
-
   /* The line edit for thing data */
-  QLineEdit* line_description;
   QLineEdit* line_name;
 
-  /* Speed result label */
-  //QLabel* lbl_speed_result;
+  /* The node list */
+  QListWidget* list_nodes;
 
-  /* Matrix control */
-  //Direction matrix_direction;
-  //MapPerson::SurfaceClassifier matrix_surface;
-
-  /* Matrix view and control */
-  //MatrixView* matrix_view;
-
-  /* The working and original person */
-  EditorMapPerson* person_original;
-  EditorMapPerson* person_working;
-
-  /* The speed control value */
-  //QSpinBox* spin_speed;
+  /* The working and original thing */
+  EditorEnumDb::Layer thing_type;
+  EditorMapThing* thing_original;
+  EditorMapThing* thing_working;
 
   /* Waiting for sub-map data */
   bool waiting_convo;
   bool waiting_for_submap;
+
+  /* Constants */
+  static const int kALGO_COUNT;
+  static const std::string kALGO_STATES[];
+  static const int kTRACK_COUNT;
+  static const std::string kTRACK_STATES[];
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -80,6 +78,9 @@ private:
 private:
   /* Creates the layout - only called on initial construction */
   void createLayout();
+
+  /* Called on initial set-up of the class */
+  void setup();
 
   /* Updates the objects with the thing data */
   void updateData();
@@ -107,11 +108,20 @@ signals:
 public slots:
   /* Button control triggers */
   void buttonCancel();
+  void buttonEditNodes();
   void buttonOk();
 
   /* Changed text in line edits */
-  void changedDescription(QString description);
+  void changedDescription();
   void changedName(QString name);
+
+  /* Check box triggers */
+  void checkBaseChange(int state);
+  void checkInteractionChange(int state);
+
+  /* Combo box triggers */
+  void comboAlgorithmChange(int index); // TODO
+  void comboTrackingChange(int index); // TODO
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
@@ -134,4 +144,4 @@ public:
   void updateSelectedTile(int id, int x, int y);
 };
 
-#endif // PERSONINSTDIALOG_H
+#endif // INSTANCEDIALOG_H
