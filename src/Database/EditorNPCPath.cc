@@ -773,15 +773,51 @@ QString EditorNPCPath::getNodeStr(int index)
 
   if(node != NULL)
   {
-    /* Index */
-    name_str += QString::number(index) + ": ";
+    /* If path based node system */
+    if(state == MapNPC::LOOPED || state == MapNPC::BACKANDFORTH)
+    {
+      /* Index */
+      name_str += QString::number(index) + ": ";
 
-    /* X, Y */
-    name_str += "At (" + QString::number(node->x) + "," +
-                         QString::number(node->y) + ") ";
+      /* X, Y */
+      name_str += "At (" + QString::number(node->x) + "," +
+                           QString::number(node->y) + ") ";
 
-    /* Delay */
-    name_str += "For " + QString::number(node->delay) + " ms";
+      /* Delay */
+      name_str += "For " + QString::number(node->delay) + " ms ";
+
+      /* XY Flip */
+      if(state == MapNPC::BACKANDFORTH && (index+1) == nodes.size())
+        name_str += "Then Reverse Direction";
+      else if(node->xy_flip)
+        name_str += "Then Y-X Move";
+      else
+        name_str += "Then X-Y Move";
+    }
+    /* Random rectangle range (only two points) */
+    else if(state == MapNPC::RANDOMRANGE)
+    {
+      if(index == 0)
+        name_str += "Starting corner of Rectangle (";
+      else
+        name_str += "Other corner of Rectangle (";
+
+      /* Finalize display */
+      name_str += QString::number(node->x) + "," +
+                  QString::number(node->y) + ") ";
+    }
+    /* Random over entire map */
+    else if(state == MapNPC::RANDOM)
+    {
+      name_str += "Starting At (" + QString::number(node->x) + "," +
+                                    QString::number(node->y) + ") ";
+    }
+    /* Locked */
+    else
+    {
+      name_str += "At (" + QString::number(node->x) + "," +
+                           QString::number(node->y) + ") Forever";
+    }
   }
 
   return name_str;

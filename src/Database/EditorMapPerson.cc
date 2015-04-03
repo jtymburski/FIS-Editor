@@ -287,6 +287,13 @@ void EditorMapPerson::save(FileHandler* fh, bool game_only)
         fh->writeXmlData("name", getName().toStdString());
       if(base->getDescription() != getDescription())
         fh->writeXmlData("description", getDescription().toStdString());
+
+      /* Event save, if relevant (isBaseEvent() is true) */
+      if(!isBaseEvent())
+      {
+        EditorEvent edit_event(getEvent());
+        edit_event.save(fh, game_only);
+      }
     }
     else
     {

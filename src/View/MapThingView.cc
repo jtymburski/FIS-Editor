@@ -23,6 +23,7 @@ MapThingView::MapThingView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
+  instance_dialog = NULL;
   thing_dialog = NULL;
 
   /* Create the layout */
@@ -138,20 +139,42 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
   if(sub_thing != NULL)
     current = sub_thing;
 
-  /* Delete the old and create the new dialog */
-  if(thing_dialog != NULL)
+  /* -- Is an instance -- */
+  if(current->getBaseThing() != NULL)
   {
-    disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
-    disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-               this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-    delete thing_dialog;
+    /* Delete the old and create the new instance dialog */
+    if(instance_dialog != NULL)
+    {
+      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete instance_dialog;
+    }
+    instance_dialog = new InstanceDialog(current, this);
+    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    instance_dialog->show();
   }
-  thing_dialog = new ThingDialog(current, this);
-  connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
-  connect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-  thing_dialog->show();
+  /* -- Is a base -- */
+  else
+  {
+    /* Delete the old and create the new thing dialog */
+    if(thing_dialog != NULL)
+    {
+      disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
+      disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete thing_dialog;
+    }
+    thing_dialog = new ThingDialog(current, this);
+    connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
+    connect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    thing_dialog->show();
+  }
 
+  /* Fills the dialogs with data */
   emit fillWithData(EditorEnumDb::THING_VIEW);
 }
 
@@ -191,34 +214,6 @@ void MapThingView::updateInfo()
       }
     }
   }
-}
-
-/*
- * Description: Refreshes the Editor Thing list.
- *
- * Inputs: none
- * Output: none
- */
-void MapThingView::updateList()
-{
-  int index = thing_list->currentRow();
-
-  /* Set up the base list */
-  thing_list->clear();
-  if(editor_map != NULL)
-  {
-    /* Set up the base list */
-    for(int i = 0; i < editor_map->getThingCount(); i++)
-      thing_list->addItem(editor_map->getThingByIndex(i)->getNameList());
-    editor_map->updateAll();
-
-    /* Set up the instances list */
-    thingInstanceUpdate();
-  }
-
-  thing_list->setCurrentRow(index);
-  updateInfo();
-  update();
 }
 
 /*============================================================================
@@ -281,13 +276,7 @@ void MapThingView::editInstance()
     EditorMapThing* thing = editor_map->getThing(
                                            id, editor_map->getCurrentMap()->id);
     if(thing != NULL)
-    {
-      // TODO: FIX
-      //editThing(thing);
-
-      InstanceDialog* instance = new InstanceDialog(thing, this);
-      instance->show();
-    }
+      editThing(thing);
   }
 }
 
@@ -379,6 +368,35 @@ void MapThingView::thingInstanceUpdate()
   thing_instances->clearSelection();
   thing_instances->clearFocus();
   thing_instances->blockSignals(false);
+}
+
+/*
+ * Description: Refreshes the Editor Thing list. Also, triggered by instance
+ *              thing dialog on ok (slot).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapThingView::updateList()
+{
+  int index = thing_list->currentRow();
+
+  /* Set up the base list */
+  thing_list->clear();
+  if(editor_map != NULL)
+  {
+    /* Set up the base list */
+    for(int i = 0; i < editor_map->getThingCount(); i++)
+      thing_list->addItem(editor_map->getThingByIndex(i)->getNameList());
+    editor_map->updateAll();
+
+    /* Set up the instances list */
+    thingInstanceUpdate();
+  }
+
+  thing_list->setCurrentRow(index);
+  updateInfo();
+  update();
 }
 
 /*
@@ -556,6 +574,8 @@ void MapThingView::updateListItems(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListItems(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListItems(list);
 }
 
 /*
@@ -568,6 +588,8 @@ void MapThingView::updateListMaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListMaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListMaps(list);
 }
 
 /*
@@ -580,6 +602,8 @@ void MapThingView::updateListSubmaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListSubmaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListSubmaps(list);
 }
 
 /*
@@ -592,6 +616,8 @@ void MapThingView::updateListThings(QVector<QString> list)
 {
   if(thing_dialog != NULL)
     thing_dialog->getEventView()->setListThings(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListThings(list);
 }
 
 /*
@@ -606,6 +632,8 @@ void MapThingView::updateSelectedTile(int id, int x, int y)
 {
   if(thing_dialog != NULL)
     thing_dialog->updateSelectedTile(id, x, y);
+  if(instance_dialog != NULL)
+    instance_dialog->updateSelectedTile(id, x, y);
 }
 
 /*============================================================================

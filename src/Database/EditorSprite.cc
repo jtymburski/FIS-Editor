@@ -464,11 +464,6 @@ void EditorSprite::setFrameAngle(int frame_num, int angle)
 }
 
 /*
-info.path = path;
-info.image = QImage(path);
-*/
-
-/*
  * Description : Sets the frame path at the given position
  *
  * Input: Frame position, path

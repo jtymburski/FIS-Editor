@@ -53,6 +53,7 @@ InstanceDialog::InstanceDialog(EditorMapThing* edit_thing, QWidget* parent)
  *         QWidget* parent - the parent widget
  */
 InstanceDialog::InstanceDialog(EditorMapPerson* edit_person, QWidget* parent)
+              : QDialog(parent)
 {
   /* Set-up the person set - copied to working for changes */
   thing_type = EditorEnumDb::PERSON;
@@ -73,6 +74,7 @@ InstanceDialog::InstanceDialog(EditorMapPerson* edit_person, QWidget* parent)
  *         QWidget* parent - the parent widget
  */
 InstanceDialog::InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent)
+              : QDialog(parent)
 {
   /* Set-up the npc set - copied to working for changes */
   thing_type = EditorEnumDb::NPC;
@@ -196,7 +198,7 @@ void InstanceDialog::createLayout()
     box_interaction = new QCheckBox("Force Interaction", this);
     connect(box_interaction, SIGNAL(stateChanged(int)),
             this, SLOT(checkInteractionChange(int)));
-    layout->addWidget(box_interaction, 3, 6, 1, 2);//, Qt::AlignHCenter);
+    layout->addWidget(box_interaction, 3, 6, 1, 2);
 
     /* Node control */
     QLabel* lbl_nodes = new QLabel("Nodes", this);
@@ -259,24 +261,16 @@ void InstanceDialog::setup()
 
   /* Layout setup */
   createLayout();
-  updateData();
-}
 
-/*
- * Description: Updates the data in the widgets. CreateLayout() must be called
- *              prior.
- *
- * Inputs: none
- * Output: none
- */
-void InstanceDialog::updateData()
-{
   /* Name and descrip */
   line_name->setText(thing_working->getName());
   edit_description->setPlainText(thing_working->getDescription());
 
   /* Event control */
+  box_base_event->blockSignals(true);
   box_base_event->setChecked(thing_working->isBaseEvent());
+  event_view->setEnabled(!thing_working->isBaseEvent());
+  box_base_event->blockSignals(false);
 
   /* If NPC, update movement data */
   if(thing_type == EditorEnumDb::NPC)
@@ -285,8 +279,48 @@ void InstanceDialog::updateData()
     EditorNPCPath* path = npc->getPath();
 
     /* Combo box algorithm */
-    //if(path->getState() == // HERE
+    if(path->getState() == MapNPC::LOCKED)
+      combo_algorithm->setCurrentIndex(0);
+    else if(path->getState() == MapNPC::LOOPED)
+      combo_algorithm->setCurrentIndex(1);
+    else if(path->getState() == MapNPC::BACKANDFORTH)
+      combo_algorithm->setCurrentIndex(2);
+    else if(path->getState() == MapNPC::RANDOMRANGE)
+      combo_algorithm->setCurrentIndex(3);
+    else if(path->getState() == MapNPC::RANDOM)
+      combo_algorithm->setCurrentIndex(4);
+
+    /* Combo box tracking */
+    if(path->getTracking() == MapNPC::NOTRACK)
+      combo_tracking->setCurrentIndex(0);
+    else if(path->getTracking() == MapNPC::AVOIDPLAYER)
+      combo_tracking->setCurrentIndex(1);
+    else if(path->getTracking() == MapNPC::TOPLAYER)
+      combo_tracking->setCurrentIndex(2);
+
+    /* Forced interaction */
+    box_interaction->setChecked(path->isForcedInteraction());
+
+    /* Nodes */
+    updateNodes();
   }
+}
+
+/*
+ * Description: Updates the list of nodes in the view.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void InstanceDialog::updateNodes()
+{
+  /* Clear the existing list */
+  list_nodes->clear();
+
+  /* Fill the new list */
+  EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+  for(int i = 0; i < npc->getPath()->getNodes().size(); i++)
+    list_nodes->addItem(npc->getPath()->getNodeStr(i));
 }
 
 /*============================================================================
@@ -336,7 +370,7 @@ void InstanceDialog::buttonCancel()
  */
 void InstanceDialog::buttonEditNodes()
 {
-  // TODO - last
+  qDebug() << "EDIT NODES";
 }
 
 /*
@@ -350,6 +384,7 @@ void InstanceDialog::buttonEditNodes()
 void InstanceDialog::buttonOk()
 {
   /* Proceed to ok() */
+  updateOriginal();
   emit ok();
   event_ctrl->setEventBlank(false);
   close();
@@ -389,10 +424,32 @@ void InstanceDialog::changedName(QString name)
  */
 void InstanceDialog::checkBaseChange(int state)
 {
+  /* Was this an instance event, now a base event? */
+  bool was_instance = false;
+  if(state == Qt::Checked)
+    was_instance = true;
+
   /* If base is checked, event is disabled. Otherwise, enabled */
+  thing_working->setUseBaseEvent(state == Qt::Checked);
   event_view->setEnabled(state == Qt::Unchecked);
 
-  // TODO - the check base state has changed
+  /* Update the event accordingly */
+  EditorEvent* old_event = event_ctrl;
+  event_ctrl = new EditorEvent(
+                            EventHandler::copyEvent(thing_working->getEvent()));
+  event_view->setEvent(event_ctrl);
+
+  /* Handle the old event */
+  if(was_instance)
+  {
+    thing_working->setEvent(*old_event->getEvent());
+    old_event->setEventBlank(false);
+  }
+  else
+  {
+    old_event->setEventBlank();
+  }
+  delete old_event;
 }
 
 /*
@@ -405,7 +462,11 @@ void InstanceDialog::checkBaseChange(int state)
  */
 void InstanceDialog::checkInteractionChange(int state)
 {
-  // TODO - the check forced interaction state has changed
+  if(thing_type == EditorEnumDb::NPC)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+    npc->getPath()->setForcedInteraction(state == Qt::Checked);
+  }
 }
 
 /*
@@ -418,7 +479,25 @@ void InstanceDialog::checkInteractionChange(int state)
  */
 void InstanceDialog::comboAlgorithmChange(int index)
 {
-  // TODO - the combo box for algorithm type has changed
+  if(thing_type == EditorEnumDb::NPC)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+
+    /* Update state */
+    if(index == 0)
+      npc->getPath()->setState(MapNPC::LOCKED);
+    else if(index == 1)
+      npc->getPath()->setState(MapNPC::LOOPED);
+    else if(index == 2)
+      npc->getPath()->setState(MapNPC::BACKANDFORTH);
+    else if(index == 3)
+      npc->getPath()->setState(MapNPC::RANDOMRANGE);
+    else if(index == 4)
+      npc->getPath()->setState(MapNPC::RANDOM);
+
+    /* Update nodes */
+    updateNodes();
+  }
 }
 
 /*
@@ -431,7 +510,18 @@ void InstanceDialog::comboAlgorithmChange(int index)
  */
 void InstanceDialog::comboTrackingChange(int index)
 {
-  // TODO - the combo box for tracking type has changed
+  if(thing_type == EditorEnumDb::NPC)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+
+    /* Update tracking */
+    if(index == 0)
+      npc->getPath()->setTracking(MapNPC::NOTRACK);
+    else if(index == 1)
+      npc->getPath()->setTracking(MapNPC::AVOIDPLAYER);
+    else if(index == 2)
+      npc->getPath()->setTracking(MapNPC::TOPLAYER);
+  }
 }
 
 /*
@@ -544,7 +634,8 @@ void InstanceDialog::updateOriginal()
       *((EditorMapNPC*)thing_original) = *((EditorMapNPC*)thing_working);
 
     /* Fix the event */
-    thing_original->setEvent(*event_ctrl->getEvent());
+    if(!box_base_event->isChecked())
+      thing_original->setEvent(*event_ctrl->getEvent());
   }
 }
 

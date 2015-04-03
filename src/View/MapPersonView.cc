@@ -23,6 +23,7 @@ MapPersonView::MapPersonView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
+  instance_dialog = NULL;
   person_dialog = NULL;
 
   /* Create the layout */
@@ -138,20 +139,41 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
   if(sub_person != NULL)
     current = sub_person;
 
-  /* Delete the old and create the new dialog */
-  if(person_dialog != NULL)
+  /* -- Is an instance -- */
+  if(current->getBasePerson() != NULL)
   {
-    disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
-    disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-               this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-    delete person_dialog;
+    if(instance_dialog != NULL)
+    {
+      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete instance_dialog;
+    }
+    instance_dialog = new InstanceDialog(current, this);
+    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    instance_dialog->show();
   }
-  person_dialog = new PersonDialog(current, this);
-  connect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
-  connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-  person_dialog->show();
+  /* -- Is a base -- */
+  else
+  {
+    /* Delete the old and create the new dialog */
+    if(person_dialog != NULL)
+    {
+      disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
+      disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete person_dialog;
+    }
+    person_dialog = new PersonDialog(current, this);
+    connect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
+    connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    person_dialog->show();
+  }
 
+  /* Fills the dialogs with data */
   emit fillWithData(EditorEnumDb::PERSON_VIEW);
 }
 
@@ -191,34 +213,6 @@ void MapPersonView::updateInfo()
       }
     }
   }
-}
-
-/*
- * Description: Refreshes the Editor Person list.
- *
- * Inputs: none
- * Output: none
- */
-void MapPersonView::updateList()
-{
-  int index = person_list->currentRow();
-
-  /* Set up the base list */
-  person_list->clear();
-  if(editor_map != NULL)
-  {
-    /* Set up the base list */
-    for(int i = 0; i < editor_map->getPersonCount(); i++)
-      person_list->addItem(editor_map->getPersonByIndex(i)->getNameList());
-    editor_map->updateAll();
-
-    /* Set up the instances list */
-    personInstanceUpdate();
-  }
-
-  person_list->setCurrentRow(index);
-  updateInfo();
-  update();
 }
 
 /*============================================================================
@@ -282,12 +276,7 @@ void MapPersonView::editInstance()
     EditorMapPerson* person = editor_map->getPerson(
                                            id, editor_map->getCurrentMap()->id);
     if(person != NULL)
-    {
-      //editPerson(person);
-
-      InstanceDialog* instance = new InstanceDialog(person, this);
-      instance->show();
-    }
+      editPerson(person);
   }
 }
 
@@ -380,6 +369,34 @@ void MapPersonView::personInstanceUpdate()
   person_instances->clearSelection();
   person_instances->clearFocus();
   person_instances->blockSignals(false);
+}
+
+/*
+ * Description: Refreshes the Editor Person list.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapPersonView::updateList()
+{
+  int index = person_list->currentRow();
+
+  /* Set up the base list */
+  person_list->clear();
+  if(editor_map != NULL)
+  {
+    /* Set up the base list */
+    for(int i = 0; i < editor_map->getPersonCount(); i++)
+      person_list->addItem(editor_map->getPersonByIndex(i)->getNameList());
+    editor_map->updateAll();
+
+    /* Set up the instances list */
+    personInstanceUpdate();
+  }
+
+  person_list->setCurrentRow(index);
+  updateInfo();
+  update();
 }
 
 /*
@@ -557,6 +574,8 @@ void MapPersonView::updateListItems(QVector<QString> list)
 {
   if(person_dialog != NULL)
     person_dialog->getEventView()->setListItems(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListItems(list);
 }
 
 /*
@@ -569,6 +588,8 @@ void MapPersonView::updateListMaps(QVector<QString> list)
 {
   if(person_dialog != NULL)
     person_dialog->getEventView()->setListMaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListMaps(list);
 }
 
 /*
@@ -581,6 +602,8 @@ void MapPersonView::updateListSubmaps(QVector<QString> list)
 {
   if(person_dialog != NULL)
     person_dialog->getEventView()->setListSubmaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListSubmaps(list);
 }
 
 /*
@@ -593,6 +616,8 @@ void MapPersonView::updateListThings(QVector<QString> list)
 {
   if(person_dialog != NULL)
     person_dialog->getEventView()->setListThings(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListThings(list);
 }
 
 /*
@@ -607,4 +632,6 @@ void MapPersonView::updateSelectedTile(int id, int x, int y)
 {
   if(person_dialog != NULL)
     person_dialog->updateSelectedTile(id, x, y);
+  if(instance_dialog != NULL)
+    instance_dialog->updateSelectedTile(id, x, y);
 }

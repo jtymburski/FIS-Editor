@@ -23,6 +23,7 @@ MapNPCView::MapNPCView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
+  instance_dialog = NULL;
   npc_dialog = NULL;
 
   /* Create the layout */
@@ -138,20 +139,42 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
   if(sub_npc != NULL)
     current = sub_npc;
 
-  /* Delete the old and create the new dialog */
-  if(npc_dialog != NULL)
+  /* -- Is an instance -- */
+  if(current->getBasePerson() != NULL)
   {
-    disconnect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
-    disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-               this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-    delete npc_dialog;
+    /* Delete the old and create the new dialog */
+    if(instance_dialog != NULL)
+    {
+      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete instance_dialog;
+    }
+    instance_dialog = new InstanceDialog(current, this);
+    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    instance_dialog->show();
   }
-  npc_dialog = new PersonDialog(current, this);
-  connect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
-  connect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
-  npc_dialog->show();
+  /* -- Is a base -- */
+  else
+  {
+    /* Delete the old and create the new dialog */
+    if(npc_dialog != NULL)
+    {
+      disconnect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
+      disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      delete npc_dialog;
+    }
+    npc_dialog = new PersonDialog(current, this);
+    connect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
+    connect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    npc_dialog->show();
+  }
 
+  /* Fills the dialogs with data */
   emit fillWithData(EditorEnumDb::NPC_VIEW);
 }
 
@@ -191,34 +214,6 @@ void MapNPCView::updateInfo()
       }
     }
   }
-}
-
-/*
- * Description: Refreshes the Editor NPC list.
- *
- * Inputs: none
- * Output: none
- */
-void MapNPCView::updateList()
-{
-  int index = npc_list->currentRow();
-
-  /* Set up the base list */
-  npc_list->clear();
-  if(editor_map != NULL)
-  {
-    /* Set up the base list */
-    for(int i = 0; i < editor_map->getNPCCount(); i++)
-      npc_list->addItem(editor_map->getNPCByIndex(i)->getNameList());
-    editor_map->updateAll();
-
-    /* Set up the instances list */
-    npcInstanceUpdate();
-  }
-
-  npc_list->setCurrentRow(index);
-  updateInfo();
-  update();
 }
 
 /*============================================================================
@@ -280,12 +275,7 @@ void MapNPCView::editInstance()
 
     EditorMapNPC* npc = editor_map->getNPC(id, editor_map->getCurrentMap()->id);
     if(npc != NULL)
-    {
-      //editNPC(npc);
-
-      InstanceDialog* instance = new InstanceDialog(npc, this);
-      instance->show();
-    }
+      editNPC(npc);
   }
 }
 
@@ -378,6 +368,34 @@ void MapNPCView::npcInstanceUpdate()
   npc_instances->clearSelection();
   npc_instances->clearFocus();
   npc_instances->blockSignals(false);
+}
+
+/*
+ * Description: Refreshes the Editor NPC list.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapNPCView::updateList()
+{
+  int index = npc_list->currentRow();
+
+  /* Set up the base list */
+  npc_list->clear();
+  if(editor_map != NULL)
+  {
+    /* Set up the base list */
+    for(int i = 0; i < editor_map->getNPCCount(); i++)
+      npc_list->addItem(editor_map->getNPCByIndex(i)->getNameList());
+    editor_map->updateAll();
+
+    /* Set up the instances list */
+    npcInstanceUpdate();
+  }
+
+  npc_list->setCurrentRow(index);
+  updateInfo();
+  update();
 }
 
 /*
@@ -555,6 +573,8 @@ void MapNPCView::updateListItems(QVector<QString> list)
 {
   if(npc_dialog != NULL)
     npc_dialog->getEventView()->setListItems(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListItems(list);
 }
 
 /*
@@ -567,6 +587,8 @@ void MapNPCView::updateListMaps(QVector<QString> list)
 {
   if(npc_dialog != NULL)
     npc_dialog->getEventView()->setListMaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListMaps(list);
 }
 
 /*
@@ -579,6 +601,8 @@ void MapNPCView::updateListSubmaps(QVector<QString> list)
 {
   if(npc_dialog != NULL)
     npc_dialog->getEventView()->setListSubmaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListSubmaps(list);
 }
 
 /*
@@ -591,6 +615,8 @@ void MapNPCView::updateListThings(QVector<QString> list)
 {
   if(npc_dialog != NULL)
     npc_dialog->getEventView()->setListThings(list);
+  if(instance_dialog != NULL)
+    instance_dialog->getEventView()->setListThings(list);
 }
 
 /*
@@ -605,4 +631,6 @@ void MapNPCView::updateSelectedTile(int id, int x, int y)
 {
   if(npc_dialog != NULL)
     npc_dialog->updateSelectedTile(id, x, y);
+  if(instance_dialog != NULL)
+    instance_dialog->updateSelectedTile(id, x, y);
 }

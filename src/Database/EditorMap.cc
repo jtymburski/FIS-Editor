@@ -1166,8 +1166,9 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         /* TODO: TESTING - REMOVE */
         else
         {
-          new_npc->getPath()->appendNode(new_npc->getX()+5, new_npc->getY());
-          new_npc->getPath()->appendNode(new_npc->getX()+10, new_npc->getY()+5);
+          new_npc->getPath()->appendNode(new_npc->getX()-5, new_npc->getY()-5);
+          new_npc->getPath()->appendNode(new_npc->getX()+10, new_npc->getY()+5,
+                                         50, true);
           new_npc->getPath()->appendNode(new_npc->getX()+1, new_npc->getY()+4);
         }
       }

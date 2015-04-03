@@ -82,8 +82,8 @@ private:
   /* Called on initial set-up of the class */
   void setup();
 
-  /* Updates the objects with the thing data */
-  void updateData();
+  /* Updates the list of nodes */
+  void updateNodes();
 
 /*============================================================================
  * PROTECTED FUNCTIONS

@@ -32,6 +32,9 @@ private:
   /* The current editing map */
   EditorMap* editor_map;
 
+  /* Thing instance dialog */
+  InstanceDialog* instance_dialog;
+
   /* Label views for selected thing */
   QLabel* lbl_id;
   QLabel* lbl_image;
@@ -63,9 +66,6 @@ private:
 
   /* Refreshes the info in the lower half of the widget */
   void updateInfo();
-
-  /* Refreshes the editor thing list in the view */
-  void updateList();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -112,6 +112,9 @@ public slots:
 
   /* Update thing instances in view */
   void thingInstanceUpdate();
+
+  /* Refreshes the editor thing list in the view */
+  void updateList();
 
   /* Updates the thing sidebar */
   void updateThings();

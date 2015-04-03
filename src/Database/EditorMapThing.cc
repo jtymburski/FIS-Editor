@@ -80,7 +80,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   setBase(source.getBaseThing());
   setDescription(source.getDescription());
   event_base = source.event_base;
-  setEvent(EventHandler::copyEvent(source.getEvent()));
+  setEvent(EventHandler::copyEvent(source.event));
   setID(source.getID());
   setName(source.getName());
   setVisibility(source.isVisible());
@@ -185,7 +185,7 @@ EditorSprite* EditorMapThing::getDialogImage()
  */
 Event EditorMapThing::getEvent() const
 {
-  if(base != NULL && event_base)
+  if(isBaseEvent())
     return base->event;
   return event;
 }
@@ -328,6 +328,7 @@ void EditorMapThing::load(XmlData data, int index)
     edit_event.load(data, index + 1);
     if(edit_event.getEvent() != NULL)
       event = *edit_event.getEvent();
+    event_base = false;
   }
   else if(element == "image")
   {
@@ -434,7 +435,7 @@ void EditorMapThing::save(FileHandler* fh, bool game_only)
         fh->writeXmlData("description", getDescription().toStdString());
 
       /* Event save, if relevant (isBaseEvent() is true) */
-      if(event_base)
+      if(!event_base)
       {
         EditorEvent edit_event(getEvent());
         edit_event.save(fh, game_only);
