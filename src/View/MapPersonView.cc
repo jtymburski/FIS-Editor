@@ -145,14 +145,14 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
     if(instance_dialog != NULL)
     {
       disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     instance_dialog->show();
   }
   /* -- Is a base -- */
@@ -162,14 +162,14 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
     if(person_dialog != NULL)
     {
       disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
-      disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
       delete person_dialog;
     }
     person_dialog = new PersonDialog(current, this);
     connect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
-    connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     person_dialog->show();
   }
 

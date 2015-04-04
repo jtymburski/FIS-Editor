@@ -65,6 +65,7 @@ private:
   /* Waiting for sub-map data */
   bool waiting_convo;
   bool waiting_for_submap;
+  bool waiting_path;
 
   /* Constants */
   static const int kALGO_COUNT;
@@ -99,8 +100,11 @@ signals:
   /* Ok pressed */
   void ok();
 
+  /* Path edit start trigger */
+  void pathEditStart(EditorNPCPath*);
+
   /* Select tile trigger */
-  void selectTile(EditorEnumDb::MapViewMode view);
+  void selectTile(EditorEnumDb::MapObjectMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -120,8 +124,8 @@ public slots:
   void checkInteractionChange(int state);
 
   /* Combo box triggers */
-  void comboAlgorithmChange(int index); // TODO
-  void comboTrackingChange(int index); // TODO
+  void comboAlgorithmChange(int index);
+  void comboTrackingChange(int index);
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
@@ -139,6 +143,9 @@ public:
 
   /* Sets the working thing to the original */
   void updateOriginal();
+
+  /* Update path finished */
+  void updatePathFinished(); // TODO
 
   /* Update the selected tile for the thing */
   void updateSelectedTile(int id, int x, int y);

@@ -96,7 +96,7 @@ signals:
   void ok();
 
   /* Select tile trigger */
-  void selectTile(EditorEnumDb::MapViewMode view);
+  void selectTile(EditorEnumDb::MapObjectMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

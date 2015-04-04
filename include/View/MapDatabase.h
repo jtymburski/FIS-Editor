@@ -9,7 +9,7 @@
 #define MAPDATABASE_H
 
 #include <QListWidget>
-#include <QWidget>
+#include <QStackedWidget>
 
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
@@ -17,7 +17,7 @@
 #include "View/MapPersonView.h"
 #include "View/MapThingView.h"
 
-class MapDatabase : public QWidget
+class MapDatabase : public QStackedWidget
 {
   Q_OBJECT
 public:
@@ -37,12 +37,9 @@ private:
   /* The editing map for the database */
   EditorMap* editing_map;
 
-  /* Layout */
-  QVBoxLayout* layout;
-
   /* Last thing mode to call update */
-  EditorEnumDb::MapViewMode mode_for_data;
-  EditorEnumDb::MapViewMode mode_for_tile;
+  EditorEnumDb::MapObjectMode mode_for_data;
+  EditorEnumDb::MapObjectMode mode_for_tile;
 
   /* The Views */
   MapNPCView* view_npc;
@@ -52,6 +49,28 @@ private:
   MapThingView* view_thing;
   QListWidget* view_top;
 
+  /* Widgets in stacked control */
+  EditorEnumDb::MapEditMode widget_mode;
+  QWidget* widget_main;
+  QWidget* widget_path;
+  QWidget* widget_teleport;
+
+/*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Set-up main widget */
+  void setupMain();
+
+  /* Set-up path editor widget */
+  void setupPathEdit();
+
+  /* Set-up teleport selector */
+  void setupTeleportSelect();
+
+  /* Sets the widget mode */
+  void setWidgetMode(EditorEnumDb::MapEditMode mode);
+
 protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
@@ -60,6 +79,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Path edit start/stop signal */
+  void pathEditTrigger(bool toggle); // TODO
+
   /* Select tile trigger to map render */
   void selectTile();
 
@@ -77,10 +99,17 @@ public slots:
   void buttonNew();
 
   /* Fills thing with data */
-  void fillWithData(EditorEnumDb::MapViewMode view);
+  void fillWithData(EditorEnumDb::MapObjectMode view);
+
+  /* Path widget control */
+  void pathChanged(int current_row);
+  void pathClickDouble(QListWidgetItem* item);
+  void pathClickRight(const QPoint & pos);
+  void pathEditStart(EditorNPCPath*);
+  void pathFinished();
 
   /* Select a tile trigger - to the map render */
-  void selectTile(EditorEnumDb::MapViewMode view);
+  void selectTile(EditorEnumDb::MapObjectMode view);
 
   /* Sends the selected tile to the appropriate thing pop-up */
   void sendSelectedTile(int id, int x, int y);

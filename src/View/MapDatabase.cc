@@ -7,14 +7,47 @@
  ******************************************************************************/
 #include "View/MapDatabase.h"
 
-MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
+MapDatabase::MapDatabase(QWidget *parent) : QStackedWidget(parent)
 {
   editing_map = NULL;
   mode_for_data = EditorEnumDb::RAW_VIEW;
   mode_for_tile = EditorEnumDb::RAW_VIEW;
+  widget_mode = EditorEnumDb::NORMAL_EDIT;
+
+  /* Set-up widgets */
+  setupMain();
+  setupPathEdit();
+  setupTeleportSelect();
+
+  /* Stacked widget control */
+  addWidget(widget_main);
+  addWidget(widget_path);
+  addWidget(widget_teleport);
+
+  /* View control */
+  updateSelected(EditorEnumDb::RAW_VIEW);
+  setWidgetMode(widget_mode);
+}
+
+/*
+ * Description: Destructor Function
+ */
+MapDatabase::~MapDatabase()
+{
+}
+
+/*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+
+/* Set-up main widget */
+// TODO: Comment
+void MapDatabase::setupMain()
+{
+  widget_main = new QWidget(this);
 
   /* Top view */
-  view_top = new QListWidget(this);
+  view_top = new QListWidget(widget_main);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
   items << "Raw Images" << "Sprites" << "Things" << "Persons" << "NPCs";
@@ -25,33 +58,35 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
           this, SLOT(updateSelected(int)));
 
   /* Sets up the various views */
-  view_raw = new RawImageView(this);
-  view_sprite = new SpriteView(this);
-  view_thing = new MapThingView(this);
-  view_person = new MapPersonView(this);
-  view_npc = new MapNPCView(this);
+  view_raw = new RawImageView(widget_main);
+  view_sprite = new SpriteView(widget_main);
+  view_thing = new MapThingView(widget_main);
+  view_person = new MapPersonView(widget_main);
+  view_npc = new MapNPCView(widget_main);
 
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
-  connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
-          this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
-  connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
-  connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
-          this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
-  connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
-  connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapViewMode)),
-          this, SLOT(fillWithData(EditorEnumDb::MapViewMode)));
-  connect(view_npc, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-          this, SLOT(selectTile(EditorEnumDb::MapViewMode)));
+  connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_npc, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_npc, SIGNAL(pathEditStart(EditorNPCPath*)),
+          this, SLOT(pathEditStart(EditorNPCPath*)));
 
   /* Push buttons at the bottom of the layout */
-  button_delete = new QPushButton("Delete", this);
-  button_duplicate = new QPushButton("Duplicate", this);
-  button_import = new QPushButton("Import", this);
-  button_new = new QPushButton("New", this);
+  button_delete = new QPushButton("Delete", widget_main);
+  button_duplicate = new QPushButton("Duplicate", widget_main);
+  button_import = new QPushButton("Import", widget_main);
+  button_new = new QPushButton("New", widget_main);
   QHBoxLayout* hlayout = new QHBoxLayout();
   hlayout->addWidget(button_new);
   hlayout->addWidget(button_delete);
@@ -63,7 +98,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   connect(button_new, SIGNAL(clicked()), this, SLOT(buttonNew()));
 
   /* Layout */
-  layout = new QVBoxLayout(this);
+  QVBoxLayout* layout = new QVBoxLayout(widget_main);
   layout->addWidget(view_top);
   layout->addWidget(view_raw);
   layout->addWidget(view_sprite);
@@ -71,14 +106,61 @@ MapDatabase::MapDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
   layout->addLayout(hlayout);
-  updateSelected(EditorEnumDb::RAW_VIEW);
 }
 
-/*
- * Description: Destructor Function
- */
-MapDatabase::~MapDatabase()
+/* Set-up path editor widget */
+// TODO: Comment
+void MapDatabase::setupPathEdit()
 {
+  widget_path = new QWidget(this);
+
+  /* Node viewer and editor */
+  QListWidget* node_list = new QListWidget(widget_path);
+  connect(node_list, SIGNAL(currentRowChanged(int)),
+          this, SLOT(pathChanged(int)));
+  connect(node_list, SIGNAL(customContextMenuRequested(QPoint)),
+          this, SLOT(pathClickRight(QPoint)));
+  connect(node_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(pathClickDouble(QListWidgetItem*)));
+
+  /* Button finish */
+  QPushButton* button_path = new QPushButton("Finished", widget_path);
+  button_path->setMinimumWidth(150);
+  connect(button_path, SIGNAL(clicked()), this, SLOT(pathFinished()));
+
+  /* Layout */
+  QVBoxLayout* layout = new QVBoxLayout(widget_path);
+  layout->addWidget(node_list);
+  layout->addWidget(button_path, 0, Qt::AlignHCenter);
+}
+
+/* Set-up teleport selector */
+// TODO: Comment
+void MapDatabase::setupTeleportSelect()
+{
+  widget_teleport = new QWidget(this);
+
+  /* Label for the teleport notification */
+  QLabel* lbl_teleport = new QLabel(
+       "Select tile for\nwhere the teleportation\nevent will send the thing.",
+       widget_teleport);
+  lbl_teleport->setAlignment(Qt::AlignCenter);
+  QFont font = lbl_teleport->font();
+  font.setPointSize(14);
+  font.setBold(true);
+  lbl_teleport->setFont(font);
+
+  /* Layout */
+  QVBoxLayout* layout = new QVBoxLayout(widget_teleport);
+  layout->addWidget(lbl_teleport, 0, Qt::AlignCenter);
+}
+
+/* Sets the widget mode */
+// TODO: Comment
+void MapDatabase::setWidgetMode(EditorEnumDb::MapEditMode mode)
+{
+  setCurrentIndex(mode);
+  widget_mode = mode;
 }
 
 /*============================================================================
@@ -142,7 +224,7 @@ void MapDatabase::buttonNew()
 }
 
 /* Fills thing with data */
-void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
+void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
 {
   if(editing_map != NULL)
   {
@@ -178,8 +260,39 @@ void MapDatabase::fillWithData(EditorEnumDb::MapViewMode view)
   }
 }
 
+/* Path chosen changed */
+void MapDatabase::pathChanged(int current_row)
+{
+  // TODO
+}
+
+/* Click control for path edit view */
+void MapDatabase::pathClickDouble(QListWidgetItem* item)
+{
+  // TODO
+}
+
+/* Click control for path edit view */
+void MapDatabase::pathClickRight(const QPoint & pos)
+{
+  // TODO
+}
+
+/* Path edit start. Connected to views below */
+void MapDatabase::pathEditStart(EditorNPCPath* path)
+{
+  qDebug() << "PATH EDIT START: " << path;
+  // TODO
+}
+
+/* Click control for path edit view */
+void MapDatabase::pathFinished()
+{
+  // TODO
+}
+
 /* Select a tile trigger - to the map render */
-void MapDatabase::selectTile(EditorEnumDb::MapViewMode view)
+void MapDatabase::selectTile(EditorEnumDb::MapObjectMode view)
 {
   if(editing_map != NULL)
   {

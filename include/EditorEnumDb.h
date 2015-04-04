@@ -45,13 +45,19 @@ public:
               NO_LAYER = 17
              };
 
-  /* Map view mode */
-  enum MapViewMode {RAW_VIEW = 0,
-                    SPRITE_VIEW = 1,
-                    THING_VIEW = 2,
-                    PERSON_VIEW = 3,
-                    NPC_VIEW = 4
+  /* Map edit mode */
+  enum MapEditMode {NORMAL_EDIT = 0,
+                    PATH_EDIT = 1,
+                    TELEPORT_SELECT = 2,
                    };
+
+  /* Map object mode */
+  enum MapObjectMode {RAW_VIEW = 0,
+                      SPRITE_VIEW = 1,
+                      THING_VIEW = 2,
+                      PERSON_VIEW = 3,
+                      NPC_VIEW = 4
+                     };
 
   /* Sprite edit mode */
   enum SpriteEditMode {SPRITE_FRAMES, SPRITE_DATA, SPRITE_ALL};

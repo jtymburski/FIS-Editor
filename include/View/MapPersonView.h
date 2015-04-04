@@ -80,10 +80,10 @@ signals:
   void ensureVisible(QRect rect);
 
   /* Triggers the update the data of objects for use in events */
-  void fillWithData(EditorEnumDb::MapViewMode view);
+  void fillWithData(EditorEnumDb::MapObjectMode view);
 
   /* Triggers for the select tile on the given view mode */
-  void selectTile(EditorEnumDb::MapViewMode view);
+  void selectTile(EditorEnumDb::MapObjectMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

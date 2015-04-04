@@ -250,7 +250,9 @@ void InstanceDialog::setup()
 {
   /* Variable clean-up */
   convo_dialog = NULL;
+  waiting_convo = false;
   waiting_for_submap = false;
+  waiting_path = false;
 
   /* Set-up the event */
   if(thing_original != NULL)
@@ -370,7 +372,12 @@ void InstanceDialog::buttonCancel()
  */
 void InstanceDialog::buttonEditNodes()
 {
-  qDebug() << "EDIT NODES";
+  if(thing_type == EditorEnumDb::NPC && !waiting_path)
+  {
+    emit pathEditStart(((EditorMapNPC*)thing_working)->getPath());
+    waiting_path = true;
+    hide();
+  }
 }
 
 /*
@@ -636,6 +643,22 @@ void InstanceDialog::updateOriginal()
     /* Fix the event */
     if(!box_base_event->isChecked())
       thing_original->setEvent(*event_ctrl->getEvent());
+  }
+}
+
+/*
+ * Description: When the update path has been completed, this function
+ *              is called to re-show the dialog and clean-up.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void InstanceDialog::updatePathFinished()
+{
+  if(waiting_path)
+  {
+    waiting_path = false;
+    show();
   }
 }
 

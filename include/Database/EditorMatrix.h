@@ -75,13 +75,13 @@ private:
   void copySelf(const EditorMatrix &source);
 
   /* Decrements the render depth on the active tile */
-  bool decrementDepthOnActive();
+  bool decrementDepthOnActive(bool min = false);
 
   /* Gets the first valid sprite */
   EditorTileSprite* getValidSprite();
 
   /* Increments the render depth on the active tile */
-  bool incrementDepthOnActive();
+  bool incrementDepthOnActive(bool max = false);
 
   /* Updates mouse location on scene, based on point */
   bool mouseUpdate(QPointF point);

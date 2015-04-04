@@ -146,14 +146,19 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
     if(instance_dialog != NULL)
     {
       disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      disconnect(instance_dialog,
+                 SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+      disconnect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
+                 this, SIGNAL(pathEditStart(EditorNPCPath*)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    connect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
+            this, SIGNAL(pathEditStart(EditorNPCPath*)));
     instance_dialog->show();
   }
   /* -- Is a base -- */
@@ -163,14 +168,14 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
     if(npc_dialog != NULL)
     {
       disconnect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
-      disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+      disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
       delete npc_dialog;
     }
     npc_dialog = new PersonDialog(current, this);
     connect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
-    connect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapViewMode)),
-            this, SIGNAL(selectTile(EditorEnumDb::MapViewMode)));
+    connect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     npc_dialog->show();
   }
 

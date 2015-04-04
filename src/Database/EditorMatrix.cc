@@ -136,11 +136,25 @@ void EditorMatrix::copySelf(const EditorMatrix &source)
 /*
  * Description: Decreases the render depth on the active tile by 1. 
  *
- * Inputs: none
+ * Inputs: bool min - push it to the min as opposed to decrement by 1
  * Output: bool - true if the depth decreased by 1. false if as low as possible
  */
-bool EditorMatrix::decrementDepthOnActive()
+bool EditorMatrix::decrementDepthOnActive(bool min)
 {
+  if(min)
+  {
+    if(!active_sprite->decrementRenderDepth())
+    {
+      incrementDepthOnActive(true);
+      return true;
+    }
+    else
+    {
+      while(active_sprite->decrementRenderDepth());
+      return false;
+    }
+  }
+
   return active_sprite->decrementRenderDepth();
 }
 
@@ -173,11 +187,25 @@ EditorTileSprite* EditorMatrix::getValidSprite()
 /*
  * Description: Increases the render depth on the active tile by 1. 
  *
- * Inputs: none
+ * Inputs: bool max - push it to the max as opposed to increment by 1
  * Output: bool - true if the depth increased by 1. false if as high as possible
  */
-bool EditorMatrix::incrementDepthOnActive()
+bool EditorMatrix::incrementDepthOnActive(bool max)
 {
+  if(max)
+  {
+    if(!active_sprite->incrementRenderDepth())
+    {
+      decrementDepthOnActive(true);
+      return true;
+    }
+    else
+    {
+      while(active_sprite->incrementRenderDepth());
+      return false;
+    }
+  }
+
   return active_sprite->incrementRenderDepth();
 }
 
@@ -343,6 +371,10 @@ void EditorMatrix::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     {
       if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
         changePassOnActive(false);
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
+        incrementDepthOnActive(true);
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
+        decrementDepthOnActive(true);
     }
   }
 }
@@ -382,6 +414,14 @@ void EditorMatrix::mousePressEvent(QGraphicsSceneMouseEvent *event)
       if(cursor_mode == EditorEnumDb::THING_PASS_ALL)
       {
         changePassOnActive(false);
+      }
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_PLUS)
+      {
+        incrementDepthOnActive(true);
+      }
+      else if(cursor_mode == EditorEnumDb::THING_RENDER_MINUS)
+      {
+        decrementDepthOnActive(true);
       }
       else
       {
