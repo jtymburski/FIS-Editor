@@ -10,6 +10,7 @@
 /* Constant Implementation - see header file for descriptions */
 const uint8_t EditorNPCPath::kBORDER_W = 2;
 const uint8_t EditorNPCPath::kCOLOR_ALPHA = 191;
+const float EditorNPCPath::kHOVER_ALPHA = 0.5;
 const uint8_t EditorNPCPath::kLINE_W = 3;
 const uint8_t EditorNPCPath::kRECT_W = 15;
 
@@ -52,6 +53,8 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   /* Initial values */
   setColorPreset(0);
   hovered = false;
+  index_move = -1;
+  index_select = -1;
   interact = false;
   state = MapNPC::LOOPED;
   tracking = MapNPC::NOTRACK;
@@ -64,6 +67,11 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   base_node.xy_flip = xy_flip;
   nodes.clear();
   nodes.push_back(base_node);
+
+  /* Clear the hover node */
+  hover_node.x = 0;
+  hover_node.y = 0;
+  hover_used = false;
 }
 
 /*
@@ -85,7 +93,7 @@ EditorNPCPath::~EditorNPCPath()
 }
 
 /*============================================================================
- * PROTECTED FUNCTIONS
+ * PRIVATE FUNCTIONS
  *===========================================================================*/
 
 /*
@@ -114,41 +122,21 @@ void EditorNPCPath::copySelf(const EditorNPCPath &source)
  * Description: Returns the hover color. If hovered is true, border color is
  *              white. Otherwise, border color is black.
  *
- * Inputs: none
+ * Inputs: bool hover_node - is the node to get the border for a hover node
  * Output: QColor - the color to be used for borders
  */
-QColor EditorNPCPath::getHoverColor()
+QColor EditorNPCPath::getHoverColor(bool hover_node)
 {
-  if(hovered)
-    return QColor(225, 225, 225);
-  return QColor(0, 0, 0);
-}
-
-/*
- * Description: The hover enter event of the item (when the mouse enters the
- *              defined shape(). This is re-implemented from parent and then
- *              sets the hover status.
- *
- * Inputs: QGraphicsSceneHoverEvent* - not used
- * Output: none
- */
-void EditorNPCPath::hoverEnterEvent(QGraphicsSceneHoverEvent*)
-{
-  setHovered(true);
-  emit hoverInit(this);
-}
-
-/*
- * Description: The hover exit event of the item (when the mouse exits the
- *              defined shape(). This is re-implemented from parent and then
- *              sets the hover status.
- *
- * Inputs: QGraphicsSceneHoverEvent* - not used
- * Output: none
- */
-void EditorNPCPath::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
-{
-  setHovered(false);
+  if(hover_node)
+  {
+    return QColor(0, 0, 0, 255 * kHOVER_ALPHA);
+  }
+  else
+  {
+    if(hovered)
+      return QColor(225, 225, 225);
+    return QColor(0, 0, 0);
+  }
 }
 
 /*
@@ -413,10 +401,23 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   int rect_x = tile_x + offset;
   int rect_y = tile_y + offset;
   QRect rect(rect_x, rect_y, kRECT_W, kRECT_W);
+  if(node_num == -1)
+  {
+    color.setRgb(color.red(), color.green(),
+                 color.blue(), color.alpha() * kHOVER_ALPHA);
+  }
+  else
+  {
+    if(node_num == index_select)
+      color.setRgb(255, 255, 255, color.alpha());
+    if(node_num == index_move)
+      color.setRgb(color.red(), color.green(),
+                   color.blue(), color.alpha() * 0.25);
+  }
   painter->fillRect(rect, color);
 
   /* Paint border corners */
-  QColor hover_color = getHoverColor();
+  QColor hover_color = getHoverColor(node_num == -1);
   painter->fillRect(rect_x - 1, rect_y - 1, kBORDER_W, kBORDER_W, hover_color);
   painter->fillRect(rect_x + kRECT_W - 1, rect_y - 1,
                     kBORDER_W, kBORDER_W, hover_color);
@@ -538,6 +539,53 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   painter->setPen(hover_color);
   if(node_num >= 0)
     painter->drawText(rect, Qt::AlignCenter, QString::number(node_num));
+  else if(node_num == -1)
+    painter->drawText(rect, Qt::AlignCenter, "H");
+}
+
+/*
+ * Description: Unsets all indexes with moving and selecting. Only occurs on
+ *              any modification to the node structure.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorNPCPath::unsetAllIndexes()
+{
+  unsetIndexMove(false);
+  unsetIndexSelect(false);
+  update();
+}
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: The hover enter event of the item (when the mouse enters the
+ *              defined shape(). This is re-implemented from parent and then
+ *              sets the hover status.
+ *
+ * Inputs: QGraphicsSceneHoverEvent* - not used
+ * Output: none
+ */
+void EditorNPCPath::hoverEnterEvent(QGraphicsSceneHoverEvent*)
+{
+  setHovered(true);
+  emit hoverInit(this);
+}
+
+/*
+ * Description: The hover exit event of the item (when the mouse exits the
+ *              defined shape(). This is re-implemented from parent and then
+ *              sets the hover status.
+ *
+ * Inputs: QGraphicsSceneHoverEvent* - not used
+ * Output: none
+ */
+void EditorNPCPath::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
+{
+  setHovered(false);
 }
 
 /*============================================================================
@@ -575,7 +623,8 @@ bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
 
     /* Push back nodes and update */
     nodes.push_back(new_node);
-    update();
+    unsetAllIndexes();
+    emit pathChanged();
     return true;
   }
   return false;
@@ -620,6 +669,19 @@ QRectF EditorNPCPath::boundingRect() const
         max_y = nodes[i].y;
     }
 
+    /* Modifications for adding hover node, if relevant */
+    if(hover_used)
+    {
+      if(hover_node.x < min_x)
+        min_x = hover_node.x;
+      if(hover_node.y < min_y)
+        min_y = hover_node.y;
+      if(hover_node.x > max_x)
+        max_x = hover_node.x;
+      if(hover_node.y > max_y)
+        max_y = hover_node.y;
+    }
+
     /* Calculate the bounding box */
     int size = EditorHelpers::getTileSize();
     int x = min_x * size;
@@ -630,7 +692,7 @@ QRectF EditorNPCPath::boundingRect() const
     int h = (max_y - min_y) * size;
     if(h == 0)
       h = size;
-    return QRectF(x, y, w + size, h + size);
+    return (QRectF(x, y, w + size, h + size) | hover_rect);
   }
   return QRectF();
 }
@@ -647,7 +709,8 @@ bool EditorNPCPath::deleteNode(int index)
   if(index >= 1 && index < nodes.size())
   {
     nodes.removeAt(index);
-    update();
+    unsetAllIndexes();
+    emit pathChanged();
     return true;
   }
   return false;
@@ -663,7 +726,8 @@ void EditorNPCPath::deleteNodes()
 {
   while(nodes.size() > 1)
     nodes.removeLast();
-  update();
+  unsetAllIndexes();
+  emit pathChanged();
 }
 
 /*
@@ -691,7 +755,8 @@ bool EditorNPCPath::editNode(int index, int x, int y, int delay, bool xy_flip)
     else
       node->xy_flip = xy_flip;
 
-    update();
+    unsetAllIndexes();
+    emit pathChanged();
     return true;
   }
   return false;
@@ -730,6 +795,137 @@ QColor EditorNPCPath::getColorPreset(int index)
 int EditorNPCPath::getColorPresetCount()
 {
   return color_presets.size();
+}
+
+/*
+ * Description: Returns the hover state which indicates where the hovering node
+ *              is in relation to the primary path.
+ *
+ * Inputs: int &index - pass by reference node index
+ *         int hx - the hover x. default invalid and uses internal hover x
+ *         int hy - the hover y. default invalid and uses internal hover y
+ * Output: EditorNPCPath::HoverState - the relevant hover state enum
+ */
+EditorNPCPath::HoverState EditorNPCPath::getHoverState(int &index, int hx,
+                                                       int hy)
+{
+  HoverState hover_state = NO_HOVER;
+
+  if(hover_used)
+  {
+    int x = hover_node.x;
+    int y = hover_node.y;
+    if(hx >= 0 && hy >= 0)
+    {
+      x = hx;
+      y = hy;
+    }
+
+    /* Loop through all nodes */
+    for(int i = 1; (hover_state == NO_HOVER) && (i < nodes.size()); i++)
+    {
+      /* First check if it's on the node */
+      if(nodes[i].x == x && nodes[i].y == y)
+        hover_state = ON_NODE;
+
+      /* Second, check if it's on the path */
+      if(hover_state == NO_HOVER)
+      {
+        int curr_x = nodes[i].x;
+        int curr_y = nodes[i].y;
+        int prev_x = nodes[i-1].x;
+        int prev_y = nodes[i-1].y;
+        int delta_x = curr_x - prev_x;
+        int delta_y = curr_y - prev_y;
+
+        /* Direction parsing, depending on flip */
+        if(nodes[i-1].xy_flip)
+        {
+          /* Check y first */
+          if(delta_y > 0)
+          {
+            if(prev_x == x && (y - prev_y ) > 0 && (y - prev_y) <= delta_y)
+              hover_state = ON_PATH;
+          }
+          else if(delta_y < 0)
+          {
+            if(prev_x == x && (y - prev_y) < 0 && (y - prev_y) >= delta_y)
+              hover_state = ON_PATH;
+          }
+
+          /* Check x next */
+          if(delta_x > 0)
+          {
+            if(y == curr_y && (x - prev_x) > 0 && (x - prev_x) < delta_x)
+              hover_state = ON_PATH;
+          }
+          else if(delta_x < 0)
+          {
+            if(y == curr_y && (x - prev_x) < 0 && (x - prev_x) > delta_x)
+              hover_state = ON_PATH;
+          }
+        }
+        else
+        {
+          /* Check x first */
+          if(delta_x > 0)
+          {
+            if(prev_y == y && (x - prev_x) > 0 && (x - prev_x) <= delta_x)
+              hover_state = ON_PATH;
+          }
+          else if(delta_x < 0)
+          {
+            if(prev_y == y && (x - prev_x) < 0 && (x - prev_x) >= delta_x)
+              hover_state = ON_PATH;
+          }
+
+          /* Check y next */
+          if(delta_y > 0)
+          {
+            if(x == curr_x && (y - prev_y) > 0 && (y - prev_y) < delta_y)
+              hover_state = ON_PATH;
+          }
+          else if(delta_y < 0)
+          {
+            if(x == curr_x && (y - prev_y) < 0 && (y - prev_y) > delta_y)
+              hover_state = ON_PATH;
+          }
+        }
+      }
+
+      /* If the hover state is valid now, set index */
+      if(hover_state != NO_HOVER)
+        index = i;
+    }
+
+    /* If not no hover, set as general hover */
+    if(hover_state == NO_HOVER)
+      hover_state = GENERAL;
+  }
+
+  return hover_state;
+}
+
+/*
+ * Description: Returns the move node index.
+ *
+ * Inputs: none
+ * Output: int - the move node index
+ */
+int EditorNPCPath::getIndexMove()
+{
+  return index_move;
+}
+
+/*
+ * Description: Returns the select node index.
+ *
+ * Inputs: none
+ * Output: int - the select node index
+ */
+int EditorNPCPath::getIndexSelect()
+{
+  return index_select;
 }
 
 /*
@@ -946,7 +1142,8 @@ bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
 
         /* Insert the node */
         nodes.insert(index, new_node);
-        update();
+        unsetAllIndexes();
+        emit pathChanged();
         return true;
       }
 
@@ -997,6 +1194,10 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
   {
     /* Determine the color */
     QColor color(color_r, color_g, color_b, color_a);
+
+    /* Paint the hover node */
+    if(hover_used)
+      paintNode(painter, NULL, &hover_node, NULL, color);
 
     /* Parse all paths */
     for(int i = 0; i < nodes.size(); i++)
@@ -1113,6 +1314,67 @@ void EditorNPCPath::setHovered(bool hovered)
   }
 }
 
+/* Sets the hover node x, y. Default unsets */
+void EditorNPCPath::setHoverNode(int x, int y)
+{
+  if(x >= 0 && y >= 0)
+  {
+    hover_node.x = x;
+    hover_node.y = y;
+    hover_used = true;
+
+    /* Calculate hover rect */
+    int size = EditorHelpers::getTileSize();
+    QRectF new_rect(x * size, y * size, size, size);
+    hover_rect |= new_rect;
+  }
+  else
+  {
+    /* First set it in new bounding box */
+    hover_node.x = 0;
+    hover_node.y = 0;
+    hover_used = false;
+  }
+  update();
+}
+
+/*
+ * Description: Sets the index of the node that is in the process of being
+ *              moved. Renders it more transparent during the move cycle.
+ *
+ * Inputs: int index - the node index being moved
+ * Output: bool - true if the index was in range and was changed
+ */
+bool EditorNPCPath::setIndexMove(int index)
+{
+  if(index >= 0 && index < nodes.size())
+  {
+    index_move = index;
+    update();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the index of the node that is selected (by the menu
+ *              selection for viewing). Renders it brighter while it is
+ *              selected.
+ *
+ * Inputs: int index - the node index being selected
+ * Output: bool - true if the index was in range and was changed
+ */
+bool EditorNPCPath::setIndexSelect(int index)
+{
+  if(index >= 0 && index < nodes.size())
+  {
+    index_select = index;
+    update();
+    return true;
+  }
+  return false;
+}
+
 /*
  * Description: Sets the state of the node set (how the npc parses the nodes)
  *
@@ -1142,7 +1404,7 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
         nodes.removeLast();
     }
 
-    update();
+    unsetAllIndexes();
   }
 }
 
@@ -1192,6 +1454,59 @@ QPainterPath EditorNPCPath::shape() const
     // TODO: FUTURE - FOR LINES??
   }
   return path;
+}
+
+/*
+ * Description: Updates the move index to a new x and y location.
+ *
+ * Inputs: int x - the new x location of the node
+ *         int y - the new y location of the node
+ * Output: bool - true if the index move was successful
+ */
+bool EditorNPCPath::updateIndexMove(int x, int y)
+{
+  bool success = false;
+
+  if(index_move >= 0)
+  {
+    success = editNode(index_move, x, y, -1, nodes[index_move].xy_flip);
+    if(success)
+      unsetIndexMove();
+  }
+
+  return success;
+}
+
+/*
+ * Description: Unsets the move index (either on completion of move or cancel).
+ *
+ * Inputs: bool allow_update - update the QGraphicsItem. Default to true
+ * Output: none
+ */
+void EditorNPCPath::unsetIndexMove(bool allow_update)
+{
+  if(index_move >= 0)
+  {
+    index_move = -1;
+    if(allow_update)
+      update();
+  }
+}
+
+/*
+ * Description: Unsets the select index, once the list is refreshed.
+ *
+ * Inputs: bool allow_update - update the QGraphicsItem. Default to true
+ * Output: none
+ */
+void EditorNPCPath::unsetIndexSelect(bool allow_update)
+{
+  if(index_select >= 0)
+  {
+    index_select = -1;
+    if(allow_update)
+      update();
+  }
 }
 
 /*============================================================================

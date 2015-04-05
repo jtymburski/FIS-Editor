@@ -153,6 +153,9 @@ public:
   void updateListSubmaps(QVector<QString> list);
   void updateListThings(QVector<QString> list);
 
+  /* Update path finished */
+  void updatePathFinished();
+
   /* Update the selected tile for the npc */
   void updateSelectedTile(int id, int x, int y);
 };

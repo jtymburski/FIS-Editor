@@ -41,6 +41,10 @@ private:
   EditorEnumDb::MapObjectMode mode_for_data;
   EditorEnumDb::MapObjectMode mode_for_tile;
 
+  /* Working path control variables */
+  QListWidget* path_list;
+  EditorNPCPath* path_working;
+
   /* The Views */
   MapNPCView* view_npc;
   MapPersonView* view_person;
@@ -79,8 +83,11 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Signals map rendering view to ensure the following rect is visible */
+  void ensureVisible(QRect rect);
+
   /* Path edit start/stop signal */
-  void pathEditTrigger(bool toggle); // TODO
+  void pathEditTrigger(EditorNPCPath* path); // TODO
 
   /* Select tile trigger to map render */
   void selectTile();
@@ -117,6 +124,9 @@ public slots:
   /* Updated data from higher up in the stack */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+
+  /* Updates the path nodes in the list widget */
+  void updatePathNodes();
 
   /* Updates based on selected index */
   void updateSelected(int index);

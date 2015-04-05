@@ -658,6 +658,7 @@ void InstanceDialog::updatePathFinished()
   if(waiting_path)
   {
     waiting_path = false;
+    updateNodes();
     show();
   }
 }

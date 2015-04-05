@@ -12,6 +12,7 @@ MapDatabase::MapDatabase(QWidget *parent) : QStackedWidget(parent)
   editing_map = NULL;
   mode_for_data = EditorEnumDb::RAW_VIEW;
   mode_for_tile = EditorEnumDb::RAW_VIEW;
+  path_working = NULL;
   widget_mode = EditorEnumDb::NORMAL_EDIT;
 
   /* Set-up widgets */
@@ -67,14 +68,20 @@ void MapDatabase::setupMain()
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
+  connect(view_thing, SIGNAL(ensureVisible(QRect)),
+          this, SIGNAL(ensureVisible(QRect)));
   connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_person, SIGNAL(ensureVisible(QRect)),
+          this, SIGNAL(ensureVisible(QRect)));
   connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_npc, SIGNAL(ensureVisible(QRect)),
+          this, SIGNAL(ensureVisible(QRect)));
   connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_npc, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -114,13 +121,20 @@ void MapDatabase::setupPathEdit()
 {
   widget_path = new QWidget(this);
 
+  /* Title label */
+  QLabel* lbl_title = new QLabel("NPC Path Edit", widget_path);
+  QFont font = lbl_title->font();
+  font.setBold(true);
+  font.setPointSize(9);
+  lbl_title->setFont(font);
+
   /* Node viewer and editor */
-  QListWidget* node_list = new QListWidget(widget_path);
-  connect(node_list, SIGNAL(currentRowChanged(int)),
+  path_list = new QListWidget(widget_path);
+  connect(path_list, SIGNAL(currentRowChanged(int)),
           this, SLOT(pathChanged(int)));
-  connect(node_list, SIGNAL(customContextMenuRequested(QPoint)),
+  connect(path_list, SIGNAL(customContextMenuRequested(QPoint)),
           this, SLOT(pathClickRight(QPoint)));
-  connect(node_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+  connect(path_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
           this, SLOT(pathClickDouble(QListWidgetItem*)));
 
   /* Button finish */
@@ -130,7 +144,8 @@ void MapDatabase::setupPathEdit()
 
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(widget_path);
-  layout->addWidget(node_list);
+  layout->addWidget(lbl_title, 0, Qt::AlignHCenter);
+  layout->addWidget(path_list);
   layout->addWidget(button_path, 0, Qt::AlignHCenter);
 }
 
@@ -263,7 +278,8 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
 /* Path chosen changed */
 void MapDatabase::pathChanged(int current_row)
 {
-  // TODO
+  if(path_working != NULL)
+    path_working->setIndexSelect(current_row);
 }
 
 /* Click control for path edit view */
@@ -281,14 +297,34 @@ void MapDatabase::pathClickRight(const QPoint & pos)
 /* Path edit start. Connected to views below */
 void MapDatabase::pathEditStart(EditorNPCPath* path)
 {
-  qDebug() << "PATH EDIT START: " << path;
-  // TODO
+  if(path_working == NULL && path != NULL)
+  {
+    /* Set the widget mode and update node view */
+    setWidgetMode(EditorEnumDb::PATH_EDIT);
+    path_working = path;
+    updatePathNodes();
+    emit pathEditTrigger(path);
+
+    /* Signals */
+    connect(path_working, SIGNAL(pathChanged()), this, SLOT(updatePathNodes()));
+
+    // TODO
+  }
 }
 
 /* Click control for path edit view */
 void MapDatabase::pathFinished()
 {
-  // TODO
+  if(path_working != NULL)
+  {
+    /* Restore the widget mode */
+    setWidgetMode(EditorEnumDb::NORMAL_EDIT);
+    view_npc->updatePathFinished();
+
+    /* Restore and disconnect map view */
+    path_working = NULL;
+    emit pathEditTrigger(NULL);
+  }
 }
 
 /* Select a tile trigger - to the map render */
@@ -350,6 +386,18 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
   {
     view_npc->updateListMaps(maps);
   }
+}
+
+/* Updates the path nodes in the list widget */
+// TODO: Comment
+void MapDatabase::updatePathNodes()
+{
+  /* Clear the existing list */
+  path_list->clear();
+
+  /* Fill the new list */
+  for(int i = 0; i < path_working->getNodes().size(); i++)
+    path_list->addItem(path_working->getNodeStr(i));
 }
 
 /* Updates based on selected index */

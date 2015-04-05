@@ -62,11 +62,7 @@ void MapView::setupLeftBar()
           map_database, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           map_database, SLOT(updatedMaps(QVector<QString>)));
-  connect(map_database->getThingView(), SIGNAL(ensureVisible(QRect)),
-          this, SLOT(ensureVisible(QRect)));
-  connect(map_database->getPersonView(), SIGNAL(ensureVisible(QRect)),
-          this, SLOT(ensureVisible(QRect)));
-  connect(map_database->getNPCView(), SIGNAL(ensureVisible(QRect)),
+  connect(map_database, SIGNAL(ensureVisible(QRect)),
           this, SLOT(ensureVisible(QRect)));
 
   /* Sets up the dock which contains the sprites and images tabs */
@@ -109,6 +105,8 @@ void MapView::setupMapView()//int x, int y)
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
           map_database, SLOT(sendSelectedTile(int,int,int)));
   connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
+  connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
+          map_render, SLOT(pathEditTrigger(EditorNPCPath*)));
 }
 
 /*

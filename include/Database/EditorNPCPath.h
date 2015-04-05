@@ -11,7 +11,7 @@
 #include <QGraphicsObject>
 #include <QList>
 #include <QPainter>
-#include <QRect>
+#include <QRectF>
 
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
@@ -35,6 +35,9 @@ public:
   enum { Type_PathRender = UserType + 2};
   int type() const { return Type_PathRender; }
 
+  /* Hover area enum to indicate where passed location is */
+  enum HoverState {NO_HOVER, GENERAL, ON_NODE, ON_PATH};
+
 private:
   /* Color of path */
   int color_a;
@@ -44,7 +47,14 @@ private:
   int color_r;
 
   /* Is the path hovered? */
+  Path hover_node;
+  QRectF hover_rect;
+  bool hover_used;
   bool hovered;
+
+  /* Indexes for handle control */
+  int index_move;
+  int index_select;
 
   /* Force interaction when within range? */
   bool interact;
@@ -61,22 +71,19 @@ private:
   /*------------------- Constants -----------------------*/
   const static uint8_t kBORDER_W; /* Border width around lines and rects */
   const static uint8_t kCOLOR_ALPHA; /* Default color alpha */
+  const static float kHOVER_ALPHA; /* The ratio for hover alpha mod */
   const static uint8_t kLINE_W; /* Line width (without border) */
   const static uint8_t kRECT_W; /* Rect width (without border) */
 
 /*============================================================================
- * PROTECTED FUNCTIONS
+ * PRIVATE FUNCTIONS
  *===========================================================================*/
-protected:
+private:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorNPCPath &source);
 
   /* Get hover color */
-  QColor getHoverColor();
-
-  /* Hover control */
-  void hoverEnterEvent(QGraphicsSceneHoverEvent*);
-  void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
+  QColor getHoverColor(bool hover_node = false);
 
   /* Corner paint function */
   void paintCorner(QPainter* painter, int x, int y,
@@ -91,12 +98,26 @@ protected:
   void paintNode(QPainter* painter, Path* prev, Path* curr, Path* next,
                  QColor color, int node_num = -1);
 
+  /* Unsets all indexes modifying the path structure */
+  void unsetAllIndexes();
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+protected:
+  /* Hover control */
+  void hoverEnterEvent(QGraphicsSceneHoverEvent*);
+  void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
+
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
   /* Triggers if the hover event was fired */
   void hoverInit(EditorNPCPath* path);
+
+  /* Triggers if the path was changed */
+  void pathChanged();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -119,6 +140,13 @@ public:
   QColor getColor();
   QColor getColorPreset(int index);
   int getColorPresetCount();
+
+  /* Returns the hover state */
+  HoverState getHoverState(int &index, int hx = -1, int hy = -1);
+
+  /* Gets the index of actions that can be done on the path */
+  int getIndexMove();
+  int getIndexSelect();
 
   /* Returns the path node or node information at the selected index */
   Path* getNode(int index);
@@ -163,6 +191,13 @@ public:
   /* Sets if the path is hovered */
   void setHovered(bool hovered);
 
+  /* Sets the hover node x, y. Default unsets */
+  void setHoverNode(int x = -1, int y = -1);
+
+  /* Sets the index of actions that can be done on the path */
+  bool setIndexMove(int index);
+  bool setIndexSelect(int index);
+
   /* Sets the path state */
   void setState(MapNPC::NodeState state);
 
@@ -171,6 +206,13 @@ public:
 
   /* Shape definition function - virtual */
   QPainterPath shape() const;
+
+  /* Update index move */
+  bool updateIndexMove(int x, int y);
+
+  /* Unsets index of actions on the path */
+  void unsetIndexMove(bool allow_update = true);
+  void unsetIndexSelect(bool allow_update = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

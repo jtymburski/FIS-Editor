@@ -47,11 +47,22 @@ private:
   /* The rendering map */
   //SubMapInfo* map; // TODO: REMOVE??
 
+  /* The editing path */
+  EditorNPCPath* path_edit;
+
   /* In tile select mode */
   bool tile_select;
 
   /*------------------- Constants -----------------------*/
   //const static int kELEMENT_DATA;     /* Element data type for sprite */
+
+/*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Path click manipulation - for editing paths */
+  void pathClickLeft(int x, int y);
+  void pathClickRight(int x, int y);
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -82,6 +93,9 @@ public slots:
   /* NPC Path Add/Remove control */
   void npcPathAdd(EditorNPCPath* path);
   void npcPathRemove(EditorNPCPath* path);
+
+  /* Path edit trigger */
+  void pathEditTrigger(EditorNPCPath* path);
 
   /* Select a tile trigger */
   void selectTile();

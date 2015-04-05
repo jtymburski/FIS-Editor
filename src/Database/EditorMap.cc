@@ -1170,6 +1170,11 @@ void EditorMap::clickTrigger(bool single, bool right_click)
           new_npc->getPath()->appendNode(new_npc->getX()+10, new_npc->getY()+5,
                                          50, true);
           new_npc->getPath()->appendNode(new_npc->getX()+1, new_npc->getY()+4);
+          //new_npc->getPath()->setIndexSelect(0);
+          //new_npc->getPath()->setIndexMove(2);
+          //new_npc->getPath()->updateIndexMove(new_npc->getX()+10,
+          //                                    new_npc->getY()+20);
+          //new_npc->getPath()->setHoverNode(1, 1);
         }
       }
       else if(cursor == EditorEnumDb::ERASER)
@@ -3056,6 +3061,21 @@ int EditorMap::setNPC(EditorMapNPC* npc, int sub_map)
 }
 
 /*
+ * Description: Sets if the paths are enabled (and displayed on the screen).
+ *              This is used as an over-ride for visibility, when the paths are
+ *              to be disabled regardless of visibility status.
+ *
+ * Inputs: bool enabled - paths enabled??
+ * Output: none
+ */
+void EditorMap::setPathsEnabled(bool enabled)
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+      sub_maps[i]->npcs[j]->getPath()->setEnabled(enabled);
+}
+
+/*
  * Description: Sets the person in the set within the editor map. If a person,
  *              already exists with the ID, it deletes the existing one.
  *
@@ -3383,7 +3403,7 @@ void EditorMap::setVisibilityPaths(bool visible)
 
     for(int i = 0; i < sub_maps.size(); i++)
       for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
-        sub_maps[i]->npcs[j]->getPath()->setEnabled(visible);
+        sub_maps[i]->npcs[j]->getPath()->setVisible(visible);
   }
 }
 

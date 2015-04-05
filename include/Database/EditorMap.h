@@ -150,8 +150,8 @@ signals:
   void npcInstanceChanged();
 
   /* Path mods to the map */
-  void npcPathAdd(EditorNPCPath* path); // TODO
-  void npcPathRemove(EditorNPCPath* path); // TODO
+  void npcPathAdd(EditorNPCPath* path);
+  void npcPathRemove(EditorNPCPath* path);
 
   /* Person instant changed */
   void personInstanceChanged();
@@ -287,6 +287,9 @@ public:
 
   /* Sets a npc in the map */
   int setNPC(EditorMapNPC* npc, int sub_map = -1);
+
+  /* Set paths enabled - higher over-ride then visibility */
+  void setPathsEnabled(bool enabled);
 
   /* Sets a person in the map */
   int setPerson(EditorMapPerson* person, int sub_map = -1);

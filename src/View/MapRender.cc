@@ -25,6 +25,7 @@ MapRender::MapRender(QWidget* parent)
 {
   /* Data init */
   editing_map = NULL;
+  path_edit = NULL;
   tile_select = false;
 
   /* Sets the background to be black */
@@ -38,6 +39,50 @@ MapRender::~MapRender()
 {
   /* Clear out the rendering map */
   setMapEditor(NULL);
+}
+
+/*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+
+/* Path click manipulation - for editing paths */
+void MapRender::pathClickLeft(int x, int y)
+{
+  int index = 0;
+  EditorNPCPath::HoverState state = path_edit->getHoverState(index, x, y);
+  if(path_edit->getIndexMove() >= 1)
+  {
+    if(state == EditorNPCPath::ON_PATH || state == EditorNPCPath::GENERAL)
+      path_edit->updateIndexMove(x, y);
+  }
+  else if(state == EditorNPCPath::ON_NODE)
+  {
+    path_edit->setIndexMove(index);
+  }
+  else if(state == EditorNPCPath::ON_PATH)
+  {
+    path_edit->insertNodeBefore(index, x, y);
+  }
+  else if(state == EditorNPCPath::GENERAL)
+  {
+    path_edit->appendNode(x, y);
+  }
+}
+
+/* Path click manipulation - for editing paths */
+// TODO: Comment
+void MapRender::pathClickRight(int x, int y)
+{
+  QList<Path> list = path_edit->getNodes();
+  bool success = false;
+  for(int i = 1; !success && (i < list.size()); i++)
+  {
+    if(list[i].x == x && list[i].y == y)
+    {
+      path_edit->deleteNode(i);
+      success = true;
+    }
+  }
 }
 
 /*============================================================================
@@ -77,6 +122,10 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
       {
         editing_map->setHoverTile(NULL);
         active_tile = NULL;
+
+        /* Remove hover trigger to path edit */
+        if(path_edit != NULL)
+          path_edit->setHoverNode();
       }
     }
 
@@ -90,6 +139,10 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         editing_map->setHoverTile(active_tile);
         new_hover = true;
         emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
+
+        /* New hover trigger to path edit */
+        if(path_edit != NULL)
+          path_edit->setHoverNode(active_tile->getX(), active_tile->getY());
       }
       else
       {
@@ -98,8 +151,8 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
 
     /* If a new hover tile, execute the click */
-    if(new_hover && (event->buttons() & Qt::LeftButton ||
-                     event->buttons() & Qt::RightButton) &&
+    if(new_hover && path_edit == NULL && (event->buttons() & Qt::LeftButton ||
+                                          event->buttons() & Qt::RightButton) &&
        editing_map->getHoverInfo()->active_cursor != EditorEnumDb::BLOCKPLACE)
     {
       editing_map->clickTrigger(false, event->buttons() & Qt::RightButton);
@@ -127,6 +180,16 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             editing_map->getHoverInfo()->hover_tile->getX(),
                             editing_map->getHoverInfo()->hover_tile->getY());
       tile_select = false;
+    }
+    else if(path_edit != NULL)
+    {
+      int hover_x = editing_map->getHoverInfo()->hover_tile->getX();
+      int hover_y = editing_map->getHoverInfo()->hover_tile->getY();
+
+      if(event->button() == Qt::LeftButton)
+        pathClickLeft(hover_x, hover_y);
+      else if(event->button() == Qt::RightButton)
+        pathClickRight(hover_x, hover_y);
     }
     else if(event->button() == Qt::LeftButton)
     {
@@ -194,6 +257,28 @@ void MapRender::npcPathAdd(EditorNPCPath* path)
 void MapRender::npcPathRemove(EditorNPCPath* path)
 {
   removeItem(path);
+}
+
+/* Path edit trigger */
+void MapRender::pathEditTrigger(EditorNPCPath* path)
+{
+  if(editing_map != NULL)
+  {
+    /* Start the path edit */
+    if(path_edit == NULL && path != NULL)
+    {
+      path_edit = path;
+      addItem(path_edit);
+      editing_map->setPathsEnabled(false);
+    }
+    /* Stop the path edit */
+    else if(path_edit != NULL && path == NULL)
+    {
+      removeItem(path_edit);
+      path_edit = NULL;
+      editing_map->setPathsEnabled(true);
+    }
+  }
 }
 
 /* Select a tile trigger */

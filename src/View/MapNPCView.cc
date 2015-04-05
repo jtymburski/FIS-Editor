@@ -625,6 +625,20 @@ void MapNPCView::updateListThings(QVector<QString> list)
 }
 
 /*
+ * Description: Updates the instance dialog and notifies that the path
+ *              edit has been completed. Triggered on the finish button inside
+ *              the view in the MapDatabase.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapNPCView::updatePathFinished()
+{
+  if(instance_dialog != NULL)
+    instance_dialog->updatePathFinished();
+}
+
+/*
  * Description: Updates the event embedded in the person dialog with the
  *              selected tile. Used for event creation. Called by parent.
  *
