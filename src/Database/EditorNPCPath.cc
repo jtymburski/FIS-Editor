@@ -105,6 +105,8 @@ EditorNPCPath::~EditorNPCPath()
  */
 void EditorNPCPath::copySelf(const EditorNPCPath &source)
 {
+  prepareGeometryChange();
+
   color_r = source.color_r;
   color_g = source.color_g;
   color_b = source.color_b;
@@ -607,6 +609,8 @@ bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
   if(x >= 0 && y >= 0 && delay >= 0 && (state == MapNPC::LOOPED ||
      state == MapNPC::BACKANDFORTH || state == MapNPC::RANDOMRANGE))
   {
+    prepareGeometryChange();
+
     Path new_node;
     new_node.x = x;
     new_node.y = y;
@@ -692,7 +696,7 @@ QRectF EditorNPCPath::boundingRect() const
     int h = (max_y - min_y) * size;
     if(h == 0)
       h = size;
-    return (QRectF(x, y, w + size, h + size) | hover_rect);
+    return QRectF(x, y, w + size, h + size);
   }
   return QRectF();
 }
@@ -708,7 +712,10 @@ bool EditorNPCPath::deleteNode(int index)
 {
   if(index >= 1 && index < nodes.size())
   {
+    prepareGeometryChange();
+
     nodes.removeAt(index);
+
     unsetAllIndexes();
     emit pathChanged();
     return true;
@@ -724,8 +731,11 @@ bool EditorNPCPath::deleteNode(int index)
  */
 void EditorNPCPath::deleteNodes()
 {
+  prepareGeometryChange();
+
   while(nodes.size() > 1)
     nodes.removeLast();
+
   unsetAllIndexes();
   emit pathChanged();
 }
@@ -746,6 +756,8 @@ bool EditorNPCPath::editNode(int index, int x, int y, int delay, bool xy_flip)
   Path* node = getNode(index);
   if(node != NULL && x >= 0 && y >= 0)
   {
+    prepareGeometryChange();
+
     node->x = x;
     node->y = y;
     if(delay >= 0)
@@ -1134,6 +1146,8 @@ bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
     {
       if(x >= 0 && y >= 0 && delay >= 0)
       {
+        prepareGeometryChange();
+
         Path new_node;
         new_node.x = x;
         new_node.y = y;
@@ -1317,16 +1331,13 @@ void EditorNPCPath::setHovered(bool hovered)
 /* Sets the hover node x, y. Default unsets */
 void EditorNPCPath::setHoverNode(int x, int y)
 {
+  prepareGeometryChange();
+
   if(x >= 0 && y >= 0)
   {
     hover_node.x = x;
     hover_node.y = y;
     hover_used = true;
-
-    /* Calculate hover rect */
-    int size = EditorHelpers::getTileSize();
-    QRectF new_rect(x * size, y * size, size, size);
-    hover_rect |= new_rect;
   }
   else
   {
@@ -1335,6 +1346,7 @@ void EditorNPCPath::setHoverNode(int x, int y)
     hover_node.y = 0;
     hover_used = false;
   }
+
   update();
 }
 
@@ -1386,6 +1398,7 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
   if(this->state != state)
   {
     this->state = state;
+    prepareGeometryChange();
 
     /* Update the node count depending on the state change */
     if(state == MapNPC::RANDOMRANGE)

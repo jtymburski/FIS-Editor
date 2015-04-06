@@ -29,7 +29,7 @@ public:
   EditorNPCPath(const EditorNPCPath &source);
 
   /* Destructor Function */
-  ~EditorNPCPath();
+  virtual ~EditorNPCPath();
 
   /* Control functions */
   enum { Type_PathRender = UserType + 2};
@@ -48,7 +48,6 @@ private:
 
   /* Is the path hovered? */
   Path hover_node;
-  QRectF hover_rect;
   bool hover_used;
   bool hovered;
 

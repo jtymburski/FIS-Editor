@@ -95,7 +95,11 @@ bool MapRender::event(QEvent *event)
 {
   /* If leaving the widget, nullify the hover event */
   if(event->type() == QEvent::Leave && editing_map != NULL)
+  {
     editing_map->setHoverTile(NULL);
+    if(path_edit != NULL)
+      path_edit->setHoverNode();
+  }
 
   return QGraphicsScene::event(event);
 }

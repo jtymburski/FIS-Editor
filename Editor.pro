@@ -6,7 +6,7 @@
 TARGET = UnivursaEditor
 TEMPLATE = app
 
-CONFIG += qt console
+CONFIG += qt console static
 
 unix {
   LIBS += -lGLU

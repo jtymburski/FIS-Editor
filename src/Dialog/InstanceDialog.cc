@@ -502,6 +502,13 @@ void InstanceDialog::comboAlgorithmChange(int index)
     else if(index == 4)
       npc->getPath()->setState(MapNPC::RANDOM);
 
+    /* Disable edit button if relevant */
+    if(npc->getPath()->getState() == MapNPC::LOCKED ||
+       npc->getPath()->getState() == MapNPC::RANDOM)
+      btn_edit_nodes->setEnabled(false);
+    else
+      btn_edit_nodes->setEnabled(true);
+
     /* Update nodes */
     updateNodes();
   }
