@@ -76,8 +76,8 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Signals map rendering view to ensure the following rect is visible */
-  void ensureVisible(QRect rect);
+  /* Signals map rendering view to ensure the following item is visible */
+  void ensureVisible(QGraphicsItem* item);
 
   /* Triggers the update the data of objects for use in events */
   void fillWithData(EditorEnumDb::MapObjectMode view);

@@ -72,6 +72,10 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   hover_node.x = 0;
   hover_node.y = 0;
   hover_used = false;
+
+  /* Clear the move node */
+  move_node.x = 0;
+  move_node.y = 0;
 }
 
 /*
@@ -554,7 +558,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
  */
 void EditorNPCPath::unsetAllIndexes()
 {
-  unsetIndexMove(false);
+  unsetIndexMove(true, false);
   unsetIndexSelect(false);
   update();
 }
@@ -1157,6 +1161,7 @@ bool EditorNPCPath::insertNodeBefore(int index, int x, int y,
         /* Insert the node */
         nodes.insert(index, new_node);
         unsetAllIndexes();
+
         emit pathChanged();
         return true;
       }
@@ -1210,7 +1215,7 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
     QColor color(color_r, color_g, color_b, color_a);
 
     /* Paint the hover node */
-    if(hover_used)
+    if(hover_used && index_move < 0)
       paintNode(painter, NULL, &hover_node, NULL, color);
 
     /* Parse all paths */
@@ -1338,6 +1343,13 @@ void EditorNPCPath::setHoverNode(int x, int y)
     hover_node.x = x;
     hover_node.y = y;
     hover_used = true;
+
+    /* If move cycle, move that node to the new location */
+    if(index_move >= 0)
+    {
+      nodes[index_move].x = x;
+      nodes[index_move].y = y;
+    }
   }
   else
   {
@@ -1359,9 +1371,14 @@ void EditorNPCPath::setHoverNode(int x, int y)
  */
 bool EditorNPCPath::setIndexMove(int index)
 {
-  if(index >= 0 && index < nodes.size())
+  if(index_move < 0 && index > 0 && index < nodes.size())
   {
     index_move = index;
+
+    /* Set move node old location */
+    move_node.x = nodes[index].x;
+    move_node.y = nodes[index].y;
+
     update();
     return true;
   }
@@ -1470,36 +1487,25 @@ QPainterPath EditorNPCPath::shape() const
 }
 
 /*
- * Description: Updates the move index to a new x and y location.
- *
- * Inputs: int x - the new x location of the node
- *         int y - the new y location of the node
- * Output: bool - true if the index move was successful
- */
-bool EditorNPCPath::updateIndexMove(int x, int y)
-{
-  bool success = false;
-
-  if(index_move >= 0)
-  {
-    success = editNode(index_move, x, y, -1, nodes[index_move].xy_flip);
-    if(success)
-      unsetIndexMove();
-  }
-
-  return success;
-}
-
-/*
  * Description: Unsets the move index (either on completion of move or cancel).
  *
- * Inputs: bool allow_update - update the QGraphicsItem. Default to true
+ * Inputs: bool cancel - true to cancel the move. false to use hover location
+ *         bool allow_update - update the QGraphicsItem. Default to true
  * Output: none
  */
-void EditorNPCPath::unsetIndexMove(bool allow_update)
+void EditorNPCPath::unsetIndexMove(bool cancel, bool allow_update)
 {
   if(index_move >= 0)
   {
+    /* If cancel, reset the location */
+    if(cancel)
+    {
+      prepareGeometryChange();
+      nodes[index_move].x = move_node.x;
+      nodes[index_move].y = move_node.y;
+    }
+
+    /* Kick out the old move index */
     index_move = -1;
     if(allow_update)
       update();

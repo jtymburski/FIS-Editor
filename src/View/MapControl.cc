@@ -77,19 +77,19 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   resize_index = 0;
 
   /* Sets up the bottom buttons that interact with the sub-map list */
-  QPushButton* new_submap = new QPushButton("New",this);
+  button_new = new QPushButton("New",this);
   button_delete = new QPushButton("Delete",this);
-  QPushButton* duplicate_submap = new QPushButton("Duplicate",this);
-  QPushButton* import_submap = new QPushButton("Import",this);
+  button_duplicate = new QPushButton("Duplicate",this);
+  button_import = new QPushButton("Import",this);
   QHBoxLayout* button_layout2 = new QHBoxLayout();
-  button_layout2->addWidget(new_submap);
+  button_layout2->addWidget(button_new);
   button_layout2->addWidget(button_delete);
-  button_layout2->addWidget(import_submap);
-  button_layout2->addWidget(duplicate_submap);
-  connect(new_submap, SIGNAL(clicked()), this, SLOT(newSubMap()));
+  button_layout2->addWidget(button_import);
+  button_layout2->addWidget(button_duplicate);
+  connect(button_new, SIGNAL(clicked()), this, SLOT(newSubMap()));
   connect(button_delete, SIGNAL(clicked()), this, SLOT(deleteSubMap()));
-  connect(duplicate_submap, SIGNAL(clicked()), this, SLOT(duplicateSubMap()));
-  connect(import_submap, SIGNAL(clicked()), this, SLOT(importSubMap()));
+  connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateSubMap()));
+  connect(button_import, SIGNAL(clicked()), this, SLOT(importSubMap()));
   main_layout->addLayout(button_layout2);
 }
 
@@ -445,6 +445,20 @@ void MapControl::updateBottomRow(int current_row)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/* Disables control on changing sub for when in editing view with map */
+void MapControl::disableControl(bool disabled)
+{
+  list_bottom->setDisabled(disabled);
+  button_delete->setDisabled(disabled);
+  button_duplicate->setDisabled(disabled);
+  button_import->setDisabled(disabled);
+  button_new->setDisabled(disabled);
+
+  /* Fix bottom row buttons */
+  if(!disabled)
+    updateBottomRow(list_bottom->currentRow());
+}
 
 /* Get the current sub-map */
 SubMapInfo* MapControl::getCurrentMap()

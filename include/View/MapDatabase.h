@@ -42,7 +42,10 @@ private:
   EditorEnumDb::MapObjectMode mode_for_tile;
 
   /* Working path control variables */
+  QAction* path_delete_node;
+  QAction* path_edit_node;
   QListWidget* path_list;
+  QMenu* path_menu;
   EditorNPCPath* path_working;
 
   /* The Views */
@@ -83,11 +86,11 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Signals map rendering view to ensure the following rect is visible */
-  void ensureVisible(QRect rect);
+  /* Signals map rendering view to ensure the following item is visible */
+  void ensureVisible(QGraphicsItem* item);
 
   /* Path edit start/stop signal */
-  void pathEditTrigger(EditorNPCPath* path); // TODO
+  void pathEditTrigger(EditorNPCPath* path);
 
   /* Select tile trigger to map render */
   void selectTile();
@@ -110,10 +113,12 @@ public slots:
 
   /* Path widget control */
   void pathChanged(int current_row);
-  void pathClickDouble(QListWidgetItem* item);
+  void pathClickDouble(QListWidgetItem*);
   void pathClickRight(const QPoint & pos);
   void pathEditStart(EditorNPCPath*);
   void pathFinished();
+  void pathNodeDelete();
+  void pathNodeEdit();
 
   /* Select a tile trigger - to the map render */
   void selectTile(EditorEnumDb::MapObjectMode view);

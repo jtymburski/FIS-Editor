@@ -62,8 +62,10 @@ void MapView::setupLeftBar()
           map_database, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           map_database, SLOT(updatedMaps(QVector<QString>)));
-  connect(map_database, SIGNAL(ensureVisible(QRect)),
-          this, SLOT(ensureVisible(QRect)));
+  connect(map_database, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SLOT(ensureVisible(QGraphicsItem*)));
+  connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
+          this, SLOT(pathEditTrigger(EditorNPCPath*)));
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
@@ -105,8 +107,6 @@ void MapView::setupMapView()//int x, int y)
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
           map_database, SLOT(sendSelectedTile(int,int,int)));
   connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
-  connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
-          map_render, SLOT(pathEditTrigger(EditorNPCPath*)));
 }
 
 /*
@@ -131,16 +131,33 @@ void MapView::setupRightBar()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Ensures the following rect is visible in scene */
-void MapView::ensureVisible(QRect rect)
+/* Ensures the following item is visible in scene */
+void MapView::ensureVisible(QGraphicsItem* item)
 {
   if(map_render_view != NULL)
-  {
-    float factor = kZOOM_STATES[zoom_state] * EditorHelpers::getTileSize();
-    QRectF converted(rect.x() * factor, rect.y() * factor,
-                     rect.width() * factor, rect.height() * factor);
+    map_render_view->ensureVisible(item, 100, 100);
+}
 
-    map_render_view->ensureVisible(converted, 0, 0);
+/* Path edit trigger */
+// TODO: Comment
+void MapView::pathEditTrigger(EditorNPCPath* path)
+{
+  if(map_render != NULL)
+  {
+    map_render->pathEditTrigger(path);
+
+    /* If new path to edit, disable upper control */
+    if(path != NULL)
+    {
+      map_control->disableControl(true);
+      emit disableControl(true);
+    }
+    /* Otherwise, enable upper control */
+    else
+    {
+      map_control->disableControl(false);
+      emit disableControl(false);
+    }
   }
 }
 

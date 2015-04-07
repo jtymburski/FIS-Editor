@@ -53,14 +53,21 @@ public:
   ~Application();
 
 private:
+  /* Actions */
+  QAction* action_export;
+  QAction* action_load;
+  QAction* action_new;
+  QAction* action_play;
+  QAction* action_recent;
+  QAction* action_save;
+  QAction* action_saveas;
+  QAction* action_zoom_in;
+  QAction* action_zoom_out;
+
   /* Brush and Menu Tabs */
   QToolBar* bar_brush;
   QToolBar* bar_map_ctrl;
   QToolBar* bar_menu;
-  QToolBar* bar_view;
-
-  /* Cursor menu */
-  QMenu* cursor_menu;
 
   /* File name - last used save as */
   QString file_name;
@@ -72,17 +79,18 @@ private:
   /* Game View */
   GameView* game_view;
 
+  /* Menus */
+  QMenu* menu_cursor;
+  QMenu* menu_edit;
+
   /* Process execution variable */
   QProcess run_process;
+
   /* View action pointers */
   QAction *viewalllayers_action;
 
   /* The users login name */
   QString username;
-
-  /* Zoom in and zoom out map buttons */
-  QAction* zoom_in_action;
-  QAction* zoom_out_action;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -115,6 +123,9 @@ protected:
  * SLOTS
  *===========================================================================*/
 public slots:
+  /* Disables control for when in editing view with map */
+  void disableControl(bool disabled);
+
   /* Export action */
   void exportTo();
 

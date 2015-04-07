@@ -320,7 +320,13 @@ void MapPersonView::instanceRowChanged(int index)
     int person_id = MapThingView::getInstanceID(
                                        person_instances->currentItem()->text());
     if(editor_map->setHoverPerson(person_id))
-      emit ensureVisible(editor_map->getHoverInfo()->selected_thing);
+    {
+      EditorMapPerson* person = editor_map->getPerson(person_id,
+                                               editor_map->getCurrentMap()->id);
+      if(person != NULL)
+        emit ensureVisible(editor_map->getCurrentMap()->tiles[person->getX()]
+                                                             [person->getY()]);
+    }
   }
 }
 

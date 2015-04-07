@@ -32,6 +32,9 @@ public:
 private:
   /* Bottom delete button */
   QPushButton* button_delete;
+  QPushButton* button_duplicate;
+  QPushButton* button_import;
+  QPushButton* button_new;
 
   /* The editing map */
   EditorMap* editing_map;
@@ -125,6 +128,9 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Disables control on changing sub for when in editing view with map */
+  void disableControl(bool disabled);
+
   /* Get the current sub-map */
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();

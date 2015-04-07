@@ -58,6 +58,9 @@ private:
   /* Force interaction when within range? */
   bool interact;
 
+  /* Old move node, prior to move command */
+  Path move_node;
+
   /* List of path nodes */
   QList<Path> nodes;
 
@@ -206,11 +209,8 @@ public:
   /* Shape definition function - virtual */
   QPainterPath shape() const;
 
-  /* Update index move */
-  bool updateIndexMove(int x, int y);
-
   /* Unsets index of actions on the path */
-  void unsetIndexMove(bool allow_update = true);
+  void unsetIndexMove(bool cancel = false, bool allow_update = true);
   void unsetIndexSelect(bool allow_update = true);
 
 /*============================================================================

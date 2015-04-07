@@ -324,7 +324,13 @@ void MapNPCView::instanceRowChanged(int index)
     int npc_id = MapThingView::getInstanceID(
                                           npc_instances->currentItem()->text());
     if(editor_map->setHoverNPC(npc_id))
-      emit ensureVisible(editor_map->getHoverInfo()->selected_thing);
+    {
+      EditorMapNPC* npc = editor_map->getNPC(npc_id,
+                                             editor_map->getCurrentMap()->id);
+      if(npc != NULL)
+        emit ensureVisible(editor_map->getCurrentMap()->tiles[npc->getX()]
+                                                             [npc->getY()]);
+    }
   }
 }
 

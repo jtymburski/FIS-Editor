@@ -317,9 +317,15 @@ void MapThingView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
-    int thing_index = getInstanceID(thing_instances->currentItem()->text());
-    if(editor_map->setHoverThing(thing_index))
-      emit ensureVisible(editor_map->getHoverInfo()->selected_thing);
+    int thing_id = getInstanceID(thing_instances->currentItem()->text());
+    if(editor_map->setHoverThing(thing_id))
+    {
+      EditorMapThing* thing = editor_map->getThing(thing_id,
+                                              editor_map->getCurrentMap()->id);
+      if(thing != NULL)
+        emit ensureVisible(editor_map->getCurrentMap()->tiles[thing->getX()]
+                                                             [thing->getY()]);
+    }
   }
 }
 

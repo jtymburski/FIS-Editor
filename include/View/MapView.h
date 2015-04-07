@@ -97,6 +97,9 @@ private:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Disables control on high level for when in editing view with map */
+  void disableControl(bool disabled);
+
   /* Passes the editor sprite up */
   void sendUpEditorSprite(EditorSprite* e);
 
@@ -111,8 +114,11 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Ensures the following rect is visible in scene */
-  void ensureVisible(QRect rect);
+  /* Ensures the following item is visible in scene */
+  void ensureVisible(QGraphicsItem* item);
+
+  /* Path edit trigger */
+  void pathEditTrigger(EditorNPCPath* path);
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);

@@ -49,23 +49,21 @@ MapRender::~MapRender()
 void MapRender::pathClickLeft(int x, int y)
 {
   int index = 0;
+
   EditorNPCPath::HoverState state = path_edit->getHoverState(index, x, y);
-  if(path_edit->getIndexMove() >= 1)
-  {
-    if(state == EditorNPCPath::ON_PATH || state == EditorNPCPath::GENERAL)
-      path_edit->updateIndexMove(x, y);
-  }
-  else if(state == EditorNPCPath::ON_NODE)
+  if(state == EditorNPCPath::ON_NODE)
   {
     path_edit->setIndexMove(index);
   }
   else if(state == EditorNPCPath::ON_PATH)
   {
     path_edit->insertNodeBefore(index, x, y);
+    path_edit->setIndexMove(index);
   }
   else if(state == EditorNPCPath::GENERAL)
   {
     path_edit->appendNode(x, y);
+    path_edit->setIndexMove(path_edit->getNodes().size() - 1);
   }
 }
 
@@ -97,8 +95,14 @@ bool MapRender::event(QEvent *event)
   if(event->type() == QEvent::Leave && editing_map != NULL)
   {
     editing_map->setHoverTile(NULL);
+
+    /* Clean up path edit */
     if(path_edit != NULL)
+    {
       path_edit->setHoverNode();
+      if(path_edit->getIndexMove() >= 0)
+        path_edit->unsetIndexMove(true);
+    }
   }
 
   return QGraphicsScene::event(event);
@@ -109,7 +113,8 @@ bool MapRender::event(QEvent *event)
  *              hovering box color changes, and placement while the mouse
  *              button is pressed.)
  *
- * Inputs: Mouse Event
+ * Inputs: QGraphicsSceneMouseEvent* event - the mouse event
+ * Output: none
  */
 void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
@@ -191,9 +196,16 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
       int hover_y = editing_map->getHoverInfo()->hover_tile->getY();
 
       if(event->button() == Qt::LeftButton)
+      {
         pathClickLeft(hover_x, hover_y);
+      }
       else if(event->button() == Qt::RightButton)
-        pathClickRight(hover_x, hover_y);
+      {
+        if(path_edit->getIndexMove() >= 0)
+          path_edit->unsetIndexMove(true);
+        else
+          pathClickRight(hover_x, hover_y);
+      }
     }
     else if(event->button() == Qt::LeftButton)
     {
@@ -228,8 +240,15 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   /* Ensure editing map is valid */
   if(editing_map != NULL && editing_map->getHoverInfo()->hover_tile != NULL)
   {
+    /* If path edit is not null, it takes priority for events */
+    if(path_edit != NULL)
+    {
+      if(path_edit->getIndexMove() >= 0 && event->button() == Qt::LeftButton)
+        path_edit->unsetIndexMove();
+    }
     /* If click release, and block place, proceed */
-    if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
+    else if(editing_map->getHoverInfo()->active_cursor ==
+                                                       EditorEnumDb::BLOCKPLACE)
     {
       if((event->button() == Qt::LeftButton && !block_erase) ||
          (event->button() == Qt::RightButton && block_erase))

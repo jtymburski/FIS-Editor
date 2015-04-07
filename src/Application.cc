@@ -75,6 +75,8 @@ Application::Application(QWidget* parent)
           game_view, SIGNAL(updatedItems(QVector<QString>)));
   connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
+  connect(game_view->getMapView(), SIGNAL(disableControl(bool)),
+          this, SLOT(disableControl(bool)));
 
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
@@ -164,35 +166,35 @@ void Application::saveApp()
 void Application::setupTopMenu()
 {
   /* Sets up the File menu actions */
-  QAction* show_menu_action = new QAction("&Menu", this);
-  show_menu_action->setIcon(QIcon(":/images/icons/32_database.png"));
-  QAction* new_action = new QAction("&New",this);
-  new_action->setIcon(QIcon(":/images/icons/32_new.png"));
-  QAction* load_action = new QAction("&Load",this);
-  load_action->setIcon(QIcon(":/images/icons/32_load.png"));
-  QAction* recentfiles_action = new QAction("&Recent Files",this);
-  QAction* save_action = new QAction("&Save",this);
-  save_action->setIcon(QIcon(":/images/icons/32_save.png"));
-  QAction* saveas_action = new QAction("&Save As",this);
-  saveas_action->setIcon(QIcon(":/images/icons/32_save_as.png"));
-  QAction* export_action = new QAction("&Export to Game", this);
-  export_action->setIcon(QIcon(":/images/icons/32_export.png"));
+  QAction* action_show_menu = new QAction("&Menu", this);
+  action_show_menu->setIcon(QIcon(":/images/icons/32_database.png"));
+  action_new = new QAction("&New",this);
+  action_new->setIcon(QIcon(":/images/icons/32_new.png"));
+  action_load = new QAction("&Load",this);
+  action_load->setIcon(QIcon(":/images/icons/32_load.png"));
+  action_recent = new QAction("&Recent Files",this);
+  action_save = new QAction("&Save",this);
+  action_save->setIcon(QIcon(":/images/icons/32_save.png"));
+  action_saveas = new QAction("&Save As",this);
+  action_saveas->setIcon(QIcon(":/images/icons/32_save_as.png"));
+  action_export = new QAction("&Export to Game", this);
+  action_export->setIcon(QIcon(":/images/icons/32_export.png"));
   QAction* quit_action = new QAction("&Quit",this);
 
   /* Sets up file menu itself */
   QMenu* file_menu = menuBar()->addMenu("&File");
-  file_menu->addAction(new_action);
-  file_menu->addAction(load_action);
-  file_menu->addAction(recentfiles_action);
+  file_menu->addAction(action_new);
+  file_menu->addAction(action_load);
+  file_menu->addAction(action_recent);
   file_menu->addSeparator();
-  file_menu->addAction(save_action);
-  file_menu->addAction(saveas_action);
-  file_menu->addAction(export_action);
+  file_menu->addAction(action_save);
+  file_menu->addAction(action_saveas);
+  file_menu->addAction(action_export);
   file_menu->addSeparator();
   file_menu->addAction(quit_action);
 
   /* Connects File menu actions to slots */
-  connect(show_menu_action, SIGNAL(triggered()), this, SLOT(showDatabase()));
+  connect(action_show_menu, SIGNAL(triggered()), this, SLOT(showDatabase()));
   connect(quit_action,SIGNAL(triggered()), this, SLOT(close()));
 
   /* Sets up Edit menu actions*/
@@ -215,15 +217,15 @@ void Application::setupTopMenu()
   findreplace_action->setDisabled(true);
 
   /* Sets up Edit menu itself */
-  QMenu* edit_menu = menuBar()->addMenu("&Edit");
-  edit_menu->addAction(undo_action);
-  edit_menu->addAction(redo_action);
-  edit_menu->addSeparator();
-  edit_menu->addAction(cut_action);
-  edit_menu->addAction(copy_action);
-  edit_menu->addAction(paste_action);
-  edit_menu->addSeparator();
-  edit_menu->addAction(findreplace_action);
+  menu_edit = menuBar()->addMenu("&Edit");
+  menu_edit->addAction(undo_action);
+  menu_edit->addAction(redo_action);
+  menu_edit->addSeparator();
+  menu_edit->addAction(cut_action);
+  menu_edit->addAction(copy_action);
+  menu_edit->addAction(paste_action);
+  menu_edit->addSeparator();
+  menu_edit->addAction(findreplace_action);
 
   QActionGroup* cursor_group = new QActionGroup(this);
   cursor_group->setExclusive(true);
@@ -256,17 +258,20 @@ void Application::setupTopMenu()
   QAction* pass_west_action = new QAction("&Passability West", cursor_group);
   pass_west_action->setCheckable(true);
   pass_west_action->setIcon(QIcon(":/images/icons/32_passW.png"));
-  cursor_menu = menuBar()->addMenu("&Cursor Modes");
+  menu_cursor = menuBar()->addMenu("&Cursor Modes");
 
   /* Sets up the menu toolbars */
+  QToolBar* db_menu = new QToolBar("Database View", this);
+  db_menu->addAction(action_show_menu);
+  addToolBar(Qt::TopToolBarArea, db_menu);
+  db_menu->setFloatable(false);
+  db_menu->setMovable(false);
   bar_menu = new QToolBar("Menus",this);
-  bar_menu->addAction(show_menu_action);
-  bar_menu->addSeparator();
-  bar_menu->addAction(new_action);
-  bar_menu->addAction(load_action);
-  bar_menu->addAction(save_action);
-  bar_menu->addAction(saveas_action);
-  bar_menu->addAction(export_action);
+  bar_menu->addAction(action_new);
+  bar_menu->addAction(action_load);
+  bar_menu->addAction(action_save);
+  bar_menu->addAction(action_saveas);
+  bar_menu->addAction(action_export);
   bar_menu->addSeparator();
   bar_menu->addAction(undo_action);
   bar_menu->addAction(redo_action);
@@ -276,15 +281,14 @@ void Application::setupTopMenu()
   addToolBar(Qt::TopToolBarArea,bar_menu);
   bar_menu->setFloatable(false);
   bar_menu->setMovable(false);
-  connect(new_action, SIGNAL(triggered()), this, SLOT(newGame()));
-  connect(load_action, SIGNAL(triggered()), this, SLOT(load()));
-  connect(save_action, SIGNAL(triggered()), this, SLOT(save()));
-  connect(saveas_action, SIGNAL(triggered()), this, SLOT(saveAs()));
-  connect(export_action, SIGNAL(triggered()), this, SLOT(exportTo()));
+  connect(action_new, SIGNAL(triggered()), this, SLOT(newGame()));
+  connect(action_load, SIGNAL(triggered()), this, SLOT(load()));
+  connect(action_save, SIGNAL(triggered()), this, SLOT(save()));
+  connect(action_saveas, SIGNAL(triggered()), this, SLOT(saveAs()));
+  connect(action_export, SIGNAL(triggered()), this, SLOT(exportTo()));
 
   /* Sets up the brushes toolbar */
   bar_brush = new QToolBar("Brushes", this);
-  bar_brush->addSeparator();
   bar_brush->addAction(basicmode_action);
   bar_brush->addAction(erasermode_action);
   bar_brush->addAction(blockplacemode_action);
@@ -295,15 +299,15 @@ void Application::setupTopMenu()
   bar_brush->addAction(pass_south_action);
   bar_brush->addAction(pass_west_action);
   addToolBar(Qt::TopToolBarArea,bar_brush);
-  cursor_menu->addAction(basicmode_action);
-  cursor_menu->addAction(erasermode_action);
-  cursor_menu->addAction(blockplacemode_action);
-  cursor_menu->addAction(fill_action);
-  cursor_menu->addAction(pass_all_action);
-  cursor_menu->addAction(pass_north_action);
-  cursor_menu->addAction(pass_east_action);
-  cursor_menu->addAction(pass_south_action);
-  cursor_menu->addAction(pass_west_action);
+  menu_cursor->addAction(basicmode_action);
+  menu_cursor->addAction(erasermode_action);
+  menu_cursor->addAction(blockplacemode_action);
+  menu_cursor->addAction(fill_action);
+  menu_cursor->addAction(pass_all_action);
+  menu_cursor->addAction(pass_north_action);
+  menu_cursor->addAction(pass_east_action);
+  menu_cursor->addAction(pass_south_action);
+  menu_cursor->addAction(pass_west_action);
   bar_brush->setFloatable(false);
   bar_brush->setMovable(false);
   connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setCursorBasic()));
@@ -322,28 +326,46 @@ void Application::setupTopMenu()
           this, SLOT(setPassWestCursor()));
 
   /* Set up the map control bar */
-  zoom_in_action = new QAction("&Zoom In", this);
-  zoom_in_action->setIcon(QIcon(":/images/icons/32_zoom_in.png"));
-  zoom_out_action = new QAction("&Zoom Out", this);
-  zoom_out_action->setIcon(QIcon(":/images/icons/32_zoom_out.png"));
-  QAction* play_action = new QAction("&Test Map", this);
-  play_action->setIcon(QIcon(":/images/icons/32_play.png"));
+  action_zoom_in = new QAction("&Zoom In", this);
+  action_zoom_in->setIcon(QIcon(":/images/icons/32_zoom_in.png"));
+  action_zoom_out = new QAction("&Zoom Out", this);
+  action_zoom_out->setIcon(QIcon(":/images/icons/32_zoom_out.png"));
+  action_play = new QAction("&Test Map", this);
+  action_play->setIcon(QIcon(":/images/icons/32_play.png"));
   bar_map_ctrl = new QToolBar("Map Control", this);
-  bar_map_ctrl->addSeparator();
-  bar_map_ctrl->addAction(zoom_in_action);
-  bar_map_ctrl->addAction(zoom_out_action);
-  bar_map_ctrl->addAction(play_action);
+  bar_map_ctrl->addAction(action_zoom_in);
+  bar_map_ctrl->addAction(action_zoom_out);
+  bar_map_ctrl->addAction(action_play);
   bar_map_ctrl->setFloatable(false);
   bar_map_ctrl->setMovable(false);
   addToolBar(Qt::TopToolBarArea, bar_map_ctrl);
-  connect(zoom_in_action, SIGNAL(triggered()), this, SLOT(zoomInMap()));
-  connect(zoom_out_action, SIGNAL(triggered()), this, SLOT(zoomOutMap()));
-  connect(play_action, SIGNAL(triggered()), this, SLOT(play()));
+  connect(action_zoom_in, SIGNAL(triggered()), this, SLOT(zoomInMap()));
+  connect(action_zoom_out, SIGNAL(triggered()), this, SLOT(zoomOutMap()));
+  connect(action_play, SIGNAL(triggered()), this, SLOT(play()));
 }
 
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
+
+/* Disables control for when in editing view with map */
+void Application::disableControl(bool disabled)
+{
+  game_db_dock->setDisabled(disabled);
+
+  bar_brush->setDisabled(disabled);
+  action_export->setDisabled(disabled);
+  action_load->setDisabled(disabled);
+  action_new->setDisabled(disabled);
+  action_play->setDisabled(disabled);
+  action_recent->setDisabled(disabled);
+  action_save->setDisabled(disabled);
+  action_saveas->setDisabled(disabled);
+  bar_menu->setDisabled(disabled);
+
+  menu_cursor->setDisabled(disabled);
+  menu_edit->setDisabled(disabled);
+}
 
 /* Export action */
 void Application::exportTo()
@@ -629,13 +651,13 @@ void Application::setView(EditorEnumDb::ViewMode v)
   if(v != EditorEnumDb::MAPVIEW)
   {
     bar_brush->setDisabled(true);
-    cursor_menu->setDisabled(true);
+    menu_cursor->setDisabled(true);
     bar_map_ctrl->setDisabled(true);
   }
   else
   {
     bar_brush->setEnabled(true);
-    cursor_menu->setEnabled(true);
+    menu_cursor->setEnabled(true);
     bar_map_ctrl->setEnabled(true);
   }
 }
@@ -689,28 +711,28 @@ void Application::showDatabase()
 /* Zoom in or out in the map */
 void Application::zoomInMap()
 {
-  if(zoom_in_action->isEnabled())
+  if(action_zoom_in->isEnabled())
   {
     /* Zoom out should be enabled if zooming in */
-    zoom_out_action->setEnabled(true);
+    action_zoom_out->setEnabled(true);
 
     /* If zoom in returns true, it's reached the end */
     if(game_view->getMapView()->zoomIn())
-      zoom_in_action->setDisabled(true);
+      action_zoom_in->setDisabled(true);
   }
 }
 
 /* Zoom in or out in the map */
 void Application::zoomOutMap()
 {
-  if(zoom_out_action->isEnabled())
+  if(action_zoom_out->isEnabled())
   {
     /* Zoom in should be enabled if zooming out */
-    zoom_in_action->setEnabled(true);
+    action_zoom_in->setEnabled(true);
 
     /* If zoom in returns true, it's reached the end */
     if(game_view->getMapView()->zoomOut())
-      zoom_out_action->setDisabled(true);
+      action_zoom_out->setDisabled(true);
   }
 }
 

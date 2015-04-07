@@ -68,20 +68,20 @@ void MapDatabase::setupMain()
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
-  connect(view_thing, SIGNAL(ensureVisible(QRect)),
-          this, SIGNAL(ensureVisible(QRect)));
+  connect(view_thing, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
-  connect(view_person, SIGNAL(ensureVisible(QRect)),
-          this, SIGNAL(ensureVisible(QRect)));
+  connect(view_person, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
-  connect(view_npc, SIGNAL(ensureVisible(QRect)),
-          this, SIGNAL(ensureVisible(QRect)));
+  connect(view_npc, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_npc, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -130,12 +130,23 @@ void MapDatabase::setupPathEdit()
 
   /* Node viewer and editor */
   path_list = new QListWidget(widget_path);
+  path_list->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(path_list, SIGNAL(currentRowChanged(int)),
           this, SLOT(pathChanged(int)));
   connect(path_list, SIGNAL(customContextMenuRequested(QPoint)),
           this, SLOT(pathClickRight(QPoint)));
   connect(path_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
           this, SLOT(pathClickDouble(QListWidgetItem*)));
+
+  /* Right click menu control */
+  path_menu = new QMenu("Node Edit", widget_path);
+  path_edit_node = new QAction("Edit", path_menu);
+  connect(path_edit_node, SIGNAL(triggered()), this, SLOT(pathNodeEdit()));
+  path_delete_node = new QAction("Delete", widget_path);
+  connect(path_delete_node, SIGNAL(triggered()), this, SLOT(pathNodeDelete()));
+  path_menu->addAction(path_edit_node);
+  path_menu->addAction(path_delete_node);
+  path_menu->hide();
 
   /* Button finish */
   QPushButton* button_path = new QPushButton("Finished", widget_path);
@@ -278,20 +289,38 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
 /* Path chosen changed */
 void MapDatabase::pathChanged(int current_row)
 {
-  if(path_working != NULL)
+  if(path_working != NULL && editing_map != NULL && current_row >= 0)
+  {
     path_working->setIndexSelect(current_row);
+    emit ensureVisible(editing_map->getCurrentMap()->
+                                    tiles[path_working->getNodeX(current_row)]
+                                         [path_working->getNodeY(current_row)]);
+  }
 }
 
 /* Click control for path edit view */
-void MapDatabase::pathClickDouble(QListWidgetItem* item)
+void MapDatabase::pathClickDouble(QListWidgetItem*)
 {
-  // TODO
+  if(path_working != NULL && (path_working->getState() == MapNPC::LOOPED ||
+                              path_working->getState() == MapNPC::BACKANDFORTH))
+    pathNodeEdit();
 }
 
 /* Click control for path edit view */
 void MapDatabase::pathClickRight(const QPoint & pos)
 {
-  // TODO
+  if(path_working != NULL)
+  {
+    QListWidgetItem* item = path_list->itemAt(pos);
+    if(item != NULL)
+    {
+      /* Disable delete if the node is the root node, then exec */
+      path_delete_node->setEnabled(path_list->row(item) > 0);
+      path_edit_node->setEnabled(path_working->getState() == MapNPC::LOOPED ||
+                              path_working->getState() == MapNPC::BACKANDFORTH);
+      path_menu->exec(QCursor::pos());
+    }
+  }
 }
 
 /* Path edit start. Connected to views below */
@@ -307,8 +336,6 @@ void MapDatabase::pathEditStart(EditorNPCPath* path)
 
     /* Signals */
     connect(path_working, SIGNAL(pathChanged()), this, SLOT(updatePathNodes()));
-
-    // TODO
   }
 }
 
@@ -320,10 +347,44 @@ void MapDatabase::pathFinished()
     /* Restore the widget mode */
     setWidgetMode(EditorEnumDb::NORMAL_EDIT);
     view_npc->updatePathFinished();
+    disconnect(path_working, SIGNAL(pathChanged()),
+               this, SLOT(updatePathNodes()));
 
     /* Restore and disconnect map view */
     path_working = NULL;
     emit pathEditTrigger(NULL);
+  }
+}
+
+/* Delete path node on selection in list */
+void MapDatabase::pathNodeDelete()
+{
+  if(path_working != NULL && path_list->currentItem() != NULL)
+  {
+    int index = path_list->row(path_list->currentItem());
+
+    /* Only proceed if index is greater than 0 - can't delete root node */
+    if(index > 0)
+    {
+      /* Create warning about deleting */
+      QMessageBox msg_box;
+      msg_box.setWindowTitle("Node Delete");
+      msg_box.setText("Deleting path node index " + QString::number(index));
+      msg_box.setInformativeText("Are you sure?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      if(msg_box.exec() == QMessageBox::Yes)
+        path_working->deleteNode(index);
+    }
+  }
+}
+
+/* Path node edit on selection in list */
+void MapDatabase::pathNodeEdit()
+{
+  if(path_working != NULL && (path_working->getState() == MapNPC::LOOPED ||
+                              path_working->getState() == MapNPC::BACKANDFORTH))
+  {
+    qDebug() << "TODO: Edit node";
   }
 }
 
