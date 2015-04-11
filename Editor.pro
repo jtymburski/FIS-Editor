@@ -84,6 +84,7 @@ SOURCES += \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
+    ../Project/src/Game/KeyHandler.cc \
     ../Project/src/Game/Map/MapNPC.cc \
     ../Project/src/Game/Map/MapPerson.cc \
     ../Project/src/Game/Map/MapThing.cc \
@@ -103,6 +104,7 @@ SOURCES += \
     ../Project/src/Game/Player/Signature.cc \
     ../Project/src/Game/Player/Skill.cc \
     ../Project/src/Game/Player/SkillSet.cc
+
 
 HEADERS += \
     include/Application.h \
@@ -163,6 +165,7 @@ HEADERS += \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
+    ../Project/include/Game/KeyHandler.h \
     ../Project/include/Game/Map/MapNPC.h \
     ../Project/include/Game/Map/MapPerson.h \
     ../Project/include/Game/Map/MapThing.h \
@@ -182,6 +185,7 @@ HEADERS += \
     ../Project/include/Game/Player/Signature.h \
     ../Project/include/Game/Player/Skill.h \
     ../Project/include/Game/Player/SkillSet.h
+
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
