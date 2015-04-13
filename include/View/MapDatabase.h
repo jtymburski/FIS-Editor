@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QStackedWidget>
 
+#include "Dialog/NodeDialog.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
 #include "View/MapNPCView.h"
@@ -125,6 +126,9 @@ public slots:
 
   /* Sends the selected tile to the appropriate thing pop-up */
   void sendSelectedTile(int id, int x, int y);
+
+  /* Update all lists */
+  void updateAllLists();
 
   /* Updated data from higher up in the stack */
   void updatedItems(QVector<QString> items);

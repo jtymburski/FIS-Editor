@@ -760,6 +760,82 @@ void EditorMap::recursiveFill(int x, int y, EditorEnumDb::Layer layer,
 }
 
 /*
+ * Description: Resizes the passed in sub map to the designated width and
+ *              height.
+ *
+ * Inputs: SubMapInfo* map - the non-NULL sub map reference
+ *         int width - the new width of the map
+ *         int height - the new height of the map
+ * Output: bool - true if the resize was successful
+ */
+bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
+{
+  /* Remove all things for processing */
+  tilesThingRemove(true);
+  tilesPersonRemove(true);
+  tilesNPCRemove(true);
+
+  /* If smaller, delete tiles on width */
+  if(map->tiles.size() > width)
+  {
+    while(map->tiles.size() > width)
+    {
+      for(int i = 0; i < map->tiles.back().size(); i++)
+        delete map->tiles.back()[i];
+      map->tiles.removeLast();
+    }
+  }
+  /* If larger, add tiles on width */
+  else if(map->tiles.size() < width)
+  {
+    for(int i = map->tiles.size(); i < width; i++)
+    {
+      QVector<EditorTile*> row;
+
+      for(int j = 0; j < map->tiles.front().size(); j++)
+      {
+        row.push_back(new EditorTile(i, j, getTileIcons()));
+        row.last()->setHoverInfo(getHoverInfo());
+      }
+
+      map->tiles.push_back(row);
+    }
+  }
+
+  /* If smaller, delete tiles on height */
+  if(map->tiles.front().size() > height)
+  {
+    while(map->tiles.front().size() > height)
+    {
+      for(int i = 0; i < map->tiles.size(); i++)
+      {
+        delete map->tiles[i].back();
+        map->tiles[i].removeLast();
+      }
+    }
+  }
+  /* If larger, add tiles on height */
+  else if(map->tiles.front().size() < height)
+  {
+    for(int i = 0; i < map->tiles.size(); i++)
+    {
+      for(int j = map->tiles[i].size(); j < height; j++)
+      {
+        map->tiles[i].push_back(new EditorTile(i, j, getTileIcons()));
+        map->tiles[i].last()->setHoverInfo(getHoverInfo());
+      }
+    }
+  }
+
+  /* Add all things back for processing */
+  tilesThingAdd(true);
+  tilesPersonAdd(true);
+  tilesNPCAdd(true);
+
+  return true;
+}
+
+/*
  * Description: Saves the sub map pointer passed in to the file handler. If
  *              game only, some parts are skipped. If first, it makes the
  *              sub-map a main.
@@ -1163,19 +1239,6 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         /* Attempt to place - if failed, delete */
         if(!addNPC(new_npc, NULL, false))
           delete new_npc;
-        /* TODO: TESTING - REMOVE */
-        else
-        {
-          new_npc->getPath()->appendNode(new_npc->getX()-5, new_npc->getY()-5);
-          new_npc->getPath()->appendNode(new_npc->getX()+10, new_npc->getY()+5,
-                                         50, true);
-          new_npc->getPath()->appendNode(new_npc->getX()+1, new_npc->getY()+4);
-          //new_npc->getPath()->setIndexSelect(0);
-          //new_npc->getPath()->setIndexMove(2);
-          //new_npc->getPath()->updateIndexMove(new_npc->getX()+10,
-          //                                    new_npc->getY()+20);
-          //new_npc->getPath()->setHoverNode(1, 1);
-        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
@@ -2509,6 +2572,23 @@ void EditorMap::load(XmlData data, int index)
 }
 
 /*
+ * Description: Resizes the passed in sub map index to the designated width and
+ *              height. Fails if the index of the sub-map does not exist.
+ *
+ * Inputs: int index - the index of the sub-map in the map set
+ *         int width - the new width of the map
+ *         int height - the new height of the map
+ * Output: bool - true if the resize was successful
+ */
+bool EditorMap::resizeMap(int index, int width, int height)
+{
+  SubMapInfo* map = getMapByIndex(index);
+  if(map != NULL && width > 0 && height > 0)
+    return resizeMap(map, width, height);
+  return false;
+}
+
+/*
  * Description: Saves the map data to the file handling pointer.
  *
  * Inputs: FileHandler* fh - the file handling pointer
@@ -3444,6 +3524,13 @@ void EditorMap::tilesNPCAdd(bool update_all)
           sub_maps[i]->npcs.remove(j);
           j--;
         }
+        else
+        {
+          /* Good NPC - check paths */
+          sub_maps[i]->npcs[j]->getPath()->checkNodes(0, 0,
+                                           active_submap->tiles.size(),
+                                           active_submap->tiles.front().size());
+        }
       }
     }
   }
@@ -3467,6 +3554,13 @@ void EditorMap::tilesNPCAdd(bool update_all)
           active_submap->npcs.remove(i);
           i--;
         }
+        else
+        {
+          /* Good NPC - check paths */
+          active_submap->npcs[i]->getPath()->checkNodes(0, 0,
+                                           active_submap->tiles.size(),
+                                           active_submap->tiles.front().size());
+        }
       }
     }
   }
@@ -3478,28 +3572,51 @@ void EditorMap::tilesNPCAdd(bool update_all)
  *              Just removes the npcs from the tiles but still stored into
  *              memory.
  *
- * Inputs: none
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
  * Output: none
  */
-void EditorMap::tilesNPCRemove()
+void EditorMap::tilesNPCRemove(bool update_all)
 {
-  if(active_submap != NULL)
+  /* Clear selection */
+  setHoverThing(-1);
+
+  /* Update all sub-maps - used for loading */
+  if(update_all)
   {
-    /* Clear selection */
-    setHoverThing(-1);
-
-    for(int i = 0; i < active_submap->npcs.size(); i++)
+    for(int i = 0; i < sub_maps.size(); i++)
     {
-      EditorMapNPC* npc = active_submap->npcs[i];
-      int x = npc->getX();
-      int y = npc->getY();
-      int w = npc->getMatrix()->getWidth();
-      int h = npc->getMatrix()->getHeight();
+      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+      {
+        EditorMapNPC* npc = sub_maps[i]->npcs[j];
+        int x = npc->getX();
+        int y = npc->getY();
+        int w = npc->getMatrix()->getWidth();
+        int h = npc->getMatrix()->getHeight();
 
-      for(int j = 0; j < w; j++)
-        for(int k = 0; k < h; k++)
-          active_submap->tiles[x+j][y+k]->
+        for(int m = 0; m < w; m++)
+          for(int n = 0; n < h; n++)
+            sub_maps[i]->tiles[x+m][y+n]->
+                               unsetNPC(npc->getMatrix()->getRenderDepth(m, n));
+      }
+    }
+  }
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->npcs.size(); i++)
+      {
+        EditorMapNPC* npc = active_submap->npcs[i];
+        int x = npc->getX();
+        int y = npc->getY();
+        int w = npc->getMatrix()->getWidth();
+        int h = npc->getMatrix()->getHeight();
+
+        for(int j = 0; j < w; j++)
+          for(int k = 0; k < h; k++)
+            active_submap->tiles[x+j][y+k]->
                                unsetNPC(npc->getMatrix()->getRenderDepth(j, k));
+      }
     }
   }
 }
@@ -3556,28 +3673,51 @@ void EditorMap::tilesPersonAdd(bool update_all)
  *              Just removes the persons from the tiles but still stored into
  *              memory.
  *
- * Inputs: none
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
  * Output: none
  */
-void EditorMap::tilesPersonRemove()
+void EditorMap::tilesPersonRemove(bool update_all)
 {
-  if(active_submap != NULL)
+  /* Update all sub-maps - used for loading / resizing */
+  if(update_all)
   {
-    /* Clear selection */
-    setHoverThing(-1);
-
-    for(int i = 0; i < active_submap->persons.size(); i++)
+    for(int i = 0; i < sub_maps.size(); i++)
     {
-      EditorMapPerson* person = active_submap->persons[i];
-      int x = person->getX();
-      int y = person->getY();
-      int w = person->getMatrix()->getWidth();
-      int h = person->getMatrix()->getHeight();
+      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+      {
+        EditorMapPerson* person = sub_maps[i]->persons[j];
+        int x = person->getX();
+        int y = person->getY();
+        int w = person->getMatrix()->getWidth();
+        int h = person->getMatrix()->getHeight();
 
-      for(int j = 0; j < w; j++)
-        for(int k = 0; k < h; k++)
-          active_submap->tiles[x+j][y+k]->
+        for(int m = 0; m < w; m++)
+          for(int n = 0; n < h; n++)
+            sub_maps[i]->tiles[x+m][y+n]->
+                         unsetPerson(person->getMatrix()->getRenderDepth(m, n));
+      }
+    }
+  }
+  else
+  {
+    if(active_submap != NULL)
+    {
+      /* Clear selection */
+      setHoverThing(-1);
+
+      for(int i = 0; i < active_submap->persons.size(); i++)
+      {
+        EditorMapPerson* person = active_submap->persons[i];
+        int x = person->getX();
+        int y = person->getY();
+        int w = person->getMatrix()->getWidth();
+        int h = person->getMatrix()->getHeight();
+
+        for(int j = 0; j < w; j++)
+          for(int k = 0; k < h; k++)
+            active_submap->tiles[x+j][y+k]->
                          unsetPerson(person->getMatrix()->getRenderDepth(j, k));
+      }
     }
   }
 }
@@ -3634,28 +3774,51 @@ void EditorMap::tilesThingAdd(bool update_all)
  *              Just removes the things from the tiles but still stored into
  *              memory.
  *
- * Inputs: none
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
  * Output: none
  */
-void EditorMap::tilesThingRemove()
+void EditorMap::tilesThingRemove(bool update_all)
 {
-  if(active_submap != NULL)
+  /* Update all sub-maps - used for loading / resizing */
+  if(update_all)
   {
-    /* Clear selection */
-    setHoverThing(-1);
-
-    for(int i = 0; i < active_submap->things.size(); i++)
+    for(int i = 0; i < sub_maps.size(); i++)
     {
-      EditorMapThing* thing = active_submap->things[i];
-      int x = thing->getX();
-      int y = thing->getY();
-      int w = thing->getMatrix()->getWidth();
-      int h = thing->getMatrix()->getHeight();
+      for(int j = 0; j < sub_maps[i]->things.size(); j++)
+      {
+        EditorMapThing* thing = sub_maps[i]->things[j];
+        int x = thing->getX();
+        int y = thing->getY();
+        int w = thing->getMatrix()->getWidth();
+        int h = thing->getMatrix()->getHeight();
 
-      for(int j = 0; j < w; j++)
-        for(int k = 0; k < h; k++)
-          active_submap->tiles[x+j][y+k]->
+        for(int m = 0; m < w; m++)
+          for(int n = 0; n < h; n++)
+            sub_maps[i]->tiles[x+m][y+n]->
+                           unsetThing(thing->getMatrix()->getRenderDepth(m, n));
+      }
+    }
+  }
+  else
+  {
+    if(active_submap != NULL)
+    {
+      /* Clear selection */
+      setHoverThing(-1);
+
+      for(int i = 0; i < active_submap->things.size(); i++)
+      {
+        EditorMapThing* thing = active_submap->things[i];
+        int x = thing->getX();
+        int y = thing->getY();
+        int w = thing->getMatrix()->getWidth();
+        int h = thing->getMatrix()->getHeight();
+
+        for(int j = 0; j < w; j++)
+          for(int k = 0; k < h; k++)
+            active_submap->tiles[x+j][y+k]->
                            unsetThing(thing->getMatrix()->getRenderDepth(j, k));
+      }
     }
   }
 }

@@ -74,6 +74,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Signal for updating all lists in map database */
+  void updateAllLists();
+
   /* Signal for setting the sub-map in the rendering space */
   void updateMap();
 

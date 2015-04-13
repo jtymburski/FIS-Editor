@@ -384,7 +384,14 @@ void MapDatabase::pathNodeEdit()
   if(path_working != NULL && (path_working->getState() == MapNPC::LOOPED ||
                               path_working->getState() == MapNPC::BACKANDFORTH))
   {
-    qDebug() << "TODO: Edit node";
+    /* Create the dialog and execute */
+    int index = path_list->currentRow();
+    NodeDialog* dialog = new NodeDialog(path_working, index, this);
+    if(dialog->exec() == QDialog::Accepted)
+      path_list->setCurrentRow(index);
+
+    delete dialog;
+    dialog = NULL;
   }
 }
 
@@ -413,6 +420,14 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
   {
     view_npc->updateSelectedTile(id, x, y);
   }
+}
+
+/* Update all lists */
+void MapDatabase::updateAllLists()
+{
+  view_thing->updateList();
+  view_person->updateList();
+  view_npc->updateList();
 }
 
 /* Updated data from higher up in the stack */

@@ -310,73 +310,10 @@ void MapControl::resizeSubMap()
   int height = EditorMap::getDialogHeight(mapsize_dialog);
 
   /* Modify the sub-map information, if changed */
+  editing_map->resizeMap(resize_index, width, height);
   SubMapInfo* info = editing_map->getMapByIndex(resize_index);
   if(info != NULL)
-  {
-    if(list_bottom->currentRow() != 0)
       info->name = name;
-
-    /* Remove all things for processing */
-    editing_map->tilesThingRemove();
-    editing_map->tilesPersonRemove();
-
-    /* If smaller, delete tiles on width */
-    if(info->tiles.size() > width)
-    {
-      while(info->tiles.size() > width)
-      {
-        for(int i = 0; i < info->tiles.back().size(); i++)
-          delete info->tiles.back()[i];
-        info->tiles.removeLast();
-      }
-    }
-    /* If larger, add tiles on width */
-    else if(info->tiles.size() < width)
-    {
-      for(int i = info->tiles.size(); i < width; i++)
-      {
-        QVector<EditorTile*> row;
-
-        for(int j = 0; j < info->tiles.front().size(); j++)
-        {
-          row.push_back(new EditorTile(i, j, editing_map->getTileIcons()));
-          row.last()->setHoverInfo(editing_map->getHoverInfo());
-        }
-
-        info->tiles.push_back(row);
-      }
-    }
-
-    /* If smaller, delete tiles on height */
-    if(info->tiles.front().size() > height)
-    {
-      while(info->tiles.front().size() > height)
-      {
-        for(int i = 0; i < info->tiles.size(); i++)
-        {
-          delete info->tiles[i].back();
-          info->tiles[i].removeLast();
-        }
-      }
-    }
-    /* If larger, add tiles on height */
-    else if(info->tiles.front().size() < height)
-    {
-      for(int i = 0; i < info->tiles.size(); i++)
-      {
-        for(int j = info->tiles[i].size(); j < height; j++)
-        {
-          info->tiles[i].push_back(new EditorTile(
-                                            i, j, editing_map->getTileIcons()));
-          info->tiles[i].last()->setHoverInfo(editing_map->getHoverInfo());
-        }
-      }
-    }
-
-    /* Add all things back for processing */
-    editing_map->tilesThingAdd();
-    editing_map->tilesPersonAdd();
-  }
 
   /* Finally, close the dialog */
   mapsize_dialog->close();
@@ -385,6 +322,7 @@ void MapControl::resizeSubMap()
 
   /* Update list, and view if applicable */
   updateMapList();
+  emit updateAllLists();
   if(info == editing_map->getCurrentMap())
     emit updateMap();
 }

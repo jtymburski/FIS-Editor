@@ -132,6 +132,9 @@ protected:
   void recursiveFill(int x, int y, EditorEnumDb::Layer layer,
                      EditorSprite* target, SubMapInfo* map);
 
+  /* Resizes sub-maps */
+  bool resizeMap(SubMapInfo* map, int width, int height); // TODO
+
   /* Saves the sub-map */
   void saveSubMap(FileHandler* fh, bool game_only,
                   SubMapInfo* map, bool first = false);
@@ -257,6 +260,9 @@ public:
   /* Loads the map */
   void load(XmlData data, int index);
 
+  /* Resizes sub-maps */
+  bool resizeMap(int index, int width, int height);
+
   /* Saves the map */
   void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
 
@@ -315,11 +321,11 @@ public:
 
   /* Thing processing for updating with the new data */
   void tilesNPCAdd(bool update_all = false);
-  void tilesNPCRemove();
+  void tilesNPCRemove(bool update_all = false);
   void tilesPersonAdd(bool update_all = false);
-  void tilesPersonRemove();
+  void tilesPersonRemove(bool update_all = false);
   void tilesThingAdd(bool update_all = false);
-  void tilesThingRemove();
+  void tilesThingRemove(bool update_all = false);
 
   /* Update all tiles */
   void updateAll();

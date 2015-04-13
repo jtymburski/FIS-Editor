@@ -131,6 +131,9 @@ public:
   /* Necessary function for returning the bounding rectangle - virtual */
   QRectF boundingRect() const;
 
+  /* Checks all nodes to see if they are in map range */
+  void checkNodes(int x, int y, int w, int h);
+
   /* Delete nodes from list */
   bool deleteNode(int index);
   void deleteNodes();

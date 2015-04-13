@@ -706,6 +706,29 @@ QRectF EditorNPCPath::boundingRect() const
 }
 
 /*
+ * Description: Checks all nodes with the passed in size of the corresponding
+ *              map. If any node falls outside this range, the node is removed.
+ *              Also, can be used to limit an npc path nodes to a range.
+ *
+ * Inputs: int x - the x start of map, usually 0
+ *         int y - the y start of map, usually 0
+ *         int w - the width of map
+ *         int h - the height of map
+ * Output: none
+ */
+void EditorNPCPath::checkNodes(int x, int y, int w, int h)
+{
+  for(int i = 0; i < nodes.size(); i++)
+  {
+    if(nodes[i].x < x || nodes[i].y < y || nodes[i].x >= w || nodes[i].y >= h)
+    {
+      deleteNode(i);
+      i--;
+    }
+  }
+}
+
+/*
  * Description: Deletes the node at the passed in index. Index is 0 for the
  *              front and then plus from there.
  *

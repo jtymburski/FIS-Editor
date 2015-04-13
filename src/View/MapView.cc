@@ -107,6 +107,8 @@ void MapView::setupMapView()//int x, int y)
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
           map_database, SLOT(sendSelectedTile(int,int,int)));
   connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
+  connect(map_control, SIGNAL(updateAllLists()),
+          map_database, SLOT(updateAllLists()));
 }
 
 /*
