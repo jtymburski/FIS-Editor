@@ -70,6 +70,10 @@ private:
   /* Tracking properties */
   MapNPC::TrackingState tracking;
 
+  /* Visibility control */
+  bool visible_by_control;
+  bool visible_by_edit;
+
   /*------------------- Constants -----------------------*/
   const static uint8_t kBORDER_W; /* Border width around lines and rects */
   const static uint8_t kCOLOR_ALPHA; /* Default color alpha */
@@ -182,6 +186,10 @@ public:
   /* Returns if the path is hovered */
   bool isHovered();
 
+  /* Returns visibility status */
+  bool isVisibleControl();
+  bool isVisibleEdit();
+
   /* Painting function for Path Wrapper - virtual */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem*,
              QWidget*);
@@ -208,6 +216,10 @@ public:
 
   /* Sets the tracking state of the npc on the path */
   void setTracking(MapNPC::TrackingState tracking);
+
+  /* Set visibility control */
+  void setVisibleControl(bool visible);
+  void setVisibleEdit(bool visible);
 
   /* Shape definition function - virtual */
   QPainterPath shape() const;

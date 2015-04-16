@@ -331,6 +331,7 @@ void MapDatabase::pathEditStart(EditorNPCPath* path)
     /* Set the widget mode and update node view */
     setWidgetMode(EditorEnumDb::PATH_EDIT);
     path_working = path;
+    editing_map->setHoverPathMode(true);
     updatePathNodes();
     emit pathEditTrigger(path);
 
@@ -351,6 +352,7 @@ void MapDatabase::pathFinished()
                this, SLOT(updatePathNodes()));
 
     /* Restore and disconnect map view */
+    editing_map->setHoverPathMode(false);
     path_working = NULL;
     emit pathEditTrigger(NULL);
   }

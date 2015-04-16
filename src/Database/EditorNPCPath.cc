@@ -58,6 +58,8 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   interact = false;
   state = MapNPC::LOOPED;
   tracking = MapNPC::NOTRACK;
+  visible_by_control = true;
+  visible_by_edit = true;
 
   /* Set up base node, based on starting point */
   Path base_node;
@@ -646,63 +648,59 @@ bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
  */
 QRectF EditorNPCPath::boundingRect() const
 {
-  if(isEnabled())
+  int min_x = -1;
+  int max_x = -1;
+  int min_y = -1;
+  int max_y = -1;
+
+  /* Find the lowest and highest x nodes */
+  for(int i = 0; i < nodes.size(); i++)
   {
-    int min_x = -1;
-    int max_x = -1;
-    int min_y = -1;
-    int max_y = -1;
+    /* Check min */
+    if(min_x < 0 || nodes[i].x < min_x)
+      min_x = nodes[i].x;
 
-    /* Find the lowest and highest x nodes */
-    for(int i = 0; i < nodes.size(); i++)
-    {
-      /* Check min */
-      if(min_x < 0 || nodes[i].x < min_x)
-        min_x = nodes[i].x;
-
-      /* Check max */
-      if(max_x < 0 || nodes[i].x > max_x)
-        max_x = nodes[i].x;
-    }
-
-    /* Find the lowest and highest y nodes */
-    for(int i = 0; i < nodes.size(); i++)
-    {
-      /* Check min */
-      if(min_y < 0 || nodes[i].y < min_y)
-        min_y = nodes[i].y;
-
-      /* Check max */
-      if(max_y < 0 || nodes[i].y > max_y)
-        max_y = nodes[i].y;
-    }
-
-    /* Modifications for adding hover node, if relevant */
-    if(hover_used)
-    {
-      if(hover_node.x < min_x)
-        min_x = hover_node.x;
-      if(hover_node.y < min_y)
-        min_y = hover_node.y;
-      if(hover_node.x > max_x)
-        max_x = hover_node.x;
-      if(hover_node.y > max_y)
-        max_y = hover_node.y;
-    }
-
-    /* Calculate the bounding box */
-    int size = EditorHelpers::getTileSize();
-    int x = min_x * size;
-    int y = min_y * size;
-    int w = (max_x - min_x) * size;
-    if(w == 0)
-      w = size;
-    int h = (max_y - min_y) * size;
-    if(h == 0)
-      h = size;
-    return QRectF(x, y, w + size, h + size);
+    /* Check max */
+    if(max_x < 0 || nodes[i].x > max_x)
+      max_x = nodes[i].x;
   }
-  return QRectF();
+
+  /* Find the lowest and highest y nodes */
+  for(int i = 0; i < nodes.size(); i++)
+  {
+    /* Check min */
+    if(min_y < 0 || nodes[i].y < min_y)
+      min_y = nodes[i].y;
+
+    /* Check max */
+    if(max_y < 0 || nodes[i].y > max_y)
+      max_y = nodes[i].y;
+  }
+
+  /* Modifications for adding hover node, if relevant */
+  if(hover_used)
+  {
+    if(hover_node.x < min_x)
+      min_x = hover_node.x;
+    if(hover_node.y < min_y)
+      min_y = hover_node.y;
+    if(hover_node.x > max_x)
+      max_x = hover_node.x;
+    if(hover_node.y > max_y)
+      max_y = hover_node.y;
+  }
+
+  /* Calculate the bounding box */
+  int size = EditorHelpers::getTileSize();
+  int x = min_x * size;
+  int y = min_y * size;
+  int w = (max_x - min_x) * size;
+  if(w == 0)
+    w = size;
+  int h = (max_y - min_y) * size;
+  if(h == 0)
+    h = size;
+  return QRectF(x, y, w + size, h + size);
 }
 
 /*
@@ -1222,6 +1220,28 @@ bool EditorNPCPath::isHovered()
 }
 
 /*
+ * Description: Returns if the visibility setting from map control is true.
+ *
+ * Inputs: none
+ * Output: bool - true if visible based on control setting
+ */
+bool EditorNPCPath::isVisibleControl()
+{
+  return visible_by_control;
+}
+
+/*
+ * Description: Returns if the visibility setting from map render edit is true.
+ *
+ * Inputs: none
+ * Output: bool - true if visible based on render edit setting
+ */
+bool EditorNPCPath::isVisibleEdit()
+{
+  return visible_by_edit;
+}
+
+/*
  * Description: Paints the path node set
  *
  * Input: QPainter* painter - the painting engine
@@ -1232,7 +1252,7 @@ bool EditorNPCPath::isHovered()
 void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*, 
                           QWidget*)
 {
-  if(isEnabled())
+  if(isVisible())
   {
     /* Determine the color */
     QColor color(color_r, color_g, color_b, color_a);
@@ -1478,6 +1498,42 @@ void EditorNPCPath::setTracking(MapNPC::TrackingState tracking)
 }
 
 /*
+ * Description: Sets the visibility of the path. Controlled by the MapControl
+ *              view and affects visibility.
+ *
+ * Inputs: bool visible - true if path should be visible
+ * Output: none
+ */
+void EditorNPCPath::setVisibleControl(bool visible)
+{
+  if(visible != visible_by_control)
+  {
+    visible_by_control = visible;
+    setEnabled(visible_by_control && visible_by_edit);
+    setVisible(visible_by_control && visible_by_edit);
+    update();
+  }
+}
+
+/*
+ * Description: Sets the visibility of the path. Controlled by the MapRender
+ *              view and affects visibility.
+ *
+ * Inputs: bool visible - true if path should be visible
+ * Output: none
+ */
+void EditorNPCPath::setVisibleEdit(bool visible)
+{
+  if(visible != visible_by_edit)
+  {
+    visible_by_edit = visible;
+    setEnabled(visible_by_control && visible_by_edit);
+    setVisible(visible_by_control && visible_by_edit);
+    update();
+  }
+}
+
+/*
  * Description: Sets the hover custom shape of the npc path set (which is
  *              different to the more rudimentary boundingBox). Allows for more
  *              fine tooth control of the hover state. Re-implemented virtual
@@ -1489,23 +1545,18 @@ void EditorNPCPath::setTracking(MapNPC::TrackingState tracking)
 QPainterPath EditorNPCPath::shape() const
 {
   QPainterPath path;
+  int size = EditorHelpers::getTileSize();
+  int rect = kRECT_W + kLINE_W * 2;
+  int offset = (size - rect) / 2;
 
-  /* Hover path only valid if path is enabled */
-  if(isEnabled())
+  for(int i = 0; i < nodes.size(); i++)
   {
-    int size = EditorHelpers::getTileSize();
-    int rect = kRECT_W + kLINE_W * 2;
-    int offset = (size - rect) / 2;
-
-    for(int i = 0; i < nodes.size(); i++)
-    {
-      int x = nodes[i].x * size + offset;
-      int y = nodes[i].y * size + offset;
-      path.addRect(x, y, rect, rect);
-    }
-
-    // TODO: FUTURE - FOR LINES??
+    int x = nodes[i].x * size + offset;
+    int y = nodes[i].y * size + offset;
+    path.addRect(x, y, rect, rect);
   }
+
+  // TODO: FUTURE - FOR LINES??
   return path;
 }
 

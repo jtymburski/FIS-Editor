@@ -277,6 +277,7 @@ public:
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
   void setHoverLayer(EditorEnumDb::Layer layer);
   bool setHoverNPC(int id);
+  void setHoverPathMode(bool path_mode);
   bool setHoverPerson(int id);
   bool setHoverThing(int id);
   void setHoverTile(EditorTile* tile);

@@ -1001,7 +1001,7 @@ bool EditorMap::updateHoverThing(bool unset)
       active_info.hover_tile->setHover(true);
     }
     /* Otherwise, it is being added */
-    else
+    else if(!active_info.path_edit_mode)
     {
       /* Check if it would be valid */
       bool invalid = false;
@@ -1065,6 +1065,7 @@ void EditorMap::clearHoverInfo()
 {
   active_info.active_cursor = EditorEnumDb::NO_CURSOR;
   active_info.active_layer = EditorEnumDb::NO_LAYER;
+  active_info.path_edit_mode = false;
 
   active_info.active_npc = NULL;
   active_info.active_person = NULL;
@@ -2842,6 +2843,24 @@ bool EditorMap::setHoverNPC(int id)
 }
 
 /*
+ * Description: Sets if the map is in a hover path edit mode. Used to notify
+ *              the rendering engine on how tiles are displayed on hover.
+ *
+ * Inputs: bool path_mode - true if in path edit mode
+ * Output: none
+ */
+void EditorMap::setHoverPathMode(bool path_mode)
+{
+  /* First, unset hover if relevant */
+  updateHoverThing(true);
+
+  active_info.path_edit_mode = path_mode;
+
+  if(active_info.hover_tile != NULL)
+    active_info.hover_tile->update();
+}
+
+/*
  * Description: Sets the hover person, being flagged when selecting an instance
  *              in the list in MapPersonView.
  *
@@ -3152,7 +3171,7 @@ void EditorMap::setPathsEnabled(bool enabled)
 {
   for(int i = 0; i < sub_maps.size(); i++)
     for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
-      sub_maps[i]->npcs[j]->getPath()->setEnabled(enabled);
+      sub_maps[i]->npcs[j]->getPath()->setVisibleEdit(enabled);
 }
 
 /*
@@ -3483,7 +3502,7 @@ void EditorMap::setVisibilityPaths(bool visible)
 
     for(int i = 0; i < sub_maps.size(); i++)
       for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
-        sub_maps[i]->npcs[j]->getPath()->setVisible(visible);
+        sub_maps[i]->npcs[j]->getPath()->setVisibleControl(visible);
   }
 }
 

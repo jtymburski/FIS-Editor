@@ -31,6 +31,7 @@ struct HoverInfo
 {
   EditorEnumDb::Layer active_layer;
   EditorEnumDb::CursorMode active_cursor;
+  bool path_edit_mode;
 
   EditorMapNPC* active_npc;
   EditorMapPerson* active_person;

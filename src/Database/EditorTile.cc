@@ -147,7 +147,8 @@ bool EditorTile::isHoverNPC()
 {
   if(hover_info->hover_tile != NULL && hover_info->active_npc != NULL &&
      hover_info->active_cursor == EditorEnumDb::BASIC &&
-     hover_info->active_layer == EditorEnumDb::NPC)
+     hover_info->active_layer == EditorEnumDb::NPC &&
+     !hover_info->path_edit_mode)
   {
     return true;
   }
@@ -165,7 +166,8 @@ bool EditorTile::isHoverPerson()
 {
   if(hover_info->hover_tile != NULL && hover_info->active_person != NULL &&
      hover_info->active_cursor == EditorEnumDb::BASIC &&
-     hover_info->active_layer == EditorEnumDb::PERSON)
+     hover_info->active_layer == EditorEnumDb::PERSON &&
+     !hover_info->path_edit_mode)
   {
     return true;
   }
@@ -196,7 +198,8 @@ bool EditorTile::isHoverSprite()
       hover_info->active_layer == EditorEnumDb::UPPER2 ||
       hover_info->active_layer == EditorEnumDb::UPPER3 ||
       hover_info->active_layer == EditorEnumDb::UPPER4 ||
-      hover_info->active_layer == EditorEnumDb::UPPER5))
+      hover_info->active_layer == EditorEnumDb::UPPER5) &&
+     !hover_info->path_edit_mode)
   {
     return true;
   }
@@ -214,7 +217,8 @@ bool EditorTile::isHoverThing()
 {
   if(hover_info->hover_tile != NULL && hover_info->active_thing != NULL &&
      hover_info->active_cursor == EditorEnumDb::BASIC &&
-     hover_info->active_layer == EditorEnumDb::THING)
+     hover_info->active_layer == EditorEnumDb::THING &&
+     !hover_info->path_edit_mode)
   {
     return true;
   }
