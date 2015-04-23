@@ -913,6 +913,10 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
   for(int i = 0; i < map->persons.size(); i++)
     map->persons[i]->save(fh, game_only);
 
+  /* Add npcs */
+  for(int i = 0; i < map->npcs.size(); i++)
+    map->npcs[i]->save(fh, game_only);
+
   /* End element */
   fh->writeXmlElementEnd();
 }
@@ -1683,7 +1687,7 @@ int EditorMap::getNextMapID()
 int EditorMap::getNextNPCID(bool from_sub)
 {
   bool found = false;
-  int id = 0;
+  int id = kBASE_ID_NPC;
 
   /* If not from sub map, check base for base ID */
   if(!from_sub)
@@ -1714,7 +1718,6 @@ int EditorMap::getNextNPCID(bool from_sub)
     qSort(id_list);
 
     /* Find the next available ID */
-    id = kBASE_ID_NPC;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
       if(id_list[i] != (id + i))
@@ -2616,6 +2619,10 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
     /* Add persons */
     for(int i = 0; i < base_persons.size(); i++)
       base_persons[i]->save(fh, game_only);
+
+    /* Add npcs */
+    for(int i = 0; i < base_npcs.size(); i++)
+      base_npcs[i]->save(fh, game_only);
 
     /* Save all maps if sub_index is out of range */
     if(sub_index <= 0 || sub_index >= sub_maps.size())

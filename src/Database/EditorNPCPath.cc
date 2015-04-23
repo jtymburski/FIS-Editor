@@ -1241,6 +1241,13 @@ bool EditorNPCPath::isVisibleEdit()
   return visible_by_edit;
 }
 
+/* Loads the path data */
+// TODO: Comment
+void EditorNPCPath::load(XmlData data, int index)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Paints the path node set
  *
@@ -1295,6 +1302,60 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
 
       /* Paint node rect */
       paintNode(painter, prev, curr, next, color, i);
+    }
+  }
+}
+
+/*
+ * Description: Saves the path data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
+void EditorNPCPath::save(FileHandler* fh, bool game_only)
+{
+  EditorNPCPath default_path;
+  (void)game_only;
+
+  if(fh != NULL)
+  {
+    /* Write the path state */
+    if(default_path.getState() != getState())
+    {
+      std::string element = "nodestate";
+      fh->writeXmlData(element, MapNPC::getNodeString(getState()));
+    }
+
+    /* Write the tracking state */
+    if(default_path.getTracking() != getTracking())
+    {
+      std::string element = "tracking";
+      fh->writeXmlData(element, MapNPC::getTrackingString(getTracking()));
+    }
+
+    /* Write the forced interaction state */
+    if(default_path.isForcedInteraction() != isForcedInteraction())
+      fh->writeXmlData("forcedinteraction", isForcedInteraction());
+
+    /* Write the nodes */
+    for(int i = 0; i < nodes.size(); i++)
+    {
+      fh->writeXmlElement("node", "id", QString::number(i).toStdString());
+
+      /* X and y location */
+      fh->writeXmlData("x", nodes[i].x);
+      fh->writeXmlData("y", nodes[i].y);
+
+      /* Delay */
+      if(nodes[i].delay > 0)
+        fh->writeXmlData("delay", nodes[i].delay);
+
+      /* XY Flip */
+      if(nodes[i].xy_flip)
+        fh->writeXmlData("xyflip", nodes[i].xy_flip);
+
+      fh->writeXmlElementEnd();
     }
   }
 }

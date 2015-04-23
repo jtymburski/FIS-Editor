@@ -15,6 +15,7 @@
 
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
+#include "FileHandler.h"
 #include "Game/Map/MapNPC.h"
 
 /* Editor NPC Path Class */
@@ -190,9 +191,15 @@ public:
   bool isVisibleControl();
   bool isVisibleEdit();
 
+  /* Loads the path data */
+  void load(XmlData data, int index); // TODO
+
   /* Painting function for Path Wrapper - virtual */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem*,
              QWidget*);
+
+  /* Saves the path data */
+  void save(FileHandler* fh, bool game_only = false); // TODO
 
   /* Sets the color of the path */
   bool setColor(int r, int g, int b, int a = kCOLOR_ALPHA);
