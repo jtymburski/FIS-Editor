@@ -8,6 +8,9 @@
 #include "Database/EditorSprite.h"
 #include <QDebug>
 
+/* Constant Implementation - see header file for descriptions */
+const float EditorSprite::kREF_RGB = 255.0;
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -192,35 +195,49 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h)
   /* Modify brightness and color values */
   QImage editing_image = getImage(index);
   QColor old_color;
-  int delta = getBrightness() - 255;
   int r_mod = getColorRed();
   int g_mod = getColorGreen();
   int b_mod = getColorBlue();
   int r,g,b;
 
-  for(int i=0; i < editing_image.width(); i++)
+  for(int i = 0; i < editing_image.width(); i++)
   {
-    for(int j=0; j < editing_image.height(); j++)
+    for(int j = 0; j < editing_image.height(); j++)
     {
-      if(qAlpha(editing_image.pixel(i,j)) > 0)
+      if(qAlpha(editing_image.pixel(i, j)) > 0)
       {
-        /* Modify color first */
-        old_color = QColor(editing_image.pixel(i,j));
-        r = old_color.red() + r_mod - 255;
-        g = old_color.green() + g_mod - 255;
-        b = old_color.blue() + b_mod - 255;
+        old_color = QColor(editing_image.pixel(i, j));
+        r = old_color.red();
+        g = old_color.green();
+        b = old_color.blue();
 
-        /* Then brightness value */
-        r += delta;
-        g += delta;
-        b += delta;
+        /* Brightness value */
+        float delta_mod = (getBrightness() / kREF_RGB);
+        if(delta_mod < 1.0)
+        {
+          r *= delta_mod;
+          g *= delta_mod;
+          b *= delta_mod;
+        }
+        else if(delta_mod > 1.0)
+        {
+          int bright_value = getBrightness() - kREF_RGB;
+          r += bright_value;
+          g += bright_value;
+          b += bright_value;
 
-        /* Bound the values */
-        r = qBound(0,r,255);
-        g = qBound(0,g,255);
-        b = qBound(0,b,255);
+          /* Bound the values */
+          r = qBound(0, r, (int)kREF_RGB);
+          g = qBound(0, g, (int)kREF_RGB);
+          b = qBound(0, b, (int)kREF_RGB);
+        }
 
-        editing_image.setPixel(i,j,qRgb(r,g,b));
+        /* Then, modify the color */
+        r *= (r_mod / kREF_RGB);
+        g *= (g_mod / kREF_RGB);
+        b *= (b_mod / kREF_RGB);
+
+        editing_image.setPixel(i, j, qRgb(r, g, b));
       }
     }
   }
@@ -283,7 +300,7 @@ QString EditorSprite::getAnimationTime()
  */
 int EditorSprite::getBrightness()
 {
-  return sprite->getBrightness()*255.0;
+  return sprite->getBrightness()*kREF_RGB;
 }
 
 /*
@@ -372,7 +389,7 @@ void EditorSprite::setAnimationTime(QString time)
  */
 void EditorSprite::setBrightness(int brightness)
 {
-  sprite->setBrightness(brightness/255.0);
+  sprite->setBrightness(brightness / kREF_RGB);
   emit spriteChanged();
 }
 
@@ -967,7 +984,7 @@ void EditorSprite::load(XmlData data, int index)
   }
   else if(element == "brightness")
   {
-    setBrightness(static_cast<int>(data.getDataFloat() * 255));
+    setBrightness(static_cast<int>(data.getDataFloat() * kREF_RGB));
   }
   else if(element == "color_r")
   {
@@ -1084,7 +1101,7 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
     qreal old_opacity = painter->opacity();
 
     /* Paint pixmap */
-    painter->setOpacity(getOpacity() / 255.0);
+    painter->setOpacity(getOpacity() / kREF_RGB);
     painter->drawPixmap(bound, transformPixmap(index, w, h));
 
     /* Restore values */

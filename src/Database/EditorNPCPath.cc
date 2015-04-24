@@ -1241,11 +1241,86 @@ bool EditorNPCPath::isVisibleEdit()
   return visible_by_edit;
 }
 
-/* Loads the path data */
-// TODO: Comment
+/*
+ * Description: Loads the path data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorNPCPath::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  QString element = QString::fromStdString(data.getElement(index));
+  std::vector<std::string> elements = data.getTailElements(index);
+
+  /* -- INDIVIDUAL NODE ELEMENTS -- */
+  if(element == "node" && elements.size() == 2)
+  {
+    int node_index = std::stoi(data.getKeyValue(index));
+    if(node_index >= 0)
+    {
+      /* Ensure there are enough nodes for the index */
+      while(node_index >= nodes.size())
+        appendNode(0, 0);
+
+      /* Insert element information */
+      /* -- X -- */
+      if(elements.back() == "x")
+      {
+        editNode(node_index, data.getDataInteger(), nodes[node_index].y,
+                 nodes[node_index].delay, nodes[node_index].xy_flip);
+      }
+      /* -- Y -- */
+      else if(elements.back() == "y")
+      {
+        editNode(node_index, nodes[node_index].x, data.getDataInteger(),
+                 nodes[node_index].delay, nodes[node_index].xy_flip);
+      }
+      /* -- DELAY -- */
+      else if(elements.back() == "delay")
+      {
+        editNode(node_index, nodes[node_index].x, nodes[node_index].y,
+                 data.getDataInteger(), nodes[node_index].xy_flip);
+      }
+      /* -- XY FLIP -- */
+      else if(elements.back() == "xyflip")
+      {
+        editNode(node_index, nodes[node_index].x, nodes[node_index].y,
+                 nodes[node_index].delay, data.getDataBool());
+      }
+    }
+  }
+  /* -- NODE STATE -- */
+  else if(element == "nodestate")
+  {
+    QString state = QString::fromStdString(data.getDataString());
+    if(state == "looped")
+      setState(MapNPC::LOOPED);
+    else if(state == "backandforth")
+      setState(MapNPC::BACKANDFORTH);
+    else if(state == "randomrange")
+      setState(MapNPC::RANDOMRANGE);
+    else if(state == "random")
+      setState(MapNPC::RANDOM);
+    else if(state == "locked")
+      setState(MapNPC::LOCKED);
+  }
+  /* -- TRACKING STATE -- */
+  else if(element == "tracking")
+  {
+    QString tracking = QString::fromStdString(data.getDataString());
+    if(tracking == "none")
+      setTracking(MapNPC::NOTRACK);
+    else if(tracking == "toplayer")
+      setTracking(MapNPC::TOPLAYER);
+    else if(tracking == "avoidplayer")
+      setTracking(MapNPC::AVOIDPLAYER);
+  }
+  /* -- FORCED INTERACTION -- */
+  else if(element == "forcedinteraction")
+  {
+    setForcedInteraction(data.getDataBool());
+  }
 }
 
 /*

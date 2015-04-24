@@ -221,15 +221,25 @@ bool SpriteView::deleteSprite()
   /* If valid, proceed deletion */
   if(selected != NULL)
   {
-    int index = editor_sprite_list->currentRow();
-    success = editor_map->unsetSpriteByIndex(index);
-
-    /* If successfull, reset list */
-    if(success)
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting sprite " + selected->getNameList());
+    msg_box.setInformativeText(
+         "This will delete ALL instances of this sprite on map. Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
     {
-      updateList();
-      if(index >= editor_sprite_list->count())
-        editor_sprite_list->setCurrentRow(editor_sprite_list->count() - 1);
+      /* Proceed with deletion */
+      int index = editor_sprite_list->currentRow();
+      success = editor_map->unsetSpriteByIndex(index);
+
+      /* If successfull, reset list */
+      if(success)
+      {
+        updateList();
+        if(index >= editor_sprite_list->count())
+          editor_sprite_list->setCurrentRow(editor_sprite_list->count() - 1);
+      }
     }
   }
 

@@ -446,15 +446,25 @@ bool MapPersonView::deletePerson()
   /* If valid, proceed deletion */
   if(selected != NULL)
   {
-    int index = person_list->currentRow();
-    success = editor_map->unsetPersonByIndex(index);
-
-    /* If successfull, reset list */
-    if(success)
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting base person " + selected->getNameList());
+    msg_box.setInformativeText(
+                  "This will delete ALL instances of this base. Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
     {
-      updateList();
-      if(index >= person_list->count())
-        person_list->setCurrentRow(person_list->count() - 1);
+      /* Proceed with deletion */
+      int index = person_list->currentRow();
+      success = editor_map->unsetPersonByIndex(index);
+
+      /* If successfull, reset list */
+      if(success)
+      {
+        updateList();
+        if(index >= person_list->count())
+          person_list->setCurrentRow(person_list->count() - 1);
+      }
     }
   }
 

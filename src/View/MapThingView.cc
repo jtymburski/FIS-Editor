@@ -446,15 +446,25 @@ bool MapThingView::deleteThing()
   /* If valid, proceed deletion */
   if(selected != NULL)
   {
-    int index = thing_list->currentRow();
-    success = editor_map->unsetThingByIndex(index);
-
-    /* If successfull, reset list */
-    if(success)
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting base thing " + selected->getNameList());
+    msg_box.setInformativeText(
+                  "This will delete ALL instances of this base. Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
     {
-      updateList();
-      if(index >= thing_list->count())
-        thing_list->setCurrentRow(thing_list->count() - 1);
+      /* Proceed with deletion */
+      int index = thing_list->currentRow();
+      success = editor_map->unsetThingByIndex(index);
+
+      /* If successfull, reset list */
+      if(success)
+      {
+        updateList();
+        if(index >= thing_list->count())
+          thing_list->setCurrentRow(thing_list->count() - 1);
+      }
     }
   }
 

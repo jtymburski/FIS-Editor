@@ -57,6 +57,9 @@ private:
   /* Frame information */
   QVector<FrameInfo> frame_info;
 
+  /*------------------- Constants -----------------------*/
+  const static float kREF_RGB; /* The max reference RGB value */
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/

@@ -643,7 +643,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
         map->persons.append(person);
     }
 
-    /* Continue to parse the data in the thing */
+    /* Continue to parse the data in the person */
     QString element = QString::fromStdString(data.getElement(index + 1));
     if(element == "base")
     {
@@ -670,6 +670,66 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     else
     {
       person->load(data, index + 1);
+    }
+  }
+  /* -------------- MAP NPC -------------- */
+  else if(element == "mapnpc")
+  {
+    int npc_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapNPC* npc = getNPC(npc_id, map->id);
+
+    /* Create new npc if it doesn't exist */
+    if(npc == NULL)
+    {
+      npc = new EditorMapNPC(npc_id);
+      npc->setTileIcons(getTileIcons());
+
+      /* Find insertion location */
+      int index = -1;
+      bool near = false;
+      for(int i = 0; !near && (i < map->npcs.size()); i++)
+      {
+        if(map->npcs[i]->getID() > npc->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If near, insert at index. Otherwise, append */
+      if(near)
+        map->npcs.insert(index, npc);
+      else
+        map->npcs.append(npc);
+    }
+
+    /* Continue to parse the data in the npc */
+    QString element = QString::fromStdString(data.getElement(index + 1));
+    if(element == "base")
+    {
+      /* Get name and desc. if it has been changed */
+      EditorMapNPC default_npc;
+      QString default_name = "";
+      QString default_desc = "";
+      if(default_npc.getName() != npc->getName())
+        default_name = npc->getName();
+      if(default_npc.getDescription() != npc->getDescription())
+        default_desc = npc->getDescription();
+
+      /* Set the base */
+      EditorMapNPC* base_npc = getNPC(data.getDataInteger());
+      if(base_npc != NULL)
+      {
+        npc->setBase(base_npc);
+        if(default_name != "")
+          npc->setName(default_name);
+        if(default_desc != "")
+          npc->setDescription(default_desc);
+      }
+    }
+    else
+    {
+      npc->load(data, index + 1);
     }
   }
 }
@@ -2553,6 +2613,22 @@ void EditorMap::load(XmlData data, int index)
     /* Continue to parse the data in the person */
     person->load(data, index + 1);
   }
+  else if(data.getElement(index) == "mapnpc" && data.getKey(index) == "id")
+  {
+    int npc_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapNPC* npc = getNPC(npc_id);
+
+    /* Create new npc if it doesn't exist */
+    if(npc == NULL)
+    {
+      npc = new EditorMapNPC(npc_id);
+      npc->setTileIcons(getTileIcons());
+      setNPC(npc);
+    }
+
+    /* Continue to parse the data in the npc */
+    npc->load(data, index + 1);
+  }
   else if(data.getElement(index) == "main" ||
           (data.getElement(index) == "section" && data.getKey(index) == "id"))
   {
@@ -3554,8 +3630,8 @@ void EditorMap::tilesNPCAdd(bool update_all)
         {
           /* Good NPC - check paths */
           sub_maps[i]->npcs[j]->getPath()->checkNodes(0, 0,
-                                           active_submap->tiles.size(),
-                                           active_submap->tiles.front().size());
+                                           sub_maps[i]->tiles.size(),
+                                           sub_maps[i]->tiles.front().size());
         }
       }
     }
