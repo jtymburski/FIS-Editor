@@ -2995,6 +2995,8 @@ void EditorMap::setHoverTile(EditorTile* tile)
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)
     active_info.hover_tile->update();
+
+  //qDebug() << "SET HOVER TILE: " << tile;
 }
 
 /*

@@ -45,6 +45,55 @@ MapRender::~MapRender()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
+/* Mouse event */
+bool MapRender::mouseEvent(QGraphicsSceneMouseEvent* event)
+{
+  if(editing_map != NULL)
+  {
+    bool new_hover = false;
+    EditorTile* active_tile = editing_map->getHoverInfo()->hover_tile;
+
+    /* Check if left the current tile */
+    if(active_tile != NULL)
+    {
+      QRectF bound = active_tile->boundingRect();
+      if(!bound.contains(event->scenePos()))
+      {
+        editing_map->setHoverTile(NULL);
+        active_tile = NULL;
+
+        /* Remove hover trigger to path edit */
+        if(path_edit != NULL)
+          path_edit->setHoverNode();
+      }
+    }
+
+    /* Check which tile it's hovering on now */
+    if(active_tile == NULL)
+    {
+      QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
+      if(hover_item != NULL && hover_item->zValue() == 0)
+      {
+        active_tile = (EditorTile*)hover_item;
+        editing_map->setHoverTile(active_tile);
+        new_hover = true;
+        emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
+
+        /* New hover trigger to path edit */
+        if(path_edit != NULL)
+          path_edit->setHoverNode(active_tile->getX(), active_tile->getY());
+      }
+      else
+      {
+        emit sendCurrentPosition(-1, -1);
+      }
+    }
+
+    return new_hover;
+  }
+  return false;
+}
+
 /* Path click manipulation - for editing paths */
 void MapRender::pathClickLeft(int x, int y)
 {
@@ -95,6 +144,7 @@ bool MapRender::event(QEvent *event)
   if(event->type() == QEvent::Leave && editing_map != NULL)
   {
     editing_map->setHoverTile(NULL);
+    emit sendCurrentPosition(-1, -1);
 
     /* Clean up path edit */
     if(path_edit != NULL)
@@ -120,44 +170,7 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
   if(editing_map != NULL)
   {
-    bool new_hover = false;
-    EditorTile* active_tile = editing_map->getHoverInfo()->hover_tile;
-
-    /* Check if left the current tile */
-    if(active_tile != NULL)
-    {
-      QRectF bound = active_tile->boundingRect();
-      if(!bound.contains(event->scenePos()))
-      {
-        editing_map->setHoverTile(NULL);
-        active_tile = NULL;
-
-        /* Remove hover trigger to path edit */
-        if(path_edit != NULL)
-          path_edit->setHoverNode();
-      }
-    }
-
-    /* Check which tile it's hovering on now */
-    if(active_tile == NULL)
-    {
-      QGraphicsItem* hover_item = itemAt(event->scenePos(), QTransform());
-      if(hover_item != NULL && hover_item->zValue() == 0)
-      {
-        active_tile = (EditorTile*)hover_item;
-        editing_map->setHoverTile(active_tile);
-        new_hover = true;
-        emit sendCurrentPosition(active_tile->getX(), active_tile->getY());
-
-        /* New hover trigger to path edit */
-        if(path_edit != NULL)
-          path_edit->setHoverNode(active_tile->getX(), active_tile->getY());
-      }
-      else
-      {
-        emit sendCurrentPosition(-1, -1);
-      }
-    }
+    bool new_hover = mouseEvent(event);
 
     /* If a new hover tile, execute the click */
     if(new_hover && path_edit == NULL && (event->buttons() & Qt::LeftButton ||
@@ -166,9 +179,9 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     {
       editing_map->clickTrigger(false, event->buttons() & Qt::RightButton);
     }
-
-    QGraphicsScene::mouseMoveEvent(event);
   }
+
+  QGraphicsScene::mouseMoveEvent(event);
 }
 
 /*
@@ -179,6 +192,9 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
  */
 void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+  /* Do a mouse check */
+  mouseEvent(event);
+
   /* Ensure editing map is valid */
   if(editing_map != NULL && editing_map->getHoverInfo()->hover_tile != NULL)
   {
@@ -232,6 +248,8 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
       }
     }
   }
+
+  QGraphicsScene::mousePressEvent(event);
 }
 
 /* Mouse release event */
@@ -264,6 +282,8 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
       }
     }
   }
+
+  QGraphicsScene::mouseReleaseEvent(event);
 }
 
 /*============================================================================

@@ -1,56 +1,49 @@
 /*******************************************************************************
- * Class Name: EditorMapPerson
- * Date Created: March 3, 2015
+ * Class Name: EditorMapItem
+ * Date Created: April 25, 2015
  * Inheritance: EditorMapThing
- * Description: The class for managing the interfacing with MapPerson and 
+ * Description: The class for managing the interfacing with MapItem and 
  *              filling it with data. The management pop-up is PersonDialog.
  ******************************************************************************/
-#ifndef EDITORMAPPERSON_H
-#define EDITORMAPPERSON_H
+#ifndef EDITORMAPITEM_H
+#define EDITORMAPITEM_H
 
 #include "Database/EditorMapThing.h"
-#include "Game/Map/MapPerson.h"
+#include "Game/Map/MapItem.h"
 
-class EditorMapPerson : public EditorMapThing
+class EditorMapItem : public EditorMapThing
 {
 public:
   /* Constructor function */
-  EditorMapPerson(int id = -1, QString name = "Default Name",
-                  QString description = "");
+  EditorMapItem(int id = -1, QString name = "Default Name",
+                QString description = "");
                   
   /* Copy constructor function */
-  EditorMapPerson(const EditorMapPerson &source);
+  EditorMapItem(const EditorMapItem &source);
   
   /* Destructor function */
-  virtual ~EditorMapPerson();
+  virtual ~EditorMapItem();
   
 private:
-  /* The set of thing matrixes for different grounds and directions */
-  QList<QList<EditorMatrix*>> matrix_set;
-
-  /* Reference person */
-  MapPerson person;
+  /* Reference item */
+  MapItem item;
 
   /* -------------------------- Constants ------------------------- */
-  const static uint8_t kTOTAL_DIRECTIONS; /* The max # of directions to move */
-  const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
+  //const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
 
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
   /* Delete defines matrixes stored in class - called once at destruction */
-  void deleteMatrixes();
-  
-  /* Initialize matrixes stored in class - called once at start */
-  void initializeMatrixes();
-  
+  //void deleteMatrixes();
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
-  void copySelf(const EditorMapPerson &source);
+  void copySelf(const EditorMapItem &source);
 
   /* Saves the person data - virtualized */
   virtual void saveData(FileHandler* fh, bool game_only = false,
@@ -59,39 +52,43 @@ protected:
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-public: 
-  /* Gets the base person of the person */
-  EditorMapPerson* getBasePerson() const;
+public:
+  /* Gets the base item of the item */
+  EditorMapItem* getBaseItem() const;
 
-  /* Returns the speed of the person */
-  uint16_t getSpeed() const;
+  /* Returns the core (game representation) ID. -1 if unset */
+  int getCoreID();
 
-  /* Returns the state at the defined surface and direction */
-  EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
-                         Direction direction);
-  QList<QList<EditorMatrix*>> getStates();
+  /* Returns the count of how many of these items are available */
+  uint32_t getCount();
 
-  /* Loads the person data */
+  /* Returns if the item is picked up by just walking over */
+  bool isWalkover();
+
+  /* Loads the item data */
   virtual void load(XmlData data, int index);
 
-  /* Saves the person data */
+  /* Saves the item data */
   virtual void save(FileHandler* fh, bool game_only = false);
 
-  /* Sets the base reference person */
-  void setBase(EditorMapPerson* person);
+  /* Sets the base reference item */
+  void setBase(EditorMapItem* item);
+  
+  /* Sets the core (game representation) ID. If invalid, sets to -1 */
+  void setCoreID(int id);
+  
+  /* Sets the number of this item */
+  void setCount(uint32_t count);
 
-  /* Sets the speed of the person */
-  void setSpeed(uint16_t speed);
-
-  /* Sets the rendering tile icons */
-  void setTileIcons(TileIcons* icons);
+  /* Sets if the item is picked up by merely walking over it */
+  void setWalkover(bool walkover);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 public:
   /* The copy operator */
-  EditorMapPerson& operator= (const EditorMapPerson &source);
+  EditorMapItem& operator= (const EditorMapItem &source);
 };
 
-#endif // EDITORMAPPERSON_H
+#endif // EDITORMAPITEM_H

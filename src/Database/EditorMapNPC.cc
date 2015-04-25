@@ -69,6 +69,28 @@ void EditorMapNPC::copySelf(const EditorMapNPC &source)
   path = source.path;
 }
 
+/*
+ * Description: Saves the data for the npc. This does not include the npc
+ *              wrapper. Virtualized for other classes as well.
+ *
+ * Inputs: FileHandler* fh - the file handling data pointer
+ *         bool game_only - true if only include game only data
+ *         bool inc_matrix - true if include the base thing matrix
+ * Output: none
+ */
+void EditorMapNPC::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
+{
+  /* First write person data */
+  EditorMapPerson::saveData(fh, game_only, inc_matrix);
+
+  /* Next npc data: If not base, write path */
+  if(getBaseNPC() != NULL)
+  {
+    /* Save the path */
+    path.save(fh, game_only);
+  }
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -131,83 +153,10 @@ void EditorMapNPC::load(XmlData data, int index)
  */
 void EditorMapNPC::save(FileHandler* fh, bool game_only)
 {
-  EditorMapNPC default_npc;
-
   if(fh != NULL)
   {
-    /* Depending on if base or not, write different data */
-    EditorMapNPC* base = getBaseNPC();
-    if(base != NULL)
-    {
-      fh->writeXmlElement("mapnpc", "id", getID());
-
-      /* Write base settings */
-      fh->writeXmlData("base", base->getID());
-      QString startpoint = QString::number(getX()) + "," +
-                           QString::number(getY());
-      fh->writeXmlData("startpoint", startpoint.toStdString());
-
-      /* Check the name and description, if it's different from base */
-      if(base->getName() != getName())
-        fh->writeXmlData("name", getName().toStdString());
-      if(base->getDescription() != getDescription())
-        fh->writeXmlData("description", getDescription().toStdString());
-
-      /* Event save, if relevant (isBaseEvent() is true) */
-      if(!isBaseEvent())
-      {
-        EditorEvent edit_event(getEvent());
-        edit_event.save(fh, game_only);
-      }
-
-      /* Save the path */
-      path.save(fh, game_only);
-    }
-    else
-    {
-      fh->writeXmlElement("mapnpc", "id", getID());
-
-      /* Write the core thing data */
-      fh->writeXmlData("name", getName().toStdString());
-      fh->writeXmlData("description", getDescription().toStdString());
-      if(default_npc.isVisible() != isVisible())
-        fh->writeXmlData("visible", isVisible());
-      if(default_npc.getSpeed() != getSpeed())
-        fh->writeXmlData("speed", getSpeed());
-
-      /* Save the dialog image */
-      EditorSprite* dialog_image = getDialogImage();
-      if(!dialog_image->isAllNull() && dialog_image->frameCount() == 1)
-        fh->writeXmlData("image",
-               EditorHelpers::trimPath(dialog_image->getPath(0)).toStdString());
-
-      /* Matrix saves */
-      MapPerson::SurfaceClassifier surface = MapPerson::GROUND;
-      fh->writeXmlElement("ground");
-
-      fh->writeXmlElement("north");
-      getState(surface, Direction::NORTH)->save(fh, game_only, true);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("east");
-      getState(surface, Direction::EAST)->save(fh, game_only, true);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("south");
-      getState(surface, Direction::SOUTH)->save(fh, game_only, true);
-      fh->writeXmlElementEnd();
-      fh->writeXmlElement("west");
-      getState(surface, Direction::WEST)->save(fh, game_only, true);
-      fh->writeXmlElementEnd();
-
-      fh->writeXmlElementEnd();
-
-      /* Save the render matrix */
-      getState(surface, Direction::NORTH)->saveRender(fh);
-
-      /* Event save */
-      EditorEvent edit_event(getEvent());
-      edit_event.save(fh, game_only);
-    }
-
+    fh->writeXmlElement("mapnpc", "id", getID());
+    saveData(fh, game_only, false);
     fh->writeXmlElementEnd();
   }
 }

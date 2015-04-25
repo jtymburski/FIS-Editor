@@ -95,6 +95,65 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
 }
 
 /*
+ * Description: Saves the data for the thing. This does not include the thing
+ *              wrapper. Virtualized for other classes as well.
+ *
+ * Inputs: FileHandler* fh - the file handling data pointer
+ *         bool game_only - true if only include game only data
+ *         bool inc_matrix - true if include the base thing matrix
+ * Output: none
+ */
+void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
+{
+  EditorMapThing default_thing;
+
+  /* Depending on if base or not, write different data */
+  if(base != NULL)
+  {
+    /* Write base settings */
+    fh->writeXmlData("base", base->getID());
+    QString startpoint = QString::number(getX()) + "," +
+                         QString::number(getY());
+    fh->writeXmlData("startpoint", startpoint.toStdString());
+
+    /* Check the name and description, if it's different from base */
+    if(base->getName() != getName())
+      fh->writeXmlData("name", getName().toStdString());
+    if(base->getDescription() != getDescription())
+      fh->writeXmlData("description", getDescription().toStdString());
+
+    /* Event save, if relevant (isBaseEvent() is true) */
+    if(!event_base)
+    {
+      EditorEvent edit_event(getEvent());
+      edit_event.save(fh, game_only);
+    }
+  }
+  /* Otherwise, is base - write core data */
+  else
+  {
+    /* Write the core thing data */
+    fh->writeXmlData("name", getName().toStdString());
+    fh->writeXmlData("description", getDescription().toStdString());
+    if(default_thing.isVisible() != isVisible())
+      fh->writeXmlData("visible", isVisible());
+
+    /* Save the dialog image */
+    if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
+      fh->writeXmlData("image",
+                EditorHelpers::trimPath(dialog_image.getPath(0)).toStdString());
+
+    /* Matrix save */
+    if(inc_matrix)
+      matrix->save(fh, game_only);
+
+    /* Event save */
+    EditorEvent edit_event(getEvent());
+    edit_event.save(fh, game_only);
+  }
+}
+
+/*
  * Description: Sets the matrix in the thing class. This is used by children
  *              to utilize the painting and control of the thing.
  *
@@ -413,55 +472,10 @@ bool EditorMapThing::paint(int frame_index, QPainter* painter, QRect rect,
  */
 void EditorMapThing::save(FileHandler* fh, bool game_only)
 {
-  EditorMapThing default_thing;
-
   if(fh != NULL)
   {
     fh->writeXmlElement("mapthing", "id", getID());
-
-    /* Depending on if base or not, write different data */
-    if(base != NULL)
-    {
-      /* Write base settings */
-      fh->writeXmlData("base", base->getID());
-      QString startpoint = QString::number(getX()) + "," +
-                           QString::number(getY());
-      fh->writeXmlData("startpoint", startpoint.toStdString());
-
-      /* Check the name and description, if it's different from base */
-      if(base->getName() != getName())
-        fh->writeXmlData("name", getName().toStdString());
-      if(base->getDescription() != getDescription())
-        fh->writeXmlData("description", getDescription().toStdString());
-
-      /* Event save, if relevant (isBaseEvent() is true) */
-      if(!event_base)
-      {
-        EditorEvent edit_event(getEvent());
-        edit_event.save(fh, game_only);
-      }
-    }
-    else
-    {
-      /* Write the core thing data */
-      fh->writeXmlData("name", getName().toStdString());
-      fh->writeXmlData("description", getDescription().toStdString());
-      if(default_thing.isVisible() != isVisible())
-        fh->writeXmlData("visible", isVisible());
-
-      /* Save the dialog image */
-      if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
-        fh->writeXmlData("image",
-                EditorHelpers::trimPath(dialog_image.getPath(0)).toStdString());
-
-      /* Matrix save */
-      matrix->save(fh, game_only);
-
-      /* Event save */
-      EditorEvent edit_event(getEvent());
-      edit_event.save(fh, game_only);
-    }
-
+    saveData(fh, game_only);
     fh->writeXmlElementEnd();
   }
 }

@@ -17,7 +17,7 @@ class EditorMapThing : public EditorTemplate
 {
 public:
   /* Constructor function */
-  EditorMapThing(int id = -1, QString name = "Default Thing",
+  EditorMapThing(int id = -1, QString name = "Default Name",
                  QString description = "");
 
   /* Copy constructor */
@@ -56,6 +56,10 @@ private:
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMapThing &source, bool inc_matrix = true);
+
+  /* Saves the thing data - virtualized */
+  virtual void saveData(FileHandler* fh, bool game_only = false,
+                        bool inc_matrix = true);
 
   /* Sets the matrix in the class - this is used by children to utilize the
    * printing of the thing */

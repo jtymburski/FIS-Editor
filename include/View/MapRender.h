@@ -60,6 +60,9 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Mouse event */
+  bool mouseEvent(QGraphicsSceneMouseEvent* event);
+
   /* Path click manipulation - for editing paths */
   void pathClickLeft(int x, int y);
   void pathClickRight(int x, int y);

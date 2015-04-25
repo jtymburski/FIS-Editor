@@ -17,7 +17,7 @@ class EditorMapNPC : public EditorMapPerson
 {
 public:
   /* Constructor function */
-  EditorMapNPC(int id = -1, QString name = "Default NPC", 
+  EditorMapNPC(int id = -1, QString name = "Default Name",
                QString description = "");
 
   /* Copy constructor function */
@@ -44,7 +44,11 @@ private:
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMapNPC &source);
-  
+
+  /* Saves the npc data - virtualized */
+  virtual void saveData(FileHandler* fh, bool game_only = false,
+                        bool inc_matrix = true);
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

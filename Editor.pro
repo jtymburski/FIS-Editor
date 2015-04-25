@@ -39,6 +39,7 @@ SOURCES += \
     src/Database/EditorEvent.cc \
     src/Database/EditorItem.cc \
     src/Database/EditorMap.cc \
+    src/Database/EditorMapItem.cc \
     src/Database/EditorMapNPC.cc \
     src/Database/EditorMapPerson.cc \
     src/Database/EditorMapThing.cc \
@@ -86,6 +87,7 @@ SOURCES += \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
     ../Project/src/Game/KeyHandler.cc \
+    ../Project/src/Game/Map/MapItem.cc \
     ../Project/src/Game/Map/MapNPC.cc \
     ../Project/src/Game/Map/MapPerson.cc \
     ../Project/src/Game/Map/MapThing.cc \
@@ -118,6 +120,7 @@ HEADERS += \
     include/Database/EditorEvent.h \
     include/Database/EditorItem.h \
     include/Database/EditorMap.h \
+    include/Database/EditorMapItem.h \
     include/Database/EditorMapNPC.h \
     include/Database/EditorMapPerson.h \
     include/Database/EditorMapThing.h \
@@ -168,6 +171,7 @@ HEADERS += \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
     ../Project/include/Game/KeyHandler.h \
+    ../Project/include/Game/Map/MapItem.h \
     ../Project/include/Game/Map/MapNPC.h \
     ../Project/include/Game/Map/MapPerson.h \
     ../Project/include/Game/Map/MapThing.h \
