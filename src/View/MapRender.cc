@@ -122,7 +122,7 @@ void MapRender::pathClickRight(int x, int y)
 {
   QList<Path> list = path_edit->getNodes();
   bool success = false;
-  for(int i = 1; !success && (i < list.size()); i++)
+  for(int i = 0; !success && (i < list.size()); i++)
   {
     if(list[i].x == x && list[i].y == y)
     {
@@ -140,18 +140,45 @@ void MapRender::pathClickRight(int x, int y)
 // TODO: Comment
 bool MapRender::event(QEvent *event)
 {
-  /* If leaving the widget, nullify the hover event */
-  if(event->type() == QEvent::Leave && editing_map != NULL)
-  {
-    editing_map->setHoverTile(NULL);
-    emit sendCurrentPosition(-1, -1);
+  //qDebug() << event->type();
+  //qDebug() << views().front()->x() << "," << views().front()->y() << ","
+  //         << views().front()->width() << "," << views().front()->height();
+  //qDebug() << geometry();
+  //qDebug() << if(views().front()->rect().contains(views().front()->mapFromGlobal(QCursor::pos()))
 
-    /* Clean up path edit */
-    if(path_edit != NULL)
+  QGraphicsView* view = views().front();
+  //qDebug() << "Geometry: " << view->geometry();
+  //qDebug() << "Cursor: " << QCursor::pos();
+  //qDebug() << "Point: " << view->mapFromGlobal(QCursor::pos());
+
+  if(editing_map != NULL)// &&
+     //!view->rect().contains(view->mapFromGlobal(QCursor::pos())))
+  {
+    /* If leaving the widget, nullify the hover event */
+    if(event->type() == QEvent::Leave)
     {
-      path_edit->setHoverNode();
-      if(path_edit->getIndexMove() >= 0)
-        path_edit->unsetIndexMove(true);
+      QPoint point = view->mapFromGlobal(QCursor::pos());
+      int ref_min = 1;
+      int x_ref = view->geometry().width()
+                - view->verticalScrollBar()->width() - point.x();
+      int y_ref = view->geometry().height()
+                - view->horizontalScrollBar()->height() - point.y();
+
+      /* Is actually leaving (for fake events) */
+      if(point.x() <= ref_min || point.y() <= ref_min ||
+         x_ref <= ref_min || y_ref <= ref_min)
+      {
+        editing_map->setHoverTile(NULL);
+        emit sendCurrentPosition(-1, -1);
+
+        /* Clean up path edit */
+        if(path_edit != NULL)
+        {
+          path_edit->setHoverNode();
+          if(path_edit->getIndexMove() >= 0)
+            path_edit->unsetIndexMove(true);
+        }
+      }
     }
   }
 
@@ -193,7 +220,7 @@ void MapRender::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
   /* Do a mouse check */
-  mouseEvent(event);
+  //mouseEvent(event);
 
   /* Ensure editing map is valid */
   if(editing_map != NULL && editing_map->getHoverInfo()->hover_tile != NULL)
@@ -249,7 +276,7 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
   }
 
-  QGraphicsScene::mousePressEvent(event);
+  //QGraphicsScene::mousePressEvent(event);
 }
 
 /* Mouse release event */
@@ -283,7 +310,7 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
   }
 
-  QGraphicsScene::mouseReleaseEvent(event);
+  //QGraphicsScene::mouseReleaseEvent(event);
 }
 
 /*============================================================================

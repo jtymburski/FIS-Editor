@@ -214,6 +214,8 @@ void InstanceDialog::createLayout()
 
     /* Node list */
     list_nodes = new QListWidget(this);
+    connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            this, SLOT(editNode(QListWidgetItem*)));
     layout->addWidget(list_nodes, 5, 5, 1, 4);
 
     btn_offset = 5;
@@ -321,7 +323,7 @@ void InstanceDialog::updateNodes()
 
   /* Fill the new list */
   EditorMapNPC* npc = (EditorMapNPC*)thing_working;
-  for(int i = 0; i < npc->getPath()->getNodes().size(); i++)
+  for(int i = -1; i < npc->getPath()->getNodes().size(); i++)
     list_nodes->addItem(npc->getPath()->getNodeStr(i));
 }
 
@@ -570,6 +572,36 @@ void InstanceDialog::editConversation(Conversation* convo, bool is_option)
   connect(convo_dialog, SIGNAL(success()),
           event_view, SLOT(updateConversation()));
   convo_dialog->show();
+}
+
+/*
+ * Description: Edits a single node in the instance widget, with the NodeDialog.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
+void InstanceDialog::editNode(QListWidgetItem*)
+{
+  if(thing_type == EditorEnumDb::NPC)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+    int index = list_nodes->currentRow();
+
+    if(npc != NULL && npc->getPath()->getState() != MapNPC::LOCKED &&
+       (npc->getPath()->getState() == MapNPC::LOOPED ||
+        npc->getPath()->getState() == MapNPC::BACKANDFORTH || index == 0))
+    {
+      NodeDialog* dialog = new NodeDialog(npc->getPath(), index - 1, this);
+      if(dialog->exec() == QDialog::Accepted)
+      {
+        updateNodes();
+        list_nodes->setCurrentRow(index);
+      }
+
+      delete dialog;
+      dialog = NULL;
+    }
+  }
 }
 
 /*

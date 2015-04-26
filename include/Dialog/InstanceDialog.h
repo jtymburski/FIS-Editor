@@ -15,6 +15,7 @@
 
 #include "Database/EditorMapNPC.h"
 #include "Dialog/ConvoDialog.h"
+#include "Dialog/NodeDialog.h"
 #include "View/EventView.h"
 
 class InstanceDialog : public QDialog
@@ -129,6 +130,9 @@ public slots:
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
+
+  /* Edit Single Node trigger */
+  void editNode(QListWidgetItem*);
 
   /* Select tile trigger */
   void selectTile();

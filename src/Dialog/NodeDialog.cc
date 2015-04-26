@@ -105,7 +105,7 @@ void NodeDialog::createDialog()
 void NodeDialog::updateData()
 {
   /* Add the data if the node is in valid range */
-  if(path_node >= 0 && path_node < path_working->getNodes().size())
+  if(path_node >= -1 && path_node < path_working->getNodes().size())
   {
     /* Set the window title */
     setWindowTitle("Node #" + QString::number(path_node) + " - X:" +
@@ -181,6 +181,11 @@ void NodeDialog::buttonOk()
     path_original->editNode(path_node, path_original->getNodeX(path_node),
                             path_original->getNodeY(path_node),
                             spin_delay->value(), radio_yx->isChecked());
+    emit success();
+  }
+  else if(path_node == -1)
+  {
+    path_original->editStartNode(spin_delay->value(), radio_yx->isChecked());
     emit success();
   }
 

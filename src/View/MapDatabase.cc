@@ -291,10 +291,10 @@ void MapDatabase::pathChanged(int current_row)
 {
   if(path_working != NULL && editing_map != NULL && current_row >= 0)
   {
-    path_working->setIndexSelect(current_row);
+    path_working->setIndexSelect(current_row-1);
     emit ensureVisible(editing_map->getCurrentMap()->
-                                    tiles[path_working->getNodeX(current_row)]
-                                         [path_working->getNodeY(current_row)]);
+                                  tiles[path_working->getNodeX(current_row-1)]
+                                       [path_working->getNodeY(current_row-1)]);
   }
 }
 
@@ -317,7 +317,9 @@ void MapDatabase::pathClickRight(const QPoint & pos)
       /* Disable delete if the node is the root node, then exec */
       path_delete_node->setEnabled(path_list->row(item) > 0);
       path_edit_node->setEnabled(path_working->getState() == MapNPC::LOOPED ||
-                              path_working->getState() == MapNPC::BACKANDFORTH);
+                             path_working->getState() == MapNPC::BACKANDFORTH ||
+                             (path_working->getState() == MapNPC::RANDOMRANGE &&
+                              path_list->row(item) == 0));
       path_menu->exec(QCursor::pos());
     }
   }
@@ -363,10 +365,10 @@ void MapDatabase::pathNodeDelete()
 {
   if(path_working != NULL && path_list->currentItem() != NULL)
   {
-    int index = path_list->row(path_list->currentItem());
+    int index = path_list->row(path_list->currentItem())-1;
 
     /* Only proceed if index is greater than 0 - can't delete root node */
-    if(index > 0)
+    if(index >= 0)
     {
       /* Create warning about deleting */
       QMessageBox msg_box;
@@ -384,11 +386,12 @@ void MapDatabase::pathNodeDelete()
 void MapDatabase::pathNodeEdit()
 {
   if(path_working != NULL && (path_working->getState() == MapNPC::LOOPED ||
-                              path_working->getState() == MapNPC::BACKANDFORTH))
+                            path_working->getState() == MapNPC::BACKANDFORTH ||
+                            path_working->getState() == MapNPC::RANDOMRANGE))
   {
     /* Create the dialog and execute */
     int index = path_list->currentRow();
-    NodeDialog* dialog = new NodeDialog(path_working, index, this);
+    NodeDialog* dialog = new NodeDialog(path_working, index - 1, this);
     if(dialog->exec() == QDialog::Accepted)
       path_list->setCurrentRow(index);
 
@@ -474,7 +477,7 @@ void MapDatabase::updatePathNodes()
   path_list->clear();
 
   /* Fill the new list */
-  for(int i = 0; i < path_working->getNodes().size(); i++)
+  for(int i = -1; i < path_working->getNodes().size(); i++)
     path_list->addItem(path_working->getNodeStr(i));
 }
 

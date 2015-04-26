@@ -14,6 +14,7 @@
 #include <QGraphicsScene>
 #include <QList>
 #include <QRect>
+#include <QScrollBar>
 #include <QWidget>
 
 #include "Database/EditorMap.h"

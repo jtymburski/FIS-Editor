@@ -133,7 +133,8 @@ void EditorMapNPC::load(XmlData data, int index)
 
   /* Parse path elements */
   if(element == "nodestate" || element == "tracking" ||
-     element == "forcedinteraction" || element == "node")
+     element == "forcedinteraction" || element == "node" ||
+     element == "startnode")
   {
     path.load(data, index);
   }
@@ -190,8 +191,7 @@ bool EditorMapNPC::setX(int x)
 {
   if(EditorMapThing::setX(x))
   {
-    path.editNode(0, x, path.getNodeY(0),
-                  path.getNodeDelay(0), path.getNodeXYFlip(0));
+    path.setStartNode(x, path.getStartNode().y);
     return true;
   }
   return false;
@@ -208,8 +208,7 @@ bool EditorMapNPC::setY(int y)
 {
   if(EditorMapThing::setY(y))
   {
-    path.editNode(0, path.getNodeX(0), y,
-                  path.getNodeDelay(0), path.getNodeXYFlip(0));
+    path.setStartNode(path.getStartNode().x, y);
     return true;
   }
   return false;

@@ -24,7 +24,7 @@ class EditorNPCPath : public QGraphicsObject
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorNPCPath(int x = 0, int y = 0, int delay = 0, bool xy_flip = false);
+  EditorNPCPath(int x = -1, int y = -1, int delay = 0, bool xy_flip = false);
 
   /* Copy constructor function */
   EditorNPCPath(const EditorNPCPath &source);
@@ -65,6 +65,9 @@ private:
   /* List of path nodes */
   QList<Path> nodes;
 
+  /* Start node */
+  Path start_node;
+
   /* Sets the path state */
   MapNPC::NodeState state;
 
@@ -80,6 +83,7 @@ private:
   const static uint8_t kCOLOR_ALPHA; /* Default color alpha */
   const static float kHOVER_ALPHA; /* The ratio for hover alpha mod */
   const static uint8_t kLINE_W; /* Line width (without border) */
+  const static int kNODE_START; /* Use start node for painting node */
   const static uint8_t kRECT_W; /* Rect width (without border) */
 
 /*============================================================================
@@ -103,7 +107,7 @@ private:
 
   /* Node paint function */
   void paintNode(QPainter* painter, Path* prev, Path* curr, Path* next,
-                 QColor color, int node_num = -1);
+                 QColor color, int node_num = -2);
 
   /* Unsets all indexes modifying the path structure */
   void unsetAllIndexes();
@@ -146,6 +150,9 @@ public:
   /* Edits the node at the index */
   bool editNode(int index, int x, int y, int delay = -1, bool xy_flip = false);
 
+  /* Edits the start node */
+  void editStartNode(int delay, bool xy_flip);
+
   /* Returns color of the path */
   QColor getColor();
   QColor getColorPreset(int index);
@@ -168,6 +175,9 @@ public:
 
   /* Returns the set of path nodes */
   QList<Path> getNodes();
+
+  /* Returns the start node */
+  Path getStartNode();
 
   /* Returns the state of the path */
   MapNPC::NodeState getState();
@@ -217,6 +227,9 @@ public:
   /* Sets the index of actions that can be done on the path */
   bool setIndexMove(int index);
   bool setIndexSelect(int index);
+
+  /* Sets the start node */
+  bool setStartNode(int x, int y);
 
   /* Sets the path state */
   void setState(MapNPC::NodeState state);

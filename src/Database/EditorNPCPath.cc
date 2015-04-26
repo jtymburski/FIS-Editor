@@ -12,6 +12,7 @@ const uint8_t EditorNPCPath::kBORDER_W = 2;
 const uint8_t EditorNPCPath::kCOLOR_ALPHA = 191;
 const float EditorNPCPath::kHOVER_ALPHA = 0.5;
 const uint8_t EditorNPCPath::kLINE_W = 3;
+const int EditorNPCPath::kNODE_START = -1;
 const uint8_t EditorNPCPath::kRECT_W = 15;
 
 /*============================================================================
@@ -53,8 +54,8 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   /* Initial values */
   setColorPreset(0);
   hovered = false;
-  index_move = -1;
-  index_select = -1;
+  index_move = -2;
+  index_select = -2;
   interact = false;
   state = MapNPC::LOOPED;
   tracking = MapNPC::NOTRACK;
@@ -62,13 +63,16 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   visible_by_edit = true;
 
   /* Set up base node, based on starting point */
-  Path base_node;
-  base_node.x = x;
-  base_node.y = y;
-  base_node.delay = delay;
-  base_node.xy_flip = xy_flip;
   nodes.clear();
-  nodes.push_back(base_node);
+  if(x >= 0 && y >= 0)
+  {
+    Path base_node;
+    base_node.x = x;
+    base_node.y = y;
+    base_node.delay = delay;
+    base_node.xy_flip = xy_flip;
+    nodes.push_back(base_node);
+  }
 
   /* Clear the hover node */
   hover_node.x = 0;
@@ -78,6 +82,12 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   /* Clear the move node */
   move_node.x = 0;
   move_node.y = 0;
+
+  /* Clear the start node */
+  start_node.x = -1;
+  start_node.y = -1;
+  start_node.delay = 0;
+  start_node.xy_flip = false;
 }
 
 /*
@@ -120,6 +130,7 @@ void EditorNPCPath::copySelf(const EditorNPCPath &source)
 
   interact = source.interact;
   nodes = source.nodes;
+  start_node = source.start_node;
   state = source.state;
   tracking = source.tracking;
 
@@ -394,7 +405,7 @@ void EditorNPCPath::paintLines(QPainter* painter, Path* curr, Path* next,
  *         Path* next - the next path node
  *         QColor color - the color to paint the colored center of the node
  *         int node_num - the number of the node. Defaults to unused and paints
- *                        nothing
+ *                        nothing. -1 is hover node. -2 is start node
  * Output: none
  */
 void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
@@ -409,7 +420,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   int rect_x = tile_x + offset;
   int rect_y = tile_y + offset;
   QRect rect(rect_x, rect_y, kRECT_W, kRECT_W);
-  if(node_num == -1)
+  if(node_num == -2)
   {
     color.setRgb(color.red(), color.green(),
                  color.blue(), color.alpha() * kHOVER_ALPHA);
@@ -425,7 +436,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   painter->fillRect(rect, color);
 
   /* Paint border corners */
-  QColor hover_color = getHoverColor(node_num == -1);
+  QColor hover_color = getHoverColor(node_num == -2);
   painter->fillRect(rect_x - 1, rect_y - 1, kBORDER_W, kBORDER_W, hover_color);
   painter->fillRect(rect_x + kRECT_W - 1, rect_y - 1,
                     kBORDER_W, kBORDER_W, hover_color);
@@ -439,6 +450,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   bool left = false;
   bool right = false;
   bool top = false;
+  /* Previous node */
   if(prev != NULL)
   {
     int delta_x = curr->x - prev->x;
@@ -460,6 +472,7 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
         bottom = true;
     }
   }
+  /* Next node */
   if(next != NULL)
   {
     int delta_x = next->x - curr->x;
@@ -479,6 +492,28 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
         bottom = true;
       else
         top = true;
+    }
+  }
+  /* Start node */
+  if(node_num == 0)
+  {
+    int delta_x = curr->x - start_node.x;
+    int delta_y = curr->y - start_node.y;
+
+    /* Check where */
+    if(delta_x != 0 && (start_node.xy_flip || delta_y == 0))
+    {
+      if(delta_x > 0)
+        left = true;
+      else
+        right = true;
+    }
+    else if(delta_y != 0 && (!start_node.xy_flip || delta_x == 0))
+    {
+      if(delta_y > 0)
+        top = true;
+      else
+        bottom = true;
     }
   }
 
@@ -547,7 +582,9 @@ void EditorNPCPath::paintNode(QPainter* painter, Path* prev, Path* curr,
   painter->setPen(hover_color);
   if(node_num >= 0)
     painter->drawText(rect, Qt::AlignCenter, QString::number(node_num));
-  else if(node_num == -1)
+  else if(node_num == kNODE_START)
+    painter->drawText(rect, Qt::AlignCenter, "S");
+  else
     painter->drawText(rect, Qt::AlignCenter, "H");
 }
 
@@ -648,10 +685,10 @@ bool EditorNPCPath::appendNode(int x, int y, int delay, bool xy_flip)
  */
 QRectF EditorNPCPath::boundingRect() const
 {
-  int min_x = -1;
-  int max_x = -1;
-  int min_y = -1;
-  int max_y = -1;
+  int min_x = start_node.x;
+  int max_x = start_node.x;
+  int min_y = start_node.y;
+  int max_y = start_node.y;
 
   /* Find the lowest and highest x nodes */
   for(int i = 0; i < nodes.size(); i++)
@@ -735,7 +772,7 @@ void EditorNPCPath::checkNodes(int x, int y, int w, int h)
  */
 bool EditorNPCPath::deleteNode(int index)
 {
-  if(index >= 1 && index < nodes.size())
+  if(index >= 0 && index < nodes.size())
   {
     prepareGeometryChange();
 
@@ -758,7 +795,7 @@ void EditorNPCPath::deleteNodes()
 {
   prepareGeometryChange();
 
-  while(nodes.size() > 1)
+  while(nodes.size() > 0)
     nodes.removeLast();
 
   unsetAllIndexes();
@@ -797,6 +834,29 @@ bool EditorNPCPath::editNode(int index, int x, int y, int delay, bool xy_flip)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Modifies the start node delay (ms) and xy_flip setting (bool).
+ *
+ * Inputs: int delay - the delay for the npc to wait in ms on the node
+ *         bool xy_flip - should the parsing go y->x instead of x->y
+ * Output: none
+ */
+void EditorNPCPath::editStartNode(int delay, bool xy_flip)
+{
+  prepareGeometryChange();
+
+  /* Set the node settings */
+  if(delay >= 0)
+    start_node.delay = delay;
+  if(state == MapNPC::RANDOMRANGE)
+    start_node.xy_flip = false;
+  else
+    start_node.xy_flip = xy_flip;
+
+  unsetAllIndexes();
+  emit pathChanged();
 }
 
 /*
@@ -859,14 +919,14 @@ EditorNPCPath::HoverState EditorNPCPath::getHoverState(int &index, int hx,
     }
 
     /* Loop through all nodes */
-    for(int i = 1; (hover_state == NO_HOVER) && (i < nodes.size()); i++)
+    for(int i = 0; (hover_state == NO_HOVER) && (i < nodes.size()); i++)
     {
       /* First check if it's on the node */
       if(nodes[i].x == x && nodes[i].y == y)
         hover_state = ON_NODE;
 
       /* Second, check if it's on the path */
-      if(hover_state == NO_HOVER)
+      if(hover_state == NO_HOVER && i > 0)
       {
         int curr_x = nodes[i].x;
         int curr_y = nodes[i].y;
@@ -986,9 +1046,16 @@ Path* EditorNPCPath::getNode(int index)
  */
 int EditorNPCPath::getNodeDelay(int index)
 {
-  Path* node = getNode(index);
-  if(node != NULL)
-    return node->delay;
+  if(index == kNODE_START)
+  {
+    return start_node.delay;
+  }
+  else
+  {
+    Path* node = getNode(index);
+    if(node != NULL)
+      return node->delay;
+  }
   return -1;
 }
 
@@ -996,60 +1063,90 @@ int EditorNPCPath::getNodeDelay(int index)
  * Description: Returns a summary of the node at the index as a string. Used
  *              in lists when working with edit control of the node stack.
  *
- * Inputs: int index - the index of the node in the set
+ * Inputs: int index - the index of the node in the set. If less than 0, get
+ *                     start node string.
  * Output: QString - the string summary of the node
  */
 QString EditorNPCPath::getNodeStr(int index)
 {
   QString name_str = "";
-  Path* node = getNode(index);
 
-  if(node != NULL)
+  /* If index out of range, use start node */
+  if(index < 0)
   {
-    /* If path based node system */
-    if(state == MapNPC::LOOPED || state == MapNPC::BACKANDFORTH)
-    {
-      /* Index */
-      name_str += QString::number(index) + ": ";
-
-      /* X, Y */
-      name_str += "At (" + QString::number(node->x) + "," +
-                           QString::number(node->y) + ") ";
-
-      /* Delay */
-      name_str += "For " + QString::number(node->delay) + " ms ";
-
-      /* XY Flip */
-      if(state == MapNPC::BACKANDFORTH && (index+1) == nodes.size())
-        name_str += "Then Reverse Direction";
-      else if(node->xy_flip)
-        name_str += "Then Y-X Move";
-      else
-        name_str += "Then X-Y Move";
-    }
-    /* Random rectangle range (only two points) */
-    else if(state == MapNPC::RANDOMRANGE)
-    {
-      if(index == 0)
-        name_str += "Starting corner of Rectangle (";
-      else
-        name_str += "Other corner of Rectangle (";
-
-      /* Finalize display */
-      name_str += QString::number(node->x) + "," +
-                  QString::number(node->y) + ") ";
-    }
-    /* Random over entire map */
-    else if(state == MapNPC::RANDOM)
-    {
-      name_str += "Starting At (" + QString::number(node->x) + "," +
-                                    QString::number(node->y) + ") ";
-    }
     /* Locked */
+    if(state == MapNPC::LOCKED)
+    {
+      name_str += "At (" + QString::number(start_node.x) + "," +
+                           QString::number(start_node.y) + ") Forever";
+    }
+    /* All other states */
     else
     {
-      name_str += "At (" + QString::number(node->x) + "," +
-                           QString::number(node->y) + ") Forever";
+      name_str += "Starting At (" + QString::number(start_node.x) + "," +
+                                    QString::number(start_node.y) + ") For " +
+                                    QString::number(start_node.delay) + " ms";
+      if(nodes.size() > 0 &&
+         (state != MapNPC::RANDOM || state != MapNPC::RANDOMRANGE))
+      {
+        if(start_node.xy_flip)
+          name_str += " Then Y-X Move";
+        else
+          name_str += " Then X-Y Move";
+      }
+    }
+  }
+  /* Otherwise, get from node stack */
+  else
+  {
+    Path* node = getNode(index);
+    if(node != NULL)
+    {
+      /* If path based node system */
+      if(state == MapNPC::LOOPED || state == MapNPC::BACKANDFORTH)
+      {
+        /* Index */
+        name_str += QString::number(index) + ": ";
+
+        /* X, Y */
+        name_str += "At (" + QString::number(node->x) + "," +
+                             QString::number(node->y) + ") ";
+
+        /* Delay */
+        name_str += "For " + QString::number(node->delay) + " ms ";
+
+        /* XY Flip */
+        if(state == MapNPC::BACKANDFORTH && (index+1) == nodes.size())
+          name_str += "Then Reverse Direction";
+        else if(node->xy_flip)
+          name_str += "Then Y-X Move";
+        else
+          name_str += "Then X-Y Move";
+      }
+      /* Random rectangle range (only two points) */
+      else if(state == MapNPC::RANDOMRANGE)
+      {
+        if(index == 0)
+          name_str += "Starting corner of Rectangle (";
+        else
+          name_str += "Other corner of Rectangle (";
+
+        /* Finalize display */
+        name_str += QString::number(node->x) + "," +
+                    QString::number(node->y) + ") ";
+      }
+      /* Random over entire map */
+      else if(state == MapNPC::RANDOM)
+      {
+        name_str += "Starting At (" + QString::number(node->x) + "," +
+                                      QString::number(node->y) + ") ";
+      }
+      /* Locked */
+      else
+      {
+        name_str += "At (" + QString::number(node->x) + "," +
+                             QString::number(node->y) + ") Forever";
+      }
     }
   }
 
@@ -1064,9 +1161,16 @@ QString EditorNPCPath::getNodeStr(int index)
  */
 int EditorNPCPath::getNodeX(int index)
 {
-  Path* node = getNode(index);
-  if(node != NULL)
-    return node->x;
+  if(index == kNODE_START)
+  {
+    return start_node.x;
+  }
+  else
+  {
+    Path* node = getNode(index);
+    if(node != NULL)
+      return node->x;
+  }
   return -1;
 }
 
@@ -1080,9 +1184,16 @@ int EditorNPCPath::getNodeX(int index)
  */
 bool EditorNPCPath::getNodeXYFlip(int index)
 {
-  Path* node = getNode(index);
-  if(node != NULL)
-    return node->xy_flip;
+  if(index == kNODE_START)
+  {
+    return start_node.xy_flip;
+  }
+  else
+  {
+    Path* node = getNode(index);
+    if(node != NULL)
+      return node->xy_flip;
+  }
   return false;
 }
 
@@ -1094,9 +1205,16 @@ bool EditorNPCPath::getNodeXYFlip(int index)
  */
 int EditorNPCPath::getNodeY(int index)
 {
-  Path* node = getNode(index);
-  if(node != NULL)
-    return node->y;
+  if(index == kNODE_START)
+  {
+    return start_node.y;
+  }
+  else
+  {
+    Path* node = getNode(index);
+    if(node != NULL)
+      return node->y;
+  }
   return -1;
 }
 
@@ -1109,6 +1227,17 @@ int EditorNPCPath::getNodeY(int index)
 QList<Path> EditorNPCPath::getNodes()
 {
   return nodes;
+}
+
+/*
+ * Description: Returns the start node path struct.
+ *
+ * Inputs: none
+ * Output: Path - the path struct for the start node
+ */
+Path EditorNPCPath::getStartNode()
+{
+  return start_node;
 }
 
 /*
@@ -1257,7 +1386,7 @@ void EditorNPCPath::load(XmlData data, int index)
   if(element == "node" && elements.size() == 2)
   {
     int node_index = std::stoi(data.getKeyValue(index));
-    if(node_index >= 0)
+    if(node_index >= 0 && state != MapNPC::RANDOM && state != MapNPC::LOCKED)
     {
       /* Ensure there are enough nodes for the index */
       while(node_index >= nodes.size())
@@ -1288,6 +1417,18 @@ void EditorNPCPath::load(XmlData data, int index)
         editNode(node_index, nodes[node_index].x, nodes[node_index].y,
                  nodes[node_index].delay, data.getDataBool());
       }
+    }
+  }
+  /* START NODE ELEMENTS */
+  else if(element == "startnode" && elements.size() == 2)
+  {
+    if(elements.back() == "delay")
+    {
+      editStartNode(data.getDataInteger(), start_node.xy_flip);
+    }
+    else if(elements.back() == "xyflip")
+    {
+      editStartNode(start_node.delay, data.getDataBool());
     }
   }
   /* -- NODE STATE -- */
@@ -1344,6 +1485,8 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
       paintNode(painter, NULL, &hover_node, NULL, color);
 
     /* Parse all paths */
+    if(nodes.size() > 0)
+      paintLines(painter, &start_node, &nodes.front(), color);
     for(int i = 0; i < nodes.size(); i++)
     {
       Path* curr = &nodes[i];
@@ -1357,6 +1500,12 @@ void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
       /* Paint the path between nodes */
       paintLines(painter, curr, next, color);
     }
+
+    /* Paint the start node */
+    if(nodes.size() > 0)
+      paintNode(painter, NULL, &start_node, &nodes.front(), color, kNODE_START);
+    else
+      paintNode(painter, NULL, &start_node, NULL, color, kNODE_START);
 
     /* Parse all nodes */
     for(int i = 0; i < nodes.size(); i++)
@@ -1413,24 +1562,42 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
     if(default_path.isForcedInteraction() != isForcedInteraction())
       fh->writeXmlData("forcedinteraction", isForcedInteraction());
 
-    /* Write the nodes */
-    for(int i = 0; i < nodes.size(); i++)
+    /* Write the start node information, if relevant and not redundant */
+    if(start_node.delay > 0 || start_node.xy_flip)
     {
-      fh->writeXmlElement("node", "id", QString::number(i).toStdString());
+      fh->writeXmlElement("startnode");
 
-      /* X and y location */
-      fh->writeXmlData("x", nodes[i].x);
-      fh->writeXmlData("y", nodes[i].y);
-
-      /* Delay */
-      if(nodes[i].delay > 0)
-        fh->writeXmlData("delay", nodes[i].delay);
-
-      /* XY Flip */
-      if(nodes[i].xy_flip)
-        fh->writeXmlData("xyflip", nodes[i].xy_flip);
+      if(start_node.delay > 0)
+        fh->writeXmlData("delay", start_node.delay);
+      if(start_node.xy_flip)
+        fh->writeXmlData("xyflip", start_node.xy_flip);
 
       fh->writeXmlElementEnd();
+    }
+
+    /* Write the nodes */
+    if(getState() != MapNPC::RANDOM || getState() != MapNPC::LOCKED)
+    {
+      for(int i = 0; i < nodes.size(); i++)
+      {
+        fh->writeXmlElement("node", "id", QString::number(i).toStdString());
+
+        /* X and y location */
+        fh->writeXmlData("x", nodes[i].x);
+        fh->writeXmlData("y", nodes[i].y);
+
+        if(getState() != MapNPC::RANDOMRANGE)
+        {
+          /* Delay */
+          if(nodes[i].delay > 0)
+            fh->writeXmlData("delay", nodes[i].delay);
+
+          /* XY Flip */
+          if(nodes[i].xy_flip)
+            fh->writeXmlData("xyflip", nodes[i].xy_flip);
+        }
+        fh->writeXmlElementEnd();
+      }
     }
   }
 }
@@ -1550,7 +1717,7 @@ void EditorNPCPath::setHoverNode(int x, int y)
  */
 bool EditorNPCPath::setIndexMove(int index)
 {
-  if(index_move < 0 && index > 0 && index < nodes.size())
+  if(index_move < 0 && index >= 0 && index < nodes.size())
   {
     index_move = index;
 
@@ -1569,15 +1736,39 @@ bool EditorNPCPath::setIndexMove(int index)
  *              selection for viewing). Renders it brighter while it is
  *              selected.
  *
- * Inputs: int index - the node index being selected
+ * Inputs: int index - the node index being selected. -1 is starting node
  * Output: bool - true if the index was in range and was changed
  */
 bool EditorNPCPath::setIndexSelect(int index)
 {
-  if(index >= 0 && index < nodes.size())
+  if(index >= -1 && index < nodes.size())
   {
     index_select = index;
     update();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the start node x and y coordinate. Changes as the thing
+ *              moves.
+ *
+ * Inputs: int x - the x tile location of the start location of the NPC
+ *         int y - the y tile location of the start location of the NPC
+ * Output: bool - true if changed
+ */
+bool EditorNPCPath::setStartNode(int x, int y)
+{
+  if(x >= 0 && y >= 0)
+  {
+    prepareGeometryChange();
+
+    start_node.x = x;
+    start_node.y = y;
+
+    unsetAllIndexes();
+    emit pathChanged();
     return true;
   }
   return false;
@@ -1609,7 +1800,7 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
     }
     else if(state == MapNPC::RANDOM || state == MapNPC::LOCKED)
     {
-      while(nodes.size() > 1)
+      while(nodes.size() > 0)
         nodes.removeLast();
     }
 
@@ -1685,6 +1876,11 @@ QPainterPath EditorNPCPath::shape() const
   int rect = kRECT_W + kLINE_W * 2;
   int offset = (size - rect) / 2;
 
+  /* Start node */
+  path.addRect(start_node.x * size + offset, start_node.y * size + offset,
+               rect, rect);
+
+  /* Nodes */
   for(int i = 0; i < nodes.size(); i++)
   {
     int x = nodes[i].x * size + offset;
@@ -1716,7 +1912,7 @@ void EditorNPCPath::unsetIndexMove(bool cancel, bool allow_update)
     }
 
     /* Kick out the old move index */
-    index_move = -1;
+    index_move = -2;
     if(allow_update)
       update();
   }
@@ -1730,9 +1926,9 @@ void EditorNPCPath::unsetIndexMove(bool cancel, bool allow_update)
  */
 void EditorNPCPath::unsetIndexSelect(bool allow_update)
 {
-  if(index_select >= 0)
+  if(index_select >= -1)
   {
-    index_select = -1;
+    index_select = -2;
     if(allow_update)
       update();
   }
