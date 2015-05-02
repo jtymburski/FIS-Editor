@@ -19,6 +19,7 @@
 
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
+#include "Database/EditorMapItem.h"
 #include "Database/EditorMapNPC.h"
 #include "Database/EditorMapPerson.h"
 #include "Database/EditorMapThing.h"
@@ -35,8 +36,9 @@ struct SubMapInfo
   QVector<QVector<EditorTile*>> tiles;
   EditorNPCPath* path_top;
 
-  QVector<EditorMapPerson*> persons;
+  QVector<EditorMapItem*> items;
   QVector<EditorMapNPC*> npcs;
+  QVector<EditorMapPerson*> persons;
   QVector<EditorMapThing*> things;
 };
 
@@ -64,8 +66,9 @@ private:
   SubMapInfo* active_submap;
 
   /* The base map things */
-  QVector<EditorMapPerson*> base_persons;
+  QVector<EditorMapItem*> base_items;
   QVector<EditorMapNPC*> base_npcs;
+  QVector<EditorMapPerson*> base_persons;
   QVector<EditorMapThing*> base_things;
 
   /* The map set ID */

@@ -73,7 +73,7 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   QLabel* name = new QLabel("Name: ");
   layout->addWidget(name,0,1, Qt::AlignRight);
   QLineEdit* name_input = new QLineEdit(working_sprite->getName());
-  name_input->setInputMask("xxxxxxxxxxxxxxxx");
+  name_input->setMaxLength(32);
   connect(name_input,SIGNAL(textChanged(QString)),
           working_sprite,SLOT(setName(QString)));
   layout->addWidget(name_input,0,2,1,2);

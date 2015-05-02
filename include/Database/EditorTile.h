@@ -17,6 +17,7 @@
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
+#include "Database/EditorMapItem.h"
 #include "Database/EditorMapNPC.h"
 #include "Database/EditorMapPerson.h"
 #include "Database/EditorMapThing.h"
@@ -33,6 +34,7 @@ struct HoverInfo
   EditorEnumDb::CursorMode active_cursor;
   bool path_edit_mode;
 
+  EditorMapItem* active_item;
   EditorMapNPC* active_npc;
   EditorMapPerson* active_person;
   EditorSprite* active_sprite;
@@ -80,6 +82,7 @@ private:
   QList<TileRenderInfo> layers_upper;
 
   /* Things on the tile */
+  QList<TileRenderInfo> items;
   QList<TileRenderInfo> npcs;
   QList<TileRenderInfo> persons;
   QList<TileRenderInfo> things;
@@ -110,6 +113,7 @@ protected:
   void copySelf(const EditorTile &source);
 
   /* Determine if hovering sprite or thing in tile */
+  bool isHoverItem();
   bool isHoverNPC();
   bool isHoverPerson();
   bool isHoverSprite();
@@ -119,6 +123,9 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Adds item to tile stack */
+  bool addItem(EditorMapItem* item);
+
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
 
@@ -149,6 +156,10 @@ public:
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
 
+  /* Returns the map item pointer(s) */
+  EditorMapItem* getItem(int index);
+  QVector<EditorMapItem*> getItems();
+
   /* Returns the map npc pointer at the given render depth */
   EditorMapNPC* getNPC(int render_level);
 
@@ -163,6 +174,7 @@ public:
 
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);
+  bool getVisibilityItems();
   bool getVisibilityNPC(int render_level);
   bool getVisibilityPerson(int render_level);
   bool getVisibilityThing(int render_level);
@@ -213,6 +225,7 @@ public:
   void setVisibility(EditorEnumDb::Layer layer, bool visible);
   void setVisibilityBase(bool);
   void setVisibilityEnhancer(bool);
+  void setVisibilityItems(bool visible);
   bool setVisibilityLower(int, bool);
   void setVisibilityNPC(bool visible);
   bool setVisibilityNPC(int render_level, bool visible);
@@ -229,6 +242,11 @@ public:
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
+
+  /* Unsets the stored item pointer(s) */
+  bool unsetItem(EditorMapItem* item);
+  bool unsetItem(int index);
+  void unsetItems();
 
   /* Unsets the stored npc pointer(s) */
   bool unsetNPC(EditorMapNPC* npc);

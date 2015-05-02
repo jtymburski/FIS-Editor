@@ -52,6 +52,7 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
     layers_upper.push_back(temp);
 
   /* Prep editor things in tile */
+  items.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
     npcs.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
@@ -83,6 +84,7 @@ EditorTile::~EditorTile()
   layers_lower.clear();
   layers_upper.clear();
 
+  items.clear();
   npcs.clear();
   persons.clear();
   things.clear();
@@ -133,7 +135,26 @@ void EditorTile::copySelf(const EditorTile &source)
     layers_upper[i].visible = source.layers_upper[i].visible;
   }
 
-  // TODO: ADD THING, PERSON, AND NPC
+  // TODO: ADD THING, PERSON, NPC, ITEM, AND IO ??
+}
+
+/*
+ * Description: Returns if there is a valid hover item, the active layer is
+ *              a item layer, and the placing pen is an item placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover item should be shown
+ */
+bool EditorTile::isHoverItem()
+{
+  if(hover_info->hover_tile != NULL && hover_info->active_item != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::ITEM &&
+     !hover_info->path_edit_mode)
+  {
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -230,6 +251,36 @@ bool EditorTile::isHoverThing()
  *===========================================================================*/
 
 /*
+ * Description: Adds the item sprite pointer, stored within the class. This is
+ *              restricted by the max number of items on each tile (10).
+ *
+ * Inputs: EditorMapItem item - the item to add to the tile
+ * Output: bool - true if the item was added
+ */
+bool EditorTile::addItem(EditorMapItem* item)
+{
+  if(items.size() < kMAX_ITEMS)
+  {
+    if(items.size() == 1 && items.front().thing == NULL)
+    {
+      items.front().thing = item;
+    }
+    else
+    {
+      TileRenderInfo temp;
+      temp.sprite = NULL;
+      temp.thing = item;
+      temp.visible = items.front().visible;
+
+      items.push_back(temp);
+    }
+    update();
+    return true;
+  }
+  return false;
+}
+
+/*
  * Description: Returns the bounding rectangle (Needed by API)
  *
  * Inputs: none
@@ -272,6 +323,18 @@ QString EditorTile::getActiveLayers()
     if(things[i].thing != NULL)
       layer_string += "MT" + QString::number(i) + "("
                    + QString::number(things[i].thing->getID()) + "),";
+
+  /* Get item info, if relevant */
+  QString item_string = "MI(";
+  for(int i = 0; i < items.size(); i++)
+    if(items[i].thing != NULL)
+      item_string += QString::number(items[i].thing->getID()) + ",";
+  if(items.size() > 1 || items.front().thing != NULL)
+  {
+    item_string.chop(1);
+    item_string +=  "),";
+    layer_string += item_string;
+  }
 
   /* Get person info, if relevant */
   for(int i = 0; i < persons.size(); i++)
@@ -357,9 +420,9 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
       return getPassabilityPerson(direction);
     case EditorEnumDb::NPC:
       return getPassabilityNPC(direction);
-    case EditorEnumDb::ITEM:
     case EditorEnumDb::IO:
     case EditorEnumDb::ENHANCER:
+    case EditorEnumDb::ITEM:
     case EditorEnumDb::UPPER1:
     case EditorEnumDb::UPPER2:
     case EditorEnumDb::UPPER3:
@@ -390,7 +453,13 @@ int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
                                         getPassability(layer, Direction::WEST));
 }
 
-/* Returns the passability of the npc */
+/*
+ * Description: Returns the passability of the npc(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
 bool EditorTile::getPassabilityNPC(Direction direction)
 {
   EditorMapThing* npc = npcs[0].thing;
@@ -477,6 +546,36 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::NPC, direction);
 
   return passable;
+}
+
+/*
+ * Description: Returns the map item pointer for the npc at the rendering
+ *              index stack.
+ *
+ * Inputs: int index - the index of the item in the stack
+ * Output: EditorMapItem* - the item at the index
+ */
+EditorMapItem* EditorTile::getItem(int index)
+{
+  if(index >= 0 && index < items.size())
+    return (EditorMapItem*)items[index].thing;
+  return NULL;
+}
+
+/*
+ * Description: Returns all items on the tile.
+ *
+ * Inputs: none
+ * Output: QVector<EditorMapItem*> - the stack of all items on the tile
+ */
+QVector<EditorMapItem*> EditorTile::getItems()
+{
+  QVector<EditorMapItem*> stack;
+
+  for(int i = 0; i < items.size(); i++)
+    stack.push_back((EditorMapItem*)items[i].thing);
+
+  return stack;
 }
 
 /*
@@ -609,6 +708,17 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
 }
 
 /*
+ * Description: Returns the visibility of the item stack
+ *
+ * Inputs: none
+ * Output: bool - true if the item stack is visible
+ */
+bool EditorTile::getVisibilityItems()
+{
+  return items.front().visible;
+}
+
+/*
  * Description: Returns the visibility of the npc render level
  *
  * Inputs: int render_level - the render level to acquire the visibility
@@ -706,6 +816,7 @@ void EditorTile::paint(QPainter *painter,
   /* Determine if it's a hover thing - special state */
   int diff_x = 0;
   int diff_y = 0;
+  bool hover_item = isHoverItem();
   bool hover_npc = isHoverNPC();
   bool hover_person = isHoverPerson();
   bool hover_sprite = isHoverSprite();
@@ -763,6 +874,10 @@ void EditorTile::paint(QPainter *painter,
       things[i].thing->paint(0, painter, bound, x_pos - things[i].thing->getX(),
                              y_pos - things[i].thing->getY());
 
+    /* Paint the top item */
+    if(i == 0 && items.front().visible && items.last().thing != NULL)
+      items.last().thing->paint(0, painter, bound);
+
     /* Paint the person */
     if(persons[i].visible && persons[i].thing != NULL)
       persons[i].thing->paint(0, painter, bound,
@@ -779,6 +894,10 @@ void EditorTile::paint(QPainter *painter,
   /* If hover thing is true, render it */
   if(hover_thing)
     hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
+
+  /* If hover item is true, render it */
+  if(hover_item)
+    hover_info->active_thing->paint(painter, bound);
 
   /* If hover person is true, render it */
   if(hover_person)
@@ -847,6 +966,14 @@ void EditorTile::paint(QPainter *painter,
 
       if(hovered_invalid ||
          getThing(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
+    /* -- HOVER ITEM CONTROL -- */
+    else if(hover_item)
+    {
+      if(items.size() >= kMAX_ITEMS)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);
@@ -1240,6 +1367,8 @@ void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
     setVisibilityLower(4, visible);
   else if(layer == EditorEnumDb::THING)
     setVisibilityThing(visible);
+  else if(layer == EditorEnumDb::ITEM)
+    setVisibilityItems(visible);
   else if(layer == EditorEnumDb::PERSON)
     setVisibilityPerson(visible);
   else if(layer == EditorEnumDb::NPC)
@@ -1287,6 +1416,18 @@ void EditorTile::setVisibilityGrid(bool toggle)
 {
   visible_grid = toggle;
   update();
+}
+
+/*
+ * Description: Sets the visibility of the stack of npcs.
+ *
+ * Inputs: bool visible - true if the item stack is visible
+ * Output: none
+ */
+void EditorTile::setVisibilityItems(bool visible)
+{
+  for(int i = 0; i < items.size(); i++)
+    items[i].visible = visible;
 }
 
 /*
@@ -1534,6 +1675,68 @@ void EditorTile::unplace(EditorSprite* sprite)
 }
 
 /*
+ * Description: Unsets the item pointer in the tile. Searches through all
+ *              the items in the stack and removes it if the pointer is found.
+ *
+ * Inputs: EditorMapItem* item - the item to remove from the tile
+ * Output: bool - true if the item was found and removed
+ */
+bool EditorTile::unsetItem(EditorMapItem* item)
+{
+  for(int i = 0; i < items.size(); i++)
+  {
+    if(items[i].thing == item)
+    {
+      if(items.size() > 1)
+        items.removeAt(i);
+      else
+        items[i].thing = NULL;
+      update();
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets the item pointer in the tile at the render level.
+ *
+ * Inputs: int index - the item index in the stack
+ * Output: bool - true if a item was removed at the passed index
+ */
+bool EditorTile::unsetItem(int index)
+{
+  if(index >= 0 && index < items.size())
+  {
+    if(items[index].thing != NULL)
+    {
+      if(items.size() > 1)
+        items.removeAt(index);
+      else
+        items[index].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets all the items in the stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorTile::unsetItems()
+{
+  while(items.size() > 1)
+    items.removeLast();
+  items.front().thing = NULL;
+  update();
+}
+
+/*
  * Description: Unsets the npc pointer in the tile. Searches through all
  *              render levels and removes it if the pointer is found.
  *
@@ -1556,10 +1759,10 @@ bool EditorTile::unsetNPC(EditorMapNPC* npc)
 }
 
 /*
- * Description: Unsets the person pointer in the tile at the render level.
+ * Description: Unsets the npc pointer in the tile at the render level.
  *
- * Inputs: int render_level - the render depth to remove the person from
- * Output: bool - true if a person was removed at the passed depth
+ * Inputs: int render_level - the render depth to remove the npc from
+ * Output: bool - true if a npc was removed at the passed depth
  */
 bool EditorTile::unsetNPC(int render_level)
 {
