@@ -101,6 +101,10 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Attempts to add item to the current sub-map */
+  bool addItem(EditorMapItem* item, SubMapInfo* map = NULL, // TODO
+               bool existing = true);
+
   /* Attempts to add npc to the current sub-map */
   bool addNPC(EditorMapNPC* npc, SubMapInfo* map = NULL,
               bool existing = true);
@@ -136,7 +140,7 @@ protected:
                      EditorSprite* target, SubMapInfo* map);
 
   /* Resizes sub-maps */
-  bool resizeMap(SubMapInfo* map, int width, int height); // TODO
+  bool resizeMap(SubMapInfo* map, int width, int height);
 
   /* Saves the sub-map */
   void saveSubMap(FileHandler* fh, bool game_only,
@@ -187,6 +191,7 @@ public:
   bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
 
   /* Returns current references for lists in map */
+  int getCurrentItemIndex(); // TODO
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
   int getCurrentNPCIndex();
@@ -199,6 +204,15 @@ public:
 
   /* Returns the ID of the map set */
   virtual int getID() const;
+
+  /* Return stored item information */
+  EditorMapItem* getItem(int id, int sub_map = -1); // TODO
+  EditorMapItem* getItemByIndex(int index, int sub_map = -1); // TODO
+  int getItemCount(int sub_map = -1); // TODO
+  int getItemIndex(int id, int sub_map = -1); // TODO
+  QVector<QString> getItemList(int sub_map = -1, bool all_submaps = false,
+                               bool shortened = false); // TODO
+  QVector<EditorMapItem*> getItems(int sub_map = -1); // TODO
 
   /* Returns the stored map information */
   SubMapInfo* getMap(int id);
@@ -214,6 +228,7 @@ public:
   virtual QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
+  int getNextItemID(bool from_sub = false); // TODO
   int getNextMapID();
   int getNextNPCID(bool from_sub = false);
   int getNextPersonID(bool from_sub = false);
@@ -270,6 +285,7 @@ public:
   void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
+  bool setCurrentItem(int index); // TODO
   bool setCurrentMap(int index);
   bool setCurrentNPC(int index);
   bool setCurrentPerson(int index);
@@ -278,6 +294,7 @@ public:
 
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
+  bool setHoverItem(int id); // TODO
   void setHoverLayer(EditorEnumDb::Layer layer);
   bool setHoverNPC(int id);
   void setHoverPathMode(bool path_mode);
@@ -287,6 +304,9 @@ public:
 
   /* Sets the ID of the map set */
   virtual void setID(int id);
+
+  /* Sets a item in the map */
+  int setItem(EditorMapItem* item, int sub_map = -1); // TODO
 
   /* Sets a map, based on ID */
   int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles);
@@ -333,6 +353,11 @@ public:
 
   /* Update all tiles */
   void updateAll();
+
+  /* Unset item(s) */
+  bool unsetItem(int id, bool from_sub = false); // TODO
+  bool unsetItemByIndex(int index, int sub_map = -1); // TODO
+  void unsetItems(bool from_sub = false); // TODO
 
   /* Unset map(s) */
   bool unsetMap(int id);

@@ -3636,6 +3636,7 @@ void EditorMap::tilesNPCAdd(bool update_all)
                                            sub_maps[i]->tiles.front().size());
         }
       }
+      recolorNPCPaths(sub_maps[i]);
     }
   }
   /* Or just the active one */
