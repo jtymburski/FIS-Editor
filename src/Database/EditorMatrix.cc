@@ -1443,7 +1443,8 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
               if(matrix[i][k]->frameCount() != frames ||
                  set[i][k].size() != 1 ||
                  set[i][k].front().second != path ||
-                 set[i][k].front().first != set[i][j].front().first)
+                 set[i][k].front().first != set[i][j].front().first ||
+                 skip_set[i][k])
               {
                 finished = true;
               }
@@ -1482,7 +1483,8 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
                 if(matrix[k][j+l]->frameCount() != frames ||
                    set[k][j+l].size() != 1 ||
                    set[k][j+l].front().second != path ||
-                   set[k][j+l].front().first != set[i][j].front().first)
+                   set[k][j+l].front().first != set[i][j].front().first ||
+                   skip_set[k][j+l])
                 {
                   finished = true;
                 }
