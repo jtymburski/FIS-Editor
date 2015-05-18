@@ -266,7 +266,7 @@ int EditorMapThing::getID() const
  * Inputs: none
  * Output: EditorMatrix* - the matrix sprite set
  */
-EditorMatrix* EditorMapThing::getMatrix()
+EditorMatrix* EditorMapThing::getMatrix() const
 {
   if(base != NULL)
     return base->matrix;
@@ -338,6 +338,30 @@ int EditorMapThing::getX()
 int EditorMapThing::getY()
 {
   return y;
+}
+
+/*
+ * Description: Checks the matrix at the given x and y location, if the sprites
+ *              within are null. Virtualized.
+ *
+ * Inputs: int x - the x offset from top left in matrix
+ *         int y - the y offset from top left in matrix
+ * Output: bool - true if sprite contains only null paths.
+ */
+bool EditorMapThing::isAllNull(int x, int y) const
+{
+  bool is_null = true;
+
+  /* If matrix is valid */
+  if(getMatrix() != NULL)
+  {
+    /* Get sprite, if valid */
+    EditorTileSprite* sprite = getMatrix()->getSprite(x, y);
+    if(sprite != NULL)
+      is_null = sprite->isAllNull();
+  }
+
+  return is_null;
 }
 
 /*

@@ -246,9 +246,46 @@ EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
  * Inputs: none
  * Output: QList<QList<EditorMatrix*>> - stack of matrixes
  */
-QList<QList<EditorMatrix*>> EditorMapPerson::getStates()
+QList<QList<EditorMatrix*>> EditorMapPerson::getStates() const
 {
+  EditorMapPerson* base = getBasePerson();
+
+  /* Check if it's a base and the frames from it should be used isntead */
+  if(base != NULL)
+    return base->matrix_set;
   return matrix_set;
+}
+
+/*
+ * Description: Checks all matrixes at the given x and y location, if the
+ *              sprites within are null. Virtualized.
+ *
+ * Inputs: int x - the x offset from top left in matrixes
+ *         int y - the y offset from top left in matrixes
+ * Output: bool - true if sprites contains only null paths.
+ */
+bool EditorMapPerson::isAllNull(int x, int y) const
+{
+  bool is_null = true;
+  QList<QList<EditorMatrix*>> set = getStates();
+
+  /* Loop through all matrixes */
+  for(int i = 0; i < set.size(); i++)
+  {
+    for(int j = 0; j < set[i].size(); j++)
+    {
+      /* If matrix is valid */
+      if(set[i][j] != NULL)
+      {
+        /* Get sprite, if valid */
+        EditorTileSprite* sprite = set[i][j]->getSprite(x, y);
+        if(sprite != NULL)
+          is_null &= sprite->isAllNull();
+      }
+    }
+  }
+
+  return is_null;
 }
 
 /*

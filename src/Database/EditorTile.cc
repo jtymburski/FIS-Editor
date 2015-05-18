@@ -825,6 +825,14 @@ void EditorTile::paint(QPainter *painter,
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
+
+    /* Use the differential to make sure the sprite is valid */
+    if(hover_thing && hover_info->active_thing->isAllNull(diff_x, diff_y))
+      hover_thing = false;
+    if(hover_person && hover_info->active_person->isAllNull(diff_x, diff_y))
+      hover_person = false;
+    if(hover_npc && hover_info->active_npc->isAllNull(diff_x, diff_y))
+      hover_npc = false;
   }
 
   /* Render the base */
@@ -1257,7 +1265,8 @@ bool EditorTile::setNPC(EditorMapNPC* npc)
     {
       /* Determine the render level */
       int render_level = npc->getMatrix()->getRenderDepth(x, y);
-      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
+         !npc->isAllNull(x, y))
       {
         /* Set the new npc */
         npcs[render_level].thing = npc;
@@ -1288,7 +1297,8 @@ bool EditorTile::setPerson(EditorMapPerson* person)
     {
       /* Determine the render level */
       int render_level = person->getMatrix()->getRenderDepth(x, y);
-      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
+         !person->isAllNull(x, y))
       {
         /* Set the new person */
         persons[render_level].thing = person;
@@ -1319,7 +1329,8 @@ bool EditorTile::setThing(EditorMapThing* thing)
     {
       /* Determine the render level */
       int render_level = thing->getMatrix()->getRenderDepth(x, y);
-      if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
+         !thing->isAllNull(x, y))
       {
         /* Set the new thing */
         things[render_level].thing = thing;

@@ -69,7 +69,10 @@ public:
   /* Returns the state at the defined surface and direction */
   EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
                          Direction direction);
-  QList<QList<EditorMatrix*>> getStates();
+  QList<QList<EditorMatrix*>> getStates() const;
+
+  /* Returns if the tile sprites in all matrixes at that x, y are null */
+  virtual bool isAllNull(int x, int y) const;
 
   /* Loads the person data */
   virtual void load(XmlData data, int index);

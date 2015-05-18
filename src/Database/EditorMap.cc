@@ -122,11 +122,14 @@ bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map, bool existing)
     {
       for(int j = 0; j < h; j++)
       {
-        int depth = npc->getMatrix()->getRenderDepth(i, j);
+        if(!npc->isAllNull(i, j))
+        {
+          int depth = npc->getMatrix()->getRenderDepth(i, j);
 
-        if(map->tiles[x+i][y+j]->getNPC(depth) != NULL ||
-           map->tiles[x+i][y+j]->getPerson(depth) != NULL)
-          valid = false;
+          if(map->tiles[x+i][y+j]->getNPC(depth) != NULL ||
+             map->tiles[x+i][y+j]->getPerson(depth) != NULL)
+            valid = false;
+        }
       }
     }
   }
@@ -192,11 +195,14 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map,
     {
       for(int j = 0; j < h; j++)
       {
-        int depth = person->getMatrix()->getRenderDepth(i, j);
+        if(!person->isAllNull(i, j))
+        {
+          int depth = person->getMatrix()->getRenderDepth(i, j);
 
-        if(map->tiles[x+i][y+j]->getPerson(depth) != NULL ||
-           map->tiles[x+i][y+j]->getNPC(depth) != NULL)
-          valid = false;
+          if(map->tiles[x+i][y+j]->getPerson(depth) != NULL ||
+             map->tiles[x+i][y+j]->getNPC(depth) != NULL)
+            valid = false;
+        }
       }
     }
   }
@@ -252,9 +258,10 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
     /* Check each tile */
     for(int i = 0; i < w; i++)
       for(int j = 0; j < h; j++)
-        if(map->tiles[x+i][y+j]->getThing(
-                        thing->getMatrix()->getRenderDepth(i, j)) != NULL)
-          valid = false;
+        if(!thing->isAllNull(i, j))
+          if(map->tiles[x+i][y+j]->getThing(
+                          thing->getMatrix()->getRenderDepth(i, j)) != NULL)
+            valid = false;
   }
 
   /* If valid, place thing */

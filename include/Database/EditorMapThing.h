@@ -88,7 +88,7 @@ public:
   virtual int getID() const;
 
   /* Returns the matrix in the thing class */
-  EditorMatrix* getMatrix();
+  EditorMatrix* getMatrix() const;
 
   /* Gets the user submitted name of the thing */
   virtual QString getName() const;
@@ -100,6 +100,9 @@ public:
   /* Returns the x and y coordinate of the thing */
   int getX();
   int getY();
+
+  /* Returns if the tile sprites in all matrixes at that x, y are null */
+  virtual bool isAllNull(int x, int y) const;
 
   /* Returns if the thing is using the base event */
   bool isBaseEvent() const;

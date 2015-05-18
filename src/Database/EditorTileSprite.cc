@@ -221,7 +221,7 @@ void EditorTileSprite::paint(QPainter* painter,
 
   /* Render the passability */
   if(visible_passability && tile_icons != NULL &&
-     getRenderDepth() == 0 && frameCount() > 0)
+     getRenderDepth() == 0 && frameCount() > 0 && !isAllNull())
   {
     /* North Passability */
     if(getPassability(Direction::NORTH))
@@ -264,7 +264,7 @@ void EditorTileSprite::paint(QPainter* painter,
                       QColor(0, 0, 0, 128));
 
     /* Paint the text */
-    if(frameCount() > 0)
+    if(frameCount() > 0 && !isAllNull())
     {
       QFont font;
       font.setBold(true);
