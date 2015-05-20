@@ -223,8 +223,13 @@ void InstanceDialog::createLayout()
 
   /* The button control */
   layout->setRowMinimumHeight(6, 15);
+  QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
+  btn_base_edit->setMaximumWidth(75);
+  connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
+  layout->addWidget(btn_base_edit, 7, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
+  btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   layout->addWidget(btn_ok, 7, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
@@ -351,6 +356,37 @@ void InstanceDialog::closeEvent(QCloseEvent* event)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Button slot on the edit base button. Opens up the edit dialog
+ *              and locks the instance dialog until that edit is complete.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void InstanceDialog::buttonBaseEdit()
+{
+  if(thing_original != NULL)
+  {
+    /* Create pop-up to decide what to do with edit */
+    QMessageBox msg_box;
+    msg_box.setWindowTitle("Save?");
+    msg_box.setText("Save instance before editing base?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                               QMessageBox::Cancel);
+    int status = msg_box.exec();
+    if(status == QMessageBox::Yes)
+    {
+      buttonOk();
+      emit editBase(thing_original->getBaseThing());
+    }
+    else if(status == QMessageBox::No)
+    {
+      buttonCancel();
+      emit editBase(thing_original->getBaseThing());
+    }
+  }
+}
 
 /*
  * Description: Button slot on the cancel button. Just closes the dialog and

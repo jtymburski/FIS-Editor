@@ -98,6 +98,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Edit base signal */
+  void editBase(EditorMapThing* thing);
+
   /* Ok pressed */
   void ok();
 
@@ -112,6 +115,7 @@ signals:
  *===========================================================================*/
 public slots:
   /* Button control triggers */
+  void buttonBaseEdit();
   void buttonCancel();
   void buttonEditNodes();
   void buttonOk();

@@ -146,14 +146,19 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
     if(instance_dialog != NULL)
     {
       disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+      disconnect(instance_dialog,
+                 SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+                 this, SLOT(editBaseThing(EditorMapThing*)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+            this, SLOT(editBaseThing(EditorMapThing*)));
     instance_dialog->show();
   }
   /* -- Is a base -- */
@@ -258,6 +263,17 @@ void MapThingView::deleteInstance()
       editor_map->unsetThing(index, true);
     }
   }
+}
+
+/*
+ * Description: Triggers by instance dialog to edit base of the instant.
+ *
+ * Inputs: EditorMapThing* base - the base to edit
+ * Output: none
+ */
+void MapThingView::editBaseThing(EditorMapThing* base)
+{
+  qDebug() << "TODO EDIT BASE: " << base->getID();
 }
 
 /*

@@ -96,6 +96,9 @@ public slots:
   /* Delete thing instance */
   void deleteInstance();
 
+  /* Edit the base thing */
+  void editBaseThing(EditorMapThing* base);
+
   /* Edit thing instance */
   void editInstance();
 
