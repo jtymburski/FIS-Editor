@@ -134,9 +134,11 @@ public slots:
 public:
   /* Adds a path to the Editor Matrix. It can handle matrix format file names */
   bool addPath(QString path, int x = 0, int y = 0, bool hflip = false, 
-               bool vflip = false, bool reset = false);
+               bool vflip = false, bool reset = false,
+               bool clear_modified = false);
   bool addPath(QString root_path, QString file_name, int x = 0, int y = 0, 
-               bool hflip = false, bool vflip = false, bool reset = false);
+               bool hflip = false, bool vflip = false, bool reset = false,
+               bool clear_modified = false);
 
   /* Cleans the scene. Used for when adding or removing from view */
   void cleanScene(bool just_hover = false);

@@ -273,7 +273,8 @@ void MapThingView::deleteInstance()
  */
 void MapThingView::editBaseThing(EditorMapThing* base)
 {
-  qDebug() << "TODO EDIT BASE: " << base->getID();
+  if(base != NULL)
+    editThing(base);
 }
 
 /*

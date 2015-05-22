@@ -822,6 +822,7 @@ QVector<QPair<QString,QString>> EditorSprite::getPathSet()
 
   /* Try to execute a smart parse first */
   int index = getSmartCount();
+
   if(index > 0)
   {
     QString png = ".png";
@@ -885,6 +886,7 @@ int EditorSprite::getSmartCount()
        no_end.at(no_end.size() - 2).isDigit())
     {
       int index = 1;
+      int ref_index = no_end.right(2).toInt();
 
       for(int i = 1; !finished && (i < frame_info.size()); i++)
       {
@@ -900,7 +902,8 @@ int EditorSprite::getSmartCount()
            frame_info[i].vflip == frame_info.front().vflip &&
            frame_info[i].rotate90 == frame_info.front().rotate90 &&
            frame_info[i].rotate180 == frame_info.front().rotate180 &&
-           frame_info[i].rotate270 == frame_info.front().rotate270)
+           frame_info[i].rotate270 == frame_info.front().rotate270 &&
+           sub.right(2).toInt() == (ref_index + index))
         {
           index++;
         }

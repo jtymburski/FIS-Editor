@@ -151,6 +151,8 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
       disconnect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
                  this, SIGNAL(pathEditStart(EditorNPCPath*)));
+      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+                 this, SLOT(editBaseNPC(EditorMapThing*)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
@@ -159,6 +161,8 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     connect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
             this, SIGNAL(pathEditStart(EditorNPCPath*)));
+    connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+            this, SLOT(editBaseNPC(EditorMapThing*)));
     instance_dialog->show();
   }
   /* -- Is a base -- */
@@ -263,6 +267,18 @@ void MapNPCView::deleteInstance()
       editor_map->unsetNPC(index, true);
     }
   }
+}
+
+/*
+ * Description: Triggers by instance dialog to edit base of the instant.
+ *
+ * Inputs: EditorMapThing* base - the base npc to edit
+ * Output: none
+ */
+void MapNPCView::editBaseNPC(EditorMapThing* base)
+{
+  if(base != NULL)
+    editNPC((EditorMapNPC*)base);
 }
 
 /*

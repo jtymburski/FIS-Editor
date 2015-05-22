@@ -147,12 +147,16 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
       disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
       disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+                 this, SLOT(editBasePerson(EditorMapThing*)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+            this, SLOT(editBasePerson(EditorMapThing*)));
     instance_dialog->show();
   }
   /* -- Is a base -- */
@@ -257,6 +261,18 @@ void MapPersonView::deleteInstance()
       editor_map->unsetPerson(index, true);
     }
   }
+}
+
+/*
+ * Description: Triggers by instance dialog to edit base of the instant.
+ *
+ * Inputs: EditorMapThing* base - the base person to edit
+ * Output: none
+ */
+void MapPersonView::editBasePerson(EditorMapThing* base)
+{
+  if(base != NULL)
+    editPerson((EditorMapPerson*)base);
 }
 
 /*

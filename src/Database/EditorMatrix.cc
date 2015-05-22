@@ -488,7 +488,7 @@ void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
 {
   if(!result_path.isEmpty() && place_x >= 0 && place_y >= 0)
   {
-    addPath(result_path, place_x, place_y, hflip, vflip);
+    addPath(result_path, place_x, place_y, hflip, vflip, false, true);
     emit matrixChange();
   }
 }
@@ -508,16 +508,18 @@ void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
  *         bool hflip - true if all the sprites should be horizontally flipped
  *         bool vflip - true if all the sprites should be vertically flipped
  *         bool reset - true if the entire matrix should be cleared first
+ *         bool clear_modified - should the sprites being modified by the matrix
+ *                               be cleared prior to the modification
  * Output: bool - true if it was added
  */
 bool EditorMatrix::addPath(QString path, int x, int y, bool hflip, 
-                           bool vflip, bool reset)
+                           bool vflip, bool reset, bool clear_modified)
 {
   if(!path.isEmpty())
   {
     QStringList path_set = path.split(QDir::separator());
     return addPath(path.remove(path_set.last()), path_set.last(), x, y, 
-                   hflip, vflip, reset);
+                   hflip, vflip, reset, clear_modified);
   }
 
   return false;
@@ -536,10 +538,13 @@ bool EditorMatrix::addPath(QString path, int x, int y, bool hflip,
  *         bool hflip - true if all the sprites should be horizontally flipped
  *         bool vflip - true if all the sprites should be vertically flipped
  *         bool reset - true if the entire matrix should be cleared first
+ *         bool clear_modified - should the sprites being modified by the matrix
+ *                               be cleared prior to the modification
  * Output: bool - true if it was added
  */
 bool EditorMatrix::addPath(QString root_path, QString file_name, 
-                           int x, int y, bool hflip, bool vflip, bool reset)
+                           int x, int y, bool hflip, bool vflip, bool reset,
+                           bool clear_modified)
 {
   if(!root_path.isEmpty() && !file_name.isEmpty() && x >= 0 && y >= 0)
   {
@@ -559,10 +564,16 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
 
     /* Go through paths and add them */
     for(uint16_t i = 0; i < name_set.size(); i++)
+    {
       for(uint16_t j = 0; j < name_set[i].size(); j++)
+      {
+        if(clear_modified)
+          matrix[x + i][y + j]->deleteAllFrames();
         matrix[x + i][y + j]->addPath(root_path + 
                                       QString::fromStdString(name_set[i][j]),
                                       hflip, vflip);
+      }
+    }
 
     emit matrixChange();
     return true;

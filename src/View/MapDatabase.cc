@@ -107,12 +107,12 @@ void MapDatabase::setupMain()
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(widget_main);
   layout->addWidget(view_top);
+  layout->addLayout(hlayout);
   layout->addWidget(view_raw);
   layout->addWidget(view_sprite);
   layout->addWidget(view_thing);
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
-  layout->addLayout(hlayout);
 }
 
 /* Set-up path editor widget */

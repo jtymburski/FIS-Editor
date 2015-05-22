@@ -98,6 +98,9 @@ public slots:
   /* Delete npc instance */
   void deleteInstance();
 
+  /* Edit the base npc */
+  void editBaseNPC(EditorMapThing* base);
+
   /* Edit npc instance */
   void editInstance();
 
