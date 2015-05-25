@@ -1017,12 +1017,15 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     }
     else if(current_map != NULL)
     {
-      count += current_map->getSaveCount();
+      count += current_map->getSaveCount(sub_index);
     }
 
     /* Create the new save dialog */
     QProgressDialog progress("", "", 0, count, this);
-    progress.setWindowTitle("Saving");
+    if(game_only)
+      progress.setWindowTitle("Exporting");
+    else
+      progress.setWindowTitle("Saving");
     progress.setCancelButton(NULL);
     progress.setWindowModality(Qt::WindowModal);
     progress.show();

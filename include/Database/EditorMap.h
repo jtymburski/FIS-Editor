@@ -256,7 +256,7 @@ public:
   QVector<EditorMapPerson*> getPersons(int sub_map = -1);
 
   /* Returns the number of things that will be saved */
-  int getSaveCount(bool single = false);
+  int getSaveCount(int sub_index = -1);
 
   /* Returns the set layers in a string */
   QString getSetLayers(int map_index, int x, int y);

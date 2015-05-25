@@ -2307,10 +2307,10 @@ QVector<EditorMapPerson*> EditorMap::getPersons(int sub_map)
  * Description: Returns the number of items that will be saved in the given
  *              map. Used for determing how far along the save process is.
  *
- * Inputs: bool single - true if only loading one sub-map?
+ * Inputs: int sub_index - sub index for loading - if relevant
  * Output: int - the total number of items to be saved in the map
  */
-int EditorMap::getSaveCount(bool single)
+int EditorMap::getSaveCount(int sub_index)
 {
   int total = 0;
 
@@ -2319,10 +2319,16 @@ int EditorMap::getSaveCount(bool single)
         + base_items.size();
 
   /* Get count from sub-maps */
+  int start_index = 0;
   int limit = sub_maps.size();
-  if(single)
-    limit = 1;
-  for(int i = 0; i < limit; i++)
+  if(sub_index > 0 && sub_index < sub_maps.size())
+  {
+    start_index = sub_index;
+    limit = start_index + 1;
+  }
+
+  /* Go through the subs */
+  for(int i = start_index; i < limit; i++)
   {
     /* Add thing(s) instances */
     total += sub_maps[i]->things.size() + sub_maps[i]->persons.size() +
