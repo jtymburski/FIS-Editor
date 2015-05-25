@@ -13,6 +13,7 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QObject>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QString>
 #include <QVector>
@@ -118,9 +119,10 @@ protected:
                 bool existing = true);
 
   /* Adds tile sprite data */
-  void addTileSpriteData(FileHandler* fh, int index, EditorEnumDb::Layer layer);
-  void addTileSpriteData(FileHandler* fh, SubMapInfo* map,
-                         EditorEnumDb::Layer layer);
+  void addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
+                         int index, EditorEnumDb::Layer layer);
+  void addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
+                         SubMapInfo* map, EditorEnumDb::Layer layer);
 
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
@@ -143,7 +145,7 @@ protected:
   bool resizeMap(SubMapInfo* map, int width, int height);
 
   /* Saves the sub-map */
-  void saveSubMap(FileHandler* fh, bool game_only,
+  void saveSubMap(FileHandler* fh, QProgressDialog* save_dialog, bool game_only,
                   SubMapInfo* map, bool first = false);
 
   /* Sets the hover thing, based on the passed in rect */
@@ -253,6 +255,9 @@ public:
                                  bool shortened = false);
   QVector<EditorMapPerson*> getPersons(int sub_map = -1);
 
+  /* Returns the number of things that will be saved */
+  int getSaveCount(bool single = false);
+
   /* Returns the set layers in a string */
   QString getSetLayers(int map_index, int x, int y);
 
@@ -282,7 +287,8 @@ public:
   bool resizeMap(int index, int width, int height);
 
   /* Saves the map */
-  void save(FileHandler* fh, bool game_only = false, int sub_index = -1);
+  void save(FileHandler* fh, QProgressDialog* save_dialog,
+            bool game_only = false, int sub_index = -1);
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
   bool setCurrentItem(int index); // TODO

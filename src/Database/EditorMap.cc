@@ -289,14 +289,15 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
  *              map index in the layer.
  *
  * Inputs: FileHandler* fh - the file handling control pointer
+ *         QProgressDialog* save_dialog - dialog for handling save status
  *         int index - index of the sub-map
  *         EditorEnumDb::Layer layer - the layer to insert the data into
  * Output: none
  */
-void EditorMap::addTileSpriteData(FileHandler* fh, int index,
-                                  EditorEnumDb::Layer layer)
+void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
+                                  int index, EditorEnumDb::Layer layer)
 {
-  addTileSpriteData(fh, sub_maps[index], layer);
+  addTileSpriteData(fh, save_dialog, sub_maps[index], layer);
 }
 
 /*
@@ -304,12 +305,13 @@ void EditorMap::addTileSpriteData(FileHandler* fh, int index,
  *              map in the layer.
  *
  * Inputs: FileHandler* fh - the file handling control pointer
+ *         QProgressDialog* save_dialog - dialog for handling save status
  *         SubMapInfo* map - the sub map reference pointer
  *         EditorEnumDb::Layer layer - the layer to insert the data into
  * Output: none
  */
-void EditorMap::addTileSpriteData(FileHandler* fh, SubMapInfo* map,
-                                  EditorEnumDb::Layer layer)
+void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
+                                  SubMapInfo* map, EditorEnumDb::Layer layer)
 {
   QList<QPoint> empty_set;
   int max_pass = EditorHelpers::getPassabilityNum(true, true, true, true);
@@ -369,6 +371,9 @@ void EditorMap::addTileSpriteData(FileHandler* fh, SubMapInfo* map,
         fh->writeXmlElementEnd();
       }
     }
+
+    /* Save status */
+    save_dialog->setValue(save_dialog->value() + map->tiles.size());
   }
 }
 
@@ -908,13 +913,14 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
  *              sub-map a main.
  *
  * Inputs: FileHandler* fh - the file handling control pointer
+ *         QProgressDialog* save_dialog - dialog used for saving status
  *         bool game_only - only game applicable data
  *         SubMapInfo* map - the sub map struct
  *         bool first - only the first used
  * Output: none
  */
-void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
-                           SubMapInfo* map, bool first)
+void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
+                           bool game_only, SubMapInfo* map, bool first)
 {
   /* Initial element */
   if(first)
@@ -930,59 +936,68 @@ void EditorMap::saveSubMap(FileHandler* fh, bool game_only,
 
   /* Add base tiles */
   fh->writeXmlElement("base");
-  addTileSpriteData(fh, map, EditorEnumDb::BASE);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::BASE);
   fh->writeXmlElementEnd();
 
   /* Add enhancer tiles */
   fh->writeXmlElement("enhancer");
-  addTileSpriteData(fh, map, EditorEnumDb::ENHANCER);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::ENHANCER);
   fh->writeXmlElementEnd();
 
   /* Add lower tiles */
   fh->writeXmlElement("lower", "index", "0");
-  addTileSpriteData(fh, map, EditorEnumDb::LOWER1);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER1);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "1");
-  addTileSpriteData(fh, map, EditorEnumDb::LOWER2);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER2);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "2");
-  addTileSpriteData(fh, map, EditorEnumDb::LOWER3);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER3);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "3");
-  addTileSpriteData(fh, map, EditorEnumDb::LOWER4);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER4);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "4");
-  addTileSpriteData(fh, map, EditorEnumDb::LOWER5);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER5);
   fh->writeXmlElementEnd();
 
   /* Add upper tiles */
   fh->writeXmlElement("upper", "index", "0");
-  addTileSpriteData(fh, map, EditorEnumDb::UPPER1);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER1);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "1");
-  addTileSpriteData(fh, map, EditorEnumDb::UPPER2);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER2);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "2");
-  addTileSpriteData(fh, map, EditorEnumDb::UPPER3);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER3);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "3");
-  addTileSpriteData(fh, map, EditorEnumDb::UPPER4);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER4);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "4");
-  addTileSpriteData(fh, map, EditorEnumDb::UPPER5);
+  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER5);
   fh->writeXmlElementEnd();
 
   /* Add things */
   for(int i = 0; i < map->things.size(); i++)
+  {
     map->things[i]->save(fh, game_only);
+    save_dialog->setValue(save_dialog->value()+1);
+  }
 
   /* Add persons */
   for(int i = 0; i < map->persons.size(); i++)
+  {
     map->persons[i]->save(fh, game_only);
+    save_dialog->setValue(save_dialog->value()+1);
+  }
 
   /* Add npcs */
   for(int i = 0; i < map->npcs.size(); i++)
+  {
     map->npcs[i]->save(fh, game_only);
+    save_dialog->setValue(save_dialog->value()+1);
+  }
 
   /* End element */
   fh->writeXmlElementEnd();
@@ -2289,6 +2304,40 @@ QVector<EditorMapPerson*> EditorMap::getPersons(int sub_map)
 }
 
 /*
+ * Description: Returns the number of items that will be saved in the given
+ *              map. Used for determing how far along the save process is.
+ *
+ * Inputs: bool single - true if only loading one sub-map?
+ * Output: int - the total number of items to be saved in the map
+ */
+int EditorMap::getSaveCount(bool single)
+{
+  int total = 0;
+
+  /* Get count from base items */
+  total += sprites.size() + base_things.size() + base_persons.size()
+        + base_items.size();
+
+  /* Get count from sub-maps */
+  int limit = sub_maps.size();
+  if(single)
+    limit = 1;
+  for(int i = 0; i < limit; i++)
+  {
+    /* Add thing(s) instances */
+    total += sub_maps[i]->things.size() + sub_maps[i]->persons.size() +
+             sub_maps[i]->npcs.size() + sub_maps[i]->items.size();
+
+    /* Add total number of sprites * 12 layers
+     * (base, enhancer, lower x 5, upper x 5) */
+    if(sub_maps[i]->tiles.size() > 0)
+      total += 12 * sprites.size() * sub_maps[i]->tiles.size();
+  }
+
+  return total;
+}
+
+/*
  * Description: Returns the active layers in the given tile, in comma delimited
  *              string format.
  *
@@ -2679,11 +2728,13 @@ bool EditorMap::resizeMap(int index, int width, int height)
  * Description: Saves the map data to the file handling pointer.
  *
  * Inputs: FileHandler* fh - the file handling pointer
+ *         QProgressDialog* dialog - the dialog that holds the amount saved
  *         bool game_only - true if the data should include game only relevant
  *         int sub_index - the sub map index to save
  * Output: none
  */
-void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
+void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
+                     bool game_only, int sub_index)
 {
   if(fh != NULL)
   {
@@ -2693,30 +2744,42 @@ void EditorMap::save(FileHandler* fh, bool game_only, int sub_index)
 
     /* Add sprites */
     for(int i = 0; i < sprites.size(); i++)
+    {
       sprites[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
 
     /* Add things */
     for(int i = 0; i < base_things.size(); i++)
+    {
       base_things[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
 
     /* Add persons */
     for(int i = 0; i < base_persons.size(); i++)
+    {
       base_persons[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
 
     /* Add npcs */
     for(int i = 0; i < base_npcs.size(); i++)
+    {
       base_npcs[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
 
     /* Save all maps if sub_index is out of range */
     if(sub_index <= 0 || sub_index >= sub_maps.size())
     {
       for(int i = 0; i < sub_maps.size(); i++)
-        saveSubMap(fh, game_only, sub_maps[i], i == 0);
+        saveSubMap(fh, save_dialog, game_only, sub_maps[i], i == 0);
     }
     /* Otherwise, just save the only map */
     else
     {
-      saveSubMap(fh, game_only, sub_maps[sub_index], true);
+      saveSubMap(fh, save_dialog, game_only, sub_maps[sub_index], true);
     }
 
     fh->writeXmlElementEnd();

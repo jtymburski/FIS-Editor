@@ -784,6 +784,14 @@ void GameDatabase::load(FileHandler* fh)
     bool read_success = true;
     bool success = true;
 
+    /* Initiate the progress dialog for loading */
+    QProgressDialog progress("", "", 0, fh->getCount(), this);
+    progress.setWindowTitle("Loading");
+    progress.setCancelButton(NULL);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.show();
+    int progress_index = 0;
+
     /* Loop through all elements */
     do
     {
@@ -818,6 +826,7 @@ void GameDatabase::load(FileHandler* fh)
         }
       }
 
+      progress.setValue(++progress_index);
     } while(!done);
   }
 
@@ -999,18 +1008,39 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
 {
   if(fh != NULL)
   {
+    /* Determine total number of things to be saved */
+    int count = 0;
+    if(!selected_map)
+    {
+      for(int i = 0; i < data_map.size(); i++)
+        count += data_map[i]->getSaveCount();
+    }
+    else if(current_map != NULL)
+    {
+      count += current_map->getSaveCount();
+    }
+
+    /* Create the new save dialog */
+    QProgressDialog progress("", "", 0, count, this);
+    progress.setWindowTitle("Saving");
+    progress.setCancelButton(NULL);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.show();
+    progress.setValue(0);
+
+    /* Write starting element */
     fh->writeXmlElement("game");
 
     /* If not the selected map, save all the maps */
     if(!selected_map)
     {
       for(int i = 0; i < data_map.size(); i++)
-        data_map[i]->save(fh, game_only);
+        data_map[i]->save(fh, &progress, game_only);
     }
     /* Otherwise, save the single map */
     else if(current_map != NULL)
     {
-      current_map->save(fh, game_only, sub_index);
+      current_map->save(fh, &progress, game_only, sub_index);
     }
 
     fh->writeXmlElementEnd();

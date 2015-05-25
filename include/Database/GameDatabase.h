@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QVector>
