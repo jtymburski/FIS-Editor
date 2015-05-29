@@ -790,7 +790,7 @@ void GameDatabase::load(FileHandler* fh)
     progress.setCancelButton(NULL);
     progress.setWindowModality(Qt::WindowModal);
     progress.show();
-    int progress_index = 0;
+    progress.setValue(0);
 
     /* Loop through all elements */
     do
@@ -826,7 +826,7 @@ void GameDatabase::load(FileHandler* fh)
         }
       }
 
-      progress.setValue(++progress_index);
+      progress.setValue(progress.value() + 1);
     } while(!done);
   }
 
