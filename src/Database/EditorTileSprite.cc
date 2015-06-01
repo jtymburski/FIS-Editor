@@ -137,6 +137,22 @@ bool EditorTileSprite::getPassability(Direction dir)
 }
 
 /*
+ * Description: Returns an integer between 0 and 15 which is a binary
+ *              representation of the 4 bits of direction. A 1 indicates that
+ *              direction is passable.
+ *
+ * Inputs: none
+ * Output: int - the binary to base 10 integer representation of passabilities
+ */
+int EditorTileSprite::getPassabilityNum()
+{
+  return EditorHelpers::getPassabilityNum(getPassability(Direction::NORTH),
+                                          getPassability(Direction::EAST),
+                                          getPassability(Direction::SOUTH),
+                                          getPassability(Direction::WEST));
+}
+
+/*
  * Description: Returns the render depth of the EditorTile sprite. This is a 
  *              number from 0 to X, of the point it is rendered on the map.
  *

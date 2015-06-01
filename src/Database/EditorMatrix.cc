@@ -1236,41 +1236,82 @@ void EditorMatrix::load(XmlData data, int index)
   }
   else if(element == "x" && data.getElement(index + 1) == "y")
   {
-    int x = QString::fromStdString(data.getKeyValue(index)).toInt();
-    int y = QString::fromStdString(data.getKeyValue(index + 1)).toInt();
-
-    if(x >= 0 && y >= 0)
+    /* Get contents and ensure it conforms to standard - comma delimited list */
+    QString x_set = QString::fromStdString(data.getKeyValue(index));
+    QString y_set = QString::fromStdString(data.getKeyValue(index + 1));
+    QStringList x_split = x_set.split(",");
+    QStringList y_split = y_set.split(",");
+    if(x_split.size() == y_split.size())
     {
       /* Determine type of element */
-      QString define_elem = QString::fromStdString(data.getElement(index+2));
+      QString define_elem = QString::fromStdString(data.getElement(index + 2));
       QStringList element_list = define_elem.split("_");
+      bool hflip = false;
+      bool vflip = false;
       if(element_list.front() == "path")
       {
         /* Determine flips */
-        bool hflip = false;
-        bool vflip = false;
         if(element_list.contains("hf"))
           hflip = true;
         if(element_list.contains("vf"))
           vflip = true;
-
-        /* Add path */
-        addPath(EditorHelpers::getProjectDir() + QDir::separator() +
-                QString::fromStdString(data.getDataString()),
-                x, y, hflip, vflip);
       }
-      else if(define_elem == "passability")
+
+      /* Path determination */
+      QString base_str = QString::fromStdString(data.getDataString());
+      QString path_combined = EditorHelpers::getProjectDir() +
+                              QDir::separator() + base_str;
+
+      /* Loop through pairs */
+      for(int i = 0; i < x_split.size(); i++)
       {
-        /* Ensure matrix is large enough */
-        if(getWidth() <= x || getHeight() <= y)
+        /* Split the pair - dash delimited */
+        QStringList x_pair = x_split[i].split("-");
+        QStringList y_pair = y_split[i].split("-");
+
+        /* X set */
+        int x1 = x_pair.first().toInt();
+        int x2 = x_pair.last().toInt();
+        if(x1 > x2)
         {
-          increaseWidth(x - getWidth() + 1);
-          increaseHeight(y - getHeight() + 1);
+          int temp = x1;
+          x1 = x2;
+          x2 = temp;
         }
 
-        /* Set passability */
-        matrix[x][y]->setPassability(
-                                  QString::fromStdString(data.getDataString()));
+        /* Y set */
+        int y1 = y_pair.first().toInt();
+        int y2 = y_pair.last().toInt();
+        if(y1 > y2)
+        {
+          int temp = y1;
+          y1 = y2;
+          y2 = temp;
+        }
+
+        /* Ensure matrix is large enough */
+        if(getWidth() <= x2 || getHeight() <= y2)
+        {
+          increaseWidth(x2 - getWidth() + 1);
+          increaseHeight(y2 - getHeight() + 1);
+        }
+
+        /* Loop through x,y set */
+        for(int j = x1; j <= x2; j++)
+        {
+          for(int k = y1; k <= y2; k++)
+          {
+            /* Determine type of element */
+            if(element_list.front() == "path")
+            {
+              addPath(path_combined, j, k, hflip, vflip);
+            }
+            else if(define_elem == "passability")
+            {
+              matrix[j][k]->setPassability(base_str);
+            }
+          }
+        }
       }
     }
   }
@@ -1560,6 +1601,13 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
       }
     }
 
+    /* Set up passability matrix */
+    QVector<QVector<QPair<int,int>>> pass_set;
+    int pass_max = EditorHelpers::getPassabilityNum(true, true, true, true);
+    QVector<QPair<int,int>> blank_set;
+    for(int i = 0; i <= pass_max; i++)
+      pass_set.push_back(blank_set);
+
     /* Loop through matrix and add paths and passability remaining */
     for(int i = 0; i < matrix.size(); i++)
     {
@@ -1569,43 +1617,46 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
         if(matrix[i][j]->frameCount() != 0)
         {
           /* Do check for both to see if elements should be written */
+          int pass_num = matrix[i][j]->getPassabilityNum();
           bool passability = matrix[i][j]->getRenderDepth() == 0 &&
-                             (matrix[i][j]->getPassability(Direction::NORTH) ||
-                              matrix[i][j]->getPassability(Direction::EAST) ||
-                              matrix[i][j]->getPassability(Direction::SOUTH) ||
-                              matrix[i][j]->getPassability(Direction::WEST));
-          bool path = !skip_set[i][j];
+                             pass_num > 0;
 
-          /* Add element, if relevant */
-          if(path || passability)
+          /* Add path(s), if relevant */
+          if(!skip_set[i][j])
           {
             fh->writeXmlElement("x", "index", i);
             fh->writeXmlElement("y", "index", j);
-          }
 
-          /* Adds paths */
-          if(path)
+            /* Path data */
             for(int k = 0; k < set[i][j].size(); k++)
               fh->writeXmlData(set[i][j][k].first.toStdString(),
                                set[i][j][k].second.toStdString());
 
-          /* Add passability */
-          if(passability)
-            fh->writeXmlData("passability",
-                             EditorHelpers::getPassabilityStr(
-                                matrix[i][j]->getPassability(Direction::NORTH),
-                                matrix[i][j]->getPassability(Direction::EAST),
-                                matrix[i][j]->getPassability(Direction::SOUTH),
-                                matrix[i][j]->getPassability(Direction::WEST))
-                                                                .toStdString());
-
-          /* Close element, if relevant */
-          if(path || passability)
-          {
             fh->writeXmlElementEnd();
             fh->writeXmlElementEnd();
           }
+
+          /* Passability handling */
+          if(passability)
+            pass_set[pass_num].push_back(QPair<int,int>(i, j));
         }
+      }
+    }
+
+    /* Optimize and Push passability data to file */
+    QVector<QPair<QString,QString>> index_set =
+                                        EditorHelpers::optimizePoints(pass_set);
+    for(int i = 1; i < index_set.size(); i++)
+    {
+      /* Don't proceed if pair is empty */
+      if(!index_set[i].first.isEmpty())
+      {
+        fh->writeXmlElement("x", "index", index_set[i].first.toStdString());
+        fh->writeXmlElement("y", "index", index_set[i].second.toStdString());
+        fh->writeXmlData("passability",
+                         EditorHelpers::getPassabilityStr(i).toStdString());
+        fh->writeXmlElementEnd();
+        fh->writeXmlElementEnd();
       }
     }
 
@@ -1615,10 +1666,10 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
     {
       fh->writeXmlElement("sprite");
       sprite->save(fh, game_only, true);
-      fh->writeXmlElementEnd();
+      fh->writeXmlElementEnd(); /* </sprite> */
     }
 
-    fh->writeXmlElementEnd();
+    fh->writeXmlElementEnd(); /* </sprites> */
 
     /* Save the render matrix */
     if(!no_render)

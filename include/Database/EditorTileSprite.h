@@ -66,6 +66,7 @@ public:
   /* Returns the passability */
   QString getPassability();
   bool getPassability(Direction dir);
+  int getPassabilityNum();
 
   /* Returns the render depth */
   uint8_t getRenderDepth();

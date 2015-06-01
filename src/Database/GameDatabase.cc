@@ -789,8 +789,12 @@ void GameDatabase::load(FileHandler* fh)
     progress.setWindowTitle("Loading");
     progress.setCancelButton(NULL);
     progress.setWindowModality(Qt::WindowModal);
+    int value = 0;
+    progress.setValue(value);
+    progress.setMinimumDuration(0);
+    progress.setWindowFlags(Qt::Window | Qt::CustomizeWindowHint |
+                            Qt::WindowTitleHint| Qt::WindowSystemMenuHint);
     progress.show();
-    progress.setValue(0);
 
     /* Loop through all elements */
     do
@@ -826,7 +830,7 @@ void GameDatabase::load(FileHandler* fh)
         }
       }
 
-      progress.setValue(progress.value() + 1);
+      progress.setValue(++value);
     } while(!done);
   }
 
@@ -1028,8 +1032,11 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
       progress.setWindowTitle("Saving");
     progress.setCancelButton(NULL);
     progress.setWindowModality(Qt::WindowModal);
-    progress.show();
+    progress.setMinimumDuration(0);
     progress.setValue(0);
+    progress.setWindowFlags(Qt::Window | Qt::CustomizeWindowHint |
+                            Qt::WindowTitleHint| Qt::WindowSystemMenuHint);
+    progress.show();
 
     /* Write starting element */
     fh->writeXmlElement("game");
