@@ -119,10 +119,10 @@ protected:
                 bool existing = true);
 
   /* Adds tile sprite data */
+  void addTilePassData(FileHandler* fh, QProgressDialog* save_dialog,
+                       QList<QList<QPoint>> data_set);
   void addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
-                         int index, EditorEnumDb::Layer layer);
-  void addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
-                         SubMapInfo* map, EditorEnumDb::Layer layer);
+                         QList<QList<QPoint>> data_set);
 
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
@@ -224,6 +224,9 @@ public:
   QVector<QString> getMapList();
   QString getMapNameList(int index);
   QVector<SubMapInfo*> getMaps();
+
+  /* Returns the max sprite ID */
+  int getMaxSpriteID();
 
   /* Returns the name of the map set */
   virtual QString getName() const;

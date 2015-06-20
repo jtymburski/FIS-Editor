@@ -814,11 +814,11 @@ QString EditorSprite::getPath(int frame_num)
  *              has) and the second is the actual path.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - the returned path vector
+ * Output: QList<QPair<QString,QString>> - the returned path list
  */
-QVector<QPair<QString,QString>> EditorSprite::getPathSet()
+QList<QPair<QString,QString>> EditorSprite::getPathSet()
 {
-  QVector<QPair<QString,QString>> frame_stack;
+  QList<QPair<QString,QString>> frame_stack;
 
   /* Try to execute a smart parse first */
   int index = getSmartCount();
@@ -1161,7 +1161,7 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
     /* Write frame data */
     if(!core_only)
     {
-      QVector<QPair<QString,QString>> frame_set = getPathSet();
+      QList<QPair<QString,QString>> frame_set = getPathSet();
       for(int i = 0; i < frame_set.size(); i++)
         fh->writeXmlData(frame_set[i].first.toStdString(),
                          frame_set[i].second.toStdString());

@@ -1431,12 +1431,12 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
     fh->writeXmlElement("sprites");
 
     /* Get parsing information */
-    QVector<QVector<QVector<QPair<QString,QString>>>> set;
-    QVector<QVector<bool>> skip_set;
+    QList<QList<QList<QPair<QString,QString>>>> set;
+    QList<QList<bool>> skip_set;
     for(int i = 0; i < matrix.size(); i++)
     {
-      QVector<QVector<QPair<QString,QString>>> row_set;
-      QVector<bool> row_skip;
+      QList<QList<QPair<QString,QString>>> row_set;
+      QList<bool> row_skip;
       for(int j = 0; j < matrix[i].size(); j++)
       {
         row_set.push_back(matrix[i][j]->getPathSet());
@@ -1602,9 +1602,9 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
     }
 
     /* Set up passability matrix */
-    QVector<QVector<QPair<int,int>>> pass_set;
+    QList<QList<QPoint>> pass_set;
     int pass_max = EditorHelpers::getPassabilityNum(true, true, true, true);
-    QVector<QPair<int,int>> blank_set;
+    QList<QPoint> blank_set;
     for(int i = 0; i <= pass_max; i++)
       pass_set.push_back(blank_set);
 
@@ -1638,13 +1638,13 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
 
           /* Passability handling */
           if(passability)
-            pass_set[pass_num].push_back(QPair<int,int>(i, j));
+            pass_set[pass_num].push_back(QPoint(i, j));
         }
       }
     }
 
     /* Optimize and Push passability data to file */
-    QVector<QPair<QString,QString>> index_set =
+    QList<QPair<QString,QString>> index_set =
                                         EditorHelpers::optimizePoints(pass_set);
     for(int i = 1; i < index_set.size(); i++)
     {

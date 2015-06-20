@@ -285,96 +285,75 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
 }
 
 /*
- * Description: Adds tile sprite data to the file handler from the selected sub
- *              map index in the layer.
+ * Description: Adds tile pass data to the file handler from the selected sub
+ *              map index in the layer and optimizes the data set. The data
+ *              set is sorted with the first level is based on the passability
+ *              (0-15 = no pass to N,E,S,W) and the second is a stack of all
+ *              points of that passability.
  *
  * Inputs: FileHandler* fh - the file handling control pointer
  *         QProgressDialog* save_dialog - dialog for handling save status
- *         int index - index of the sub-map
- *         EditorEnumDb::Layer layer - the layer to insert the data into
+ *         QList<QList<QPoint>> data_set - the coordinates of the passability
  * Output: none
  */
-void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
-                                  int index, EditorEnumDb::Layer layer)
+void EditorMap::addTilePassData(FileHandler* fh, QProgressDialog* save_dialog,
+                                QList<QList<QPoint>> data_set)
 {
-  addTileSpriteData(fh, save_dialog, sub_maps[index], layer);
+  /* Optimize */
+  QList<QPair<QString,QString>> pass_set =
+                                        EditorHelpers::optimizePoints(data_set);
+
+  /* Loop through all x,y string pairs for sprite set */
+  for(int i = 1; i < pass_set.size(); i++)
+  {
+    if(!pass_set[i].first.isEmpty())
+    {
+      fh->writeXmlElement("x", "index", pass_set[i].first.toStdString());
+      fh->writeXmlElement("y", "index", pass_set[i].second.toStdString());
+      fh->writeXmlData("passability",
+                       EditorHelpers::getPassabilityStr(i).toStdString());
+      fh->writeXmlElementEnd();
+      fh->writeXmlElementEnd();
+    }
+  }
+
+  /* Save status */
+  save_dialog->setValue(save_dialog->value() + 1);
 }
 
 /*
  * Description: Adds tile sprite data to the file handler from the selected sub
- *              map in the layer.
+ *              map index in the layer and optimizes the data set. The data
+ *              set is sorted with the first level is based on the sprite ID
+ *              and the second is a stack of all points of that sprite ID.
  *
  * Inputs: FileHandler* fh - the file handling control pointer
  *         QProgressDialog* save_dialog - dialog for handling save status
- *         SubMapInfo* map - the sub map reference pointer
- *         EditorEnumDb::Layer layer - the layer to insert the data into
+ *         QList<QList<QPoint>> data_set - the coordinates of the sprites
  * Output: none
  */
 void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
-                                  SubMapInfo* map, EditorEnumDb::Layer layer)
+                                  QList<QList<QPoint>> data_set)
 {
-  QList<QPoint> empty_set;
-  int max_pass = EditorHelpers::getPassabilityNum(true, true, true, true);
-  QString sep = ",";
+  /* Optimize */
+  QList<QPair<QString,QString>> sprite_set =
+                                        EditorHelpers::optimizePoints(data_set);
 
-  for(int i = 0; i < sprites.size(); i++)
+  /* Loop through all x,y string pairs for sprite set */
+  for(int i = 0; i < sprite_set.size(); i++)
   {
-    QList<QList<QPoint>> coords;
-    for(int j = 0; j <= max_pass; j++)
-      coords.push_back(empty_set);
-
-
-    for(int j = 0; j < map->tiles.size(); j++)
+    if(!sprite_set[i].first.isEmpty())
     {
-      for(int k = 0; k < map->tiles[j].size(); k++)
-      {
-        if(map->tiles[j][k]->getSprite(layer) == sprites[i])
-        {
-          int pass = map->tiles[j][k]->getPassabilityNum(layer);
-          coords[pass].push_back(QPoint(j, k));
-        }
-      }
+      fh->writeXmlElement("x", "index", sprite_set[i].first.toStdString());
+      fh->writeXmlElement("y", "index", sprite_set[i].second.toStdString());
+      fh->writeXmlData("sprite_id", QString::number(i).toStdString());
+      fh->writeXmlElementEnd();
+      fh->writeXmlElementEnd();
     }
-
-    /* Parse all coords */
-    for(int j = 0; j < coords.size(); j++)
-    {
-      if(coords[j].size() > 0)
-      {
-        QList<QPair<QString,QString>> str_set =
-                                     EditorHelpers::rectilinearSplit(coords[j]);
-
-        QString x_set = "";
-        QString y_set = "";
-        for(int k = 0; k < str_set.size(); k++)
-        {
-          x_set += str_set[k].first + sep;
-          y_set += str_set[k].second + sep;
-        }
-        x_set.chop(1);
-        y_set.chop(1);
-
-        /* Print the elements */
-        fh->writeXmlElement("x", "index", x_set.toStdString());
-        fh->writeXmlElement("y", "index", y_set.toStdString());
-        fh->writeXmlData("sprite_id",
-                         QString::number(sprites[i]->getID()).toStdString());
-        if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::LOWER1 ||
-           layer == EditorEnumDb::LOWER2 || layer == EditorEnumDb::LOWER3 ||
-           layer == EditorEnumDb::LOWER4 || layer == EditorEnumDb::LOWER5)
-        {
-          QString passability = EditorHelpers::getPassabilityStr(j);
-          if(!passability.isEmpty())
-            fh->writeXmlData("passability", passability.toStdString());
-        }
-        fh->writeXmlElementEnd();
-        fh->writeXmlElementEnd();
-      }
-    }
-
-    /* Save status */
-    save_dialog->setValue(save_dialog->value() + map->tiles.size());
   }
+
+  /* Save status */
+  save_dialog->setValue(save_dialog->value() + 1);
 }
 
 /*
@@ -934,48 +913,99 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   fh->writeXmlData("width", map->tiles.size());
   fh->writeXmlData("height", map->tiles.front().size());
 
+  /* Initial starting point - fill starting arrays */
+  QList<QList<QList<QPoint>>> sprite_stack;
+  QList<QList<QList<QPoint>>> pass_stack;
+  QList<QPoint> blank_stack;
+  int max_layer = EditorEnumDb::NO_LAYER;
+  int max_pass = EditorHelpers::getPassabilityNum(true, true, true, true);
+  int max_sprite = getMaxSpriteID();
+  for(int i = 0; i < max_layer; i++)
+  {
+    QList<QList<QPoint>> sprite_layer;
+    QList<QList<QPoint>> pass_layer;
+
+    /* Fill sprites and passability */
+    if(sprite_layer.size() == 0)
+    {
+      for(int j = 0; j <= max_sprite; j++)
+        sprite_layer.append(blank_stack);
+      for(int j = 0; j <= max_pass; j++)
+        pass_layer.append(blank_stack);
+    }
+
+    /* Append to parents */
+    sprite_stack.append(sprite_layer);
+    pass_stack.append(pass_layer);
+  }
+
+  /* Loop through all tiles and sort the data */
+  for(int i = 0; i < map->tiles.size(); i++)
+  {
+    for(int j = 0; j < map->tiles[i].size(); j++)
+    {
+      /* Loop through and get all layers */
+      for(int k = 0; k < max_layer; k++)
+      {
+        EditorEnumDb::Layer layer = (EditorEnumDb::Layer)k;
+        EditorSprite* sprite = map->tiles[i][j]->getSprite(layer);
+        int pass = map->tiles[i][j]->getPassabilityNum(layer);
+        if(sprite != NULL)
+          sprite_stack[k][sprite->getID()].push_back(QPoint(i, j));
+        if(pass > 0)
+          pass_stack[k][pass].push_back(QPoint(i, j));
+      }
+    }
+  }
+
   /* Add base tiles */
   fh->writeXmlElement("base");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::BASE);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::BASE]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::BASE]);
   fh->writeXmlElementEnd();
 
   /* Add enhancer tiles */
   fh->writeXmlElement("enhancer");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::ENHANCER);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::ENHANCER]);
   fh->writeXmlElementEnd();
 
   /* Add lower tiles */
   fh->writeXmlElement("lower", "index", "0");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER1);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER1]);
+  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER1]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "1");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER2);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER2]);
+  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER2]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "2");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER3);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER3]);
+  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER3]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "3");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER4);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER4]);
+  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER4]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "4");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::LOWER5);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER5]);
+  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER5]);
   fh->writeXmlElementEnd();
 
   /* Add upper tiles */
   fh->writeXmlElement("upper", "index", "0");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER1);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER1]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "1");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER2);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER2]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "2");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER3);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER3]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "3");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER4);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER4]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "4");
-  addTileSpriteData(fh, save_dialog, map, EditorEnumDb::UPPER5);
+  addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER5]);
   fh->writeXmlElementEnd();
 
   /* Add things */
@@ -1711,6 +1741,24 @@ QVector<SubMapInfo*> EditorMap::getMaps()
 }
 
 /*
+ * Description: Returns the highest sprite ID in the map set of sprites.
+ *
+ * Inputs: none
+ * Output: int - the max sprite. -1 if no sprites found
+ */
+int EditorMap::getMaxSpriteID()
+{
+  int max = -1;
+
+  /* Loop through all sprites */
+  for(int i = 0; i < sprites.size(); i++)
+    if(sprites[i]->getID() > max)
+      max = sprites[i]->getID();
+
+  return max;
+}
+
+/*
  * Description: Returns the name of the master editor Map
  *
  * Inputs: none
@@ -2337,7 +2385,7 @@ int EditorMap::getSaveCount(int sub_index)
     /* Add total number of sprites * 12 layers
      * (base, enhancer, lower x 5, upper x 5) */
     if(sub_maps[i]->tiles.size() > 0)
-      total += 12 * sprites.size() * sub_maps[i]->tiles.size();
+      total += 12 + 6; // 12 different tile layers + 6 with passability
   }
 
   return total;

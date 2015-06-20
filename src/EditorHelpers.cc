@@ -158,153 +158,6 @@ int EditorHelpers::getPassabilityNum(bool north, bool east,
 }
 
 /*
- * Description: Takes a set of stacked integer x and y coordinate pairs
- *              organized by passability number and optimizes. Returns a set
- *              of passability organized string pair that's the x and y index
- *              for saving to a file. Order is as follows for input: first vec
- *              is 0-15 integer representation of passability, second vec is
- *              all the integer x, y pairs of that passability. Order is as
- *              follows for output: vector is 0-15 integer representation of
- *              passability of a pair of x index and y index for file saving.
- *
- * Inputs: QVector<QVector<QPair<int,int>>> orig_set - see description
- * Output: QVector<QPair<QString,QString>> - see description
- */
-QVector<QPair<QString,QString>> EditorHelpers::getPassabilityOpt(
-                                      QVector<QVector<QPair<int,int>>> orig_set)
-{
-  /* Set up passability matrix */
-  QVector<QPair<QString,QString>> opt_set;
-  QVector<QVector<QPair<QString,QString>>> pass_strs;
-  int pass_max = EditorHelpers::getPassabilityNum(true, true, true, true);
-  QVector<QPair<QString,QString>> blank_strs;
-  for(int i = 0; i <= pass_max; i++)
-  {
-    pass_strs.push_back(blank_strs);
-    opt_set.push_back(QPair<QString,QString>("", ""));
-  }
-
-  /* Compressing y of passability */
-  QPair<QString,QString> str_set;
-  for(int i = 0; i < orig_set.size(); i++)
-  {
-    /* Only proceed if there is 1 or more pairs */
-    if(orig_set[i].size() > 0)
-    {
-      int start_x = orig_set[i].front().first;
-      int start_y = orig_set[i].front().second;
-      int length = 1;
-
-      /* Loop through remaining pairs */
-      for(int j = 1; j < orig_set[i].size(); j++)
-      {
-        /* Check if the next element doesn't line up */
-        if(start_x != orig_set[i][j].first ||
-           (start_y + length) != orig_set[i][j].second)
-        {
-          str_set.first = QString::number(start_x);
-          str_set.second = QString::number(start_y);
-          if(length > 1)
-            str_set.second += "-" + QString::number(start_y + length - 1);
-          pass_strs[i].push_back(str_set);
-
-          /* Reset */
-          start_x = orig_set[i][j].first;
-          start_y = orig_set[i][j].second;
-          length = 0;
-        }
-
-        /* Increment length */
-        length++;
-      }
-
-      /* Load the final set */
-      str_set.first = QString::number(start_x);
-      str_set.second = QString::number(start_y);
-      if(length > 1)
-        str_set.second += "-" + QString::number(start_y + length - 1);
-      pass_strs[i].push_back(str_set);
-    }
-  }
-
-  /* Compressing x of passability */
-  for(int i = 0; i < pass_strs.size(); i++)
-  {
-    /* Only proceed if there is 1 or more pairs */
-    if(pass_strs[i].size() > 0)
-    {
-      QVector<QPair<QString,QString>> pair_set;
-
-      /* References */
-      QString ref_x = pass_strs[i].front().first;
-      int int_x = ref_x.toInt();
-      QString ref_y = pass_strs[i].front().second;
-      int length = 1;
-
-      /* Loop through remaining pairs */
-      for(int j = 1; j < pass_strs[i].size(); j++)
-      {
-        /* Check if the next element doesn't line up */
-        if(ref_y != pass_strs[i][j].second ||
-           QString::number(int_x + length) != pass_strs[i][j].first)
-        {
-          str_set.first = ref_x;
-          if(length > 1)
-            str_set.first += "-" + QString::number(int_x + length - 1);
-          str_set.second = ref_y;
-          pair_set.push_back(str_set);
-
-          /* Reset */
-          ref_x = pass_strs[i][j].first;
-          int_x = ref_x.toInt();
-          ref_y = pass_strs[i][j].second;
-          length = 0;
-        }
-
-        /* Increment length */
-        length++;
-      }
-
-      /* Load the final set */
-      str_set.first = ref_x;
-      if(length > 1)
-        str_set.first += "-" + QString::number(int_x + length - 1);
-      str_set.second = ref_y;
-      pair_set.push_back(str_set);
-
-      /* Replace the vector */
-      pass_strs[i] = pair_set;
-    }
-  }
-
-  /* Final compression of the passability data */
-  for(int i = 1; i < pass_strs.size(); i++)
-  {
-    /* Only proceed if there are passability pairs */
-    if(pass_strs[i].size() > 0)
-    {
-      QString x_index = "";
-      QString y_index = "";
-
-      /* Go through all pairs and make single string */
-      for(int j = 0; j < pass_strs[i].size(); j++)
-      {
-        x_index += pass_strs[i][j].first + ",";
-        y_index += pass_strs[i][j].second + ",";
-      }
-      x_index.chop(1);
-      y_index.chop(1);
-
-      /* Push to pair */
-      opt_set[i].first = x_index;
-      opt_set[i].second = y_index;
-    }
-  }
-
-  return opt_set;
-}
-
-/*
  * Description: Returns the passability in string format for storing in file.
  *              This puts the directions comma delimited.
  *
@@ -514,150 +367,49 @@ QRectF EditorHelpers::normalizePoints(QPointF point1, QPointF point2)
 }
 
 /*
- * Description: Takes a set of stacked integer x and y coordinate pairs
+ * Description: Takes a set of stacked integer x and y coordinate points
  *              organized in vector stack and optimizes. Returns a set of same
  *              vector stack organized string pair that's the x and y index
  *              for saving to a file. Order is as follows for input: first vec
  *              is sorted by category of pairs, second vec is all the integer x,
  *              y pairs of that category. Order is as follows for output: vector
- *              is sorted category of a pair of x index and y index for file
+ *              is sorted category of a point of x index and y index for file
  *              saving. Category size matches input.
  *
- * Inputs: QVector<QVector<QPair<int,int>>> orig_set - see description
- * Output: QVector<QPair<QString,QString>> - see description
+ * Inputs: QList<QList<QPoint>> orig_set - see description
+ * Output: QList<QPair<QString,QString>> - see description
  */
-QVector<QPair<QString,QString>> EditorHelpers::optimizePoints(
-                                      QVector<QVector<QPair<int,int>>> orig_set)
-
+QList<QPair<QString,QString>> EditorHelpers::optimizePoints(
+                                              QList<QList<QPoint>> orig_set)
 {
-  /* Set up passability matrix */
-  QVector<QPair<QString,QString>> opt_set;
-  QVector<QVector<QPair<QString,QString>>> opt_strs;
-  QVector<QPair<QString,QString>> blank_strs;
-  for(int i = 0; i < orig_set.size(); i++)
-  {
-    opt_strs.push_back(blank_strs);
-    opt_set.push_back(QPair<QString,QString>("", ""));
-  }
+  QList<QPair<QString,QString>> return_set;
 
-  /* Compressing y of passability */
-  QPair<QString,QString> str_set;
+  /* Loop through origin set for optimization */
   for(int i = 0; i < orig_set.size(); i++)
   {
-    /* Only proceed if there is 1 or more pairs */
+    QString x_set = "";
+    QString y_set = "";
+
+    /* Only proceed if there are pairs */
     if(orig_set[i].size() > 0)
     {
-      int start_x = orig_set[i].front().first;
-      int start_y = orig_set[i].front().second;
-      int length = 1;
-
-      /* Loop through remaining pairs */
-      for(int j = 1; j < orig_set[i].size(); j++)
-      {
-        /* Check if the next element doesn't line up */
-        if(start_x != orig_set[i][j].first ||
-           (start_y + length) != orig_set[i][j].second)
-        {
-          str_set.first = QString::number(start_x);
-          str_set.second = QString::number(start_y);
-          if(length > 1)
-            str_set.second += "-" + QString::number(start_y + length - 1);
-          opt_strs[i].push_back(str_set);
-
-          /* Reset */
-          start_x = orig_set[i][j].first;
-          start_y = orig_set[i][j].second;
-          length = 0;
-        }
-
-        /* Increment length */
-        length++;
-      }
-
-      /* Load the final set */
-      str_set.first = QString::number(start_x);
-      str_set.second = QString::number(start_y);
-      if(length > 1)
-        str_set.second += "-" + QString::number(start_y + length - 1);
-      opt_strs[i].push_back(str_set);
-    }
-  }
-
-  /* Compressing x of passability */
-  for(int i = 0; i < opt_strs.size(); i++)
-  {
-    /* Only proceed if there is 1 or more pairs */
-    if(opt_strs[i].size() > 0)
-    {
-      QVector<QPair<QString,QString>> pair_set;
-
-      /* References */
-      QString ref_x = opt_strs[i].front().first;
-      int int_x = ref_x.toInt();
-      QString ref_y = opt_strs[i].front().second;
-      int length = 1;
-
-      /* Loop through remaining pairs */
-      for(int j = 1; j < opt_strs[i].size(); j++)
-      {
-        /* Check if the next element doesn't line up */
-        if(ref_y != opt_strs[i][j].second ||
-           QString::number(int_x + length) != opt_strs[i][j].first)
-        {
-          str_set.first = ref_x;
-          if(length > 1)
-            str_set.first += "-" + QString::number(int_x + length - 1);
-          str_set.second = ref_y;
-          pair_set.push_back(str_set);
-
-          /* Reset */
-          ref_x = opt_strs[i][j].first;
-          int_x = ref_x.toInt();
-          ref_y = opt_strs[i][j].second;
-          length = 0;
-        }
-
-        /* Increment length */
-        length++;
-      }
-
-      /* Load the final set */
-      str_set.first = ref_x;
-      if(length > 1)
-        str_set.first += "-" + QString::number(int_x + length - 1);
-      str_set.second = ref_y;
-      pair_set.push_back(str_set);
-
-      /* Replace the vector */
-      opt_strs[i] = pair_set;
-    }
-  }
-
-  /* Final compression of the passability data */
-  for(int i = 1; i < opt_strs.size(); i++)
-  {
-    /* Only proceed if there are passability pairs */
-    if(opt_strs[i].size() > 0)
-    {
-      QString x_index = "";
-      QString y_index = "";
+      QList<QPair<QString,QString>> rect_set = rectilinearSplit(orig_set[i]);
 
       /* Go through all pairs and make single string */
-      for(int j = 0; j < opt_strs[i].size(); j++)
+      for(int j = 0; j < rect_set.size(); j++)
       {
-        x_index += opt_strs[i][j].first + ",";
-        y_index += opt_strs[i][j].second + ",";
+        x_set += rect_set[j].first + ",";
+        y_set += rect_set[j].second + ",";
       }
-      x_index.chop(1);
-      y_index.chop(1);
-
-      /* Push to pair */
-      opt_set[i].first = x_index;
-      opt_set[i].second = y_index;
+      x_set.chop(1);
+      y_set.chop(1);
     }
+
+    /* Push to pair */
+    return_set.push_back(QPair<QString,QString>(x_set, y_set));
   }
 
-  return opt_set;
+  return return_set;
 }
 
 /*

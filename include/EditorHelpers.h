@@ -53,10 +53,6 @@ public:
   /* Returns a base 10 number of the representing passability (as a binary) */
   static int getPassabilityNum(bool north, bool east, bool south, bool west);
 
-  /* Returns the passability optimization result */
-  static QVector<QPair<QString,QString>> getPassabilityOpt(
-                                     QVector<QVector<QPair<int,int>>> orig_set);
-
   /* Returns the passability string */
   static QString getPassabilityStr(bool north, bool east,
                                    bool south, bool west);
@@ -78,8 +74,8 @@ public:
   static QRectF normalizePoints(QPointF point1, QPointF point2);
 
   /* Optimize points for index saving */
-  static QVector<QPair<QString,QString>> optimizePoints(
-                                     QVector<QVector<QPair<int,int>>> orig_set);
+  static QList<QPair<QString,QString>> optimizePoints(
+                                             QList<QList<QPoint>> orig_set);
 
   /* Rectilinear split */
   static QList<QPair<QString, QString>> rectilinearSplit(

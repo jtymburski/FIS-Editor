@@ -207,7 +207,7 @@ public:
   QString getPath(int frame_num);
 
   /* Gets the simplified path set */
-  QVector<QPair<QString,QString>> getPathSet();
+  QList<QPair<QString,QString>> getPathSet();
 
   /* Returns the modified pixmap */
   QPixmap getPixmap(int index, int w, int h);

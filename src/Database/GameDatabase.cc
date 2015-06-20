@@ -788,6 +788,7 @@ void GameDatabase::load(FileHandler* fh)
     QProgressDialog progress("", "", 0, fh->getCount(), this);
     progress.setWindowTitle("Loading");
     progress.setCancelButton(NULL);
+    progress.setLabelText("Loading Game...");
     progress.setWindowModality(Qt::WindowModal);
     int value = 0;
     progress.setValue(value);
@@ -1027,9 +1028,15 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Create the new save dialog */
     QProgressDialog progress("", "", 0, count, this);
     if(game_only)
+    {
       progress.setWindowTitle("Exporting");
+      progress.setLabelText("Exporting Game...");
+    }
     else
+    {
       progress.setWindowTitle("Saving");
+      progress.setLabelText("Saving Game...");
+    }
     progress.setCancelButton(NULL);
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(0);
