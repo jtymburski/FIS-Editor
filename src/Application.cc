@@ -419,8 +419,9 @@ void Application::play()
     fh.start();
 
     /* Save the current sub-map */
-    game_database->save(&fh, true, true,
-                        game_view->getMapView()->getCurrentSubMap());
+    game_database->save(&fh, true, true);
+        // Note: commented out to export all subs - change by re-appending
+        //,game_view->getMapView()->getCurrentSubMap());
 
     /* Finish the write */
     fh.stop();

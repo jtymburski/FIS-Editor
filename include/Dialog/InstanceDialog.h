@@ -33,6 +33,7 @@ public:
 private:
   /* Check boxes for base event and interaction control */
   QCheckBox* box_base_event;
+  QCheckBox* box_base_speed;
   QCheckBox* box_interaction;
 
   /* Button for triggering node edit */
@@ -52,11 +53,17 @@ private:
   EditorEvent* event_ctrl;
   EventView* event_view;
 
+  /* Speed result label */
+  QLabel* lbl_speed_result;
+
   /* The line edit for thing data */
   QLineEdit* line_name;
 
   /* The node list */
   QListWidget* list_nodes;
+
+  /* The speed control value */
+  QSpinBox* spin_speed;
 
   /* The working and original thing */
   EditorEnumDb::Layer thing_type;

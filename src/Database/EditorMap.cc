@@ -952,7 +952,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
         int pass = map->tiles[i][j]->getPassabilityNum(layer);
         if(sprite != NULL)
           sprite_stack[k][sprite->getID()].push_back(QPoint(i, j));
-        if(pass > 0)
+        if(pass > 0 && map->tiles[i][j]->getSprite(layer) != NULL)
           pass_stack[k][pass].push_back(QPoint(i, j));
       }
     }
@@ -972,23 +972,23 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   /* Add lower tiles */
   fh->writeXmlElement("lower", "index", "0");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER1]);
-  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER1]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::LOWER1]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "1");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER2]);
-  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER2]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::LOWER2]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "2");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER3]);
-  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER3]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::LOWER3]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "3");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER4]);
-  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER4]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::LOWER4]);
   fh->writeXmlElementEnd();
   fh->writeXmlElement("lower", "index", "4");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER5]);
-  addTilePassData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::LOWER5]);
+  addTilePassData(fh, save_dialog, pass_stack[(int)EditorEnumDb::LOWER5]);
   fh->writeXmlElementEnd();
 
   /* Add upper tiles */

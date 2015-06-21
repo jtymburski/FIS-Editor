@@ -8,9 +8,10 @@
 #include "View/MapView.h"
 
 /* Constants */
-const int MapView::kDEFAULT_ZOOM = 3;
-const int MapView::kNUM_ZOOM_STATES = 8;
-const float MapView::kZOOM_STATES[] = {0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4};
+const int MapView::kDEFAULT_ZOOM = 4;
+const int MapView::kNUM_ZOOM_STATES = 10;
+const float MapView::kZOOM_STATES[] = {0.125, 0.25, 0.5, 0.75, 1,
+                                       1.5, 2, 3, 4, 8};
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS

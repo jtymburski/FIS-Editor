@@ -1605,8 +1605,12 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
     QList<QList<QPoint>> pass_set;
     int pass_max = EditorHelpers::getPassabilityNum(true, true, true, true);
     QList<QPoint> blank_set;
+    QList<QList<QPoint>> blank_dset;
     for(int i = 0; i <= pass_max; i++)
       pass_set.push_back(blank_set);
+    QStringList str_keys;
+    QStringList str_paths;
+    QList<QList<QList<QPoint>>> str_points;
 
     /* Loop through matrix and add paths and passability remaining */
     for(int i = 0; i < matrix.size(); i++)
@@ -1624,21 +1628,71 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
           /* Add path(s), if relevant */
           if(!skip_set[i][j])
           {
-            fh->writeXmlElement("x", "index", i);
-            fh->writeXmlElement("y", "index", j);
+            /* If there is more than one set, the order matters so load them
+             * in individually */
+            if(set[i][j].size() > 1)
+            {
+              fh->writeXmlElement("x", "index", i);
+              fh->writeXmlElement("y", "index", j);
 
-            /* Path data */
-            for(int k = 0; k < set[i][j].size(); k++)
-              fh->writeXmlData(set[i][j][k].first.toStdString(),
-                               set[i][j][k].second.toStdString());
+              /* Path data */
+              for(int k = 0; k < set[i][j].size(); k++)
+                fh->writeXmlData(set[i][j][k].first.toStdString(),
+                                 set[i][j][k].second.toStdString());
 
-            fh->writeXmlElementEnd();
-            fh->writeXmlElementEnd();
+              fh->writeXmlElementEnd();
+              fh->writeXmlElementEnd();
+            }
+            /* Otherwise, add them to the optimize array list */
+            else
+            {
+              /* Find string index */
+              int index = str_keys.indexOf(set[i][j].front().second);
+              if(index < 0)
+              {
+                index = str_keys.size();
+                str_keys.push_back(set[i][j].front().second);
+                str_points.push_back(blank_dset);
+              }
+
+              /* Find path index */
+              int index2 = str_paths.indexOf(set[i][j].front().first);
+              if(index2 < 0)
+              {
+                index2 = str_paths.size();
+                str_paths.push_back(set[i][j].front().first);
+              }
+              while(str_points[index].size() <= index2)
+                str_points[index].push_back(blank_set);
+
+              /* Place the point */
+              str_points[index][index2].push_back(QPoint(i, j));
+            }
           }
 
           /* Passability handling */
           if(passability)
             pass_set[pass_num].push_back(QPoint(i, j));
+        }
+      }
+    }
+
+    /* Optimize and push the last sprites data to file */
+    for(int i = 0; i < str_points.size(); i++)
+    {
+      QList<QPair<QString,QString>> path_set =
+                                   EditorHelpers::optimizePoints(str_points[i]);
+      for(int j = 0; j < path_set.size(); j++)
+      {
+        if(!path_set[j].first.isEmpty())
+        {
+          /* Write the data */
+          fh->writeXmlElement("x", "index", path_set[j].first.toStdString());
+          fh->writeXmlElement("y", "index", path_set[j].second.toStdString());
+          fh->writeXmlData(str_paths[j].toStdString(),
+                           str_keys[i].toStdString());
+          fh->writeXmlElementEnd();
+          fh->writeXmlElementEnd();
         }
       }
     }
