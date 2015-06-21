@@ -28,6 +28,8 @@ EditorMapPerson::EditorMapPerson(int id, QString name, QString description)
                : EditorMapThing(id, name, description)
 {
   initializeMatrixes();
+
+  speed_base = true;
 }
                 
 /*
@@ -122,6 +124,7 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
 
   /* Person data */
   setSpeed(source.getSpeed());
+  setUseBaseSpeed(source.isBaseSpeed());
 }
 
 /*
@@ -169,6 +172,11 @@ void EditorMapPerson::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     /* Save the render matrix */
     getState(surface, Direction::NORTH)->saveRender(fh);
   }
+  else
+  {
+    if(!isBaseSpeed())
+      fh->writeXmlData("speed", getSpeed());
+  }
 }
 
 /*============================================================================
@@ -197,7 +205,23 @@ EditorMapPerson* EditorMapPerson::getBasePerson() const
  */
 uint16_t EditorMapPerson::getSpeed() const
 {
-  return person.getSpeed();
+  uint16_t speed = 0;
+
+  /* If instance */
+  if(getBasePerson() != NULL)
+  {
+    if(speed_base)
+      speed = getBasePerson()->getSpeed();
+    else
+      speed = person.getSpeed();
+  }
+  /* Otherwise, a base */
+  else
+  {
+    speed = person.getSpeed();
+  }
+
+  return speed;
 }
 
 /*
@@ -289,6 +313,21 @@ bool EditorMapPerson::isAllNull(int x, int y) const
 }
 
 /*
+ * Description: Returns if the person is using the speed from the base person
+ *              class or if the speed being used is only relative to the
+ *              instance.
+ *
+ * Inputs: none
+ * Output: bool - true if the class is using the base speed
+ */
+bool EditorMapPerson::isBaseSpeed() const
+{
+  if(getBasePerson() == NULL || speed_base)
+    return true;
+  return false;
+}
+
+/*
  * Description: Loads the person data from the XML struct and offset index.
  *
  * Inputs: XmlData data - the XML data tree struct
@@ -334,6 +373,8 @@ void EditorMapPerson::load(XmlData data, int index)
   else if(element == "speed")
   {
     setSpeed(data.getDataInteger());
+    if(getBasePerson() != NULL)
+      setUseBaseSpeed(false);
   }
   else
   {
@@ -371,7 +412,11 @@ void EditorMapPerson::setBase(EditorMapPerson* person)
   EditorMapThing* thing = NULL;
 
   if(person != NULL)
+  {
     thing = person;
+    setSpeed(person->getSpeed());
+    setUseBaseSpeed(true);
+  }
 
   EditorMapThing::setBase(thing);
 }
@@ -401,6 +446,18 @@ void EditorMapPerson::setTileIcons(TileIcons* icons)
       matrix_set[i][j]->setTileIcons(icons);
 
   EditorMapThing::setTileIcons(icons);
+}
+
+/*
+ * Description: Triggers if the class should use the base speed as opposed to
+ *              the instance speed. Only relevant if there is a base set.
+ *
+ * Inputs: bool use_base - true if the base speed should be used
+ * Output: none
+ */
+void EditorMapPerson::setUseBaseSpeed(bool use_base)
+{
+  speed_base = use_base;
 }
 
 /*============================================================================

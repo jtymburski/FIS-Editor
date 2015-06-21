@@ -170,15 +170,18 @@ void Application::setupTopMenu()
   action_show_menu->setIcon(QIcon(":/images/icons/32_database.png"));
   action_new = new QAction("&New",this);
   action_new->setIcon(QIcon(":/images/icons/32_new.png"));
+  action_new->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
   action_load = new QAction("&Load",this);
   action_load->setIcon(QIcon(":/images/icons/32_load.png"));
   action_recent = new QAction("&Recent Files",this);
   action_save = new QAction("&Save",this);
   action_save->setIcon(QIcon(":/images/icons/32_save.png"));
+  action_save->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
   action_saveas = new QAction("&Save As",this);
   action_saveas->setIcon(QIcon(":/images/icons/32_save_as.png"));
   action_export = new QAction("&Export to Game", this);
   action_export->setIcon(QIcon(":/images/icons/32_export.png"));
+  action_export->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
   QAction* quit_action = new QAction("&Quit",this);
 
   /* Sets up file menu itself */
@@ -332,6 +335,7 @@ void Application::setupTopMenu()
   action_zoom_out->setIcon(QIcon(":/images/icons/32_zoom_out.png"));
   action_play = new QAction("&Test Map", this);
   action_play->setIcon(QIcon(":/images/icons/32_play.png"));
+  action_play->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
   bar_map_ctrl = new QToolBar("Map Control", this);
   bar_map_ctrl->addAction(action_zoom_in);
   bar_map_ctrl->addAction(action_zoom_out);

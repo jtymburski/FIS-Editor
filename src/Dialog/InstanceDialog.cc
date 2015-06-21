@@ -149,18 +149,37 @@ void InstanceDialog::createLayout()
           this, SLOT(changedDescription()));
   layout->addWidget(edit_description, 2, 1, 2, 3);
 
+  /* Speed settings */
+  if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
+  {
+    QLabel* lbl_speed = new QLabel("Speed", this);
+    layout->addWidget(lbl_speed, 4, 0);
+    spin_speed = new QSpinBox(this);
+    spin_speed->setMinimum(0);
+    spin_speed->setMaximum(256);
+    connect(spin_speed, SIGNAL(valueChanged(int)),
+            this, SLOT(speedChanged(int)));
+    layout->addWidget(spin_speed, 4, 1);
+    lbl_speed_result = new QLabel("X ms/tile");
+    layout->addWidget(lbl_speed_result, 4, 2);
+    box_base_speed = new QCheckBox("Use Base", this);
+    connect(box_base_speed, SIGNAL(stateChanged(int)),
+            this, SLOT(checkBaseSpeed(int)));
+    layout->addWidget(box_base_speed, 4, 3);
+  }
+
   /* Use base event widget */
   box_base_event = new QCheckBox("Use Base Event", this);
   connect(box_base_event, SIGNAL(stateChanged(int)),
           this, SLOT(checkBaseChange(int)));
-  layout->addWidget(box_base_event, 4, 1, 1, 2);
+  layout->addWidget(box_base_event, 5, 1, 1, 2);
 
   /* Event View */
   event_view = new EventView(event_ctrl, this);
   connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
   connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-  layout->addWidget(event_view, 5, 0, 1, 4);
+  layout->addWidget(event_view, 6, 0, 1, 4);
 
   /* Movement section only relevant if npc */
   int btn_offset = 0;
@@ -216,7 +235,7 @@ void InstanceDialog::createLayout()
     list_nodes = new QListWidget(this);
     connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(editNode(QListWidgetItem*)));
-    layout->addWidget(list_nodes, 5, 5, 1, 4);
+    layout->addWidget(list_nodes, 5, 5, 2, 4);
 
     btn_offset = 5;
   }
@@ -226,16 +245,16 @@ void InstanceDialog::createLayout()
   QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
   btn_base_edit->setMaximumWidth(75);
   connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
-  layout->addWidget(btn_base_edit, 7, 0);
+  layout->addWidget(btn_base_edit, 8, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 7, 2 + btn_offset);
+  layout->addWidget(btn_ok, 8, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   btn_cancel->setMaximumWidth(75);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 7, 3 + btn_offset);
+  layout->addWidget(btn_cancel, 8, 3 + btn_offset);
 
   /* Dialog control */
   if(thing_type == EditorEnumDb::THING)
@@ -274,6 +293,14 @@ void InstanceDialog::setup()
   /* Name and descrip */
   line_name->setText(thing_working->getName());
   edit_description->setPlainText(thing_working->getDescription());
+
+  /* Speed */
+  if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
+  {
+    spin_speed->setValue(((EditorMapPerson*)thing_working)->getSpeed());
+    box_base_speed->setChecked(
+                              ((EditorMapPerson*)thing_working)->isBaseSpeed());
+  }
 
   /* Event control */
   box_base_event->blockSignals(true);
@@ -498,6 +525,24 @@ void InstanceDialog::checkBaseChange(int state)
 }
 
 /*
+ * Description: Slot triggered when the check box to use the base speed changes
+ *              state. Updates the enabled status of the spinner plus spinner
+ *              value.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void InstanceDialog::checkBaseSpeed(int state)
+{
+  /* Disable/enable the speed if base is chosen */
+  spin_speed->setDisabled(state == Qt::Checked);
+  ((EditorMapPerson*)thing_working)->setUseBaseSpeed(state == Qt::Checked);
+
+  /* Update the value of the spin speed box */
+  spin_speed->setValue(((EditorMapPerson*)thing_working)->getSpeed());
+}
+
+/*
  * Description: Slot triggered when the state of the check box for the "force
  *              instance" event changes. This is used to force the npc to
  *              interact with a person, if within vicinity.
@@ -678,6 +723,24 @@ void InstanceDialog::selectTileConvo()
     waiting_convo = true;
     convo_dialog->hide();
   }
+}
+
+/*
+ * Description: Slot triggered when the speed spinner value changes. Updates the
+ *              instance class with the new speed value (working instance).
+ *
+ * Inputs: int value - the new value for the spinner
+ * Output: none
+ */
+void InstanceDialog::speedChanged(int value)
+{
+  /* This updates even when locked - if not wanted, add check for base status */
+  ((EditorMapPerson*)thing_working)->setSpeed(value);
+
+  if(value > 0)
+    lbl_speed_result->setText(QString::number(4096 / value) + " ms/tile");
+  else
+    lbl_speed_result->setText("0 ms/tile");
 }
 
 /*============================================================================

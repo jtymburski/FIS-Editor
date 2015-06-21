@@ -133,6 +133,7 @@ public slots:
 
   /* Check box triggers */
   void checkBaseChange(int state);
+  void checkBaseSpeed(int state);
   void checkInteractionChange(int state);
 
   /* Combo box triggers */
@@ -148,6 +149,9 @@ public slots:
   /* Select tile trigger */
   void selectTile();
   void selectTileConvo();
+
+  /* Speed changed */
+  void speedChanged(int value); // TODO
 
 /*============================================================================
  * PUBLIC FUNCTIONS

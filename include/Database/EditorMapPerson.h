@@ -31,6 +31,9 @@ private:
   /* Reference person */
   MapPerson person;
 
+  /* Map Person to use base speed */
+  bool speed_base;
+
   /* -------------------------- Constants ------------------------- */
   const static uint8_t kTOTAL_DIRECTIONS; /* The max # of directions to move */
   const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
@@ -74,6 +77,9 @@ public:
   /* Returns if the tile sprites in all matrixes at that x, y are null */
   virtual bool isAllNull(int x, int y) const;
 
+  /* Returns if the person is using the base speed */
+  bool isBaseSpeed() const;
+
   /* Loads the person data */
   virtual void load(XmlData data, int index);
 
@@ -88,6 +94,9 @@ public:
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
+
+  /* Sets the class to use the base speed */
+  void setUseBaseSpeed(bool use_base);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
