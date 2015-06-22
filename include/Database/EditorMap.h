@@ -103,7 +103,7 @@ private:
  *===========================================================================*/
 protected:
   /* Attempts to add item to the current sub-map */
-  bool addItem(EditorMapItem* item, SubMapInfo* map = NULL, // TODO
+  bool addItem(EditorMapItem* item, SubMapInfo* map = NULL,
                bool existing = true);
 
   /* Attempts to add npc to the current sub-map */
@@ -123,6 +123,9 @@ protected:
                        QList<QList<QPoint>> data_set);
   void addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
                          QList<QList<QPoint>> data_set);
+
+  /* Clear map data */
+  void clearAll();
 
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorMap &source);
@@ -158,6 +161,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Item instant changed */
+  void itemInstanceChanged(); // TODO: HOOK
+
   /* NPC instant changed */
   void npcInstanceChanged();
 
@@ -170,7 +176,7 @@ signals:
 
   /* Thing instant changed */
   void thingInstanceChanged();
-
+// TODO: HERE \/
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
@@ -193,7 +199,7 @@ public:
   bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
 
   /* Returns current references for lists in map */
-  int getCurrentItemIndex(); // TODO
+  int getCurrentItemIndex();
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
   int getCurrentNPCIndex();
@@ -208,13 +214,13 @@ public:
   virtual int getID() const;
 
   /* Return stored item information */
-  EditorMapItem* getItem(int id, int sub_map = -1); // TODO
-  EditorMapItem* getItemByIndex(int index, int sub_map = -1); // TODO
-  int getItemCount(int sub_map = -1); // TODO
-  int getItemIndex(int id, int sub_map = -1); // TODO
+  EditorMapItem* getItem(int id, int sub_map = -1);
+  EditorMapItem* getItemByIndex(int index, int sub_map = -1);
+  int getItemCount(int sub_map = -1);
+  int getItemIndex(int id, int sub_map = -1);
   QVector<QString> getItemList(int sub_map = -1, bool all_submaps = false,
-                               bool shortened = false); // TODO
-  QVector<EditorMapItem*> getItems(int sub_map = -1); // TODO
+                               bool shortened = false);
+  QVector<EditorMapItem*> getItems(int sub_map = -1);
 
   /* Returns the stored map information */
   SubMapInfo* getMap(int id);
@@ -233,7 +239,7 @@ public:
   virtual QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
-  int getNextItemID(bool from_sub = false); // TODO
+  int getNextItemID(bool from_sub = false);
   int getNextMapID();
   int getNextNPCID(bool from_sub = false);
   int getNextPersonID(bool from_sub = false);
@@ -294,7 +300,7 @@ public:
             bool game_only = false, int sub_index = -1);
 
   /* Sets the current references for the selected sprite(s) or thing(s) */
-  bool setCurrentItem(int index); // TODO
+  bool setCurrentItem(int index);
   bool setCurrentMap(int index);
   bool setCurrentNPC(int index);
   bool setCurrentPerson(int index);
@@ -303,7 +309,7 @@ public:
 
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
-  bool setHoverItem(int id); // TODO
+  bool setHoverItem(int id);
   void setHoverLayer(EditorEnumDb::Layer layer);
   bool setHoverNPC(int id);
   void setHoverPathMode(bool path_mode);
@@ -315,7 +321,7 @@ public:
   virtual void setID(int id);
 
   /* Sets a item in the map */
-  int setItem(EditorMapItem* item, int sub_map = -1); // TODO
+  int setItem(EditorMapItem* item, int sub_map = -1);
 
   /* Sets a map, based on ID */
   int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles);
@@ -353,6 +359,8 @@ public:
   void setVisibilityPaths(bool visible);
 
   /* Thing processing for updating with the new data */
+  void tilesItemAdd(bool update_all = false);
+  void tilesItemRemove(bool update_all = false);
   void tilesNPCAdd(bool update_all = false);
   void tilesNPCRemove(bool update_all = false);
   void tilesPersonAdd(bool update_all = false);
@@ -364,9 +372,9 @@ public:
   void updateAll();
 
   /* Unset item(s) */
-  bool unsetItem(int id, bool from_sub = false); // TODO
-  bool unsetItemByIndex(int index, int sub_map = -1); // TODO
-  void unsetItems(bool from_sub = false); // TODO
+  bool unsetItem(int id, bool from_sub = false);
+  bool unsetItemByIndex(int index, int sub_map = -1);
+  void unsetItems(bool from_sub = false);
 
   /* Unset map(s) */
   bool unsetMap(int id);

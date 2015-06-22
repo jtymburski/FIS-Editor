@@ -9,7 +9,7 @@
 
 /* Constant Implementation - see header file for descriptions */
 const uint8_t EditorTile::kLOWER_COUNT_MAX = 5;
-const uint8_t EditorTile::kMAX_ITEMS = 20;
+const uint8_t EditorTile::kMAX_ITEMS = 10;
 const uint8_t EditorTile::kUPPER_COUNT_MAX = 5;
 
 /*============================================================================
@@ -135,7 +135,7 @@ void EditorTile::copySelf(const EditorTile &source)
     layers_upper[i].visible = source.layers_upper[i].visible;
   }
 
-  // TODO: ADD THING, PERSON, NPC, ITEM, AND IO ??
+  // TODO: ADD THING, PERSON, NPC, ITEM, AND IO. No, handled in map.
 }
 
 /*
@@ -546,6 +546,42 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::NPC, direction);
 
   return passable;
+}
+
+/*
+ * Description: Returns the item in the stack on the tile with the matching
+ *              base item ID. Returns NULL if not found.
+ *
+ * Inputs: int id - the id of the base item
+ * Output: EditorMapItem* - the found item. NULL if not found.
+ */
+EditorMapItem* EditorTile::getItemBaseID(int id)
+{
+  EditorMapItem* found_item = NULL;
+
+  for(int i = 0; i < items.size(); i++)
+    if(items[i].thing->getBaseThing()->getID() == id)
+      found_item = (EditorMapItem*)items[i].thing;
+
+  return found_item;
+}
+
+/*
+ * Description: Returns the item in the stack on the tile with the matching
+ *              item ID. Returns NULL if not found.
+ *
+ * Inputs: int id - the id of the item
+ * Output: EditorMapItem* - the found item. NULL if not found.
+ */
+EditorMapItem* EditorTile::getItemID(int id)
+{
+  EditorMapItem* found_item = NULL;
+
+  for(int i = 0; i < items.size(); i++)
+    if(items[i].thing->getID() == id)
+      found_item = (EditorMapItem*)items[i].thing;
+
+  return found_item;
 }
 
 /*

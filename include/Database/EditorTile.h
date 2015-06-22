@@ -100,6 +100,7 @@ private:
   /* Positions and depths for the tiles on the map grid */
   int x_pos, y_pos;
 
+public:
   /*------------------- Constants -----------------------*/
   const static uint8_t kLOWER_COUNT_MAX; /* The max number of lower layers */
   const static uint8_t kMAX_ITEMS; /* The max number of items stored */
@@ -157,6 +158,8 @@ public:
   bool getPassabilityVisible(Direction direction);
 
   /* Returns the map item pointer(s) */
+  EditorMapItem* getItemBaseID(int id); // TODO
+  EditorMapItem* getItemID(int id); // TODO
   EditorMapItem* getItem(int index);
   QVector<EditorMapItem*> getItems();
 

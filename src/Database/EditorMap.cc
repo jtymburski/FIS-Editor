@@ -73,21 +73,56 @@ EditorMap::EditorMap(const EditorMap &source) : EditorMap()
  */
 EditorMap::~EditorMap()
 {
-  /* Remove all things */
-  unsetThings();
-  unsetPersons();
-  unsetNPCs();
-
-  /* Remove all sprites */
-  unsetSprites();
-
-  /* Finally, delete all maps */
-  unsetMaps();
+  clearAll();
 }
 
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
+
+/* Attempts to add item to the current sub-map */
+// TODO: Comment
+bool EditorMap::addItem(EditorMapItem* item, SubMapInfo* map, bool existing)
+{
+  int x = item->getX();
+  int y = item->getY();
+  int w = item->getMatrix()->getWidth();
+  int h = item->getMatrix()->getHeight();
+
+  /* Ensure map isn't null. If not set, use active sub-map */
+  if(map == NULL)
+    map = active_submap;
+
+  /* Check if item can be placed */
+  bool valid = false;
+  if(x >= 0 && y >= 0 && x <= map->tiles.size() &&
+     y <= map->tiles[x].size() && w == 1 && h == 1)
+  {
+    /* Check validity of item */
+    if(!item->isAllNull(0, 0) &&
+       map->tiles[x][y]->getItems().size() < EditorTile::kMAX_ITEMS)
+    {
+      valid = true;
+    }
+  }
+
+  /* If valid, place item */
+  if(valid)
+  {
+    /* Add the item to the tile */
+    map->tiles[x][y]->addItem(item);
+
+    /* Add to stack and emit new signals */
+    if(!existing)
+    {
+      map->items.push_back(item);
+      emit itemInstanceChanged();
+      setHoverThing(-1);
+    }
+  }
+
+  return valid;
+}
 
 /*
  * Description: Attempts to add the npc to the current sub-map. NPC needs
@@ -356,6 +391,23 @@ void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
   save_dialog->setValue(save_dialog->value() + 1);
 }
 
+/* Clear map data */
+// TODO: Comment
+void EditorMap::clearAll()
+{
+  /* Remove all things */
+  unsetThings();
+  unsetItems();
+  unsetPersons();
+  unsetNPCs();
+
+  /* Remove all sprites */
+  unsetSprites();
+
+  /* Finally, delete all maps */
+  unsetMaps();
+}
+
 /*
  * Description: Copies all data from source editor thing to this editor
  *              thing.
@@ -375,6 +427,10 @@ void EditorMap::copySelf(const EditorMap &source)
   /* Add base things */
   for(int i = 0; i < source.base_things.size(); i++)
     base_things.push_back(new EditorMapThing(*source.base_things[i]));
+
+  /* Add base items */
+  for(int i = 0; i < source.base_items.size(); i++)
+    base_items.push_back(new EditorMapItem(*source.base_items[i]));
 
   /* Add base persons */
   for(int i = 0; i < source.base_persons.size(); i++)
@@ -425,6 +481,15 @@ void EditorMap::copySelf(const EditorMap &source)
       t->setX(source.sub_maps[i]->things[j]->getX());
       t->setY(source.sub_maps[i]->things[j]->getY());
       setThing(t, source.sub_maps[i]->id);
+    }
+
+    /* Add instance map items */
+    for(int j = 0; j < source.sub_maps[i]->items.size(); j++)
+    {
+      EditorMapItem* item = new EditorMapItem(*source.sub_maps[i]->items[j]);
+      item->setX(source.sub_maps[i]->items[j]->getX());
+      item->setY(source.sub_maps[i]->items[j]->getY());
+      setItem(item, source.sub_maps[i]->id);
     }
 
     /* Add instance map persons */
@@ -601,6 +666,66 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     else
     {
       thing->load(data, index + 1);
+    }
+  }
+  /* -------------- MAP Item -------------- */
+  else if(element == "mapitem")
+  {
+    int item_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapItem* item = getItem(item_id, map->id);
+
+    /* Create new item if it doesn't exist */
+    if(item == NULL)
+    {
+      item = new EditorMapItem(item_id);
+      item->setTileIcons(getTileIcons());
+
+      /* Find insertion location */
+      int index = -1;
+      bool near = false;
+      for(int i = 0; !near && (i < map->items.size()); i++)
+      {
+        if(map->items[i]->getID() > item->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If near, insert at index. Otherwise, append */
+      if(near)
+        map->items.insert(index, item);
+      else
+        map->items.append(item);
+    }
+
+    /* Continue to parse the data in the thing */
+    QString element = QString::fromStdString(data.getElement(index + 1));
+    if(element == "base")
+    {
+      /* Get name and desc. if it has been changed */
+      EditorMapItem default_item;
+      QString default_name = "";
+      QString default_desc = "";
+      if(default_item.getName() != item->getName())
+        default_name = item->getName();
+      if(default_item.getDescription() != item->getDescription())
+        default_desc = item->getDescription();
+
+      /* Set the base */
+      EditorMapItem* base_item = getItem(data.getDataInteger());
+      if(base_item != NULL)
+      {
+        item->setBase(base_item);
+        if(default_name != "")
+          item->setName(default_name);
+        if(default_desc != "")
+          item->setDescription(default_desc);
+      }
+    }
+    else
+    {
+      item->load(data, index + 1);
     }
   }
   /* -------------- MAP PERSON -------------- */
@@ -823,6 +948,7 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 {
   /* Remove all things for processing */
   tilesThingRemove(true);
+  tilesItemRemove(true);
   tilesPersonRemove(true);
   tilesNPCRemove(true);
 
@@ -880,6 +1006,7 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 
   /* Add all things back for processing */
   tilesThingAdd(true);
+  tilesItemAdd(true);
   tilesPersonAdd(true);
   tilesNPCAdd(true);
 
@@ -1015,6 +1142,13 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
     save_dialog->setValue(save_dialog->value()+1);
   }
 
+  /* Add items */
+  for(int i = 0; i < map->items.size(); i++)
+  {
+    map->items[i]->save(fh, game_only);
+    save_dialog->setValue(save_dialog->value()+1);
+  }
+
   /* Add persons */
   for(int i = 0; i < map->persons.size(); i++)
   {
@@ -1089,6 +1223,8 @@ bool EditorMap::updateHoverThing(bool unset)
   {
     if(active_info.active_layer == EditorEnumDb::THING)
       thing = active_info.active_thing;
+    else if(active_info.active_layer == EditorEnumDb::ITEM)
+      thing = active_info.active_item;
     else if(active_info.active_layer == EditorEnumDb::PERSON)
       thing = active_info.active_person;
     else if(active_info.active_layer == EditorEnumDb::NPC)
@@ -1489,6 +1625,13 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
   return false;
 }
 
+/* Returns current references for lists in map */
+// TODO: Comment
+int EditorMap::getCurrentItemIndex()
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Returns the current sub-map being rendered. Controlled by
  *              MapControl class.
@@ -1642,6 +1785,49 @@ int EditorMap::getID() const
   return id;
 }
 
+/* Return stored item information */
+// TODO: Comment
+EditorMapItem* EditorMap::getItem(int id, int sub_map)
+{
+  // TODO: Implementation
+}
+
+/* Return stored item information */
+// TODO: Comment
+EditorMapItem* EditorMap::getItemByIndex(int index, int sub_map)
+{
+  // TODO: Implementation
+}
+
+/* Return stored item information */
+// TODO: Comment
+int EditorMap::getItemCount(int sub_map)
+{
+  // TODO: Implementation
+}
+
+/* Return stored item information */
+// TODO: Comment
+int EditorMap::getItemIndex(int id, int sub_map)
+{
+  // TODO: Implementation
+}
+
+/* Return stored item information */
+// TODO: Comment
+QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
+                                        bool shortened)
+{
+  // TODO: Implementation
+}
+
+/* Return stored item information */
+// TODO: Comment
+QVector<EditorMapItem*> EditorMap::getItems(int sub_map)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Returns the map with the corresponding ID. NULL if ID doesn't
  *              match any map.
@@ -1777,6 +1963,13 @@ QString EditorMap::getName() const
 QString EditorMap::getNameList()
 {
   return EditorHelpers::getListString(id, name);
+}
+
+/* Returns available IDs in the set. Useful for when creating a new one */
+// TODO: Comment
+int EditorMap::getNextItemID(bool from_sub)
+{
+  // TODO: Implementation
 }
 
 /*
@@ -2840,6 +3033,13 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
   }
 }
 
+/* Sets the current references for the selected sprite(s) or thing(s) */
+// TODO: Comment
+bool EditorMap::setCurrentItem(int index)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Sets the current sub-map, based on the index in the stack.
  *              Passing in -1 unsets the active submap (to NULL).
@@ -3015,6 +3215,13 @@ void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
     active_info.hover_tile->update();
 }
 
+/* Sets the hover information */
+// TODO: Comment
+bool EditorMap::setHoverItem(int id)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Sets the current layer, for the hover tile, as controlled by
  *              MapControl.
@@ -3136,6 +3343,13 @@ void EditorMap::setID(int id)
     this->id = kUNSET_ID;
   else
     this->id = id;
+}
+
+/* Sets a item in the map */
+// TODO: Comment
+int EditorMap::setItem(EditorMapItem* item, int sub_map)
+{
+  // TODO: Implementation
 }
 
 /*
@@ -3715,6 +3929,20 @@ void EditorMap::setVisibilityPaths(bool visible)
   }
 }
 
+/* Thing processing for updating with the new data */
+// TODO: Comment
+void EditorMap::tilesItemAdd(bool update_all)
+{
+  // TODO: Implementation
+}
+
+/* Thing processing for updating with the new data */
+// TODO: Comment
+void EditorMap::tilesItemRemove(bool update_all)
+{
+  // TODO: Implementation
+}
+
 /*
  * Description: Re-adds all sub-map npcs to tiles. This is called after
  *              calling tilesNPCRemove(), processing the npc, and then
@@ -4076,6 +4304,27 @@ bool EditorMap::unsetMap(int id)
 {
   int index = getMapIndex(id);
   return unsetMapByIndex(index);
+}
+
+/* Unset item(s) */
+// TODO: Comment
+bool EditorMap::unsetItem(int id, bool from_sub)
+{
+  // TODO: Implementation
+}
+
+/* Unset item(s) */
+// TODO: Comment
+bool EditorMap::unsetItemByIndex(int index, int sub_map)
+{
+  // TODO: Implementation
+}
+
+/* Unset item(s) */
+// TODO: Comment
+void EditorMap::unsetItems(bool from_sub)
+{
+  // TODO: Implementation
 }
 
 /*
@@ -4573,6 +4822,7 @@ EditorMap& EditorMap::operator= (const EditorMap &source)
     return *this;
 
   /* Do the copy */
+  clearAll();
   copySelf(source);
 
   /* Return the copied object */

@@ -17,13 +17,13 @@ public:
   /* Constructor function */
   EditorMapItem(int id = -1, QString name = "Default Name",
                 QString description = "");
-                  
+
   /* Copy constructor function */
   EditorMapItem(const EditorMapItem &source);
-  
+
   /* Destructor function */
   virtual ~EditorMapItem();
-  
+
 private:
   /* Reference item */
   MapItem item;
