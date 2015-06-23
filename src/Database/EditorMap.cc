@@ -1319,6 +1319,7 @@ void EditorMap::clearHoverInfo()
   active_info.active_layer = EditorEnumDb::NO_LAYER;
   active_info.path_edit_mode = false;
 
+  active_info.active_item = NULL;
   active_info.active_npc = NULL;
   active_info.active_person = NULL;
   active_info.active_sprite = NULL;
@@ -1443,6 +1444,37 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         /* If found, remove from tiles and delete */
         if(found != NULL)
           unsetThing(found->getID(), true);
+      }
+    }
+    /* Check on the layer - item */
+    else if(layer == EditorEnumDb::ITEM)
+    {
+      /* Check cursor */
+      if(cursor == EditorEnumDb::BASIC && active_info.active_item != NULL)
+      {
+        /* Create the thing */
+        int id = getNextItemID(true);
+        EditorMapItem* new_item = new EditorMapItem(id);
+        new_item->setBase(active_info.active_item);
+        new_item->setX(active_info.hover_tile->getX());
+        new_item->setY(active_info.hover_tile->getY());
+
+        /* Attempt to place - if failed, delete */
+        if(!addItem(new_item, NULL, false))
+          delete new_item;
+      }
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        int max = Helpers::getRenderDepth();
+
+        /* Loop through all to find the top item */
+        EditorMapItem* found = NULL;
+        if(active_info.hover_tile->getItems().front() != NULL)
+          found = active_info.hover_tile->getItems().last();
+
+        /* If found, remove from tiles and delete */
+        if(found != NULL)
+          unsetItem(found->getID(), true);
       }
     }
     /* Check on the layer - person */
@@ -1600,6 +1632,16 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       setThing(thing, new_map->id);
     }
 
+    /* Add item instances */
+    for(int i = 0; i < copy_map->items.size(); i++)
+    {
+      EditorMapItem* item = new EditorMapItem(*copy_map->items[i]);
+      item->setID(getNextItemID(true));
+      item->setX(copy_map->items[i]->getX());
+      item->setY(copy_map->items[i]->getY());
+      setItem(item, new_map->id);
+    }
+
     /* Add person instances */
     for(int i = 0; i < copy_map->persons.size(); i++)
     {
@@ -1629,7 +1671,18 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
 // TODO: Comment
 int EditorMap::getCurrentItemIndex()
 {
-  // TODO: Implementation
+  /* Ensure the active item isn't null */
+  if(active_info.active_item != NULL)
+  {
+    for(int i = 0; i < base_items.size(); i++)
+      if(base_items[i] == active_info.active_item)
+        return i;
+
+    /* Item not found, it doesn't exist -> nullify it */
+    setCurrentItem(-1);
+  }
+
+  return -1;
 }
 
 /*
@@ -1789,28 +1842,81 @@ int EditorMap::getID() const
 // TODO: Comment
 EditorMapItem* EditorMap::getItem(int id, int sub_map)
 {
-  // TODO: Implementation
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_items.size(); i++)
+        if(base_items[i]->getID() == id)
+          return base_items[i];
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->items.size(); i++)
+        if(sub_maps[sub_map]->items[i]->getID() == id)
+          return sub_maps[sub_map]->items[i];
+    }
+  }
+
+  return NULL;
 }
 
 /* Return stored item information */
 // TODO: Comment
 EditorMapItem* EditorMap::getItemByIndex(int index, int sub_map)
 {
-  // TODO: Implementation
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_items.size())
+      return base_items[index];
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->items.size())
+      return sub_maps[sub_map]->items[index];
+  }
+  return NULL;
 }
 
 /* Return stored item information */
 // TODO: Comment
 int EditorMap::getItemCount(int sub_map)
 {
-  // TODO: Implementation
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+    return base_items.size();
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+    return sub_maps[sub_map]->items.size();
+  return 0;
 }
 
 /* Return stored item information */
 // TODO: Comment
 int EditorMap::getItemIndex(int id, int sub_map)
 {
-  // TODO: Implementation
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_items.size(); i++)
+        if(base_items[i]->getID() == id)
+          return i;
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->items.size(); i++)
+        if(sub_maps[sub_map]->items[i]->getID() == id)
+          return i;
+    }
+  }
+  return -1;
 }
 
 /* Return stored item information */
@@ -1818,14 +1924,55 @@ int EditorMap::getItemIndex(int id, int sub_map)
 QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
                                         bool shortened)
 {
-  // TODO: Implementation
+  QVector<QString> stack;
+  stack.push_back("MAP ITEMS");
+
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all items and add them to the list */
+    for(int i = 0; i < base_items.size(); i++)
+      stack.push_back(base_items[i]->getNameList());
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->items.size(); j++)
+        stack.push_back(sub_maps[i]->items[j]->getNameList(shortened));
+  }
+
+  return stack;
 }
 
 /* Return stored item information */
 // TODO: Comment
 QVector<EditorMapItem*> EditorMap::getItems(int sub_map)
 {
-  // TODO: Implementation
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    return base_items;
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    return sub_maps[sub_map]->items;
+  }
+
+  /* Otherwise, return blank list */
+  QVector<EditorMapItem*> blank_list;
+  return blank_list;
 }
 
 /*
@@ -1969,7 +2116,54 @@ QString EditorMap::getNameList()
 // TODO: Comment
 int EditorMap::getNextItemID(bool from_sub)
 {
-  // TODO: Implementation
+  bool found = false;
+  int id = 0;
+
+  /* If not from sub map, check base for base ID */
+  if(!from_sub)
+  {
+    for(int i = 0; !found && (i < base_items.size()); i++)
+    {
+      if(base_items[i]->getID() != i)
+      {
+        id = i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && base_items.size() > 0)
+      id = base_items.last()->getID() + 1;
+  }
+  /* Otherwise, check the sub-maps for available ID */
+  else
+  {
+    /* Compile the IDs of all things in all sub-maps */
+    QVector<int> id_list;
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->items.size(); j++)
+        id_list.push_back(sub_maps[i]->items[j]->getID());
+
+    /* Sort the list */
+    qSort(id_list);
+
+    /* Find the next available ID */
+    id = kBASE_ID_ITEMS;
+    for(int i = 0; !found && (i < id_list.size()); i++)
+    {
+      if(id_list[i] != (id + i))
+      {
+        id += i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && id_list.size() > 0)
+      id = id_list.last() + 1;
+  }
+
+  return id;
 }
 
 /*
@@ -2557,7 +2751,7 @@ int EditorMap::getSaveCount(int sub_index)
 
   /* Get count from base items */
   total += sprites.size() + base_things.size() + base_persons.size()
-        + base_items.size();
+        + base_npcs.size() + base_items.size();
 
   /* Get count from sub-maps */
   int start_index = 0;
@@ -2900,6 +3094,22 @@ void EditorMap::load(XmlData data, int index)
     /* Continue to parse the data in the thing */
     thing->load(data, index + 1);
   }
+  else if(data.getElement(index) == "mapitem" && data.getKey(index) == "id")
+  {
+    int item_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapItem* item = getItem(item_id);
+
+    /* Create new item if it doesn't exist */
+    if(item == NULL)
+    {
+      item = new EditorMapItem(item_id);
+      item->setTileIcons(getTileIcons());
+      setItem(item);
+    }
+
+    /* Continue to parse the data in the item */
+    item->load(data, index + 1);
+  }
   else if(data.getElement(index) == "mapperson" && data.getKey(index) == "id")
   {
     int person_id = QString::fromStdString(data.getKeyValue(index)).toInt();
@@ -3000,6 +3210,13 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
     for(int i = 0; i < base_things.size(); i++)
     {
       base_things[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
+
+    /* Add items */
+    for(int i = 0; i < base_items.size(); i++)
+    {
+      base_items[i]->save(fh, game_only);
       save_dialog->setValue(save_dialog->value()+1);
     }
 

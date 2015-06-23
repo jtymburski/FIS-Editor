@@ -176,7 +176,7 @@ signals:
 
   /* Thing instant changed */
   void thingInstanceChanged();
-// TODO: HERE \/
+
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
@@ -298,7 +298,7 @@ public:
   /* Saves the map */
   void save(FileHandler* fh, QProgressDialog* save_dialog,
             bool game_only = false, int sub_index = -1);
-
+// TODO: HERE
   /* Sets the current references for the selected sprite(s) or thing(s) */
   bool setCurrentItem(int index);
   bool setCurrentMap(int index);
