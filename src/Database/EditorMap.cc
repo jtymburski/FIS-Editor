@@ -80,8 +80,16 @@ EditorMap::~EditorMap()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Attempts to add item to the current sub-map */
-// TODO: Comment
+/*
+ * Description: Attempts to add the item to the current sub-map. Item needs
+ *              to be given an x and y start location prior to calling this
+ *              function.
+ *
+ * Inputs: EditorMapItem* item - the item to attempt to add
+ *         SubMapInfo* map - the map to add the item to
+ *         bool existing - false if new item. true otherwise
+ * Output: bool - true if the item was added (does not delete if fails)
+ */
 bool EditorMap::addItem(EditorMapItem* item, SubMapInfo* map, bool existing)
 {
   int x = item->getX();
@@ -391,8 +399,12 @@ void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
   save_dialog->setValue(save_dialog->value() + 1);
 }
 
-/* Clear map data */
-// TODO: Comment
+/*
+ * Description: Clears all set map data and leaves just a clean construct.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMap::clearAll()
 {
   /* Remove all things */
@@ -1465,8 +1477,6 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
-        int max = Helpers::getRenderDepth();
-
         /* Loop through all to find the top item */
         EditorMapItem* found = NULL;
         if(active_info.hover_tile->getItems().front() != NULL)
@@ -1667,8 +1677,14 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
   return false;
 }
 
-/* Returns current references for lists in map */
-// TODO: Comment
+/*
+ * Description: Returns the current selected base item in the list of items.
+ *              On click, if the layer and pen is correct, this is the item
+ *              that instantized and then placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the item stack
+ */
 int EditorMap::getCurrentItemIndex()
 {
   /* Ensure the active item isn't null */
@@ -1838,8 +1854,13 @@ int EditorMap::getID() const
   return id;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns the item with the corresponding ID.
+ *
+ * Inputs: int id - the id of the item to get
+ *         int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: EditorMapItem* - the pointer to match the ID. NULL if not found.
+ */
 EditorMapItem* EditorMap::getItem(int id, int sub_map)
 {
   if(id >= 0)
@@ -1863,8 +1884,14 @@ EditorMapItem* EditorMap::getItem(int id, int sub_map)
   return NULL;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns the item at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ *         int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: EditorMapItem* - the pointer to match the index. NULL if out of
+ *                         range
+ */
 EditorMapItem* EditorMap::getItemByIndex(int index, int sub_map)
 {
   /* If sub map ref is less than 0, get from base set */
@@ -1882,8 +1909,12 @@ EditorMapItem* EditorMap::getItemByIndex(int index, int sub_map)
   return NULL;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns the number of items in the list.
+ *
+ * Inputs: int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: int - the number of items in the map set
+ */
 int EditorMap::getItemCount(int sub_map)
 {
   /* If sub map ref is less than 0, get from base set */
@@ -1895,8 +1926,14 @@ int EditorMap::getItemCount(int sub_map)
   return 0;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns the index in the list of items of the matching id.
+ *              Less than 0 if none match.
+ *
+ * Inputs: int id - the id to find the index for
+ *         int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: int - the index of the item. Less than 0 if no item matches
+ */
 int EditorMap::getItemIndex(int id, int sub_map)
 {
   if(id >= 0)
@@ -1919,8 +1956,16 @@ int EditorMap::getItemIndex(int id, int sub_map)
   return -1;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns a list of all items in the format of a HEADER row
+ *              with the following rows as "ID: NAME".
+ *
+ * Inputs: int sub_map - the sub-map to get the items for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
+ * Output: QVector<QString> - list of all items
+ */
 QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
                                         bool shortened)
 {
@@ -1955,8 +2000,12 @@ QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
   return stack;
 }
 
-/* Return stored item information */
-// TODO: Comment
+/*
+ * Description: Returns the list of all items in the editor map
+ *
+ * Inputs: int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: QVector<EditorMapItem*> - list of all items
+ */
 QVector<EditorMapItem*> EditorMap::getItems(int sub_map)
 {
   /* If sub map ref is less than 0, get from base set */
@@ -2112,8 +2161,13 @@ QString EditorMap::getNameList()
   return EditorHelpers::getListString(id, name);
 }
 
-/* Returns available IDs in the set. Useful for when creating a new one */
-// TODO: Comment
+/*
+ * Description: Returns the next available item ID that can be used for a new
+ *              item.
+ *
+ * Inputs: none
+ * Output: int - the id to use
+ */
 int EditorMap::getNextItemID(bool from_sub)
 {
   bool found = false;
@@ -3250,11 +3304,34 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
   }
 }
 
-/* Sets the current references for the selected sprite(s) or thing(s) */
-// TODO: Comment
+/*
+ * Description: Sets the current item, based on the index in the stack.
+ *              Passing in -1 unsets the active item (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - item index in the list of map items
+ * Output: bool - true if the active item was changed
+ */
 bool EditorMap::setCurrentItem(int index)
 {
-  // TODO: Implementation
+  if(index >= -1 && index < base_items.size())
+  {
+    /* Unset the hover, if relevant */
+    updateHoverThing(true);
+
+    /* If index is -1, unset the current item */
+    if(index == -1)
+      active_info.active_item = NULL;
+    /* Otherwise, index is in valid range of base item set */
+    else
+      active_info.active_item = base_items[index];
+
+    /* Set the hover, if relevant */
+    updateHoverThing();
+
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -3300,7 +3377,7 @@ bool EditorMap::setCurrentMap(int index)
  *              Passing in -1 unsets the active npc (to NULL). This sprite is
  *              used in click placement.
  *
- * Inputs: int index - thing index in the list of map npcs
+ * Inputs: int index - npc index in the list of map npcs
  * Output: bool - true if the active npc was changed
  */
 bool EditorMap::setCurrentNPC(int index)
@@ -3432,11 +3509,18 @@ void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
     active_info.hover_tile->update();
 }
 
-/* Sets the hover information */
-// TODO: Comment
+/*
+ * Description: Sets the hover item, being flagged when selecting an instance
+ *              in the list in MapItemView.
+ *
+ * Inputs: int id - the id of the item instance
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
 bool EditorMap::setHoverItem(int id)
 {
-  // TODO: Implementation
+  if(active_submap != NULL)
+    return setHoverThing(getItem(id, active_submap->id));
+  return false;
 }
 
 /*
@@ -3543,8 +3627,6 @@ void EditorMap::setHoverTile(EditorTile* tile)
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)
     active_info.hover_tile->update();
-
-  //qDebug() << "SET HOVER TILE: " << tile;
 }
 
 /*
@@ -3562,11 +3644,107 @@ void EditorMap::setID(int id)
     this->id = id;
 }
 
-/* Sets a item in the map */
-// TODO: Comment
+/*
+ * Description: Sets the item in the set within the editor map. If a item,
+ *              already exists with the ID, it deletes the existing one.
+ *
+ * Inputs: EditorMapItem* item - the new item to set in
+ *         int sub_map - the sub-map to set the items for (<0 is base)
+ * Output: int - the index if set. If < 0, it is not set.
+ */
 int EditorMap::setItem(EditorMapItem* item, int sub_map)
 {
-  // TODO: Implementation
+  if(item != NULL && item->getID() >= 0)
+  {
+    bool found = false;
+    int index = -1;
+    bool near = false;
+
+    /* If sub map id is less than 0, work with base item */
+    if(sub_map < 0)
+    {
+      /* Find if the ID exists */
+      for(int i = 0; !found && !near && (i < base_items.size()); i++)
+      {
+        if(base_items[i]->getID() == item->getID())
+        {
+          index = i;
+          found = true;
+        }
+        else if(base_items[i]->getID() > item->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If found, modify the index with the new information */
+      if(found)
+      {
+        unsetItemByIndex(index);
+        base_items.insert(index, item);
+      }
+      else if(near)
+      {
+        base_items.insert(index, item);
+      }
+      else
+      {
+        base_items.append(item);
+        index = base_items.size() - 1;
+      }
+    }
+    /* Otherwise, work with the sub id */
+    else if(sub_map < sub_maps.size())
+    {
+      /* Check to make sure the thing could be added */
+      int x_start = item->getX();
+      int y_start = item->getY();
+      int x_end = x_start + item->getMatrix()->getWidth();
+      int y_end = y_start + item->getMatrix()->getHeight();
+      if(x_start >= 0 && x_end <= sub_maps[sub_map]->tiles.size() &&
+         y_start >= 0 && y_end <= sub_maps[sub_map]->tiles[x_start].size())
+      {
+        /* First remove the existing id, if one exists */
+        unsetItem(item->getID(), true);
+
+        /* Now insert into the proper location in the item stack in the map */
+        for(int i = 0; !near && (i < sub_maps[sub_map]->items.size()); i++)
+        {
+          if(sub_maps[sub_map]->items[i]->getID() > item->getID())
+          {
+            index = i;
+            near = true;
+          }
+        }
+
+        /* If near, insert at index. Otherwise, append */
+        if(near)
+        {
+          sub_maps[sub_map]->items.insert(index, item);
+        }
+        else
+        {
+          sub_maps[sub_map]->items.append(item);
+          index = sub_maps[sub_map]->items.size() - 1;
+        }
+
+        /* Add to tile */
+        for(int i = x_start; i < x_end; i++)
+        {
+          for(int j = y_start; j < y_end; j++)
+          {
+            bool add = sub_maps[sub_map]->tiles[i][j]->addItem(item);
+            if(!add)
+              index = -1;
+          }
+        }
+      }
+    }
+
+    return index;
+  }
+  return -1;
 }
 
 /*
@@ -4146,18 +4324,95 @@ void EditorMap::setVisibilityPaths(bool visible)
   }
 }
 
-/* Thing processing for updating with the new data */
-// TODO: Comment
+/*
+ * Description: Re-adds all sub-map items to tiles. This is called after
+ *              calling tilesItemRemove(), processing the item, and then
+ *              re-calling. Any item instances that can't be re-added are
+ *              deleted and removed from the list.
+ * TODO: FUTURE - warn about items being removed??
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
 void EditorMap::tilesItemAdd(bool update_all)
 {
-  // TODO: Implementation
+  /* Update all sub-maps - used for loading */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      for(int j = 0; j < sub_maps[i]->items.size(); j++)
+      {
+        if(!addItem(sub_maps[i]->items[j], sub_maps[i]))
+        {
+          delete sub_maps[i]->items[j];
+          sub_maps[i]->items.remove(j);
+          j--;
+        }
+      }
+    }
+  }
+  /* Or just the active one */
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->items.size(); i++)
+      {
+        if(!addThing(active_submap->items[i]))
+        {
+          delete active_submap->items[i];
+          active_submap->items.remove(i);
+          i--;
+        }
+      }
+    }
+  }
 }
 
-/* Thing processing for updating with the new data */
-// TODO: Comment
+/*
+ * Description: Removes all sub-map items from tiles. This is called before
+ *              processing item changes, and then calling tilesItemAdd().
+ *              Just removes the items from the tiles but still stored into
+ *              memory.
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
 void EditorMap::tilesItemRemove(bool update_all)
 {
-  // TODO: Implementation
+  /* Update all sub-maps - used for loading / resizing */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      for(int j = 0; j < sub_maps[i]->items.size(); j++)
+      {
+        EditorMapItem* item = sub_maps[i]->items[j];
+        int x = item->getX();
+        int y = item->getY();
+
+        sub_maps[i]->tiles[x][y]->unsetItem(item);
+      }
+    }
+  }
+  else
+  {
+    if(active_submap != NULL)
+    {
+      /* Clear selection */
+      setHoverThing(-1);
+
+      for(int i = 0; i < active_submap->items.size(); i++)
+      {
+        EditorMapItem* item = active_submap->items[i];
+        int x = item->getX();
+        int y = item->getY();
+
+        active_submap->tiles[x][y]->unsetItem(item);
+      }
+    }
+  }
 }
 
 /*
@@ -4523,25 +4778,122 @@ bool EditorMap::unsetMap(int id)
   return unsetMapByIndex(index);
 }
 
-/* Unset item(s) */
-// TODO: Comment
+/*
+ * Description: Unset the item within the list that correspond to the ID.
+ *
+ * Inputs: int id - the item id
+ *         bool from_sub - true if it should be unset in sub-maps instead
+ * Output: bool - was a item deleted?
+ */
 bool EditorMap::unsetItem(int id, bool from_sub)
 {
-  // TODO: Implementation
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    int index = getItemIndex(id);
+    return unsetItemByIndex(index);
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    bool deleted = false;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      int index = getItemIndex(id, i);
+      deleted |= unsetItemByIndex(index, i);
+    }
+
+    return deleted;
+  }
 }
 
-/* Unset item(s) */
-// TODO: Comment
+/*
+ * Description: Unset the item within the list that correspond to the index.
+ *
+ * Inputs: int index - the item index corresponder
+ *         int sub_map - the sub-map to get the items for (<0 is base)
+ * Output: bool - was a item deleted?
+ */
 bool EditorMap::unsetItemByIndex(int index, int sub_map)
 {
-  // TODO: Implementation
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_items.size())
+    {
+      /* Remove all items related to this index - sub persons */
+      for(int i = 0; i < sub_maps.size(); i++)
+      {
+        for(int j = 0; j < sub_maps[i]->items.size(); j++)
+        {
+          if(sub_maps[i]->items[j]->getBaseItem() != NULL &&
+             sub_maps[i]->items[j]->getBaseItem()->getID() ==
+             base_items[index]->getID())
+          {
+            unsetItemByIndex(j, i);
+            j--;
+          }
+        }
+      }
+
+      /* Finally, delete the item */
+      delete base_items[index];
+      base_items.remove(index);
+
+      return true;
+    }
+  }
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->items.size())
+    {
+      EditorMapItem* ref = sub_maps[sub_map]->items[index];
+
+      /* Remove the instances from tiles */
+      int x = ref->getX();
+      int y = ref->getY();
+      sub_maps[sub_map]->tiles[x][y]->unsetItem(ref);
+
+      /* Finally, delete the item */
+      delete ref;
+      sub_maps[sub_map]->items.remove(index);
+
+      /* Update list */
+      emit itemInstanceChanged();
+      setHoverItem(-1);
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
-/* Unset item(s) */
-// TODO: Comment
+/*
+ * Description: Unsets all map items within the EditorMap set.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: none
+ */
 void EditorMap::unsetItems(bool from_sub)
 {
-  // TODO: Implementation
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    while(base_items.size() > 0)
+      unsetItemByIndex(0);
+    base_items.clear();
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      while(sub_maps[i]->items.size() > 0)
+        unsetItemByIndex(0, i);
+      sub_maps[i]->items.clear();
+    }
+  }
 }
 
 /*

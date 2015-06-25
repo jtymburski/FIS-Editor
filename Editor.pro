@@ -149,6 +149,7 @@ HEADERS += \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
+    #include/View/MapItemView.h \
     include/View/MapNPCView.h \
     include/View/MapPersonView.h \
     include/View/MapRender.h \
