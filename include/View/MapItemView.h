@@ -14,9 +14,9 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
-#include "Dialog/InstanceDialog.h"
-//#include "Dialog/ItemDialog.h"
+#include "Dialog/ItemDialog.h"
 #include "EditorHelpers.h"
+#include "View/MapThingView.h"
 
 class MapItemView : public QWidget
 {
@@ -45,7 +45,7 @@ private:
   QMenu* rightclick_menu;
 
   /* The item dialog for editing */
-  //ItemDialig* item_dialog;
+  ItemDialog* item_dialog;
 
   /* The list of items in the view */
   QListWidget* item_instances;
@@ -84,7 +84,7 @@ signals:
   void fillWithData(EditorEnumDb::MapObjectMode view);
 
   /* Triggers for the select tile on the given view mode */
-  void selectTile(EditorEnumDb::MapObjectMode view);
+  //void selectTile(EditorEnumDb::MapObjectMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -97,7 +97,7 @@ public slots:
   void deleteInstance();
 
   /* Edit the base item */
-  void editBaseItem(EditorMapItem* base);
+  void editBaseItem(EditorMapThing* base);
 
   /* Edit item instance */
   void editInstance();
@@ -150,11 +150,5 @@ public:
 
   /* Updates list in item dialog, needed for event control */
   void updateListItems(QVector<QString> list);
-  void updateListMaps(QVector<QString> list); // TODO: REMOVE
-  void updateListSubmaps(QVector<QString> list); // TODO: REMOVE
-  void updateListThings(QVector<QString> list); // TODO: REMOVE
-
-  /* Update the selected tile for the item */
-  void updateSelectedTile(int id, int x, int y); // TODO: REMOVE
 };
 #endif // MAPITEMVIEW_H

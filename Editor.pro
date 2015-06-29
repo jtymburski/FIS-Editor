@@ -58,6 +58,7 @@ SOURCES += \
     src/Dialog/FrameDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
+    src/Dialog/ItemDialog.cc \
     src/Dialog/MatrixDialog.cc \
     src/Dialog/NodeDialog.cc \
     src/Dialog/PersonDialog.cc \
@@ -67,6 +68,7 @@ SOURCES += \
     src/View/GameView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
+    src/View/MapItemView.cc \
     src/View/MapNPCView.cc \
     src/View/MapPersonView.cc \
     src/View/MapRender.cc \
@@ -140,6 +142,7 @@ HEADERS += \
     include/Dialog/FrameDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
+    include/Dialog/ItemDialog.h \
     include/Dialog/MatrixDialog.h \
     include/Dialog/NodeDialog.h \
     include/Dialog/PersonDialog.h \
@@ -149,7 +152,7 @@ HEADERS += \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
-    #include/View/MapItemView.h \
+    include/View/MapItemView.h \
     include/View/MapNPCView.h \
     include/View/MapPersonView.h \
     include/View/MapRender.h \
