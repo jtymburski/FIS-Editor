@@ -42,7 +42,7 @@ private:
   EditorMapItem* item_working;
 
   /* The frame image */
-  QLabel* lbl_frame_img;
+  //QLabel* lbl_frame_img;
 
   /* The list of objects used in possible events */
   QVector<QString> list_items;
@@ -53,9 +53,6 @@ private:
 
   /* Matrix view and control */
   MatrixView* matrix_view;
-
-  /* The count of number of items in stack */
-  //QSpinBox* spin_count; // TODO: REMOVE
 
 public:
   /*------------------- Constants -----------------------*/
@@ -103,7 +100,7 @@ public slots:
   void coreItemChanged(int index);
 
   /* Update the frame for the thing */
-  void updateFrame();
+  //void updateFrame();
 
   /* Visibility status changed */
   void visibilityChanged(int index);

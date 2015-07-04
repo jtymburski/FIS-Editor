@@ -120,9 +120,9 @@ void MapItemView::createLayout()
   lbl_id = new QLabel("ID:", this);
   layout->addWidget(lbl_id, 0, Qt::AlignHCenter);
 
-  /* Size label */
-  lbl_size = new QLabel("Size:", this);
-  layout->addWidget(lbl_size, 0, Qt::AlignHCenter);
+  /* Walkover label */
+  lbl_walkover = new QLabel("Walkover:", this);
+  layout->addWidget(lbl_walkover, 0, Qt::AlignHCenter);
 }
 
 /*
@@ -180,7 +180,7 @@ void MapItemView::updateInfo()
     lbl_id->setText("ID:");
     lbl_image->setPixmap(QPixmap());
     lbl_name->setText("Name:");
-    lbl_size->setText("Size:  |  Frames:");
+    lbl_walkover->setText("Walkover:");
 
     EditorMapItem* item = getSelected();
     if(item != NULL)
@@ -189,12 +189,17 @@ void MapItemView::updateInfo()
       lbl_id->setText("ID: " + QString::number(item->getID()));
       lbl_name->setText("Name: " + item->getName());
 
-      /* If matrix is valid, set the remaining info */
+      /* If matrix is valid, set the image */
       if(item->getMatrix() != NULL)
       {
         lbl_image->setPixmap(item->getMatrix()->getSnapshot(200, 200));
-        lbl_size->setText("Size: 1 x 1");
       }
+
+      /* Walkover info */
+      if(item->isWalkover())
+        lbl_walkover->setText("Walkover: TRUE");
+      else
+        lbl_walkover->setText("Walkover: FALSE");
     }
   }
 }

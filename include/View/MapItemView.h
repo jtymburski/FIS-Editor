@@ -36,7 +36,7 @@ private:
   QLabel* lbl_id;
   QLabel* lbl_image;
   QLabel* lbl_name;
-  QLabel* lbl_size;
+  QLabel* lbl_walkover;
 
   /* Right click menu on instance list */
   QMenu* rightclick_menu;

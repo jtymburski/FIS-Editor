@@ -1717,11 +1717,7 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
     /* Save the sprite data */
     EditorTileSprite* sprite = getValidSprite();
     if(sprite != NULL)
-    {
-      fh->writeXmlElement("sprite");
       sprite->save(fh, game_only, true);
-      fh->writeXmlElementEnd(); /* </sprite> */
-    }
 
     fh->writeXmlElementEnd(); /* </sprites> */
 
@@ -1741,13 +1737,18 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
 void EditorMatrix::saveRender(FileHandler* fh)
 {
   QString render_matrix = "";
+  bool all_zero = true;
   if(fh != NULL && matrix.size() > 0)
   {
     for(int j = 0; j < matrix.front().size(); j++)
     {
       for(int i = 0; i < matrix.size(); i++)
+      {
+        if(matrix[i][j]->getRenderDepth() != 0)
+          all_zero = false;
         render_matrix.push_back(
                        QString::number(matrix[i][j]->getRenderDepth()) + ",");
+      }
       if(render_matrix.endsWith(","))
         render_matrix.chop(1);
       render_matrix += ".";
@@ -1755,7 +1756,9 @@ void EditorMatrix::saveRender(FileHandler* fh)
     if(render_matrix.endsWith("."))
       render_matrix.chop(1);
 
-    fh->writeXmlData("rendermatrix", render_matrix.toStdString());
+    /* Only render if not all zero */
+    if(!all_zero)
+      fh->writeXmlData("rendermatrix", render_matrix.toStdString());
   }
 }
 

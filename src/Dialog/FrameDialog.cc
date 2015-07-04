@@ -74,7 +74,7 @@ FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
     /* Delete button setup */
     QPushButton* deleteframe = new QPushButton("Delete This Frame", this);
     connect(deleteframe,SIGNAL(pressed()),this,SLOT(deleteFrame()));
-    if(s->frameCount() <= 1)
+    if(s->frameCount() <= 0)
       deleteframe->setEnabled(false);
 
     /* Set up the layout */

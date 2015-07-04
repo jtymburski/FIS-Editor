@@ -1129,32 +1129,45 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
 {
   QString base_path = EditorHelpers::getSpriteDir();
   base_path = base_path.left(base_path.indexOf("/sprites"));
-  EditorSprite default_sprite;
+  EditorSprite ref;
 
   if(fh != NULL)
   {
+    /* Check if data is default */
+    bool animate = ref.getAnimationTime() != getAnimationTime();
+    bool rotate = ref.getSprite()->getRotation() != sprite->getRotation();
+    bool bright = ref.getSprite()->getBrightness() != sprite->getBrightness();
+    bool color_r = ref.getSprite()->getColorRed() != sprite->getColorRed();
+    bool color_g = ref.getSprite()->getColorGreen() != sprite->getColorGreen();
+    bool color_b = ref.getSprite()->getColorBlue() != sprite->getColorBlue();
+    bool opac = ref.getSprite()->getOpacity() != sprite->getOpacity();
+    bool dir = ref.getSprite()->isDirectionForward() !=
+               sprite->isDirectionForward();
+
     if(!core_only)
       fh->writeXmlElement("sprite", "id", getID());
+    else if(animate || rotate || bright || color_r ||
+            color_g || color_b || opac || dir)
+      fh->writeXmlElement("sprite");
 
     /* Write sprite data */
     if(!game_only && !core_only)
       fh->writeXmlData("name", getName().toStdString());
-    if(default_sprite.getAnimationTime() != getAnimationTime())
+    if(animate)
       fh->writeXmlData("animation", getAnimationTime().toInt());
-    if(default_sprite.getSprite()->getRotation() != sprite->getRotation())
+    if(rotate)
       fh->writeXmlData("rotation", sprite->getRotation());
-    if(default_sprite.getSprite()->getBrightness() != sprite->getBrightness())
+    if(bright)
       fh->writeXmlData("brightness", (float)sprite->getBrightness());
-    if(default_sprite.getSprite()->getColorRed() != sprite->getColorRed())
+    if(color_r)
       fh->writeXmlData("color_r", sprite->getColorRed());
-    if(default_sprite.getSprite()->getColorGreen() != sprite->getColorGreen())
+    if(color_g)
       fh->writeXmlData("color_g", sprite->getColorGreen());
-    if(default_sprite.getSprite()->getColorBlue() != sprite->getColorBlue())
+    if(color_b)
       fh->writeXmlData("color_b", sprite->getColorBlue());
-    if(default_sprite.getSprite()->getOpacity() != sprite->getOpacity())
+    if(opac)
       fh->writeXmlData("opacity", sprite->getOpacity());
-    if(default_sprite.getSprite()->isDirectionForward() !=
-                           sprite->isDirectionForward())
+    if(dir)
       fh->writeXmlData("forward", sprite->isDirectionForward());
     //fh->writeXmlData("sound", NULL); // TODO
 
@@ -1165,7 +1178,12 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
       for(int i = 0; i < frame_set.size(); i++)
         fh->writeXmlData(frame_set[i].first.toStdString(),
                          frame_set[i].second.toStdString());
+    }
 
+    /* Close element, if relevant */
+    if(!core_only || animate || rotate || bright || color_r ||
+            color_g || color_b || opac || dir)
+    {
       fh->writeXmlElementEnd();
     }
   }

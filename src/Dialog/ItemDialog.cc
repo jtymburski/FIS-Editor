@@ -38,7 +38,7 @@ ItemDialog:: ItemDialog(EditorMapItem* edit_item, QWidget* parent)
   box_core->blockSignals(true);
   updateData();
   box_core->blockSignals(false);
-  updateFrame();
+  //updateFrame();
 }
 
 /*
@@ -69,7 +69,8 @@ void ItemDialog::createLayout(bool instance)
   /* Layout setup */
   QGridLayout* layout = new QGridLayout(this);
   layout->setSizeConstraint(QLayout::SetFixedSize);
-  layout->setColumnStretch(2, 1);
+  //layout->setColumnMinimumWidth(3, 30);
+  layout->setColumnStretch(3, 1);
 
   /* The ID widget */
   QLabel* lbl_id = new QLabel("ID:", this);
@@ -81,15 +82,15 @@ void ItemDialog::createLayout(bool instance)
 
   /* The name widget */
   QLabel* lbl_name = new QLabel("Name:", this);
-  layout->addWidget(lbl_name, 1, 0);
+  layout->addWidget(lbl_name, 2, 0);
   line_name = new QLineEdit("", this);
   connect(line_name, SIGNAL(textEdited(QString)),
           this, SLOT(changedName(QString)));
-  layout->addWidget(line_name, 1, 1, 1, 2);
+  layout->addWidget(line_name, 2, 1, 1, 4);
 
   /* The visibility widget */
   QLabel* lbl_visible = new QLabel("Visible:", this);
-  layout->addWidget(lbl_visible, 2, 0);
+  layout->addWidget(lbl_visible, 1, 0);
   box_visible = new QComboBox(this);
   box_visible->addItem("False");
   box_visible->addItem("True");
@@ -97,7 +98,7 @@ void ItemDialog::createLayout(bool instance)
     box_visible->setDisabled(true);
   connect(box_visible, SIGNAL(currentIndexChanged(int)),
           this, SLOT(visibilityChanged(int)));
-  layout->addWidget(box_visible, 2, 1);
+  layout->addWidget(box_visible, 1, 1);
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
@@ -116,15 +117,6 @@ void ItemDialog::createLayout(bool instance)
           this, SLOT(coreItemChanged(int)));
   layout->addWidget(box_core, 0, 5, 1, 3);
 
-  /* Count */
-  //QLabel* lbl_count = new QLabel("Count:", this);
-  //layout->addWidget(lbl_count, 1, 4, 1, 1);
-  //spin_count = new QSpinBox(this);
-  //spin_count->setMinimum(1);
-  //spin_count->setMaximum(kMAX_COUNT);
-  //connect(spin_count, SIGNAL(valueChanged(int)), this, SLOT(changedCount(int)));
-  //layout->addWidget(spin_count, 1, 5, 1, 2);
-
   /* Walkover item */
   QLabel* lbl_walkover = new QLabel("Walkover:", this);
   layout->addWidget(lbl_walkover, 1, 4, 1, 1);
@@ -136,27 +128,27 @@ void ItemDialog::createLayout(bool instance)
   layout->addWidget(box_walkover, 1, 5, 1, 2);
 
   /* The sprite view widget */
-  QLabel* lbl_frame = new QLabel("Large Item:", this);
-  layout->addWidget(lbl_frame, 7, 0, 1, 1);
-  lbl_frame_img = new QLabel(this);
-  lbl_frame_img->setMinimumSize(200, 200);
-  lbl_frame_img->setStyleSheet("border: 1px solid black");
-  lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 7, 1, 1, 3);
-  QPushButton* btn_frame_click = new QPushButton(this);
-  btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_frame_click->setIconSize(QSize(24,24));
-  btn_frame_click->setMaximumSize(30, 30);
-  if(instance)
-    btn_frame_click->setDisabled(true);
-  connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 7, 3, 1, 1, Qt::AlignTop);
+  //QLabel* lbl_frame = new QLabel("Large Item:", this);
+  //layout->addWidget(lbl_frame, 7, 0, 1, 1);
+  //lbl_frame_img = new QLabel(this);
+  //lbl_frame_img->setMinimumSize(200, 200);
+  //lbl_frame_img->setStyleSheet("border: 1px solid black");
+  //lbl_frame_img->setAlignment(Qt::AlignCenter);
+  //layout->addWidget(lbl_frame_img, 7, 1, 1, 3);
+  //QPushButton* btn_frame_click = new QPushButton(this);
+  //btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
+  //btn_frame_click->setIconSize(QSize(24,24));
+  //btn_frame_click->setMaximumSize(30, 30);
+  //if(instance)
+  //  btn_frame_click->setDisabled(true);
+  //connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
+  //layout->addWidget(btn_frame_click, 7, 3, 1, 1, Qt::AlignTop);
 
   /* Matrix View */
   matrix_view = new MatrixView(item_working->getMatrix(), this, true);
   if(instance)
     matrix_view->setDisabled(true);
-  layout->addWidget(matrix_view, 7, 4, 1, 4, Qt::AlignRight);
+  layout->addWidget(matrix_view, 7, 0, 1, 8, Qt::AlignHCenter);
 
   /* The button control */
   layout->setRowMinimumHeight(8, 15);
@@ -183,7 +175,6 @@ void ItemDialog::updateData()
   /* General */
   line_description->setText(item_working->getDescription());
   line_name->setText(item_working->getName());
-  //spin_count->setValue(item_working->getCount()); // TODO: REMOVE
 
   /* Visiblity */
   if(item_working->isVisible())
@@ -338,19 +329,19 @@ void ItemDialog::coreItemChanged(int index)
  * Inputs: none
  * Output: none
  */
-void ItemDialog::updateFrame()
-{
-  QImage original = item_working->getDialogImage()->getImage(0);
-  if(original.width() > 200 || original.height() > 200)
-  {
-    QImage scaled_image = original.scaled(200, 200, Qt::KeepAspectRatio);
-    lbl_frame_img->setPixmap(QPixmap::fromImage(scaled_image));
-  }
-  else
-  {
-    lbl_frame_img->setPixmap(QPixmap::fromImage(original));
-  }
-}
+//void ItemDialog::updateFrame()
+//{
+//  QImage original = item_working->getDialogImage()->getImage(0);
+//  if(original.width() > 200 || original.height() > 200)
+//  {
+//    QImage scaled_image = original.scaled(200, 200, Qt::KeepAspectRatio);
+//    lbl_frame_img->setPixmap(QPixmap::fromImage(scaled_image));
+//  }
+//  else
+//  {
+//    lbl_frame_img->setPixmap(QPixmap::fromImage(original));
+//  }
+//}
 
 /*
  * Description: The drop down for visibility of the thing changed slot. This

@@ -703,7 +703,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only)
 {
   (void)game_only;
 
-  if(fh != NULL)
+  if(fh != NULL && event.classification != EventClassifier::NOEVENT)
   {
     fh->writeXmlElement("event");
 
