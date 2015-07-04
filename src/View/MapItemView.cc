@@ -588,10 +588,6 @@ void MapItemView::setEditorMap(EditorMap* map)
  */
 void MapItemView::updateListItems(QVector<QString> list)
 {
-  // TODO
-
-  //if(person_dialog != NULL)
-  //  person_dialog->getEventView()->setListItems(list);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListItems(list);
+  if(item_dialog != NULL)
+    item_dialog->setListItems(list);
 }

@@ -26,6 +26,7 @@
 EditorMapItem::EditorMapItem(int id, QString name, QString description)
              : EditorMapThing(id, name, description)
 {
+  item.setCount(1);
 }
                   
 /*

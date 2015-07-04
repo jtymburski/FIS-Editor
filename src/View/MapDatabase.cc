@@ -51,7 +51,8 @@ void MapDatabase::setupMain()
   view_top = new QListWidget(widget_main);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Raw Images" << "Sprites" << "Things" << "Persons" << "NPCs";
+  items << "Raw Images" << "Sprites" << "Things" << "Items"
+        << "Persons" << "NPCs";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   view_top->setMaximumHeight(60);
@@ -59,27 +60,20 @@ void MapDatabase::setupMain()
           this, SLOT(updateSelected(int)));
 
   /* Sets up the various views */
+  view_item = new MapItemView(widget_main);
+  view_npc = new MapNPCView(widget_main);
+  view_person = new MapPersonView(widget_main);
   view_raw = new RawImageView(widget_main);
   view_sprite = new SpriteView(widget_main);
   view_thing = new MapThingView(widget_main);
-  view_person = new MapPersonView(widget_main);
-  view_npc = new MapNPCView(widget_main);
 
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
-  connect(view_thing, SIGNAL(ensureVisible(QGraphicsItem*)),
+  connect(view_item, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
-  connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+  connect(view_item, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
-  connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
-  connect(view_person, SIGNAL(ensureVisible(QGraphicsItem*)),
-          this, SIGNAL(ensureVisible(QGraphicsItem*)));
-  connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
-          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
-  connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
   connect(view_npc, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
@@ -88,6 +82,18 @@ void MapDatabase::setupMain()
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
   connect(view_npc, SIGNAL(pathEditStart(EditorNPCPath*)),
           this, SLOT(pathEditStart(EditorNPCPath*)));
+  connect(view_person, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
+  connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+  connect(view_thing, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
+  connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
 
   /* Push buttons at the bottom of the layout */
   button_delete = new QPushButton("Delete", widget_main);
@@ -113,6 +119,7 @@ void MapDatabase::setupMain()
   layout->addWidget(view_thing);
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
+  layout->addWidget(view_item);
 }
 
 /* Set-up path editor widget */
@@ -205,6 +212,8 @@ void MapDatabase::buttonDelete()
     view_person->deletePerson();
   else if(view_npc->isVisible())
     view_npc->deleteNPC();
+  else if(view_item->isVisible())
+    view_item->deleteItem();
 }
 
 // TODO: Comment
@@ -219,6 +228,8 @@ void MapDatabase::buttonDuplicate()
     view_person->duplicatePerson();
   else if(view_npc->isVisible())
     view_npc->duplicateNPC();
+  else if(view_item->isVisible())
+    view_item->duplicateItem();
 }
 
 // TODO: Comment
@@ -233,6 +244,8 @@ void MapDatabase::buttonImport()
     view_person->importPerson();
   else if(view_npc->isVisible())
     view_npc->importNPC();
+  else if(view_item->isVisible())
+    view_item->importItem();
 }
 
 // TODO: Comment
@@ -247,6 +260,8 @@ void MapDatabase::buttonNew()
     view_person->newPerson();
   else if(view_npc->isVisible())
     view_npc->newNPC();
+  else if(view_item->isVisible())
+    view_item->newItem();
 }
 
 /* Fills thing with data */
@@ -431,6 +446,7 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
 void MapDatabase::updateAllLists()
 {
   view_thing->updateList();
+  view_item->updateList();
   view_person->updateList();
   view_npc->updateList();
 }
@@ -441,6 +457,10 @@ void MapDatabase::updatedItems(QVector<QString> items)
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {
     view_thing->updateListItems(items);
+  }
+  else if(mode_for_data == EditorEnumDb::ITEM_VIEW)
+  {
+    view_item->updateListItems(items);
   }
   else if(mode_for_data == EditorEnumDb::PERSON_VIEW)
   {
@@ -496,6 +516,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->show();
     view_sprite->hide();
     view_thing->hide();
+    view_item->hide();
     view_person->hide();
     view_npc->hide();
 
@@ -510,6 +531,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->show();
     view_thing->hide();
+    view_item->hide();
     view_person->hide();
     view_npc->hide();
   }
@@ -518,6 +540,16 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->show();
+    view_item->hide();
+    view_person->hide();
+    view_npc->hide();
+  }
+  else if(index == EditorEnumDb::ITEM_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_item->show();
     view_person->hide();
     view_npc->hide();
   }
@@ -526,6 +558,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->hide();
+    view_item->hide();
     view_person->show();
     view_npc->hide();
   }
@@ -534,6 +567,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->hide();
+    view_item->hide();
     view_person->hide();
     view_npc->show();
   }
@@ -542,6 +576,11 @@ void MapDatabase::updateSelected(int index)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+MapItemView* MapDatabase::getItemView()
+{
+  return view_item;
+}
 
 MapNPCView* MapDatabase::getNPCView()
 {
@@ -578,6 +617,9 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the thing view */
   view_thing->setEditorMap(editing_map);
+
+  /* Add to the item view */
+  view_item->setEditorMap(editing_map);
 
   /* Add to the person view */
   view_person->setEditorMap(editing_map);

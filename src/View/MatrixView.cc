@@ -18,13 +18,16 @@
  *
  * Inputs: EditorMatrix* matrix - the matrix to display in the view
  *         QWidget* parent - parent widget
+ *         bool no_grow - is the item limited to one frame with 1x1 matrix
  */
-MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
+MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
+          : QFrame(parent)
 {
   /* Initialize variables */
   this->matrix = NULL;
   last_path = EditorHelpers::getSpriteDir();
   matrix_dialog = NULL;
+  this->no_grow = no_grow;
   playing = false;
   sprite_dialog = NULL;
   int icon_size = 24;
@@ -41,8 +44,17 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
 
   /* Set up the view */
   matrix_view = new QGraphicsView(this);
-  int size = EditorHelpers::getTileSize() * 5 +
-             EditorHelpers::getTileSize() / 2;
+  int size = 0;
+  if(no_grow)
+  {
+    size = EditorHelpers::getTileSize() * 2 +
+           EditorHelpers::getTileSize() / 2;
+  }
+  else
+  {
+    size = EditorHelpers::getTileSize() * 5 +
+           EditorHelpers::getTileSize() / 2;
+  }
   matrix_view->setMinimumSize(size, size);
   matrix_view->setMaximumSize(size, size);
   layout->addWidget(matrix_view, 1, 1, 10, 10);
@@ -57,22 +69,25 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   connect(button_view_grid, SIGNAL(toggled(bool)),
           this, SLOT(buttonViewGrid(bool)));
   layout->addWidget(button_view_grid, 0, 1);
-  button_view_pass = new QPushButton(this);
-  button_view_pass->setCheckable(true);
-  button_view_pass->setIcon(QIcon(":/images/icons/32_pass_vis.png"));
-  button_view_pass->setIconSize(QSize(icon_size,icon_size));
-  button_view_pass->setMaximumSize(button_size, button_size);
-  connect(button_view_pass, SIGNAL(toggled(bool)),
-          this, SLOT(buttonViewPass(bool)));
-  layout->addWidget(button_view_pass, 0, 2);
-  button_view_render = new QPushButton(this);
-  button_view_render->setCheckable(true);
-  button_view_render->setIcon(QIcon(":/images/icons/32_render_vis.png"));
-  button_view_render->setIconSize(QSize(icon_size,icon_size));
-  button_view_render->setMaximumSize(button_size, button_size);
-  connect(button_view_render, SIGNAL(toggled(bool)),
-          this, SLOT(buttonViewRender(bool)));
-  layout->addWidget(button_view_render, 0, 3);
+  if(!no_grow)
+  {
+    button_view_pass = new QPushButton(this);
+    button_view_pass->setCheckable(true);
+    button_view_pass->setIcon(QIcon(":/images/icons/32_pass_vis.png"));
+    button_view_pass->setIconSize(QSize(icon_size,icon_size));
+    button_view_pass->setMaximumSize(button_size, button_size);
+    connect(button_view_pass, SIGNAL(toggled(bool)),
+            this, SLOT(buttonViewPass(bool)));
+    layout->addWidget(button_view_pass, 0, 2);
+    button_view_render = new QPushButton(this);
+    button_view_render->setCheckable(true);
+    button_view_render->setIcon(QIcon(":/images/icons/32_render_vis.png"));
+    button_view_render->setIconSize(QSize(icon_size,icon_size));
+    button_view_render->setMaximumSize(button_size, button_size);
+    connect(button_view_render, SIGNAL(toggled(bool)),
+            this, SLOT(buttonViewRender(bool)));
+    layout->addWidget(button_view_render, 0, 3);
+  }
 
   /* Set up the pen push buttons */
   button_pen_place = new QPushButton(this);
@@ -92,30 +107,33 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   button_pen_erase->setMaximumSize(button_size, button_size);
   connect(button_pen_erase, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
   layout->addWidget(button_pen_erase, 2, 0);
-  button_pen_plus = new QPushButton(this);
-  button_pen_plus->setCheckable(true);
-  button_pen_plus->setAutoExclusive(true);
-  button_pen_plus->setIcon(QIcon(":/images/icons/32_depth_up.png"));
-  button_pen_plus->setIconSize(QSize(icon_size,icon_size));
-  button_pen_plus->setMaximumSize(button_size, button_size);
-  connect(button_pen_plus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
-  layout->addWidget(button_pen_plus, 3, 0);
-  button_pen_minus = new QPushButton(this);
-  button_pen_minus->setCheckable(true);
-  button_pen_minus->setAutoExclusive(true);
-  button_pen_minus->setIcon(QIcon(":/images/icons/32_depth_down.png"));
-  button_pen_minus->setIconSize(QSize(icon_size,icon_size));
-  button_pen_minus->setMaximumSize(button_size, button_size);
-  connect(button_pen_minus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
-  layout->addWidget(button_pen_minus, 4, 0);
-  button_pen_pass = new QPushButton(this);
-  button_pen_pass->setCheckable(true);
-  button_pen_pass->setAutoExclusive(true);
-  button_pen_pass->setIcon(QIcon(":/images/icons/32_passA.png"));
-  button_pen_pass->setIconSize(QSize(icon_size,icon_size));
-  button_pen_pass->setMaximumSize(button_size, button_size);
-  connect(button_pen_pass, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
-  layout->addWidget(button_pen_pass, 5, 0);
+  if(!no_grow)
+  {
+    button_pen_plus = new QPushButton(this);
+    button_pen_plus->setCheckable(true);
+    button_pen_plus->setAutoExclusive(true);
+    button_pen_plus->setIcon(QIcon(":/images/icons/32_depth_up.png"));
+    button_pen_plus->setIconSize(QSize(icon_size,icon_size));
+    button_pen_plus->setMaximumSize(button_size, button_size);
+    connect(button_pen_plus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    layout->addWidget(button_pen_plus, 3, 0);
+    button_pen_minus = new QPushButton(this);
+    button_pen_minus->setCheckable(true);
+    button_pen_minus->setAutoExclusive(true);
+    button_pen_minus->setIcon(QIcon(":/images/icons/32_depth_down.png"));
+    button_pen_minus->setIconSize(QSize(icon_size,icon_size));
+    button_pen_minus->setMaximumSize(button_size, button_size);
+    connect(button_pen_minus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    layout->addWidget(button_pen_minus, 4, 0);
+    button_pen_pass = new QPushButton(this);
+    button_pen_pass->setCheckable(true);
+    button_pen_pass->setAutoExclusive(true);
+    button_pen_pass->setIcon(QIcon(":/images/icons/32_passA.png"));
+    button_pen_pass->setIconSize(QSize(icon_size,icon_size));
+    button_pen_pass->setMaximumSize(button_size, button_size);
+    connect(button_pen_pass, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    layout->addWidget(button_pen_pass, 5, 0);
+  }
 
   /* Sprite setting button */
   button_sprite_edit = new QPushButton(this);
@@ -126,64 +144,67 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
           this, SLOT(buttonSpriteEdit()));
   layout->addWidget(button_sprite_edit, 0, 10);
 
-  /* Increase/decrease width buttons */
-  QPushButton* button_width_minus = new QPushButton(this);
-  button_width_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
-  button_width_minus->setIconSize(QSize(icon_size,icon_size));
-  button_width_minus->setMaximumSize(button_size, button_size);
-  connect(button_width_minus, SIGNAL(clicked()),
-          this, SLOT(buttonWidthDecrease()));
-  layout->addWidget(button_width_minus, 11, 9);
-  QPushButton* button_width_plus = new QPushButton(this);
-  button_width_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
-  button_width_plus->setIconSize(QSize(icon_size,icon_size));
-  button_width_plus->setMaximumSize(button_size, button_size);
-  connect(button_width_plus, SIGNAL(clicked()),
-          this, SLOT(buttonWidthIncrease()));
-  layout->addWidget(button_width_plus, 11, 10);
+  if(!no_grow)
+  {
+    /* Increase/decrease width buttons */
+    QPushButton* button_width_minus = new QPushButton(this);
+    button_width_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
+    button_width_minus->setIconSize(QSize(icon_size,icon_size));
+    button_width_minus->setMaximumSize(button_size, button_size);
+    connect(button_width_minus, SIGNAL(clicked()),
+            this, SLOT(buttonWidthDecrease()));
+    layout->addWidget(button_width_minus, 11, 9);
+    QPushButton* button_width_plus = new QPushButton(this);
+    button_width_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
+    button_width_plus->setIconSize(QSize(icon_size,icon_size));
+    button_width_plus->setMaximumSize(button_size, button_size);
+    connect(button_width_plus, SIGNAL(clicked()),
+            this, SLOT(buttonWidthIncrease()));
+    layout->addWidget(button_width_plus, 11, 10);
 
-  /* Increase/decrease height buttons */
-  QPushButton* button_height_minus = new QPushButton(this);
-  button_height_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
-  button_height_minus->setIconSize(QSize(icon_size,icon_size));
-  button_height_minus->setMaximumSize(button_size, button_size);
-  connect(button_height_minus, SIGNAL(clicked()),
-          this, SLOT(buttonHeightDecrease()));
-  layout->addWidget(button_height_minus, 9, 11);
-  QPushButton* button_height_plus = new QPushButton(this);
-  button_height_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
-  button_height_plus->setIconSize(QSize(icon_size,icon_size));
-  button_height_plus->setMaximumSize(button_size, button_size);
-  connect(button_height_plus, SIGNAL(clicked()),
-          this, SLOT(buttonHeightIncrease()));
-  layout->addWidget(button_height_plus, 10, 11);
+    /* Increase/decrease height buttons */
+    QPushButton* button_height_minus = new QPushButton(this);
+    button_height_minus->setIcon(QIcon(":/images/icons/32_minus.png"));
+    button_height_minus->setIconSize(QSize(icon_size,icon_size));
+    button_height_minus->setMaximumSize(button_size, button_size);
+    connect(button_height_minus, SIGNAL(clicked()),
+            this, SLOT(buttonHeightDecrease()));
+    layout->addWidget(button_height_minus, 9, 11);
+    QPushButton* button_height_plus = new QPushButton(this);
+    button_height_plus->setIcon(QIcon(":/images/icons/32_plus.png"));
+    button_height_plus->setIconSize(QSize(icon_size,icon_size));
+    button_height_plus->setMaximumSize(button_size, button_size);
+    connect(button_height_plus, SIGNAL(clicked()),
+            this, SLOT(buttonHeightIncrease()));
+    layout->addWidget(button_height_plus, 10, 11);
 
-  /* Trim scene button */
-  QPushButton* button_trim = new QPushButton(this);
-  button_trim->setIcon(QIcon(":/images/icons/32_collapse.png"));
-  button_trim->setIconSize(QSize(icon_size,icon_size));
-  button_trim->setMaximumSize(button_size, button_size);
-  connect(button_trim, SIGNAL(clicked()),
-          this, SLOT(buttonTrim()));
-  layout->addWidget(button_trim, 11, 11);
+    /* Trim scene button */
+    QPushButton* button_trim = new QPushButton(this);
+    button_trim->setIcon(QIcon(":/images/icons/32_collapse.png"));
+    button_trim->setIconSize(QSize(icon_size,icon_size));
+    button_trim->setMaximumSize(button_size, button_size);
+    connect(button_trim, SIGNAL(clicked()),
+            this, SLOT(buttonTrim()));
+    layout->addWidget(button_trim, 11, 11);
 
-  /* Scene control buttons */
-  button_play = new QPushButton(this);
-  button_play->setIcon(QIcon(":/images/icons/32_play.png"));
-  button_play->setIconSize(QSize(icon_size, icon_size));
-  button_play->setMaximumSize(button_size, button_size);
-  connect(button_play, SIGNAL(clicked()), this, SLOT(buttonRunAnimation()));
-  layout->addWidget(button_play, 11, 0);
-  button_frame_prev = new QPushButton("<", this);
-  button_frame_prev->setMaximumSize(button_size, button_size);
-  connect(button_frame_prev, SIGNAL(clicked()), this, SLOT(buttonFramePrev()));
-  layout->addWidget(button_frame_prev, 11, 1);//, Qt::AlignRight);
-  lbl_frame_num = new QLabel("0", this);
-  layout->addWidget(lbl_frame_num, 11, 2, Qt::AlignCenter);
-  button_frame_next = new QPushButton(">", this);
-  button_frame_next->setMaximumSize(button_size, button_size);
-  connect(button_frame_next, SIGNAL(clicked()), this, SLOT(buttonFrameNext()));
-  layout->addWidget(button_frame_next, 11, 3);//, Qt::AlignLeft);
+    /* Scene control buttons */
+    button_play = new QPushButton(this);
+    button_play->setIcon(QIcon(":/images/icons/32_play.png"));
+    button_play->setIconSize(QSize(icon_size, icon_size));
+    button_play->setMaximumSize(button_size, button_size);
+    connect(button_play, SIGNAL(clicked()), this, SLOT(buttonRunAnimation()));
+    layout->addWidget(button_play, 11, 0);
+    button_frame_prev = new QPushButton("<", this);
+    button_frame_prev->setMaximumSize(button_size, button_size);
+    connect(button_frame_prev, SIGNAL(clicked()), this, SLOT(buttonFramePrev()));
+    layout->addWidget(button_frame_prev, 11, 1);//, Qt::AlignRight);
+    lbl_frame_num = new QLabel("0", this);
+    layout->addWidget(lbl_frame_num, 11, 2, Qt::AlignCenter);
+    button_frame_next = new QPushButton(">", this);
+    button_frame_next->setMaximumSize(button_size, button_size);
+    connect(button_frame_next, SIGNAL(clicked()), this, SLOT(buttonFrameNext()));
+    layout->addWidget(button_frame_next, 11, 3);//, Qt::AlignLeft);
+  }
 
   /* Set up the right click menu */
   rightclick_menu = new QMenu("Sprite Edit", this);
@@ -193,29 +214,32 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent) : QFrame(parent)
   QAction* action_view = new QAction("View Sprite", rightclick_menu);
   connect(action_view, SIGNAL(triggered()), this, SLOT(actionSpriteView()));
   rightclick_menu->addAction(action_view);
-  action_depth = new QAction("Render Depth", rightclick_menu);
-  connect(action_depth, SIGNAL(triggered()), this, SLOT(actionRenderDepth()));
-  rightclick_menu->addAction(action_depth);
-  action_pass_n = new QAction("Pass N", rightclick_menu);
-  action_pass_n->setCheckable(true);
-  connect(action_pass_n, SIGNAL(toggled(bool)),
-          this, SLOT(actionPassabilityNorth(bool)));
-  rightclick_menu->addAction(action_pass_n);
-  action_pass_e = new QAction("Pass E", rightclick_menu);
-  action_pass_e->setCheckable(true);
-  connect(action_pass_e, SIGNAL(toggled(bool)),
-          this, SLOT(actionPassabilityEast(bool)));
-  rightclick_menu->addAction(action_pass_e);
-  action_pass_s = new QAction("Pass S", rightclick_menu);
-  action_pass_s->setCheckable(true);
-  connect(action_pass_s, SIGNAL(toggled(bool)),
-          this, SLOT(actionPassabilitySouth(bool)));
-  rightclick_menu->addAction(action_pass_s);
-  action_pass_w = new QAction("Pass W", rightclick_menu);
-  action_pass_w->setCheckable(true);
-  connect(action_pass_w, SIGNAL(toggled(bool)),
-          this, SLOT(actionPassabilityWest(bool)));
-  rightclick_menu->addAction(action_pass_w);
+  if(!no_grow)
+  {
+    action_depth = new QAction("Render Depth", rightclick_menu);
+    connect(action_depth, SIGNAL(triggered()), this, SLOT(actionRenderDepth()));
+    rightclick_menu->addAction(action_depth);
+    action_pass_n = new QAction("Pass N", rightclick_menu);
+    action_pass_n->setCheckable(true);
+    connect(action_pass_n, SIGNAL(toggled(bool)),
+            this, SLOT(actionPassabilityNorth(bool)));
+    rightclick_menu->addAction(action_pass_n);
+    action_pass_e = new QAction("Pass E", rightclick_menu);
+    action_pass_e->setCheckable(true);
+    connect(action_pass_e, SIGNAL(toggled(bool)),
+            this, SLOT(actionPassabilityEast(bool)));
+    rightclick_menu->addAction(action_pass_e);
+    action_pass_s = new QAction("Pass S", rightclick_menu);
+    action_pass_s->setCheckable(true);
+    connect(action_pass_s, SIGNAL(toggled(bool)),
+            this, SLOT(actionPassabilitySouth(bool)));
+    rightclick_menu->addAction(action_pass_s);
+    action_pass_w = new QAction("Pass W", rightclick_menu);
+    action_pass_w->setCheckable(true);
+    connect(action_pass_w, SIGNAL(toggled(bool)),
+            this, SLOT(actionPassabilityWest(bool)));
+    rightclick_menu->addAction(action_pass_w);
+  }
   rightclick_menu->hide();
 
   /* Configure parent widget */
@@ -250,43 +274,46 @@ MatrixView::~MatrixView()
  */
 bool MatrixView::setActiveFrame(int index)
 {
-  int min = 0;
-  int max = matrix->getTrimFrames();
-  if(max < 0)
-    max = 0;
+  if(!no_grow)
+  {
+    int min = 0;
+    int max = matrix->getTrimFrames();
+    if(max < 0)
+      max = 0;
 
-  /* Make sure the index is in range */
-  if(index > max)
-    index = max;
-  else if(index < min)
-    index = min;
+    /* Make sure the index is in range */
+    if(index > max)
+      index = max;
+    else if(index < min)
+      index = min;
 
-  /* Sets the new index for the matrix */
-  matrix->setActiveFrame(index, true);
-  lbl_frame_num->setText(QString::number(index));
+    /* Sets the new index for the matrix */
+    matrix->setActiveFrame(index, true);
+    lbl_frame_num->setText(QString::number(index));
 
-  /* Enable/disable control for previous button */
-  if(index == min)
-    button_frame_prev->setDisabled(true);
-  else
-    button_frame_prev->setEnabled(true);
+    /* Enable/disable control for previous button */
+    if(index == min)
+      button_frame_prev->setDisabled(true);
+    else
+      button_frame_prev->setEnabled(true);
 
-  /* Enable/disable control for next button */
-  if(index == max)
-    button_frame_next->setDisabled(true);
-  else
-    button_frame_next->setEnabled(true);
+    /* Enable/disable control for next button */
+    if(index == max)
+      button_frame_next->setDisabled(true);
+    else
+      button_frame_next->setEnabled(true);
 
-  /* If both buttons are disabled, disable play button */
-  if(button_frame_prev->isEnabled() || button_frame_next->isEnabled())
-    button_play->setEnabled(true);
-  else
-    button_play->setEnabled(false);
+    /* If both buttons are disabled, disable play button */
+    if(button_frame_prev->isEnabled() || button_frame_next->isEnabled())
+      button_play->setEnabled(true);
+    else
+      button_play->setEnabled(false);
 
 
-  /* If it's min or max, return true - indicating end is reached */
-  if(index == min || index == max)
-    return true;
+    /* If it's min or max, return true - indicating end is reached */
+    if(index == min || index == max)
+      return true;
+  }
   return false;
 }
 
@@ -749,21 +776,30 @@ void MatrixView::initMatrixPlace()
   {
     last_path = path;
 
-    /* Close and delete the dialog if button pressed */
-    if(matrix_dialog != NULL)
+    /* If growth limited, just take single image */
+    if(no_grow)
     {
-      matrix_dialog->hide();
-      disconnect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
-                 matrix, SLOT(matrixPlace(QString, bool, bool)));
-      delete matrix_dialog;
-      matrix_dialog = NULL;
+      matrix->matrixPlace(path, false, false);
     }
+    /* Otherwise, send to matrix dialog */
+    else
+    {
+      /* Close and delete the dialog if button pressed */
+      if(matrix_dialog != NULL)
+      {
+        matrix_dialog->hide();
+        disconnect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
+                   matrix, SLOT(matrixPlace(QString, bool, bool)));
+        delete matrix_dialog;
+        matrix_dialog = NULL;
+      }
 
-    /* Open the matrix dialog and connect it */
-    matrix_dialog = new MatrixDialog(path, this);
-    connect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
-            matrix, SLOT(matrixPlace(QString, bool, bool)));
-    matrix_dialog->show();
+      /* Open the matrix dialog and connect it */
+      matrix_dialog = new MatrixDialog(path, this);
+      connect(matrix_dialog, SIGNAL(matrixPlace(QString, bool, bool)),
+              matrix, SLOT(matrixPlace(QString, bool, bool)));
+      matrix_dialog->show();
+    }
   }
 }
 
@@ -794,33 +830,36 @@ void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
   {
     stopAnimation();
 
-    /* If render depth is 0, enable elements and set their checked state */
-    if(sprite->getRenderDepth() == 0 && sprite->frameCount() > 0)
+    if(!no_grow)
     {
-      action_pass_e->setEnabled(true);
-      action_pass_n->setEnabled(true);
-      action_pass_s->setEnabled(true);
-      action_pass_w->setEnabled(true);
+      /* If render depth is 0, enable elements and set their checked state */
+      if(sprite->getRenderDepth() == 0 && sprite->frameCount() > 0)
+      {
+        action_pass_e->setEnabled(true);
+        action_pass_n->setEnabled(true);
+        action_pass_s->setEnabled(true);
+        action_pass_w->setEnabled(true);
 
-      action_pass_e->setChecked(sprite->getPassability(Direction::EAST));
-      action_pass_n->setChecked(sprite->getPassability(Direction::NORTH));
-      action_pass_s->setChecked(sprite->getPassability(Direction::SOUTH));
-      action_pass_w->setChecked(sprite->getPassability(Direction::WEST));
-    }
-    /* Otherwise, disable action elements */
-    else
-    {
-      action_pass_e->setDisabled(true);
-      action_pass_n->setDisabled(true);
-      action_pass_s->setDisabled(true);
-      action_pass_w->setDisabled(true);
-    }
+        action_pass_e->setChecked(sprite->getPassability(Direction::EAST));
+        action_pass_n->setChecked(sprite->getPassability(Direction::NORTH));
+        action_pass_s->setChecked(sprite->getPassability(Direction::SOUTH));
+        action_pass_w->setChecked(sprite->getPassability(Direction::WEST));
+      }
+      /* Otherwise, disable action elements */
+      else
+      {
+        action_pass_e->setDisabled(true);
+        action_pass_n->setDisabled(true);
+        action_pass_s->setDisabled(true);
+        action_pass_w->setDisabled(true);
+      }
 
-    /* Control for if render depth is editable */
-    if(sprite->frameCount() > 0)
-      action_depth->setEnabled(true);
-    else
-      action_depth->setDisabled(true);
+      /* Control for if render depth is editable */
+      if(sprite->frameCount() > 0)
+        action_depth->setEnabled(true);
+      else
+        action_depth->setDisabled(true);
+    }
 
     /* Execute the right click menu at the cursor */
     rightclick_menu->exec(QCursor::pos());
@@ -835,7 +874,7 @@ void MatrixView::rightClickTrigger(EditorTileSprite* sprite)
  */
 void MatrixView::startAnimation()
 {
-  if(matrix != NULL && matrix->getSprite(0, 0) != NULL)
+  if(matrix != NULL && matrix->getSprite(0, 0) != NULL && !no_grow)
   {
     playing = true;
     button_play->setIcon(QIcon(":/images/icons/32_stop.png"));
@@ -857,7 +896,7 @@ void MatrixView::startAnimation()
  */
 void MatrixView::stopAnimation()
 {
-  if(matrix != NULL)
+  if(matrix != NULL && !no_grow)
   {
     playing = false;
     button_play->setIcon(QIcon(":/images/icons/32_play.png"));
@@ -922,8 +961,11 @@ void MatrixView::setMatrix(EditorMatrix* matrix)
 
     /* Set the view control */
     buttonViewGrid(button_view_grid->isChecked());
-    buttonViewPass(button_view_pass->isChecked());
-    buttonViewRender(button_view_render->isChecked());
+    if(!no_grow)
+    {
+      buttonViewPass(button_view_pass->isChecked());
+      buttonViewRender(button_view_render->isChecked());
+    }
     setActiveFrame(0);
 
     /* Sprite edit initial control */

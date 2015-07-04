@@ -28,15 +28,14 @@ public:
   ~ItemDialog();
 
 private:
+  /* The core item selection box */
+  QComboBox* box_core;
+
   /* The visible control box */
   QComboBox* box_visible;
 
-  /* The conversation dialog */
-  //ConvoDialog* convo_dialog;
-
-  /* Event view and control */
-  //EditorEvent* event_ctrl;
-  //EventView* event_view;
+  /* Is the item a walkover? */
+  QComboBox* box_walkover;
 
   /* The frame control dialog */
   FrameDialog* frame_dialog;
@@ -48,6 +47,9 @@ private:
   /* The frame image */
   QLabel* lbl_frame_img;
 
+  /* The list of objects used in possible events */
+  QVector<QString> list_items;
+
   /* The line edit for thing data */
   QLineEdit* line_description;
   QLineEdit* line_name;
@@ -55,9 +57,11 @@ private:
   /* Matrix view and control */
   MatrixView* matrix_view;
 
-  /* Waiting for sub-map data */
-  //bool waiting_convo;
-  //bool waiting_for_submap;
+  /* The count of number of items in stack */
+  QSpinBox* spin_count;
+
+  /*------------------- Constants -----------------------*/
+  const static int kMAX_COUNT; /* Maximum number of items */
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -83,9 +87,6 @@ signals:
   /* Ok pressed */
   void ok();
 
-  /* Select tile trigger */
-  //void selectTile(EditorEnumDb::MapObjectMode view);
-
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -96,15 +97,12 @@ public slots:
   void buttonOk();
 
   /* Changed text in line edits */
+  void changedCount(int count);
   void changedDescription(QString description);
   void changedName(QString name);
 
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
-
-  /* Select tile trigger */
-  //void selectTile();
-  //void selectTileConvo();
+  /* Core item status changed */
+  void coreItemChanged(int index);
 
   /* Update the frame for the thing */
   void updateFrame();
@@ -112,18 +110,18 @@ public slots:
   /* Visibility status changed */
   void visibilityChanged(int index);
 
+  /* Walkover status changed */
+  void walkoverChanged(int index);
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the event view widget */
-  //EventView* getEventView();
+  /* Sets the list of items, used for event creation */
+  void setListItems(QVector<QString> items);
 
   /* Sets the working item to the original */
   void updateOriginal();
-
-  /* Update the selected tile for the thing */
-  //void updateSelectedTile(int id, int x, int y);
 };
 
 #endif // ITEMDIALOG_H

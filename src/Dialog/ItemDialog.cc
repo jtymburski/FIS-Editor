@@ -8,6 +8,9 @@
 #include "Dialog/ItemDialog.h"
 #include <QDebug>
 
+/* Constant Implementation - see header file for descriptions */
+const int ItemDialog::kMAX_COUNT = 2048;
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -34,7 +37,9 @@ ItemDialog:: ItemDialog(EditorMapItem* edit_item, QWidget* parent)
 
   /* Layout setup */
   createLayout(edit_item->getBaseItem() != NULL);
+  box_core->blockSignals(true);
   updateData();
+  box_core->blockSignals(false);
   updateFrame();
 }
 
@@ -102,16 +107,44 @@ void ItemDialog::createLayout(bool instance)
   line_description = new QLineEdit("", this);
   connect(line_description, SIGNAL(textEdited(QString)),
           this, SLOT(changedDescription(QString)));
-  layout->addWidget(line_description, 3, 1, 1, 5);
+  layout->addWidget(line_description, 3, 1, 1, 7);
+
+  /* Core ID */
+  QLabel* lbl_core = new QLabel("Game Item:", this);
+  layout->addWidget(lbl_core, 0, 4, 1, 1);
+  box_core = new QComboBox(this);
+  box_core->addItem("None");
+  connect(box_core, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(coreItemChanged(int)));
+  layout->addWidget(box_core, 0, 5, 1, 3);
+
+  /* Count */
+  QLabel* lbl_count = new QLabel("Count:", this);
+  layout->addWidget(lbl_count, 1, 4, 1, 1);
+  spin_count = new QSpinBox(this);
+  spin_count->setMinimum(1);
+  spin_count->setMaximum(kMAX_COUNT);
+  connect(spin_count, SIGNAL(valueChanged(int)), this, SLOT(changedCount(int)));
+  layout->addWidget(spin_count, 1, 5, 1, 2);
+
+  /* Walkover item */
+  QLabel* lbl_walkover = new QLabel("Walkover:", this);
+  layout->addWidget(lbl_walkover, 2, 4, 1, 1);
+  box_walkover = new QComboBox(this);
+  box_walkover->addItem("False");
+  box_walkover->addItem("True");
+  connect(box_walkover, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(walkoverChanged(int)));
+  layout->addWidget(box_walkover, 2, 5, 1, 2);
 
   /* The sprite view widget */
-  QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 4, 0, 2, 1);
+  QLabel* lbl_frame = new QLabel("Large Item:", this);
+  layout->addWidget(lbl_frame, 7, 0, 1, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 4, 1, 2, 3);
+  layout->addWidget(lbl_frame_img, 7, 1, 1, 3);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -119,13 +152,13 @@ void ItemDialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
+  layout->addWidget(btn_frame_click, 7, 3, 1, 1, Qt::AlignTop);
 
   /* Matrix View */
-  matrix_view = new MatrixView(item_working->getMatrix(), this);
+  matrix_view = new MatrixView(item_working->getMatrix(), this, true);
   if(instance)
     matrix_view->setDisabled(true);
-  layout->addWidget(matrix_view, 4, 4, 4, 4);
+  layout->addWidget(matrix_view, 7, 4, 1, 4, Qt::AlignRight);
 
   /* The button control */
   layout->setRowMinimumHeight(8, 15);
@@ -142,19 +175,38 @@ void ItemDialog::createLayout(bool instance)
 
 /*
  * Description: Updates the data in the widgets. CreateLayout() must be called
- *              prior.
+ *              prior. Assumes signals have been blocked as needed.
  *
  * Inputs: none
  * Output: none
  */
 void ItemDialog::updateData()
 {
+  /* General */
   line_description->setText(item_working->getDescription());
   line_name->setText(item_working->getName());
+  spin_count->setValue(item_working->getCount());
+
+  /* Visiblity */
   if(item_working->isVisible())
     box_visible->setCurrentIndex(1);
   else
     box_visible->setCurrentIndex(0);
+
+  /* Walkover */
+  if(item_working->isWalkover())
+    box_walkover->setCurrentIndex(1);
+  else
+    box_walkover->setCurrentIndex(0);
+
+  /* Game Item */
+  box_core->setCurrentIndex(0);
+  for(int i = 0; i < list_items.size(); i++)
+  {
+    int id = list_items[i].split(":").front().toInt();
+    if(id == item_working->getCoreID())
+      box_core->setCurrentIndex(i + 1);
+  }
 }
 
 /*============================================================================
@@ -231,6 +283,18 @@ void ItemDialog::buttonOk()
 }
 
 /*
+ * Description: Slot triggered by spinner changing the count of the items on
+ *              pickup.
+ *
+ * Inputs: int count - the number of items on pick up
+ * Output: none
+ */
+void ItemDialog::changedCount(int count)
+{
+  item_working->setCount(count);
+}
+
+/*
  * Description: Slot triggered on the text edit field being changed, which
  *              updates the description.
  *
@@ -255,37 +319,19 @@ void ItemDialog::changedName(QString name)
 }
 
 /*
- * Description: Edits the current conversation instance trigger. Triggered
- *              from EventView. Required to lock out the pop-up.
+ * Description: Slot triggered when the core item drop down changes selection.
+ *              Updates the ID in the stored class.
  *
- * Inputs: Conversation* convo - the conversation segment to edit
- *         bool is_option - true if the segment is an option
+ * Inputs: int index - the index in the list
  * Output: none
  */
-//void ThingDialog::editConversation(Conversation* convo, bool is_option)
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//               this, SLOT(selectTileConvo()));
-//    disconnect(convo_dialog, SIGNAL(success()),
-//               event_view, SLOT(updateConversation()));
-//    delete convo_dialog;
-//  }
-//  convo_dialog = NULL;
-//
-//  /* Create the new conversation dialog */
-//  convo_dialog = new ConvoDialog(convo, is_option, this);
-//  convo_dialog->setListThings(getEventView()->getListThings());
-//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-//  convo_dialog->getEventView()->setListSubmaps(getEventView()->getListSubmaps());
-//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//          this, SLOT(selectTileConvo()));
-//  connect(convo_dialog, SIGNAL(success()),
-//          event_view, SLOT(updateConversation()));
-//  convo_dialog->show();
-//}
+void ItemDialog::coreItemChanged(int index)
+{
+  if(index > 0)
+    item_working->setCoreID(box_core->currentText().split(":").front().toInt());
+  else
+    item_working->setCoreID(-1);
+}
 
 /*
  * Description: Updates the frame dialog image in the pop-up. Scales the image
@@ -309,39 +355,6 @@ void ItemDialog::updateFrame()
 }
 
 /*
- * Description: Triggers the select tile dialog for the pop-up. This hides the
- *              pop-up and waits for a tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-//void ThingDialog::selectTile()
-//{
-//  waiting_convo = false;
-//  waiting_for_submap = true;
-//  hide();
-//  emit selectTile(EditorEnumDb::THING_VIEW);
-//}
-
-/*
- * Description: Triggers the select tile dialog for the conversation in the
- *              event view in the pop-up. This hides the pop-up and waits for a
- *              tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-//void ThingDialog::selectTileConvo()
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    selectTile();
-//    waiting_convo = true;
-//    convo_dialog->hide();
-//  }
-//}
-
-/*
  * Description: The drop down for visibility of the thing changed slot. This
  *              updates the visibility in the working item.
  *
@@ -353,20 +366,39 @@ void ItemDialog::visibilityChanged(int index)
   item_working->setVisibility(index == 1);
 }
 
+/*
+ * Description: Slot triggers when the walkover drop down changes state. First,
+ *              index 0, is false and second is true.
+ *
+ * Inputs: int index - index in the walkover drop down
+ * Output: none
+ */
+void ItemDialog::walkoverChanged(int index)
+{
+  item_working->setWalkover(index == 1);
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
 /*
- * Description: Returns the event view within the thing dialog.
+ * Description: Sets the list of items, used for event creation
  *
- * Inputs: none
- * Output: EventView* - the event view widget for the current thing
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
  */
-//EventView* ThingDialog::getEventView()
-//{
-//  return event_view;
-//}
+void ItemDialog::setListItems(QVector<QString> items)
+{
+  list_items = items;
+  box_core->blockSignals(true);
+  box_core->clear();
+  box_core->addItem("None");
+  for(int i = 0; i < list_items.size(); i++)
+    box_core->addItem(list_items[i]);
+  updateData();
+  box_core->blockSignals(false);
+}
 
 /*
  * Description: Updates the original item with the working data. Called after
@@ -381,32 +413,3 @@ void ItemDialog::updateOriginal()
   if(item_original != NULL)
     *item_original = *item_working;
 }
-
-/*
- * Description: Updates the dialog with the tile which was selected on the
- *              sub-map. This shows the pop-up and updates the event with the
- *              new location. If it was triggered from the embedded event view,
- *              it passes the updated location to it.
- *
- * Inputs: int id - the ID of the sub-map
- *         int x - the x tile location in the sub-map
- *         int y - the y tile location in the sub-map
- * Output: none
- */
-//void ThingDialog::updateSelectedTile(int id, int x, int y)
-//{
-//  if(waiting_for_submap)
-//  {
-//    waiting_for_submap = false;
-//    show();
-//    if(waiting_convo)
-//    {
-//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-//      convo_dialog->show();
-//    }
-//    else
-//    {
-//      event_view->updateSelectedTile(id, x, y);
-//    }
-//  }
-//}

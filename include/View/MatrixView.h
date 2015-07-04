@@ -26,7 +26,8 @@ class MatrixView : public QFrame
   Q_OBJECT
 public:
   /* Constructor Function */
-  MatrixView(EditorMatrix* matrix = NULL, QWidget* parent = NULL);
+  MatrixView(EditorMatrix* matrix = NULL, QWidget* parent = NULL,
+             bool no_grow = false);
 
   /* Destructor function */
   ~MatrixView();
@@ -77,6 +78,9 @@ private:
 
   /* The viewport for the matrix */
   QGraphicsView* matrix_view;
+
+  /* Is growth restricted */
+  bool no_grow;
 
   /* Playing status */
   bool playing;
@@ -167,4 +171,4 @@ public:
   /* Sets a different matrix to the active view */
   void setMatrix(EditorMatrix* matrix);
 };
-#endif // SpriteView_H
+#endif // MATRIXVIEW_H

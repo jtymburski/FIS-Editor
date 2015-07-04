@@ -82,6 +82,24 @@ void EditorTileSprite::copySelf(const EditorTileSprite &source)
  *===========================================================================*/
 
 /*
+ * Description: Adds path to the tail end of the sprite stack. This also takes
+ *              the path and attempts to split it by the | delimiter. This will
+ *              indicate the number of frames it will be adding.
+ *
+ * Inputs: QString path - the path to try and split and add in
+ *         bool hflip - horizontally flip all sprites added
+ *         bool vflip - vertically flip all sprites added
+ * Output: int - the number of frames added to the end
+ */
+int EditorTileSprite::addPath(QString path, bool hflip, bool vflip)
+{
+  int count = EditorSprite::addPath(path, hflip, vflip);
+  if(count > 0)
+    update();
+  return count;
+}
+
+/*
  * Description: Returns the bounding rectangle (Needed by API)
  *
  * Inputs: none

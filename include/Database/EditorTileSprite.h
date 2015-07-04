@@ -57,6 +57,9 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Adds paths to the tail end of the sprite stack. Splits on | */
+  int addPath(QString path, bool hflip = false, bool vflip = false);
+
   /* Necessary function for returning the bounding rectangle */
   QRectF boundingRect() const;
 

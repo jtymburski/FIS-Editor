@@ -12,11 +12,12 @@
 #include <QStackedWidget>
 
 #include "Dialog/NodeDialog.h"
-#include "View/RawImageView.h"
-#include "View/SpriteView.h"
+#include "View/MapItemView.h"
 #include "View/MapNPCView.h"
 #include "View/MapPersonView.h"
 #include "View/MapThingView.h"
+#include "View/RawImageView.h"
+#include "View/SpriteView.h"
 
 class MapDatabase : public QStackedWidget
 {
@@ -50,6 +51,7 @@ private:
   EditorNPCPath* path_working;
 
   /* The Views */
+  MapItemView* view_item;
   MapNPCView* view_npc;
   MapPersonView* view_person;
   RawImageView* view_raw;
@@ -145,6 +147,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the views */
+  MapItemView* getItemView();
   MapNPCView* getNPCView();
   MapPersonView* getPersonView();
   RawImageView* getRawView();
