@@ -32,9 +32,6 @@ private:
   /* The current editing map */
   EditorMap* editor_map;
 
-  /* Thing instance dialog */
-  InstanceDialog* instance_dialog;
-
   /* Label views for selected item */
   QLabel* lbl_id;
   QLabel* lbl_image;

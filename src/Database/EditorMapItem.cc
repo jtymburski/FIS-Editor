@@ -94,14 +94,13 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   {
     if(getCoreID() >= 0)
       fh->writeXmlData("core_id", getCoreID());
+    if(default_item.isWalkover() != isWalkover())
+      fh->writeXmlData("walkover", isWalkover());
   }
   /* Next item data: Is not base */
   else
   {
-    if(default_item.getCount() != getCount())
-      fh->writeXmlData("count", (int)getCount());
-    if(default_item.isWalkover() != isWalkover())
-      fh->writeXmlData("walkover", isWalkover());
+    fh->writeXmlData("count", (int)getCount());
   }
 }
 

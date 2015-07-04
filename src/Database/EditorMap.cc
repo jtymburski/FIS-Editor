@@ -3363,6 +3363,7 @@ bool EditorMap::setCurrentMap(int index)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
     /* Trigger thing instance update */
+    emit itemInstanceChanged();
     emit npcInstanceChanged();
     emit personInstanceChanged();
     emit thingInstanceChanged();
@@ -4359,7 +4360,7 @@ void EditorMap::tilesItemAdd(bool update_all)
     {
       for(int i = 0; i < active_submap->items.size(); i++)
       {
-        if(!addThing(active_submap->items[i]))
+        if(!addItem(active_submap->items[i]))
         {
           delete active_submap->items[i];
           active_submap->items.remove(i);

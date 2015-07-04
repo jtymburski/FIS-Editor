@@ -147,7 +147,7 @@ void EditorTile::copySelf(const EditorTile &source)
  */
 bool EditorTile::isHoverItem()
 {
-  if(hover_info->hover_tile != NULL && hover_info->active_item != NULL &&
+  if(hover_info->hover_tile == this && hover_info->active_item != NULL &&
      hover_info->active_cursor == EditorEnumDb::BASIC &&
      hover_info->active_layer == EditorEnumDb::ITEM &&
      !hover_info->path_edit_mode)
@@ -844,7 +844,7 @@ int EditorTile::getY()
  * Output: none
  */
 void EditorTile::paint(QPainter *painter,
-                        const QStyleOptionGraphicsItem*, QWidget*)
+                       const QStyleOptionGraphicsItem*, QWidget*)
 {
   int size = EditorHelpers::getTileSize();
   QRect bound(x_pos * size, y_pos * size, size, size);
@@ -941,7 +941,7 @@ void EditorTile::paint(QPainter *painter,
 
   /* If hover item is true, render it */
   if(hover_item)
-    hover_info->active_thing->paint(painter, bound);
+    hover_info->active_item->paint(painter, bound);
 
   /* If hover person is true, render it */
   if(hover_person)
@@ -1475,6 +1475,7 @@ void EditorTile::setVisibilityItems(bool visible)
 {
   for(int i = 0; i < items.size(); i++)
     items[i].visible = visible;
+  update();
 }
 
 /*

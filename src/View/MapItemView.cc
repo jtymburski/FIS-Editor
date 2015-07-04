@@ -23,7 +23,6 @@ MapItemView::MapItemView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
   editor_map = NULL;
-  instance_dialog = NULL;
   item_dialog = NULL;
 
   /* Create the layout */
@@ -142,18 +141,12 @@ void MapItemView::editItem(EditorMapItem* sub_item)
   /* -- Is an instance -- */
   if(current->getBaseItem() != NULL)
   {
-    if(instance_dialog != NULL)
-    {
-      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-                 this, SLOT(editBaseItem(EditorMapThing*)));
-      delete instance_dialog;
-    }
-    instance_dialog = new InstanceDialog(current, this);
-    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-    connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-            this, SLOT(editBaseItem(EditorMapThing*)));
-    instance_dialog->show();
+    bool ok;
+    int result = QInputDialog::getInt(this, tr("Edit Item Count"),
+                                      tr("Item Count:"), current->getCount(),
+                                      1, ItemDialog::kMAX_COUNT, 1, &ok);
+    if(ok)
+      current->setCount(result);
   }
   /* -- Is a base -- */
   else
@@ -167,10 +160,10 @@ void MapItemView::editItem(EditorMapItem* sub_item)
     item_dialog = new ItemDialog(current, this);
     connect(item_dialog, SIGNAL(ok()), this, SLOT(updateItems()));
     item_dialog->show();
-  }
 
-  /* Fills the dialogs with data */
-  emit fillWithData(EditorEnumDb::ITEM_VIEW);
+    /* Fills the dialogs with data */
+    emit fillWithData(EditorEnumDb::ITEM_VIEW);
+  }
 }
 
 /*

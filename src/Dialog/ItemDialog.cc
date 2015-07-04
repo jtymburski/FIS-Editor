@@ -9,7 +9,7 @@
 #include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
-const int ItemDialog::kMAX_COUNT = 2048;
+const int ItemDialog::kMAX_COUNT = 2000000000;
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -25,9 +25,7 @@ const int ItemDialog::kMAX_COUNT = 2048;
 ItemDialog:: ItemDialog(EditorMapItem* edit_item, QWidget* parent)
           : QDialog(parent)
 {
-  //convo_dialog = NULL;
   frame_dialog = NULL;
-  //waiting_for_submap = false;
 
   /* Set-up the item set - copied to working for changes */
   item_original = edit_item;
@@ -119,23 +117,23 @@ void ItemDialog::createLayout(bool instance)
   layout->addWidget(box_core, 0, 5, 1, 3);
 
   /* Count */
-  QLabel* lbl_count = new QLabel("Count:", this);
-  layout->addWidget(lbl_count, 1, 4, 1, 1);
-  spin_count = new QSpinBox(this);
-  spin_count->setMinimum(1);
-  spin_count->setMaximum(kMAX_COUNT);
-  connect(spin_count, SIGNAL(valueChanged(int)), this, SLOT(changedCount(int)));
-  layout->addWidget(spin_count, 1, 5, 1, 2);
+  //QLabel* lbl_count = new QLabel("Count:", this);
+  //layout->addWidget(lbl_count, 1, 4, 1, 1);
+  //spin_count = new QSpinBox(this);
+  //spin_count->setMinimum(1);
+  //spin_count->setMaximum(kMAX_COUNT);
+  //connect(spin_count, SIGNAL(valueChanged(int)), this, SLOT(changedCount(int)));
+  //layout->addWidget(spin_count, 1, 5, 1, 2);
 
   /* Walkover item */
   QLabel* lbl_walkover = new QLabel("Walkover:", this);
-  layout->addWidget(lbl_walkover, 2, 4, 1, 1);
+  layout->addWidget(lbl_walkover, 1, 4, 1, 1);
   box_walkover = new QComboBox(this);
   box_walkover->addItem("False");
   box_walkover->addItem("True");
   connect(box_walkover, SIGNAL(currentIndexChanged(int)),
           this, SLOT(walkoverChanged(int)));
-  layout->addWidget(box_walkover, 2, 5, 1, 2);
+  layout->addWidget(box_walkover, 1, 5, 1, 2);
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Large Item:", this);
@@ -185,7 +183,7 @@ void ItemDialog::updateData()
   /* General */
   line_description->setText(item_working->getDescription());
   line_name->setText(item_working->getName());
-  spin_count->setValue(item_working->getCount());
+  //spin_count->setValue(item_working->getCount()); // TODO: REMOVE
 
   /* Visiblity */
   if(item_working->isVisible())

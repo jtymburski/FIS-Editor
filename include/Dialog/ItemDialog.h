@@ -12,9 +12,6 @@
 #include <QGridLayout>
 
 #include "Database/EditorMapItem.h"
-//#include "Database/EditorMapThing.h"
-//#include "Dialog/ConvoDialog.h"
-//#include "View/EventView.h"
 #include "View/MatrixView.h"
 
 class ItemDialog : public QDialog
@@ -58,8 +55,9 @@ private:
   MatrixView* matrix_view;
 
   /* The count of number of items in stack */
-  QSpinBox* spin_count;
+  //QSpinBox* spin_count; // TODO: REMOVE
 
+public:
   /*------------------- Constants -----------------------*/
   const static int kMAX_COUNT; /* Maximum number of items */
 
