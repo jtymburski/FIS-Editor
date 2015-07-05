@@ -128,6 +128,10 @@ void MapView::setupRightBar()
   addDockWidget(Qt::RightDockWidgetArea,layer_dock);
   layer_dock->setFeatures(QDockWidget::DockWidgetMovable
                     | QDockWidget::DockWidgetFloatable);
+
+  /* Connections */
+  connect(map_control, SIGNAL(layerChanged(EditorEnumDb::Layer)),
+          this, SIGNAL(layerChanged(EditorEnumDb::Layer)));
 }
 
 /*============================================================================

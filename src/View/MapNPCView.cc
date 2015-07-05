@@ -145,7 +145,8 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
     /* Delete the old and create the new dialog */
     if(instance_dialog != NULL)
     {
-      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+      disconnect(instance_dialog, SIGNAL(ok(QString)),
+                 this, SLOT(updateList(QString)));
       disconnect(instance_dialog,
                  SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
@@ -156,7 +157,8 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
-    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(ok(QString)),
+            this, SLOT(updateList(QString)));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     connect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
@@ -239,8 +241,13 @@ void MapNPCView::updateInfo()
 void MapNPCView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
+  {
     editor_map->setCurrentNPC(index);
+    editor_map->setHoverNPC(-1);
+  }
+
   updateInfo();
+  npc_instances->clearSelection();
 }
 
 /*
@@ -337,6 +344,7 @@ void MapNPCView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
+    /* Set the hover NPC in the class */
     int npc_id = MapThingView::getInstanceID(
                                           npc_instances->currentItem()->text());
     if(editor_map->setHoverNPC(npc_id))
@@ -344,8 +352,20 @@ void MapNPCView::instanceRowChanged(int index)
       EditorMapNPC* npc = editor_map->getNPC(npc_id,
                                              editor_map->getCurrentMap()->id);
       if(npc != NULL)
+      {
         emit ensureVisible(editor_map->getCurrentMap()->tiles[npc->getX()]
                                                              [npc->getY()]);
+
+        /* Select the base in the list */
+        if(npc->getBaseNPC() != NULL)
+        {
+          int index = editor_map->getNPCIndex(npc->getBaseNPC()->getID());
+          npc_list->blockSignals(true);
+          npc_list->setCurrentRow(index);
+          npc_list->blockSignals(false);
+          updateInfo();
+        }
+      }
     }
   }
 }
@@ -367,10 +387,10 @@ void MapNPCView::itemDoubleClicked(QListWidgetItem*)
  *              put them in the list. Triggers on change events, such as editing
  *              and deleting instances, and on initial setup
  *
- * Inputs: none
+ * Inputs: QString name_list - the list of the added npc. Blank if N/A
  * Output: none
  */
-void MapNPCView::npcInstanceUpdate()
+void MapNPCView::npcInstanceUpdate(QString name_list)
 {
   npc_instances->blockSignals(true);
   npc_instances->clearSelection();
@@ -395,6 +415,14 @@ void MapNPCView::npcInstanceUpdate()
   npc_instances->clearSelection();
   npc_instances->clearFocus();
   npc_instances->blockSignals(false);
+
+  /* If name list is not blank, select the name in the list */
+  if(!name_list.isEmpty())
+  {
+    for(int i = 0; i < npc_instances->count(); i++)
+      if(npc_instances->item(i)->text() == name_list)
+        npc_instances->setCurrentRow(i);
+  }
 }
 
 /*
@@ -417,7 +445,7 @@ void MapNPCView::updateList()
     editor_map->updateAll();
 
     /* Set up the instances list */
-    npcInstanceUpdate();
+    npcInstanceUpdate("");
   }
 
   npc_list->setCurrentRow(index);
@@ -583,8 +611,8 @@ void MapNPCView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
-    disconnect(editor_map, SIGNAL(npcInstanceChanged()),
-               this, SLOT(npcInstanceUpdate()));
+    disconnect(editor_map, SIGNAL(npcInstanceChanged(QString)),
+               this, SLOT(npcInstanceUpdate(QString)));
   }
 
   editor_map = map;
@@ -592,8 +620,8 @@ void MapNPCView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
-    connect(editor_map, SIGNAL(npcInstanceChanged()),
-            this, SLOT(npcInstanceUpdate()));
+    connect(editor_map, SIGNAL(npcInstanceChanged(QString)),
+            this, SLOT(npcInstanceUpdate(QString)));
   }
 
   /* Finally, update list */

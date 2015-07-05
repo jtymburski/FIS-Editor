@@ -86,7 +86,6 @@ public slots:
   EditorItem* getItemView();
   void setItemView(EditorItem* item);
 
-
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
 

@@ -124,7 +124,7 @@ bool EditorMap::addItem(EditorMapItem* item, SubMapInfo* map, bool existing)
     if(!existing)
     {
       map->items.push_back(item);
-      emit itemInstanceChanged();
+      emit itemInstanceChanged(item->getNameList());
       setHoverThing(-1);
     }
   }
@@ -189,7 +189,7 @@ bool EditorMap::addNPC(EditorMapNPC* npc, SubMapInfo* map, bool existing)
     if(!existing)
     {
       map->npcs.push_back(npc);
-      emit npcInstanceChanged();
+      emit npcInstanceChanged(npc->getNameList());
       setHoverThing(-1);
 
       /* Update path colors and connect signals */
@@ -262,7 +262,7 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map,
     if(!existing)
     {
       map->persons.push_back(person);
-      emit personInstanceChanged();
+      emit personInstanceChanged(person->getNameList());
       setHoverThing(-1);
     }
   }
@@ -319,7 +319,7 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
     if(!existing)
     {
       map->things.push_back(thing);
-      emit thingInstanceChanged();
+      emit thingInstanceChanged(thing->getNameList());
       setHoverThing(-1);
     }
   }
@@ -3363,10 +3363,10 @@ bool EditorMap::setCurrentMap(int index)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
     /* Trigger thing instance update */
-    emit itemInstanceChanged();
-    emit npcInstanceChanged();
-    emit personInstanceChanged();
-    emit thingInstanceChanged();
+    emit itemInstanceChanged("");
+    emit npcInstanceChanged("");
+    emit personInstanceChanged("");
+    emit thingInstanceChanged("");
 
     return true;
   }
@@ -4860,7 +4860,7 @@ bool EditorMap::unsetItemByIndex(int index, int sub_map)
       sub_maps[sub_map]->items.remove(index);
 
       /* Update list */
-      emit itemInstanceChanged();
+      emit itemInstanceChanged("");
       setHoverItem(-1);
 
       return true;
@@ -5032,7 +5032,7 @@ bool EditorMap::unsetNPCByIndex(int index, int sub_map)
       sub_maps[sub_map]->npcs.remove(index);
 
       /* Update list */
-      emit npcInstanceChanged();
+      emit npcInstanceChanged("");
       setHoverNPC(-1);
 
       return true;
@@ -5158,7 +5158,7 @@ bool EditorMap::unsetPersonByIndex(int index, int sub_map)
       sub_maps[sub_map]->persons.remove(index);
 
       /* Update list */
-      emit personInstanceChanged();
+      emit personInstanceChanged("");
       setHoverPerson(-1);
 
       return true;
@@ -5337,7 +5337,7 @@ bool EditorMap::unsetThingByIndex(int index, int sub_map)
       sub_maps[sub_map]->things.remove(index);
 
       /* Update list */
-      emit thingInstanceChanged();
+      emit thingInstanceChanged("");
       setHoverThing(-1);
 
       return true;

@@ -144,15 +144,18 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
   {
     if(instance_dialog != NULL)
     {
-      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
-      disconnect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+      disconnect(instance_dialog, SIGNAL(ok(QString)),
+                 this, SLOT(personInstanceUpdate(QString)));
+      disconnect(
+            instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
       disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
                  this, SLOT(editBasePerson(EditorMapThing*)));
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
-    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(ok(QString)),
+            this, SLOT(personInstanceUpdate(QString)));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
@@ -233,8 +236,13 @@ void MapPersonView::updateInfo()
 void MapPersonView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
+  {
     editor_map->setCurrentPerson(index);
+    editor_map->setHoverPerson(-1);
+  }
+
   updateInfo();
+  person_instances->clearSelection();
 }
 
 /*
@@ -297,6 +305,18 @@ void MapPersonView::editInstance()
 }
 
 /*
+ * Description: Instance list item double clicked. Just triggers the edit
+ *              instance action.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
+void MapPersonView::instanceDoubleClicked(QListWidgetItem*)
+{
+  editInstance();
+}
+
+/*
  * Description: Slot which triggers a right click menu when an instance is
  *              right clicked within the list. Offers delete and edit actions.
  *
@@ -311,18 +331,6 @@ void MapPersonView::instanceMenu(const QPoint & pos)
 }
 
 /*
- * Description: Instance list item double clicked. Just triggers the edit
- *              instance action.
- *
- * Inputs: QListWidgetItem* - not used
- * Output: none
- */
-void MapPersonView::instanceDoubleClicked(QListWidgetItem*)
-{
-  editInstance();
-}
-
-/*
  * Description: Slot which triggers when a row in the instance list of persons
  *              changes. This changes which person is hovered on the map.
  *
@@ -333,6 +341,7 @@ void MapPersonView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
+    /* Set the hover person in the class */
     int person_id = MapThingView::getInstanceID(
                                        person_instances->currentItem()->text());
     if(editor_map->setHoverPerson(person_id))
@@ -340,8 +349,21 @@ void MapPersonView::instanceRowChanged(int index)
       EditorMapPerson* person = editor_map->getPerson(person_id,
                                                editor_map->getCurrentMap()->id);
       if(person != NULL)
+      {
         emit ensureVisible(editor_map->getCurrentMap()->tiles[person->getX()]
                                                              [person->getY()]);
+
+        /* Select the base in the list */
+        if(person->getBasePerson() != NULL)
+        {
+          int index = editor_map->getPersonIndex(
+                                              person->getBasePerson()->getID());
+          person_list->blockSignals(true);
+          person_list->setCurrentRow(index);
+          person_list->blockSignals(false);
+          updateInfo();
+        }
+      }
     }
   }
 }
@@ -363,10 +385,10 @@ void MapPersonView::itemDoubleClicked(QListWidgetItem*)
  *              put them in the list. Triggers on change events, such as editing
  *              and deleting instances, and on initial setup
  *
- * Inputs: none
+ * Inputs: QString name_list - the list of the added item. Blank if N/A
  * Output: none
  */
-void MapPersonView::personInstanceUpdate()
+void MapPersonView::personInstanceUpdate(QString name_list)
 {
   person_instances->blockSignals(true);
   person_instances->clearSelection();
@@ -391,6 +413,14 @@ void MapPersonView::personInstanceUpdate()
   person_instances->clearSelection();
   person_instances->clearFocus();
   person_instances->blockSignals(false);
+
+  /* If name list is not blank, select the name in the list */
+  if(!name_list.isEmpty())
+  {
+    for(int i = 0; i < person_instances->count(); i++)
+      if(person_instances->item(i)->text() == name_list)
+        person_instances->setCurrentRow(i);
+  }
 }
 
 /*
@@ -413,7 +443,7 @@ void MapPersonView::updateList()
     editor_map->updateAll();
 
     /* Set up the instances list */
-    personInstanceUpdate();
+    personInstanceUpdate("");
   }
 
   person_list->setCurrentRow(index);
@@ -579,8 +609,8 @@ void MapPersonView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
-    disconnect(editor_map, SIGNAL(personInstanceChanged()),
-               this, SLOT(personInstanceUpdate()));
+    disconnect(editor_map, SIGNAL(personInstanceChanged(QString)),
+               this, SLOT(personInstanceUpdate(QString)));
   }
 
   editor_map = map;
@@ -588,8 +618,8 @@ void MapPersonView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
-    connect(editor_map, SIGNAL(personInstanceChanged()),
-            this, SLOT(personInstanceUpdate()));
+    connect(editor_map, SIGNAL(personInstanceChanged(QString)),
+            this, SLOT(personInstanceUpdate(QString)));
   }
 
   /* Finally, update list */

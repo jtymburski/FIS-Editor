@@ -115,7 +115,7 @@ public slots:
   void itemDoubleClicked(QListWidgetItem*);
 
   /* Update thing instances in view */
-  void thingInstanceUpdate();
+  void thingInstanceUpdate(QString name_list);
 
   /* Refreshes the editor thing list in the view */
   void updateList();

@@ -88,6 +88,7 @@ void NodeDialog::createDialog()
 
   /* The button control */
   QPushButton* btn_ok = new QPushButton("Ok", this);
+  btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   layout->addWidget(btn_ok, 4, 1);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);

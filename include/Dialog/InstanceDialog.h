@@ -109,7 +109,8 @@ signals:
   void editBase(EditorMapThing* thing);
 
   /* Ok pressed */
-  void ok();
+  void ok(); // TODO: REMOVE
+  void ok(QString name_list);
 
   /* Path edit start trigger */
   void pathEditStart(EditorNPCPath*);

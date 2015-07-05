@@ -229,6 +229,7 @@ void MatrixDialog::createDialog()
   connect(button_trim, SIGNAL(clicked()), this, SLOT(buttonTrim()));
   layout->addWidget(button_trim, 6, 4);
   QPushButton* button_ok = new QPushButton("Ok", this);
+  button_ok->setDefault(true);
   connect(button_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   layout->addWidget(button_ok, 6, 5);
   QPushButton* button_cancel = new QPushButton("Cancel", this);

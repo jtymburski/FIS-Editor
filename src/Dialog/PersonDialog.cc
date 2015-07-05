@@ -205,6 +205,7 @@ void PersonDialog::createLayout(bool instance)
   /* The button control */
   layout->setRowMinimumHeight(9, 15);
   QPushButton* btn_ok = new QPushButton("Ok", this);
+  btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   layout->addWidget(btn_ok, 10, 6);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);

@@ -64,6 +64,16 @@ private:
   QAction* action_zoom_in;
   QAction* action_zoom_out;
 
+  /* Pen Actions */
+  QAction* action_basic;
+  QAction* action_blockplace;
+  QAction* action_fill;
+  QAction* action_passall;
+  QAction* action_passE;
+  QAction* action_passN;
+  QAction* action_passS;
+  QAction* action_passW;
+
   /* Brush and Menu Tabs */
   QToolBar* bar_brush;
   QToolBar* bar_map_ctrl;
@@ -128,6 +138,9 @@ public slots:
 
   /* Export action */
   void exportTo();
+
+  /* Slot for layer changing */
+  void layerChanged(EditorEnumDb::Layer layer);
 
   /* Load action */
   void load();

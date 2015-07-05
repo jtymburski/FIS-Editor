@@ -60,6 +60,7 @@ FrameDialog::FrameDialog(QWidget *parent, EditorSprite* s, int framenum)
 
     /* Ok button setup */
     QPushButton* ok = new QPushButton("Ok", this);
+    ok->setDefault(true);
     connect(ok,SIGNAL(pressed()),this,SLOT(finishSave()));
     connect(ok,SIGNAL(pressed()),this,SLOT(close()));
 

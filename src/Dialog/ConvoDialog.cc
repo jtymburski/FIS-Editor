@@ -92,6 +92,7 @@ void ConvoDialog::createDialog(bool is_option)
 
   /* The push buttons */
   QPushButton* btn_ok = new QPushButton("Ok", this);
+  btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));

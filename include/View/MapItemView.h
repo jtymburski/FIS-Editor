@@ -80,9 +80,6 @@ signals:
   /* Triggers the update the data of objects for use in events */
   void fillWithData(EditorEnumDb::MapObjectMode view);
 
-  /* Triggers for the select tile on the given view mode */
-  //void selectTile(EditorEnumDb::MapObjectMode view);
-
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -112,7 +109,7 @@ public slots:
   void itemDoubleClicked(QListWidgetItem*);
 
   /* Update item instances in view */
-  void itemInstanceUpdate();
+  void itemInstanceUpdate(QString name_list);
 
   /* Refreshes the editor item list in the view */
   void updateList();

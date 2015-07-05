@@ -117,7 +117,7 @@ public slots:
   void itemDoubleClicked(QListWidgetItem*);
 
   /* Update npc instances in view */
-  void npcInstanceUpdate();
+  void npcInstanceUpdate(QString name_list);
 
   /* Refreshes the editor npc list in the view */
   void updateList();

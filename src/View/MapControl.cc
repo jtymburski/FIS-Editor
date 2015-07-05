@@ -252,8 +252,11 @@ void MapControl::itemCheckChanged(QListWidgetItem* item)
 /* Selected layer changed */
 void MapControl::layerChanged(int current_row)
 {
+  EditorEnumDb::Layer layer = (EditorEnumDb::Layer)current_row;
+  emit layerChanged(layer);
+
   if(editing_map != NULL)
-    editing_map->setHoverLayer((EditorEnumDb::Layer)current_row);
+    editing_map->setHoverLayer(layer);
 }
 
 /* Right click list menu on bottom list */

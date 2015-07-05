@@ -74,6 +74,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Signal for layer changing */
+  void layerChanged(EditorEnumDb::Layer layer);
+
   /* Signal for updating all lists in map database */
   void updateAllLists();
 

@@ -127,23 +127,6 @@ void ItemDialog::createLayout(bool instance)
           this, SLOT(walkoverChanged(int)));
   layout->addWidget(box_walkover, 1, 5, 1, 2);
 
-  /* The sprite view widget */
-  //QLabel* lbl_frame = new QLabel("Large Item:", this);
-  //layout->addWidget(lbl_frame, 7, 0, 1, 1);
-  //lbl_frame_img = new QLabel(this);
-  //lbl_frame_img->setMinimumSize(200, 200);
-  //lbl_frame_img->setStyleSheet("border: 1px solid black");
-  //lbl_frame_img->setAlignment(Qt::AlignCenter);
-  //layout->addWidget(lbl_frame_img, 7, 1, 1, 3);
-  //QPushButton* btn_frame_click = new QPushButton(this);
-  //btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
-  //btn_frame_click->setIconSize(QSize(24,24));
-  //btn_frame_click->setMaximumSize(30, 30);
-  //if(instance)
-  //  btn_frame_click->setDisabled(true);
-  //connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  //layout->addWidget(btn_frame_click, 7, 3, 1, 1, Qt::AlignTop);
-
   /* Matrix View */
   matrix_view = new MatrixView(item_working->getMatrix(), this, true);
   if(instance)
@@ -153,6 +136,7 @@ void ItemDialog::createLayout(bool instance)
   /* The button control */
   layout->setRowMinimumHeight(8, 15);
   QPushButton* btn_ok = new QPushButton("Ok", this);
+  btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   layout->addWidget(btn_ok, 9, 6);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
@@ -321,27 +305,6 @@ void ItemDialog::coreItemChanged(int index)
   else
     item_working->setCoreID(-1);
 }
-
-/*
- * Description: Updates the frame dialog image in the pop-up. Scales the image
- *              to fit inside a fixed label.
- *
- * Inputs: none
- * Output: none
- */
-//void ItemDialog::updateFrame()
-//{
-//  QImage original = item_working->getDialogImage()->getImage(0);
-//  if(original.width() > 200 || original.height() > 200)
-//  {
-//    QImage scaled_image = original.scaled(200, 200, Qt::KeepAspectRatio);
-//    lbl_frame_img->setPixmap(QPixmap::fromImage(scaled_image));
-//  }
-//  else
-//  {
-//    lbl_frame_img->setPixmap(QPixmap::fromImage(original));
-//  }
-//}
 
 /*
  * Description: The drop down for visibility of the thing changed slot. This

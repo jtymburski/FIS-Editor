@@ -145,7 +145,8 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
     /* Delete the old and create the new instance dialog */
     if(instance_dialog != NULL)
     {
-      disconnect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+      disconnect(instance_dialog, SIGNAL(ok(QString)),
+                 this, SLOT(thingInstanceUpdate(QString)));
       disconnect(instance_dialog,
                  SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
@@ -154,7 +155,8 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
       delete instance_dialog;
     }
     instance_dialog = new InstanceDialog(current, this);
-    connect(instance_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+    connect(instance_dialog, SIGNAL(ok(QString)),
+            this, SLOT(thingInstanceUpdate(QString)));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
@@ -235,8 +237,13 @@ void MapThingView::updateInfo()
 void MapThingView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
+  {
     editor_map->setCurrentThing(index);
+    editor_map->setHoverThing(-1);
+  }
+
   updateInfo();
+  thing_instances->clearSelection();
 }
 
 /*
@@ -334,14 +341,27 @@ void MapThingView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
+    /* Set the hover thing in the class */
     int thing_id = getInstanceID(thing_instances->currentItem()->text());
     if(editor_map->setHoverThing(thing_id))
     {
       EditorMapThing* thing = editor_map->getThing(thing_id,
                                               editor_map->getCurrentMap()->id);
       if(thing != NULL)
+      {
         emit ensureVisible(editor_map->getCurrentMap()->tiles[thing->getX()]
                                                              [thing->getY()]);
+
+        /* Select the base in the list */
+        if(thing->getBaseThing() != NULL)
+        {
+          int index = editor_map->getThingIndex(thing->getBaseThing()->getID());
+          thing_list->blockSignals(true);
+          thing_list->setCurrentRow(index);
+          thing_list->blockSignals(false);
+          updateInfo();
+        }
+      }
     }
   }
 }
@@ -363,10 +383,10 @@ void MapThingView::itemDoubleClicked(QListWidgetItem*)
  *              put them in the list. Triggers on change events, such as editing
  *              and deleting instances, and on initial setup
  *
- * Inputs: none
+ * Inputs: QString name_list - the list of the added thing. Blank if N/A
  * Output: none
  */
-void MapThingView::thingInstanceUpdate()
+void MapThingView::thingInstanceUpdate(QString name_list)
 {
   thing_instances->blockSignals(true);
   thing_instances->clearSelection();
@@ -391,11 +411,18 @@ void MapThingView::thingInstanceUpdate()
   thing_instances->clearSelection();
   thing_instances->clearFocus();
   thing_instances->blockSignals(false);
+
+  /* If name list is not blank, select the name in the list */
+  if(!name_list.isEmpty())
+  {
+    for(int i = 0; i < thing_instances->count(); i++)
+      if(thing_instances->item(i)->text() == name_list)
+        thing_instances->setCurrentRow(i);
+  }
 }
 
 /*
- * Description: Refreshes the Editor Thing list. Also, triggered by instance
- *              thing dialog on ok (slot).
+ * Description: Refreshes the Editor Thing list.
  *
  * Inputs: none
  * Output: none
@@ -414,7 +441,7 @@ void MapThingView::updateList()
     editor_map->updateAll();
 
     /* Set up the instances list */
-    thingInstanceUpdate();
+    thingInstanceUpdate("");
   }
 
   thing_list->setCurrentRow(index);
@@ -580,8 +607,8 @@ void MapThingView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
-    disconnect(editor_map, SIGNAL(thingInstanceChanged()),
-               this, SLOT(thingInstanceUpdate()));
+    disconnect(editor_map, SIGNAL(thingInstanceChanged(QString)),
+               this, SLOT(thingInstanceUpdate(QString)));
   }
 
   editor_map = map;
@@ -589,8 +616,8 @@ void MapThingView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
-    connect(editor_map, SIGNAL(thingInstanceChanged()),
-            this, SLOT(thingInstanceUpdate()));
+    connect(editor_map, SIGNAL(thingInstanceChanged(QString)),
+            this, SLOT(thingInstanceUpdate(QString)));
   }
 
   /* Finally, update list */

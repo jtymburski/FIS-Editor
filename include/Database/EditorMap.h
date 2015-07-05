@@ -162,20 +162,20 @@ protected:
  *===========================================================================*/
 signals:
   /* Item instant changed */
-  void itemInstanceChanged(); // TODO: HOOK
+  void itemInstanceChanged(QString name_list);
 
   /* NPC instant changed */
-  void npcInstanceChanged();
+  void npcInstanceChanged(QString name_list);
 
   /* Path mods to the map */
   void npcPathAdd(EditorNPCPath* path);
   void npcPathRemove(EditorNPCPath* path);
 
   /* Person instant changed */
-  void personInstanceChanged();
+  void personInstanceChanged(QString name_list);
 
   /* Thing instant changed */
-  void thingInstanceChanged();
+  void thingInstanceChanged(QString name_list);
 
 /*============================================================================
  * PUBLIC SLOTS

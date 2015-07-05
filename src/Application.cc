@@ -77,6 +77,8 @@ Application::Application(QWidget* parent)
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
   connect(game_view->getMapView(), SIGNAL(disableControl(bool)),
           this, SLOT(disableControl(bool)));
+  connect(game_view->getMapView(), SIGNAL(layerChanged(EditorEnumDb::Layer)),
+          this, SLOT(layerChanged(EditorEnumDb::Layer)));
 
   /* Calls all setup functions */
   setWindowTitle("Univursa Designer");
@@ -233,34 +235,34 @@ void Application::setupTopMenu()
   QActionGroup* cursor_group = new QActionGroup(this);
   cursor_group->setExclusive(true);
 
-  QAction* basicmode_action = new QAction("&Basic",cursor_group);
-  basicmode_action->setCheckable(true);
-  basicmode_action->setChecked(true);
-  basicmode_action->setIcon(QIcon(":/images/icons/32_pencil.png"));
-  QAction* erasermode_action = new QAction("&Eraser",cursor_group);
-  erasermode_action->setCheckable(true);
-  erasermode_action->setIcon(QIcon(":/images/icons/32_eraser.png"));
-  QAction* blockplacemode_action = new QAction("&Block Place",cursor_group);
-  blockplacemode_action->setCheckable(true);
-  blockplacemode_action->setIcon(QIcon(":/images/icons/32_rect_fill.png"));
-  QAction* fill_action = new QAction("&Fill",cursor_group);
-  fill_action->setCheckable(true);
-  fill_action->setIcon(QIcon(":/images/icons/32_fill.png"));
-  QAction* pass_all_action = new QAction("&Passability All", cursor_group);
-  pass_all_action->setCheckable(true);
-  pass_all_action->setIcon(QIcon(":/images/icons/32_passA.png"));
-  QAction* pass_north_action = new QAction("&Passability North", cursor_group);
-  pass_north_action->setCheckable(true);
-  pass_north_action->setIcon(QIcon(":/images/icons/32_passN.png"));
-  QAction* pass_east_action = new QAction("&Passability East", cursor_group);
-  pass_east_action->setCheckable(true);
-  pass_east_action->setIcon(QIcon(":/images/icons/32_passE.png"));
-  QAction* pass_south_action = new QAction("&Passability South", cursor_group);
-  pass_south_action->setCheckable(true);
-  pass_south_action->setIcon(QIcon(":/images/icons/32_passS.png"));
-  QAction* pass_west_action = new QAction("&Passability West", cursor_group);
-  pass_west_action->setCheckable(true);
-  pass_west_action->setIcon(QIcon(":/images/icons/32_passW.png"));
+  action_basic = new QAction("&Basic",cursor_group);
+  action_basic->setCheckable(true);
+  action_basic->setChecked(true);
+  action_basic->setIcon(QIcon(":/images/icons/32_pencil.png"));
+  QAction* action_eraser = new QAction("&Eraser",cursor_group);
+  action_eraser->setCheckable(true);
+  action_eraser->setIcon(QIcon(":/images/icons/32_eraser.png"));
+  action_blockplace = new QAction("&Block Place",cursor_group);
+  action_blockplace->setCheckable(true);
+  action_blockplace->setIcon(QIcon(":/images/icons/32_rect_fill.png"));
+  action_fill = new QAction("&Fill",cursor_group);
+  action_fill->setCheckable(true);
+  action_fill->setIcon(QIcon(":/images/icons/32_fill.png"));
+  action_passall = new QAction("&Passability All", cursor_group);
+  action_passall->setCheckable(true);
+  action_passall->setIcon(QIcon(":/images/icons/32_passA.png"));
+  action_passN = new QAction("&Passability North", cursor_group);
+  action_passN->setCheckable(true);
+  action_passN->setIcon(QIcon(":/images/icons/32_passN.png"));
+  action_passE = new QAction("&Passability East", cursor_group);
+  action_passE->setCheckable(true);
+  action_passE->setIcon(QIcon(":/images/icons/32_passE.png"));
+  action_passS = new QAction("&Passability South", cursor_group);
+  action_passS->setCheckable(true);
+  action_passS->setIcon(QIcon(":/images/icons/32_passS.png"));
+  action_passW = new QAction("&Passability West", cursor_group);
+  action_passW->setCheckable(true);
+  action_passW->setIcon(QIcon(":/images/icons/32_passW.png"));
   menu_cursor = menuBar()->addMenu("&Cursor Modes");
 
   /* Sets up the menu toolbars */
@@ -292,40 +294,40 @@ void Application::setupTopMenu()
 
   /* Sets up the brushes toolbar */
   bar_brush = new QToolBar("Brushes", this);
-  bar_brush->addAction(basicmode_action);
-  bar_brush->addAction(erasermode_action);
-  bar_brush->addAction(blockplacemode_action);
-  bar_brush->addAction(fill_action);
-  bar_brush->addAction(pass_all_action);
-  bar_brush->addAction(pass_north_action);
-  bar_brush->addAction(pass_east_action);
-  bar_brush->addAction(pass_south_action);
-  bar_brush->addAction(pass_west_action);
+  bar_brush->addAction(action_basic);
+  bar_brush->addAction(action_eraser);
+  bar_brush->addAction(action_blockplace);
+  bar_brush->addAction(action_fill);
+  bar_brush->addAction(action_passall);
+  bar_brush->addAction(action_passN);
+  bar_brush->addAction(action_passE);
+  bar_brush->addAction(action_passS);
+  bar_brush->addAction(action_passW);
   addToolBar(Qt::TopToolBarArea,bar_brush);
-  menu_cursor->addAction(basicmode_action);
-  menu_cursor->addAction(erasermode_action);
-  menu_cursor->addAction(blockplacemode_action);
-  menu_cursor->addAction(fill_action);
-  menu_cursor->addAction(pass_all_action);
-  menu_cursor->addAction(pass_north_action);
-  menu_cursor->addAction(pass_east_action);
-  menu_cursor->addAction(pass_south_action);
-  menu_cursor->addAction(pass_west_action);
+  menu_cursor->addAction(action_basic);
+  menu_cursor->addAction(action_eraser);
+  menu_cursor->addAction(action_blockplace);
+  menu_cursor->addAction(action_fill);
+  menu_cursor->addAction(action_passall);
+  menu_cursor->addAction(action_passN);
+  menu_cursor->addAction(action_passE);
+  menu_cursor->addAction(action_passS);
+  menu_cursor->addAction(action_passW);
   bar_brush->setFloatable(false);
   bar_brush->setMovable(false);
-  connect(basicmode_action,SIGNAL(triggered()),this,SLOT(setCursorBasic()));
-  connect(erasermode_action,SIGNAL(triggered()),this,SLOT(setCursorEraser()));
-  connect(blockplacemode_action,SIGNAL(triggered()),
+  connect(action_basic,SIGNAL(triggered()),this,SLOT(setCursorBasic()));
+  connect(action_eraser,SIGNAL(triggered()),this,SLOT(setCursorEraser()));
+  connect(action_blockplace,SIGNAL(triggered()),
           this,SLOT(setCursorBlock()));
-  connect(fill_action,SIGNAL(triggered()),this,SLOT(setCursorFill()));
-  connect(pass_all_action, SIGNAL(triggered()), this, SLOT(setPassAllCursor()));
-  connect(pass_north_action, SIGNAL(triggered()),
+  connect(action_fill,SIGNAL(triggered()),this,SLOT(setCursorFill()));
+  connect(action_passall, SIGNAL(triggered()), this, SLOT(setPassAllCursor()));
+  connect(action_passN, SIGNAL(triggered()),
           this, SLOT(setPassNorthCursor()));
-  connect(pass_east_action, SIGNAL(triggered()),
+  connect(action_passE, SIGNAL(triggered()),
           this, SLOT(setPassEastCursor()));
-  connect(pass_south_action, SIGNAL(triggered()),
+  connect(action_passS, SIGNAL(triggered()),
           this, SLOT(setPassSouthCursor()));
-  connect(pass_west_action, SIGNAL(triggered()),
+  connect(action_passW, SIGNAL(triggered()),
           this, SLOT(setPassWestCursor()));
 
   /* Set up the map control bar */
@@ -382,6 +384,61 @@ void Application::exportTo()
     if(!file.endsWith(".ugv"))
       file += ".ugv";
     exportGame(file);
+  }
+}
+
+/* Slot for layer changing */
+void Application::layerChanged(EditorEnumDb::Layer layer)
+{
+  /* Enabling / Disabling paint and fill pen */
+  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
+     layer == EditorEnumDb::LOWER1 || layer == EditorEnumDb::LOWER2 ||
+     layer == EditorEnumDb::LOWER3 || layer == EditorEnumDb::LOWER4 ||
+     layer == EditorEnumDb::LOWER5 || layer == EditorEnumDb::UPPER1 ||
+     layer == EditorEnumDb::UPPER2 || layer == EditorEnumDb::UPPER3 ||
+     layer == EditorEnumDb::UPPER4 || layer == EditorEnumDb::UPPER5)
+  {
+    action_blockplace->setEnabled(true);
+    action_fill->setEnabled(true);
+  }
+  else
+  {
+    action_blockplace->setDisabled(true);
+    action_fill->setDisabled(true);
+
+    /* If either selected, change to place pen */
+    if(action_blockplace->isChecked() || action_fill->isChecked())
+    {
+      action_basic->setChecked(true);
+    }
+  }
+
+  /* Enabling / Disabling passability pens */
+  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::LOWER1 ||
+     layer == EditorEnumDb::LOWER2 || layer == EditorEnumDb::LOWER3 ||
+     layer == EditorEnumDb::LOWER4 || layer == EditorEnumDb::LOWER5)
+  {
+    action_passall->setEnabled(true);
+    action_passE->setEnabled(true);
+    action_passN->setEnabled(true);
+    action_passS->setEnabled(true);
+    action_passW->setEnabled(true);
+  }
+  else
+  {
+    action_passall->setDisabled(true);
+    action_passE->setDisabled(true);
+    action_passN->setDisabled(true);
+    action_passS->setDisabled(true);
+    action_passW->setDisabled(true);
+
+    /* If either selected, change to place pen */
+    if(action_passall->isChecked() || action_passE->isChecked() ||
+       action_passN->isChecked() || action_passS->isChecked() ||
+       action_passW->isChecked())
+    {
+      action_basic->setChecked(true);
+    }
   }
 }
 

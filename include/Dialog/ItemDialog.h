@@ -41,9 +41,6 @@ private:
   EditorMapItem* item_original;
   EditorMapItem* item_working;
 
-  /* The frame image */
-  //QLabel* lbl_frame_img;
-
   /* The list of objects used in possible events */
   QVector<QString> list_items;
 
@@ -98,9 +95,6 @@ public slots:
 
   /* Core item status changed */
   void coreItemChanged(int index);
-
-  /* Update the frame for the thing */
-  //void updateFrame();
 
   /* Visibility status changed */
   void visibilityChanged(int index);

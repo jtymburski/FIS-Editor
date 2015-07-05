@@ -218,8 +218,13 @@ void MapItemView::updateInfo()
 void MapItemView::currentRowChanged(int index)
 {
   if(editor_map != NULL)
+  {
     editor_map->setCurrentItem(index);
+    editor_map->setHoverItem(-1);
+  }
+
   updateInfo();
+  item_instances->clearSelection();
 }
 
 /*
@@ -317,14 +322,27 @@ void MapItemView::instanceRowChanged(int index)
 {
   if(index >= 0 && editor_map != NULL)
   {
+    /* Set the hover item in the class */
     int id = MapThingView::getInstanceID(item_instances->currentItem()->text());
     if(editor_map->setHoverItem(id))
     {
       EditorMapItem* item = editor_map->getItem(id, 
                                                editor_map->getCurrentMap()->id);
       if(item != NULL)
+      {
         emit ensureVisible(editor_map->getCurrentMap()->tiles[item->getX()]
                                                              [item->getY()]);
+
+        /* Select the base in the list */
+        if(item->getBaseItem() != NULL)
+        {
+          int index = editor_map->getItemIndex(item->getBaseItem()->getID());
+          item_list->blockSignals(true);
+          item_list->setCurrentRow(index);
+          item_list->blockSignals(false);
+          updateInfo();
+        }
+      }
     }
   }
 }
@@ -346,10 +364,10 @@ void MapItemView::itemDoubleClicked(QListWidgetItem*)
  *              put them in the list. Triggers on change events, such as editing
  *              and deleting instances, and on initial setup
  *
- * Inputs: none
+ * Inputs: QString name_list - the list of the added item. Blank if N/A
  * Output: none
  */
-void MapItemView::itemInstanceUpdate()
+void MapItemView::itemInstanceUpdate(QString name_list)
 {
   item_instances->blockSignals(true);
   item_instances->clearSelection();
@@ -374,6 +392,14 @@ void MapItemView::itemInstanceUpdate()
   item_instances->clearSelection();
   item_instances->clearFocus();
   item_instances->blockSignals(false);
+
+  /* If name list is not blank, select the name in the list */
+  if(!name_list.isEmpty())
+  {
+    for(int i = 0; i < item_instances->count(); i++)
+      if(item_instances->item(i)->text() == name_list)
+        item_instances->setCurrentRow(i);
+  }
 }
 
 /*
@@ -396,7 +422,7 @@ void MapItemView::updateList()
     editor_map->updateAll();
 
     /* Set up the instances list */
-    itemInstanceUpdate();
+    itemInstanceUpdate("");
   }
 
   item_list->setCurrentRow(index);
@@ -561,8 +587,8 @@ void MapItemView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
-    disconnect(editor_map, SIGNAL(itemInstanceChanged()),
-               this, SLOT(itemInstanceUpdate()));
+    disconnect(editor_map, SIGNAL(itemInstanceChanged(QString)),
+               this, SLOT(itemInstanceUpdate(QString)));
   }
 
   editor_map = map;
@@ -570,8 +596,8 @@ void MapItemView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
-    connect(editor_map, SIGNAL(itemInstanceChanged()),
-            this, SLOT(itemInstanceUpdate()));
+    connect(editor_map, SIGNAL(itemInstanceChanged(QString)),
+            this, SLOT(itemInstanceUpdate(QString)));
   }
 
   /* Finally, update list */

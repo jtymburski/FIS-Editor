@@ -457,7 +457,7 @@ void InstanceDialog::buttonOk()
 {
   /* Proceed to ok() */
   updateOriginal();
-  emit ok();
+  emit ok(thing_original->getNameList());
   event_ctrl->setEventBlank(false);
   close();
 }

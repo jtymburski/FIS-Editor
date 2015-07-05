@@ -100,6 +100,9 @@ signals:
   /* Disables control on high level for when in editing view with map */
   void disableControl(bool disabled);
 
+  /* Signal for layer changing */
+  void layerChanged(EditorEnumDb::Layer layer);
+
   /* Passes the editor sprite up */
   void sendUpEditorSprite(EditorSprite* e);
 
