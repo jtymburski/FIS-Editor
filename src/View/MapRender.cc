@@ -25,6 +25,7 @@ MapRender::MapRender(QWidget* parent)
 {
   /* Data init */
   editing_map = NULL;
+  middleclick_menu = NULL;
   path_edit = NULL;
   tile_select = false;
 
@@ -44,6 +45,72 @@ MapRender::~MapRender()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
+
+/* Menu adding for tile click */
+void MapRender::menuSprites(EditorTile* t, QMenu* menu)
+{
+  /* Base */
+  QAction* act_b = new QAction("B: UNSET", menu);
+  act_b->setDisabled(true);
+  if(t->getSprite(EditorEnumDb::BASE) != NULL)
+  {
+    act_b->setText("B: " + t->getSprite(EditorEnumDb::BASE)->getName());
+    act_b->setEnabled(true);
+  }
+  connect(act_b, SIGNAL(triggered()), this, SLOT(tileSpriteB()));
+  menu->addAction(act_b);
+
+  /* Enhancer */
+  QAction* act_e = new QAction("E: UNSET", menu);
+  act_e->setDisabled(true);
+  if(t->getSprite(EditorEnumDb::ENHANCER) != NULL)
+  {
+    act_e->setText("E: " + t->getSprite(EditorEnumDb::ENHANCER)->getName());
+    act_e->setEnabled(true);
+  }
+  connect(act_e, SIGNAL(triggered()), this, SLOT(tileSpriteE()));
+  menu->addAction(act_e);
+
+  /* Lowers */
+  for(int i = (int)EditorEnumDb::LOWER1; i <= (int)EditorEnumDb::LOWER5; i++)
+  {
+    int ref = i - EditorEnumDb::LOWER1 + 1;
+    QAction* act_l = new QAction("L" + QString::number(ref) + ": UNSET", menu);
+    act_l->setDisabled(true);
+    if(t->getSprite((EditorEnumDb::Layer)i) != NULL)
+    {
+      act_l->setText("L" + QString::number(ref) + ": " +
+                     t->getSprite((EditorEnumDb::Layer)i)->getName());
+      act_l->setEnabled(true);
+    }
+    menu->addAction(act_l);
+  }
+  connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tileSpriteL1()));
+  connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tileSpriteL2()));
+  connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tileSpriteL3()));
+  connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tileSpriteL4()));
+  connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tileSpriteL5()));
+
+  /* Uppers */
+  for(int i = (int)EditorEnumDb::UPPER1; i <= (int)EditorEnumDb::UPPER5; i++)
+  {
+    int ref = i - EditorEnumDb::UPPER1 + 1;
+    QAction* act_u = new QAction("U" + QString::number(ref) + ": UNSET", menu);
+    act_u->setDisabled(true);
+    if(t->getSprite((EditorEnumDb::Layer)i) != NULL)
+    {
+      act_u->setText("U" + QString::number(ref) + ": " +
+                     t->getSprite((EditorEnumDb::Layer)i)->getName());
+      act_u->setEnabled(true);
+    }
+    menu->addAction(act_u);
+  }
+  connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tileSpriteU1()));
+  connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tileSpriteU2()));
+  connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileSpriteU3()));
+  connect(menu->actions()[10], SIGNAL(triggered()), this, SLOT(tileSpriteU4()));
+  connect(menu->actions()[11], SIGNAL(triggered()), this, SLOT(tileSpriteU5()));
+}
 
 /* Mouse event */
 bool MapRender::mouseEvent(QGraphicsSceneMouseEvent* event)
@@ -129,6 +196,62 @@ void MapRender::pathClickRight(int x, int y)
       path_edit->deleteNode(i);
       success = true;
     }
+  }
+}
+
+/* Right click menu initialize */
+// TODO: Comment
+void MapRender::tileClickInit()
+{
+  /* Delete the old menu if it still exists */
+  if(middleclick_menu != NULL)
+  {
+    delete middleclick_menu;
+    middleclick_menu = NULL;
+  }
+
+  if(views().size() > 0)
+  {
+    EditorTile* t = editing_map->getHoverInfo()->hover_tile;
+
+    /* Menu init */
+    middleclick_menu = new QMenu("Tile", views().front());
+    middleclick_menu->hide();
+
+    /* Sprites */
+    QMenu* menu_sprites = new QMenu("Sprites", middleclick_menu);
+    menuSprites(t, menu_sprites);
+
+    /* Things */
+    QMenu* menu_things = new QMenu("Things", middleclick_menu);
+    menu_things->addAction(new QAction("TODO", menu_things));
+
+    /* Items */
+    QMenu* menu_items = new QMenu("Items", middleclick_menu);
+    menu_items->addAction(new QAction("TODO", menu_items));
+
+    /* IOs */
+    QMenu* menu_ios = new QMenu("IOs", middleclick_menu);
+    menu_ios->addAction(new QAction("TODO", menu_ios));
+
+    /* Persons */
+    QMenu* menu_persons = new QMenu("Persons", middleclick_menu);
+    menu_persons->addAction(new QAction("TODO", menu_persons));
+
+    /* NPCs */
+    QMenu* menu_npcs = new QMenu("NPCs", middleclick_menu);
+    menu_npcs->addAction(new QAction("TODO", menu_npcs));
+
+    /* Add sub-menus */
+    middleclick_menu->addMenu(menu_sprites);
+    middleclick_menu->addMenu(menu_things);
+    middleclick_menu->addMenu(menu_items);
+    middleclick_menu->addMenu(menu_ios);
+    middleclick_menu->addMenu(menu_persons);
+    middleclick_menu->addMenu(menu_npcs);
+
+    /* Execute menu */
+    middleclick_menu->exec(QCursor::pos());
   }
 }
 
@@ -250,6 +373,10 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
           pathClickRight(hover_x, hover_y);
       }
     }
+    else if(event->button() == Qt::MidButton)
+    {
+      tileClickInit();
+    }
     else if(event->button() == Qt::LeftButton)
     {
       if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
@@ -355,6 +482,78 @@ void MapRender::pathEditTrigger(EditorNPCPath* path)
 void MapRender::selectTile()
 {
   tile_select = true;
+}
+
+/* Tile slots */
+void MapRender::tileSpriteB()
+{
+  qDebug() << "TODO: BASE EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteE()
+{
+  qDebug() << "TODO: ENHANCER EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteL1()
+{
+  qDebug() << "TODO: LOWER 1 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteL2()
+{
+  qDebug() << "TODO: LOWER 2 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteL3()
+{
+  qDebug() << "TODO: LOWER 3 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteL4()
+{
+  qDebug() << "TODO: LOWER 4 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteL5()
+{
+  qDebug() << "TODO: LOWER 5 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteU1()
+{
+  qDebug() << "TODO: UPPER 1 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteU2()
+{
+  qDebug() << "TODO: UPPER 2 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteU3()
+{
+  qDebug() << "TODO: UPPER 3 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteU4()
+{
+  qDebug() << "TODO: UPPER 4 EDIT";
+}
+
+/* Tile slots */
+void MapRender::tileSpriteU5()
+{
+  qDebug() << "TODO: UPPER 5 EDIT";
 }
 
 /* Update the rendering sub-map */

@@ -158,8 +158,8 @@ public:
   bool getPassabilityVisible(Direction direction);
 
   /* Returns the map item pointer(s) */
-  EditorMapItem* getItemBaseID(int id); // TODO
-  EditorMapItem* getItemID(int id); // TODO
+  EditorMapItem* getItemBaseID(int id);
+  EditorMapItem* getItemID(int id);
   EditorMapItem* getItem(int index);
   QVector<EditorMapItem*> getItems();
 

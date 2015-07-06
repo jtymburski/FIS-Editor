@@ -13,6 +13,7 @@
 #include <QTabWidget>
 #include <QGraphicsScene>
 #include <QList>
+#include <QMenu>
 #include <QRect>
 #include <QScrollBar>
 #include <QWidget>
@@ -48,6 +49,9 @@ private:
   /* The rendering map */
   //SubMapInfo* map; // TODO: REMOVE??
 
+  /* The middle click menu */
+  QMenu* middleclick_menu;
+
   /* The editing path */
   EditorNPCPath* path_edit;
 
@@ -61,12 +65,18 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Menu adding for tile click */
+  void menuSprites(EditorTile* t, QMenu* menu);
+
   /* Mouse event */
   bool mouseEvent(QGraphicsSceneMouseEvent* event);
 
   /* Path click manipulation - for editing paths */
   void pathClickLeft(int x, int y);
   void pathClickRight(int x, int y);
+
+  /* Right click menu initialize */
+  void tileClickInit();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -103,6 +113,20 @@ public slots:
 
   /* Select a tile trigger */
   void selectTile();
+
+  /* Tile slots */
+  void tileSpriteB();
+  void tileSpriteE();
+  void tileSpriteL1();
+  void tileSpriteL2();
+  void tileSpriteL3();
+  void tileSpriteL4();
+  void tileSpriteL5();
+  void tileSpriteU1();
+  void tileSpriteU2();
+  void tileSpriteU3();
+  void tileSpriteU4();
+  void tileSpriteU5();
 
   /* Update the rendering sub-map */
   void updateRenderingMap();
