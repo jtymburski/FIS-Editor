@@ -98,6 +98,9 @@ public slots:
   /* Edit the base person */
   void editBasePerson(EditorMapThing* base);
 
+  /* Edit the hover instance */
+  void editHoverInstance(int index);
+
   /* Edit person instance */
   void editInstance();
 

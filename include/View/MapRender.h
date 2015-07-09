@@ -1,4 +1,4 @@
-/*******************************************************************************
+   /*******************************************************************************
  * Class Name: MapRender
  * Date Created: November 11, 2013
  * Inheritance: QGLWidget
@@ -66,7 +66,12 @@ private:
  *===========================================================================*/
 private:
   /* Menu adding for tile click */
-  void menuSprites(EditorTile* t, QMenu* menu);
+  bool menuIOs(EditorTile* t, QMenu* menu);
+  bool menuItems(EditorTile* t, QMenu* menu);
+  bool menuNPCs(EditorTile* t, QMenu* menu);
+  bool menuPersons(EditorTile* t, QMenu* menu);
+  bool menuSprites(EditorTile* t, QMenu* menu);
+  bool menuThings(EditorTile* t, QMenu* menu);
 
   /* Mouse event */
   bool mouseEvent(QGraphicsSceneMouseEvent* event);
@@ -100,6 +105,13 @@ signals:
   /* Sends the selected tile to the thing pop-up */
   void sendSelectedTile(int id, int x, int y);
 
+  /* Tile signals */
+  void tileItem(int index);
+  void tileNPC(int depth);
+  void tilePerson(int depth);
+  void tileSprite(EditorEnumDb::Layer layer);
+  void tileThing(int depth);
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -115,6 +127,36 @@ public slots:
   void selectTile();
 
   /* Tile slots */
+  void tileItem0();
+  void tileItem1();
+  void tileItem2();
+  void tileItem3();
+  void tileItem4();
+  void tileItem5();
+  void tileItem6();
+  void tileItem7();
+  void tileItem8();
+  void tileItem9();
+  void tileNPC0();
+  void tileNPC1();
+  void tileNPC2();
+  void tileNPC3();
+  void tileNPC4();
+  void tileNPC5();
+  void tileNPC6();
+  void tileNPC7();
+  void tileNPC8();
+  void tileNPC9();
+  void tilePerson0();
+  void tilePerson1();
+  void tilePerson2();
+  void tilePerson3();
+  void tilePerson4();
+  void tilePerson5();
+  void tilePerson6();
+  void tilePerson7();
+  void tilePerson8();
+  void tilePerson9();
   void tileSpriteB();
   void tileSpriteE();
   void tileSpriteL1();
@@ -127,6 +169,16 @@ public slots:
   void tileSpriteU3();
   void tileSpriteU4();
   void tileSpriteU5();
+  void tileThing0();
+  void tileThing1();
+  void tileThing2();
+  void tileThing3();
+  void tileThing4();
+  void tileThing5();
+  void tileThing6();
+  void tileThing7();
+  void tileThing8();
+  void tileThing9();
 
   /* Update the rendering sub-map */
   void updateRenderingMap();

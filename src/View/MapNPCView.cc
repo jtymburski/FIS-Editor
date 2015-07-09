@@ -146,7 +146,7 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
     if(instance_dialog != NULL)
     {
       disconnect(instance_dialog, SIGNAL(ok(QString)),
-                 this, SLOT(updateList(QString)));
+                 this, SLOT(npcInstanceUpdate(QString)));
       disconnect(instance_dialog,
                  SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
                  this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
@@ -158,7 +158,7 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
     }
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok(QString)),
-            this, SLOT(updateList(QString)));
+            this, SLOT(npcInstanceUpdate(QString)));
     connect(instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
             this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
     connect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
@@ -286,6 +286,28 @@ void MapNPCView::editBaseNPC(EditorMapThing* base)
 {
   if(base != NULL)
     editNPC((EditorMapNPC*)base);
+}
+
+/*
+ * Description: Triggers to edit the hover tile NPC instance at the index.
+ *
+ * Inputs: int index - the depth index on the tile
+ * Output: none
+ */
+void MapNPCView::editHoverInstance(int index)
+{
+  if(editor_map != NULL)
+  {
+    /* Check if hover tile is valid */
+    EditorTile* t = editor_map->getHoverInfo()->hover_tile;
+    if(t != NULL)
+    {
+      /* Check if npc at index is valid */
+      EditorMapNPC* npc = t->getNPC(index);
+      if(npc != NULL)
+        editNPC(npc);
+    }
+  }
 }
 
 /*

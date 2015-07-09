@@ -14,7 +14,7 @@
 /*
  * Description: Constructor function - Set up toolbox
  *
- * Input: parent widget
+ * Inputs: QWidget* parent - the parent widget
  */
 SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 {
@@ -38,8 +38,6 @@ SpriteView::SpriteView(QWidget *parent) : QWidget(parent)
 
 /*
  * Description: Destructor function
- *
- * Input: none
  */
 SpriteView::~SpriteView()
 {
@@ -55,7 +53,8 @@ SpriteView::~SpriteView()
  *              positions for all of the sprites that have been selected and
  *              added to the toolbar
  *
- * Inputs: Unused
+ * Inputs: none
+ * Output: none
  */
 void SpriteView::paintEvent(QPaintEvent *)
 {
@@ -94,10 +93,12 @@ void SpriteView::paintEvent(QPaintEvent *)
 
 /*
  * Description: The mouse double click event brings up a display that contains
- * all of the frames in the current sprite selected, right now this was just for
- * debugging reasons, however it may have a use later on
+ *              all of the frames in the current sprite selected, right now
+ *              this was just for debugging reasons, however it may have a use
+ *              later on.
  *
- * Inputs: Mouse event
+ * Inputs: QMouseEvent* e - the mouse double click event
+ * Output: none
  */
 void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 {
@@ -115,7 +116,8 @@ void SpriteView::mouseDoubleClickEvent(QMouseEvent *e)
 /*
  * Description: Adds an editor sprite to the toolbox
  *
- * Inputs: The editor sprite to add
+ * Inputs: EditorSprite* e - The editor sprite to add
+ * Output: none
  */
 void SpriteView::addEditorSprite(EditorSprite *e)
 {
@@ -131,10 +133,39 @@ void SpriteView::addEditorSprite(EditorSprite *e)
   }
 }
 
-/* Opens the sprite editing dialog */
-void SpriteView::editSprite()
+/*
+ * Description: Edits the hover tile sprite at the designated layer.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the sprite layer
+ * Output: none
+ */
+void SpriteView::editHoverSprite(EditorEnumDb::Layer layer)
+{
+  if(editor_map != NULL)
+  {
+    /* Check if hover tile is valid */
+    EditorTile* t = editor_map->getHoverInfo()->hover_tile;
+    if(t != NULL)
+    {
+      /* Check if sprite at index is valid */
+      EditorSprite* sprite = t->getSprite(layer);
+      if(sprite != NULL)
+        editSprite(sprite);
+    }
+  }
+}
+
+/*
+ * Description: Opens the sprite editing dialog.
+ *
+ * Inputs: EditorSprite* edit - a sprite to edit. If NULL, use current (default)
+ * Output: none
+ */
+void SpriteView::editSprite(EditorSprite* edit)
 {
   EditorSprite* current = getSelected();
+  if(edit != NULL)
+    current = edit;
 
   /* Delete the old and create the new dialog */
   if(sprite_dialog != NULL)
@@ -146,6 +177,9 @@ void SpriteView::editSprite()
 
 /*
  * Description: Refreshes the Editor Sprite list
+ *
+ * Inputs: none
+ * Output: none
  */
 void SpriteView::updateList()
 {
@@ -164,7 +198,12 @@ void SpriteView::updateList()
   update();
 }
 
-/* Update selected sprite */
+/*
+ * Description: Updates the selected sprite at the current row.
+ *
+ * Inputs: int current_row - the row to update
+ * Output: none
+ */
 void SpriteView::updateSelected(int current_row)
 {
   if(editor_map != NULL)
@@ -173,7 +212,12 @@ void SpriteView::updateSelected(int current_row)
   update();
 }
 
-/* Views the frame sequence */
+/*
+ * Description: View the frame sequence of the current sprite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SpriteView::viewFrameSequence()
 {
   EditorSprite* current_sprite = getSelected();
@@ -211,7 +255,7 @@ void SpriteView::viewFrameSequence()
  *              parent.
  *
  * Inputs: none
- * Output: returns true if sprite deleted.
+ * Output: bool - returns true if sprite deleted.
  */
 bool SpriteView::deleteSprite()
 {

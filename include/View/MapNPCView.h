@@ -101,6 +101,9 @@ public slots:
   /* Edit the base npc */
   void editBaseNPC(EditorMapThing* base);
 
+  /* Edit the hover instance */
+  void editHoverInstance(int index);
+
   /* Edit npc instance */
   void editInstance();
 

@@ -285,6 +285,28 @@ void MapThingView::editBaseThing(EditorMapThing* base)
 }
 
 /*
+ * Description: Triggers to edit the hover tile thing instance at the index.
+ *
+ * Inputs: int index - the depth index on the tile
+ * Output: none
+ */
+void MapThingView::editHoverInstance(int index)
+{
+  if(editor_map != NULL)
+  {
+    /* Check if hover tile is valid */
+    EditorTile* t = editor_map->getHoverInfo()->hover_tile;
+    if(t != NULL)
+    {
+      /* Check if thing at index is valid */
+      EditorMapThing* thing = t->getThing(index);
+      if(thing != NULL)
+        editThing(thing);
+    }
+  }
+}
+
+/*
  * Description: Slot which triggers when an instance is edited, from a right
  *              click select on the instance. Opens up edit dialog.
  *

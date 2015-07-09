@@ -284,6 +284,28 @@ void MapPersonView::editBasePerson(EditorMapThing* base)
 }
 
 /*
+ * Description: Triggers to edit the hover tile person instance at the index.
+ *
+ * Inputs: int index - the depth index on the tile
+ * Output: none
+ */
+void MapPersonView::editHoverInstance(int index)
+{
+  if(editor_map != NULL)
+  {
+    /* Check if hover tile is valid */
+    EditorTile* t = editor_map->getHoverInfo()->hover_tile;
+    if(t != NULL)
+    {
+      /* Check if person at index is valid */
+      EditorMapPerson* person = t->getPerson(index);
+      if(person != NULL)
+        editPerson(person);
+    }
+  }
+}
+
+/*
  * Description: Slot which triggers when an instance is edited, from a right
  *              click select on the instance. Opens up edit dialog.
  *

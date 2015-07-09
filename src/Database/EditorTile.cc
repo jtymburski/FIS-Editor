@@ -629,6 +629,24 @@ EditorMapNPC* EditorTile::getNPC(int render_level)
 }
 
 /*
+ * Description: Returns the stack of all NPCs, up to the render depth limiter.
+ *              If the indicated render depth is unset, the pointer will be
+ *              NULL.
+ *
+ * Inputs: none
+ * Output: QVector<EditorMapNPC*> - the stack of NPCs, corresponding to depth
+ */
+QVector<EditorMapNPC*> EditorTile::getNPCs()
+{
+  QVector<EditorMapNPC*> stack;
+
+  for(int i = 0; i < npcs.size(); i++)
+    stack.push_back((EditorMapNPC*)npcs[i].thing);
+
+  return stack;
+}
+
+/*
  * Description: Returns the map person pointer for the person at the rendering
  *              level.
  *
@@ -640,6 +658,24 @@ EditorMapPerson* EditorTile::getPerson(int render_level)
   if(render_level >= 0 && render_level < Helpers::getRenderDepth())
     return (EditorMapPerson*)persons[render_level].thing;
   return NULL;
+}
+
+/*
+ * Description: Returns the stack of all persons, up to the render depth
+ *              limiter. If the indicated render depth is unset, the pointer
+ *              will be NULL.
+ *
+ * Inputs: none
+ * Output: QVector<EditorMapPerson*> - the stack of persons, by depth
+ */
+QVector<EditorMapPerson*> EditorTile::getPersons()
+{
+  QVector<EditorMapPerson*> stack;
+
+  for(int i = 0; i < persons.size(); i++)
+    stack.push_back((EditorMapPerson*)persons[i].thing);
+
+  return stack;
 }
 
 /*
@@ -706,6 +742,24 @@ EditorMapThing* EditorTile::getThing(int render_level)
   if(render_level >= 0 && render_level < Helpers::getRenderDepth())
     return things[render_level].thing;
   return NULL;
+}
+
+/*
+ * Description: Returns the stack of all things, up to the render depth
+ *              limiter. If the indicated render depth is unset, the pointer
+ *              will be NULL.
+ *
+ * Inputs: none
+ * Output: QVector<EditorMapThing*> - the stack of things, by depth
+ */
+QVector<EditorMapThing*> EditorTile::getThings()
+{
+  QVector<EditorMapThing*> stack;
+
+  for(int i = 0;i < things.size(); i++)
+    stack.push_back((EditorMapThing*)things[i].thing);
+
+  return stack;
 }
 
 /*

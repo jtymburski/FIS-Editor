@@ -47,6 +47,9 @@ private:
   /* The sprite dialog for editing */
   SpriteDialog* sprite_dialog;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Sets up the painting of all selected files */
   void paintEvent(QPaintEvent *);
@@ -54,12 +57,25 @@ protected:
   /* Views Frames */
   void mouseDoubleClickEvent(QMouseEvent *e);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Sends up the Editor Sprite */
+  void sendUpEditorSprite(EditorSprite* sprite);
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Adds an Editor Sprite to the toolbox */
   void addEditorSprite(EditorSprite* e);
 
+  /* Edit the hover sprite at the layer */
+  void editHoverSprite(EditorEnumDb::Layer layer);
+
   /* Opens the sprite editing dialog */
-  void editSprite();
+  void editSprite(EditorSprite* edit = NULL);
 
   /* Updates the sprite list */
   void updateList();
@@ -70,10 +86,9 @@ public slots:
   /* Views the frame sequence */
   void viewFrameSequence();
 
-signals:
-  /* Sends up the Editor Sprite */
-  void sendUpEditorSprite(EditorSprite* sprite);
-
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Deletes the selected sprite */
   bool deleteSprite();

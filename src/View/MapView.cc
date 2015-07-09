@@ -110,6 +110,19 @@ void MapView::setupMapView()//int x, int y)
   connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
   connect(map_control, SIGNAL(updateAllLists()),
           map_database, SLOT(updateAllLists()));
+
+  /* Connections - map render to map database */
+  connect(map_render, SIGNAL(tileSprite(EditorEnumDb::Layer)),
+          map_database->getSpriteView(),
+          SLOT(editHoverSprite(EditorEnumDb::Layer)));
+  connect(map_render, SIGNAL(tileThing(int)),
+          map_database->getThingView(), SLOT(editHoverInstance(int)));
+  connect(map_render, SIGNAL(tilePerson(int)),
+          map_database->getPersonView(), SLOT(editHoverInstance(int)));
+  connect(map_render, SIGNAL(tileNPC(int)),
+          map_database->getNPCView(), SLOT(editHoverInstance(int)));
+  connect(map_render, SIGNAL(tileItem(int)),
+          map_database->getItemView(), SLOT(editHoverInstance(int)));
 }
 
 /*

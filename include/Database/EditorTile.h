@@ -165,15 +165,18 @@ public:
 
   /* Returns the map npc pointer at the given render depth */
   EditorMapNPC* getNPC(int render_level);
+  QVector<EditorMapNPC*> getNPCs(); // TODO
 
   /* Returns the map person pointer at the given render depth */
   EditorMapPerson* getPerson(int render_level);
+  QVector<EditorMapPerson*> getPersons(); // TODO
 
   /* Returns the sprite based on layer and direction */
   EditorSprite* getSprite(EditorEnumDb::Layer layer);
 
   /* Returns the map thing pointer(s) for the generic thing */
   EditorMapThing* getThing(int render_level);
+  QVector<EditorMapThing*> getThings(); // TODO
 
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);

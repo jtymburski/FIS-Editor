@@ -47,8 +47,141 @@ MapRender::~MapRender()
  *===========================================================================*/
 
 /* Menu adding for tile click */
-void MapRender::menuSprites(EditorTile* t, QMenu* menu)
+bool MapRender::menuIOs(EditorTile* t, QMenu* menu)
 {
+  menu->addAction(new QAction("TODO", menu));
+  menu->actions().front()->setDisabled(true);
+  return false;
+}
+
+/* Menu adding for tile click */
+bool MapRender::menuItems(EditorTile* t, QMenu* menu)
+{
+  bool set = false;
+  QVector<EditorMapItem*> stack = t->getItems();
+
+  /* Go through the item stack */
+  for(int i = 0; i < EditorTile::kMAX_ITEMS; i++)
+  {
+    QAction* action = new QAction(QString::number(i) + ": ", menu);
+    if(stack.size() > i && stack[i] != NULL)
+    {
+      action->setText(action->text() + stack[i]->getName());
+      set = true;
+    }
+    else
+    {
+      action->setText(action->text() + "UNSET");
+      action->setDisabled(true);
+    }
+
+    menu->addAction(action);
+  }
+
+  if(menu->actions().size() >= EditorTile::kMAX_ITEMS)
+  {
+    connect(menu->actions()[0], SIGNAL(triggered()), this, SLOT(tileItem0()));
+    connect(menu->actions()[1], SIGNAL(triggered()), this, SLOT(tileItem1()));
+    connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tileItem2()));
+    connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tileItem3()));
+    connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tileItem4()));
+    connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tileItem5()));
+    connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tileItem6()));
+    connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tileItem7()));
+    connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tileItem8()));
+    connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileItem9()));
+  }
+
+  return set;
+}
+
+/* Menu adding for tile click */
+bool MapRender::menuNPCs(EditorTile* t, QMenu* menu)
+{
+  bool set = false;
+  QVector<EditorMapNPC*> stack = t->getNPCs();
+
+  /* Go through the npc stack */
+  for(int i = 0; i < stack.size(); i++)
+  {
+    QAction* action = new QAction(QString::number(i) + ": ", menu);
+    if(stack[i] != NULL)
+    {
+      action->setText(action->text() + stack[i]->getName());
+      set = true;
+    }
+    else
+    {
+      action->setText(action->text() + "UNSET");
+      action->setDisabled(true);
+    }
+
+    menu->addAction(action);
+  }
+
+  if(menu->actions().size() >= 10)
+  {
+    connect(menu->actions()[0], SIGNAL(triggered()), this, SLOT(tileNPC0()));
+    connect(menu->actions()[1], SIGNAL(triggered()), this, SLOT(tileNPC1()));
+    connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tileNPC2()));
+    connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tileNPC3()));
+    connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tileNPC4()));
+    connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tileNPC5()));
+    connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tileNPC6()));
+    connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tileNPC7()));
+    connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tileNPC8()));
+    connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileNPC9()));
+  }
+
+  return set;
+}
+
+/* Menu adding for tile click */
+bool MapRender::menuPersons(EditorTile* t, QMenu* menu)
+{
+  bool set = false;
+  QVector<EditorMapPerson*> stack = t->getPersons();
+
+  /* Go through the person stack */
+  for(int i = 0; i < stack.size(); i++)
+  {
+    QAction* action = new QAction(QString::number(i) + ": ", menu);
+    if(stack[i] != NULL)
+    {
+      action->setText(action->text() + stack[i]->getName());
+      set = true;
+    }
+    else
+    {
+      action->setText(action->text() + "UNSET");
+      action->setDisabled(true);
+    }
+
+    menu->addAction(action);
+  }
+
+  if(menu->actions().size() >= 10)
+  {
+    connect(menu->actions()[0], SIGNAL(triggered()), this, SLOT(tilePerson0()));
+    connect(menu->actions()[1], SIGNAL(triggered()), this, SLOT(tilePerson1()));
+    connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tilePerson2()));
+    connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tilePerson3()));
+    connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tilePerson4()));
+    connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tilePerson5()));
+    connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tilePerson6()));
+    connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tilePerson7()));
+    connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tilePerson8()));
+    connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tilePerson9()));
+  }
+
+  return set;
+}
+
+/* Menu adding for tile click */
+bool MapRender::menuSprites(EditorTile* t, QMenu* menu)
+{
+  bool set = false;
+
   /* Base */
   QAction* act_b = new QAction("B: UNSET", menu);
   act_b->setDisabled(true);
@@ -56,6 +189,7 @@ void MapRender::menuSprites(EditorTile* t, QMenu* menu)
   {
     act_b->setText("B: " + t->getSprite(EditorEnumDb::BASE)->getName());
     act_b->setEnabled(true);
+    set = true;
   }
   connect(act_b, SIGNAL(triggered()), this, SLOT(tileSpriteB()));
   menu->addAction(act_b);
@@ -67,6 +201,7 @@ void MapRender::menuSprites(EditorTile* t, QMenu* menu)
   {
     act_e->setText("E: " + t->getSprite(EditorEnumDb::ENHANCER)->getName());
     act_e->setEnabled(true);
+    set = true;
   }
   connect(act_e, SIGNAL(triggered()), this, SLOT(tileSpriteE()));
   menu->addAction(act_e);
@@ -82,6 +217,7 @@ void MapRender::menuSprites(EditorTile* t, QMenu* menu)
       act_l->setText("L" + QString::number(ref) + ": " +
                      t->getSprite((EditorEnumDb::Layer)i)->getName());
       act_l->setEnabled(true);
+      set = true;
     }
     menu->addAction(act_l);
   }
@@ -102,6 +238,7 @@ void MapRender::menuSprites(EditorTile* t, QMenu* menu)
       act_u->setText("U" + QString::number(ref) + ": " +
                      t->getSprite((EditorEnumDb::Layer)i)->getName());
       act_u->setEnabled(true);
+      set = true;
     }
     menu->addAction(act_u);
   }
@@ -110,6 +247,49 @@ void MapRender::menuSprites(EditorTile* t, QMenu* menu)
   connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileSpriteU3()));
   connect(menu->actions()[10], SIGNAL(triggered()), this, SLOT(tileSpriteU4()));
   connect(menu->actions()[11], SIGNAL(triggered()), this, SLOT(tileSpriteU5()));
+
+  return set;
+}
+
+/* Menu adding for tile click */
+bool MapRender::menuThings(EditorTile* t, QMenu* menu)
+{
+  bool set = false;
+  QVector<EditorMapThing*> stack = t->getThings();
+
+  /* Go through the thing stack */
+  for(int i = 0; i < stack.size(); i++)
+  {
+    QAction* action = new QAction(QString::number(i) + ": ", menu);
+    if(stack[i] != NULL)
+    {
+      action->setText(action->text() + stack[i]->getName());
+      set = true;
+    }
+    else
+    {
+      action->setText(action->text() + "UNSET");
+      action->setDisabled(true);
+    }
+
+    menu->addAction(action);
+  }
+
+  if(menu->actions().size() >= 10)
+  {
+    connect(menu->actions()[0], SIGNAL(triggered()), this, SLOT(tileThing0()));
+    connect(menu->actions()[1], SIGNAL(triggered()), this, SLOT(tileThing1()));
+    connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tileThing2()));
+    connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tileThing3()));
+    connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tileThing4()));
+    connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tileThing5()));
+    connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tileThing6()));
+    connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tileThing7()));
+    connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tileThing8()));
+    connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileThing9()));
+  }
+
+  return set;
 }
 
 /* Mouse event */
@@ -220,27 +400,35 @@ void MapRender::tileClickInit()
 
     /* Sprites */
     QMenu* menu_sprites = new QMenu("Sprites", middleclick_menu);
-    menuSprites(t, menu_sprites);
+    QFont font_bold = menu_sprites->font();
+    font_bold.setBold(true);
+    if(menuSprites(t, menu_sprites))
+      menu_sprites->menuAction()->setFont(font_bold);
 
     /* Things */
     QMenu* menu_things = new QMenu("Things", middleclick_menu);
-    menu_things->addAction(new QAction("TODO", menu_things));
+    if(menuThings(t, menu_things))
+      menu_things->menuAction()->setFont(font_bold);
 
     /* Items */
     QMenu* menu_items = new QMenu("Items", middleclick_menu);
-    menu_items->addAction(new QAction("TODO", menu_items));
+    if(menuItems(t, menu_items))
+      menu_items->menuAction()->setFont(font_bold);
 
     /* IOs */
     QMenu* menu_ios = new QMenu("IOs", middleclick_menu);
-    menu_ios->addAction(new QAction("TODO", menu_ios));
+    if(menuIOs(t, menu_ios))
+      menu_ios->menuAction()->setFont(font_bold);
 
     /* Persons */
     QMenu* menu_persons = new QMenu("Persons", middleclick_menu);
-    menu_persons->addAction(new QAction("TODO", menu_persons));
+    if(menuPersons(t, menu_persons))
+      menu_persons->menuAction()->setFont(font_bold);
 
     /* NPCs */
     QMenu* menu_npcs = new QMenu("NPCs", middleclick_menu);
-    menu_npcs->addAction(new QAction("TODO", menu_npcs));
+    if(menuNPCs(t, menu_npcs))
+      menu_npcs->menuAction()->setFont(font_bold);
 
     /* Add sub-menus */
     middleclick_menu->addMenu(menu_sprites);
@@ -484,77 +672,67 @@ void MapRender::selectTile()
   tile_select = true;
 }
 
-/* Tile slots */
-void MapRender::tileSpriteB()
-{
-  qDebug() << "TODO: BASE EDIT";
-}
+/* ------ Tile item slots ------ */
+void MapRender::tileItem0() { emit tileItem(0); }
+void MapRender::tileItem1() { emit tileItem(1); }
+void MapRender::tileItem2() { emit tileItem(2); }
+void MapRender::tileItem3() { emit tileItem(3); }
+void MapRender::tileItem4() { emit tileItem(4); }
+void MapRender::tileItem5() { emit tileItem(5); }
+void MapRender::tileItem6() { emit tileItem(6); }
+void MapRender::tileItem7() { emit tileItem(7); }
+void MapRender::tileItem8() { emit tileItem(8); }
+void MapRender::tileItem9() { emit tileItem(9); }
 
-/* Tile slots */
-void MapRender::tileSpriteE()
-{
-  qDebug() << "TODO: ENHANCER EDIT";
-}
+/* ------ Tile npc slots ------ */
+void MapRender::tileNPC0() { emit tileNPC(0); }
+void MapRender::tileNPC1() { emit tileNPC(1); }
+void MapRender::tileNPC2() { emit tileNPC(2); }
+void MapRender::tileNPC3() { emit tileNPC(3); }
+void MapRender::tileNPC4() { emit tileNPC(4); }
+void MapRender::tileNPC5() { emit tileNPC(5); }
+void MapRender::tileNPC6() { emit tileNPC(6); }
+void MapRender::tileNPC7() { emit tileNPC(7); }
+void MapRender::tileNPC8() { emit tileNPC(8); }
+void MapRender::tileNPC9() { emit tileNPC(9); }
 
-/* Tile slots */
-void MapRender::tileSpriteL1()
-{
-  qDebug() << "TODO: LOWER 1 EDIT";
-}
+/* ------ Tile person slots ------ */
+void MapRender::tilePerson0() { emit tilePerson(0); }
+void MapRender::tilePerson1() { emit tilePerson(1); }
+void MapRender::tilePerson2() { emit tilePerson(2); }
+void MapRender::tilePerson3() { emit tilePerson(3); }
+void MapRender::tilePerson4() { emit tilePerson(4); }
+void MapRender::tilePerson5() { emit tilePerson(5); }
+void MapRender::tilePerson6() { emit tilePerson(6); }
+void MapRender::tilePerson7() { emit tilePerson(7); }
+void MapRender::tilePerson8() { emit tilePerson(8); }
+void MapRender::tilePerson9() { emit tilePerson(9); }
 
-/* Tile slots */
-void MapRender::tileSpriteL2()
-{
-  qDebug() << "TODO: LOWER 2 EDIT";
-}
+/* ------ Tile sprite slots ------ */
+void MapRender::tileSpriteB() { emit tileSprite(EditorEnumDb::BASE); }
+void MapRender::tileSpriteE() { emit tileSprite(EditorEnumDb::ENHANCER); }
+void MapRender::tileSpriteL1() { emit tileSprite(EditorEnumDb::LOWER1); }
+void MapRender::tileSpriteL2() { emit tileSprite(EditorEnumDb::LOWER2); }
+void MapRender::tileSpriteL3() { emit tileSprite(EditorEnumDb::LOWER3); }
+void MapRender::tileSpriteL4() { emit tileSprite(EditorEnumDb::LOWER4); }
+void MapRender::tileSpriteL5() { emit tileSprite(EditorEnumDb::LOWER5); }
+void MapRender::tileSpriteU1() { emit tileSprite(EditorEnumDb::UPPER1); }
+void MapRender::tileSpriteU2() { emit tileSprite(EditorEnumDb::UPPER2); }
+void MapRender::tileSpriteU3() { emit tileSprite(EditorEnumDb::UPPER3); }
+void MapRender::tileSpriteU4() { emit tileSprite(EditorEnumDb::UPPER4); }
+void MapRender::tileSpriteU5() { emit tileSprite(EditorEnumDb::UPPER5); }
 
-/* Tile slots */
-void MapRender::tileSpriteL3()
-{
-  qDebug() << "TODO: LOWER 3 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteL4()
-{
-  qDebug() << "TODO: LOWER 4 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteL5()
-{
-  qDebug() << "TODO: LOWER 5 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteU1()
-{
-  qDebug() << "TODO: UPPER 1 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteU2()
-{
-  qDebug() << "TODO: UPPER 2 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteU3()
-{
-  qDebug() << "TODO: UPPER 3 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteU4()
-{
-  qDebug() << "TODO: UPPER 4 EDIT";
-}
-
-/* Tile slots */
-void MapRender::tileSpriteU5()
-{
-  qDebug() << "TODO: UPPER 5 EDIT";
-}
+/* ------ Tile thing slots ------ */
+void MapRender::tileThing0() { emit tileThing(0); }
+void MapRender::tileThing1() { emit tileThing(1); }
+void MapRender::tileThing2() { emit tileThing(2); }
+void MapRender::tileThing3() { emit tileThing(3); }
+void MapRender::tileThing4() { emit tileThing(4); }
+void MapRender::tileThing5() { emit tileThing(5); }
+void MapRender::tileThing6() { emit tileThing(6); }
+void MapRender::tileThing7() { emit tileThing(7); }
+void MapRender::tileThing8() { emit tileThing(8); }
+void MapRender::tileThing9() { emit tileThing(9); }
 
 /* Update the rendering sub-map */
 void MapRender::updateRenderingMap()
