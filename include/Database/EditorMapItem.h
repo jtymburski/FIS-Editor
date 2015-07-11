@@ -3,7 +3,7 @@
  * Date Created: April 25, 2015
  * Inheritance: EditorMapThing
  * Description: The class for managing the interfacing with MapItem and 
- *              filling it with data. The management pop-up is PersonDialog.
+ *              filling it with data. The management pop-up is ItemDialog.
  ******************************************************************************/
 #ifndef EDITORMAPITEM_H
 #define EDITORMAPITEM_H

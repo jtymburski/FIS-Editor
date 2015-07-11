@@ -51,6 +51,9 @@ public:
                     TELEPORT_SELECT = 2,
                    };
 
+  /* Map interactive object type */
+  enum MapIOType {IO_STATE, IO_TRANSITION};
+  
   /* Map object mode */
   enum MapObjectMode {RAW_VIEW = 0,
                       SPRITE_VIEW = 1,

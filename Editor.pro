@@ -1,7 +1,7 @@
-#################################################
-# Made by Jordan. Do not edit. Only for testing
-# Date: December 10, 2012
-#################################################
+##########################################################
+# Made by Jordan. Do not edit unless you knows the secret
+# Date Created: December 10, 2012
+##########################################################
 
 TARGET = UnivursaEditor
 TEMPLATE = app
@@ -89,9 +89,11 @@ SOURCES += \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
     ../Project/src/Game/KeyHandler.cc \
+    ../Project/src/Game/Map/MapInteractiveObject.cc \
     ../Project/src/Game/Map/MapItem.cc \
     ../Project/src/Game/Map/MapNPC.cc \
     ../Project/src/Game/Map/MapPerson.cc \
+    ../Project/src/Game/Map/MapState.cc \
     ../Project/src/Game/Map/MapThing.cc \
     ../Project/src/Game/Map/SpriteMatrix.cc \
     ../Project/src/Game/Map/Tile.cc \
@@ -175,9 +177,11 @@ HEADERS += \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
     ../Project/include/Game/KeyHandler.h \
+    ../Project/include/Game/Map/MapInteractiveObject.h \
     ../Project/include/Game/Map/MapItem.h \
     ../Project/include/Game/Map/MapNPC.h \
     ../Project/include/Game/Map/MapPerson.h \
+    ../Project/include/Game/Map/MapState.h \
     ../Project/include/Game/Map/MapThing.h \
     ../Project/include/Game/Map/SpriteMatrix.h \
     ../Project/include/Game/Map/Tile.h \
