@@ -51,8 +51,9 @@ EditorMapIO::~EditorMapIO()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Delete defines matrixes stored in class - called once at destruction */
-//void deleteMatrixes();
+/* Creates a fresh new blank state */
+// TODO: Comment
+//EditorState* EditorMapIO::createBlankState();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -112,13 +113,20 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
 // TODO: Comment
 void EditorMapIO::appendState(EditorEnumDb::MapIOType type)
 {
-  // TODO: Implementation
+  EditorState* state = createBlankState();
+  state->type = type;
+  appendState(state);
 }
 
 // TODO: Comment
-void EditorMapIO::appendState(EditorState* state)
+bool EditorMapIO::appendState(EditorState* state)
 {
-  // TODO: Implementation
+  if(state != NULL)
+  {
+    states.push_back(state);
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -138,35 +146,49 @@ EditorMapIO* EditorMapIO:: getBaseIO() const
 // TODO: Comment
 int EditorMapIO::getInactiveTime()
 {
-  // TODO: Implementation
+  return io.getInactiveTime();
 }
 
 /* Returns the state or states stored within the class */
 // TODO: Comment
 EditorState* EditorMapIO::getState(int index)
 {
-  // TODO: Implementation
+  if(index >= 0 && index < states.size())
+    return states[index];
+  return NULL;
 }
 
 /* Returns the state or states stored within the class */
 // TODO: Comment
 QVector<EditorState*> EditorMapIO::getStates()
 {
-  // TODO: Implementation
+  return states;
 }
 
 /* Insert state at index */
 // TODO: Comment
-void EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
+bool EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
 {
-  // TODO: Implementation
+  EditorState* state = createBlankState();
+  state->type = type;
+  if(insertState(index, state))
+    return true;
+
+  /* Otherwise, just delete the state */
+  delete state;
+  return false;
 }
 
 /* Insert state at index */
 // TODO: Comment
-void EditorMapIO::insertState(int index, EditorState* state)
+bool EditorMapIO::insertState(int index, EditorState* state)
 {
-  // TODO: Implementation
+  if(index >= 0 && index <= states.size() && state != NULL)
+  {
+    states.insert(index, state);
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -181,23 +203,93 @@ void EditorMapIO::load(XmlData data, int index)
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
-  // TODO: Implementation
-  //if(element == "core_id")
-  //{
-  //  setCoreID(data.getDataInteger());
-  //}
-  //else if(element == "count")
-  //{
-  //  setCount(data.getDataInteger());
-  //}
-  //else if(element == "walkover")
-  //{
-  //  setWalkover(data.getDataBool());
-  //}
-  //else
-  //{
-  //  EditorMapThing::load(data, index);
-  //}
+  if(element == "inactive")
+  {
+    setInactiveTime(data.getDataInteger());
+  }
+  else if(element == "rendermatrix")
+  {
+    for(int i = 0; i < states.size(); i++)
+      states[i]->matrix->load(data, index);
+  }
+  else if(element == "states")
+  {
+    /* Check index first */
+    EditorState* state = NULL;
+    int ref = QString::fromStdString(data.getKeyValue(index + 1)).toInt();
+    if(ref >= 0)
+    {
+      while(states.size() <= ref)
+        appendState(createBlankState());
+      state = getState(ref);
+
+      /* Proceed if not null */
+      if(state != NULL)
+      {
+        /* Ensure type is right */
+        QString element2 = QString::fromStdString(data.getElement(index + 1));
+        if(element2 == "state")
+          state->type = EditorEnumDb::IO_STATE;
+        else if(element2 == "transition")
+          state->type == EditorEnumDb::IO_TRANSITION;
+
+        /* Process the objects inside the state type definition */
+        QString element3 = QString::fromStdString(data.getElement(index + 2));
+        /* ---- SPRITES (MATRIX) ---- */
+        if(element3 == "sprites")
+        {
+          state->matrix->load(data, index + 3);
+        }
+        /* ---- TRANSITION INTERACTION ---- */
+        else if(element3 == "interaction")
+        {
+          QString interaction = QString::fromStdString(data.getDataString());
+          if(interaction == "use")
+            state->interact = MapState::USE;
+          else if(interaction == "walkoff")
+            state->interact = MapState::WALKOFF;
+          else if(interaction == "walkon")
+            state->interact = MapState::WALKON;
+        }
+        /* ---- ENTER EVENT ---- */
+        else if(element3 == "enterevent")
+        {
+          EditorEvent event(state->event_enter);
+          event.load(data, index + 3);
+          if(event.getEvent() != NULL)
+            state->event_enter = *event.getEvent();
+        }
+        /* ---- EXIT EVENT ---- */
+        else if(element3 == "exitevent")
+        {
+          EditorEvent event(state->event_exit);
+          event.load(data, index + 3);
+          if(event.getEvent() != NULL)
+            state->event_enter = *event.getEvent();
+        }
+        /* ---- USE EVENT ---- */
+        else if(element3 == "useevent")
+        {
+          EditorEvent event(state->event_use);
+          event.load(data, index + 3);
+          if(event.getEvent() != NULL)
+            state->event_enter = *event.getEvent();
+        }
+        /* ---- WALKOVER EVENT ---- */
+        else if(element3 == "walkoverevent")
+        {
+          EditorEvent event(state->event_walkover);
+          event.load(data, index + 3);
+          if(event.getEvent() != NULL)
+            state->event_enter = *event.getEvent();
+        }
+      }
+    }
+  }
+  else
+  {
+    EditorMapThing::load(data, index);
+  }
 }
 
 /*
@@ -239,35 +331,41 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
 // TODO: Comment
 void EditorMapIO::setInactiveTime(int time)
 {
-  // TODO: Implementation
+  io.setInactiveTime(time);
 }
 
 /* Sets the state at the index (will replace existing) */
 // TODO: Comment
-void EditorMapIO::setState(int index, EditorEnumDb::MapIOType type)
+bool EditorMapIO::setState(int index, EditorState* state)
 {
-  // TODO: Implementation
-}
-
-/* Sets the state at the index (will replace existing) */
-// TODO: Comment
-void EditorMapIO::setState(int index, EditorState* state)
-{
-  // TODO: Implementation
+  if(index >= 0 && index < states.size() && state != NULL)
+  {
+    deleteState(states[index]);
+    states.replace(index, state);
+    return true;
+  }
+  return false;
 }
 
 /* Unset a state or unset all states */
 // TODO: Comment
 bool EditorMapIO::unsetState(int index)
 {
-  // TODO: Implementation
+  if(index >= 0 && index < states.size())
+  {
+    deleteState(states[index]);
+    states.remove(index);
+    return true;
+  }
+  return false;
 }
 
 /* Unset a state or unset all states */
 // TODO: Comment
-bool EditorMapIO::unsetStates()
+void EditorMapIO::unsetStates()
 {
-  // TODO: Implementation
+  while(states.size() > 0)
+    unsetState(0);
 }
 
 /*============================================================================
@@ -293,4 +391,43 @@ EditorMapIO& EditorMapIO::operator= (const EditorMapIO &source)
 
   /* Return the copied object */
   return *this;
+}
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+
+/* Creates a fresh new blank state */
+// TODO: Comment
+EditorState* EditorMapIO::createBlankState()
+{
+  EditorState* state = new EditorState;
+
+  state->matrix = new EditorMatrix();
+  state->type = EditorEnumDb::IO_STATE;
+  state->interact = MapState::NOINTERACTION;
+  state->event_enter = EventHandler::createEventTemplate();
+  state->event_exit = EventHandler::createEventTemplate();
+  state->event_use = EventHandler::createEventTemplate();
+  state->event_walkover = EventHandler::createEventTemplate();
+
+  return state;
+}
+
+/* Deletes a slate at the given pointer */
+// TODO: Comment
+void EditorMapIO::deleteState(EditorState* state)
+{
+  if(state != NULL)
+  {
+    /* Delete memory in structure */
+    delete state->matrix;
+    EventHandler::deleteEvent(state->event_enter);
+    EventHandler::deleteEvent(state->event_exit);
+    EventHandler::deleteEvent(state->event_use);
+    EventHandler::deleteEvent(state->event_walkover);
+
+    /* Delete state structure */
+    delete state;
+  }
 }

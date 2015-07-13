@@ -19,7 +19,7 @@ struct EditorState
 {
   EditorMatrix* matrix;
   EditorEnumDb::MapIOType type;
-  MapState::InteractionState state;
+  MapState::InteractionState interact;
   
   Event event_enter;
   Event event_exit;
@@ -57,8 +57,8 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Delete defines matrixes stored in class - called once at destruction */
-  //void deleteMatrixes();
+  /* Creates a fresh new blank state */
+  //EditorState* createBlankState();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -77,7 +77,7 @@ protected:
 public:
   /* Append a state to the tail of the list */
   void appendState(EditorEnumDb::MapIOType type);
-  void appendState(EditorState* state);
+  bool appendState(EditorState* state);
   
   /* Gets the base ref of the io */
   EditorMapIO* getBaseIO() const;
@@ -90,8 +90,8 @@ public:
   QVector<EditorState*> getStates();
 
   /* Insert state at index */
-  void insertState(int index, EditorEnumDb::MapIOType type);
-  void insertState(int index, EditorState* state);
+  bool insertState(int index, EditorEnumDb::MapIOType type);
+  bool insertState(int index, EditorState* state);
 
   /* Loads the io data */
   virtual void load(XmlData data, int index);
@@ -106,12 +106,11 @@ public:
   void setInactiveTime(int time);
   
   /* Sets the state at the index (will replace existing) */
-  void setState(int index, EditorEnumDb::MapIOType type);
-  void setState(int index, EditorState* state);
+  bool setState(int index, EditorState* state);
   
   /* Unset a state or unset all states */
   bool unsetState(int index);
-  bool unsetStates();
+  void unsetStates();
 
 /*============================================================================
  * OPERATOR FUNCTIONS
@@ -119,6 +118,16 @@ public:
 public:
   /* The copy operator */
   EditorMapIO& operator= (const EditorMapIO &source);
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Creates a fresh new blank state */
+  static EditorState* createBlankState();
+
+  /* Deletes a slate at the given pointer */
+  static void deleteState(EditorState* state);
 };
 
 #endif // EDITORMAPIO_H
