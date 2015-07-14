@@ -83,7 +83,7 @@ public:
   EditorMapIO* getBaseIO() const;
 
   /* Returns the inactive time before returning down the state path (ms) */
-  int getInactiveTime();
+  int getInactiveTime() const;
 
   /* Returns the state or states stored within the class */
   EditorState* getState(int index);
@@ -106,7 +106,7 @@ public:
   void setInactiveTime(int time);
   
   /* Sets the state at the index (will replace existing) */
-  bool setState(int index, EditorState* state);
+  bool setState(int index, EditorState* state, bool data_only = false);
   
   /* Unset a state or unset all states */
   bool unsetState(int index);

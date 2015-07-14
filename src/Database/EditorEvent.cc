@@ -697,15 +697,16 @@ void EditorEvent::load(XmlData data, int index)
  *
  * Inputs: FileHandler* fh - the file handling pointer
  *         bool game_only - true if the data should include game only relevant
+ *         QString preface - the wrapper text element. default to "event"
  * Output: none
  */
-void EditorEvent::save(FileHandler* fh, bool game_only)
+void EditorEvent::save(FileHandler* fh, bool game_only, QString preface)
 {
   (void)game_only;
 
   if(fh != NULL && event.classification != EventClassifier::NOEVENT)
   {
-    fh->writeXmlElement("event");
+    fh->writeXmlElement(preface.toStdString());
 
     /* -- GIVE ITEM EVENT -- */
     if(event.classification == EventClassifier::GIVEITEM)

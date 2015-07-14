@@ -1365,9 +1365,10 @@ bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
  *              passability.
  *
  * Inputs: EditorMatrix* base_matrix - the matrix to match
+ *         bool passability - true if passability shoudl be rebased
  * Output: bool - true if the matrix was matched
  */
-bool EditorMatrix::rebase(EditorMatrix* base_matrix)
+bool EditorMatrix::rebase(EditorMatrix* base_matrix, bool passability)
 {
   if(base_matrix != NULL)
   {
@@ -1381,8 +1382,9 @@ bool EditorMatrix::rebase(EditorMatrix* base_matrix)
       {
         matrix[i][j]->setRenderDepth(
                         base_matrix->matrix[i][j]->getRenderDepth());
-        matrix[i][j]->setPassability(
-                        base_matrix->matrix[i][j]->getPassability());
+        if(passability)
+          matrix[i][j]->setPassability(
+                                   base_matrix->matrix[i][j]->getPassability());
       }
     }
 

@@ -193,7 +193,7 @@ public:
              int offset_x = 0, int offset_y = 0);
 
   /* Rebase the matrix to match the passed in matrix */
-  bool rebase(EditorMatrix* base_matrix);
+  bool rebase(EditorMatrix* base_matrix, bool passability = true);
 
   /* Removes all sprites */
   void removeAll();

@@ -52,7 +52,6 @@ EditorMapIO::~EditorMapIO()
  *===========================================================================*/
 
 /* Creates a fresh new blank state */
-// TODO: Comment
 //EditorState* EditorMapIO::createBlankState();
 
 /*============================================================================
@@ -68,10 +67,20 @@ EditorMapIO::~EditorMapIO()
  */
 void EditorMapIO::copySelf(const EditorMapIO &source)
 {
+  /* Copy base data */
   EditorMapThing::copySelf(source);
 
-  // TODO: Implementation
-  //io = source.io;
+  /* Remove all states, then add blank states up to size */
+  unsetStates();
+  while(states.size() < source.states.size())
+    appendState(EditorEnumDb::IO_STATE);
+
+  /* Set the state information */
+  for(int i = 0; i < states.size(); i++)
+    setState(i, source.states[i], true);
+
+  /* Copy Inactive time */
+  setInactiveTime(source.getInactiveTime());
 }
 
 /*
@@ -87,22 +96,85 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
 {
   EditorMapIO default_io;
 
-  /* First write thing data */
+  /* First write core thing data */
   EditorMapThing::saveData(fh, game_only, inc_matrix);
 
-  /* Next item data: Is base - write core data */
-  // TODO: Implementation
-  //if(getBaseItem() == NULL)
-  //{
-  //  if(getCoreID() >= 0)
-  //    fh->writeXmlData("core_id", getCoreID());
-  //  if(default_item.isWalkover() != isWalkover())
-  //    fh->writeXmlData("walkover", isWalkover());
-  //}
-  /* Next item data: Is not base */
+  /* Next IO data: Is not base - write core data */
+  if(getBaseIO() != NULL)
+  {
+    /* Write the states */
+    fh->writeXmlElement("states");
+    for(int i = 0; i < states.size(); i++)
+    {
+      /* Header */
+      if(states[i]->type == EditorEnumDb::IO_STATE)
+        fh->writeXmlElement("state", "id", i);
+      else
+        fh->writeXmlElement("transition", "id", i);
+
+      /* Write matrix */
+      states[i]->matrix->save(fh, game_only, true);
+
+      /* Event and interaction only relevant for state type */
+      if(states[i]->type == EditorEnumDb::IO_STATE)
+      {
+        /* Write interaction trigger */
+        if(states[i]->interact == MapState::USE)
+          fh->writeXmlData("interaction", "use");
+        else if(states[i]->interact == MapState::WALKOFF)
+          fh->writeXmlData("interaction", "walkoff");
+        else if(states[i]->interact == MapState::WALKON)
+          fh->writeXmlData("interaction", "walkon");
+
+        /* Enter event */
+        if(states[i]->event_enter.classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent event(states[i]->event_enter);
+          event.save(fh, game_only, "enterevent");
+        }
+
+        /* Exit event */
+        if(states[i]->event_exit.classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent event(states[i]->event_exit);
+          event.save(fh, game_only, "exitevent");
+        }
+
+        /* Use event */
+        if(states[i]->event_use.classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent event(states[i]->event_use);
+          event.save(fh, game_only, "useevent");
+        }
+
+        /* Walkover event */
+        if(states[i]->event_walkover.classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent event(states[i]->event_walkover);
+          event.save(fh, game_only, "walkoverevent");
+        }
+      }
+
+      /* End Header */
+      fh->writeXmlElementEnd(); /* </state> or </transition> */
+    }
+    fh->writeXmlElementEnd(); /* </states> */
+
+    /* Render matrix */
+    if(states.size() > 0)
+      states.front()->matrix->saveRender(fh);
+
+    /* Inactivity time */
+    if(default_io.getInactiveTime() != getInactiveTime() &&
+       getInactiveTime() >= 0)
+    {
+      fh->writeXmlData("inactive", getInactiveTime());
+    }
+  }
+  /* Next item data: Is base - not used currently */
   //else
   //{
-  //  fh->writeXmlData("count", (int)getCount());
+  //
   //}
 }
 
@@ -123,6 +195,8 @@ bool EditorMapIO::appendState(EditorState* state)
 {
   if(state != NULL)
   {
+    if(states.size() > 0)
+      state->matrix->rebase(states.front()->matrix, false);
     states.push_back(state);
     return true;
   }
@@ -144,7 +218,7 @@ EditorMapIO* EditorMapIO:: getBaseIO() const
 
 /* Returns the inactive time before returning down the state path (ms) */
 // TODO: Comment
-int EditorMapIO::getInactiveTime()
+int EditorMapIO::getInactiveTime() const
 {
   return io.getInactiveTime();
 }
@@ -185,6 +259,8 @@ bool EditorMapIO::insertState(int index, EditorState* state)
 {
   if(index >= 0 && index <= states.size() && state != NULL)
   {
+    if(states.size() > 0)
+      state->matrix->rebase(states.front()->matrix, false);
     states.insert(index, state);
     return true;
   }
@@ -209,6 +285,11 @@ void EditorMapIO::load(XmlData data, int index)
   }
   else if(element == "rendermatrix")
   {
+    /* Ensure there is at least one */
+    if(states.size() == 0)
+      appendState(EditorEnumDb::IO_STATE);
+
+    /* Next, load the render matrix in to each state */
     for(int i = 0; i < states.size(); i++)
       states[i]->matrix->load(data, index);
   }
@@ -220,7 +301,7 @@ void EditorMapIO::load(XmlData data, int index)
     if(ref >= 0)
     {
       while(states.size() <= ref)
-        appendState(createBlankState());
+        appendState(EditorEnumDb::IO_STATE);
       state = getState(ref);
 
       /* Proceed if not null */
@@ -231,7 +312,7 @@ void EditorMapIO::load(XmlData data, int index)
         if(element2 == "state")
           state->type = EditorEnumDb::IO_STATE;
         else if(element2 == "transition")
-          state->type == EditorEnumDb::IO_TRANSITION;
+          state->type = EditorEnumDb::IO_TRANSITION;
 
         /* Process the objects inside the state type definition */
         QString element3 = QString::fromStdString(data.getElement(index + 2));
@@ -336,12 +417,34 @@ void EditorMapIO::setInactiveTime(int time)
 
 /* Sets the state at the index (will replace existing) */
 // TODO: Comment
-bool EditorMapIO::setState(int index, EditorState* state)
+bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
 {
   if(index >= 0 && index < states.size() && state != NULL)
   {
-    deleteState(states[index]);
-    states.replace(index, state);
+    /* If data only, just make data cross over */
+    if(data_only)
+    {
+      EditorState* ref = states[index];
+
+      /* Base state data */
+      *ref->matrix = *state->matrix;
+      ref->type = state->type;
+      ref->interact = state->interact;
+
+      /* Event state data */
+      ref->event_enter = EventHandler::copyEvent(state->event_enter);
+      ref->event_exit = EventHandler::copyEvent(state->event_exit);
+      ref->event_use = EventHandler::copyEvent(state->event_use);
+      ref->event_walkover = EventHandler::copyEvent(state->event_walkover);
+    }
+    /* Otherwise, this new pointer replaces the existing and the existing is
+     * deleted. */
+    else
+    {
+      deleteState(states[index]);
+      states.replace(index, state);
+    }
+
     return true;
   }
   return false;
