@@ -27,7 +27,7 @@ EditorMapIO::EditorMapIO(int id, QString name, QString description)
            : EditorMapThing(id, name, description)
 {
 }
-                 
+
 /*
  * Description: Copy constructor. Calls the blank constructor and then copies
  *              the data from the source.
@@ -182,7 +182,13 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-// TODO: Comment
+/*
+ * Description: Appends a blank state to the back side of the stack with the
+ *              passed in type.
+ *
+ * Inputs: EditorEnumDb::MapIOType type - the type of the state
+ * Output: none
+ */
 void EditorMapIO::appendState(EditorEnumDb::MapIOType type)
 {
   EditorState* state = createBlankState();
@@ -190,7 +196,14 @@ void EditorMapIO::appendState(EditorEnumDb::MapIOType type)
   appendState(state);
 }
 
-// TODO: Comment
+/*
+ * Description: Appends the passed in state pointer to the back side of the
+ *              stack. If this function returns true, it will take control of
+ *              releasing the pointer memory when it no longer needs it.
+ *
+ * Inputs: EditorState* state - the new state to append
+ * Output: bool - true if it was pushed to the back of the array
+ */
 bool EditorMapIO::appendState(EditorState* state)
 {
   if(state != NULL)
@@ -216,15 +229,25 @@ EditorMapIO* EditorMapIO:: getBaseIO() const
   return NULL;
 }
 
-/* Returns the inactive time before returning down the state path (ms) */
-// TODO: Comment
+/*
+ * Description: Returns the inactive time before returning down the state path.
+ *              This time will step back one state and then start timing again.
+ *
+ * Inputs: none
+ * Output: int - the inactive time, in milliseconds
+ */
 int EditorMapIO::getInactiveTime() const
 {
   return io.getInactiveTime();
 }
 
-/* Returns the state or states stored within the class */
-// TODO: Comment
+/*
+ * Description: Returns the IO state at the given index in the stack. Returns
+ *              NULL if the index is out of range.
+ *
+ * Inputs: int index - the index of the state in the stack
+ * Output: EditorState* - the state structure pointer
+ */
 EditorState* EditorMapIO::getState(int index)
 {
   if(index >= 0 && index < states.size())
@@ -232,15 +255,26 @@ EditorState* EditorMapIO::getState(int index)
   return NULL;
 }
 
-/* Returns the state or states stored within the class */
-// TODO: Comment
+/*
+ * Description: Returns a vector of all states in the IO stack.
+ *
+ * Inputs: none
+ * Output: QVector<EditorState*> - the vector of all states
+ */
 QVector<EditorState*> EditorMapIO::getStates()
 {
   return states;
 }
 
-/* Insert state at index */
-// TODO: Comment
+/*
+ * Description: Inserts a blank state of the indicated type at the index.
+ *              The state at the index and all after are pushed back by one.
+ *
+ * Inputs: int index - the index to insert the new state at
+ *         EditorEnumDb::MapIOType type - the type of the state
+ * Output: bool - true if the the state was inserted. Fails if the index is out
+ *                of range.
+ */
 bool EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
 {
   EditorState* state = createBlankState();
@@ -253,8 +287,17 @@ bool EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
   return false;
 }
 
-/* Insert state at index */
-// TODO: Comment
+/*
+ * Description: Inserts the new state pointer at the index. The state at the
+ *              index and all after are pushed back by one. If the function
+ *              returns true, the class takes control of releasing the memory
+ *              of the pointer.
+ *
+ * Inputs: int index - the index to insert the new state at
+ *         EditorState* state - the state to insert at the index
+ * Output: bool - true if the state was inserted. Fails if the index is out
+ *                of range or the pointer is NULL.
+ */
 bool EditorMapIO::insertState(int index, EditorState* state)
 {
   if(index >= 0 && index <= states.size() && state != NULL)
@@ -408,15 +451,34 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
   EditorMapThing::setBase(thing);
 }
 
-/* Sets the inactive time before the state returns down the state path (ms) */
-// TODO: Comment
+/*
+ * Description: Sets the inactive time for the IO state handling. This time is
+ *              in milliseconds and indicates the amount of time the IO will
+ *              remain at the current state before returning back towards the
+ *              first state. If time is less than 0, it de-activates the time.
+ *
+ * Inputs: int time - the inactive time, in milliseconds
+ * Output: none
+ */
 void EditorMapIO::setInactiveTime(int time)
 {
   io.setInactiveTime(time);
 }
 
-/* Sets the state at the index (will replace existing) */
-// TODO: Comment
+/*
+ * Description: Sets the state at the given index to the new pointer. If the
+ *              class returns true, it takes control of the memory of the new
+ *              state pointer. However, if data_only is true, it just copies
+ *              the data from the state and does not delete or take control of
+ *              the passed in state.
+ *
+ * Inputs: int index - index where to edit/replace the state
+ *         EditorState* state - the state to edit/replace the state at the index
+ *         bool data_only - default false. If true, the data from the state is
+ *                          copied. If false, the state pointer is used to
+ *                          replace the state at the index
+ * Output: bool - true if the edit/replace occurred
+ */
 bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
 {
   if(index >= 0 && index < states.size() && state != NULL)
@@ -450,8 +512,14 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
   return false;
 }
 
-/* Unset a state or unset all states */
-// TODO: Comment
+/*
+ * Description: Unsets a single state at the given index. The stack of states
+ *              is automatically compressed after removing the state. Returns
+ *              true if the state was removed. This deletes the memory.
+ *
+ * Inputs: int index - the index to remove the state from the stack.
+ * Output: bool - true if the state at the index was removed.
+ */
 bool EditorMapIO::unsetState(int index)
 {
   if(index >= 0 && index < states.size())
@@ -463,8 +531,12 @@ bool EditorMapIO::unsetState(int index)
   return false;
 }
 
-/* Unset a state or unset all states */
-// TODO: Comment
+/*
+ * Description: Unsets all states in the IO stack. This deletes the memory.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorMapIO::unsetStates()
 {
   while(states.size() > 0)
@@ -500,8 +572,15 @@ EditorMapIO& EditorMapIO::operator= (const EditorMapIO &source)
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 
-/* Creates a fresh new blank state */
-// TODO: Comment
+/*
+ * Description: Creates an entirely blank editor state structure. This is a
+ *              public static function and retains no memory management. The
+ *              caller assumes all responsibility for deleting the associated
+ *              state pointer with a call to EditorMapIO::deleteState().
+ *
+ * Inputs: none
+ * Output: EditorState* - the newly created blank state pointer
+ */
 EditorState* EditorMapIO::createBlankState()
 {
   EditorState* state = new EditorState;
@@ -517,8 +596,14 @@ EditorState* EditorMapIO::createBlankState()
   return state;
 }
 
-/* Deletes a slate at the given pointer */
-// TODO: Comment
+/*
+ * Description: Deletes the state structure and all internal allocated memory.
+ *              This is a public static function and is isolated from the
+ *              EditorMapIO class.
+ *
+ * Inputs: EditorState* state - the state pointer to delete.
+ * Output: none
+ */
 void EditorMapIO::deleteState(EditorState* state)
 {
   if(state != NULL)
