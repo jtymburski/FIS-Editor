@@ -274,7 +274,7 @@ QList<QList<EditorMatrix*>> EditorMapPerson::getStates() const
 {
   EditorMapPerson* base = getBasePerson();
 
-  /* Check if it's a base and the frames from it should be used isntead */
+  /* Check if it's a base and the frames from it should be used instead */
   if(base != NULL)
     return base->matrix_set;
   return matrix_set;

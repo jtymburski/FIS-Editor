@@ -18,12 +18,6 @@
 #include <QString>
 #include <QVector>
 
-#include "Database/EditorSprite.h"
-#include "Database/EditorTemplate.h"
-#include "Database/EditorMapItem.h"
-#include "Database/EditorMapNPC.h"
-#include "Database/EditorMapPerson.h"
-#include "Database/EditorMapThing.h"
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"

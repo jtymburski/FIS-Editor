@@ -26,6 +26,14 @@
 EditorMapIO::EditorMapIO(int id, QString name, QString description)
            : EditorMapThing(id, name, description)
 {
+  /* Create root state */
+  EditorState* state = createBlankState();
+  state->matrix->increaseWidth();
+  state->type = EditorEnumDb::IO_STATE;
+  states.push_back(state);
+
+  /* Set the initial frames in the thing */
+  setMatrix(state->matrix);
 }
 
 /*
@@ -45,6 +53,12 @@ EditorMapIO::EditorMapIO(const EditorMapIO &source)
  */
 EditorMapIO::~EditorMapIO()
 {
+  unsetMatrix();
+  unsetStates();
+
+  /* Delete last state */
+  deleteState(states.front());
+  states.clear();
 }
 
 /*============================================================================
@@ -209,7 +223,10 @@ bool EditorMapIO::appendState(EditorState* state)
   if(state != NULL)
   {
     if(states.size() > 0)
+    {
+      state->matrix->setTileIcons(tile_icons);
       state->matrix->rebase(states.front()->matrix, false);
+    }
     states.push_back(state);
     return true;
   }
@@ -238,6 +255,10 @@ EditorMapIO* EditorMapIO:: getBaseIO() const
  */
 int EditorMapIO::getInactiveTime() const
 {
+  EditorMapIO* base = getBaseIO();
+
+  if(base != NULL)
+    return base->getInactiveTime();
   return io.getInactiveTime();
 }
 
@@ -250,8 +271,20 @@ int EditorMapIO::getInactiveTime() const
  */
 EditorState* EditorMapIO::getState(int index)
 {
-  if(index >= 0 && index < states.size())
-    return states[index];
+  EditorMapIO* base = getBaseIO();
+
+  /* Check if it's a base and the frames from it should be used instead */
+  if(base != NULL)
+  {
+    if(index >= 0 && index < base->states.size())
+      return base->states[index];
+  }
+  else
+  {
+    if(index >= 0 && index < states.size())
+      return states[index];
+  }
+
   return NULL;
 }
 
@@ -263,12 +296,18 @@ EditorState* EditorMapIO::getState(int index)
  */
 QVector<EditorState*> EditorMapIO::getStates()
 {
+  EditorMapIO* base = getBaseIO();
+
+  /* Check if it's a base and the frames from it should be used instead */
+  if(base != NULL)
+    return base->states;
   return states;
 }
 
 /*
  * Description: Inserts a blank state of the indicated type at the index.
  *              The state at the index and all after are pushed back by one.
+ *              Cannot insert in front of array at root.
  *
  * Inputs: int index - the index to insert the new state at
  *         EditorEnumDb::MapIOType type - the type of the state
@@ -291,7 +330,7 @@ bool EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
  * Description: Inserts the new state pointer at the index. The state at the
  *              index and all after are pushed back by one. If the function
  *              returns true, the class takes control of releasing the memory
- *              of the pointer.
+ *              of the pointer. Can not insert in front of array at root.
  *
  * Inputs: int index - the index to insert the new state at
  *         EditorState* state - the state to insert at the index
@@ -300,10 +339,13 @@ bool EditorMapIO::insertState(int index, EditorEnumDb::MapIOType type)
  */
 bool EditorMapIO::insertState(int index, EditorState* state)
 {
-  if(index >= 0 && index <= states.size() && state != NULL)
+  if(index > 0 && index <= states.size() && state != NULL)
   {
     if(states.size() > 0)
+    {
+      state->matrix->setTileIcons(tile_icons);
       state->matrix->rebase(states.front()->matrix, false);
+    }
     states.insert(index, state);
     return true;
   }
@@ -490,6 +532,8 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
 
       /* Base state data */
       *ref->matrix = *state->matrix;
+      if(index == 0)
+        ref->matrix->setTileIcons(tile_icons);
       ref->type = state->type;
       ref->interact = state->interact;
 
@@ -503,13 +547,36 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
      * deleted. */
     else
     {
+      if(index == 0)
+        unsetMatrix();
+
       deleteState(states[index]);
       states.replace(index, state);
+
+      if(index == 0)
+      {
+        state->matrix->setTileIcons(tile_icons);
+        setMatrix(state->matrix);
+      }
     }
 
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets the tile icons, for rendering purposes.
+ *
+ * Inputs: TileIcons* icons - the rendering icon pointer. Managed by gamedb
+ * Output: none
+ */
+void EditorMapIO::setTileIcons(TileIcons* icons)
+{
+  for(int i = 0; i < states.size(); i++)
+    states[i]->matrix->setTileIcons(icons);
+
+  EditorMapThing::setTileIcons(icons);
 }
 
 /*
@@ -522,7 +589,7 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
  */
 bool EditorMapIO::unsetState(int index)
 {
-  if(index >= 0 && index < states.size())
+  if(index > 0 && index < states.size())
   {
     deleteState(states[index]);
     states.remove(index);
@@ -539,8 +606,8 @@ bool EditorMapIO::unsetState(int index)
  */
 void EditorMapIO::unsetStates()
 {
-  while(states.size() > 0)
-    unsetState(0);
+  while(states.size() > 1)
+    unsetState(states.size() - 1);
 }
 
 /*============================================================================

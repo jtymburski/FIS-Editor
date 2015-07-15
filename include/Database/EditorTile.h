@@ -17,6 +17,7 @@
 #include <QWidget>
 
 #include "Database/EditorSprite.h"
+#include "Database/EditorMapIO.h"
 #include "Database/EditorMapItem.h"
 #include "Database/EditorMapNPC.h"
 #include "Database/EditorMapPerson.h"
@@ -34,6 +35,7 @@ struct HoverInfo
   EditorEnumDb::CursorMode active_cursor;
   bool path_edit_mode;
 
+  EditorMapIO* active_io;
   EditorMapItem* active_item;
   EditorMapNPC* active_npc;
   EditorMapPerson* active_person;
@@ -82,6 +84,7 @@ private:
   QList<TileRenderInfo> layers_upper;
 
   /* Things on the tile */
+  QList<TileRenderInfo> ios;
   QList<TileRenderInfo> items;
   QList<TileRenderInfo> npcs;
   QList<TileRenderInfo> persons;
@@ -114,6 +117,7 @@ protected:
   void copySelf(const EditorTile &source);
 
   /* Determine if hovering sprite or thing in tile */
+  bool isHoverIO();
   bool isHoverItem();
   bool isHoverNPC();
   bool isHoverPerson();
@@ -142,6 +146,9 @@ public:
   /* Returns the passability based on layer and direction */
   bool getPassability(EditorEnumDb::Layer layer, Direction direction);
 
+  /* Returns the passability of the IO */
+  bool getPassabilityIO(Direction direction);
+
   /* Returns a number between 0 and 15 for what the passability is */
   int getPassabilityNum(EditorEnumDb::Layer layer);
 
@@ -157,6 +164,10 @@ public:
   /* Returns the passability based on direction and what layers are visible */
   bool getPassabilityVisible(Direction direction);
 
+  /* Returns the map io pointer at the given render depth and all ios */
+  EditorMapIO* getIO(int render_level);
+  QVector<EditorMapIO*> getIOs();
+
   /* Returns the map item pointer(s) */
   EditorMapItem* getItemBaseID(int id);
   EditorMapItem* getItemID(int id);
@@ -165,21 +176,22 @@ public:
 
   /* Returns the map npc pointer at the given render depth */
   EditorMapNPC* getNPC(int render_level);
-  QVector<EditorMapNPC*> getNPCs(); // TODO
+  QVector<EditorMapNPC*> getNPCs();
 
   /* Returns the map person pointer at the given render depth */
   EditorMapPerson* getPerson(int render_level);
-  QVector<EditorMapPerson*> getPersons(); // TODO
+  QVector<EditorMapPerson*> getPersons();
 
   /* Returns the sprite based on layer and direction */
   EditorSprite* getSprite(EditorEnumDb::Layer layer);
 
   /* Returns the map thing pointer(s) for the generic thing */
   EditorMapThing* getThing(int render_level);
-  QVector<EditorMapThing*> getThings(); // TODO
+  QVector<EditorMapThing*> getThings();
 
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);
+  bool getVisibilityIO(int render_level);
   bool getVisibilityItems();
   bool getVisibilityNPC(int render_level);
   bool getVisibilityPerson(int render_level);
@@ -210,6 +222,9 @@ public:
   void setHoverInfo(bool hover, bool hover_invalid = false,
                     HoverInfo* new_info = NULL);
 
+  /* Sets the io sprite pointer, stored within the class */
+  bool setIO(EditorMapIO* io);
+
   /* Sets the passability based on layer and direction */
   void setPassability(EditorEnumDb::Layer layer, bool passable);
   void setPassability(EditorEnumDb::Layer layer, Direction direction,
@@ -231,6 +246,8 @@ public:
   void setVisibility(EditorEnumDb::Layer layer, bool visible);
   void setVisibilityBase(bool);
   void setVisibilityEnhancer(bool);
+  void setVisibilityIO(bool visible);
+  bool setVisibilityIO(int render_level, bool visible);
   void setVisibilityItems(bool visible);
   bool setVisibilityLower(int, bool);
   void setVisibilityNPC(bool visible);
@@ -248,6 +265,11 @@ public:
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
+
+  /* Unsets the stored io pointer(s) */
+  bool unsetIO(EditorMapIO* io);
+  bool unsetIO(int render_level);
+  void unsetIOs();
 
   /* Unsets the stored item pointer(s) */
   bool unsetItem(EditorMapItem* item);

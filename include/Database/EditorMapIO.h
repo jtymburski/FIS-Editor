@@ -107,7 +107,10 @@ public:
   
   /* Sets the state at the index (will replace existing) */
   bool setState(int index, EditorState* state, bool data_only = false);
-  
+
+  /* Sets the rendering tile icons */
+  void setTileIcons(TileIcons* icons);
+
   /* Unset a state or unset all states */
   bool unsetState(int index);
   void unsetStates();

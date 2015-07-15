@@ -43,12 +43,13 @@ private:
   /* The actual thing for in game */
   MapThing thing;
 
-  /* The rendering tile icons */
-  TileIcons* tile_icons;
-
   /* The X/Y position of the thing */
   int x;
   int y;
+
+protected:
+  /* The rendering tile icons */
+  TileIcons* tile_icons;
 
 /*============================================================================
  * PROTECTED FUNCTIONS

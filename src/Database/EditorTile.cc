@@ -52,6 +52,8 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
     layers_upper.push_back(temp);
 
   /* Prep editor things in tile */
+  for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
+    ios.push_back(temp);
   items.push_back(temp);
   for(uint8_t i = 0; i < Helpers::getRenderDepth(); i++)
     npcs.push_back(temp);
@@ -84,6 +86,7 @@ EditorTile::~EditorTile()
   layers_lower.clear();
   layers_upper.clear();
 
+  ios.clear();
   items.clear();
   npcs.clear();
   persons.clear();
@@ -136,6 +139,25 @@ void EditorTile::copySelf(const EditorTile &source)
   }
 
   // TODO: ADD THING, PERSON, NPC, ITEM, AND IO. No, handled in map.
+}
+
+/*
+ * Description: Returns if there is a valid hover IO, the active layer is
+ *              a IO layer, and the placing pen is a IO placement.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover IO should be shown
+ */
+bool EditorTile::isHoverIO()
+{
+  if(hover_info->hover_tile != NULL && hover_info->active_io != NULL &&
+     hover_info->active_cursor == EditorEnumDb::BASIC &&
+     hover_info->active_layer == EditorEnumDb::IO &&
+     !hover_info->path_edit_mode)
+  {
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -336,6 +358,12 @@ QString EditorTile::getActiveLayers()
     layer_string += item_string;
   }
 
+  /* Get IO info, if relevant */
+  for(int i = 0; i < ios.size(); i++)
+    if(ios[i].thing != NULL)
+      layer_string += "MIO" + QString::number(i) + "("
+                   + QString::number(ios[i].thing->getID()) + "),";
+
   /* Get person info, if relevant */
   for(int i = 0; i < persons.size(); i++)
     if(persons[i].thing != NULL)
@@ -416,11 +444,15 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
     case EditorEnumDb::THING:
       return getPassabilityThing(direction);
       break;
+    case EditorEnumDb::IO:
+      return getPassabilityIO(direction);
+      break;
     case EditorEnumDb::PERSON:
       return getPassabilityPerson(direction);
+      break;
     case EditorEnumDb::NPC:
       return getPassabilityNPC(direction);
-    case EditorEnumDb::IO:
+      break;
     case EditorEnumDb::ENHANCER:
     case EditorEnumDb::ITEM:
     case EditorEnumDb::UPPER1:
@@ -434,6 +466,27 @@ bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
       break;
   }
   return false;
+}
+
+/*
+ * Description: Returns the passability of the io(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityIO(Direction direction)
+{
+  EditorMapThing* io = ios[0].thing;
+
+  if(io != NULL)
+  {
+    EditorTileSprite* sprite = io->getMatrix()->getSprite(
+                                    getX() - io->getX(), getY() - io->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
 }
 
 /*
@@ -540,12 +593,46 @@ bool EditorTile::getPassabilityVisible(Direction direction)
     passable &= getPassability(EditorEnumDb::LOWER5, direction);
   if(things[0].visible)
     passable &= getPassability(EditorEnumDb::THING, direction);
+  if(ios[0].visible)
+    passable &= getPassability(EditorEnumDb::IO, direction);
   if(persons[0].visible)
     passable &= getPassability(EditorEnumDb::PERSON, direction);
   if(npcs[0].visible)
     passable &= getPassability(EditorEnumDb::NPC, direction);
 
   return passable;
+}
+
+/*
+ * Description: Returns the map IO pointer for the IO at the rendering
+ *              level.
+ *
+ * Inputs: int render_level - the render level inside the tile
+ * Output: EditorMapIO* - the IO at the render level
+ */
+EditorMapIO* EditorTile::getIO(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return (EditorMapIO*)ios[render_level].thing;
+  return NULL;
+}
+
+/*
+ * Description: Returns the stack of all IOs, up to the render depth limiter.
+ *              If the indicated render depth is unset, the pointer will be
+ *              NULL.
+ *
+ * Inputs: none
+ * Output: QVector<EditorMapIO*> - the stack of IOs, corresponding to depth
+ */
+QVector<EditorMapIO*> EditorTile::getIOs()
+{
+  QVector<EditorMapIO*> stack;
+
+  for(int i = 0; i < ios.size(); i++)
+    stack.push_back((EditorMapIO*)ios[i].thing);
+
+  return stack;
 }
 
 /*
@@ -798,6 +885,19 @@ bool EditorTile::getVisibility(EditorEnumDb::Layer layer)
 }
 
 /*
+ * Description: Returns the visibility of the IO render level
+ *
+ * Inputs: int render_level - the render level to acquire the visibility
+ * Output: bool - true if the IO layer is visible
+ */
+bool EditorTile::getVisibilityIO(int render_level)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+    return ios[render_level].visible;
+  return false;
+}
+
+/*
  * Description: Returns the visibility of the item stack
  *
  * Inputs: none
@@ -906,12 +1006,13 @@ void EditorTile::paint(QPainter *painter,
   /* Determine if it's a hover thing - special state */
   int diff_x = 0;
   int diff_y = 0;
+  bool hover_io = isHoverIO();
   bool hover_item = isHoverItem();
   bool hover_npc = isHoverNPC();
   bool hover_person = isHoverPerson();
   bool hover_sprite = isHoverSprite();
   bool hover_thing = isHoverThing();
-  if(hover_thing || hover_person || hover_npc)
+  if(hover_thing || hover_io || hover_person || hover_npc)
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
@@ -919,6 +1020,8 @@ void EditorTile::paint(QPainter *painter,
     /* Use the differential to make sure the sprite is valid */
     if(hover_thing && hover_info->active_thing->isAllNull(diff_x, diff_y))
       hover_thing = false;
+    if(hover_io && hover_info->active_thing->isAllNull(diff_x, diff_y))
+      hover_io = false;
     if(hover_person && hover_info->active_person->isAllNull(diff_x, diff_y))
       hover_person = false;
     if(hover_npc && hover_info->active_npc->isAllNull(diff_x, diff_y))
@@ -971,6 +1074,10 @@ void EditorTile::paint(QPainter *painter,
     if(things[i].visible && things[i].thing != NULL)
       things[i].thing->paint(0, painter, bound, x_pos - things[i].thing->getX(),
                              y_pos - things[i].thing->getY());
+    /* Paint the io */
+    else if(ios[i].visible && ios[i].thing != NULL)
+      ios[i].thing->paint(0, painter, bound, x_pos - ios[i].thing->getX(),
+                          y_pos - ios[i].thing->getY());
 
     /* Paint the top item */
     if(i == 0 && items.front().visible && items.last().thing != NULL)
@@ -981,9 +1088,8 @@ void EditorTile::paint(QPainter *painter,
       persons[i].thing->paint(0, painter, bound,
                               x_pos - persons[i].thing->getX(),
                               y_pos - persons[i].thing->getY());
-
     /* Paint the npc */
-    if(npcs[i].visible && npcs[i].thing != NULL)
+    else if(npcs[i].visible && npcs[i].thing != NULL)
       npcs[i].thing->paint(0, painter, bound,
                            x_pos - npcs[i].thing->getX(),
                            y_pos - npcs[i].thing->getY());
@@ -992,17 +1098,17 @@ void EditorTile::paint(QPainter *painter,
   /* If hover thing is true, render it */
   if(hover_thing)
     hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
-
-  /* If hover item is true, render it */
-  if(hover_item)
-    hover_info->active_item->paint(painter, bound);
-
-  /* If hover person is true, render it */
-  if(hover_person)
-    hover_info->active_person->paint(painter, bound, diff_x, diff_y);
-
   /* If hover npc is true, render it */
-  if(hover_npc)
+  else if(hover_npc)
+    hover_info->active_io->paint(painter, bound, diff_x, diff_y);
+  /* If hover item is true, render it */
+  else if(hover_item)
+    hover_info->active_item->paint(painter, bound);
+  /* If hover person is true, render it */
+  else if(hover_person)
+    hover_info->active_person->paint(painter, bound, diff_x, diff_y);
+  /* If hover npc is true, render it */
+  else if(hover_npc)
     hover_info->active_npc->paint(painter, bound, diff_x, diff_y);
 
   /* Render the upper */
@@ -1061,9 +1167,20 @@ void EditorTile::paint(QPainter *painter,
     if(hover_thing)
     {
       EditorMatrix* matrix = hover_info->active_thing->getMatrix();
+      int depth = matrix->getRenderDepth(diff_x, diff_y);
 
-      if(hovered_invalid ||
-         getThing(matrix->getRenderDepth(diff_x, diff_y)) != NULL)
+      if(hovered_invalid || getThing(depth) != NULL || getIO(depth) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
+    /* -- HOVER IO CONTROL -- */
+    if(hover_io)
+    {
+      EditorMatrix* matrix = hover_info->active_io->getMatrix();
+      int depth = matrix->getRenderDepth(diff_x, diff_y);
+
+      if(hovered_invalid || getThing(depth) != NULL || getIO(depth) != NULL)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);
@@ -1278,6 +1395,38 @@ void EditorTile::setHoverInfo(bool hover, bool hover_invalid,
 }
 
 /*
+ * Description: Sets the io sprite pointer, stored within the class.
+ *
+ * Inputs: EditorMapIO* io - the io to add to the tile (uses the
+ *                           internal render depth and position)
+ * Output: bool - true if the io is set
+ */
+bool EditorTile::setIO(EditorMapIO* io)
+{
+  if(io != NULL)
+  {
+    /* Determine the x, y in the matrix */
+    int x = x_pos - io->getX();
+    int y = y_pos - io->getY();
+    if(x >= 0 && x < io->getMatrix()->getWidth() &&
+       y >= 0 && y < io->getMatrix()->getHeight())
+    {
+      /* Determine the render level */
+      int render_level = io->getMatrix()->getRenderDepth(x, y);
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
+         !io->isAllNull(x, y))
+      {
+        /* Set the new npc */
+        ios[render_level].thing = io;
+        update();
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
  * Description: Sets the passability of the passed in layer in all directions.
  *
  * Inputs: EditorEnumDb::Layer layer - the layer to update the passability for
@@ -1468,6 +1617,8 @@ void EditorTile::setVisibility(EditorEnumDb::Layer layer, bool visible)
     setVisibilityLower(4, visible);
   else if(layer == EditorEnumDb::THING)
     setVisibilityThing(visible);
+  else if(layer == EditorEnumDb::IO)
+    setVisibilityIO(visible);
   else if(layer == EditorEnumDb::ITEM)
     setVisibilityItems(visible);
   else if(layer == EditorEnumDb::PERSON)
@@ -1506,6 +1657,36 @@ void EditorTile::setVisibilityEnhancer(bool toggle)
 {
   layer_enhancer.visible = toggle;
   update();
+}
+
+/*
+ * Description: Sets the visibility of all layers of the ios.
+ *
+ * Inputs: bool visible - true if the io layers are visible
+ * Output: none
+ */
+void EditorTile::setVisibilityIO(bool visible)
+{
+  for(int i = 0; i < ios.size(); i++)
+    ios[i].visible = visible;
+  update();
+}
+
+/*
+ * Description: Sets the visibility of the render level of the io in tile.
+ *
+ * Inputs: int render_level - the render level to modify the visibility
+ *         bool visible - true if the render level should be visible
+ * Output: bool - true if the visibility was set
+ */
+bool EditorTile::setVisibilityIO(int render_level, bool visible)
+{
+  if(render_level >= 0 && render_level < Helpers::getRenderDepth())
+  {
+    ios[render_level].visible = visible;
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -1773,6 +1954,62 @@ void EditorTile::unplace(EditorSprite* sprite)
     }
   }
 
+  update();
+}
+
+/*
+ * Description: Unsets the IO pointer in the tile. Searches through all
+ *              render levels and removes it if the pointer is found.
+ *
+ * Inputs: EditorMapIO* io - the io to remove from the tile
+ * Output: bool - true if the io was found and removed
+ */
+bool EditorTile::unsetIO(EditorMapIO* io)
+{
+  for(int i = 0; i < ios.size(); i++)
+  {
+    if(ios[i].thing == io)
+    {
+      ios[i].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the IO pointer in the tile at the render level.
+ *
+ * Inputs: int render_level - the render depth to remove the IO from
+ * Output: bool - true if a IO was removed at the passed depth
+ */
+bool EditorTile::unsetIO(int render_level)
+{
+  if(render_level >= 0 && render_level < ios.size())
+  {
+    if(ios[render_level].thing != NULL)
+    {
+      ios[render_level].thing = NULL;
+      update();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets the IOs in all render levels.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorTile::unsetIOs()
+{
+  for(int i = 0; i < ios.size(); i++)
+    ios[i].thing = NULL;
   update();
 }
 
