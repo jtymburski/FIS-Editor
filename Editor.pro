@@ -59,6 +59,7 @@ SOURCES += \
     src/Dialog/FrameDialog.cc \
     src/Dialog/FrameList.cc \
     src/Dialog/FrameView.cc \
+    src/Dialog/IODialog.cc \
     src/Dialog/ItemDialog.cc \
     src/Dialog/MatrixDialog.cc \
     src/Dialog/NodeDialog.cc \
@@ -146,6 +147,7 @@ HEADERS += \
     include/Dialog/FrameDialog.h \
     include/Dialog/FrameList.h \
     include/Dialog/FrameView.h \
+    include/Dialog/IODialog.h \
     include/Dialog/ItemDialog.h \
     include/Dialog/MatrixDialog.h \
     include/Dialog/NodeDialog.h \

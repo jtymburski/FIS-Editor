@@ -58,9 +58,10 @@ public:
   enum MapObjectMode {RAW_VIEW = 0,
                       SPRITE_VIEW = 1,
                       THING_VIEW = 2,
-                      ITEM_VIEW = 3,
-                      PERSON_VIEW = 4,
-                      NPC_VIEW = 5
+                      IO_VIEW = 3,
+                      ITEM_VIEW = 4,
+                      PERSON_VIEW = 5,
+                      NPC_VIEW = 6
                      };
 
   /* Sprite edit mode */

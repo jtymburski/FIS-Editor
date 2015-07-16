@@ -554,45 +554,55 @@ void EditorMap::copySelf(const EditorMap &source)
     /* Add instance map things */
     for(int j = 0; j < source.sub_maps[i]->things.size(); j++)
     {
-      EditorMapThing* t = new EditorMapThing(*source.sub_maps[i]->things[j]);
-      t->setX(source.sub_maps[i]->things[j]->getX());
-      t->setY(source.sub_maps[i]->things[j]->getY());
+      EditorMapThing* ref = source.sub_maps[i]->things[j];
+      EditorMapThing* t = new EditorMapThing(*ref);
+      t->setX(ref->getX());
+      t->setY(ref->getY());
+      t->setBase(getThing(ref->getBaseThing()->getID()));
       setThing(t, source.sub_maps[i]->id);
     }
 
     /* Add instance map ios */
     for(int j = 0; j < source.sub_maps[i]->ios.size(); j++)
     {
-      EditorMapIO* io = new EditorMapIO(*source.sub_maps[i]->ios[j]);
-      io->setX(source.sub_maps[i]->ios[j]->getX());
-      io->setY(source.sub_maps[i]->ios[j]->getY());
+      EditorMapIO* ref = source.sub_maps[i]->ios[j];
+      EditorMapIO* io = new EditorMapIO(*ref);
+      io->setX(ref->getX());
+      io->setY(ref->getY());
+      io->setBase(getIO(ref->getBaseIO()->getID()));
       setIO(io, source.sub_maps[i]->id);
     }
 
     /* Add instance map items */
     for(int j = 0; j < source.sub_maps[i]->items.size(); j++)
     {
-      EditorMapItem* item = new EditorMapItem(*source.sub_maps[i]->items[j]);
-      item->setX(source.sub_maps[i]->items[j]->getX());
-      item->setY(source.sub_maps[i]->items[j]->getY());
+      EditorMapItem* ref = source.sub_maps[i]->items[j];
+      EditorMapItem* item = new EditorMapItem(*ref);
+      item->setX(ref->getX());
+      item->setY(ref->getY());
+      item->setBase(getItem(ref->getBaseItem()->getID()));
       setItem(item, source.sub_maps[i]->id);
     }
 
     /* Add instance map persons */
     for(int j = 0; j < source.sub_maps[i]->persons.size(); j++)
     {
-      EditorMapPerson* p = new EditorMapPerson(*source.sub_maps[i]->persons[j]);
-      p->setX(source.sub_maps[i]->persons[j]->getX());
-      p->setY(source.sub_maps[i]->persons[j]->getY());
+      EditorMapPerson* ref = source.sub_maps[i]->persons[j];
+      EditorMapPerson* p = new EditorMapPerson(*ref);
+      p->setX(ref->getX());
+      p->setY(ref->getY());
+      p->setBase(getPerson(ref->getBasePerson()->getID()));
       setPerson(p, source.sub_maps[i]->id);
     }
 
     /* Add instance map npcs */
     for(int j = 0; j < source.sub_maps[i]->npcs.size(); j++)
     {
-      EditorMapNPC* n = new EditorMapNPC(*source.sub_maps[i]->npcs[j]);
-      n->setX(source.sub_maps[i]->npcs[j]->getX());
-      n->setY(source.sub_maps[i]->npcs[j]->getY());
+      EditorMapNPC* ref = source.sub_maps[i]->npcs[j];
+      EditorMapNPC* n = new EditorMapNPC(*ref);
+      n->setX(ref->getX());
+      n->setY(ref->getY());
+      n->setBase(getNPC(ref->getBaseNPC()->getID()));
       setNPC(n, source.sub_maps[i]->id);
     }
   }
@@ -2191,7 +2201,7 @@ QVector<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
                                       bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("MAP IOS");
+  stack.push_back("-- INTERACTIVE OBJECTS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -2361,7 +2371,7 @@ QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
                                         bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("MAP ITEMS");
+  stack.push_back("-- ITEMS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3018,7 +3028,7 @@ QVector<QString> EditorMap::getNPCList(int sub_map, bool all_submaps,
                                        bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("MAP NPCS");
+  stack.push_back("-- NPCS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3188,7 +3198,7 @@ QVector<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
                                           bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("MAP PERSONS");
+  stack.push_back("-- PERSONS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3488,7 +3498,7 @@ QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
                                          bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("MAP THINGS");
+  stack.push_back("-- THINGS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -6241,7 +6251,6 @@ EditorMap& EditorMap::operator= (const EditorMap &source)
     return *this;
 
   /* Do the copy */
-  clearAll();
   copySelf(source);
 
   /* Return the copied object */

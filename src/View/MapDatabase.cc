@@ -51,8 +51,8 @@ void MapDatabase::setupMain()
   view_top = new QListWidget(widget_main);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Raw Images" << "Sprites" << "Things" << "Items"
-        << "Persons" << "NPCs";
+  items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects" 
+        << "Items" << "Persons" << "NPCs";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   view_top->setMaximumHeight(60);
@@ -273,10 +273,11 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     mode_for_data = view;
 
     /* Compile list */
-    QVector<QString> thing_list = editing_map->getThingList(0, true, true);
+    QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
     thing_list.push_front("0: Player");
-    thing_list << editing_map->getPersonList(0, true, true);
     thing_list << editing_map->getNPCList(0, true, true);
+    thing_list << editing_map->getThingList(0, true, true);
+    thing_list << editing_map->getIOList(0, true, true);
 
     /* Update things */
     if(view == EditorEnumDb::THING_VIEW)
@@ -543,6 +544,10 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->hide();
+  }
+  else if(index == EditorEnumDb::IO_VIEW)
+  {
+    // TODO
   }
   else if(index == EditorEnumDb::ITEM_VIEW)
   {
