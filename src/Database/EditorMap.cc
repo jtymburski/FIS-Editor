@@ -81,6 +81,63 @@ EditorMap::~EditorMap()
  *===========================================================================*/
 
 /*
+ * Description: Attempts to add the IO to the current sub-map. IO needs
+ *              to be given an x and y start location prior to calling this
+ *              function.
+ *
+ * Inputs: EditorMapIO* io - the IO to attempt to add
+ *         SubMapInfo* map - the map to add the IO to
+ *         bool existing - false if new IO. true otherwise
+ * Output: bool - true if the IO was added (does not delete if fails)
+ */
+bool EditorMap::addIO(EditorMapIO* io, SubMapInfo* map, bool existing)
+{
+  int x = io->getX();
+  int y = io->getY();
+  int w = io->getMatrix()->getWidth();
+  int h = io->getMatrix()->getHeight();
+
+  /* Ensure map isn't null */
+  if(map == NULL)
+    map = active_submap;
+
+  /* Check if IO can be placed */
+  bool valid = false;
+  if(x >= 0 && y >= 0 && (x+w) <= map->tiles.size() &&
+     (y+h) <= map->tiles[x].size())
+  {
+    valid = true;
+
+    /* Check each tile */
+    for(int i = 0; i < w; i++)
+      for(int j = 0; j < h; j++)
+        if(!io->isAllNull(i, j))
+          if(map->tiles[x+i][y+j]->getIO(
+                                io->getMatrix()->getRenderDepth(i, j)) != NULL)
+            valid = false;
+  }
+
+  /* If valid, place IO */
+  if(valid)
+  {
+    /* Add the IO to tiles */
+    for(int i = x; i < (w+x); i++)
+      for(int j = y; j < (h+y); j++)
+        map->tiles[i][j]->setIO(io);
+
+    /* Add to stack and emit new signals */
+    if(!existing)
+    {
+      map->ios.push_back(io);
+      emit ioInstanceChanged(io->getNameList());
+      setHoverThing(-1);
+    }
+  }
+
+  return valid;
+}
+
+/*
  * Description: Attempts to add the item to the current sub-map. Item needs
  *              to be given an x and y start location prior to calling this
  *              function.
@@ -407,17 +464,18 @@ void EditorMap::addTileSpriteData(FileHandler* fh, QProgressDialog* save_dialog,
  */
 void EditorMap::clearAll()
 {
-  /* Remove all things */
+  /* First delete all sub-maps */
+  unsetMaps();
+
+  /* Then, Remove all things */
   unsetThings();
+  unsetIOs();
   unsetItems();
   unsetPersons();
   unsetNPCs();
 
   /* Remove all sprites */
   unsetSprites();
-
-  /* Finally, delete all maps */
-  unsetMaps();
 }
 
 /*
@@ -429,6 +487,9 @@ void EditorMap::clearAll()
  */
 void EditorMap::copySelf(const EditorMap &source)
 {
+  /* Clear all prior */
+  clearAll();
+
   /* Add const values */
   name = source.name;
 
@@ -439,6 +500,10 @@ void EditorMap::copySelf(const EditorMap &source)
   /* Add base things */
   for(int i = 0; i < source.base_things.size(); i++)
     base_things.push_back(new EditorMapThing(*source.base_things[i]));
+
+  /* Add base ios */
+  for(int i = 0; i < source.base_ios.size(); i++)
+    base_ios.push_back(new EditorMapIO(*source.base_ios[i]));
 
   /* Add base items */
   for(int i = 0; i < source.base_items.size(); i++)
@@ -493,6 +558,15 @@ void EditorMap::copySelf(const EditorMap &source)
       t->setX(source.sub_maps[i]->things[j]->getX());
       t->setY(source.sub_maps[i]->things[j]->getY());
       setThing(t, source.sub_maps[i]->id);
+    }
+
+    /* Add instance map ios */
+    for(int j = 0; j < source.sub_maps[i]->ios.size(); j++)
+    {
+      EditorMapIO* io = new EditorMapIO(*source.sub_maps[i]->ios[j]);
+      io->setX(source.sub_maps[i]->ios[j]->getX());
+      io->setY(source.sub_maps[i]->ios[j]->getY());
+      setIO(io, source.sub_maps[i]->id);
     }
 
     /* Add instance map items */
@@ -678,6 +752,66 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     else
     {
       thing->load(data, index + 1);
+    }
+  }
+  /* -------------- MAP IO -------------- */
+  else if(element == "mapio")
+  {
+    int io_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapIO* io = getIO(io_id, map->id);
+
+    /* Create new IO if it doesn't exist */
+    if(io == NULL)
+    {
+      io = new EditorMapIO(io_id);
+      io->setTileIcons(getTileIcons());
+
+      /* Find insertion location */
+      int index = -1;
+      bool near = false;
+      for(int i = 0; !near && (i < map->ios.size()); i++)
+      {
+        if(map->ios[i]->getID() > io->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If near, insert at index. Otherwise, append */
+      if(near)
+        map->ios.insert(index, io);
+      else
+        map->ios.append(io);
+    }
+
+    /* Continue to parse the data in the thing */
+    QString element = QString::fromStdString(data.getElement(index + 1));
+    if(element == "base")
+    {
+      /* Get name and desc. if it has been changed */
+      EditorMapIO default_io;
+      QString default_name = "";
+      QString default_desc = "";
+      if(default_io.getName() != io->getName())
+        default_name = io->getName();
+      if(default_io.getDescription() != io->getDescription())
+        default_desc = io->getDescription();
+
+      /* Set the base */
+      EditorMapIO* base_io = getIO(data.getDataInteger());
+      if(base_io != NULL)
+      {
+        io->setBase(base_io);
+        if(default_name != "")
+          io->setName(default_name);
+        if(default_desc != "")
+          io->setDescription(default_desc);
+      }
+    }
+    else
+    {
+      io->load(data, index + 1);
     }
   }
   /* -------------- MAP Item -------------- */
@@ -960,6 +1094,7 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 {
   /* Remove all things for processing */
   tilesThingRemove(true);
+  tilesIORemove(true);
   tilesItemRemove(true);
   tilesPersonRemove(true);
   tilesNPCRemove(true);
@@ -1018,6 +1153,7 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 
   /* Add all things back for processing */
   tilesThingAdd(true);
+  tilesIOAdd(true);
   tilesItemAdd(true);
   tilesPersonAdd(true);
   tilesNPCAdd(true);
@@ -1154,6 +1290,13 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
     save_dialog->setValue(save_dialog->value()+1);
   }
 
+  /* Add ios */
+  for(int i = 0; i < map->ios.size(); i++)
+  {
+    map->ios[i]->save(fh, game_only);
+    save_dialog->setValue(save_dialog->value()+1);
+  }
+
   /* Add items */
   for(int i = 0; i < map->items.size(); i++)
   {
@@ -1235,6 +1378,8 @@ bool EditorMap::updateHoverThing(bool unset)
   {
     if(active_info.active_layer == EditorEnumDb::THING)
       thing = active_info.active_thing;
+    else if(active_info.active_layer == EditorEnumDb::IO)
+      thing = active_info.active_io;
     else if(active_info.active_layer == EditorEnumDb::ITEM)
       thing = active_info.active_item;
     else if(active_info.active_layer == EditorEnumDb::PERSON)
@@ -1331,6 +1476,7 @@ void EditorMap::clearHoverInfo()
   active_info.active_layer = EditorEnumDb::NO_LAYER;
   active_info.path_edit_mode = false;
 
+  active_info.active_io = NULL;
   active_info.active_item = NULL;
   active_info.active_npc = NULL;
   active_info.active_person = NULL;
@@ -1456,6 +1602,37 @@ void EditorMap::clickTrigger(bool single, bool right_click)
         /* If found, remove from tiles and delete */
         if(found != NULL)
           unsetThing(found->getID(), true);
+      }
+    }
+    /* Check on the layer - io */
+    else if(layer == EditorEnumDb::IO)
+    {
+      /* Check cursor */
+      if(cursor == EditorEnumDb::BASIC && active_info.active_thing != NULL)
+      {
+        /* Create the IO */
+        int id = getNextIOID(true);
+        EditorMapIO* new_io = new EditorMapIO(id);
+        new_io->setBase(active_info.active_io);
+        new_io->setX(active_info.hover_tile->getX());
+        new_io->setY(active_info.hover_tile->getY());
+
+        /* Attempt to place - if failed, delete */
+        if(!addIO(new_io, NULL, false))
+          delete new_io;
+      }
+      else if(cursor == EditorEnumDb::ERASER)
+      {
+        int max = Helpers::getRenderDepth();
+
+        /* Loop through all to find the top IO */
+        EditorMapIO* found = NULL;
+        for(int i = max - 1; found == NULL && i >= 0; i--)
+          found = active_info.hover_tile->getIO(i);
+
+        /* If found, remove from tiles and delete */
+        if(found != NULL)
+          unsetIO(found->getID(), true);
       }
     }
     /* Check on the layer - item */
@@ -1633,6 +1810,8 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     }
 
     /* Add thing instances */
+    while(new_map->things.size() > 0)
+      unsetThingByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->things.size(); i++)
     {
       EditorMapThing* thing = new EditorMapThing(*copy_map->things[i]);
@@ -1642,7 +1821,21 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       setThing(thing, new_map->id);
     }
 
+    /* Add io instances */
+    while(new_map->ios.size() > 0)
+      unsetIOByIndex(0, new_map->id);
+    for(int i = 0; i < copy_map->ios.size(); i++)
+    {
+      EditorMapIO* io = new EditorMapIO(*copy_map->ios[i]);
+      io->setID(getNextIOID(true));
+      io->setX(copy_map->ios[i]->getX());
+      io->setY(copy_map->ios[i]->getY());
+      setIO(io, new_map->id);
+    }
+
     /* Add item instances */
+    while(new_map->items.size() > 0)
+      unsetItemByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->items.size(); i++)
     {
       EditorMapItem* item = new EditorMapItem(*copy_map->items[i]);
@@ -1653,6 +1846,8 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     }
 
     /* Add person instances */
+    while(new_map->persons.size() > 0)
+      unsetPersonByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->persons.size(); i++)
     {
       EditorMapPerson* person = new EditorMapPerson(*copy_map->persons[i]);
@@ -1663,6 +1858,8 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     }
 
     /* Add npc instances */
+    while(new_map->npcs.size() > 0)
+      unsetNPCByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->npcs.size(); i++)
     {
       EditorMapNPC* npc = new EditorMapNPC(*copy_map->npcs[i]);
@@ -1675,6 +1872,30 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Returns the current selected base IO in the list of IOs.
+ *              On click, if the layer and pen is correct, this is the IO
+ *              that instantized and then placed.
+ *
+ * Inputs: none
+ * Output: int - the index in the IO stack
+ */
+int EditorMap::getCurrentIOIndex()
+{
+  /* Ensure the active IO isn't null */
+  if(active_info.active_io != NULL)
+  {
+    for(int i = 0; i < base_ios.size(); i++)
+      if(base_ios[i] == active_info.active_io)
+        return i;
+
+    /* IO not found, it doesn't exist -> nullify it */
+    setCurrentIO(-1);
+  }
+
+  return -1;
 }
 
 /*
@@ -1852,6 +2073,176 @@ HoverInfo* EditorMap::getHoverInfo()
 int EditorMap::getID() const
 {
   return id;
+}
+
+/*
+ * Description: Returns the IO with the corresponding ID.
+ *
+ * Inputs: int id - the id of the IO to get
+ *         int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: EditorMapIO* - the pointer to match the ID. NULL if not found.
+ */
+EditorMapIO* EditorMap::getIO(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_ios.size(); i++)
+        if(base_ios[i]->getID() == id)
+          return base_ios[i];
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->ios.size(); i++)
+        if(sub_maps[sub_map]->ios[i]->getID() == id)
+          return sub_maps[sub_map]->ios[i];
+    }
+  }
+
+  return NULL;
+}
+
+/*
+ * Description: Returns the IO at the corresponding index in the list.
+ *
+ * Inputs: int index - the index in the array (0 to size - 1)
+ *         int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: EditorMapIO* - the pointer to match the index. NULL if out of
+ *                        range
+ */
+EditorMapIO* EditorMap::getIOByIndex(int index, int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_ios.size())
+      return base_ios[index];
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->ios.size())
+      return sub_maps[sub_map]->ios[index];
+  }
+  return NULL;
+}
+
+/*
+ * Description: Returns the number of IOs in the list.
+ *
+ * Inputs: int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: int - the number of IOs in the map set
+ */
+int EditorMap::getIOCount(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+    return base_ios.size();
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+    return sub_maps[sub_map]->ios.size();
+  return 0;
+}
+
+/*
+ * Description: Returns the index in the list of IOs of the matching id.
+ *              Less than 0 if none match.
+ *
+ * Inputs: int id - the id to find the index for
+ *         int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: int - the index of the IO. Less than 0 if nothing matches
+ */
+int EditorMap::getIOIndex(int id, int sub_map)
+{
+  if(id >= 0)
+  {
+    /* If sub map ref is less than 0, get from base set */
+    if(sub_map < 0)
+    {
+      for(int i = 0; i < base_ios.size(); i++)
+        if(base_ios[i]->getID() == id)
+          return i;
+    }
+    /* Otherwise, get from sub map */
+    else if(sub_map < sub_maps.size())
+    {
+      for(int i = 0; i < sub_maps[sub_map]->ios.size(); i++)
+        if(sub_maps[sub_map]->ios[i]->getID() == id)
+          return i;
+    }
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns a list of all things in the format of a HEADER row
+ *              with the following rows as "ID: NAME".
+ *
+ * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
+ * Output: QVector<QString> - list of all things
+ */
+QVector<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
+                                      bool shortened)
+{
+  QVector<QString> stack;
+  stack.push_back("MAP IOS");
+
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all ios and add them to the list */
+    for(int i = 0; i < base_ios.size(); i++)
+      stack.push_back(base_ios[i]->getNameList());
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+        stack.push_back(sub_maps[i]->ios[j]->getNameList(shortened));
+  }
+
+  return stack;
+}
+
+/*
+ * Description: Returns the list of all IOs in the editor map
+ *
+ * Inputs: int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: QVector<EditorMapIO*> - list of all IOs
+ */
+QVector<EditorMapIO*> EditorMap::getIOs(int sub_map)
+{
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    return base_ios;
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    return sub_maps[sub_map]->ios;
+  }
+
+  /* Otherwise, return blank list */
+  QVector<EditorMapIO*> blank_list;
+  return blank_list;
 }
 
 /*
@@ -2159,6 +2550,65 @@ QString EditorMap::getName() const
 QString EditorMap::getNameList()
 {
   return EditorHelpers::getListString(id, name);
+}
+
+/*
+ * Description: Returns the next available IO ID that can be used for a new
+ *              IO.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: int - the id to use
+ */
+int EditorMap::getNextIOID(bool from_sub)
+{
+  bool found = false;
+  int id = 0;
+
+  /* If not from sub map, check base for base ID */
+  if(!from_sub)
+  {
+    for(int i = 0; !found && (i < base_ios.size()); i++)
+    {
+      if(base_ios[i]->getID() != i)
+      {
+        id = i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && base_ios.size() > 0)
+      id = base_ios.last()->getID() + 1;
+  }
+  /* Otherwise, check the sub-maps for available ID */
+  else
+  {
+    /* Compile the IDs of all IOs in all sub-maps */
+    QVector<int> id_list;
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+        id_list.push_back(sub_maps[i]->ios[j]->getID());
+
+    /* Sort the list */
+    qSort(id_list);
+
+    /* Find the next available ID */
+    id = kBASE_ID_IOS;
+    for(int i = 0; !found && (i < id_list.size()); i++)
+    {
+      if(id_list[i] != (id + i))
+      {
+        id += i;
+        found = true;
+      }
+    }
+
+    /* If nothing found, just make it the last ID + 1 */
+    if(!found && id_list.size() > 0)
+      id = id_list.last() + 1;
+  }
+
+  return id;
 }
 
 /*
@@ -2805,7 +3255,7 @@ int EditorMap::getSaveCount(int sub_index)
 
   /* Get count from base items */
   total += sprites.size() + base_things.size() + base_persons.size()
-        + base_npcs.size() + base_items.size();
+        + base_npcs.size() + base_items.size() + base_ios.size();
 
   /* Get count from sub-maps */
   int start_index = 0;
@@ -2821,7 +3271,8 @@ int EditorMap::getSaveCount(int sub_index)
   {
     /* Add thing(s) instances */
     total += sub_maps[i]->things.size() + sub_maps[i]->persons.size() +
-             sub_maps[i]->npcs.size() + sub_maps[i]->items.size();
+             sub_maps[i]->npcs.size() + sub_maps[i]->items.size() +
+             sub_maps[i]->ios.size();
 
     /* Add total number of sprites * 12 layers
      * (base, enhancer, lower x 5, upper x 5) */
@@ -3148,6 +3599,22 @@ void EditorMap::load(XmlData data, int index)
     /* Continue to parse the data in the thing */
     thing->load(data, index + 1);
   }
+  else if(data.getElement(index) == "mapio" && data.getKey(index) == "id")
+  {
+    int io_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+    EditorMapIO* io = getIO(io_id);
+
+    /* Create new IO if it doesn't exist */
+    if(io == NULL)
+    {
+      io = new EditorMapIO(io_id);
+      io->setTileIcons(getTileIcons());
+      setIO(io);
+    }
+
+    /* Continue to parse the data in the IO */
+    io->load(data, index + 1);
+  }
   else if(data.getElement(index) == "mapitem" && data.getKey(index) == "id")
   {
     int item_id = QString::fromStdString(data.getKeyValue(index)).toInt();
@@ -3267,6 +3734,13 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
       save_dialog->setValue(save_dialog->value()+1);
     }
 
+    /* Add ios */
+    for(int i = 0; i < base_ios.size(); i++)
+    {
+      base_ios[i]->save(fh, game_only);
+      save_dialog->setValue(save_dialog->value()+1);
+    }
+
     /* Add items */
     for(int i = 0; i < base_items.size(); i++)
     {
@@ -3302,6 +3776,36 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
 
     fh->writeXmlElementEnd();
   }
+}
+
+/*
+ * Description: Sets the current npc, based on the index in the stack.
+ *              Passing in -1 unsets the active npc (to NULL). This sprite is
+ *              used in click placement.
+ *
+ * Inputs: int index - npc index in the list of map npcs
+ * Output: bool - true if the active npc was changed
+ */
+bool EditorMap::setCurrentIO(int index)
+{
+  if(index >= -1 && index < base_ios.size())
+  {
+    /* Unset the hover, if relevant */
+    updateHoverThing(true);
+
+    /* If index is -1, unset the current IO */
+    if(index == -1)
+      active_info.active_io = NULL;
+    /* Otherwise, index is in valid range of base IO set */
+    else
+      active_info.active_io = base_ios[index];
+
+    /* Set the hover, if relevant */
+    updateHoverThing();
+
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -3363,6 +3867,7 @@ bool EditorMap::setCurrentMap(int index)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
     /* Trigger thing instance update */
+    emit ioInstanceChanged("");
     emit itemInstanceChanged("");
     emit npcInstanceChanged("");
     emit personInstanceChanged("");
@@ -3511,6 +4016,20 @@ void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
 }
 
 /*
+ * Description: Sets the hover IO, being flagged when selecting an instance
+ *              in the list in MapIOView.
+ *
+ * Inputs: int id - the id of the IO instance
+ * Output: bool - true if the instance was changed (unsets the old regardless)
+ */
+bool EditorMap::setHoverIO(int id)
+{
+  if(active_submap != NULL)
+    return setHoverThing(getIO(id, active_submap->id));
+  return false;
+}
+
+/*
  * Description: Sets the hover item, being flagged when selecting an instance
  *              in the list in MapItemView.
  *
@@ -3643,6 +4162,103 @@ void EditorMap::setID(int id)
     this->id = kUNSET_ID;
   else
     this->id = id;
+}
+
+/*
+ * Description: Sets the IO in the set within the editor map. If an IO,
+ *              already exists with the ID, it deletes the existing one.
+ *
+ * Inputs: EditorMapIO* io - the new IO to set in
+ *         int sub_map - the sub-map to set the IOs for (<0 is base)
+ * Output: int - the index if set. If < 0, it is not set.
+ */
+int EditorMap::setIO(EditorMapIO* io, int sub_map)
+{
+  if(io != NULL && io->getID() >= 0)
+  {
+    bool found = false;
+    int index = -1;
+    bool near = false;
+
+    /* If sub map id is less than 0, work with base IO */
+    if(sub_map < 0)
+    {
+      /* Find if the ID exists */
+      for(int i = 0; !found && !near && (i < base_ios.size()); i++)
+      {
+        if(base_ios[i]->getID() == io->getID())
+        {
+          index = i;
+          found = true;
+        }
+        else if(base_ios[i]->getID() > io->getID())
+        {
+          index = i;
+          near = true;
+        }
+      }
+
+      /* If found, modify the index with the new information */
+      if(found)
+      {
+        unsetIOByIndex(index);
+        base_ios.insert(index, io);
+      }
+      else if(near)
+      {
+        base_ios.insert(index, io);
+      }
+      else
+      {
+        base_ios.append(io);
+        index = base_ios.size() - 1;
+      }
+    }
+    /* Otherwise, work with the sub id */
+    else if(sub_map < sub_maps.size())
+    {
+      /* Check to make sure the thing could be added */
+      int x_start = io->getX();
+      int y_start = io->getY();
+      int x_end = x_start + io->getMatrix()->getWidth();
+      int y_end = y_start + io->getMatrix()->getHeight();
+      if(x_start >= 0 && x_end <= sub_maps[sub_map]->tiles.size() &&
+         y_start >= 0 && y_end <= sub_maps[sub_map]->tiles[x_start].size())
+      {
+        /* First remove the existing id, if one exists */
+        unsetIO(io->getID(), true);
+
+        /* Now insert into the proper location in the IO stack in the map */
+        for(int i = 0; !near && (i < sub_maps[sub_map]->ios.size()); i++)
+        {
+          if(sub_maps[sub_map]->ios[i]->getID() > io->getID())
+          {
+            index = i;
+            near = true;
+          }
+        }
+
+        /* If near, insert at index. Otherwise, append */
+        if(near)
+        {
+          sub_maps[sub_map]->ios.insert(index, io);
+        }
+        else
+        {
+          sub_maps[sub_map]->ios.append(io);
+          index = sub_maps[sub_map]->ios.size() - 1;
+        }
+
+        /* Add to tile */
+        for(int i = x_start; i < x_end; i++)
+          for(int j = y_start; j < y_end; j++)
+            sub_maps[sub_map]->tiles[i][j]->setIO(io);
+      }
+    }
+
+    return index;
+  }
+  return -1;
 }
 
 /*
@@ -4326,6 +4942,97 @@ void EditorMap::setVisibilityPaths(bool visible)
 }
 
 /*
+ * Description: Re-adds all sub-map IOs to tiles. This is called after
+ *              calling tilesIORemove(), processing the IO, and then
+ *              re-calling. Any IO instances that can't be re-added are
+ *              deleted and removed from the list.
+ * TODO: FUTURE - warn about IOs being removed??
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
+void EditorMap::tilesIOAdd(bool update_all)
+{
+  /* Update all sub-maps - used for loading */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+      {
+        if(!addIO(sub_maps[i]->ios[j], sub_maps[i]))
+        {
+          delete sub_maps[i]->ios[j];
+          sub_maps[i]->ios.remove(j);
+          j--;
+        }
+      }
+    }
+  }
+  /* Or just the active one */
+  else
+  {
+    if(active_submap != NULL)
+    {
+      for(int i = 0; i < active_submap->ios.size(); i++)
+      {
+        if(!addIO(active_submap->ios[i]))
+        {
+          delete active_submap->ios[i];
+          active_submap->ios.remove(i);
+          i--;
+        }
+      }
+    }
+  }
+}
+
+/*
+ * Description: Removes all sub-map IOs from tiles. This is called before
+ *              processing IO changes, and then calling tilesIOAdd().
+ *              Just removes the IOs from the tiles but still stored into
+ *              memory.
+ *
+ * Inputs: bool update_all - true if updating all sub-maps or just active one
+ * Output: none
+ */
+void EditorMap::tilesIORemove(bool update_all)
+{
+  /* Update all sub-maps - used for loading / resizing */
+  if(update_all)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+      {
+        EditorMapIO* io = sub_maps[i]->ios[j];
+        int x = io->getX();
+        int y = io->getY();
+
+        sub_maps[i]->tiles[x][y]->unsetIO(io);
+      }
+    }
+  }
+  else
+  {
+    if(active_submap != NULL)
+    {
+      /* Clear selection */
+      setHoverThing(-1);
+
+      for(int i = 0; i < active_submap->ios.size(); i++)
+      {
+        EditorMapIO* io = active_submap->ios[i];
+        int x = io->getX();
+        int y = io->getY();
+
+        active_submap->tiles[x][y]->unsetIO(io);
+      }
+    }
+  }
+}
+
+/*
  * Description: Re-adds all sub-map items to tiles. This is called after
  *              calling tilesItemRemove(), processing the item, and then
  *              re-calling. Any item instances that can't be re-added are
@@ -4768,15 +5475,129 @@ void EditorMap::updateAll()
 }
 
 /*
- * Description: Unset the map within the list that correspond to the ID.
+ * Description: Unset the IO within the list that correspond to the ID.
  *
- * Inputs: int id - the map id
- * Output: bool - true if deleted
+ * Inputs: int id - the IO id
+ *         bool from_sub - true if it should be unset in sub-maps instead
+ * Output: bool - was a IO deleted?
  */
-bool EditorMap::unsetMap(int id)
+bool EditorMap::unsetIO(int id, bool from_sub)
 {
-  int index = getMapIndex(id);
-  return unsetMapByIndex(index);
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    int index = getIOIndex(id);
+    return unsetIOByIndex(index);
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    bool deleted = false;
+
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      int index = getIOIndex(id, i);
+      deleted |= unsetIOByIndex(index, i);
+    }
+
+    return deleted;
+  }
+}
+
+/*
+ * Description: Unset the IO within the list that correspond to the index.
+ *
+ * Inputs: int index - the IO index corresponder
+ *         int sub_map - the sub-map to get the IOs for (<0 is base)
+ * Output: bool - was a IO deleted?
+ */
+bool EditorMap::unsetIOByIndex(int index, int sub_map)
+{
+  if(sub_map < 0)
+  {
+    if(index >= 0 && index < base_ios.size())
+    {
+      /* Remove all IOs related to this index - sub IOs */
+      for(int i = 0; i < sub_maps.size(); i++)
+      {
+        for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+        {
+          if(sub_maps[i]->ios[j]->getBaseIO() != NULL &&
+             sub_maps[i]->ios[j]->getBaseIO()->getID() ==
+             base_ios[index]->getID())
+          {
+            unsetIOByIndex(j, i);
+            j--;
+          }
+        }
+      }
+
+      /* Finally, delete the IO */
+      delete base_ios[index];
+      base_ios.remove(index);
+
+      return true;
+    }
+  }
+  else if(sub_map < sub_maps.size())
+  {
+    if(index >= 0 && index < sub_maps[sub_map]->ios.size())
+    {
+      EditorMapIO* ref = sub_maps[sub_map]->ios[index];
+
+      /* Remove the instances from tiles */
+      int x = ref->getX();
+      int y = ref->getY();
+      for(int i = x; i < (ref->getMatrix()->getWidth() + x) &&
+                     i < sub_maps[sub_map]->tiles.size(); i++)
+      {
+        for(int j = y; j < (ref->getMatrix()->getHeight() + y) &&
+                                 j < sub_maps[sub_map]->tiles[i].size(); j++)
+        {
+          sub_maps[sub_map]->tiles[i][j]->unsetIO(ref);
+        }
+      }
+
+      /* Finally, delete the IO */
+      delete ref;
+      sub_maps[sub_map]->ios.remove(index);
+
+      /* Update list */
+      emit ioInstanceChanged("");
+      setHoverThing(-1);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+ * Description: Unsets all map IOs within the EditorMap set.
+ *
+ * Inputs: bool from_sub - true if it should be unset in sub-maps instead
+ * Output: none
+ */
+void EditorMap::unsetIOs(bool from_sub)
+{
+  /* If not sub-maps, it's base and try to remove ID */
+  if(!from_sub)
+  {
+    while(base_ios.size() > 0)
+      unsetIOByIndex(0);
+    base_ios.clear();
+  }
+  /* Otherwise, check all sub-maps */
+  else
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+    {
+      while(sub_maps[i]->ios.size() > 0)
+        unsetIOByIndex(0, i);
+      sub_maps[i]->ios.clear();
+    }
+  }
 }
 
 /*
@@ -4898,6 +5719,18 @@ void EditorMap::unsetItems(bool from_sub)
 }
 
 /*
+ * Description: Unset the map within the list that correspond to the ID.
+ *
+ * Inputs: int id - the map id
+ * Output: bool - true if deleted
+ */
+bool EditorMap::unsetMap(int id)
+{
+  int index = getMapIndex(id);
+  return unsetMapByIndex(index);
+}
+
+/*
  * Description: Unsets the map within the list that correspond to the index.
  *
  * Inputs: int index - the sub-map index
@@ -4910,6 +5743,22 @@ bool EditorMap::unsetMapByIndex(int index)
     /* Delete all things from sub-map */
     while(sub_maps[index]->things.size() > 0)
       unsetThingByIndex(0, index);
+
+    /* Delete all ios from sub-map */
+    while(sub_maps[index]->ios.size() > 0)
+      unsetIOByIndex(0, index);
+
+    /* Delete all items froms ub-map */
+    while(sub_maps[index]->items.size() > 0)
+      unsetItemByIndex(0, index);
+
+    /* Delete all persons from sub-map */
+    while(sub_maps[index]->persons.size() > 0)
+      unsetPersonByIndex(0, index);
+
+    /* Delete all npcs from sub-map */
+    while(sub_maps[index]->npcs.size() > 0)
+      unsetNPCByIndex(0, index);
 
     /* Delete the sub-map */
     delete sub_maps[index];

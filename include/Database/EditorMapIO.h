@@ -93,6 +93,9 @@ public:
   bool insertState(int index, EditorEnumDb::MapIOType type);
   bool insertState(int index, EditorState* state);
 
+  /* Returns if the tile sprites in all matrixes at that x, y are null */
+  virtual bool isAllNull(int x, int y) const;
+
   /* Loads the io data */
   virtual void load(XmlData data, int index);
 

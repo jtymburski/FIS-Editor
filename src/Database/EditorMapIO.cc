@@ -353,6 +353,34 @@ bool EditorMapIO::insertState(int index, EditorState* state)
 }
 
 /*
+ * Description: Checks all matrixes at the given x and y location, if the
+ *              sprites within are null. Virtualized.
+ *
+ * Inputs: int x - the x offset from top left in matrixes
+ *         int y - the y offset from top left in matrixes
+ * Output: bool - true if sprites contains only null paths.
+ */
+bool EditorMapIO::isAllNull(int x, int y) const
+{
+  bool is_null = true;
+
+  /* Loop through all matrixes */
+  for(int i = 0; i < states.size(); i++)
+  {
+    /* If matrix is valid */
+    if(states[i]->matrix != NULL)
+    {
+      /* Get sprite, if valid */
+      EditorTileSprite* sprite = states[i]->matrix->getSprite(x, y);
+      if(sprite != NULL)
+        is_null &= sprite->isAllNull();
+    }
+  }
+
+  return is_null;
+}
+
+/*
  * Description: Loads the IO data from the XML struct and offset index.
  *
  * Inputs: XmlData data - the XML data tree struct

@@ -31,6 +31,7 @@ struct SubMapInfo
   QVector<QVector<EditorTile*>> tiles;
   EditorNPCPath* path_top;
 
+  QVector<EditorMapIO*> ios;
   QVector<EditorMapItem*> items;
   QVector<EditorMapNPC*> npcs;
   QVector<EditorMapPerson*> persons;
@@ -61,6 +62,7 @@ private:
   SubMapInfo* active_submap;
 
   /* The base map things */
+  QVector<EditorMapIO*> base_ios;
   QVector<EditorMapItem*> base_items;
   QVector<EditorMapNPC*> base_npcs;
   QVector<EditorMapPerson*> base_persons;
@@ -96,6 +98,10 @@ private:
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Attempts to add io to the current sub-map */
+  bool addIO(EditorMapIO* io, SubMapInfo* map = NULL,
+             bool existing = true);
+
   /* Attempts to add item to the current sub-map */
   bool addItem(EditorMapItem* item, SubMapInfo* map = NULL,
                bool existing = true);
@@ -155,6 +161,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* IO instant changed */
+  void ioInstanceChanged(QString name_list);
+
   /* Item instant changed */
   void itemInstanceChanged(QString name_list);
 
@@ -193,6 +202,7 @@ public:
   bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
 
   /* Returns current references for lists in map */
+  int getCurrentIOIndex();
   int getCurrentItemIndex();
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
@@ -206,6 +216,15 @@ public:
 
   /* Returns the ID of the map set */
   virtual int getID() const;
+
+  /* Returns stored IO information */
+  EditorMapIO* getIO(int id, int sub_map = -1);
+  EditorMapIO* getIOByIndex(int index, int sub_map = -1);
+  int getIOCount(int sub_map = -1);
+  int getIOIndex(int id, int sub_map = -1);
+  QVector<QString> getIOList(int sub_map = -1, bool all_submaps = false,
+                             bool shortened = false);
+  QVector<EditorMapIO*> getIOs(int sub_map = -1);
 
   /* Return stored item information */
   EditorMapItem* getItem(int id, int sub_map = -1);
@@ -233,6 +252,7 @@ public:
   virtual QString getNameList();
 
   /* Returns available IDs in the set. Useful for when creating a new one */
+  int getNextIOID(bool from_sub = false);
   int getNextItemID(bool from_sub = false);
   int getNextMapID();
   int getNextNPCID(bool from_sub = false);
@@ -292,8 +312,9 @@ public:
   /* Saves the map */
   void save(FileHandler* fh, QProgressDialog* save_dialog,
             bool game_only = false, int sub_index = -1);
-// TODO: HERE
+
   /* Sets the current references for the selected sprite(s) or thing(s) */
+  bool setCurrentIO(int index);
   bool setCurrentItem(int index);
   bool setCurrentMap(int index);
   bool setCurrentNPC(int index);
@@ -303,6 +324,7 @@ public:
 
   /* Sets the hover information */
   void setHoverCursor(EditorEnumDb::CursorMode cursor);
+  bool setHoverIO(int id);
   bool setHoverItem(int id);
   void setHoverLayer(EditorEnumDb::Layer layer);
   bool setHoverNPC(int id);
@@ -313,6 +335,9 @@ public:
 
   /* Sets the ID of the map set */
   virtual void setID(int id);
+
+  /* Sets a IO in the map */
+  int setIO(EditorMapIO* io, int sub_map = -1);
 
   /* Sets a item in the map */
   int setItem(EditorMapItem* item, int sub_map = -1);
@@ -353,6 +378,8 @@ public:
   void setVisibilityPaths(bool visible);
 
   /* Thing processing for updating with the new data */
+  void tilesIOAdd(bool update_all = false);
+  void tilesIORemove(bool update_all = false);
   void tilesItemAdd(bool update_all = false);
   void tilesItemRemove(bool update_all = false);
   void tilesNPCAdd(bool update_all = false);
@@ -364,6 +391,11 @@ public:
 
   /* Update all tiles */
   void updateAll();
+
+  /* Unset io(s) */
+  bool unsetIO(int id, bool from_sub = false);
+  bool unsetIOByIndex(int index, int sub_map = -1);
+  void unsetIOs(bool from_sub = false);
 
   /* Unset item(s) */
   bool unsetItem(int id, bool from_sub = false);
