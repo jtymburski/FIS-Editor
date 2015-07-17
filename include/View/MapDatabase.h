@@ -8,10 +8,12 @@
 #ifndef MAPDATABASE_H
 #define MAPDATABASE_H
 
+#include <QComboBox>
 #include <QListWidget>
 #include <QStackedWidget>
 
 #include "Dialog/NodeDialog.h"
+#include "View/MapIOView.h"
 #include "View/MapItemView.h"
 #include "View/MapNPCView.h"
 #include "View/MapPersonView.h"
@@ -36,6 +38,9 @@ private:
   QPushButton* button_import;
   QPushButton* button_new;
 
+  /* The top selection combo box */
+  QComboBox* combo_top;
+
   /* The editing map for the database */
   EditorMap* editing_map;
 
@@ -51,13 +56,13 @@ private:
   EditorNPCPath* path_working;
 
   /* The Views */
+  MapIOView* view_io;
   MapItemView* view_item;
   MapNPCView* view_npc;
   MapPersonView* view_person;
   RawImageView* view_raw;
   SpriteView* view_sprite;
   MapThingView* view_thing;
-  QListWidget* view_top;
 
   /* Widgets in stacked control */
   EditorEnumDb::MapEditMode widget_mode;
@@ -147,6 +152,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the views */
+  MapIOView* getIOView();
   MapItemView* getItemView();
   MapNPCView* getNPCView();
   MapPersonView* getPersonView();

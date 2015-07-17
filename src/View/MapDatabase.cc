@@ -48,18 +48,16 @@ void MapDatabase::setupMain()
   widget_main = new QWidget(this);
 
   /* Top view */
-  view_top = new QListWidget(widget_main);
-  view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  combo_top = new QComboBox(widget_main);
   QStringList items;
-  items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects" 
+  items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects"
         << "Items" << "Persons" << "NPCs";
-  view_top->addItems(items);
-  view_top->setCurrentRow(0);
-  view_top->setMaximumHeight(60);
-  connect(view_top, SIGNAL(currentRowChanged(int)),
+  combo_top->addItems(items);
+  connect(combo_top, SIGNAL(currentIndexChanged(int)),
           this, SLOT(updateSelected(int)));
 
   /* Sets up the various views */
+  view_io = new MapIOView(widget_main);
   view_item = new MapItemView(widget_main);
   view_npc = new MapNPCView(widget_main);
   view_person = new MapPersonView(widget_main);
@@ -70,6 +68,12 @@ void MapDatabase::setupMain()
   /* Connections for the views */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
+  connect(view_io, SIGNAL(ensureVisible(QGraphicsItem*)),
+          this, SIGNAL(ensureVisible(QGraphicsItem*)));
+  connect(view_io, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+  connect(view_io, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
   connect(view_item, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_item, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
@@ -112,14 +116,15 @@ void MapDatabase::setupMain()
 
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(widget_main);
-  layout->addWidget(view_top);
+  layout->addWidget(combo_top);
   layout->addLayout(hlayout);
   layout->addWidget(view_raw);
   layout->addWidget(view_sprite);
   layout->addWidget(view_thing);
+  layout->addWidget(view_io);
+  layout->addWidget(view_item);
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
-  layout->addWidget(view_item);
 }
 
 /* Set-up path editor widget */
@@ -208,12 +213,14 @@ void MapDatabase::buttonDelete()
     view_sprite->deleteSprite();
   else if(view_thing->isVisible())
     view_thing->deleteThing();
+  else if(view_io->isVisible())
+    view_io->deleteIO();
+  else if(view_item->isVisible())
+    view_item->deleteItem();
   else if(view_person->isVisible())
     view_person->deletePerson();
   else if(view_npc->isVisible())
     view_npc->deleteNPC();
-  else if(view_item->isVisible())
-    view_item->deleteItem();
 }
 
 // TODO: Comment
@@ -224,12 +231,14 @@ void MapDatabase::buttonDuplicate()
     view_sprite->duplicateSprite();
   else if(view_thing->isVisible())
     view_thing->duplicateThing();
+  else if(view_io->isVisible())
+    view_io->duplicateIO();
+  else if(view_item->isVisible())
+    view_item->duplicateItem();
   else if(view_person->isVisible())
     view_person->duplicatePerson();
   else if(view_npc->isVisible())
     view_npc->duplicateNPC();
-  else if(view_item->isVisible())
-    view_item->duplicateItem();
 }
 
 // TODO: Comment
@@ -240,12 +249,14 @@ void MapDatabase::buttonImport()
     view_sprite->importSprite();
   else if(view_thing->isVisible())
     view_thing->importThing();
+  else if(view_io->isVisible())
+    view_io->importIO();
+  else if(view_item->isVisible())
+    view_item->importItem();
   else if(view_person->isVisible())
     view_person->importPerson();
   else if(view_npc->isVisible())
     view_npc->importNPC();
-  else if(view_item->isVisible())
-    view_item->importItem();
 }
 
 // TODO: Comment
@@ -256,12 +267,14 @@ void MapDatabase::buttonNew()
     view_sprite->newSprite();
   else if(view_thing->isVisible())
     view_thing->newThing();
+  else if(view_io->isVisible())
+    view_io->newIO();
+  else if(view_item->isVisible())
+    view_item->newItem();
   else if(view_person->isVisible())
     view_person->newPerson();
   else if(view_npc->isVisible())
     view_npc->newNPC();
-  else if(view_item->isVisible())
-    view_item->newItem();
 }
 
 /* Fills thing with data */
@@ -284,6 +297,12 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     {
       view_thing->updateListSubmaps(editing_map->getMapList());
       view_thing->updateListThings(thing_list);
+    }
+    /* Update IOs */
+    else if(view == EditorEnumDb::IO_VIEW)
+    {
+      view_io->updateListSubmaps(editing_map->getMapList());
+      view_io->updateListThings(thing_list);
     }
     /* Update persons */
     else if(view == EditorEnumDb::PERSON_VIEW)
@@ -433,6 +452,10 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
   {
     view_thing->updateSelectedTile(id, x, y);
   }
+  else if(mode_for_tile == EditorEnumDb::IO_VIEW)
+  {
+    view_io->updateSelectedTile(id, x, y);
+  }
   else if(mode_for_tile == EditorEnumDb::PERSON_VIEW)
   {
     view_person->updateSelectedTile(id, x, y);
@@ -447,6 +470,7 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
 void MapDatabase::updateAllLists()
 {
   view_thing->updateList();
+  view_io->updateList();
   view_item->updateList();
   view_person->updateList();
   view_npc->updateList();
@@ -458,6 +482,10 @@ void MapDatabase::updatedItems(QVector<QString> items)
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {
     view_thing->updateListItems(items);
+  }
+  else if(mode_for_data == EditorEnumDb::IO_VIEW)
+  {
+    view_io->updateListItems(items);
   }
   else if(mode_for_data == EditorEnumDb::ITEM_VIEW)
   {
@@ -479,6 +507,10 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {
     view_thing->updateListMaps(maps);
+  }
+  else if(mode_for_data == EditorEnumDb::IO_VIEW)
+  {
+    view_io->updateListMaps(maps);
   }
   else if(mode_for_data == EditorEnumDb::PERSON_VIEW)
   {
@@ -517,6 +549,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->show();
     view_sprite->hide();
     view_thing->hide();
+    view_io->hide();
     view_item->hide();
     view_person->hide();
     view_npc->hide();
@@ -532,6 +565,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->show();
     view_thing->hide();
+    view_io->hide();
     view_item->hide();
     view_person->hide();
     view_npc->hide();
@@ -541,19 +575,27 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->show();
+    view_io->hide();
     view_item->hide();
     view_person->hide();
     view_npc->hide();
   }
   else if(index == EditorEnumDb::IO_VIEW)
   {
-    // TODO
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_io->show();
+    view_item->hide();
+    view_person->hide();
+    view_npc->hide();
   }
   else if(index == EditorEnumDb::ITEM_VIEW)
   {
     view_raw->hide();
     view_sprite->hide();
     view_thing->hide();
+    view_io->hide();
     view_item->show();
     view_person->hide();
     view_npc->hide();
@@ -563,6 +605,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->hide();
+    view_io->hide();
     view_item->hide();
     view_person->show();
     view_npc->hide();
@@ -572,6 +615,7 @@ void MapDatabase::updateSelected(int index)
     view_raw->hide();
     view_sprite->hide();
     view_thing->hide();
+    view_io->hide();
     view_item->hide();
     view_person->hide();
     view_npc->show();
@@ -581,6 +625,11 @@ void MapDatabase::updateSelected(int index)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+MapIOView* MapDatabase::getIOView()
+{
+  return view_io;
+}
 
 MapItemView* MapDatabase::getItemView()
 {
@@ -622,6 +671,9 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the thing view */
   view_thing->setEditorMap(editing_map);
+
+  /* Add to the IO view */
+  view_io->setEditorMap(editing_map);
 
   /* Add to the item view */
   view_item->setEditorMap(editing_map);

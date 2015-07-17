@@ -74,9 +74,11 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   QHBoxLayout* button_layout = new QHBoxLayout();
   button_layout->addWidget(button_new);
   button_layout->addWidget(button_delete);
-  button_layout->addWidget(button_import);
-  button_layout->addWidget(button_duplicate);
   layout->addLayout(button_layout);
+  QHBoxLayout* button_layout2 = new QHBoxLayout();
+  button_layout2->addWidget(button_import);
+  button_layout2->addWidget(button_duplicate);
+  layout->addLayout(button_layout2);
 
   /* Update the bottom list */
   rowChange(view_top->currentRow());
@@ -90,6 +92,8 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   tile_icons.nopassE = new QPixmap(":/images/nopass_E.png");
   tile_icons.nopassS = new QPixmap(":/images/nopass_S.png");
   tile_icons.nopassW = new QPixmap(":/images/nopass_W.png");
+
+  setMaximumWidth(182);
 }
 
 GameDatabase::~GameDatabase()
@@ -267,132 +271,144 @@ void GameDatabase::deleteResource()
   {
     int index = view_bottom->currentRow();
 
+    /* Get the category */
+    QString category = view_top->currentItem()->text();
+    QString name = view_bottom->currentItem()->text();
+
     /* Check if it's the bottom row */
     bool bottom = false;
     if((index + 1) == view_bottom->count())
       bottom = true;
 
-    /* Switch through what to do */
-    switch(view_top->currentRow())
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting \"" + name + "\" from " + category + ".");
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
     {
-      /* -- MAP -- */
-      case 0:
-        if(data_map[index] == current_map)
-        {
-          emit changeMap(NULL);
-          current_map = NULL;
-        }
-        delete data_map[index];
-        data_map.remove(index);
-        break;
-      /* -- PERSON -- */
-      case 1:
-        if(data_person[index] == current_person)
-        {
-          emit changePerson(NULL);
-          current_person = NULL;
-        }
-        delete data_person[index];
-        data_person.remove(index);
-        break;
-      /* -- PARTY -- */
-      case 2:
-        if(data_party[index] == current_party)
-        {
-          emit changeParty(NULL);
-          current_party = NULL;
-        }
-        delete data_party[index];
-        data_party.remove(index);
-        break;
-      /* -- ITEM -- */
-      case 3:
-        if(data_item[index] == current_item)
-        {
-          emit changeItem(NULL);
-          current_item = NULL;
-        }
-        delete data_item[index];
-        data_item.remove(index);
-        break;
-      /* -- ACTION -- */
-      case 4:
-        if(data_action[index] == current_action)
-        {
-          emit changeAction(NULL);
-          current_action = NULL;
-        }
-        delete data_action[index];
-        data_action.remove(index);
-        break;
-      /* -- RACE CLASS -- */
-      case 5:
-        if(data_race[index] == current_race)
-        {
-          emit changeRace(NULL);
-          current_race = NULL;
-        }
-        delete data_race[index];
-        data_race.remove(index);
-        break;
-      /* -- BATTLE CLASS -- */
-      case 6:
-        if(data_battleclass[index] == current_battleclass)
-        {
-          emit changeBattleclass(NULL);
-          current_battleclass = NULL;
-        }
-        delete data_battleclass[index];
-        data_battleclass.remove(index);
-        break;
-      /* -- SKILL SET -- */
-      case 7:
-        if(data_skillset[index] == current_skillset)
-        {
-          emit changeSkillset(NULL);
-          current_skillset = NULL;
-        }
-        delete data_skillset[index];
-        data_skillset.remove(index);
-        break;
-      /* -- SKILL -- */
-      case 8:
-        if(data_skill[index] == current_skill)
-        {
-          emit changeSkill(NULL);
-          current_skill = NULL;
-        }
-        delete data_skill[index];
-        data_skill.remove(index);
-        break;
-      /* -- EQUIPMENT -- */
-      case 9:
-        if(data_equipment[index] == current_equipment)
-        {
-          emit changeEquipment(NULL);
-          current_equipment = NULL;
-        }
-        delete data_equipment[index];
-        data_equipment.remove(index);
-        break;
-      /* -- BUBBY -- */
-      case 10:
-        if(data_bubby[index] == current_bubby)
-        {
-          emit changeBubby(NULL);
-          current_bubby = NULL;
-        }
-        delete data_bubby[index];
-        data_bubby.remove(index);
-        break;
-      default:
-        break;
-    }
+      /* Switch through what to do */
+      switch(view_top->currentRow())
+      {
+        /* -- MAP -- */
+        case 0:
+          if(data_map[index] == current_map)
+          {
+            emit changeMap(NULL);
+            current_map = NULL;
+          }
+          delete data_map[index];
+          data_map.remove(index);
+          break;
+        /* -- PERSON -- */
+        case 1:
+          if(data_person[index] == current_person)
+          {
+            emit changePerson(NULL);
+            current_person = NULL;
+          }
+          delete data_person[index];
+          data_person.remove(index);
+          break;
+        /* -- PARTY -- */
+        case 2:
+          if(data_party[index] == current_party)
+          {
+            emit changeParty(NULL);
+            current_party = NULL;
+          }
+          delete data_party[index];
+          data_party.remove(index);
+          break;
+        /* -- ITEM -- */
+        case 3:
+          if(data_item[index] == current_item)
+          {
+            emit changeItem(NULL);
+            current_item = NULL;
+          }
+          delete data_item[index];
+          data_item.remove(index);
+          break;
+        /* -- ACTION -- */
+        case 4:
+          if(data_action[index] == current_action)
+          {
+            emit changeAction(NULL);
+            current_action = NULL;
+          }
+          delete data_action[index];
+          data_action.remove(index);
+          break;
+        /* -- RACE CLASS -- */
+        case 5:
+          if(data_race[index] == current_race)
+          {
+            emit changeRace(NULL);
+            current_race = NULL;
+          }
+          delete data_race[index];
+          data_race.remove(index);
+          break;
+        /* -- BATTLE CLASS -- */
+        case 6:
+          if(data_battleclass[index] == current_battleclass)
+          {
+            emit changeBattleclass(NULL);
+            current_battleclass = NULL;
+          }
+          delete data_battleclass[index];
+          data_battleclass.remove(index);
+          break;
+        /* -- SKILL SET -- */
+        case 7:
+          if(data_skillset[index] == current_skillset)
+          {
+            emit changeSkillset(NULL);
+            current_skillset = NULL;
+          }
+          delete data_skillset[index];
+          data_skillset.remove(index);
+          break;
+        /* -- SKILL -- */
+        case 8:
+          if(data_skill[index] == current_skill)
+          {
+            emit changeSkill(NULL);
+            current_skill = NULL;
+          }
+          delete data_skill[index];
+          data_skill.remove(index);
+          break;
+        /* -- EQUIPMENT -- */
+        case 9:
+          if(data_equipment[index] == current_equipment)
+          {
+            emit changeEquipment(NULL);
+            current_equipment = NULL;
+          }
+          delete data_equipment[index];
+          data_equipment.remove(index);
+          break;
+        /* -- BUBBY -- */
+        case 10:
+          if(data_bubby[index] == current_bubby)
+          {
+            emit changeBubby(NULL);
+            current_bubby = NULL;
+          }
+          delete data_bubby[index];
+          data_bubby.remove(index);
+          break;
+        default:
+          break;
+      }
 
-    /* Update list */
-    modifyBottomList(view_top->currentRow());
-    if(bottom)
-      view_bottom->setCurrentRow(view_bottom->count() - 1);
+      /* Update list */
+      modifyBottomList(view_top->currentRow());
+      if(bottom)
+        view_bottom->setCurrentRow(view_bottom->count() - 1);
+    }
   }
 }
 
@@ -990,6 +1006,7 @@ void GameDatabase::modifyBottomList(int index)
     font.setBold(true);
     view_bottom->item(bold_index)->setFont(font);
   }
+  view_bottom->setResizeMode(QListView::Adjust);
 
   /* Replace selected row */
   if(last_row >= 0 && last_row < view_bottom->count())

@@ -70,6 +70,7 @@ SOURCES += \
     src/View/GameView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
+    src/View/MapIOView.cc \
     src/View/MapItemView.cc \
     src/View/MapNPCView.cc \
     src/View/MapPersonView.cc \
@@ -158,6 +159,7 @@ HEADERS += \
     include/View/GameView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
+    include/View/MapIOView.h \
     include/View/MapItemView.h \
     include/View/MapNPCView.h \
     include/View/MapPersonView.h \
