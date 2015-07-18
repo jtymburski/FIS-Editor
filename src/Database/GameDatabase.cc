@@ -93,7 +93,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   tile_icons.nopassS = new QPixmap(":/images/nopass_S.png");
   tile_icons.nopassW = new QPixmap(":/images/nopass_W.png");
 
-  setMaximumWidth(182);
+  setMaximumWidth(190);
 }
 
 GameDatabase::~GameDatabase()

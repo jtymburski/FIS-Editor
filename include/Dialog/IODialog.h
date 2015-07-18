@@ -30,6 +30,17 @@ private:
   /* The visible control box */
   QComboBox* box_visible;
 
+  /* Combo boxes */
+  QComboBox* box_interaction;
+  QComboBox* box_state;
+
+  /* Buttons that require external control */
+  QPushButton* btn_enter;
+  QPushButton* btn_exit;
+  QPushButton* btn_minus;
+  QPushButton* btn_use;
+  QPushButton* btn_walkover;
+
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
 
@@ -40,6 +51,9 @@ private:
   /* The frame control dialog */
   FrameDialog* frame_dialog;
 
+  /* Group box for events */
+  QGroupBox* group_events;
+
   /* The working and original IO */
   EditorMapIO* io_original;
   EditorMapIO* io_working;
@@ -48,11 +62,13 @@ private:
   QLabel* lbl_frame_img;
 
   /* The line edit for io data */
-  QLineEdit* line_description;
   QLineEdit* line_name;
 
   /* Matrix view and control */
   MatrixView* matrix_view;
+
+  /* Description text edit */
+  QTextEdit* text_description;
 
   /* Waiting for sub-map data */
   bool waiting_convo;
@@ -95,7 +111,7 @@ public slots:
   void buttonOk();
 
   /* Changed text in line edits */
-  void changedDescription(QString description);
+  void changedDescription();
   void changedName(QString name);
 
   /* Edit conversation trigger */

@@ -75,6 +75,8 @@ void IODialog::createLayout(bool instance)
   QGridLayout* layout = new QGridLayout(this);
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setColumnStretch(2, 1);
+  layout->setColumnStretch(5, 1);
+  layout->setRowStretch(6, 1);
 
   /* The ID widget */
   QLabel* lbl_id = new QLabel("ID:", this);
@@ -90,7 +92,7 @@ void IODialog::createLayout(bool instance)
   line_name = new QLineEdit("", this);
   connect(line_name, SIGNAL(textEdited(QString)),
           this, SLOT(changedName(QString)));
-  layout->addWidget(line_name, 1, 1, 1, 2);
+  layout->addWidget(line_name, 1, 1, 1, 3);
 
   /* The visibility widget */
   QLabel* lbl_visible = new QLabel("Visible:", this);
@@ -107,19 +109,51 @@ void IODialog::createLayout(bool instance)
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
   layout->addWidget(lbl_description, 3, 0);
-  line_description = new QLineEdit("", this);
-  connect(line_description, SIGNAL(textEdited(QString)),
-          this, SLOT(changedDescription(QString)));
-  layout->addWidget(line_description, 3, 1, 1, 5);
+  text_description = new QTextEdit("", this);
+  text_description->setAcceptRichText(false);
+  text_description->setMaximumHeight(120);
+  connect(text_description, SIGNAL(textChanged()),
+          this, SLOT(changedDescription()));
+  layout->addWidget(text_description, 3, 1, 2, 3);
+
+  /* State selection */
+  QLabel* lbl_state = new QLabel("State", this);
+  layout->addWidget(lbl_state, 0, 4, 1, 1);
+  box_state = new QComboBox(this);
+  layout->addWidget(box_state, 0, 5, 1, 1);
+  QHBoxLayout* layout_button = new QHBoxLayout();
+  layout_button->setSpacing(0);
+  QPushButton* btn_plus = new QPushButton("+", this);
+  QFont font = btn_plus->font();
+  font.setBold(true);
+  font.setPixelSize(14);
+  btn_plus->setFont(font);
+  btn_plus->setMaximumSize(30, 30);
+  layout_button->addWidget(btn_plus);
+  btn_minus = new QPushButton("-", this);
+  btn_minus->setFont(font);
+  btn_minus->setMaximumSize(30, 30);
+  layout_button->addWidget(btn_minus);
+  layout->addLayout(layout_button, 0, 6, 1, 1);
+  layout_button->addStretch();
+  QPushButton* btn_test = new QPushButton("Overview", this);
+  //connect()
+  layout->addWidget(btn_test, 0, 7);
+
+  /* Interaction selection */
+  QLabel* lbl_interaction = new QLabel("Interaction", this);
+  layout->addWidget(lbl_interaction, 1, 4, 1, 1);
+  box_interaction = new QComboBox(this);
+  layout->addWidget(box_interaction, 1, 5, 1, 3);
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 4, 0, 2, 1);
+  layout->addWidget(lbl_frame, 5, 0, 3, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 4, 1, 2, 3);
+  layout->addWidget(lbl_frame_img, 5, 1, 3, 3);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -127,25 +161,38 @@ void IODialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
-
-  /* Event View */
-  event_view = new EventView(event_ctrl, this);
-  if(instance)
-    event_view->setDisabled(true);
-  layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+  layout->addWidget(btn_frame_click, 5, 3, 3, 1, Qt::AlignTop);
 
   /* Matrix View */
   matrix_view = new MatrixView(io_working->getMatrix(), this);
   if(instance)
     matrix_view->setDisabled(true);
-  layout->addWidget(matrix_view, 4, 4, 4, 4);
+  layout->addWidget(matrix_view, 2, 4, 5, 4);
+
+  /* Event View */
+  group_events = new QGroupBox("Events", this);
+  btn_enter = new QPushButton("Enter", this);
+  btn_exit = new QPushButton("Exit", this);
+  btn_use = new QPushButton("Use", this);
+  btn_walkover = new QPushButton("Walkover", this);
+  QHBoxLayout* layout_events = new QHBoxLayout();
+  layout_events->addWidget(btn_enter);
+  layout_events->addWidget(btn_exit);
+  layout_events->addWidget(btn_use);
+  layout_events->addWidget(btn_walkover);
+  group_events->setLayout(layout_events);
+  layout->addWidget(group_events, 7, 4, 1, 4);
+  event_view = new EventView(event_ctrl); // TODO: REMOVE/UPDATE
+  //event_view = new EventView(event_ctrl, this);
+  //if(instance)
+  //  event_view->setDisabled(true);
+  //layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
+  //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+  //        this, SLOT(editConversation(Conversation*,bool)));
+  //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* The button control */
-  layout->setRowMinimumHeight(8, 15);
+  layout->setRowMinimumHeight(8, 25);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
@@ -167,7 +214,7 @@ void IODialog::createLayout(bool instance)
  */
 void IODialog::updateData()
 {
-  line_description->setText(io_working->getDescription());
+  text_description->setPlainText(io_working->getDescription());
   line_name->setText(io_working->getName());
   if(io_working->isVisible())
     box_visible->setCurrentIndex(1);
@@ -257,9 +304,10 @@ void IODialog::buttonOk()
  * Inputs: QString description - the new description
  * Output: none
  */
-void IODialog::changedDescription(QString description)
+void IODialog::changedDescription()
 {
-  io_working->setDescription(description);
+  QString simple = text_description->toPlainText().simplified();
+  io_working->setDescription(simple);
 }
 
 /*
