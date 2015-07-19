@@ -171,6 +171,9 @@ public:
   void setListSubmaps(QVector<QString> sub_maps);
   void setListThings(QVector<QString> things);
 
+  /* Updates the event */
+  void updateEvent();
+
   /* Update the selected tile for the thing */
   void updateSelectedTile(int id, int x, int y);
 };

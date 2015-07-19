@@ -1618,7 +1618,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::IO)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_thing != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_io != NULL)
       {
         /* Create the IO */
         int id = getNextIOID(true);

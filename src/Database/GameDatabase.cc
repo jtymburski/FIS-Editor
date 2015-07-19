@@ -858,6 +858,7 @@ void GameDatabase::load(FileHandler* fh)
     data_map[i]->tilesPersonAdd(true);
     data_map[i]->tilesNPCAdd(true);
     data_map[i]->tilesItemAdd(true);
+    data_map[i]->tilesIOAdd(true);
   }
 
   /* Update the view */

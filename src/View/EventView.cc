@@ -1048,6 +1048,18 @@ void EventView::setListThings(QVector<QString> things)
 }
 
 /*
+ * Description: Updates the editor event. Triggered by an external class when
+ *              it modifies the reference event.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::updateEvent()
+{
+  setLayoutData();
+}
+
+/*
  * Description: Updates the dialog with the tile which was selected on the
  *              sub-map. This shows the pop-up and updates the event with the
  *              new location.

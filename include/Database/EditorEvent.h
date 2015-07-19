@@ -115,6 +115,9 @@ public:
   /* Sets the conversation at the index */
   bool setConversation(QString index, Conversation convo);
 
+  /* Sets the event */
+  void setEvent(Event event);
+
   /* Sets the event to default / blank */
   void setEventBlank(bool delete_event = true);
 

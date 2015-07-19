@@ -1020,7 +1020,7 @@ void EditorTile::paint(QPainter *painter,
     /* Use the differential to make sure the sprite is valid */
     if(hover_thing && hover_info->active_thing->isAllNull(diff_x, diff_y))
       hover_thing = false;
-    if(hover_io && hover_info->active_thing->isAllNull(diff_x, diff_y))
+    if(hover_io && hover_info->active_io->isAllNull(diff_x, diff_y))
       hover_io = false;
     if(hover_person && hover_info->active_person->isAllNull(diff_x, diff_y))
       hover_person = false;
@@ -1099,7 +1099,7 @@ void EditorTile::paint(QPainter *painter,
   if(hover_thing)
     hover_info->active_thing->paint(painter, bound, diff_x, diff_y);
   /* If hover npc is true, render it */
-  else if(hover_npc)
+  else if(hover_io)
     hover_info->active_io->paint(painter, bound, diff_x, diff_y);
   /* If hover item is true, render it */
   else if(hover_item)

@@ -199,7 +199,7 @@ void MapIOView::updateInfo()
     lbl_id->setText("ID:");
     lbl_image->setPixmap(QPixmap());
     lbl_name->setText("Name:");
-    lbl_size->setText("Size:  |  Frames:");
+    lbl_size->setText("Size:  |  Nodes:");
 
     EditorMapIO* io = getSelected();
     if(io != NULL)
@@ -216,8 +216,8 @@ void MapIOView::updateInfo()
                       QString::number(io->getMatrix()->getWidth()) +
                       "W x " +
                       QString::number(io->getMatrix()->getHeight()) +
-                      "H  |  Frames: " +
-                      QString::number(io->getMatrix()->getTrimFrames() + 1));
+                      "H  |  Nodes: " +
+                      QString::number(io->getStates().size()));
       }
     }
   }

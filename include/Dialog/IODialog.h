@@ -26,6 +26,9 @@ public:
   /* Destructor function */
   ~IODialog();
 
+  /* ---- ENUMERATORS ---- */
+  enum EditEvent { NOEVENT, ENTER, EXIT, USE, WALKOVER };
+
 private:
   /* The visible control box */
   QComboBox* box_visible;
@@ -46,6 +49,9 @@ private:
 
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
+
+  /* Editing event */
+  EditEvent editing_event;
 
   /* Event view and control */
   EditorEvent* event_ctrl;
@@ -69,6 +75,9 @@ private:
 
   /* Matrix view and control */
   MatrixView* matrix_view;
+
+  /* Event pop-up */
+  QDialog* pop_event;
 
   /* Spin Boxes */
   QSpinBox* spin_inactive;
@@ -116,8 +125,10 @@ signals:
 public slots:
   /* Button control triggers */
   void buttonCancel();
+  void buttonEventCancel();
   void buttonEventEnter();
   void buttonEventExit();
+  void buttonEventOk();
   void buttonEventUse();
   void buttonEventWalkover();
   void buttonFrameEdit();

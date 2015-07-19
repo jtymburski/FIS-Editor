@@ -113,8 +113,8 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   /* First write core thing data */
   EditorMapThing::saveData(fh, game_only, inc_matrix);
 
-  /* Next IO data: Is not base - write core data */
-  if(getBaseIO() != NULL)
+  /* Next IO data: Is base - write core data */
+  if(getBaseIO() == NULL)
   {
     /* Write the states */
     fh->writeXmlElement("states");
@@ -133,12 +133,14 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
       if(states[i]->type == EditorEnumDb::IO_STATE)
       {
         /* Write interaction trigger */
+        QString action = "";
         if(states[i]->interact == MapState::USE)
-          fh->writeXmlData("interaction", "use");
+          action = "use";
         else if(states[i]->interact == MapState::WALKOFF)
-          fh->writeXmlData("interaction", "walkoff");
+          action = "walkoff";
         else if(states[i]->interact == MapState::WALKON)
-          fh->writeXmlData("interaction", "walkon");
+          action = "walkon";
+        fh->writeXmlData("interaction", action.toStdString());
 
         /* Enter event */
         if(states[i]->event_enter.classification != EventClassifier::NOEVENT)
@@ -185,7 +187,7 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
       fh->writeXmlData("inactive", getInactiveTime());
     }
   }
-  /* Next item data: Is base - not used currently */
+  /* Next item data: Is not base - not used currently */
   //else
   //{
   //
@@ -343,7 +345,7 @@ QString EditorMapIO::getStateName(int index)
  * Inputs: none
  * Output: QVector<EditorState*> - the vector of all states
  */
-QVector<EditorState*> EditorMapIO::getStates()
+QVector<EditorState*> EditorMapIO::getStates() const
 {
   EditorMapIO* base = getBaseIO();
 
@@ -412,6 +414,7 @@ bool EditorMapIO::insertState(int index, EditorState* state)
 bool EditorMapIO::isAllNull(int x, int y) const
 {
   bool is_null = true;
+  QVector<EditorState*> states = getStates();
 
   /* Loop through all matrixes */
   for(int i = 0; i < states.size(); i++)
@@ -508,7 +511,7 @@ void EditorMapIO::load(XmlData data, int index)
           EditorEvent event(state->event_exit);
           event.load(data, index + 3);
           if(event.getEvent() != NULL)
-            state->event_enter = *event.getEvent();
+            state->event_exit = *event.getEvent();
         }
         /* ---- USE EVENT ---- */
         else if(element3 == "useevent")
@@ -516,7 +519,7 @@ void EditorMapIO::load(XmlData data, int index)
           EditorEvent event(state->event_use);
           event.load(data, index + 3);
           if(event.getEvent() != NULL)
-            state->event_enter = *event.getEvent();
+            state->event_use = *event.getEvent();
         }
         /* ---- WALKOVER EVENT ---- */
         else if(element3 == "walkoverevent")
@@ -524,7 +527,7 @@ void EditorMapIO::load(XmlData data, int index)
           EditorEvent event(state->event_walkover);
           event.load(data, index + 3);
           if(event.getEvent() != NULL)
-            state->event_enter = *event.getEvent();
+            state->event_walkover = *event.getEvent();
         }
       }
     }
@@ -547,7 +550,7 @@ void EditorMapIO::save(FileHandler* fh, bool game_only)
   if(fh != NULL)
   {
     fh->writeXmlElement("mapio", "id", getID());
-    saveData(fh, game_only);
+    saveData(fh, game_only, false);
     fh->writeXmlElementEnd();
   }
 }
@@ -568,6 +571,82 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
     thing = base_io;
 
   EditorMapThing::setBase(thing);
+}
+
+/*
+ * Description: Sets the enter event for the given node index.
+ *
+ * Inputs: int index - the node index in the stack
+ *         Event event - the new enter event to set for the node
+ * Output: bool - true if the event was set
+ */
+bool EditorMapIO::setEventEnter(int index, Event event)
+{
+  EditorState* state = getState(index);
+  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+  {
+    state->event_enter = EventHandler::deleteEvent(state->event_enter);
+    state->event_enter = event;
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the exit event for the given node index.
+ *
+ * Inputs: int index - the node index in the stack
+ *         Event event - the new exit event to set for the node
+ * Output: bool - true if the event was set
+ */
+bool EditorMapIO::setEventExit(int index, Event event)
+{
+  EditorState* state = getState(index);
+  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+  {
+    state->event_exit = EventHandler::deleteEvent(state->event_exit);
+    state->event_exit = event;
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the use event for the given node index.
+ *
+ * Inputs: int index - the node index in the stack
+ *         Event event - the new use event to set for the node
+ * Output: bool - true if the event was set
+ */
+bool EditorMapIO::setEventUse(int index, Event event)
+{
+  EditorState* state = getState(index);
+  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+  {
+    state->event_use = EventHandler::deleteEvent(state->event_use);
+    state->event_use = event;
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the walkover event for the given node index.
+ *
+ * Inputs: int index - the node index in the stack
+ *         Event event - the new walkover event to set for the node
+ * Output: bool - true if the event was set
+ */
+bool EditorMapIO::setEventWalkover(int index, Event event)
+{
+  EditorState* state = getState(index);
+  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+  {
+    state->event_walkover = EventHandler::deleteEvent(state->event_walkover);
+    state->event_walkover = event;
+    return true;
+  }
+  return false;
 }
 
 /*

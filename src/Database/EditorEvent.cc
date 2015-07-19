@@ -31,9 +31,7 @@ EditorEvent::EditorEvent()
  */
 EditorEvent::EditorEvent(Event event) : EditorEvent()
 {
-  this->event = event;
-  if(event.classification == EventClassifier::STARTCONVO)
-    conversation = event.convo;
+  setEvent(event);
 }
 
 /*
@@ -791,6 +789,23 @@ bool EditorEvent::setConversation(QString index, Conversation convo)
 }
 
 /*
+ * Description: Sets the event to the passed in event struct.
+ *
+ * Inputs: Event event - the event to load in
+ * Output: none
+ */
+void EditorEvent::setEvent(Event event)
+{
+  /* Remove old event */
+  setEventBlank();
+
+  /* Create new event */
+  this->event = event;
+  if(event.classification == EventClassifier::STARTCONVO)
+    conversation = event.convo;
+}
+
+/*
  * Description: Sets the event in the class to the blank unused event.
  *
  * Inputs: bool delete_event - delete existing event. default true
@@ -801,6 +816,7 @@ void EditorEvent::setEventBlank(bool delete_event)
   if(delete_event)
     event = EventHandler::deleteEvent(event);
   event = handler.createBlankEvent();
+  conversation = NULL;
 }
 
 /*
@@ -814,7 +830,7 @@ void EditorEvent::setEventBlank(bool delete_event)
 bool EditorEvent::setEventConversation(Conversation* convo)
 {
   /* Create the new conversation */
-  event = EventHandler::deleteEvent(event);
+  setEventBlank();
   event = handler.createConversationEvent(convo);
   event.convo->text = "First Entry.";
   conversation = event.convo;
@@ -834,7 +850,7 @@ bool EditorEvent::setEventGiveItem(int id, int count)
 {
   if(id >= 0 && count > 0)
   {
-    event = EventHandler::deleteEvent(event);
+    setEventBlank();
     event = handler.createGiveItemEvent(id, count);
     return true;
   }
@@ -852,7 +868,7 @@ bool EditorEvent::setEventNotification(QString notification)
 {
   if(!notification.isEmpty())
   {
-    event = EventHandler::deleteEvent(event);
+    setEventBlank();
     event = handler.createNotificationEvent(notification.toStdString());
     return true;
   }
@@ -869,7 +885,7 @@ bool EditorEvent::setEventNotification(QString notification)
  */
 bool EditorEvent::setEventStartBattle()
 {
-  event = EventHandler::deleteEvent(event);
+  setEventBlank();
   event = handler.createStartBattleEvent();
   return true;
 }
@@ -886,7 +902,7 @@ bool EditorEvent::setEventStartMap(int id)
 {
   if(id >= 0)
   {
-    event = EventHandler::deleteEvent(event);
+    setEventBlank();
     event = handler.createStartMapEvent(id);
     return true;
   }
@@ -907,7 +923,7 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y)
 {
   if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
   {
-    event = EventHandler::deleteEvent(event);
+    setEventBlank();
     event = handler.createTeleportEvent(thing_id, x, y, section_id);
     return true;
   }

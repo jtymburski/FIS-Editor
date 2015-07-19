@@ -91,7 +91,7 @@ public:
   /* Returns the state or states stored within the class */
   EditorState* getState(int index);
   QString getStateName(int index);
-  QVector<EditorState*> getStates();
+  QVector<EditorState*> getStates() const;
 
   /* Insert state at index */
   bool insertState(int index, EditorEnumDb::MapIOType type);
@@ -108,6 +108,12 @@ public:
 
   /* Sets the base reference io */
   void setBase(EditorMapIO* base_io);
+
+  /* Sets the events */
+  bool setEventEnter(int index, Event event);
+  bool setEventExit(int index, Event event);
+  bool setEventUse(int index, Event event);
+  bool setEventWalkover(int index, Event event);
 
   /* Sets the inactive time before the state returns down the state path (ms) */
   void setInactiveTime(int time);
