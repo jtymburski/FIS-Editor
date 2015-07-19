@@ -23,6 +23,7 @@ IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
 {
   convo_dialog = NULL;
   frame_dialog = NULL;
+  state_index = 0;
   waiting_for_submap = false;
 
   /* Set-up the IO set - copied to working for changes */
@@ -106,21 +107,37 @@ void IODialog::createLayout(bool instance)
           this, SLOT(visibilityChanged(int)));
   layout->addWidget(box_visible, 2, 1);
 
+  /* Inactive time widget */
+  QLabel* lbl_time = new QLabel("Inactive Time:", this);
+  layout->addWidget(lbl_time, 3, 0);
+  spin_inactive = new QSpinBox(this);
+  spin_inactive->setMaximum(99999999);
+  spin_inactive->setSuffix(" ms");
+  connect(spin_inactive, SIGNAL(valueChanged(int)),
+          this, SLOT(changedInactive(int)));
+  layout->addWidget(spin_inactive, 3, 1);
+  box_inactive_disable = new QCheckBox("Disable", this);
+  connect(box_inactive_disable, SIGNAL(stateChanged(int)),
+          this, SLOT(checkInactive(int)));
+  layout->addWidget(box_inactive_disable, 3, 2);
+
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
-  layout->addWidget(lbl_description, 3, 0);
+  layout->addWidget(lbl_description, 4, 0);
   text_description = new QTextEdit("", this);
   text_description->setAcceptRichText(false);
   text_description->setMaximumHeight(120);
   connect(text_description, SIGNAL(textChanged()),
           this, SLOT(changedDescription()));
-  layout->addWidget(text_description, 3, 1, 2, 3);
+  layout->addWidget(text_description, 4, 1, 1, 3);
 
   /* State selection */
   QLabel* lbl_state = new QLabel("State", this);
   layout->addWidget(lbl_state, 0, 4, 1, 1);
-  box_state = new QComboBox(this);
-  layout->addWidget(box_state, 0, 5, 1, 1);
+  combo_state = new QComboBox(this);
+  connect(combo_state, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changedComboState(int)));
+  layout->addWidget(combo_state, 0, 5, 1, 1);
   QHBoxLayout* layout_button = new QHBoxLayout();
   layout_button->setSpacing(0);
   QPushButton* btn_plus = new QPushButton("+", this);
@@ -129,22 +146,30 @@ void IODialog::createLayout(bool instance)
   font.setPixelSize(14);
   btn_plus->setFont(font);
   btn_plus->setMaximumSize(30, 30);
+  connect(btn_plus, SIGNAL(clicked()), this, SLOT(buttonStateAdd()));
   layout_button->addWidget(btn_plus);
   btn_minus = new QPushButton("-", this);
   btn_minus->setFont(font);
   btn_minus->setMaximumSize(30, 30);
+  connect(btn_minus, SIGNAL(clicked()), this, SLOT(buttonStateRemove()));
   layout_button->addWidget(btn_minus);
   layout->addLayout(layout_button, 0, 6, 1, 1);
   layout_button->addStretch();
-  QPushButton* btn_test = new QPushButton("Overview", this);
-  //connect()
-  layout->addWidget(btn_test, 0, 7);
+  QPushButton* btn_overview = new QPushButton("Overview", this);
+  connect(btn_overview, SIGNAL(clicked()), this, SLOT(buttonStateOverview()));
+  layout->addWidget(btn_overview, 0, 7);
 
   /* Interaction selection */
   QLabel* lbl_interaction = new QLabel("Interaction", this);
   layout->addWidget(lbl_interaction, 1, 4, 1, 1);
-  box_interaction = new QComboBox(this);
-  layout->addWidget(box_interaction, 1, 5, 1, 3);
+  combo_interaction = new QComboBox(this);
+  combo_interaction->addItem("None");
+  combo_interaction->addItem("Walk On");
+  combo_interaction->addItem("Walk Off");
+  combo_interaction->addItem("Use");
+  connect(combo_interaction, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changedComboInteract(int)));
+  layout->addWidget(combo_interaction, 1, 5, 1, 3);
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
@@ -164,7 +189,8 @@ void IODialog::createLayout(bool instance)
   layout->addWidget(btn_frame_click, 5, 3, 3, 1, Qt::AlignTop);
 
   /* Matrix View */
-  matrix_view = new MatrixView(io_working->getMatrix(), this);
+  matrix_view = new MatrixView(NULL, this);
+  //matrix_view = new MatrixView(io_working->getMatrix(), this);
   if(instance)
     matrix_view->setDisabled(true);
   layout->addWidget(matrix_view, 2, 4, 5, 4);
@@ -172,9 +198,13 @@ void IODialog::createLayout(bool instance)
   /* Event View */
   group_events = new QGroupBox("Events", this);
   btn_enter = new QPushButton("Enter", this);
+  connect(btn_enter, SIGNAL(clicked()), this, SLOT(buttonEventEnter()));
   btn_exit = new QPushButton("Exit", this);
+  connect(btn_exit, SIGNAL(clicked()), this, SLOT(buttonEventExit()));
   btn_use = new QPushButton("Use", this);
+  connect(btn_use, SIGNAL(clicked()), this, SLOT(buttonEventUse()));
   btn_walkover = new QPushButton("Walkover", this);
+  connect(btn_walkover, SIGNAL(clicked()), this, SLOT(buttonEventWalkover()));
   QHBoxLayout* layout_events = new QHBoxLayout();
   layout_events->addWidget(btn_enter);
   layout_events->addWidget(btn_exit);
@@ -182,7 +212,7 @@ void IODialog::createLayout(bool instance)
   layout_events->addWidget(btn_walkover);
   group_events->setLayout(layout_events);
   layout->addWidget(group_events, 7, 4, 1, 4);
-  event_view = new EventView(event_ctrl); // TODO: REMOVE/UPDATE
+  event_view = new EventView(event_ctrl); // TODO: REMOVE/UPDATE?
   //event_view = new EventView(event_ctrl, this);
   //if(instance)
   //  event_view->setDisabled(true);
@@ -214,12 +244,33 @@ void IODialog::createLayout(bool instance)
  */
 void IODialog::updateData()
 {
-  text_description->setPlainText(io_working->getDescription());
+  /* Name */
   line_name->setText(io_working->getName());
+
+  /* Description */
+  text_description->setPlainText(io_working->getDescription());
+
+
+  /* Visibility */
   if(io_working->isVisible())
     box_visible->setCurrentIndex(1);
   else
     box_visible->setCurrentIndex(0);
+
+  /* Inactive */
+  if(io_working->getInactiveTime() >= 0)
+  {
+    box_inactive_disable->setChecked(false);
+    spin_inactive->setValue(io_working->getInactiveTime());
+  }
+  else
+  {
+    box_inactive_disable->setChecked(true);
+  }
+
+  /* States */
+  for(int i = 0; i < io_working->getStates().size(); i++)
+    combo_state->addItem(io_working->getStateName(i));
 }
 
 /*============================================================================
@@ -259,6 +310,34 @@ void IODialog::buttonCancel()
   close();
 }
 
+// TODO: Comment
+void IODialog::buttonEventEnter()
+{
+  // TODO: Implementation
+  qDebug() << "ENTER EVENT";
+}
+
+// TODO: Comment
+void IODialog::buttonEventExit()
+{
+  // TODO: Implementation
+  qDebug() << "EXIT EVENT";
+}
+
+// TODO: Comment
+void IODialog::buttonEventUse()
+{
+  // TODO: Implementation
+  qDebug() << "USE EVENT";
+}
+
+// TODO: Comment
+void IODialog::buttonEventWalkover()
+{
+  // TODO: Implementation
+  qDebug() << "WALKOVER EVENT";
+}
+
 /*
  * Description: Button slot on the frame edit button. This is triggered for
  *              the IO dialog. Opens the FrameDialog class.
@@ -292,22 +371,161 @@ void IODialog::buttonFrameEdit()
  */
 void IODialog::buttonOk()
 {
+  /* Consolidate before closing */
+  io_working->consolidate(state_index);
+
   emit ok();
   event_ctrl->setEventBlank(false);
   close();
+}
+
+// TODO: Comment
+void IODialog::buttonStateAdd()
+{
+  QMessageBox msg_box;
+  msg_box.setWindowTitle("Adding...");
+  msg_box.setText("Select Node Type:");
+  QPushButton* state = msg_box.addButton("State", QMessageBox::YesRole);
+  msg_box.addButton("Transition", QMessageBox::NoRole);
+  msg_box.exec();
+  if(msg_box.clickedButton() == state)
+  { /* STATE NODE */
+    io_working->appendState(EditorEnumDb::IO_STATE);
+  }
+  else
+  { /* TRANSITION NODE */
+    io_working->appendState(EditorEnumDb::IO_TRANSITION);
+  }
+
+  /* Add to combo box */
+  int index = io_working->getStates().size() - 1;
+  combo_state->addItem(io_working->getStateName(index));
+  combo_state->setCurrentIndex(index);
+}
+
+// TODO: Comment
+void IODialog::buttonStateOverview()
+{
+  // TODO: Implementation
+  QMessageBox::information(this, "Notification",
+                           "Coming soon to a production near you!");
+}
+
+// TODO: Comment
+void IODialog::buttonStateRemove()
+{
+  int index = combo_state->currentIndex();
+
+  /* Create warning about deleting */
+  QMessageBox msg_box;
+  msg_box.setWindowTitle("Deleting...");
+  msg_box.setText("Deleting node " + QString::number(index));
+  msg_box.setInformativeText("Are you sure?");
+  msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+  if(msg_box.exec() == QMessageBox::Yes)
+  {
+    /* Set to base index and remove data from class */
+    combo_state->setCurrentIndex(0);
+    io_working->unsetState(index);
+
+    /* Redo list */
+    while(combo_state->count() > 1)
+      combo_state->removeItem(1);
+    for(int i = 1; i < io_working->getStates().size(); i++)
+      combo_state->addItem(io_working->getStateName(i));
+
+    /* Reset index */
+    if(index >= combo_state->count())
+      combo_state->setCurrentIndex(index - 1);
+    else
+      combo_state->setCurrentIndex(index);
+  }
+}
+
+// TODO: Comment
+void IODialog::changedComboInteract(int index)
+{
+  EditorState* state = io_working->getState(combo_state->currentIndex());
+  if(state != NULL)
+    state->interact = (MapState::InteractionState)index;
+}
+
+// TODO: Comment
+void IODialog::changedComboState(int index)
+{
+  EditorState* state = io_working->getState(index);
+
+  /* Consolidate */
+  if(index != state_index)
+    io_working->consolidate(state_index);
+
+  /* Set the matrix */
+  matrix_view->setMatrix(state->matrix);
+
+  /* Depending on state mode, enable / disable some control */
+  if(state->type == EditorEnumDb::IO_STATE)
+  {
+    combo_interaction->setEnabled(true);
+    group_events->setEnabled(true);
+
+    /* Interaction combo box */
+    combo_interaction->setCurrentIndex((int)state->interact);
+
+    /* Events */
+    QFont bold = btn_enter->font();
+    bold.setBold(true);
+    QFont not_bold = bold;
+    not_bold.setBold(false);
+    if(state->event_enter.classification != EventClassifier::NOEVENT)
+      btn_enter->setFont(bold);
+    else
+      btn_enter->setFont(not_bold);
+    if(state->event_exit.classification != EventClassifier::NOEVENT)
+      btn_exit->setFont(bold);
+    else
+      btn_exit->setFont(not_bold);
+    if(state->event_use.classification != EventClassifier::NOEVENT)
+      btn_use->setFont(bold);
+    else
+      btn_use->setFont(not_bold);
+    if(state->event_walkover.classification != EventClassifier::NOEVENT)
+      btn_walkover->setFont(bold);
+    else
+      btn_walkover->setFont(not_bold);
+  }
+  else if(state->type == EditorEnumDb::IO_TRANSITION)
+  {
+    combo_interaction->setDisabled(true);
+    group_events->setDisabled(true);
+  }
+
+  /* If base index is 0, it cannot be deleted */
+  if(index == 0)
+    btn_minus->setDisabled(true);
+  else
+    btn_minus->setEnabled(true);
+
+  /* Reset state index */
+  state_index = index;
 }
 
 /*
  * Description: Slot triggered on the text edit field being changed, which
  *              updates the description.
  *
- * Inputs: QString description - the new description
+ * Inputs: none
  * Output: none
  */
 void IODialog::changedDescription()
 {
   QString simple = text_description->toPlainText().simplified();
   io_working->setDescription(simple);
+}
+
+// TODO: Comment
+void IODialog::changedInactive(int i)
+{
+  io_working->setInactiveTime(i);
 }
 
 /*
@@ -320,6 +538,21 @@ void IODialog::changedDescription()
 void IODialog::changedName(QString name)
 {
   io_working->setName(name);
+}
+
+// TODO: Comment
+void IODialog::checkInactive(int state)
+{
+  if(state == Qt::Checked)
+  {
+    spin_inactive->setDisabled(true);
+    io_working->setInactiveTime(-1);
+  }
+  else
+  {
+    spin_inactive->setEnabled(true);
+    io_working->setInactiveTime(spin_inactive->value());
+  }
 }
 
 /*

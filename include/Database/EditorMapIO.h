@@ -79,6 +79,9 @@ public:
   void appendState(EditorEnumDb::MapIOType type);
   bool appendState(EditorState* state);
   
+  /* Consolidates matrix data on all states */
+  void consolidate(int ref_index);
+
   /* Gets the base ref of the io */
   EditorMapIO* getBaseIO() const;
 
@@ -87,6 +90,7 @@ public:
 
   /* Returns the state or states stored within the class */
   EditorState* getState(int index);
+  QString getStateName(int index);
   QVector<EditorState*> getStates();
 
   /* Insert state at index */

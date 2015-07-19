@@ -234,6 +234,25 @@ bool EditorMapIO::appendState(EditorState* state)
 }
 
 /*
+ * Description: Consolidates matrix data on all nodes based on the reference
+ *              index matrix.
+ *
+ * Inputs: int ref_index - the index in the node stack of the reference matrix
+ * Output: none
+ */
+void EditorMapIO::consolidate(int ref_index)
+{
+  EditorState* ref_state = getState(ref_index);
+  if(ref_state != NULL)
+  {
+    /* Loop through all states */
+    for(int i = 0; i < states.size(); i++)
+      if(states[i] != ref_state)
+        states[i]->matrix->rebase(ref_state->matrix, false);
+  }
+}
+
+/*
  * Description: Returns the base IO. Default to NULL.
  *
  * Inputs: none
@@ -286,6 +305,36 @@ EditorState* EditorMapIO::getState(int index)
   }
 
   return NULL;
+}
+
+/*
+ * Description: Returns the IO state name for storing in the list at the given
+ *              index in the stack. Returns a blank string if the index is out
+ *              of range.
+ *
+ * Inputs: int index - the index of the state in the stack
+ * Output: QString - the state summary name
+ */
+QString EditorMapIO::getStateName(int index)
+{
+  EditorState* state = getState(index);
+  QString name = "";
+
+  if(state != NULL)
+  {
+    name = QString::number(index);
+    if(name.size() < 2)
+      name = "0" + name;
+    if(name.size() < 3)
+      name = "0" + name;
+    name += ": ";
+    if(state->type == EditorEnumDb::IO_STATE)
+      name += "STATE";
+    else
+      name += "TRANSITION";
+  }
+
+  return name;
 }
 
 /*

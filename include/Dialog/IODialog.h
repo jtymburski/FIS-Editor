@@ -30,9 +30,12 @@ private:
   /* The visible control box */
   QComboBox* box_visible;
 
+  /* Check boxes */
+  QCheckBox* box_inactive_disable;
+
   /* Combo boxes */
-  QComboBox* box_interaction;
-  QComboBox* box_state;
+  QComboBox* combo_interaction;
+  QComboBox* combo_state;
 
   /* Buttons that require external control */
   QPushButton* btn_enter;
@@ -66,6 +69,12 @@ private:
 
   /* Matrix view and control */
   MatrixView* matrix_view;
+
+  /* Spin Boxes */
+  QSpinBox* spin_inactive;
+
+  /* State index */
+  int state_index;
 
   /* Description text edit */
   QTextEdit* text_description;
@@ -107,12 +116,27 @@ signals:
 public slots:
   /* Button control triggers */
   void buttonCancel();
+  void buttonEventEnter();
+  void buttonEventExit();
+  void buttonEventUse();
+  void buttonEventWalkover();
   void buttonFrameEdit();
   void buttonOk();
+  void buttonStateAdd();
+  void buttonStateOverview();
+  void buttonStateRemove();
 
-  /* Changed text in line edits */
+  /* Combo changed */
+  void changedComboInteract(int index);
+  void changedComboState(int index);
+
+  /* Changed text and integers edit widgets */
   void changedDescription();
+  void changedInactive(int i);
   void changedName(QString name);
+
+  /* Check inactive time changed */
+  void checkInactive(int state);
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);

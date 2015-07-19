@@ -9,6 +9,7 @@
 #ifndef EDITOREVENT_H
 #define EDITOREVENT_H
 
+#include <QPair>
 #include <QStringList>
 #include <QVector>
 
