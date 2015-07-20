@@ -5018,8 +5018,13 @@ void EditorMap::tilesIORemove(bool update_all)
         EditorMapIO* io = sub_maps[i]->ios[j];
         int x = io->getX();
         int y = io->getY();
+        int w = io->getMatrix()->getWidth();
+        int h = io->getMatrix()->getHeight();
 
-        sub_maps[i]->tiles[x][y]->unsetIO(io);
+        for(int m = 0; m < w; m++)
+          for(int n = 0; n < h; n++)
+            sub_maps[i]->tiles[x+m][y+n]->unsetIO(
+                                         io->getMatrix()->getRenderDepth(m, n));
       }
     }
   }
@@ -5035,8 +5040,13 @@ void EditorMap::tilesIORemove(bool update_all)
         EditorMapIO* io = active_submap->ios[i];
         int x = io->getX();
         int y = io->getY();
+        int w = io->getMatrix()->getWidth();
+        int h = io->getMatrix()->getHeight();
 
-        active_submap->tiles[x][y]->unsetIO(io);
+        for(int j = 0; j < w; j++)
+          for(int k = 0; k < h; k++)
+            active_submap->tiles[x+j][y+k]->unsetIO(
+                                         io->getMatrix()->getRenderDepth(j, k));
       }
     }
   }
