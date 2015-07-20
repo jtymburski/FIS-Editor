@@ -25,21 +25,42 @@ const std::string InstanceDialog::kTRACK_STATES[] = {"None", "Away From Player",
 
 /*
  * Description: Constructor function for instant dialog. Takes an
- *              editing thing and a parent widget. Pop-up constructed using
- *              data from the thing.
+ *              editing IO and a parent widget. Pop-up constructed using
+ *              data from the IO.
  *
- * Inputs: EditorMapThing* edit_thing - the thing to edit the data for
+ * Inputs: EditorMapIO* edit_io - the IO to edit the data for
  *         QWidget* parent - the parent widget
  */
-InstanceDialog::InstanceDialog(EditorMapThing* edit_thing, QWidget* parent)
+InstanceDialog::InstanceDialog(EditorMapIO* edit_io, QWidget* parent)
            : QDialog(parent)
 {
-  /* Set-up the thing set - copied to working for changes */
-  thing_type = EditorEnumDb::THING;
-  thing_original = edit_thing;
-  thing_working = new EditorMapThing();
+  /* Set-up the IO set - copied to working for changes */
+  thing_type = EditorEnumDb::IO;
+  thing_original = edit_io;
+  thing_working = new EditorMapIO();
   if(thing_original != NULL)
-    *thing_working = *thing_original;
+    *((EditorMapIO*)thing_working) = *((EditorMapIO*)thing_original);
+
+  setup();
+}
+
+/*
+ * Description: Constructor function for instant dialog. Takes an
+ *              editing npc and a parent widget. Pop-up constructed using
+ *              data from the npc.
+ *
+ * Inputs: EditorMapNPC* edit_npc - the npc to edit the data for
+ *         QWidget* parent - the parent widget
+ */
+InstanceDialog::InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent)
+              : QDialog(parent)
+{
+  /* Set-up the npc set - copied to working for changes */
+  thing_type = EditorEnumDb::NPC;
+  thing_original = edit_npc;
+  thing_working = new EditorMapNPC();
+  if(thing_original != NULL)
+    *((EditorMapNPC*)thing_working) = *((EditorMapNPC*)thing_original);
 
   setup();
 }
@@ -67,21 +88,21 @@ InstanceDialog::InstanceDialog(EditorMapPerson* edit_person, QWidget* parent)
 
 /*
  * Description: Constructor function for instant dialog. Takes an
- *              editing npc and a parent widget. Pop-up constructed using
- *              data from the npc.
+ *              editing thing and a parent widget. Pop-up constructed using
+ *              data from the thing.
  *
- * Inputs: EditorMapNPC* edit_npc - the npc to edit the data for
+ * Inputs: EditorMapThing* edit_thing - the thing to edit the data for
  *         QWidget* parent - the parent widget
  */
-InstanceDialog::InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent)
-              : QDialog(parent)
+InstanceDialog::InstanceDialog(EditorMapThing* edit_thing, QWidget* parent)
+           : QDialog(parent)
 {
-  /* Set-up the npc set - copied to working for changes */
-  thing_type = EditorEnumDb::NPC;
-  thing_original = edit_npc;
-  thing_working = new EditorMapNPC();
+  /* Set-up the thing set - copied to working for changes */
+  thing_type = EditorEnumDb::THING;
+  thing_original = edit_thing;
+  thing_working = new EditorMapThing();
   if(thing_original != NULL)
-    *((EditorMapNPC*)thing_working) = *((EditorMapNPC*)thing_original);
+    *thing_working = *thing_original;
 
   setup();
 }
@@ -94,7 +115,8 @@ InstanceDialog::~InstanceDialog()
   thing_original = NULL;
 
   /* Delete event controller */
-  event_view->setEvent(NULL);
+  if(thing_type != EditorEnumDb::IO)
+    event_view->setEvent(NULL);
   event_ctrl->setEventBlank();
   delete event_ctrl;
   event_ctrl = NULL;
@@ -168,18 +190,24 @@ void InstanceDialog::createLayout()
     layout->addWidget(box_base_speed, 4, 3);
   }
 
-  /* Use base event widget */
-  box_base_event = new QCheckBox("Use Base Event", this);
-  connect(box_base_event, SIGNAL(stateChanged(int)),
-          this, SLOT(checkBaseChange(int)));
-  layout->addWidget(box_base_event, 5, 1, 1, 2);
+  /* Events only relevant if not IO */
+  if(thing_type != EditorEnumDb::IO)
+  {
+    /* Use base event widget */
+    box_base_event = new QCheckBox("Use Base Event", this);
+    connect(box_base_event, SIGNAL(stateChanged(int)),
+            this, SLOT(checkBaseChange(int)));
+    //if(thing_type == EditorEnumDb::IO)
+    //  box_base_event->setDisabled(true);
+    layout->addWidget(box_base_event, 5, 1, 1, 2);
 
-  /* Event View */
-  event_view = new EventView(event_ctrl, this);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-  layout->addWidget(event_view, 6, 0, 1, 4);
+    /* Event View */
+    event_view = new EventView(event_ctrl, this);
+    connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+            this, SLOT(editConversation(Conversation*,bool)));
+    connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+    layout->addWidget(event_view, 6, 0, 1, 4);
+  }
 
   /* Movement section only relevant if npc */
   int btn_offset = 0;
@@ -263,6 +291,8 @@ void InstanceDialog::createLayout()
     setWindowTitle("Person Instance Edit");
   else if(thing_type == EditorEnumDb::NPC)
     setWindowTitle("NPC Instance Edit");
+  else if(thing_type == EditorEnumDb::IO)
+    setWindowTitle("IO Instance Edit");
 }
 
 /*
@@ -281,7 +311,7 @@ void InstanceDialog::setup()
   waiting_path = false;
 
   /* Set-up the event */
-  if(thing_original != NULL)
+  if(thing_original != NULL && thing_type != EditorEnumDb::IO)
     event_ctrl = new EditorEvent(
                            EventHandler::copyEvent(thing_original->getEvent()));
   else
@@ -303,10 +333,13 @@ void InstanceDialog::setup()
   }
 
   /* Event control */
-  box_base_event->blockSignals(true);
-  box_base_event->setChecked(thing_working->isBaseEvent());
-  event_view->setEnabled(!thing_working->isBaseEvent());
-  box_base_event->blockSignals(false);
+  if(thing_type != EditorEnumDb::IO)
+  {
+    box_base_event->blockSignals(true);
+    box_base_event->setChecked(thing_working->isBaseEvent());
+    event_view->setEnabled(!thing_working->isBaseEvent());
+    box_base_event->blockSignals(false);
+  }
 
   /* If NPC, update movement data */
   if(thing_type == EditorEnumDb::NPC)
@@ -777,9 +810,11 @@ void InstanceDialog::updateOriginal()
       *((EditorMapPerson*)thing_original) = *((EditorMapPerson*)thing_working);
     else if(thing_type == EditorEnumDb::NPC)
       *((EditorMapNPC*)thing_original) = *((EditorMapNPC*)thing_working);
+    else if(thing_type == EditorEnumDb::IO)
+      *((EditorMapIO*)thing_original) = *((EditorMapIO*)thing_working);
 
     /* Fix the event */
-    if(!box_base_event->isChecked())
+    if(thing_type != EditorEnumDb::IO && !box_base_event->isChecked())
       thing_original->setEvent(*event_ctrl->getEvent());
   }
 }

@@ -656,8 +656,8 @@ void MapIOView::updateListItems(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->getEventView()->setListItems(list);
-  if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListItems(list);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->getEventView()->setListItems(list);
 }
 
 /*
@@ -670,8 +670,8 @@ void MapIOView::updateListMaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->getEventView()->setListMaps(list);
-  if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListMaps(list);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->getEventView()->setListMaps(list);
 }
 
 /*
@@ -684,8 +684,8 @@ void MapIOView::updateListSubmaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->getEventView()->setListSubmaps(list);
-  if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListSubmaps(list);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->getEventView()->setListSubmaps(list);
 }
 
 /*
@@ -698,8 +698,8 @@ void MapIOView::updateListThings(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->getEventView()->setListThings(list);
-  if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListThings(list);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->getEventView()->setListThings(list);
 }
 
 /*
@@ -714,6 +714,6 @@ void MapIOView::updateSelectedTile(int id, int x, int y)
 {
   if(io_dialog != NULL)
     io_dialog->updateSelectedTile(id, x, y);
-  if(instance_dialog != NULL)
-    instance_dialog->updateSelectedTile(id, x, y);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->updateSelectedTile(id, x, y);
 }

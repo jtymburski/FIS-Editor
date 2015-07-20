@@ -46,9 +46,6 @@ private:
   /* The editing map */
   EditorMap* editing_map;
 
-  /* The rendering map */
-  //SubMapInfo* map; // TODO: REMOVE??
-
   /* The middle click menu */
   QMenu* middleclick_menu;
 
@@ -106,6 +103,7 @@ signals:
   void sendSelectedTile(int id, int x, int y);
 
   /* Tile signals */
+  void tileIO(int depth);
   void tileItem(int index);
   void tileNPC(int depth);
   void tilePerson(int depth);
@@ -127,6 +125,16 @@ public slots:
   void selectTile();
 
   /* Tile slots */
+  void tileIO0();
+  void tileIO1();
+  void tileIO2();
+  void tileIO3();
+  void tileIO4();
+  void tileIO5();
+  void tileIO6();
+  void tileIO7();
+  void tileIO8();
+  void tileIO9();
   void tileItem0();
   void tileItem1();
   void tileItem2();

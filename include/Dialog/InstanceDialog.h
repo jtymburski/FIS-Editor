@@ -23,9 +23,10 @@ class InstanceDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  InstanceDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = NULL);
-  InstanceDialog(EditorMapPerson* edit_person, QWidget* parent = NULL);
+  InstanceDialog(EditorMapIO* edit_io, QWidget* parent = NULL);
   InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent = NULL);
+  InstanceDialog(EditorMapPerson* edit_person, QWidget* parent = NULL);
+  InstanceDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = NULL);
 
   /* Destructor function */
   ~InstanceDialog();

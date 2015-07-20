@@ -327,7 +327,13 @@ void IODialog::buttonCancel()
   close();
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the cancel button of the event pop-up. Just
+ *              closes the event dialog and doesn't save the changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventCancel()
 {
   if(editing_event != NOEVENT)
@@ -344,7 +350,14 @@ void IODialog::buttonEventCancel()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the enter event button in the dialog. Triggers
+ *              the event pop-up to be visible with the enter event for the
+ *              state
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventEnter()
 {
   /* Close the pop-up if open */
@@ -362,7 +375,14 @@ void IODialog::buttonEventEnter()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the exit event button in the dialog. Triggers
+ *              the event pop-up to be visible with the exit event for the
+ *              state
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventExit()
 {
   /* Close the pop-up if open */
@@ -380,7 +400,14 @@ void IODialog::buttonEventExit()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the ok button of the event pop-up. Closes and
+ *              savesz the event dialog to the IO working pointer in the IO
+ *              dialog.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventOk()
 {
   if(editing_event != NOEVENT)
@@ -410,7 +437,14 @@ void IODialog::buttonEventOk()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the use event button in the dialog. Triggers
+ *              the event pop-up to be visible with the use event for the
+ *              state
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventUse()
 {
   /* Close the pop-up if open */
@@ -428,7 +462,14 @@ void IODialog::buttonEventUse()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the walkover event button in the dialog. Triggers
+ *              the event pop-up to be visible with the walkover event for the
+ *              state
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonEventWalkover()
 {
   /* Close the pop-up if open */
@@ -487,7 +528,14 @@ void IODialog::buttonOk()
   close();
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the '+' button beside the node drop down which
+ *              allows for appending another state or transition node to the end
+ *              of the stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonStateAdd()
 {
   QMessageBox msg_box;
@@ -511,7 +559,14 @@ void IODialog::buttonStateAdd()
   combo_state->setCurrentIndex(index);
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the node state overview in the IO pop-up. This
+ *              gives a summary of the state/transition sequencing for the
+ *              designer.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonStateOverview()
 {
   // TODO: Implementation
@@ -519,7 +574,14 @@ void IODialog::buttonStateOverview()
                            "Coming soon to a production near you!");
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the '-' button beside the node drop down which
+ *              allows for removing the selected state or transition node in the
+ *              stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::buttonStateRemove()
 {
   int index = combo_state->currentIndex();
@@ -550,7 +612,13 @@ void IODialog::buttonStateRemove()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Connected to the combo box for the state interaction drop down.
+ *              Triggers the update for the state interaction.
+ *
+ * Inputs: int index - the index in the dropdown.
+ * Output: none
+ */
 void IODialog::changedComboInteract(int index)
 {
   EditorState* state = io_working->getState(combo_state->currentIndex());
@@ -558,7 +626,15 @@ void IODialog::changedComboInteract(int index)
     state->interact = (MapState::InteractionState)index;
 }
 
-// TODO: Comment
+/*
+ * Description: Connected to the combo box for the node drop down. Changes the
+ *              matrix and information viewed below depending on the node.
+ *              If the node is a state, interact drop down and event buttons are
+ *              also enabled.
+ *
+ * Inputs: int index - the index in the dropdown.
+ * Output: none
+ */
 void IODialog::changedComboState(int index)
 {
   EditorState* state = io_working->getState(index);
@@ -630,7 +706,13 @@ void IODialog::changedDescription()
   io_working->setDescription(simple);
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered on the spin box being changed, which updates the
+ *              inactive time. Range is 0 to 99.9 million milliseconds.
+ *
+ * Inputs: int i - the new inactive time
+ * Output: none
+ */
 void IODialog::changedInactive(int i)
 {
   io_working->setInactiveTime(i);
@@ -648,7 +730,13 @@ void IODialog::changedName(QString name)
   io_working->setName(name);
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the inactive disable/enable check box
+ *              changes state.
+ *
+ * Inputs: int state - the new check box state
+ * Output: none
+ */
 void IODialog::checkInactive(int state)
 {
   if(state == Qt::Checked)

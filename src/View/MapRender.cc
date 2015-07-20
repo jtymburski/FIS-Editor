@@ -49,9 +49,42 @@ MapRender::~MapRender()
 /* Menu adding for tile click */
 bool MapRender::menuIOs(EditorTile* t, QMenu* menu)
 {
-  menu->addAction(new QAction("TODO", menu));
-  menu->actions().front()->setDisabled(true);
-  return false;
+  bool set = false;
+  QVector<EditorMapIO*> stack = t->getIOs();
+
+  /* Go through the thing stack */
+  for(int i = 0; i < stack.size(); i++)
+  {
+    QAction* action = new QAction(QString::number(i) + ": ", menu);
+    if(stack[i] != NULL)
+    {
+      action->setText(action->text() + stack[i]->getName());
+      set = true;
+    }
+    else
+    {
+      action->setText(action->text() + "UNSET");
+      action->setDisabled(true);
+    }
+
+    menu->addAction(action);
+  }
+
+  if(menu->actions().size() >= 10)
+  {
+    connect(menu->actions()[0], SIGNAL(triggered()), this, SLOT(tileIO0()));
+    connect(menu->actions()[1], SIGNAL(triggered()), this, SLOT(tileIO1()));
+    connect(menu->actions()[2], SIGNAL(triggered()), this, SLOT(tileIO2()));
+    connect(menu->actions()[3], SIGNAL(triggered()), this, SLOT(tileIO3()));
+    connect(menu->actions()[4], SIGNAL(triggered()), this, SLOT(tileIO4()));
+    connect(menu->actions()[5], SIGNAL(triggered()), this, SLOT(tileIO5()));
+    connect(menu->actions()[6], SIGNAL(triggered()), this, SLOT(tileIO6()));
+    connect(menu->actions()[7], SIGNAL(triggered()), this, SLOT(tileIO7()));
+    connect(menu->actions()[8], SIGNAL(triggered()), this, SLOT(tileIO8()));
+    connect(menu->actions()[9], SIGNAL(triggered()), this, SLOT(tileIO9()));
+  }
+
+  return set;
 }
 
 /* Menu adding for tile click */
@@ -455,7 +488,6 @@ bool MapRender::event(QEvent *event)
   //qDebug() << views().front()->x() << "," << views().front()->y() << ","
   //         << views().front()->width() << "," << views().front()->height();
   //qDebug() << geometry();
-  //qDebug() << if(views().front()->rect().contains(views().front()->mapFromGlobal(QCursor::pos()))
 
   QGraphicsView* view = views().front();
   //qDebug() << "Geometry: " << view->geometry();
@@ -671,6 +703,18 @@ void MapRender::selectTile()
 {
   tile_select = true;
 }
+
+/* ------ Tile IO slots ------ */
+void MapRender::tileIO0() { emit tileIO(0); }
+void MapRender::tileIO1() { emit tileIO(1); }
+void MapRender::tileIO2() { emit tileIO(2); }
+void MapRender::tileIO3() { emit tileIO(3); }
+void MapRender::tileIO4() { emit tileIO(4); }
+void MapRender::tileIO5() { emit tileIO(5); }
+void MapRender::tileIO6() { emit tileIO(6); }
+void MapRender::tileIO7() { emit tileIO(7); }
+void MapRender::tileIO8() { emit tileIO(8); }
+void MapRender::tileIO9() { emit tileIO(9); }
 
 /* ------ Tile item slots ------ */
 void MapRender::tileItem0() { emit tileItem(0); }

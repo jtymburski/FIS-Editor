@@ -123,6 +123,8 @@ void MapView::setupMapView()//int x, int y)
           map_database->getNPCView(), SLOT(editHoverInstance(int)));
   connect(map_render, SIGNAL(tileItem(int)),
           map_database->getItemView(), SLOT(editHoverInstance(int)));
+  connect(map_render, SIGNAL(tileIO(int)),
+          map_database->getIOView(), SLOT(editHoverInstance(int)));
 }
 
 /*
