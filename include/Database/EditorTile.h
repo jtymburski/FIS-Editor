@@ -72,6 +72,10 @@ public:
   int type() const { return Type_TileRender; }
 
 private:
+  /* Events for the tile */
+  Event event_enter;
+  Event event_exit;
+
   /* Is the item hovered */
   HoverInfo* hover_info;
   bool hovered;
@@ -136,6 +140,10 @@ public:
 
   /* Returns the active layers in a string */
   QString getActiveLayers();
+
+  /* Gets the events */
+  Event getEventEnter() const;
+  Event getEventExit() const;
 
   /* Gets the tile for editing */
   Tile* getGameTile();
@@ -205,6 +213,10 @@ public:
   int getX();
   int getY();
 
+  /* Is tile events set */
+  bool isEventEnterSet() const;
+  bool isEventExitSet() const;
+
   /* Painting function for Tile Wrapper */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
              QWidget* widget = NULL);
@@ -213,6 +225,10 @@ public:
   bool place();
   bool place(EditorEnumDb::Layer layer, EditorSprite* sprite,
              bool load = false);
+
+  /* Sets the tile events */
+  void setEventEnter(Event event, bool just_update = false);
+  void setEventExit(Event event, bool just_update = false);
 
   /* Sets the hover state */
   void setHover(bool hover, bool hover_invalid = false);
@@ -265,6 +281,10 @@ public:
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
   void unplace(EditorSprite* sprite);
+
+  /* Unsets the tile events */
+  void unsetEventEnter();
+  void unsetEventExit();
 
   /* Unsets the stored io pointer(s) */
   bool unsetIO(EditorMapIO* io);

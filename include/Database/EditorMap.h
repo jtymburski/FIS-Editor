@@ -18,6 +18,7 @@
 #include <QString>
 #include <QVector>
 
+#include "Database/EditorEvent.h"
 #include "Database/EditorTile.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"

@@ -704,6 +704,34 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       parse++;
     }
   }
+  /* -------------- TILE EVENTS -------------*/
+  else if(element == "tileevent" && data.getElement(index + 1) == "x" &&
+          data.getElement(index + 2) == "y")
+  {
+    /* Get the category */
+    QString category = QString::fromStdString(data.getKeyValue(index));
+    int x = QString::fromStdString(data.getKeyValue(index + 1)).toInt();
+    int y = QString::fromStdString(data.getKeyValue(index + 2)).toInt();
+
+    /* Ensure x/y is in range */
+    if(x >= 0 && x < map->tiles.size() && y >= 0 && y < map->tiles[x].size())
+    {
+      if(category == "enter")
+      {
+        EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
+        edit_event.load(data, index + 1);
+        if(edit_event.getEvent() != NULL)
+          map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), true);
+      }
+      else if(category == "exit")
+      {
+        EditorEvent edit_event(map->tiles[x][y]->getEventExit());
+        edit_event.load(data, index + 1);
+        if(edit_event.getEvent() != NULL)
+          map->tiles[x][y]->setEventExit(*edit_event.getEvent(), true);
+      }
+    }
+  }
   /* -------------- MAP THING -------------- */
   else if(element == "mapthing")
   {
