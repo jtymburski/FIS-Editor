@@ -2753,9 +2753,9 @@ int EditorMap::getNextNPCID(bool from_sub)
   {
     for(int i = 0; !found && (i < base_npcs.size()); i++)
     {
-      if(base_npcs[i]->getID() != i)
+      if(base_npcs[i]->getID() != (id + i))
       {
-        id = i;
+        id += i;
         found = true;
       }
     }
