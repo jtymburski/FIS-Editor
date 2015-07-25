@@ -412,6 +412,10 @@ void IODialog::buttonEventOk()
 {
   if(editing_event != NOEVENT)
   {
+    /* If conversation dialog is visible, hide it first */
+    if(convo_dialog != NULL && convo_dialog->isVisible())
+      convo_dialog->buttonCancel();
+
     /* Hide pop-up */
     pop_event->hide();
 

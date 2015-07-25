@@ -102,6 +102,10 @@ signals:
   /* Sends the selected tile to the thing pop-up */
   void sendSelectedTile(int id, int x, int y);
 
+  /* Tile enter/exit event slots */
+  void tileEventEnter();
+  void tileEventExit();
+
   /* Tile signals */
   void tileIO(int depth);
   void tileItem(int index);

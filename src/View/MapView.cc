@@ -25,7 +25,10 @@ const float MapView::kZOOM_STATES[] = {0.125, 0.25, 0.5, 0.75, 1,
 MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
        : QMainWindow(parent)
 {
+  convo_dialog = NULL;
   cursor_mode = EditorEnumDb::BASIC;
+  event_enter = false;
+  event_exit = false;
 
   /* Calls all setup functions */
   setupLeftBar();
@@ -36,6 +39,26 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
   /* Starts disabled */
   editing_map = NULL;
   setDisabled(true);
+
+  /* Event View */
+  pop_event = new QDialog(this);
+  pop_event->setWindowTitle("Event Edit");
+  QGridLayout* e_layout = new QGridLayout(pop_event);
+  event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+  event_view = new EventView(event_ctrl, pop_event);
+  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+          this, SLOT(editConversation(Conversation*,bool)));
+  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTileEvent()));
+  e_layout->addWidget(event_view, 0, 0, 1, 4);
+  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
+  btn_event_ok->setDefault(true);
+  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(buttonEventOk()));
+  e_layout->addWidget(btn_event_ok, 1, 2);
+  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
+  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(buttonEventCancel()));
+  e_layout->addWidget(btn_event_cancel, 1, 3);
+  pop_event->setLayout(e_layout);
+  pop_event->hide();
 }
 
 /*
@@ -43,6 +66,11 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
  */
 MapView::~MapView()
 {
+  /* Delete event controller */
+  buttonEventCancel();
+  event_view->setEvent(NULL);
+  delete event_ctrl;
+  event_ctrl = NULL;
 }
 
 /*============================================================================
@@ -103,6 +131,8 @@ void MapView::setupMapView()//int x, int y)
   /* Connections */
   connect(map_render, SIGNAL(sendCurrentPosition(int,int)),
           this, SLOT(setCurrentTile(int,int)));
+  connect(map_render, SIGNAL(tileEventEnter()), this, SLOT(tileEventEnter()));
+  connect(map_render, SIGNAL(tileEventExit()), this, SLOT(tileEventExit()));
   connect(map_control, SIGNAL(updateMap()),
           map_render, SLOT(updateRenderingMap()));
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
@@ -153,7 +183,67 @@ void MapView::setupRightBar()
  * PUBLIC SLOTS
  *===========================================================================*/
 
+/* Event button triggers */
+// TODO: Comment
+void MapView::buttonEventCancel()
+{
+  if(event_enter || event_exit)
+  {
+    /* If conversation dialog is visible, hide it first */
+    if(convo_dialog != NULL && convo_dialog->isVisible())
+      convo_dialog->buttonCancel();
+
+    /* Then the event pop-up */
+    pop_event->hide();
+    event_ctrl->setEventBlank();
+    event_view->update();
+    event_enter = false;
+    event_exit = false;
+  }
+}
+
+/* Event button triggers */
+// TODO: Comment
+void MapView::buttonEventOk()
+{
+  if(event_enter || event_exit)
+  {
+    /* If conversation dialog is visible, hide it first */
+    if(convo_dialog != NULL && convo_dialog->isVisible())
+      convo_dialog->buttonCancel();
+
+    /* Hide pop-up */
+    pop_event->hide();
+
+    /* Set the event */
+    EditorTile* t = editing_map->getHoverInfo()->hover_tile;
+    if(t != NULL)
+    {
+      if(event_enter)
+        t->setEventEnter(*event_ctrl->getEvent());
+      else if(event_exit)
+        t->setEventExit(*event_ctrl->getEvent());
+
+      event_enter = false;
+      event_exit = false;
+    }
+
+    /* Clear out the event control and view class */
+    event_ctrl->setEventBlank(false);
+    event_view->update();
+  }
+}
+
+/* Edit conversation trigger */
+// TODO: Comment
+void MapView::editConversation(Conversation* convo, bool is_option)
+{
+  // TODO: Implementation
+  qDebug() << "EDIT CONVERSATION";
+}
+
 /* Ensures the following item is visible in scene */
+// TODO: Comment
 void MapView::ensureVisible(QGraphicsItem* item)
 {
   if(map_render_view != NULL)
@@ -183,10 +273,27 @@ void MapView::pathEditTrigger(EditorNPCPath* path)
   }
 }
 
+/* Select a tile trigger */
+// TODO: Comment
+void MapView::selectTileDb()
+{
+  // TODO: Implementation
+  qDebug() << "SELECT TILE DB";
+}
+
+/* Select a tile trigger */
+// TODO: Comment
+void MapView::selectTileEvent()
+{
+  // TODO: Implementation
+  qDebug() << "SELECT TILE EVENT";
+}
+
 /*
  * Description: Sets the position into the status bar
  *
  * Input: tile coordinates
+ * Output: none
  */
 void MapView::setCurrentTile(int x, int y)
 {
@@ -218,6 +325,22 @@ void MapView::setCurrentTile(int x, int y)
   }
 
   map_data->showMessage(mapsize);
+}
+
+/* Tile enter/exit event slots */
+// TODO: Comment
+void MapView::tileEventEnter()
+{
+  // TODO: Implementation
+  qDebug() << "TILE EVENT ENTER";
+}
+
+/* Tile enter/exit event slots */
+// TODO: Comment
+void MapView::tileEventExit()
+{
+  // TODO: Implementation
+  qDebug() << "TILE EVENT EXIT";
 }
 
 /*============================================================================

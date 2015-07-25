@@ -29,6 +29,7 @@
 #include <QSizePolicy>
 
 #include "Database/EditorMap.h"
+#include "EditorEnumDb.h"
 #include "View/MapRender.h"
 #include "View/RawImageView.h"
 #include "View/SpriteView.h"
@@ -48,11 +49,20 @@ public:
   ~MapView();
 
 private:
+  /* The conversation dialog */
+  ConvoDialog* convo_dialog;
+
   /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;
 
   /* The editing map */
   EditorMap* editing_map;
+
+  /* Event view and control */
+  EditorEvent* event_ctrl;
+  bool event_enter;
+  bool event_exit;
+  EventView* event_view;
 
   /* Map Control pointer - right portion */
   MapControl* map_control;
@@ -66,6 +76,9 @@ private:
   /* Map editor - center portion */
   MapRender* map_render;
   QGraphicsView* map_render_view;
+
+  /* Event edit pop-up */
+  QDialog* pop_event; // TODO
 
   /* The current zoom state */
   int zoom_state;
@@ -117,14 +130,29 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Event button triggers */
+  void buttonEventCancel();
+  void buttonEventOk();
+
+  /* Edit conversation trigger */
+  void editConversation(Conversation* convo, bool is_option);
+
   /* Ensures the following item is visible in scene */
   void ensureVisible(QGraphicsItem* item);
 
   /* Path edit trigger */
   void pathEditTrigger(EditorNPCPath* path);
 
+  /* Select a tile trigger */
+  void selectTileDb();
+  void selectTileEvent();
+
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
+
+  /* Tile enter/exit event slots */
+  void tileEventEnter();
+  void tileEventExit();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

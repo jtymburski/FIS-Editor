@@ -463,6 +463,16 @@ void MapRender::tileClickInit()
     if(menuNPCs(t, menu_npcs))
       menu_npcs->menuAction()->setFont(font_bold);
 
+    /* Tile events */
+    QAction* action_enter = new QAction("Enter Event", middleclick_menu);
+    if(editing_map->getHoverInfo()->hover_tile->isEventEnterSet())
+      action_enter->setFont(font_bold);
+    connect(action_enter, SIGNAL(triggered()), this, SIGNAL(tileEventEnter()));
+    QAction* action_exit = new QAction("Exit Event", middleclick_menu);
+    if(editing_map->getHoverInfo()->hover_tile->isEventExitSet())
+      action_exit->setFont(font_bold);
+    connect(action_exit, SIGNAL(triggered()), this, SIGNAL(tileEventExit()));
+
     /* Add sub-menus */
     middleclick_menu->addMenu(menu_sprites);
     middleclick_menu->addMenu(menu_things);
@@ -470,6 +480,9 @@ void MapRender::tileClickInit()
     middleclick_menu->addMenu(menu_ios);
     middleclick_menu->addMenu(menu_persons);
     middleclick_menu->addMenu(menu_npcs);
+    middleclick_menu->addSeparator();
+    middleclick_menu->addAction(action_enter);
+    middleclick_menu->addAction(action_exit);
 
     /* Execute menu */
     middleclick_menu->exec(QCursor::pos());
@@ -648,7 +661,7 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         QRectF rect = EditorHelpers::normalizePoints(block_origin,
                                                      event->scenePos());
         QList<QGraphicsItem*> item_set =
-                                      items(rect, Qt::IntersectsItemBoundingRect);
+                                    items(rect, Qt::IntersectsItemBoundingRect);
         QList<EditorTile*> tile_set;
         for(int i = 0; i < item_set.size(); i++)
           tile_set.push_back((EditorTile*)item_set[i]);
