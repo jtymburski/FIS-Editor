@@ -23,15 +23,15 @@ Application::Application(QWidget* parent)
   file_name = "";
   username = getenv("USERNAME");
 
-  game_db_dock = new QDockWidget();
-  game_database = new GameDatabase();
+  game_db_dock = new QDockWidget(this);
+  game_database = new GameDatabase(this);
   game_db_dock->setWindowIcon(QIcon(":/images/fbs_icon.ico"));
-  game_db_dock->setWidget(new QWidget());
+  game_db_dock->setWidget(new QWidget(this));
   game_db_dock->setWidget(game_database);
-  addDockWidget(Qt::LeftDockWidgetArea,game_db_dock);
+  addDockWidget(Qt::LeftDockWidgetArea, game_db_dock);
   game_db_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
   game_db_dock->setAllowedAreas(Qt::LeftDockWidgetArea);
-  game_db_dock->setTitleBarWidget(new QWidget());
+  game_db_dock->setTitleBarWidget(new QWidget(this));
 
   connect(game_database, SIGNAL(changeMode(EditorEnumDb::ViewMode)),
           this, SLOT(setView(EditorEnumDb::ViewMode)));
@@ -61,7 +61,7 @@ Application::Application(QWidget* parent)
   connect(game_database, SIGNAL(changeBubby(EditorBubby*)),
           this, SLOT(setBubby(EditorBubby*)));
 
-  game_view = new GameView();
+  game_view = new GameView(this);
 
   setCentralWidget(game_view);
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
@@ -108,6 +108,7 @@ Application::~Application()
 {
   /* Clean up views before mass deletion */
   game_view->getMapView()->getMapEditorView()->setMapEditor(NULL);
+  game_database->deleteAll();
 }
 
 /*============================================================================
