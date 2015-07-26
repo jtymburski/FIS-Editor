@@ -218,15 +218,17 @@ QVector<QString> ConvoDialog::getListThings()
  *              of the dialog (for teleport events). Updates the event view.
  *
  * Inputs: QVector<QString> things - the list of things
+ *         bool is_thing - is the event on a thing? Default true.
  * Output: none
  */
-void ConvoDialog::setListThings(QVector<QString> things)
+void ConvoDialog::setListThings(QVector<QString> things, bool is_thing)
 {
   list_things = things;
   event_view->setListThings(things);
 
   /* Modify the list and append -1 entry to the very front */
-  list_things.push_front("-1: This thing");
+  if(is_thing)
+    list_things.push_front("-1: This thing");
 
   updateData();
 }

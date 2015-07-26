@@ -94,7 +94,7 @@ public:
   QVector<QString> getListThings();
 
   /* Sets the list of objects, used for event creation */
-  void setListThings(QVector<QString> things);
+  void setListThings(QVector<QString> things, bool is_thing = true);
 };
 
 #endif // CONVODIALOG_H

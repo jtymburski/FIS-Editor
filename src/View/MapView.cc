@@ -272,7 +272,7 @@ void MapView::editConversation(Conversation* convo, bool is_option)
 
   /* Create the new conversation dialog */
   convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(event_view->getListThings());
+  convo_dialog->setListThings(event_view->getListThings(), false);
   convo_dialog->getEventView()->setListItems(event_view->getListItems());
   convo_dialog->getEventView()->setListMaps(event_view->getListMaps());
   convo_dialog->getEventView()->setListSubmaps(event_view->getListSubmaps());
@@ -420,6 +420,7 @@ void MapView::tileEventEnter()
   {
     event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventEnter()));
     event_view->updateEvent();
+    pop_event->setWindowTitle("Enter Event Edit");
     pop_event->show();
     event_enter = true;
 
@@ -441,6 +442,7 @@ void MapView::tileEventExit()
   {
     event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventExit()));
     event_view->updateEvent();
+    pop_event->setWindowTitle("Exit Event Edit");
     pop_event->show();
     event_exit = true;
 
