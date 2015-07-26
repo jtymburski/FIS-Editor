@@ -16,9 +16,9 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   connect(view_map, SIGNAL(updateEventObjects()),
           this, SIGNAL(updateEventObjects()));
   connect(this, SIGNAL(updatedItems(QVector<QString>)),
-          view_map, SIGNAL(updatedItems(QVector<QString>)));
+          view_map, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
-          view_map, SIGNAL(updatedMaps(QVector<QString>)));
+          view_map, SLOT(updatedMaps(QVector<QString>)));
 
   view_person = new QWidget(this);
   null_person = view_person;
@@ -198,49 +198,19 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
   setCurrentIndex(static_cast<int>(v));
 }
 
-// TODO: Remove widget if it's set in the view
-//void GameView::deactivateCurrentView()
-//{
-//  switch(mode)
-//  {
-//    case EditorEnumDb::MAPVIEW:
-//      view_map->setDisabled(true);
-//      break;
-//    case EditorEnumDb::PERSONVIEW:
-//      view_person->setDisabled(true);
-//      break;
-//    case EditorEnumDb::PARTYVIEW:
-//      view_party->setDisabled(true);
-//      break;
-//    case EditorEnumDb::ITEMVIEW:
-//      view_item->setDisabled(true);
-//      break;
-//    case EditorEnumDb::ACTIONVIEW:
-//      view_action->setDisabled(true);
-//      break;
-//    case EditorEnumDb::RACEVIEW:
-//      view_race->setDisabled(true);
-//      break;
-//    case EditorEnumDb::BATTLECLASSVIEW:
-//      view_battleclass->setDisabled(true);
-//      break;
-//    case EditorEnumDb::SKILLSETVIEW:
-//      view_skillset->setDisabled(true);
-//      break;
-//    case EditorEnumDb::SKILLVIEW:
-//      view_skill->setDisabled(true);
-//      break;
-//    case EditorEnumDb::EQUIPMENTVIEW:
-//      view_equipment->setDisabled(true);
-//      break;
-//    case EditorEnumDb::BUBBYVIEW:
-//      view_bubby->setDisabled(true);
-//      break;
-//    default:
-//      break;
+/* Updates event objects in the map database or view class */
+// TODO: Comment
+void GameView::updateEventObjectsDb()
+{
 
-//  }
-//}
+}
+
+/* Updates event objects in the map database or view class */
+// TODO: Comment
+void GameView::updateEventObjectsView()
+{
+
+}
 
 /*============================================================================
  * PUBLIC FUNCTIONS

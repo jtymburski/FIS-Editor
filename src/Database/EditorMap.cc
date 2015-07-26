@@ -719,14 +719,14 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       if(category == "enter")
       {
         EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
-        edit_event.load(data, index + 1);
+        edit_event.load(data, index + 3);
         if(edit_event.getEvent() != NULL)
           map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), true);
       }
       else if(category == "exit")
       {
         EditorEvent edit_event(map->tiles[x][y]->getEventExit());
-        edit_event.load(data, index + 1);
+        edit_event.load(data, index + 3);
         if(edit_event.getEvent() != NULL)
           map->tiles[x][y]->setEventExit(*edit_event.getEvent(), true);
       }
@@ -1226,9 +1226,9 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   fh->writeXmlData("width", map->tiles.size());
   fh->writeXmlData("height", map->tiles.front().size());
 
-  /* Initial starting point - fill starting arrays */
-  QList<QList<QList<QPoint>>> sprite_stack;
+  /* Sprite/Pass initial starting point - fill starting arrays */
   QList<QList<QList<QPoint>>> pass_stack;
+  QList<QList<QList<QPoint>>> sprite_stack;
   QList<QPoint> blank_stack;
   int max_layer = EditorEnumDb::NO_LAYER;
   int max_pass = EditorHelpers::getPassabilityNum(true, true, true, true);
@@ -1252,9 +1252,19 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
     pass_stack.append(pass_layer);
   }
 
+  /* Event stack starting point */
+  QList<QList<QList<int>>> event_stack;
+  QList<QList<int>> event_stack_empty;
+  event_stack.push_back(event_stack_empty);
+  event_stack.push_back(event_stack_empty);
+  QList<int> blank_stack2;
+
   /* Loop through all tiles and sort the data */
   for(int i = 0; i < map->tiles.size(); i++)
   {
+    event_stack.front().push_back(blank_stack2);
+    event_stack.back().push_back(blank_stack2);
+
     for(int j = 0; j < map->tiles[i].size(); j++)
     {
       /* Loop through and get all layers */
@@ -1263,11 +1273,21 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
         EditorEnumDb::Layer layer = (EditorEnumDb::Layer)k;
         EditorSprite* sprite = map->tiles[i][j]->getSprite(layer);
         int pass = map->tiles[i][j]->getPassabilityNum(layer);
+
+        /* Sprite stack add */
         if(sprite != NULL)
           sprite_stack[k][sprite->getID()].push_back(QPoint(i, j));
+
+        /* Passability stack add */
         if(pass > 0 && map->tiles[i][j]->getSprite(layer) != NULL)
           pass_stack[k][pass].push_back(QPoint(i, j));
       }
+
+      /* Event add */
+      if(map->tiles[i][j]->isEventEnterSet())
+        event_stack.front()[i].push_back(j);
+      if(map->tiles[i][j]->isEventExitSet())
+        event_stack.back()[i].push_back(j);
     }
   }
 
@@ -1319,6 +1339,70 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   fh->writeXmlElementEnd();
   fh->writeXmlElement("upper", "index", "4");
   addTileSpriteData(fh, save_dialog, sprite_stack[(int)EditorEnumDb::UPPER5]);
+  fh->writeXmlElementEnd();
+
+  /* Add enter events */
+  fh->writeXmlElement("tileevent", "type", "enter");
+  for(int i = 0; i < event_stack.front().size(); i++)
+  {
+    bool x_element = false;
+
+    /* Loop through Y elements */
+    for(int j = 0; j < event_stack.front()[i].size(); j++)
+    {
+      EditorTile* t = map->tiles[i][event_stack.front()[i][j]];
+      if(t->isEventEnterSet())
+      {
+        if(!x_element)
+        {
+          fh->writeXmlElement("x", "index", i);
+          x_element = true;
+        }
+        fh->writeXmlElement("y", "index", event_stack.front()[i][j]);
+
+        EditorEvent edit_event(t->getEventEnter());
+        edit_event.save(fh, game_only, "", true);
+
+        fh->writeXmlElementEnd();
+      }
+    }
+
+    /* X element end */
+    if(x_element)
+      fh->writeXmlElementEnd();
+  }
+  fh->writeXmlElementEnd();
+
+  /* Add exit events */
+  fh->writeXmlElement("tileevent", "type", "exit");
+  for(int i = 0; i < event_stack.front().size(); i++)
+  {
+    bool x_element = false;
+
+    /* Loop through Y elements */
+    for(int j = 0; j < event_stack.front()[i].size(); j++)
+    {
+      EditorTile* t = map->tiles[i][event_stack.front()[i][j]];
+      if(t->isEventExitSet())
+      {
+        if(!x_element)
+        {
+          fh->writeXmlElement("x", "index", i);
+          x_element = true;
+        }
+        fh->writeXmlElement("y", "index", event_stack.front()[i][j]);
+
+        EditorEvent edit_event(t->getEventExit());
+        edit_event.save(fh, game_only, "", true);
+
+        fh->writeXmlElementEnd();
+      }
+    }
+
+    /* X element end */
+    if(x_element)
+      fh->writeXmlElementEnd();
+  }
   fh->writeXmlElementEnd();
 
   /* Add things */

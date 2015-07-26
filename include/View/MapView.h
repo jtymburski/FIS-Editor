@@ -55,13 +55,19 @@ private:
   /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;
 
+  /* Is the data for database, or instead view */
+  bool data_db;
+
   /* The editing map */
   EditorMap* editing_map;
 
   /* Event view and control */
   EditorEvent* event_ctrl;
+  bool event_convo;
   bool event_enter;
   bool event_exit;
+  bool event_external;
+  EditorTile* event_tile;
   EventView* event_view;
 
   /* Map Control pointer - right portion */
@@ -92,6 +98,9 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Fill event pop-up with map data */
+  void fillEventWithData();
+
   /* Sets up the database bar */
   void setupLeftBar();
 
@@ -120,10 +129,10 @@ signals:
   void sendUpEditorSprite(EditorSprite* e);
 
   /* Updated data to pass into map database */
-  void updatedItems(QVector<QString> items);
-  void updatedMaps(QVector<QString> maps);
+  //void updatedItems(QVector<QString> items);
+  //void updatedMaps(QVector<QString> maps);
 
-  /* Updates event objects in the map database class */
+  /* Updates event objects in the map database or view class */
   void updateEventObjects();
 
 /*============================================================================
@@ -144,8 +153,12 @@ public slots:
   void pathEditTrigger(EditorNPCPath* path);
 
   /* Select a tile trigger */
+  void selectTileConvo();
   void selectTileDb();
   void selectTileEvent();
+
+  /* Send the selected tile to the event controller */
+  void sendSelectedTile(int, int, int);
 
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
@@ -153,6 +166,13 @@ public slots:
   /* Tile enter/exit event slots */
   void tileEventEnter();
   void tileEventExit();
+
+  /* Updates event objects in the map database */
+  void updateEventObjectsDb();
+
+  /* Updated data to pass into map database */
+  void updatedItems(QVector<QString> items);
+  void updatedMaps(QVector<QString> maps);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

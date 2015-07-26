@@ -89,8 +89,14 @@ private:
   QListWidget* view_bottom;
   QListWidget* view_top;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
   void changeAction(EditorAction* action);
   void changeBattleclass(EditorCategory* battle_class);
@@ -109,6 +115,9 @@ signals:
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
 
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Creates a new map, from the dialog */
   void createNewMap();
@@ -143,6 +152,9 @@ public slots:
   /* Updates event objects in the map database class */
   void updateEventObjects();
 
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Delete the game */
   void deleteAll();

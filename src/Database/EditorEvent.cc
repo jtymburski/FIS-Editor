@@ -696,15 +696,18 @@ void EditorEvent::load(XmlData data, int index)
  * Inputs: FileHandler* fh - the file handling pointer
  *         bool game_only - true if the data should include game only relevant
  *         QString preface - the wrapper text element. default to "event"
+ *         bool no_preface - no XML wrapper included if true. Default false
  * Output: none
  */
-void EditorEvent::save(FileHandler* fh, bool game_only, QString preface)
+void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
+                       bool no_preface)
 {
   (void)game_only;
 
   if(fh != NULL && event.classification != EventClassifier::NOEVENT)
   {
-    fh->writeXmlElement(preface.toStdString());
+    if(!no_preface)
+      fh->writeXmlElement(preface.toStdString());
 
     /* -- GIVE ITEM EVENT -- */
     if(event.classification == EventClassifier::GIVEITEM)
@@ -757,7 +760,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface)
       fh->writeXmlElementEnd();
     }
 
-    fh->writeXmlElementEnd();
+    if(!no_preface)
+      fh->writeXmlElementEnd();
   }
 }
 

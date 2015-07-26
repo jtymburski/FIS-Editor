@@ -110,7 +110,8 @@ public:
   void load(XmlData data, int index);
 
   /* Saves the event data */
-  void save(FileHandler* fh, bool game_only = false, QString preface = "event");
+  void save(FileHandler* fh, bool game_only = false, QString preface = "event",
+            bool no_preface = false);
 
   /* Sets the conversation at the index */
   bool setConversation(QString index, Conversation convo);

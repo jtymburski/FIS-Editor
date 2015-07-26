@@ -51,10 +51,16 @@ private:
 
   EditorEnumDb::ViewMode mode;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Paints the sprite in a bounding box */
 //  void paintEvent(QPaintEvent *);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
   /* Emits upon name change to game object */
   void nameChange(QString);
@@ -66,6 +72,9 @@ signals:
   /* Updates event objects in the map database class */
   void updateEventObjects();
 
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
 public slots:
   /* Loads the image with a valid given path */
 //  void loadSprite(QString path);
@@ -89,8 +98,13 @@ public slots:
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
 
-  //void deactivateCurrentView();
+  /* Updates event objects in the map database or view class */
+  void updateEventObjectsDb();
+  void updateEventObjectsView();
 
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Refresh View */
   void refreshView(EditorEnumDb::ViewMode mode, QWidget* old,

@@ -8,9 +8,9 @@
 #include "View/MapView.h"
 
 /* Constants */
-const int MapView::kDEFAULT_ZOOM = 4;
-const int MapView::kNUM_ZOOM_STATES = 10;
-const float MapView::kZOOM_STATES[] = {0.125, 0.25, 0.5, 0.75, 1,
+const int MapView::kDEFAULT_ZOOM = 5;
+const int MapView::kNUM_ZOOM_STATES = 11;
+const float MapView::kZOOM_STATES[] = {0.0625, 0.125, 0.25, 0.5, 0.75, 1,
                                        1.5, 2, 3, 4, 8};
 
 /*============================================================================
@@ -27,8 +27,12 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
 {
   convo_dialog = NULL;
   cursor_mode = EditorEnumDb::BASIC;
+  data_db = false;
+  event_convo = false;
   event_enter = false;
   event_exit = false;
+  event_external = false;
+  event_tile = NULL;
 
   /* Calls all setup functions */
   setupLeftBar();
@@ -77,6 +81,28 @@ MapView::~MapView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
+/* Fill event pop-up with map data */
+// TODO: Comment
+void MapView::fillEventWithData()
+{
+  if(editing_map != NULL)
+  {
+    /* Get data */
+    QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
+    thing_list.push_front("0: Player");
+    thing_list << editing_map->getNPCList(0, true, true);
+    thing_list << editing_map->getThingList(0, true, true);
+    thing_list << editing_map->getIOList(0, true, true);
+
+    /* Load data in */
+    event_view->setListSubmaps(editing_map->getMapList());
+    event_view->setListThings(thing_list);
+
+    data_db = false;
+    emit updateEventObjects();
+  }
+}
+
 /*
  * Description: Sets up the sidebar
  *
@@ -86,11 +112,7 @@ void MapView::setupLeftBar()
 {
   map_database = new MapDatabase(this);
   connect(map_database, SIGNAL(updateEventObjects()),
-          this, SIGNAL(updateEventObjects()));
-  connect(this, SIGNAL(updatedItems(QVector<QString>)),
-          map_database, SLOT(updatedItems(QVector<QString>)));
-  connect(this, SIGNAL(updatedMaps(QVector<QString>)),
-          map_database, SLOT(updatedMaps(QVector<QString>)));
+          this, SLOT(updateEventObjectsDb()));
   connect(map_database, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SLOT(ensureVisible(QGraphicsItem*)));
   connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
@@ -136,8 +158,8 @@ void MapView::setupMapView()//int x, int y)
   connect(map_control, SIGNAL(updateMap()),
           map_render, SLOT(updateRenderingMap()));
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
-          map_database, SLOT(sendSelectedTile(int,int,int)));
-  connect(map_database, SIGNAL(selectTile()), map_render, SLOT(selectTile()));
+          this, SLOT(sendSelectedTile(int,int,int)));
+  connect(map_database, SIGNAL(selectTile()), this, SLOT(selectTileDb()));
   connect(map_control, SIGNAL(updateAllLists()),
           map_database, SLOT(updateAllLists()));
 
@@ -199,6 +221,7 @@ void MapView::buttonEventCancel()
     event_view->update();
     event_enter = false;
     event_exit = false;
+    event_tile = NULL;
   }
 }
 
@@ -216,20 +239,19 @@ void MapView::buttonEventOk()
     pop_event->hide();
 
     /* Set the event */
-    EditorTile* t = editing_map->getHoverInfo()->hover_tile;
-    if(t != NULL)
+    if(event_tile != NULL)
     {
       if(event_enter)
-        t->setEventEnter(*event_ctrl->getEvent());
+        event_tile->setEventEnter(*event_ctrl->getEvent());
       else if(event_exit)
-        t->setEventExit(*event_ctrl->getEvent());
-
-      event_enter = false;
-      event_exit = false;
+        event_tile->setEventExit(*event_ctrl->getEvent());
     }
 
     /* Clear out the event control and view class */
     event_ctrl->setEventBlank(false);
+    event_enter = false;
+    event_exit = false;
+    event_tile = NULL;
     event_view->update();
   }
 }
@@ -238,16 +260,36 @@ void MapView::buttonEventOk()
 // TODO: Comment
 void MapView::editConversation(Conversation* convo, bool is_option)
 {
-  // TODO: Implementation
-  qDebug() << "EDIT CONVERSATION";
+  if(convo_dialog != NULL)
+  {
+    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+               this, SLOT(selectTileConvo()));
+    disconnect(convo_dialog, SIGNAL(success()),
+               event_view, SLOT(updateConversation()));
+    delete convo_dialog;
+  }
+  convo_dialog = NULL;
+
+  /* Create the new conversation dialog */
+  convo_dialog = new ConvoDialog(convo, is_option, this);
+  convo_dialog->setListThings(event_view->getListThings());
+  convo_dialog->getEventView()->setListItems(event_view->getListItems());
+  convo_dialog->getEventView()->setListMaps(event_view->getListMaps());
+  convo_dialog->getEventView()->setListSubmaps(event_view->getListSubmaps());
+  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+          this, SLOT(selectTileConvo()));
+  connect(convo_dialog, SIGNAL(success()),
+          event_view, SLOT(updateConversation()));
+  convo_dialog->show();
 }
 
 /* Ensures the following item is visible in scene */
 // TODO: Comment
 void MapView::ensureVisible(QGraphicsItem* item)
 {
-  if(map_render_view != NULL)
-    map_render_view->ensureVisible(item, 100, 100);
+  // TODO: FIX
+  //if(map_render_view != NULL)
+  //  map_render_view->ensureVisible(item, 100, 100);
 }
 
 /* Path edit trigger */
@@ -275,18 +317,55 @@ void MapView::pathEditTrigger(EditorNPCPath* path)
 
 /* Select a tile trigger */
 // TODO: Comment
+void MapView::selectTileConvo()
+{
+  if(convo_dialog != NULL)
+  {
+    selectTileEvent();
+    event_convo = true;
+    convo_dialog->hide();
+  }
+}
+
+/* Select a tile trigger */
+// TODO: Comment
 void MapView::selectTileDb()
 {
-  // TODO: Implementation
-  qDebug() << "SELECT TILE DB";
+  event_external = true;
+  map_render->selectTile();
 }
 
 /* Select a tile trigger */
 // TODO: Comment
 void MapView::selectTileEvent()
 {
-  // TODO: Implementation
-  qDebug() << "SELECT TILE EVENT";
+  event_external = false;
+  event_convo = false;
+  pop_event->hide();
+  map_render->selectTile();
+}
+
+/* Send the selected tile to the event controller */
+// TODO: Comment
+void MapView::sendSelectedTile(int id, int x, int y)
+{
+  if(event_external)
+  {
+    map_database->sendSelectedTile(id, x, y);
+  }
+  else
+  {
+    pop_event->show();
+    if(event_convo)
+    {
+      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+      convo_dialog->show();
+    }
+    else
+    {
+      event_view->updateSelectedTile(id, x, y);
+    }
+  }
 }
 
 /*
@@ -331,16 +410,70 @@ void MapView::setCurrentTile(int x, int y)
 // TODO: Comment
 void MapView::tileEventEnter()
 {
-  // TODO: Implementation
-  qDebug() << "TILE EVENT ENTER";
+  /* Close the pop-up if open */
+  if(event_enter || event_exit)
+    buttonEventCancel();
+
+  /* Set the event and open the new pop-up */
+  event_tile = editing_map->getHoverInfo()->hover_tile;
+  if(event_tile != NULL)
+  {
+    event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventEnter()));
+    event_view->updateEvent();
+    pop_event->show();
+    event_enter = true;
+
+    fillEventWithData();
+  }
 }
 
 /* Tile enter/exit event slots */
 // TODO: Comment
 void MapView::tileEventExit()
 {
-  // TODO: Implementation
-  qDebug() << "TILE EVENT EXIT";
+  /* Close the pop-up if open */
+  if(event_enter || event_exit)
+    buttonEventCancel();
+
+  /* Set the event and open the new pop-up */
+  event_tile = editing_map->getHoverInfo()->hover_tile;
+  if(event_tile != NULL)
+  {
+    event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventExit()));
+    event_view->updateEvent();
+    pop_event->show();
+    event_exit = true;
+
+    fillEventWithData();
+  }
+}
+
+/* Updates event objects in the map database */
+// TODO: Comment
+void MapView::updateEventObjectsDb()
+{
+  data_db = true;
+  emit updateEventObjects();
+}
+
+/* Updated data to pass into map database */
+// TODO: Comment
+void MapView::updatedItems(QVector<QString> items)
+{
+  if(data_db)
+    map_database->updatedItems(items);
+  else
+    event_view->setListItems(items);
+}
+
+/* Updated data to pass into map database */
+// TODO: Comment
+void MapView::updatedMaps(QVector<QString> maps)
+{
+  if(data_db)
+    map_database->updatedMaps(maps);
+  else
+    event_view->setListMaps(maps);
 }
 
 /*============================================================================
