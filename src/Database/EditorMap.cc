@@ -1375,14 +1375,14 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
 
   /* Add exit events */
   fh->writeXmlElement("tileevent", "type", "exit");
-  for(int i = 0; i < event_stack.front().size(); i++)
+  for(int i = 0; i < event_stack.back().size(); i++)
   {
     bool x_element = false;
 
     /* Loop through Y elements */
-    for(int j = 0; j < event_stack.front()[i].size(); j++)
+    for(int j = 0; j < event_stack.back()[i].size(); j++)
     {
-      EditorTile* t = map->tiles[i][event_stack.front()[i][j]];
+      EditorTile* t = map->tiles[i][event_stack.back()[i][j]];
       if(t->isEventExitSet())
       {
         if(!x_element)
@@ -1390,7 +1390,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
           fh->writeXmlElement("x", "index", i);
           x_element = true;
         }
-        fh->writeXmlElement("y", "index", event_stack.front()[i][j]);
+        fh->writeXmlElement("y", "index", event_stack.back()[i][j]);
 
         EditorEvent edit_event(t->getEventExit());
         edit_event.save(fh, game_only, "", true);
@@ -4551,8 +4551,10 @@ int EditorMap::setMap(int id, QString name,
 
     /* Modifiy grid and passability */
     EditorTile* ref_tile = sub_maps.front()->tiles.front().front();
+    bool events = ref_tile->getVisibilityEvents();
     bool grid = ref_tile->getVisibilityGrid();
     bool pass = ref_tile->getVisibilityPass();
+    setVisibilityEvents(events);
     setVisibilityGrid(grid);
     setVisibilityPass(pass);
     for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
@@ -5012,6 +5014,21 @@ void EditorMap::setVisibility(EditorEnumDb::Layer layer, bool visible)
   //              NOT visible
   if(layer == EditorEnumDb::NPC)
       setVisibilityPaths(visible);
+}
+
+/*
+ * Description: Sets the event notifiers visibility on all sub-map tiles.
+ *              Controlled by the map view.
+ *
+ * Inputs: bool visible - is the event notifiers visible?
+ * Output: none
+ */
+void EditorMap::setVisibilityEvents(bool visible)
+{
+  for(int i = 0; i < sub_maps.size(); i++)
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setVisibilityEvents(visible);
 }
 
 /*

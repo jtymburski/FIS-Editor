@@ -30,6 +30,7 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   /* Class control */
   hovered = false;
   tile.setStatus(Tile::ACTIVE);
+  visible_events = false;
   visible_grid = true;
   visible_passability = false;
   x_pos = x;
@@ -985,6 +986,17 @@ bool EditorTile::getVisibilityThing(int render_level)
 }
 
 /*
+ * Description: Returns if the event notifiers are visible on the tile.
+ *
+ * Inputs: none
+ * Output: bool - true if event notifiers are visible
+ */
+bool EditorTile::getVisibilityEvents()
+{
+  return visible_events;
+}
+
+/*
  * Description: Returns if the grid is visible on the tile.
  *
  * Inputs: none
@@ -1314,6 +1326,27 @@ void EditorTile::paint(QPainter *painter,
     else
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->nopassW);
+  }
+
+  /* Render the event notification */
+  if(visible_events)
+  {
+    bool enter = isEventEnterSet();
+    bool exit = isEventExitSet();
+
+    if(enter || exit)
+    {
+      /* Draw rect */
+      QColor color;
+      if(enter && exit)
+        color = QColor(255, 216, 1, 128);
+      else if(enter)
+        color = QColor(229, 103, 23, 128);
+      else if(exit)
+        color = QColor(23, 150, 230, 128);
+      painter->fillRect(x_pos * size + 1, y_pos * size + 1, size - 2, size - 2,
+                        color);
+    }
   }
 }
 
@@ -1752,6 +1785,17 @@ void EditorTile::setVisibilityEnhancer(bool toggle)
   update();
 }
 
+/* Description: Sets the event notifier visibility.
+ *
+ * Inputs: bool toggle - notifier visibility
+ * Output: none
+ */
+void EditorTile::setVisibilityEvents(bool toggle)
+{
+  visible_events = toggle;
+  update();
+}
+
 /*
  * Description: Sets the visibility of all layers of the ios.
  *
@@ -1786,6 +1830,7 @@ bool EditorTile::setVisibilityIO(int render_level, bool visible)
  * Description: Sets the grid visibility
  *
  * Input: Visibility toggle
+ * Output: none
  */
 void EditorTile::setVisibilityGrid(bool toggle)
 {

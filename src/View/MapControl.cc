@@ -20,14 +20,19 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   QHBoxLayout* button_layout = new QHBoxLayout();
 
   /* Sets up top toggle buttons */
-  grid_toggle = new QPushButton("Grid",this);
-  passability_toggle = new QPushButton("Passibility",this);
+  events_toggle = new QPushButton("Events", this);
+  grid_toggle = new QPushButton("Grid", this);
+  passability_toggle = new QPushButton("Passibility", this);
   grid_toggle->setCheckable(true);
   grid_toggle->setChecked(true);
   passability_toggle->setCheckable(true);
+  events_toggle->setCheckable(true);
   button_layout->addWidget(grid_toggle);
   button_layout->addWidget(passability_toggle);
+  button_layout->addWidget(events_toggle);
   main_layout->addLayout(button_layout);
+  connect(events_toggle, SIGNAL(toggled(bool)),
+          this, SLOT(toggleEvents(bool)));
   connect(grid_toggle, SIGNAL(toggled(bool)),
           this, SLOT(toggleGrid(bool)));
   connect(passability_toggle, SIGNAL(toggled(bool)),
@@ -360,6 +365,13 @@ void MapControl::selectSubMap(QListWidgetItem* item)
   selectSubMap(row);
 }
 
+/* Toggles the event notifier visibility */
+void MapControl::toggleEvents(bool visible)
+{
+  if(editing_map != NULL)
+    editing_map->setVisibilityEvents(visible);
+}
+
 /* Toggles the grid */
 void MapControl::toggleGrid(bool visible)
 {
@@ -413,6 +425,12 @@ int MapControl::getCurrentMapIndex()
   return list_bottom->currentRow();
 }
 
+/* Returns event notifier toggle status */
+bool MapControl::getEventsToggle()
+{
+  return events_toggle->isChecked();
+}
+
 /* Gets the status of the grid toggle */
 bool MapControl::getGridToggle()
 {
@@ -463,6 +481,7 @@ void MapControl::setMapEditor(EditorMap* editor)
   if(editing_map != NULL)
   {
     /* Update visibility of grid and passability */
+    editing_map->setVisibilityEvents(getEventsToggle());
     editing_map->setVisibilityGrid(getGridToggle());
     editing_map->setVisibilityPass(getPassabilityToggle());
 

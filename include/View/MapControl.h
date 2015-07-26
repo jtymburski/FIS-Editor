@@ -39,6 +39,9 @@ private:
   /* The editing map */
   EditorMap* editing_map;
 
+  /* Top event notifier visible button */
+  QPushButton* events_toggle;
+
   /* Top Grid visible Button */
   QPushButton* grid_toggle;
 
@@ -121,6 +124,9 @@ public slots:
   /* Select the sub-map, by double click */
   void selectSubMap(QListWidgetItem* item);
 
+  /* Toggles the event notifier visibility */
+  void toggleEvents(bool visible);
+
   /* Toggles the grid */
   void toggleGrid(bool visible);
 
@@ -140,6 +146,9 @@ public:
   /* Get the current sub-map */
   SubMapInfo* getCurrentMap();
   int getCurrentMapIndex();
+
+  /* Returns event notifier toggle status */
+  bool getEventsToggle();
 
   /* Returns grid toggle status */
   bool getGridToggle();

@@ -101,6 +101,7 @@ private:
   TileIcons* tile_icons;
 
   /* Visibility painting control */
+  bool visible_events;
   bool visible_grid;
   bool visible_passability;
 
@@ -205,7 +206,8 @@ public:
   bool getVisibilityPerson(int render_level);
   bool getVisibilityThing(int render_level);
 
-  /* Returns grid and passability visibility */
+  /* Returns grid/pass/events visibility */
+  bool getVisibilityEvents();
   bool getVisibilityGrid();
   bool getVisibilityPass();
 
@@ -274,7 +276,8 @@ public:
   bool setVisibilityThing(int render_level, bool visible);
   bool setVisibilityUpper(int, bool);
 
-  /* Sets the grid visibility */
+  /* Sets the grid/pass/events visibility */
+  void setVisibilityEvents(bool);
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);
 

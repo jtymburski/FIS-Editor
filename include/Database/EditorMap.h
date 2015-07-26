@@ -372,6 +372,7 @@ public:
   void setVisibility(EditorEnumDb::Layer layer, bool visible);
 
   /* Set grid and passability visibility */
+  void setVisibilityEvents(bool);
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);
 
