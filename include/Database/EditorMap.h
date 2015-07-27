@@ -202,6 +202,9 @@ public:
   /* Copies information, except ID, from one sub-map to another */
   bool copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map);
 
+  /* Ctrl + click trigger in map */
+  void ctrlClickTrigger();
+
   /* Returns current references for lists in map */
   int getCurrentIOIndex();
   int getCurrentItemIndex();

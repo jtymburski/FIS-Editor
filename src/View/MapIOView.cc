@@ -356,9 +356,11 @@ void MapIOView::instanceMenu(const QPoint & pos)
  *              changes. This changes which IO is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
+ *         bool lock_viewport - lock the viewport from jumping to IO.
+ *                              Default to false.
  * Output: none
  */
-void MapIOView::instanceRowChanged(int index)
+void MapIOView::instanceRowChanged(int index, bool lock_viewport)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -371,8 +373,9 @@ void MapIOView::instanceRowChanged(int index)
                                           editor_map->getCurrentMap()->id);
       if(io != NULL)
       {
-        emit ensureVisible(editor_map->getCurrentMap()->tiles[io->getX()]
-                                                             [io->getY()]);
+        if(!lock_viewport)
+          emit ensureVisible(editor_map->getCurrentMap()->tiles[io->getX()]
+                                                               [io->getY()]);
 
         /* Select the base in the list */
         if(io->getBaseIO() != NULL)
@@ -380,6 +383,7 @@ void MapIOView::instanceRowChanged(int index)
           int index = editor_map->getIOIndex(io->getBaseIO()->getID());
           io_list->blockSignals(true);
           io_list->setCurrentRow(index);
+          editor_map->setCurrentIO(index);
           io_list->blockSignals(false);
           updateInfo();
         }
@@ -432,15 +436,21 @@ void MapIOView::ioInstanceUpdate(QString name_list)
 
   io_instances->clearSelection();
   io_instances->clearFocus();
-  io_instances->blockSignals(false);
 
   /* If name list is not blank, select the name in the list */
   if(!name_list.isEmpty())
   {
     for(int i = 0; i < io_instances->count(); i++)
+    {
       if(io_instances->item(i)->text() == name_list)
+      {
         io_instances->setCurrentRow(i);
+        instanceRowChanged(i, true);
+      }
+    }
   }
+
+  io_instances->blockSignals(false);
 }
 
 /*

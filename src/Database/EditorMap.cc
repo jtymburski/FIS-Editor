@@ -1997,6 +1997,94 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
 }
 
 /*
+ * Description: Ctrl click on tile switches selected thing/sprite to the one
+ *              on the top of the selected tile.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::ctrlClickTrigger()
+{
+  EditorEnumDb::Layer layer = active_info.active_layer;
+  EditorTile* tile = active_info.hover_tile;
+
+  if(tile != NULL)
+  {
+    bool finished = false;
+
+    /* ---- THINGS ---- */
+    if(layer == EditorEnumDb::THING)
+    {
+      QVector<EditorMapThing*> set = tile->getThings();
+      for(int i = set.size() - 1; !finished && i >= 0; i--)
+      {
+        if(set[i] != NULL)
+        {
+          emit thingInstanceChanged(set[i]->getNameList());
+          finished = true;
+        }
+      }
+    }
+    /* ---- IOS ---- */
+    else if(layer == EditorEnumDb::IO)
+    {
+      QVector<EditorMapIO*> set = tile->getIOs();
+      for(int i = set.size() - 1; !finished && i >= 0; i--)
+      {
+        if(set[i] != NULL)
+        {
+          emit ioInstanceChanged(set[i]->getNameList());
+          finished = true;
+        }
+      }
+    }
+    /* ---- ITEMS ---- */
+    else if(layer == EditorEnumDb::ITEM)
+    {
+      QVector<EditorMapItem*> set = tile->getItems();
+      for(int i = set.size() - 1; !finished && i >= 0; i--)
+      {
+        if(set[i] != NULL)
+        {
+          emit itemInstanceChanged(set[i]->getNameList());
+          finished = true;
+        }
+      }
+    }
+    /* ---- PERSONS ---- */
+    else if(layer == EditorEnumDb::PERSON)
+    {
+      QVector<EditorMapPerson*> set = tile->getPersons();
+      for(int i = set.size() - 1; !finished && i >= 0; i--)
+      {
+        if(set[i] != NULL)
+        {
+          emit personInstanceChanged(set[i]->getNameList());
+          finished = true;
+        }
+      }
+    }
+    /* ---- NPCS ---- */
+    else if(layer == EditorEnumDb::NPC)
+    {
+      QVector<EditorMapNPC*> set = tile->getNPCs();
+      for(int i = set.size() - 1; !finished && i >= 0; i--)
+      {
+        if(set[i] != NULL)
+        {
+          emit npcInstanceChanged(set[i]->getNameList());
+          finished = true;
+        }
+      }
+    }
+    else
+    {
+      // TODO: SPRITE LOGIC HERE
+    }
+  }
+}
+
+/*
  * Description: Returns the current selected base IO in the list of IOs.
  *              On click, if the layer and pen is correct, this is the IO
  *              that instantized and then placed.

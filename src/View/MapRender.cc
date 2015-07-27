@@ -612,11 +612,19 @@ void MapRender::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
     else if(event->button() == Qt::LeftButton)
     {
-      if(editing_map->getHoverInfo()->active_cursor == EditorEnumDb::BLOCKPLACE)
+      /* Ctrl + Click select layered thing */
+      if(QGuiApplication::keyboardModifiers() == Qt::ControlModifier)
+      {
+        editing_map->ctrlClickTrigger();
+      }
+      /* Block place */
+      else if(editing_map->getHoverInfo()->active_cursor ==
+                                                       EditorEnumDb::BLOCKPLACE)
       {
         block_origin = event->scenePos().toPoint();
         block_erase = false;
       }
+      /* All other placement */
       else
       {
         editing_map->clickTrigger();

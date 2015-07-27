@@ -114,7 +114,7 @@ public slots:
   void instanceMenu(const QPoint & pos);
 
   /* Instance of npc row changed */
-  void instanceRowChanged(int index);
+  void instanceRowChanged(int index, bool lock_viewport = false);
 
   /* An item in the list was double clicked */
   void itemDoubleClicked(QListWidgetItem*);

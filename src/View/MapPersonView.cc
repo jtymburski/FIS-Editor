@@ -357,9 +357,11 @@ void MapPersonView::instanceMenu(const QPoint & pos)
  *              changes. This changes which person is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
+ *         bool lock_viewport - lock the viewport from jumping to the person.
+ *                              Default to false.
  * Output: none
  */
-void MapPersonView::instanceRowChanged(int index)
+void MapPersonView::instanceRowChanged(int index, bool lock_viewport)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -372,8 +374,9 @@ void MapPersonView::instanceRowChanged(int index)
                                                editor_map->getCurrentMap()->id);
       if(person != NULL)
       {
-        emit ensureVisible(editor_map->getCurrentMap()->tiles[person->getX()]
-                                                             [person->getY()]);
+        if(!lock_viewport)
+          emit ensureVisible(editor_map->getCurrentMap()->tiles[person->getX()]
+                                                              [person->getY()]);
 
         /* Select the base in the list */
         if(person->getBasePerson() != NULL)
@@ -382,6 +385,7 @@ void MapPersonView::instanceRowChanged(int index)
                                               person->getBasePerson()->getID());
           person_list->blockSignals(true);
           person_list->setCurrentRow(index);
+          editor_map->setCurrentPerson(index);
           person_list->blockSignals(false);
           updateInfo();
         }
@@ -434,15 +438,21 @@ void MapPersonView::personInstanceUpdate(QString name_list)
 
   person_instances->clearSelection();
   person_instances->clearFocus();
-  person_instances->blockSignals(false);
 
   /* If name list is not blank, select the name in the list */
   if(!name_list.isEmpty())
   {
     for(int i = 0; i < person_instances->count(); i++)
+    {
       if(person_instances->item(i)->text() == name_list)
+      {
         person_instances->setCurrentRow(i);
+        instanceRowChanged(i, true);
+      }
+    }
   }
+
+  person_instances->blockSignals(false);
 }
 
 /*

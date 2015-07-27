@@ -10,6 +10,7 @@
 
 #include <QDebug>
 #include <QGraphicsView>
+#include <QGuiApplication>
 #include <QTabWidget>
 #include <QGraphicsScene>
 #include <QList>

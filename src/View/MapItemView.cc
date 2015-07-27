@@ -338,9 +338,11 @@ void MapItemView::instanceDoubleClicked(QListWidgetItem*)
  *              changes. This changes which item is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
+ *         bool lock_viewport - lock the viewport from jumping to item. Default
+ *                              to false.
  * Output: none
  */
-void MapItemView::instanceRowChanged(int index)
+void MapItemView::instanceRowChanged(int index, bool lock_viewport)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -352,8 +354,9 @@ void MapItemView::instanceRowChanged(int index)
                                                editor_map->getCurrentMap()->id);
       if(item != NULL)
       {
-        emit ensureVisible(editor_map->getCurrentMap()->tiles[item->getX()]
-                                                             [item->getY()]);
+        if(!lock_viewport)
+          emit ensureVisible(editor_map->getCurrentMap()->tiles[item->getX()]
+                                                               [item->getY()]);
 
         /* Select the base in the list */
         if(item->getBaseItem() != NULL)
@@ -361,6 +364,7 @@ void MapItemView::instanceRowChanged(int index)
           int index = editor_map->getItemIndex(item->getBaseItem()->getID());
           item_list->blockSignals(true);
           item_list->setCurrentRow(index);
+          editor_map->setCurrentItem(index);
           item_list->blockSignals(false);
           updateInfo();
         }
@@ -413,15 +417,21 @@ void MapItemView::itemInstanceUpdate(QString name_list)
 
   item_instances->clearSelection();
   item_instances->clearFocus();
-  item_instances->blockSignals(false);
 
   /* If name list is not blank, select the name in the list */
   if(!name_list.isEmpty())
   {
     for(int i = 0; i < item_instances->count(); i++)
+    {
       if(item_instances->item(i)->text() == name_list)
+      {
         item_instances->setCurrentRow(i);
+        instanceRowChanged(i, true);
+      }
+    }
   }
+
+  item_instances->blockSignals(false);
 }
 
 /*

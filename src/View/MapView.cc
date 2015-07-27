@@ -288,8 +288,8 @@ void MapView::editConversation(Conversation* convo, bool is_option)
 void MapView::ensureVisible(QGraphicsItem* item)
 {
   // TODO: FIX
-  //if(map_render_view != NULL)
-  //  map_render_view->ensureVisible(item, 100, 100);
+  if(map_render_view != NULL)
+    map_render_view->ensureVisible(item, 100, 100);
 }
 
 /* Path edit trigger */

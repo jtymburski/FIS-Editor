@@ -360,9 +360,11 @@ void MapNPCView::instanceDoubleClicked(QListWidgetItem*)
  *              changes. This changes which npc is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
+ *         bool lock_viewport - lock the viewport from jumping to NPC. Default
+ *                              to false.
  * Output: none
  */
-void MapNPCView::instanceRowChanged(int index)
+void MapNPCView::instanceRowChanged(int index, bool lock_viewport)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -375,8 +377,9 @@ void MapNPCView::instanceRowChanged(int index)
                                              editor_map->getCurrentMap()->id);
       if(npc != NULL)
       {
-        emit ensureVisible(editor_map->getCurrentMap()->tiles[npc->getX()]
-                                                             [npc->getY()]);
+        if(!lock_viewport)
+          emit ensureVisible(editor_map->getCurrentMap()->tiles[npc->getX()]
+                                                               [npc->getY()]);
 
         /* Select the base in the list */
         if(npc->getBaseNPC() != NULL)
@@ -384,6 +387,7 @@ void MapNPCView::instanceRowChanged(int index)
           int index = editor_map->getNPCIndex(npc->getBaseNPC()->getID());
           npc_list->blockSignals(true);
           npc_list->setCurrentRow(index);
+          editor_map->setCurrentNPC(index);
           npc_list->blockSignals(false);
           updateInfo();
         }
@@ -436,15 +440,21 @@ void MapNPCView::npcInstanceUpdate(QString name_list)
 
   npc_instances->clearSelection();
   npc_instances->clearFocus();
-  npc_instances->blockSignals(false);
 
   /* If name list is not blank, select the name in the list */
   if(!name_list.isEmpty())
   {
     for(int i = 0; i < npc_instances->count(); i++)
+    {
       if(npc_instances->item(i)->text() == name_list)
+      {
         npc_instances->setCurrentRow(i);
+        instanceRowChanged(i, true);
+      }
+    }
   }
+
+  npc_instances->blockSignals(false);
 }
 
 /*

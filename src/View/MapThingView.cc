@@ -357,9 +357,11 @@ void MapThingView::instanceMenu(const QPoint & pos)
  *              changes. This changes which thing is hovered on the map.
  *
  * Inputs: int index - the new index of the row in the list
+ *         bool lock_viewport - lock the viewport from jumping to thing.
+ *                              Default to false.
  * Output: none
  */
-void MapThingView::instanceRowChanged(int index)
+void MapThingView::instanceRowChanged(int index, bool lock_viewport)
 {
   if(index >= 0 && editor_map != NULL)
   {
@@ -371,8 +373,9 @@ void MapThingView::instanceRowChanged(int index)
                                               editor_map->getCurrentMap()->id);
       if(thing != NULL)
       {
-        emit ensureVisible(editor_map->getCurrentMap()->tiles[thing->getX()]
-                                                             [thing->getY()]);
+        if(!lock_viewport)
+          emit ensureVisible(editor_map->getCurrentMap()->tiles[thing->getX()]
+                                                               [thing->getY()]);
 
         /* Select the base in the list */
         if(thing->getBaseThing() != NULL)
@@ -380,6 +383,7 @@ void MapThingView::instanceRowChanged(int index)
           int index = editor_map->getThingIndex(thing->getBaseThing()->getID());
           thing_list->blockSignals(true);
           thing_list->setCurrentRow(index);
+          editor_map->setCurrentThing(index);
           thing_list->blockSignals(false);
           updateInfo();
         }
@@ -432,15 +436,21 @@ void MapThingView::thingInstanceUpdate(QString name_list)
 
   thing_instances->clearSelection();
   thing_instances->clearFocus();
-  thing_instances->blockSignals(false);
 
   /* If name list is not blank, select the name in the list */
   if(!name_list.isEmpty())
   {
     for(int i = 0; i < thing_instances->count(); i++)
+    {
       if(thing_instances->item(i)->text() == name_list)
+      {
         thing_instances->setCurrentRow(i);
+        instanceRowChanged(i, true);
+      }
+    }
   }
+
+  thing_instances->blockSignals(false);
 }
 
 /*
