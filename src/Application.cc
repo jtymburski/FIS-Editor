@@ -88,7 +88,7 @@ Application::Application(QWidget* parent)
    //           QApplication::desktop()->availableGeometry().height()-64);
   setMinimumSize(1280,720);
   showMaximized();
-  setCursorBasic();
+  setCursorBasic(true);
 
   /* Configure the run process */
   run_process.setWorkingDirectory(EditorHelpers::getProjectDir());
@@ -316,20 +316,21 @@ void Application::setupTopMenu()
   menu_cursor->addAction(action_passW);
   bar_brush->setFloatable(false);
   bar_brush->setMovable(false);
-  connect(action_basic,SIGNAL(triggered()),this,SLOT(setCursorBasic()));
-  connect(action_eraser,SIGNAL(triggered()),this,SLOT(setCursorEraser()));
-  connect(action_blockplace,SIGNAL(triggered()),
-          this,SLOT(setCursorBlock()));
-  connect(action_fill,SIGNAL(triggered()),this,SLOT(setCursorFill()));
-  connect(action_passall, SIGNAL(triggered()), this, SLOT(setPassAllCursor()));
-  connect(action_passN, SIGNAL(triggered()),
-          this, SLOT(setPassNorthCursor()));
-  connect(action_passE, SIGNAL(triggered()),
-          this, SLOT(setPassEastCursor()));
-  connect(action_passS, SIGNAL(triggered()),
-          this, SLOT(setPassSouthCursor()));
-  connect(action_passW, SIGNAL(triggered()),
-          this, SLOT(setPassWestCursor()));
+  connect(action_basic,SIGNAL(toggled(bool)),this,SLOT(setCursorBasic(bool)));
+  connect(action_eraser,SIGNAL(toggled(bool)),this,SLOT(setCursorEraser(bool)));
+  connect(action_blockplace,SIGNAL(toggled(bool)),
+          this,SLOT(setCursorBlock(bool)));
+  connect(action_fill,SIGNAL(toggled(bool)),this,SLOT(setCursorFill(bool)));
+  connect(action_passall, SIGNAL(toggled(bool)),
+          this, SLOT(setPassAllCursor(bool)));
+  connect(action_passN, SIGNAL(toggled(bool)),
+          this, SLOT(setPassNorthCursor(bool)));
+  connect(action_passE, SIGNAL(toggled(bool)),
+          this, SLOT(setPassEastCursor(bool)));
+  connect(action_passS, SIGNAL(toggled(bool)),
+          this, SLOT(setPassSouthCursor(bool)));
+  connect(action_passW, SIGNAL(toggled(bool)),
+          this, SLOT(setPassWestCursor(bool)));
 
   /* Set up the map control bar */
   action_zoom_in = new QAction("&Zoom In", this);
@@ -408,10 +409,10 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
     action_fill->setDisabled(true);
 
     /* If either selected, change to place pen */
-    if(action_blockplace->isChecked() || action_fill->isChecked())
-    {
-      action_basic->setChecked(true);
-    }
+    //if(action_blockplace->isChecked() || action_fill->isChecked())
+    //{
+    //  action_basic->setChecked(true);
+    //}
   }
 
   /* Enabling / Disabling passability pens */
@@ -434,13 +435,17 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
     action_passW->setDisabled(true);
 
     /* If either selected, change to place pen */
-    if(action_passall->isChecked() || action_passE->isChecked() ||
-       action_passN->isChecked() || action_passS->isChecked() ||
-       action_passW->isChecked())
-    {
-      action_basic->setChecked(true);
-    }
+    //if(action_passall->isChecked() || action_passE->isChecked() ||
+    //   action_passN->isChecked() || action_passS->isChecked() ||
+    //   action_passW->isChecked())
+    //{
+    //  action_basic->setChecked(true);
+    //}
   }
+
+  /* Select place pen by default */
+  if(!action_basic->isChecked())
+    action_basic->setChecked(true);
 }
 
 /* Load action */
@@ -581,34 +586,50 @@ void Application::setBubby(EditorBubby* bubby)
 
 /*
  * Description: Sets to basic cursor mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
  */
-void Application::setCursorBasic()
+void Application::setCursorBasic(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::BASIC);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::BASIC);
 }
 
 /*
  * Description: Sets to block place cursor mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
  */
-void Application::setCursorBlock()
+void Application::setCursorBlock(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::BLOCKPLACE);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::BLOCKPLACE);
 }
 
 /*
  * Description: Sets to eraser cursor mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
  */
-void Application::setCursorEraser()
+void Application::setCursorEraser(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::ERASER);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::ERASER);
 }
 
 /*
  * Description: Sets to fill cursor mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
  */
-void Application::setCursorFill()
+void Application::setCursorFill(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::FILL);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::FILL);
 }
 
 /*
@@ -643,34 +664,64 @@ void Application::setParty(EditorParty* party)
   qDebug() << "Party: " << party;
 }
 
-/* Sets to Passability Mode */
-void Application::setPassAllCursor()
+/*
+ * Description: Sets to passability all directions mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setPassAllCursor(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_ALL);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_ALL);
 }
 
-/* Sets to Passability Mode */
-void Application::setPassEastCursor()
+/*
+ * Description: Sets to passability east direction mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setPassEastCursor(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_E);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_E);
 }
 
-/* Sets to Passability Mode */
-void Application::setPassNorthCursor()
+/*
+ * Description: Sets to passability north direction mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setPassNorthCursor(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_N);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_N);
 }
 
-/* Sets to Passability Mode */
-void Application::setPassSouthCursor()
+/*
+ * Description: Sets to passability south direction mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setPassSouthCursor(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_S);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_S);
 }
 
-/* Sets to Passability Mode */
-void Application::setPassWestCursor()
+/*
+ * Description: Sets to passability west direction mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setPassWestCursor(bool checked)
 {
-  game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_W);
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::PASS_W);
 }
 
 /*

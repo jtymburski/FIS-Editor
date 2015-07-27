@@ -28,28 +28,6 @@ public:
   /* Destructor function */
   ~RawImage();
 
-public slots:
-  /* Loads the image with a valid given path */
-  void loadSprite(QString path);
-
-  /* Deselects the sprite choice manually */
-  void deselect();
-
-  /* Attempts to make a sprite from this image, which is passed up to the
-   * main application and added to the sprite menu */
-  void makeSprite();
-
-
-protected:
-  /* Paints the sprite in a bounding box */
-  void paintEvent(QPaintEvent *);
-
-  /* Mouse Enter, Leave and Click events */
-  void enterEvent(QEvent *);
-  void leaveEvent(QEvent *);
-  void mousePressEvent(QMouseEvent *);
-  void mouseDoubleClickEvent(QMouseEvent *);
-
 private:
   /* The number of same images that trail this one */
   int followers;
@@ -73,7 +51,22 @@ private:
   /* Create a Sprite dialog */
   SpriteDialog* creation_dialog;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+protected:
+  /* Paints the sprite in a bounding box */
+  void paintEvent(QPaintEvent *);
 
+  /* Mouse Enter, Leave and Click events */
+  void enterEvent(QEvent *);
+  void leaveEvent(QEvent *);
+  void mousePressEvent(QMouseEvent *);
+  void mouseDoubleClickEvent(QMouseEvent *);
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
   /* Emits to parent when selected to deselect all others */
   void chosen(int);
@@ -83,5 +76,19 @@ signals:
 
   /* Passes up the created Editor Sprite */
   void sendUpEditorSprite(EditorSprite* e);
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+public slots:
+  /* Loads the image with a valid given path */
+  void loadSprite(QString path);
+
+  /* Deselects the sprite choice manually */
+  void deselect();
+
+  /* Attempts to make a sprite from this image, which is passed up to the
+   * main application and added to the sprite menu */
+  void makeSprite();
 };
 #endif // RAWIMAGE_H

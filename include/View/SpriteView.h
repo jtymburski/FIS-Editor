@@ -61,6 +61,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Change layer and pen trigger */
+  void changeLayer(EditorEnumDb::Layer layer);
+
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 

@@ -221,6 +221,8 @@ void MapItemView::currentRowChanged(int index)
   {
     editor_map->setCurrentItem(index);
     editor_map->setHoverItem(-1);
+    if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::ITEM)
+      emit changeLayer(EditorEnumDb::ITEM);
   }
 
   updateInfo();
@@ -361,10 +363,17 @@ void MapItemView::instanceRowChanged(int index, bool lock_viewport)
         /* Select the base in the list */
         if(item->getBaseItem() != NULL)
         {
+          /* Get index and block signals */
           int index = editor_map->getItemIndex(item->getBaseItem()->getID());
           item_list->blockSignals(true);
+
+          /* Processing */
           item_list->setCurrentRow(index);
           editor_map->setCurrentItem(index);
+          if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::ITEM)
+            emit changeLayer(EditorEnumDb::ITEM);
+
+          /* Unblock and update */
           item_list->blockSignals(false);
           updateInfo();
         }

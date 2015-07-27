@@ -166,10 +166,10 @@ public slots:
   void setBubby(EditorBubby* bubby);
 
   /* Sets normal cursors */
-  void setCursorBasic();
-  void setCursorBlock();
-  void setCursorEraser();
-  void setCursorFill();
+  void setCursorBasic(bool checked);
+  void setCursorBlock(bool checked);
+  void setCursorEraser(bool checked);
+  void setCursorFill(bool checked);
 
   /* Sets To Equipment */
   void setEquipment(EditorEquipment* equipment);
@@ -184,11 +184,11 @@ public slots:
   void setParty(EditorParty* party);
 
   /* Sets passability cursors */
-  void setPassAllCursor();
-  void setPassEastCursor();
-  void setPassNorthCursor();
-  void setPassSouthCursor();
-  void setPassWestCursor();
+  void setPassAllCursor(bool checked);
+  void setPassEastCursor(bool checked);
+  void setPassNorthCursor(bool checked);
+  void setPassSouthCursor(bool checked);
+  void setPassWestCursor(bool checked);
 
   /* Sets To Person */
   void setPerson(EditorPerson* person);

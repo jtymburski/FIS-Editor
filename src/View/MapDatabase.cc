@@ -65,19 +65,33 @@ void MapDatabase::setupMain()
   view_sprite = new SpriteView(widget_main);
   view_thing = new MapThingView(widget_main);
 
-  /* Connections for the views */
+  /* Sprite and Raw connections */
   connect(view_raw->getToolbox(),SIGNAL(sendUpEditorSprite(EditorSprite*)),
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
+  connect(view_sprite, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
+
+  /* IO connections */
+  connect(view_io, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_io, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_io, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_io, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+
+  /* Item connections */
+  connect(view_item, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_item, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_item, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+
+  /* NPC connections */
+  connect(view_npc, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_npc, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_npc, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
@@ -86,12 +100,20 @@ void MapDatabase::setupMain()
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
   connect(view_npc, SIGNAL(pathEditStart(EditorNPCPath*)),
           this, SLOT(pathEditStart(EditorNPCPath*)));
+
+  /* Person connections */
+  connect(view_person, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_person, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_person, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_person, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+
+  /* Thing connections */
+  connect(view_thing, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_thing, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SIGNAL(ensureVisible(QGraphicsItem*)));
   connect(view_thing, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),

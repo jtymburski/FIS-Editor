@@ -244,6 +244,8 @@ void MapNPCView::currentRowChanged(int index)
   {
     editor_map->setCurrentNPC(index);
     editor_map->setHoverNPC(-1);
+    if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::NPC)
+      emit changeLayer(EditorEnumDb::NPC);
   }
 
   updateInfo();
@@ -384,10 +386,17 @@ void MapNPCView::instanceRowChanged(int index, bool lock_viewport)
         /* Select the base in the list */
         if(npc->getBaseNPC() != NULL)
         {
+          /* Get index and block signals */
           int index = editor_map->getNPCIndex(npc->getBaseNPC()->getID());
           npc_list->blockSignals(true);
+
+          /* Processing */
           npc_list->setCurrentRow(index);
           editor_map->setCurrentNPC(index);
+          if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::NPC)
+            emit changeLayer(EditorEnumDb::NPC);
+
+          /* Unblock and update */
           npc_list->blockSignals(false);
           updateInfo();
         }

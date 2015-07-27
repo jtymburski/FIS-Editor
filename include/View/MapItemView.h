@@ -73,9 +73,11 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Change layer and pen trigger */
+  void changeLayer(EditorEnumDb::Layer layer);
+
   /* Signals map rendering view to ensure the following item is visible */
   void ensureVisible(QGraphicsItem* item);
-  //void ensureVisible(QRect rect);
 
   /* Triggers the update the data of objects for use in events */
   void fillWithData(EditorEnumDb::MapObjectMode view);

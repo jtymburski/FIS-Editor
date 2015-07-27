@@ -90,6 +90,9 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Change layer slot - from map DB */
+  void changeLayer(EditorEnumDb::Layer layer);
+
   /* Creates the new Sub-Map, as instantiated from dialog */
   void createNewSubMap();
 

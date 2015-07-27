@@ -165,6 +165,13 @@ void MapControl::updateMapList(int selected)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/* Change layer slot - from map DB */
+// TODO: Comment
+void MapControl::changeLayer(EditorEnumDb::Layer layer)
+{
+  list_top->setCurrentRow((int)layer);
+}
+
 /* Creates the new Sub-Map, as instantiated from dialog */
 void MapControl::createNewSubMap()
 {

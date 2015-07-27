@@ -37,8 +37,8 @@ RawImage::RawImage(QWidget *parent, QString p, int id, int f)
   rightclick_menu->hide();
   rightclick_menu->addAction(spriteify_action);
   creation_dialog = NULL;
-  connect(this,SIGNAL(sendUpEditorSprite(EditorSprite*)),parent,
-                                 SIGNAL(sendUpEditorSprite(EditorSprite*)));
+  connect(this, SIGNAL(sendUpEditorSprite(EditorSprite*)),
+          parent, SIGNAL(sendUpEditorSprite(EditorSprite*)));
 
   connect(spriteify_action,SIGNAL(triggered()),this,SLOT(makeSprite()));
 }
@@ -54,44 +54,6 @@ RawImage::~RawImage()
   if(creation_dialog != NULL)
     delete creation_dialog;
   creation_dialog = NULL;
-}
-
-/*============================================================================
- * PUBLIC FUNCTIONS
- *===========================================================================*/
-
-/*
- * Description: Loads a sprite from the given file path, updates the image
- *
- * Inputs: File path
- */
-void RawImage::loadSprite(QString path)
-{
-  pic->load(path);
-  update();
-}
-
-
-/*
- * Description: Deselects this sprite choice
- */
-void RawImage::deselect()
-{
-  mode = EditorEnumDb::STANDARD;
-  update();
-}
-
-/*
- * Description: Removes the old creation dialog, and creates a new one
- *
- */
-void RawImage::makeSprite()
-{
-  if(creation_dialog != NULL)
-    delete creation_dialog;
-  creation_dialog =
-      new SpriteDialog(this, NULL, path, followers);
-  creation_dialog->show();
 }
 
 /*============================================================================
@@ -215,4 +177,42 @@ void RawImage::mouseDoubleClickEvent(QMouseEvent *event)
     autosprite->setName(filename);
     emit sendUpEditorSprite(autosprite);
   }
+}
+
+/*============================================================================
+ * PUBLIC SLOT FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: Loads a sprite from the given file path, updates the image
+ *
+ * Inputs: File path
+ */
+void RawImage::loadSprite(QString path)
+{
+  pic->load(path);
+  update();
+}
+
+
+/*
+ * Description: Deselects this sprite choice
+ */
+void RawImage::deselect()
+{
+  mode = EditorEnumDb::STANDARD;
+  update();
+}
+
+/*
+ * Description: Removes the old creation dialog, and creates a new one
+ *
+ */
+void RawImage::makeSprite()
+{
+  if(creation_dialog != NULL)
+    delete creation_dialog;
+  creation_dialog =
+      new SpriteDialog(this, NULL, path, followers);
+  creation_dialog->show();
 }

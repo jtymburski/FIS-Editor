@@ -94,6 +94,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Change layer and pen trigger */
+  void changeLayer(EditorEnumDb::Layer layer);
+
   /* Signals map rendering view to ensure the following item is visible */
   void ensureVisible(QGraphicsItem* item);
 

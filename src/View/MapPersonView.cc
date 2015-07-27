@@ -239,6 +239,8 @@ void MapPersonView::currentRowChanged(int index)
   {
     editor_map->setCurrentPerson(index);
     editor_map->setHoverPerson(-1);
+    if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::PERSON)
+      emit changeLayer(EditorEnumDb::PERSON);
   }
 
   updateInfo();
@@ -381,11 +383,18 @@ void MapPersonView::instanceRowChanged(int index, bool lock_viewport)
         /* Select the base in the list */
         if(person->getBasePerson() != NULL)
         {
+          /* Get index and block signals */
           int index = editor_map->getPersonIndex(
                                               person->getBasePerson()->getID());
           person_list->blockSignals(true);
+
+          /* Processing */
           person_list->setCurrentRow(index);
           editor_map->setCurrentPerson(index);
+          if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::PERSON)
+            emit changeLayer(EditorEnumDb::PERSON);
+
+          /* Unblock and update */
           person_list->blockSignals(false);
           updateInfo();
         }

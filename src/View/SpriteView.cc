@@ -207,7 +207,19 @@ void SpriteView::updateList()
 void SpriteView::updateSelected(int current_row)
 {
   if(editor_map != NULL)
+  {
     editor_map->setCurrentSprite(current_row);
+    EditorEnumDb::Layer layer = editor_map->getHoverInfo()->active_layer;
+    if(layer != EditorEnumDb::BASE && layer != EditorEnumDb::ENHANCER &&
+       layer != EditorEnumDb::LOWER1 && layer != EditorEnumDb::LOWER2 &&
+       layer != EditorEnumDb::LOWER3 && layer != EditorEnumDb::LOWER4 &&
+       layer != EditorEnumDb::LOWER5 && layer != EditorEnumDb::UPPER1 &&
+       layer != EditorEnumDb::UPPER2 && layer != EditorEnumDb::UPPER3 &&
+       layer != EditorEnumDb::UPPER4 && layer != EditorEnumDb::UPPER5)
+    {
+      emit changeLayer(EditorEnumDb::LOWER1);
+    }
+  }
 
   update();
 }

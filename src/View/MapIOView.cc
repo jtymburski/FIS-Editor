@@ -240,6 +240,8 @@ void MapIOView::currentRowChanged(int index)
   {
     editor_map->setCurrentIO(index);
     editor_map->setHoverIO(-1);
+    if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::IO)
+      emit changeLayer(EditorEnumDb::IO);
   }
 
   updateInfo();
@@ -380,10 +382,17 @@ void MapIOView::instanceRowChanged(int index, bool lock_viewport)
         /* Select the base in the list */
         if(io->getBaseIO() != NULL)
         {
+          /* Get index and block signals */
           int index = editor_map->getIOIndex(io->getBaseIO()->getID());
           io_list->blockSignals(true);
+
+          /* Processing */
           io_list->setCurrentRow(index);
           editor_map->setCurrentIO(index);
+          if(editor_map->getHoverInfo()->active_layer != EditorEnumDb::IO)
+            emit changeLayer(EditorEnumDb::IO);
+
+          /* Unblock and update */
           io_list->blockSignals(false);
           updateInfo();
         }

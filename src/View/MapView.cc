@@ -150,20 +150,26 @@ void MapView::setupMapView()//int x, int y)
   map_data->setStyleSheet("border-top: 1px solid #999999");
   setStatusBar(map_data);
 
-  /* Connections */
+  /* Connections - map objects to this */
   connect(map_render, SIGNAL(sendCurrentPosition(int,int)),
           this, SLOT(setCurrentTile(int,int)));
   connect(map_render, SIGNAL(tileEventEnter()), this, SLOT(tileEventEnter()));
   connect(map_render, SIGNAL(tileEventExit()), this, SLOT(tileEventExit()));
-  connect(map_control, SIGNAL(updateMap()),
-          map_render, SLOT(updateRenderingMap()));
   connect(map_render, SIGNAL(sendSelectedTile(int,int,int)),
           this, SLOT(sendSelectedTile(int,int,int)));
   connect(map_database, SIGNAL(selectTile()), this, SLOT(selectTileDb()));
+
+  /* Connections - map control to others */
+  connect(map_control, SIGNAL(updateMap()),
+          map_render, SLOT(updateRenderingMap())); 
   connect(map_control, SIGNAL(updateAllLists()),
           map_database, SLOT(updateAllLists()));
 
-  /* Connections - map render to map database */
+  /* Connections - map database to others */
+  connect(map_database, SIGNAL(changeLayer(EditorEnumDb::Layer)),
+          map_control, SLOT(changeLayer(EditorEnumDb::Layer)));
+
+  /* Connections - map render to others */
   connect(map_render, SIGNAL(tileSprite(EditorEnumDb::Layer)),
           map_database->getSpriteView(),
           SLOT(editHoverSprite(EditorEnumDb::Layer)));
