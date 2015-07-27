@@ -2079,7 +2079,9 @@ void EditorMap::ctrlClickTrigger()
     }
     else
     {
-      // TODO: SPRITE LOGIC HERE
+      EditorSprite* sprite = tile->getSprite(layer);
+      if(sprite != NULL)
+        emit spriteIndexChange(getSpriteIndex(sprite->getID()));
     }
   }
 }

@@ -378,6 +378,21 @@ void SpriteView::newSprite()
  */
 void SpriteView::setEditorMap(EditorMap* map)
 {
+  /* If existing editor map is not NULL, undo */
+  if(editor_map != NULL)
+  {
+    disconnect(editor_map, SIGNAL(spriteIndexChange(int)),
+               this, SLOT(updateSelected(int)));
+  }
+
   editor_map = map;
+
+  if(editor_map != NULL)
+  {
+    connect(editor_map, SIGNAL(spriteIndexChange(int)),
+            this, SLOT(updateSelected(int)));
+  }
+
+  /* Finally, update list */
   updateList();
 }

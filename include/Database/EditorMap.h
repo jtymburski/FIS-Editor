@@ -178,6 +178,9 @@ signals:
   /* Person instant changed */
   void personInstanceChanged(QString name_list);
 
+  /* Sprite index change */
+  void spriteIndexChange(int index);
+
   /* Thing instant changed */
   void thingInstanceChanged(QString name_list);
 
