@@ -672,7 +672,13 @@ void MapRender::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                                     items(rect, Qt::IntersectsItemBoundingRect);
         QList<EditorTile*> tile_set;
         for(int i = 0; i < item_set.size(); i++)
-          tile_set.push_back((EditorTile*)item_set[i]);
+        {
+          if(item_set[i]->boundingRect().width() == 64 &&
+             item_set[i]->boundingRect().height() == 64)
+          {
+            tile_set.push_back((EditorTile*)item_set[i]);
+          }
+        }
         editing_map->clickTrigger(tile_set, block_erase);
       }
     }
