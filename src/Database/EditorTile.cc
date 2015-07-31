@@ -1147,8 +1147,9 @@ void EditorTile::paint(QPainter *painter,
     if(things[i].visible && things[i].thing != NULL)
       things[i].thing->paint(0, painter, bound, x_pos - things[i].thing->getX(),
                              y_pos - things[i].thing->getY());
+
     /* Paint the io */
-    else if(ios[i].visible && ios[i].thing != NULL)
+    if(ios[i].visible && ios[i].thing != NULL)
       ios[i].thing->paint(0, painter, bound, x_pos - ios[i].thing->getX(),
                           y_pos - ios[i].thing->getY());
 
@@ -1242,7 +1243,7 @@ void EditorTile::paint(QPainter *painter,
       EditorMatrix* matrix = hover_info->active_thing->getMatrix();
       int depth = matrix->getRenderDepth(diff_x, diff_y);
 
-      if(hovered_invalid || getThing(depth) != NULL || getIO(depth) != NULL)
+      if(hovered_invalid || getThing(depth) != NULL)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);
@@ -1253,7 +1254,7 @@ void EditorTile::paint(QPainter *painter,
       EditorMatrix* matrix = hover_info->active_io->getMatrix();
       int depth = matrix->getRenderDepth(diff_x, diff_y);
 
-      if(hovered_invalid || getThing(depth) != NULL || getIO(depth) != NULL)
+      if(hovered_invalid || getIO(depth) != NULL)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);

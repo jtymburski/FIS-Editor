@@ -209,19 +209,28 @@ void MapControl::deleteSubMap()
     if((index + 1) == list_bottom->count())
       bottom = true;
 
-    /* Delete the sub-map */
-    if(index == editing_map->getCurrentMapIndex())
+    /* Create warning about deleting */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting sub map \"" +
+                    list_bottom->currentItem()->text() + "\".");
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(msg_box.exec() == QMessageBox::Yes)
     {
-      editing_map->setCurrentMap(-1);
-      emit updateMap();
-    }
-    editing_map->unsetMapByIndex(index);
+      /* Delete the sub-map */
+      if(index == editing_map->getCurrentMapIndex())
+      {
+        editing_map->setCurrentMap(-1);
+        emit updateMap();
+      }
+      editing_map->unsetMapByIndex(index);
 
-    /* Update list */
-    if(bottom)
-      updateMapList(editing_map->getMapCount() - 1);
-    else
-      updateMapList(index);
+      /* Update list */
+      if(bottom)
+        updateMapList(editing_map->getMapCount() - 1);
+      else
+        updateMapList(index);
+    }
   }
 }
 
