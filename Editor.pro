@@ -24,7 +24,7 @@ win32 {
   LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
 }
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++1y
 QMAKE_CXX_FLAGS_WARN_ON += -Wall
 QT += opengl widgets #phonon network xml, core and gui are default
 
@@ -108,6 +108,7 @@ SOURCES += \
     ../Project/src/Game/Player/Category.cc \
     ../Project/src/Game/Player/Equipment.cc \
     ../Project/src/Game/Player/Flavour.cc \
+    ../Project/src/Game/Player/Inventory.cc \
     ../Project/src/Game/Player/Item.cc \
     ../Project/src/Game/Player/Party.cc \
     ../Project/src/Game/Player/Person.cc \
@@ -199,6 +200,7 @@ HEADERS += \
     ../Project/include/Game/Player/Category.h \
     ../Project/include/Game/Player/Equipment.h \
     ../Project/include/Game/Player/Flavour.h \
+    ../Project/include/Game/Player/Inventory.h \
     ../Project/include/Game/Player/Item.h \
     ../Project/include/Game/Player/Party.h \
     ../Project/include/Game/Player/Person.h \
