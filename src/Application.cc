@@ -480,15 +480,16 @@ void Application::play()
      game_view->getMapView()->getCurrentSubMap() >= 0)
   {
     /* Choose the file name and start */
-    QString play_file = EditorHelpers::getProjectDir() +
-                        "/../Editor/exports/xXx_TMP_xXx.utv";
+    //QString play_file = EditorHelpers::getProjectDir() +
+    //                    "/../Editor/exports/xXx_TMP_xXx.utv";
+    QString play_file = "../Editor/exports/xXx_TMP_xXx.utv";
     FileHandler fh(play_file.toStdString(), true, true);
     fh.start();
 
     /* Save the current sub-map */
-    game_database->save(&fh, true, true);
+    game_database->save(&fh, true);
         // Note: commented out to export all subs - change by re-appending
-        //,game_view->getMapView()->getCurrentSubMap());
+        //, true, game_view->getMapView()->getCurrentSubMap());
 
     /* Finish the write */
     fh.stop();
@@ -502,6 +503,8 @@ void Application::play()
     /* Execute the program */
     QStringList arg_list;
     arg_list.push_back(play_file);
+    arg_list.push_back(
+                 QString::number(game_database->getCurrentMap()->getID()));
     run_process.start(exec_program, arg_list);
 
     /* If successfully run, disable app. Otherwise, failed to run */
@@ -524,7 +527,7 @@ void Application::play()
   else
   {
     QMessageBox::information(this, "Can't Start!",
-                             "No sub-map selected to test.");
+                             "No map selected to test.");
   }
 }
 

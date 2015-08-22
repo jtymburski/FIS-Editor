@@ -790,6 +790,12 @@ void GameDatabase::deleteAll()
   view_top->setCurrentRow(index);
 }
 
+/* Get current map */
+EditorMap* GameDatabase::getCurrentMap()
+{
+  return current_map;
+}
+
 /* Load the game */
 void GameDatabase::load(FileHandler* fh)
 {

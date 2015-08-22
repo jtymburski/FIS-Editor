@@ -159,6 +159,9 @@ public:
   /* Delete the game */
   void deleteAll();
 
+  /* Get current map */
+  EditorMap* getCurrentMap();
+
   /* Load the game */
   void load(FileHandler* fh);
 
