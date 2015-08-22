@@ -93,7 +93,7 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   if(getBaseItem() == NULL)
   {
     if(getCoreID() >= 0)
-      fh->writeXmlData("core_id", getCoreID());
+      fh->writeXmlData("game_id", getCoreID());
     if(default_item.isWalkover() != isWalkover())
       fh->writeXmlData("walkover", isWalkover());
   }
@@ -129,7 +129,7 @@ EditorMapItem* EditorMapItem::getBaseItem() const
  */
 int EditorMapItem::getCoreID()
 {
-  return item.getCoreID();
+  return item.getGameID();
 }
 
 /*
@@ -167,7 +167,7 @@ void EditorMapItem::load(XmlData data, int index)
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
-  if(element == "core_id")
+  if(element == "core_id" || element == "game_id")
   {
     setCoreID(data.getDataInteger());
   }
@@ -229,7 +229,7 @@ void EditorMapItem::setBase(EditorMapItem* item)
  */
 void EditorMapItem::setCoreID(int id)
 {
-  item.setCoreID(id);
+  item.setGameID(id);
 }
 
 /*
