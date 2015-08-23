@@ -367,10 +367,8 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   buttons_layout->addWidget(save_button);
   right_layout->addLayout(buttons_layout);
 
-  // TODO : Replace this with some file loading
-  setBaseAction(Action());
-  //setBaseAction(Action("509,INFLICT,2.5,PHYSICAL,POLAR.PRIMAL,ALLDEFBUFF,
-  //                      AMOUNT.0,,VITA,99"));
+  /* Set up the base action with just a damage call */
+  setBaseAction(Action("0,DAMAGE,,,,,AMOUNT.0,AMOUNT.0,,100"));
 
   /* Set name */
   name = "";
@@ -410,35 +408,293 @@ void EditorAction::copySelf(const EditorAction &source)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-void EditorAction::setNameAndID(QString str)
+Infliction EditorAction::getAilment() const
 {
-  base.setID(str.split(" : ").at(0).toInt());
-  name = str.split(" : ").at(1);
-  name_edit->setText(name);
-  setWorkingAction(base);
+  return working.getAilment();
 }
 
-void EditorAction::setBaseAction(Action a)
+int EditorAction::getBase() const
 {
-  base = a;
-  setWorkingAction(base);
-  loadWorkingInfo();
-  updateLayouts();
-}
-
-Action EditorAction::getWorkingAction()
-{
-  return working;
-}
-void EditorAction::setWorkingAction(Action a)
-{
-  working  = base;//a;
-  updateLayouts();
+  return working.getBase();
 }
 
 Action EditorAction::getBaseAction()
 {
   return base;
+}
+
+float EditorAction::getChance() const
+{
+  return working.getChance();
+}
+
+Action EditorAction::getEditedAction()
+{
+  QString full_name = "";
+  name = name_edit->text();
+  if(working.getID() < 10)
+    full_name.append("0");
+  full_name.append(QString::number(working.getID()));
+  full_name.append(" : ");
+  full_name.append(name);
+  emit nameChange(full_name);
+
+  working.setBaseValue(value_edit->text().toInt(),
+                       action_flags_base_pc->isChecked());
+  working.setChance(chance_edit->text().toFloat());
+  working.setBaseVariance(variance_edit->text().toInt(),
+                          action_flags_vari_pc->isChecked());
+  working.setAilmentDuration(minduration_edit->text().toInt(),
+                             maxduration_edit->text().toInt());
+  working.setIgnoreAttack(IgnoreFlags::PHYSICAL,
+                          ignoreatk_flags_physical->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::THERMAL,
+                          ignoreatk_flags_thermal->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::POLAR,
+                          ignoreatk_flags_polar->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::PRIMAL,
+                          ignoreatk_flags_primal->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::CHARGED,
+                          ignoreatk_flags_charged->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::NIHIL,
+                          ignoreatk_flags_nihil->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::LUCK,
+                          ignoreatk_flags_luck->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::CYBERNETIC,
+                          ignoreatk_flags_cybernetic->isChecked());
+  working.setIgnoreAttack(IgnoreFlags::ARMOR,
+                          ignoreatk_flags_armor->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::PHYSICAL,
+                          ignoredef_flags_physical->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::THERMAL,
+                          ignoredef_flags_thermal->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::POLAR,
+                          ignoredef_flags_polar->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::PRIMAL,
+                          ignoredef_flags_primal->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::CHARGED,
+                          ignoredef_flags_charged->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::NIHIL,
+                          ignoredef_flags_nihil->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::LUCK,
+                          ignoredef_flags_luck->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::CYBERNETIC,
+                          ignoredef_flags_cybernetic->isChecked());
+  working.setIgnoreDefense(IgnoreFlags::ARMOR,
+                          ignoredef_flags_armor->isChecked());
+
+  working.setActionFlag(ActionFlags::DAMAGE,action_flags_damage->isChecked());
+  working.setActionFlag(ActionFlags::ALTER,action_flags_alter->isChecked() ||
+                        action_flags_alterflip->isChecked());
+  working.setActionFlag(ActionFlags::INFLICT,action_flags_inflict->isChecked());
+  working.setActionFlag(ActionFlags::RELIEVE,action_flags_relieve->isChecked());
+  working.setActionFlag(ActionFlags::ASSIGN,action_flags_assign->isChecked() ||
+                        action_flags_assignflip->isChecked());
+  working.setActionFlag(ActionFlags::REVIVE,action_flags_revive->isChecked());
+  working.setActionFlag(ActionFlags::FLIP_ATTR,
+                        action_flags_alterflip->isChecked() ||
+                        action_flags_assignflip->isChecked());
+  working.setActionFlag(ActionFlags::VALID, true);
+
+  if(ailment_poison->isChecked())
+    working.setAilment(Infliction::POISON);
+  else if(ailment_burn->isChecked())
+    working.setAilment(Infliction::BURN);
+  else if(ailment_scald->isChecked())
+    working.setAilment(Infliction::SCALD);
+  else if(ailment_char->isChecked())
+    working.setAilment(Infliction::CHARR);
+  else if(ailment_berserk->isChecked())
+    working.setAilment(Infliction::BERSERK);
+  else if(ailment_confuse->isChecked())
+    working.setAilment(Infliction::CONFUSE);
+  else if(ailment_silence->isChecked())
+    working.setAilment(Infliction::SILENCE);
+  else if(ailment_bubbify->isChecked())
+    working.setAilment(Infliction::BUBBIFY);
+  else if(ailment_deathtimer->isChecked())
+    working.setAilment(Infliction::DEATHTIMER);
+  else if(ailment_paralysis->isChecked())
+    working.setAilment(Infliction::PARALYSIS);
+  else if(ailment_blindness->isChecked())
+    working.setAilment(Infliction::BLINDNESS);
+  else if(ailment_dreadstruck->isChecked())
+    working.setAilment(Infliction::DREADSTRUCK);
+  else if(ailment_dreamsnare->isChecked())
+    working.setAilment(Infliction::DREAMSNARE);
+  else if(ailment_hellbound->isChecked())
+    working.setAilment(Infliction::HELLBOUND);
+  else if(ailment_bond->isChecked())
+    working.setAilment(Infliction::BOND);
+  else if(ailment_bonded->isChecked())
+    working.setAilment(Infliction::BONDED);
+  else if(ailment_allatkbuff->isChecked())
+    working.setAilment(Infliction::ALLATKBUFF);
+  else if(ailment_alldefbuff->isChecked())
+    working.setAilment(Infliction::ALLDEFBUFF);
+  else if(ailment_physicalbuff->isChecked())
+    working.setAilment(Infliction::PHYBUFF);
+  else if(ailment_thermalbuff->isChecked())
+    working.setAilment(Infliction::THRBUFF);
+  else if(ailment_polarbuff->isChecked())
+    working.setAilment(Infliction::POLBUFF);
+  else if(ailment_primalbuff->isChecked())
+    working.setAilment(Infliction::PRIBUFF);
+  else if(ailment_chargedbuff->isChecked())
+    working.setAilment(Infliction::CHGBUFF);
+  else if(ailment_cyberneticbuff->isChecked())
+    working.setAilment(Infliction::CYBBUFF);
+  else if(ailment_nihilbuff->isChecked())
+    working.setAilment(Infliction::NIHBUFF);
+  else if(ailment_limbertudebuff->isChecked())
+    working.setAilment(Infliction::LIMBUFF);
+  else if(ailment_unbearabilitybuff->isChecked())
+    working.setAilment(Infliction::UNBBUFF);
+  else if(ailment_vitalitybuff->isChecked())
+    working.setAilment(Infliction::VITBUFF);
+  else if(ailment_qdbuff->isChecked())
+    working.setAilment(Infliction::QDBUFF);
+  else if(ailment_rootbound->isChecked())
+    working.setAilment(Infliction::ROOTBOUND);
+  else if(ailment_doublecast->isChecked())
+    working.setAilment(Infliction::DOUBLECAST);
+  else if(ailment_triplecast->isChecked())
+    working.setAilment(Infliction::TRIPLECAST);
+  else if(ailment_halfcost->isChecked())
+    working.setAilment(Infliction::HALFCOST);
+  else if(ailment_reflect->isChecked())
+    working.setAilment(Infliction::REFLECT);
+  else if(ailment_hibernation->isChecked())
+    working.setAilment(Infliction::HIBERNATION);
+  else if(ailment_curse->isChecked())
+    working.setAilment(Infliction::CURSE);
+  else if(ailment_metatether->isChecked())
+    working.setAilment(Infliction::METATETHER);
+  else if(ailment_modulate->isChecked())
+    working.setAilment(Infliction::MODULATE);
+  else if(ailment_invalid->isChecked())
+    working.setAilment(Infliction::INVALID);
+
+  if(user_flags_VITA->isChecked())
+    working.setAttributeUser(Attribute::VITA);
+  else if(user_flags_QTDR->isChecked())
+    working.setAttributeUser(Attribute::QTDR);
+  else if(user_flags_PHAG->isChecked())
+    working.setAttributeUser(Attribute::PHAG);
+  else if(user_flags_PHFD->isChecked())
+    working.setAttributeUser(Attribute::PHFD);
+  else if(user_flags_THAG->isChecked())
+    working.setAttributeUser(Attribute::THAG);
+  else if(user_flags_THFD->isChecked())
+    working.setAttributeUser(Attribute::THFD);
+  else if(user_flags_PRAG->isChecked())
+    working.setAttributeUser(Attribute::PRAG);
+  else if(user_flags_PRFD->isChecked())
+    working.setAttributeUser(Attribute::PRFD);
+  else if(user_flags_POAG->isChecked())
+    working.setAttributeUser(Attribute::POAG);
+  else if(user_flags_POFD->isChecked())
+    working.setAttributeUser(Attribute::POFD);
+  else if(user_flags_CHAG->isChecked())
+    working.setAttributeUser(Attribute::CHAG);
+  else if(user_flags_CHFD->isChecked())
+    working.setAttributeUser(Attribute::CHFD);
+  else if(user_flags_CYAG->isChecked())
+    working.setAttributeUser(Attribute::CYAG);
+  else if(user_flags_CYFD->isChecked())
+    working.setAttributeUser(Attribute::CYFD);
+  else if(user_flags_NIAG->isChecked())
+    working.setAttributeUser(Attribute::NIAG);
+  else if(user_flags_NIFD->isChecked())
+    working.setAttributeUser(Attribute::NIFD);
+  else if(user_flags_MMNT->isChecked())
+    working.setAttributeUser(Attribute::MMNT);
+  else if(user_flags_LIMB->isChecked())
+    working.setAttributeUser(Attribute::LIMB);
+  else if(user_flags_UNBR->isChecked())
+    working.setAttributeUser(Attribute::UNBR);
+  else if(user_flags_MANN->isChecked())
+    working.setAttributeUser(Attribute::MANN);
+  else if(user_flags_NOAT->isChecked())
+    working.setAttributeUser(Attribute::NONE);
+
+  if(target_flags_VITA->isChecked())
+    working.setAttributeTarget(Attribute::VITA);
+  else if(target_flags_QTDR->isChecked())
+    working.setAttributeTarget(Attribute::QTDR);
+  else if(target_flags_PHAG->isChecked())
+    working.setAttributeTarget(Attribute::PHAG);
+  else if(target_flags_PHFD->isChecked())
+    working.setAttributeTarget(Attribute::PHFD);
+  else if(target_flags_THAG->isChecked())
+    working.setAttributeTarget(Attribute::THAG);
+  else if(target_flags_THFD->isChecked())
+    working.setAttributeTarget(Attribute::THFD);
+  else if(target_flags_PRAG->isChecked())
+    working.setAttributeTarget(Attribute::PRAG);
+  else if(target_flags_PRFD->isChecked())
+    working.setAttributeTarget(Attribute::PRFD);
+  else if(target_flags_POAG->isChecked())
+    working.setAttributeTarget(Attribute::POAG);
+  else if(target_flags_POFD->isChecked())
+    working.setAttributeTarget(Attribute::POFD);
+  else if(target_flags_CHAG->isChecked())
+    working.setAttributeTarget(Attribute::CHAG);
+  else if(target_flags_CHFD->isChecked())
+    working.setAttributeTarget(Attribute::CHFD);
+  else if(target_flags_CYAG->isChecked())
+    working.setAttributeTarget(Attribute::CYAG);
+  else if(target_flags_CYFD->isChecked())
+    working.setAttributeTarget(Attribute::CYFD);
+  else if(target_flags_NIAG->isChecked())
+    working.setAttributeTarget(Attribute::NIAG);
+  else if(target_flags_NIFD->isChecked())
+    working.setAttributeTarget(Attribute::NIFD);
+  else if(target_flags_MMNT->isChecked())
+    working.setAttributeTarget(Attribute::MMNT);
+  else if(target_flags_LIMB->isChecked())
+    working.setAttributeTarget(Attribute::LIMB);
+  else if(target_flags_UNBR->isChecked())
+    working.setAttributeTarget(Attribute::UNBR);
+  else if(target_flags_MANN->isChecked())
+    working.setAttributeTarget(Attribute::MANN);
+  else if(target_flags_NOAT->isChecked())
+    working.setAttributeTarget(Attribute::NONE);
+
+  base = working;
+  outputString();
+  loadWorkingInfo();
+  return base;
+}
+
+int EditorAction::getMin() const
+{
+  return working.getMax();
+}
+
+int EditorAction::getMax() const
+{
+  return working.getMax();
+}
+
+Attribute EditorAction::getTargetAttribute() const
+{
+  return working.getTargetAttribute();
+}
+
+Attribute EditorAction::getUserAttribute() const
+{
+  return working.getUserAttribute();
+}
+
+int EditorAction::getVariance() const
+{
+  return working.getVariance();
+}
+
+Action EditorAction::getWorkingAction()
+{
+  return working;
 }
 
 void EditorAction::loadWorkingInfo()
@@ -773,295 +1029,16 @@ void EditorAction::loadWorkingInfo()
   }
 }
 
+QString EditorAction::outputString()
+{
+  //qDebug() << QString::fromStdString(base.outputString());
+  return QString::fromStdString(base.outputString());
+}
+
 void EditorAction::resetInfo()
 {
   working = base;
   loadWorkingInfo();
-}
-
-Action EditorAction::getEditedAction()
-{
-  QString full_name = "";
-  name = name_edit->text();
-  if(working.getID() < 10)
-    full_name.append("0");
-  full_name.append(QString::number(working.getID()));
-  full_name.append(" : ");
-  full_name.append(name);
-  emit nameChange(full_name);
-
-  working.setBaseValue(value_edit->text().toInt(),
-                       action_flags_base_pc->isChecked());
-  working.setChance(chance_edit->text().toFloat());
-  working.setBaseVariance(variance_edit->text().toInt(),
-                          action_flags_vari_pc->isChecked());
-  working.setAilmentDuration(minduration_edit->text().toInt(),
-                             maxduration_edit->text().toInt());
-  working.setIgnoreAttack(IgnoreFlags::PHYSICAL,
-                          ignoreatk_flags_physical->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::THERMAL,
-                          ignoreatk_flags_thermal->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::POLAR,
-                          ignoreatk_flags_polar->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::PRIMAL,
-                          ignoreatk_flags_primal->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::CHARGED,
-                          ignoreatk_flags_charged->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::NIHIL,
-                          ignoreatk_flags_nihil->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::LUCK,
-                          ignoreatk_flags_luck->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::CYBERNETIC,
-                          ignoreatk_flags_cybernetic->isChecked());
-  working.setIgnoreAttack(IgnoreFlags::ARMOR,
-                          ignoreatk_flags_armor->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::PHYSICAL,
-                          ignoredef_flags_physical->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::THERMAL,
-                          ignoredef_flags_thermal->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::POLAR,
-                          ignoredef_flags_polar->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::PRIMAL,
-                          ignoredef_flags_primal->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::CHARGED,
-                          ignoredef_flags_charged->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::NIHIL,
-                          ignoredef_flags_nihil->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::LUCK,
-                          ignoredef_flags_luck->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::CYBERNETIC,
-                          ignoredef_flags_cybernetic->isChecked());
-  working.setIgnoreDefense(IgnoreFlags::ARMOR,
-                          ignoredef_flags_armor->isChecked());
-
-  working.setActionFlag(ActionFlags::DAMAGE,action_flags_damage->isChecked());
-  working.setActionFlag(ActionFlags::ALTER,action_flags_alter->isChecked() ||
-                        action_flags_alterflip->isChecked());
-  working.setActionFlag(ActionFlags::INFLICT,action_flags_inflict->isChecked());
-  working.setActionFlag(ActionFlags::RELIEVE,action_flags_relieve->isChecked());
-  working.setActionFlag(ActionFlags::ASSIGN,action_flags_assign->isChecked() ||
-                        action_flags_assignflip->isChecked());
-  working.setActionFlag(ActionFlags::REVIVE,action_flags_revive->isChecked());
-  working.setActionFlag(ActionFlags::FLIP_ATTR,
-                        action_flags_alterflip->isChecked() ||
-                        action_flags_assignflip->isChecked());
-  working.setActionFlag(ActionFlags::VALID, true);
-
-  if(ailment_poison->isChecked())
-    working.setAilment(Infliction::POISON);
-  else if(ailment_burn->isChecked())
-    working.setAilment(Infliction::BURN);
-  else if(ailment_scald->isChecked())
-    working.setAilment(Infliction::SCALD);
-  else if(ailment_char->isChecked())
-    working.setAilment(Infliction::CHARR);
-  else if(ailment_berserk->isChecked())
-    working.setAilment(Infliction::BERSERK);
-  else if(ailment_confuse->isChecked())
-    working.setAilment(Infliction::CONFUSE);
-  else if(ailment_silence->isChecked())
-    working.setAilment(Infliction::SILENCE);
-  else if(ailment_bubbify->isChecked())
-    working.setAilment(Infliction::BUBBIFY);
-  else if(ailment_deathtimer->isChecked())
-    working.setAilment(Infliction::DEATHTIMER);
-  else if(ailment_paralysis->isChecked())
-    working.setAilment(Infliction::PARALYSIS);
-  else if(ailment_blindness->isChecked())
-    working.setAilment(Infliction::BLINDNESS);
-  else if(ailment_dreadstruck->isChecked())
-    working.setAilment(Infliction::DREADSTRUCK);
-  else if(ailment_dreamsnare->isChecked())
-    working.setAilment(Infliction::DREAMSNARE);
-  else if(ailment_hellbound->isChecked())
-    working.setAilment(Infliction::HELLBOUND);
-  else if(ailment_bond->isChecked())
-    working.setAilment(Infliction::BOND);
-  else if(ailment_bonded->isChecked())
-    working.setAilment(Infliction::BONDED);
-  else if(ailment_allatkbuff->isChecked())
-    working.setAilment(Infliction::ALLATKBUFF);
-  else if(ailment_alldefbuff->isChecked())
-    working.setAilment(Infliction::ALLDEFBUFF);
-  else if(ailment_physicalbuff->isChecked())
-    working.setAilment(Infliction::PHYBUFF);
-  else if(ailment_thermalbuff->isChecked())
-    working.setAilment(Infliction::THRBUFF);
-  else if(ailment_polarbuff->isChecked())
-    working.setAilment(Infliction::POLBUFF);
-  else if(ailment_primalbuff->isChecked())
-    working.setAilment(Infliction::PRIBUFF);
-  else if(ailment_chargedbuff->isChecked())
-    working.setAilment(Infliction::CHGBUFF);
-  else if(ailment_cyberneticbuff->isChecked())
-    working.setAilment(Infliction::CYBBUFF);
-  else if(ailment_nihilbuff->isChecked())
-    working.setAilment(Infliction::NIHBUFF);
-  else if(ailment_limbertudebuff->isChecked())
-    working.setAilment(Infliction::LIMBUFF);
-  else if(ailment_unbearabilitybuff->isChecked())
-    working.setAilment(Infliction::UNBBUFF);
-  else if(ailment_vitalitybuff->isChecked())
-    working.setAilment(Infliction::VITBUFF);
-  else if(ailment_qdbuff->isChecked())
-    working.setAilment(Infliction::QDBUFF);
-  else if(ailment_rootbound->isChecked())
-    working.setAilment(Infliction::ROOTBOUND);
-  else if(ailment_doublecast->isChecked())
-    working.setAilment(Infliction::DOUBLECAST);
-  else if(ailment_triplecast->isChecked())
-    working.setAilment(Infliction::TRIPLECAST);
-  else if(ailment_halfcost->isChecked())
-    working.setAilment(Infliction::HALFCOST);
-  else if(ailment_reflect->isChecked())
-    working.setAilment(Infliction::REFLECT);
-  else if(ailment_hibernation->isChecked())
-    working.setAilment(Infliction::HIBERNATION);
-  else if(ailment_curse->isChecked())
-    working.setAilment(Infliction::CURSE);
-  else if(ailment_metatether->isChecked())
-    working.setAilment(Infliction::METATETHER);
-  else if(ailment_modulate->isChecked())
-    working.setAilment(Infliction::MODULATE);
-  else if(ailment_invalid->isChecked())
-    working.setAilment(Infliction::INVALID);
-
-  if(user_flags_VITA->isChecked())
-    working.setAttributeUser(Attribute::VITA);
-  else if(user_flags_QTDR->isChecked())
-    working.setAttributeUser(Attribute::QTDR);
-  else if(user_flags_PHAG->isChecked())
-    working.setAttributeUser(Attribute::PHAG);
-  else if(user_flags_PHFD->isChecked())
-    working.setAttributeUser(Attribute::PHFD);
-  else if(user_flags_THAG->isChecked())
-    working.setAttributeUser(Attribute::THAG);
-  else if(user_flags_THFD->isChecked())
-    working.setAttributeUser(Attribute::THFD);
-  else if(user_flags_PRAG->isChecked())
-    working.setAttributeUser(Attribute::PRAG);
-  else if(user_flags_PRFD->isChecked())
-    working.setAttributeUser(Attribute::PRFD);
-  else if(user_flags_POAG->isChecked())
-    working.setAttributeUser(Attribute::POAG);
-  else if(user_flags_POFD->isChecked())
-    working.setAttributeUser(Attribute::POFD);
-  else if(user_flags_CHAG->isChecked())
-    working.setAttributeUser(Attribute::CHAG);
-  else if(user_flags_CHFD->isChecked())
-    working.setAttributeUser(Attribute::CHFD);
-  else if(user_flags_CYAG->isChecked())
-    working.setAttributeUser(Attribute::CYAG);
-  else if(user_flags_CYFD->isChecked())
-    working.setAttributeUser(Attribute::CYFD);
-  else if(user_flags_NIAG->isChecked())
-    working.setAttributeUser(Attribute::NIAG);
-  else if(user_flags_NIFD->isChecked())
-    working.setAttributeUser(Attribute::NIFD);
-  else if(user_flags_MMNT->isChecked())
-    working.setAttributeUser(Attribute::MMNT);
-  else if(user_flags_LIMB->isChecked())
-    working.setAttributeUser(Attribute::LIMB);
-  else if(user_flags_UNBR->isChecked())
-    working.setAttributeUser(Attribute::UNBR);
-  else if(user_flags_MANN->isChecked())
-    working.setAttributeUser(Attribute::MANN);
-  else if(user_flags_NOAT->isChecked())
-    working.setAttributeUser(Attribute::NONE);
-
-  if(target_flags_VITA->isChecked())
-    working.setAttributeTarget(Attribute::VITA);
-  else if(target_flags_QTDR->isChecked())
-    working.setAttributeTarget(Attribute::QTDR);
-  else if(target_flags_PHAG->isChecked())
-    working.setAttributeTarget(Attribute::PHAG);
-  else if(target_flags_PHFD->isChecked())
-    working.setAttributeTarget(Attribute::PHFD);
-  else if(target_flags_THAG->isChecked())
-    working.setAttributeTarget(Attribute::THAG);
-  else if(target_flags_THFD->isChecked())
-    working.setAttributeTarget(Attribute::THFD);
-  else if(target_flags_PRAG->isChecked())
-    working.setAttributeTarget(Attribute::PRAG);
-  else if(target_flags_PRFD->isChecked())
-    working.setAttributeTarget(Attribute::PRFD);
-  else if(target_flags_POAG->isChecked())
-    working.setAttributeTarget(Attribute::POAG);
-  else if(target_flags_POFD->isChecked())
-    working.setAttributeTarget(Attribute::POFD);
-  else if(target_flags_CHAG->isChecked())
-    working.setAttributeTarget(Attribute::CHAG);
-  else if(target_flags_CHFD->isChecked())
-    working.setAttributeTarget(Attribute::CHFD);
-  else if(target_flags_CYAG->isChecked())
-    working.setAttributeTarget(Attribute::CYAG);
-  else if(target_flags_CYFD->isChecked())
-    working.setAttributeTarget(Attribute::CYFD);
-  else if(target_flags_NIAG->isChecked())
-    working.setAttributeTarget(Attribute::NIAG);
-  else if(target_flags_NIFD->isChecked())
-    working.setAttributeTarget(Attribute::NIFD);
-  else if(target_flags_MMNT->isChecked())
-    working.setAttributeTarget(Attribute::MMNT);
-  else if(target_flags_LIMB->isChecked())
-    working.setAttributeTarget(Attribute::LIMB);
-  else if(target_flags_UNBR->isChecked())
-    working.setAttributeTarget(Attribute::UNBR);
-  else if(target_flags_MANN->isChecked())
-    working.setAttributeTarget(Attribute::MANN);
-  else if(target_flags_NOAT->isChecked())
-    working.setAttributeTarget(Attribute::NONE);
-
-  base = working;
-  outputString();
-  loadWorkingInfo();
-  return base;
-}
-
-Attribute EditorAction::getUserAttribute() const
-{
-  return working.getUserAttribute();
-}
-
-Attribute EditorAction::getTargetAttribute() const
-{
-  return working.getTargetAttribute();
-}
-
-Infliction EditorAction::getAilment() const
-{
-  return working.getAilment();
-}
-
-int EditorAction::getBase() const
-{
-  return working.getBase();
-}
-
-float EditorAction::getChance() const
-{
-  return working.getChance();
-}
-
-int EditorAction::getMin() const
-{
-  return working.getMax();
-}
-
-int EditorAction::getMax() const
-{
-  return working.getMax();
-}
-
-int EditorAction::getVariance() const
-{
-  return working.getVariance();
-}
-
-QString EditorAction::outputString()
-{
-  qDebug() << "Action String: " << QString::fromStdString(base.outputString());
-  return QString::fromStdString(base.outputString());
 }
 
 void EditorAction::setActionFlag(ActionFlags set_flag, bool set)
@@ -1090,6 +1067,14 @@ void EditorAction::setAttributeUser(Attribute user)
   working.setAttributeUser(user);
 }
 
+void EditorAction::setBaseAction(Action a)
+{
+  base = a;
+  setWorkingAction(base);
+  loadWorkingInfo();
+  updateLayouts();
+}
+
 void EditorAction::setBaseValue(int value, bool percent)
 {
   working.setBaseValue(value,percent);
@@ -1113,6 +1098,21 @@ void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 void EditorAction::setIgnoreDefense(IgnoreFlags flag, bool set)
 {
   working.setIgnoreDefense(flag,set);
+}
+
+void EditorAction::setNameAndID(QString str)
+{
+  base.setID(str.split(" : ").at(0).toInt());
+  name = str.split(" : ").at(1);
+  name_edit->setText(name);
+  setWorkingAction(base);
+}
+
+void EditorAction::setWorkingAction(Action a)
+{
+  (void)a;
+  working  = base;//a;
+  updateLayouts();
 }
 
 void EditorAction::updateLayouts()
@@ -1207,6 +1207,57 @@ QString EditorAction::getName() const
 QString EditorAction::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
+}
+
+/* Loads the thing data */
+void EditorAction::load(XmlData data, int index)
+{
+  /* Parse elements */
+  if(data.getElement(index) == "action")
+  {
+    /* If only the action element - like directly from game */
+    if(data.getTailElements(index).size() == 1)
+    {
+      base.parse(data.getDataString());
+    }
+    /* Otherwise, normal expected editor save */
+    else
+    {
+      /* Name */
+      if(data.getElement(index + 1) == "name")
+      {
+        setName(QString::fromStdString(data.getDataString()));
+      }
+      /* Action string */
+      else if(data.getElement(index + 1) == "str")
+      {
+        base.parse(data.getDataString());
+      }
+    }
+  }
+}
+
+/* Saves the thing data */
+void EditorAction::save(FileHandler* fh, bool game_only)
+{
+  if(fh != NULL)
+  {
+    /* Game only: is just one string for the action */
+    if(game_only)
+    {
+      fh->writeXmlData("action", outputString().toStdString());
+    }
+    /* Editor: Also, contains name and separate string */
+    else
+    {
+      fh->writeXmlElement("action", "id", getID());
+
+      fh->writeXmlData("name", getName().toStdString());
+      fh->writeXmlData("str", outputString().toStdString());
+
+      fh->writeXmlElementEnd();
+    }
+  }
 }
 
 /* Sets the ID */

@@ -20,6 +20,7 @@
 
 #include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
+#include "FileHandler.h"
 #include "Game/Player/Action.h"
 
 class EditorAction : public QWidget, public EditorTemplate
@@ -232,56 +233,60 @@ private:
   QVBoxLayout* target_flags_layout;
   QHBoxLayout* buttons_layout;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorAction &source);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  void nameChange(QString);
+
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
 public slots:
-  /* Sets the name */
-  void setNameAndID(QString str);
-
-  /* Update Layouts */
-  void updateLayouts();
-
-  /* Get/Set for base action */
-  void setBaseAction(Action);
-  Action getBaseAction();
-
-  /* Get/Set for working action */
-  void setWorkingAction(Action);
-  Action getWorkingAction();
-
-  /* Load info from working file */
-  void loadWorkingInfo();
-
-  /* Load info from base file */
-  void resetInfo();
-
-  /* Save info to base file and return it */
-  Action getEditedAction();
-
-  /* Returns the Attribute the action may alter/assign for user and target */
-  Attribute getUserAttribute() const;
-  Attribute getTargetAttribute() const;
-
   /* Returns the infliction the action may inflict/relieve */
   Infliction getAilment() const;
 
   /* Returns the base change */
   int getBase() const;
 
+  /* Get for base action */
+  Action getBaseAction();
+
   /* Return the chance of the action occuring */
   float getChance() const;
+
+  /* Save info to base file and return it */
+  Action getEditedAction();
 
   /* Methods for returning the min and max portions of the duration */
   int getMin() const;
   int getMax() const;
 
+  /* Returns the Attribute the action may alter/assign for user and target */
+  Attribute getTargetAttribute() const;
+  Attribute getUserAttribute() const;
+
   /* Returns the variance of the Action */
   int getVariance() const;
 
+  /* Get for working action */
+  Action getWorkingAction();
+
+  /* Load info from working file */
+  void loadWorkingInfo();
+
   /* The output string (to store in file) */
   QString outputString();
+
+  /* Load info from base file */
+  void resetInfo();
 
   /* Sets an action flag */
   void setActionFlag(ActionFlags set_flag, bool set);
@@ -293,6 +298,9 @@ public slots:
   /* Sets the attributes */
   void setAttributeTarget(Attribute target);
   void setAttributeUser(Attribute user);
+
+  /* Set the base action */
+  void setBaseAction(Action);
 
   /* Sets the base value and variance (amount or pc in flag) to change
    * attribute by */
@@ -306,9 +314,18 @@ public slots:
   void setIgnoreAttack(IgnoreFlags flag, bool set);
   void setIgnoreDefense(IgnoreFlags flag, bool set);
 
-signals:
-  void nameChange(QString);
+  /* Sets the name */
+  void setNameAndID(QString str);
 
+  /* Set the working action */
+  void setWorkingAction(Action);
+
+  /* Update Layouts */
+  void updateLayouts();
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Clone */
   EditorAction* clone();
@@ -322,13 +339,21 @@ public:
   /* Returns the name of the item for listing */
   virtual QString getNameList();
 
+  /* Loads the thing data */
+  virtual void load(XmlData data, int index);
+
+  /* Saves the thing data */
+  virtual void save(FileHandler* fh, bool game_only = false);
+
   /* Sets the ID */
   virtual void setID(int id);
 
   /* Sets the name */
   virtual void setName(QString name);
 
-/* Operator functions */
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   /* The copy operator */
   EditorAction& operator= (const EditorAction &source);

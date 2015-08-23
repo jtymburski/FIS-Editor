@@ -90,6 +90,25 @@ private:
   QListWidget* view_top;
 
 /*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+private:
+  /* Add object in the correct spot in the array */
+  void addAction(EditorAction* action);
+
+  /* Change objects trigger call */
+  void changeAction(int index, bool forced = false);
+
+  /* Get object, based on ID */
+  EditorAction* getAction(int id);
+
+  /* Called to load action data */
+  void loadAction(XmlData data, int index);
+
+  /* Called upon load finish - for clean up */
+  void loadFinish();
+
+/*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:

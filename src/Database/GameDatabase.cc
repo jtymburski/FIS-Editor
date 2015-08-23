@@ -120,6 +120,117 @@ GameDatabase::~GameDatabase()
 }
 
 /*============================================================================
+ * PRIVATE FUNCTIONS
+ *===========================================================================*/
+
+/* Add object in the correct spot in the array */
+void GameDatabase::addAction(EditorAction* action)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_action.size() && !inserted); i++)
+  {
+    if(data_action[i]->getID() > action->getID())
+    {
+      data_action.insert(i, action);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_action.push_back(action);
+}
+
+/* Change objects trigger call */
+void GameDatabase::changeAction(int index, bool forced)
+{
+  bool proceed = forced;
+
+  /* Check index */
+  if(!forced)
+  {
+    if(current_action != NULL)
+    {
+      /* Create warning about changing action */
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Action. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Are you sure?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      if(msg_box.exec() == QMessageBox::Yes)
+      {
+        proceed = true;
+        current_action->resetInfo();
+      }
+    }
+    else
+    {
+      proceed = true;
+    }
+  }
+
+  /* If proceed, change action */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_action = data_action[index];
+    else
+      current_action = NULL;
+
+    /* Change object */
+    emit changeAction(current_action);
+  }
+}
+
+/* Get object, based on ID */
+EditorAction* GameDatabase::getAction(int id)
+{
+  for(int i = 0; i < data_action.size(); i++)
+    if(data_action[i]->getID() == id)
+      return data_action[i];
+  return NULL;
+}
+
+/* Called to load action data */
+void GameDatabase::loadAction(XmlData data, int index)
+{
+  /* Parse depending on the data */
+  int id = -1;
+  if(data.getTailElements(index).size() == 1)
+  {
+    EditorAction* new_action = new EditorAction();
+    new_action->load(data, index);
+    id = new_action->getID();
+    delete new_action;
+  }
+  else if(data.getKeyValue(index) != "")
+  {
+    id = std::stoi(data.getKeyValue(index));
+  }
+
+  /* If ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorAction* found_action = getAction(id);
+    if(found_action == NULL)
+    {
+      found_action = new EditorAction(id, "New Action");
+      addAction(found_action);
+    }
+    found_action->load(data, index);
+  }
+}
+
+/* Called upon load finish - for clean up */
+void GameDatabase::loadFinish()
+{
+  for(int i = 0; i < data_action.size(); i++)
+    data_action[i]->setBaseAction(data_action[i]->getBaseAction());
+}
+
+/*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
@@ -333,10 +444,7 @@ void GameDatabase::deleteResource()
         /* -- ACTION -- */
         case 4:
           if(data_action[index] == current_action)
-          {
-            emit changeAction(NULL);
-            current_action = NULL;
-          }
+            changeAction(-1, true);
           delete data_action[index];
           data_action.remove(index);
           break;
@@ -552,8 +660,7 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       break;
     /* -- ACTION -- */
     case 4:
-      current_action = data_action[index];
-      emit changeAction(current_action);
+      changeAction(index);
       break;
     /* -- RACE -- */
     case 5:
@@ -717,7 +824,7 @@ void GameDatabase::deleteAll()
   int index = view_top->currentRow();
 
   /* Action clean-up */
-  emit changeAction(NULL);
+  changeAction(-1, true);
   for(int i = 0; i < data_action.size(); i++)
     delete data_action[i];
   data_action.clear();
@@ -829,9 +936,16 @@ void GameDatabase::load(FileHandler* fh)
       /* Only validate if wrapped within game and successful read */
       if(success && data.getElement(0) == "game")
       {
+        /* If core game data, parse */
+        if(data.getElement(1) == "core")
+        {
+          /* Action */
+          if(data.getElement(2) == "action")
+            loadAction(data, 2);
+        }
         /* If map element, add new map if it doesn't exist; then send
          * new information to map */
-        if(data.getElement(1) == "map" && data.getKey(1) == "id")
+        else if(data.getElement(1) == "map" && data.getKey(1) == "id")
         {
           int map_id = QString::fromStdString(data.getKeyValue(1)).toInt();
           int map_index = -1;
@@ -856,6 +970,9 @@ void GameDatabase::load(FileHandler* fh)
       progress.setValue(++value);
     } while(!done);
   }
+
+  /* CLean up core data */
+  loadFinish();
 
   /* Clean up the maps */
   for(int i = 0; i < data_map.size(); i++)
@@ -1073,6 +1190,16 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Write starting element */
     fh->writeXmlElement("game");
 
+    /* Core data */
+    fh->writeXmlElement("core");
+
+    /* Actions */
+    for(int i = 0; i < data_action.size(); i++)
+      data_action[i]->save(fh, game_only);
+
+    fh->writeXmlElementEnd();
+
+    /* Maps */
     /* If not the selected map, save all the maps */
     if(!selected_map)
     {
