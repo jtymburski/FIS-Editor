@@ -327,9 +327,6 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Clone */
-  EditorAction* clone();
-
   /* Returns the ID of the Action */
   virtual int getID() const;
 
@@ -339,10 +336,10 @@ public:
   /* Returns the name of the item for listing */
   virtual QString getNameList();
 
-  /* Loads the thing data */
+  /* Loads the object data */
   virtual void load(XmlData data, int index);
 
-  /* Saves the thing data */
+  /* Saves the object data */
   virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the ID */

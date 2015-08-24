@@ -7,20 +7,16 @@
 #include "Database/EditorSkill.h"
 #include <QDebug>
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
 EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
 {
   top_horizontal = new QHBoxLayout();
   bottom_horizontal = new QHBoxLayout();
 
   main_layout = new QVBoxLayout();
-
-  animation_frame = new QImage(":/images/fbs_logo_transparent.png");
-  QImage temp = animation_frame->scaled(128,128);
-  animation_frame = &temp;
-  animation_label = new QLabel(this);
-  animation_label->setPixmap(QPixmap::fromImage(*animation_frame));
-  animation_label->setFixedSize(128,128);
-  top_horizontal->addWidget(animation_label,Qt::AlignTop);
 
   QVBoxLayout* combo_layout = new QVBoxLayout();
   QFormLayout* form = new QFormLayout();
@@ -64,14 +60,6 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   combo_layout->addLayout(combo_labels);
   combo_layout->addLayout(combos);
   top_horizontal->addLayout(combo_layout);
-
-  thumbnail_frame = new QImage(":/images/fbs_logo_transparent.png");
-  QImage temp2 = thumbnail_frame->scaled(64,64);
-  thumbnail_frame = &temp2;
-  thumbnail_label = new QLabel(this);
-  thumbnail_label->setPixmap(QPixmap::fromImage(*thumbnail_frame));
-  thumbnail_label->setFixedSize(64,64);
-  top_horizontal->addWidget(thumbnail_label);
 
   skill_flags = new QGroupBox("Skill Flags",this);
   QVBoxLayout* skill_flags_layout = new QVBoxLayout();
@@ -130,13 +118,43 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   QVBoxLayout* total_right = new QVBoxLayout();
   QGridLayout* skill_layout = new QGridLayout();
   total_actions = new QListWidget();
-  skill_layout->addWidget(total_actions,0,0);
+  skill_layout->addWidget(total_actions, 3, 0, 1, 2);
   skill_actions = new QListWidget();
-  skill_layout->addWidget(skill_actions,0,1);
+  skill_layout->addWidget(skill_actions, 3, 2, 1, 2);
   add_action_to_skill = new QPushButton("Add Action",this);
-  skill_layout->addWidget(add_action_to_skill,1,0);
+  skill_layout->addWidget(add_action_to_skill, 4, 0, 1, 2);
   remove_action_from_skill = new QPushButton("Remove Action",this);
-  skill_layout->addWidget(remove_action_from_skill,1,1);
+  skill_layout->addWidget(remove_action_from_skill, 4, 2, 1, 2);
+
+  /* Animation Frame */
+  QLabel* lbl_animation = new QLabel("Animation", this);
+  skill_layout->addWidget(lbl_animation, 0, 0, 1, 2, Qt::AlignHCenter);
+  lbl_anim_img = new QLabel(this);
+  lbl_anim_img->setMinimumSize(200, 200);
+  lbl_anim_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_anim_img->setAlignment(Qt::AlignCenter);
+  skill_layout->addWidget(lbl_anim_img, 1, 0, 2, 2, Qt::AlignHCenter);
+  QPushButton* btn_anim_click = new QPushButton(this);
+  btn_anim_click->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_anim_click->setIconSize(QSize(24,24));
+  btn_anim_click->setMaximumSize(30, 30);
+  connect(btn_anim_click, SIGNAL(clicked()), this, SLOT(buttonAnimEdit()));
+  skill_layout->addWidget(btn_anim_click, 2, 0, 1, 2, Qt::AlignHCenter);
+
+  /* Thumbnail Frame */
+  QLabel* lbl_thumb = new QLabel("Thumbnail", this);
+  skill_layout->addWidget(lbl_thumb, 0, 2, 1, 2, Qt::AlignHCenter);
+  lbl_thumb_img = new QLabel(this);
+  lbl_thumb_img->setMinimumSize(200, 200);
+  lbl_thumb_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_thumb_img->setAlignment(Qt::AlignCenter);
+  skill_layout->addWidget(lbl_thumb_img, 1, 2, 2, 2, Qt::AlignHCenter);
+  QPushButton* btn_thumb_click = new QPushButton(this);
+  btn_thumb_click->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_thumb_click->setIconSize(QSize(24,24));
+  btn_thumb_click->setMaximumSize(30, 30);
+  connect(btn_thumb_click, SIGNAL(clicked()), this, SLOT(buttonThumbEdit()));
+  skill_layout->addWidget(btn_thumb_click, 2, 2, 1, 2, Qt::AlignHCenter);
 
   QHBoxLayout* save_reset = new QHBoxLayout();
   save_skill = new QPushButton("Save Skill",this);
@@ -224,126 +242,41 @@ void EditorSkill::copySelf(const EditorSkill &source)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-void EditorSkill::setBaseSkill(Skill s)
+void EditorSkill::addAction()
 {
-  base = s;
-  setWorkingSkill(base);
-  loadWorkingInfo();
+  // TODO: PROPERLY IMPLEMENT
+  qDebug() << "TODO: ADD ACTION";
+
+//  if(action_selection >= 0)
+//  {
+//    QString new_string = total_actions->item(action_selection)->text().
+//        split(" : ").at(1);
+//    new_string.prepend(" : ");
+//    new_string.prepend(QString::number(running_action_id++));
+//    if(running_action_id < 10)
+//      new_string.prepend("0");
+//    skill_actions->addItem(new_string);
+
+//    skill_action_list->push_back(new QPair<QString,EditorAction*>
+//                  (new_string,
+//                   new EditorAction()));
+//    skill_action_list->last()->second->setBaseAction(
+//       Action(total_action_list->at(action_selection)->second->
+//              outputString().toStdString()));
+//    skill_action_list->last()->second->setNameAndID(new_string);
+//  }
 }
 
-void EditorSkill::setWorkingSkill(Skill s)
+void EditorSkill::buttonAnimEdit()
 {
-  working = base;
+  // TODO: PROPERLY IMPLEMENT
+  qDebug() << "TODO: ANIMATION FRAME EDIT";
 }
 
-void EditorSkill::loadWorkingInfo()
+void EditorSkill::buttonThumbEdit()
 {
-  name_edit->setText(QString::fromStdString(working.getName()));
-  message_edit->setText((QString::fromStdString(working.getMessage())));
-  description->setText(QString::fromStdString(working.getDescription()));
-  cost_edit->setText(QString::number(working.getCost()));
-  chance_edit->setText(QString::number(working.getChance()));
-  cooldown_edit->setText(QString::number(working.getCooldown()));
-  value_edit->setText(QString::number(working.getValue()));
-
-  skill_offensive->setChecked(working.getFlag(SkillFlags::OFFENSIVE));
-  skill_defensive->setChecked(working.getFlag(SkillFlags::DEFENSIVE));
-  skill_neutral->setChecked(working.getFlag(SkillFlags::NEUTRAL));
-  skill_altering->setChecked(working.getFlag(SkillFlags::ALTERING));
-  skill_damaging->setChecked(working.getFlag(SkillFlags::DAMAGING));
-  skill_healing->setChecked(working.getFlag(SkillFlags::HEALING));
-  skill_inflicting->setChecked(working.getFlag(SkillFlags::INFLICTING));
-  skill_relieving->setChecked(working.getFlag(SkillFlags::RELIEVING));
-  skill_reviving->setChecked(working.getFlag(SkillFlags::REVIVING));
-  skill_assigning->setChecked(working.getFlag(SkillFlags::ASSIGNING));
-  skill_valid->setChecked(working.getFlag(SkillFlags::VALID));
-
-  if(working.getPrimary() == Element::PHYSICAL)
-    primary_flag->setCurrentIndex(0);
-  else if(working.getPrimary() == Element::FIRE)
-    primary_flag->setCurrentIndex(1);
-  else if(working.getPrimary() == Element::ICE)
-    primary_flag->setCurrentIndex(2);
-  else if(working.getPrimary() == Element::FOREST)
-    primary_flag->setCurrentIndex(3);
-  else if(working.getPrimary() == Element::ELECTRIC)
-    primary_flag->setCurrentIndex(4);
-  else if(working.getPrimary() == Element::DIGITAL)
-    primary_flag->setCurrentIndex(5);
-  else if(working.getPrimary() == Element::NIHIL)
-    primary_flag->setCurrentIndex(6);
-  else if(working.getPrimary() == Element::NONE)
-    primary_flag->setCurrentIndex(7);
-
-  if(working.getSecondary() == Element::PHYSICAL)
-    secondary_flag->setCurrentIndex(0);
-  else if(working.getSecondary() == Element::FIRE)
-    secondary_flag->setCurrentIndex(1);
-  else if(working.getSecondary() == Element::ICE)
-    secondary_flag->setCurrentIndex(2);
-  else if(working.getSecondary() == Element::FOREST)
-    secondary_flag->setCurrentIndex(3);
-  else if(working.getSecondary() == Element::ELECTRIC)
-    secondary_flag->setCurrentIndex(4);
-  else if(working.getSecondary() == Element::DIGITAL)
-    secondary_flag->setCurrentIndex(5);
-  else if(working.getSecondary() == Element::NIHIL)
-    secondary_flag->setCurrentIndex(6);
-  else if(working.getSecondary() == Element::NONE)
-    secondary_flag->setCurrentIndex(7);
-
-  if(working.getScope() == ActionScope::USER)
-    scope_flag->setCurrentIndex(0);
-  else if(working.getScope() == ActionScope::ONE_TARGET)
-    scope_flag->setCurrentIndex(1);
-  else if(working.getScope() == ActionScope::ONE_ENEMY)
-    scope_flag->setCurrentIndex(2);
-  else if(working.getScope() == ActionScope::TWO_ENEMIES)
-    scope_flag->setCurrentIndex(3);
-  else if(working.getScope() == ActionScope::ALL_ENEMIES)
-    scope_flag->setCurrentIndex(4);
-  else if(working.getScope() == ActionScope::ONE_ALLY)
-    scope_flag->setCurrentIndex(5);
-  else if(working.getScope() == ActionScope::ONE_ALLY_NOT_USER)
-    scope_flag->setCurrentIndex(6);
-  else if(working.getScope() == ActionScope::TWO_ALLIES)
-    scope_flag->setCurrentIndex(7);
-  else if(working.getScope() == ActionScope::ALL_ALLIES)
-    scope_flag->setCurrentIndex(8);
-  else if(working.getScope() == ActionScope::ONE_ALLY_KO)
-    scope_flag->setCurrentIndex(9);
-  else if(working.getScope() == ActionScope::ALL_ALLIES_KO)
-    scope_flag->setCurrentIndex(10);
-  else if(working.getScope() == ActionScope::ONE_PARTY)
-    scope_flag->setCurrentIndex(11);
-  else if(working.getScope() == ActionScope::ALL_TARGETS)
-    scope_flag->setCurrentIndex(12);
-  else if(working.getScope() == ActionScope::NOT_USER)
-    scope_flag->setCurrentIndex(13);
-  else if(working.getScope() == ActionScope::ALL_NOT_USER)
-    scope_flag->setCurrentIndex(14);
-  else if(working.getScope() == ActionScope::NO_SCOPE)
-    scope_flag->setCurrentIndex(15);
-
-}
-
-void EditorSkill::setNameAndID(QString str)
-{
-  base.setID(str.split(" : ").at(0).toInt());
-  name = str.split(" : ").at(1);
-  name_edit->setText(name);
-  setWorkingSkill(base);
-}
-
-void EditorSkill::setTotalActionsList
-(QVector<QPair<QString,EditorAction *>* >* list)
-{
-  total_action_list = list;
-  total_actions->clear();
-  QStringList action_list;
-  for(int i=0; i<total_action_list->size(); i++)
-    action_list << total_action_list->at(i)->first;
-  total_actions->addItems(action_list);
+  // TODO: PROPERLY IMPLEMENT
+  qDebug() << "TODO: THUMBNAIL FRAME EDIT";
 }
 
 void EditorSkill::changeIndex(int x)
@@ -354,41 +287,6 @@ void EditorSkill::changeIndex(int x)
 void EditorSkill::changeSkillActionIndex(int x)
 {
   skill_action_selection = x;
-}
-
-void EditorSkill::addAction()
-{
-  if(action_selection >= 0)
-  {
-    QString new_string = total_actions->item(action_selection)->text().
-        split(" : ").at(1);
-    new_string.prepend(" : ");
-    new_string.prepend(QString::number(running_action_id++));
-    if(running_action_id < 10)
-      new_string.prepend("0");
-    skill_actions->addItem(new_string);
-
-    skill_action_list->push_back(new QPair<QString,EditorAction*>
-                  (new_string,
-                   new EditorAction()));
-    skill_action_list->last()->second->setBaseAction(
-       Action(total_action_list->at(action_selection)->second->
-              outputString().toStdString()));
-    skill_action_list->last()->second->setNameAndID(new_string);
-  }
-}
-
-void EditorSkill::removeAction()
-{
-  if(skill_action_selection >= 0 &&
-     skill_action_list->size() > 0)
-  {
-    skill_action_list->remove(skill_action_selection);
-    skill_actions->takeItem(skill_action_selection);
-    if(skill_action_selection != 0)
-      skill_action_selection--;
-  }
-
 }
 
 Skill EditorSkill::getEditedSkill()
@@ -496,6 +394,111 @@ Skill EditorSkill::getEditedSkill()
   return base;
 }
 
+void EditorSkill::loadWorkingInfo()
+{
+  name_edit->setText(QString::fromStdString(working.getName()));
+  message_edit->setText((QString::fromStdString(working.getMessage())));
+  description->setText(QString::fromStdString(working.getDescription()));
+  cost_edit->setText(QString::number(working.getCost()));
+  chance_edit->setText(QString::number(working.getChance()));
+  cooldown_edit->setText(QString::number(working.getCooldown()));
+  value_edit->setText(QString::number(working.getValue()));
+
+  skill_offensive->setChecked(working.getFlag(SkillFlags::OFFENSIVE));
+  skill_defensive->setChecked(working.getFlag(SkillFlags::DEFENSIVE));
+  skill_neutral->setChecked(working.getFlag(SkillFlags::NEUTRAL));
+  skill_altering->setChecked(working.getFlag(SkillFlags::ALTERING));
+  skill_damaging->setChecked(working.getFlag(SkillFlags::DAMAGING));
+  skill_healing->setChecked(working.getFlag(SkillFlags::HEALING));
+  skill_inflicting->setChecked(working.getFlag(SkillFlags::INFLICTING));
+  skill_relieving->setChecked(working.getFlag(SkillFlags::RELIEVING));
+  skill_reviving->setChecked(working.getFlag(SkillFlags::REVIVING));
+  skill_assigning->setChecked(working.getFlag(SkillFlags::ASSIGNING));
+  skill_valid->setChecked(working.getFlag(SkillFlags::VALID));
+
+  if(working.getPrimary() == Element::PHYSICAL)
+    primary_flag->setCurrentIndex(0);
+  else if(working.getPrimary() == Element::FIRE)
+    primary_flag->setCurrentIndex(1);
+  else if(working.getPrimary() == Element::ICE)
+    primary_flag->setCurrentIndex(2);
+  else if(working.getPrimary() == Element::FOREST)
+    primary_flag->setCurrentIndex(3);
+  else if(working.getPrimary() == Element::ELECTRIC)
+    primary_flag->setCurrentIndex(4);
+  else if(working.getPrimary() == Element::DIGITAL)
+    primary_flag->setCurrentIndex(5);
+  else if(working.getPrimary() == Element::NIHIL)
+    primary_flag->setCurrentIndex(6);
+  else if(working.getPrimary() == Element::NONE)
+    primary_flag->setCurrentIndex(7);
+
+  if(working.getSecondary() == Element::PHYSICAL)
+    secondary_flag->setCurrentIndex(0);
+  else if(working.getSecondary() == Element::FIRE)
+    secondary_flag->setCurrentIndex(1);
+  else if(working.getSecondary() == Element::ICE)
+    secondary_flag->setCurrentIndex(2);
+  else if(working.getSecondary() == Element::FOREST)
+    secondary_flag->setCurrentIndex(3);
+  else if(working.getSecondary() == Element::ELECTRIC)
+    secondary_flag->setCurrentIndex(4);
+  else if(working.getSecondary() == Element::DIGITAL)
+    secondary_flag->setCurrentIndex(5);
+  else if(working.getSecondary() == Element::NIHIL)
+    secondary_flag->setCurrentIndex(6);
+  else if(working.getSecondary() == Element::NONE)
+    secondary_flag->setCurrentIndex(7);
+
+  if(working.getScope() == ActionScope::USER)
+    scope_flag->setCurrentIndex(0);
+  else if(working.getScope() == ActionScope::ONE_TARGET)
+    scope_flag->setCurrentIndex(1);
+  else if(working.getScope() == ActionScope::ONE_ENEMY)
+    scope_flag->setCurrentIndex(2);
+  else if(working.getScope() == ActionScope::TWO_ENEMIES)
+    scope_flag->setCurrentIndex(3);
+  else if(working.getScope() == ActionScope::ALL_ENEMIES)
+    scope_flag->setCurrentIndex(4);
+  else if(working.getScope() == ActionScope::ONE_ALLY)
+    scope_flag->setCurrentIndex(5);
+  else if(working.getScope() == ActionScope::ONE_ALLY_NOT_USER)
+    scope_flag->setCurrentIndex(6);
+  else if(working.getScope() == ActionScope::TWO_ALLIES)
+    scope_flag->setCurrentIndex(7);
+  else if(working.getScope() == ActionScope::ALL_ALLIES)
+    scope_flag->setCurrentIndex(8);
+  else if(working.getScope() == ActionScope::ONE_ALLY_KO)
+    scope_flag->setCurrentIndex(9);
+  else if(working.getScope() == ActionScope::ALL_ALLIES_KO)
+    scope_flag->setCurrentIndex(10);
+  else if(working.getScope() == ActionScope::ONE_PARTY)
+    scope_flag->setCurrentIndex(11);
+  else if(working.getScope() == ActionScope::ALL_TARGETS)
+    scope_flag->setCurrentIndex(12);
+  else if(working.getScope() == ActionScope::NOT_USER)
+    scope_flag->setCurrentIndex(13);
+  else if(working.getScope() == ActionScope::ALL_NOT_USER)
+    scope_flag->setCurrentIndex(14);
+  else if(working.getScope() == ActionScope::NO_SCOPE)
+    scope_flag->setCurrentIndex(15);
+}
+
+void EditorSkill::removeAction()
+{
+  // TODO: PROPERLY IMPLEMENT
+  qDebug() << "TODO: REMOVE ACTION";
+
+//  if(skill_action_selection >= 0 &&
+//     skill_action_list->size() > 0)
+//  {
+//    skill_action_list->remove(skill_action_selection);
+//    skill_actions->takeItem(skill_action_selection);
+//    if(skill_action_selection != 0)
+//      skill_action_selection--;
+//  }
+}
+
 void EditorSkill::resetWorkingSkill()
 {
   working = base;
@@ -509,14 +512,40 @@ void EditorSkill::resetWorkingSkill()
   loadWorkingInfo();
 }
 
+void EditorSkill::setBaseSkill(Skill s)
+{
+  base = s;
+  setWorkingSkill(base);
+  loadWorkingInfo();
+}
+
+void EditorSkill::setNameAndID(QString str)
+{
+  base.setID(str.split(" : ").at(0).toInt());
+  name = str.split(" : ").at(1);
+  name_edit->setText(name);
+  setWorkingSkill(base);
+}
+
+void EditorSkill::setTotalActionsList
+(QVector<QPair<QString,EditorAction *>* >* list)
+{
+  total_action_list = list;
+  total_actions->clear();
+  QStringList action_list;
+  for(int i=0; i<total_action_list->size(); i++)
+    action_list << total_action_list->at(i)->first;
+  total_actions->addItems(action_list);
+}
+
+void EditorSkill::setWorkingSkill(Skill s)
+{
+  working = base;
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-
-EditorSkill* EditorSkill::clone()
-{
-  return this;
-}
 
 /* Returns the ID of the skill */
 int EditorSkill::getID() const

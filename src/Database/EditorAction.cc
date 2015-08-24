@@ -7,6 +7,15 @@
 #include "Database/EditorAction.h"
 #include <QDebug>
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 {
   /* Main Layout */
@@ -374,7 +383,13 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   name = "";
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function. All parameters have blank defaults.
+ *
+ * Inputs: int id - the id of the thing
+ *         QString name - the name of the thing
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorAction::EditorAction(int id, QString name, QWidget* parent)
             : EditorAction(parent)
 {
@@ -382,12 +397,20 @@ EditorAction::EditorAction(int id, QString name, QWidget* parent)
   setName(name);
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorAction &source - the source object to copy
+ */
 EditorAction::EditorAction(const EditorAction &source) : EditorAction()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorAction::~EditorAction()
 {
 }
@@ -396,7 +419,13 @@ EditorAction::~EditorAction()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorAction &source - the source to copy from
+ * Output: none
+ */
 void EditorAction::copySelf(const EditorAction &source)
 {
   name = source.name;
@@ -408,26 +437,56 @@ void EditorAction::copySelf(const EditorAction &source)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/*
+ * Description: Returns the ailment enum.
+ *
+ * Inputs: none
+ * Output: Infliction - enum that represents the ailment
+ */
 Infliction EditorAction::getAilment() const
 {
   return working.getAilment();
 }
 
+/*
+ * Description: Returns the base value of the action.
+ *
+ * Inputs: none
+ * Output: int - the base value of the action
+ */
 int EditorAction::getBase() const
 {
   return working.getBase();
 }
 
+/*
+ * Description: Returns the base action.
+ *
+ * Inputs: none
+ * Output: Action - the base action
+ */
 Action EditorAction::getBaseAction()
 {
   return base;
 }
 
+/*
+ * Description: Returns the chance of the action being processed.
+ *
+ * Inputs: none
+ * Output: float - the float percentage chance
+ */
 float EditorAction::getChance() const
 {
   return working.getChance();
 }
 
+/*
+ * Description: Returns the revised action with the class changes.
+ *
+ * Inputs: none
+ * Output: Action - the working action
+ */
 Action EditorAction::getEditedAction()
 {
   QString full_name = "";
@@ -667,36 +726,79 @@ Action EditorAction::getEditedAction()
   return base;
 }
 
+/*
+ * Description: Returns the minimum turn count of the action.
+ *
+ * Inputs: none
+ * Output: int - minimum turn ref
+ */
 int EditorAction::getMin() const
 {
   return working.getMax();
 }
 
+/*
+ * Description: Returns the maximum turn count of the action.
+ *
+ * Inputs: none
+ * Output: int - maximum turn ref
+ */
 int EditorAction::getMax() const
 {
   return working.getMax();
 }
 
+/*
+ * Description: Returns the target attribute of the action
+ *
+ * Inputs: none
+ * Output: Attribute - target attribute enum
+ */
 Attribute EditorAction::getTargetAttribute() const
 {
   return working.getTargetAttribute();
 }
 
+/*
+ * Description: Returns the user attribute of the action
+ *
+ * Inputs: none
+ * Output: Attribute - user attribute enum
+ */
 Attribute EditorAction::getUserAttribute() const
 {
   return working.getUserAttribute();
 }
 
+/*
+ * Description: Returns the variance of the base value.
+ *
+ * Inputs: none
+ * Output: int - the variance value
+ */
 int EditorAction::getVariance() const
 {
   return working.getVariance();
 }
 
+/*
+ * Description: Returns the working action, as it stands.
+ *
+ * Inputs: none
+ * Output: Action - the working action
+ */
 Action EditorAction::getWorkingAction()
 {
   return working;
 }
 
+/*
+ * Description: Loads the working info from the action into the objects within
+ *              the class view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorAction::loadWorkingInfo()
 {
   name_edit->setText(name);
@@ -1029,44 +1131,94 @@ void EditorAction::loadWorkingInfo()
   }
 }
 
+/*
+ * Description: Returns the output string of the base action.
+ *
+ * Inputs: none
+ * Output: QString - the output string sent to a file
+ */
 QString EditorAction::outputString()
 {
   //qDebug() << QString::fromStdString(base.outputString());
   return QString::fromStdString(base.outputString());
 }
 
+/*
+ * Description: Resets the working info back to the base action
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorAction::resetInfo()
 {
   working = base;
   loadWorkingInfo();
 }
 
+/*
+ * Description: Sets the action flag within the working action
+ *
+ * Inputs: ActionFlags set_flag - the flag to set
+ *         bool set - the boolean status to set the flag(s) to
+ * Output: none
+ */
 void EditorAction::setActionFlag(ActionFlags set_flag, bool set)
 {
   working.setActionFlag(set_flag,set);
 }
 
+/*
+ * Description: Sets the ailment of the working action
+ *
+ * Inputs: Infliction ailment - the ailment enum
+ * Output: none
+ */
 void EditorAction::setAilment(Infliction ailment)
 {
   working.setAilment(ailment);
 }
 
+/*
+ * Description: Sets the ailment duration (turn count)
+ *
+ * Inputs: int min - the minimum number of turns
+ *         int max - the maximum number of turns
+ * Output: bool - status if successfully set
+ */
 bool EditorAction::setAilmentDuration(int min, int max)
 {
   working.setAilmentDuration(min,max);
   return true;
 }
 
+/*
+ * Description: Sets the target attribute of the action
+ *
+ * Inputs: Attribute target - the target attribute
+ * Output: none
+ */
 void EditorAction::setAttributeTarget(Attribute target)
 {
   working.setAttributeTarget(target);
 }
 
+/*
+ * Description: Sets the user attribute of the action
+ *
+ * Inputs: Attribute user - the user attribute
+ * Output: none
+ */
 void EditorAction::setAttributeUser(Attribute user)
 {
   working.setAttributeUser(user);
 }
 
+/*
+ * Description: Sets the base action of the class.
+ *
+ * Inputs: Action a - the new base action
+ * Output: none
+ */
 void EditorAction::setBaseAction(Action a)
 {
   base = a;
@@ -1075,31 +1227,73 @@ void EditorAction::setBaseAction(Action a)
   updateLayouts();
 }
 
+/*
+ * Description: Sets the base value of the action, and if it's a percent or
+ *              pure value.
+ *
+ * Inputs: int value - the base value
+ *         bool percent - true if percent. false if direct value
+ * Output: none
+ */
 void EditorAction::setBaseValue(int value, bool percent)
 {
   working.setBaseValue(value,percent);
 }
 
+/*
+ * Description: Sets the base variance of the action, and if it's a percent or
+ *              pure value.
+ *
+ * Inputs: int variance - the variance value
+ *         bool percent - true if percent. false if direct value
+ * Output: none
+ */
 void EditorAction::setBaseVariance(int variance, bool percent)
 {
   working.setBaseVariance(variance,percent);
 }
 
+/*
+ * Description: Sets the chance of the action being processed, in percent
+ *
+ * Inputs: float chance - action chance
+ * Output: bool - true if set
+ */
 bool EditorAction::setChance(float chance)
 {
   return working.setChance(chance);
 }
 
+/*
+ * Description: Sets the attack ignore flags.
+ *
+ * Inputs: IgnoreFlags flag - attack flags to set the ignore
+ *         bool set - true to ignore. false to not
+ * Output: none
+ */
 void EditorAction::setIgnoreAttack(IgnoreFlags flag, bool set)
 {
   working.setIgnoreAttack(flag,set);
 }
 
+/*
+ * Description: Sets the defense ignore flags.
+ *
+ * Inputs: IgnoreFlags flag - defense flags to set the ignore
+ *         bool set - true to ignore. false to not
+ * Output: none
+ */
 void EditorAction::setIgnoreDefense(IgnoreFlags flag, bool set)
 {
   working.setIgnoreDefense(flag,set);
 }
 
+/*
+ * Description: Sets the name and ID based on the passed string.
+ *
+ * Inputs: QString str - the string delimited by colon (:)
+ * Output: none
+ */
 void EditorAction::setNameAndID(QString str)
 {
   base.setID(str.split(" : ").at(0).toInt());
@@ -1108,6 +1302,12 @@ void EditorAction::setNameAndID(QString str)
   setWorkingAction(base);
 }
 
+/*
+ * Description: Sets the working to the base action
+ *
+ * Inputs: Action - unused
+ * Output: none
+ */
 void EditorAction::setWorkingAction(Action a)
 {
   (void)a;
@@ -1115,6 +1315,12 @@ void EditorAction::setWorkingAction(Action a)
   updateLayouts();
 }
 
+/*
+ * Description: Updates layouts based on the settings of the action.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorAction::updateLayouts()
 {
   if(action_flags_inflict->isChecked())
@@ -1185,31 +1391,46 @@ void EditorAction::updateLayouts()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Clone */
-EditorAction* EditorAction::clone()
-{
-  return this;
-}
-
-/* Returns the ID of the Action */
+/*
+ * Description: Returns the ID of the action
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorAction::getID() const
 {
   return working.getID();
 }
 
-/* Returns the name of the item */
+/*
+ * Description: Returns the name of the action
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorAction::getName() const
 {
   return name;
 }
 
-/* Returns the name of the item for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorAction::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the thing data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorAction::load(XmlData data, int index)
 {
   /* Parse elements */
@@ -1237,7 +1458,13 @@ void EditorAction::load(XmlData data, int index)
   }
 }
 
-/* Saves the thing data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorAction::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
@@ -1260,14 +1487,24 @@ void EditorAction::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Sets the ID */
+/*
+ * Description: Sets the action ID in the base class.
+ *
+ * Inputs: int id - the action id
+ * Output: none
+ */
 void EditorAction::setID(int id)
 {
   base.setID(id);
   setWorkingAction(base);
 }
 
-/* Sets the name */
+/*
+ * Description: Sets the name of the object.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorAction::setName(QString name)
 {
   this->name = name;
@@ -1279,7 +1516,14 @@ void EditorAction::setName(QString name)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorAction.
+ *
+ * Inputs: const EditorAction &source - the source class constructor
+ * Output: EditorAction& - pointer to the copied class
+ */
 EditorAction& EditorAction::operator= (const EditorAction &source)
 {
   /* Check for self assignment */

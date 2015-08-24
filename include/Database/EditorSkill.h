@@ -24,7 +24,6 @@
 #include "EditorHelpers.h"
 #include "Game/Player/Skill.h"
 
-
 class EditorSkill : public QWidget, public EditorTemplate
 {
   Q_OBJECT
@@ -57,10 +56,8 @@ private:
   QVector<QPair<QString,EditorAction*>* >* skill_action_list;
   QVector<QPair<QString,EditorAction*>* > previous_skill_action_list;
 
-  QImage* animation_frame;
-  QImage* thumbnail_frame;
-  QLabel* animation_label;
-  QLabel* thumbnail_label;
+  QLabel* lbl_anim_img;
+  QLabel* lbl_thumb_img;
 
   QLabel* description_label;
   QTextEdit* description;
@@ -124,40 +121,62 @@ private:
 
   int running_action_id;
 
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSkill &source);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  void nameChange(QString);
+
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
 public slots:
-  /* Sets the action list */
-  void setTotalActionsList(QVector<QPair<QString,EditorAction*>* >* list);
-
-  void setNameAndID(QString str);
-
-  /* Adds an action to the skill */
+  /* Adds an action */
   void addAction();
-  void removeAction();
+
+  /* Animation and thumbnail frame edits */
+  void buttonAnimEdit();
+  void buttonThumbEdit();
 
   /* Alters the index */
   void changeIndex(int);
   void changeSkillActionIndex(int);
 
+  /* Returns the edited working skill */
+  Skill getEditedSkill();
+
+  /* Loads the working info from skill */
+  void loadWorkingInfo();
+
+  /* Removes an action from the skill */
+  void removeAction();
+
+  /* Resets the working skill to the base skill */
+  void resetWorkingSkill();
+
   /* Set base skill */
   void setBaseSkill(Skill);
 
+  /* Sets name and ID, from colon delimited string */
+  void setNameAndID(QString str);
+
+  /* Sets the action list */
+  void setTotalActionsList(QVector<QPair<QString,EditorAction*>* >* list);
+
+  /* Sets the working skill */
   void setWorkingSkill(Skill);
-  void loadWorkingInfo();
 
-  Skill getEditedSkill();
-  void resetWorkingSkill();
-
-signals:
-  void nameChange(QString);
-
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
-  /* Clone */
-  EditorSkill* clone();
-
   /* Returns the ID of the skill */
   virtual int getID() const;
 
@@ -173,7 +192,9 @@ public:
   /* Sets the name of the skill */
   virtual void setName(QString name);
 
-/* Operator functions */
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   /* The copy operator */
   EditorSkill& operator= (const EditorSkill &source);
