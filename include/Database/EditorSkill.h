@@ -21,6 +21,7 @@
 
 #include "Database/EditorAction.h"
 #include "Database/EditorTemplate.h"
+#include "Dialog/SpriteDialog.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Skill.h"
 
@@ -51,6 +52,16 @@ private:
   QString name;
   /* Testing string (May be removed) */
   QString test_string;
+
+  /* The thumbnail control dialog */
+  SpriteDialog* dialog_anim;
+  FrameDialog* dialog_thumb;
+
+  /* The thumbnail frame and animation sprite */
+  EditorSprite sprite_anim;
+  EditorSprite sprite_anim_base;
+  EditorSprite sprite_thumb;
+  EditorSprite sprite_thumb_base;
 
   QVector<QPair<QString,EditorAction*>* >* total_action_list;
   QVector<QPair<QString,EditorAction*>* >* skill_action_list;
@@ -111,11 +122,12 @@ private:
 
   QVBoxLayout* main_layout;
   QHBoxLayout* layout;
+
   /* Original Action */
- // Action::Action base;
+  //Action::Action base;
 
   /* Action being worked on */
- // Action::Action working;
+  //Action::Action working;
   int action_selection;
   int skill_action_selection;
 
@@ -142,8 +154,8 @@ public slots:
   void addAction();
 
   /* Animation and thumbnail frame edits */
-  void buttonAnimEdit();
-  void buttonThumbEdit();
+  void buttonAnimEdit(bool clean_only = false);
+  void buttonThumbEdit(bool clean_only = false);
 
   /* Alters the index */
   void changeIndex(int);
@@ -172,6 +184,10 @@ public slots:
 
   /* Sets the working skill */
   void setWorkingSkill(Skill);
+
+  /* Update the thumb and animation frame for skill */
+  void updateAnimation();
+  void updateThumb();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

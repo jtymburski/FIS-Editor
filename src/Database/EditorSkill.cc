@@ -13,6 +13,14 @@
 
 EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
 {
+  /* Dialogs for animation and thumbs */
+  dialog_anim = NULL;
+  dialog_thumb = NULL;
+
+  /* Make sure there's one frame in the thumbnail */
+  if(sprite_thumb_base.frameCount() == 0)
+    sprite_thumb_base.setPath(0, "");
+
   top_horizontal = new QHBoxLayout();
   bottom_horizontal = new QHBoxLayout();
 
@@ -192,6 +200,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
           this,SLOT(changeSkillActionIndex(int)));
 
   setBaseSkill(Skill());
+  getEditedSkill();
 }
 
 /* Constructor function with id and name */
@@ -200,6 +209,7 @@ EditorSkill::EditorSkill(int id, QString name, QWidget* parent)
 {
   setID(id);
   setName(name);
+  getEditedSkill();
 }
 
 /* Copy constructor */
@@ -210,6 +220,7 @@ EditorSkill::EditorSkill(const EditorSkill &source) : EditorSkill()
 
 EditorSkill::~EditorSkill()
 {
+  resetWorkingSkill();
 }
 
 /*============================================================================
@@ -230,9 +241,8 @@ void EditorSkill::copySelf(const EditorSkill &source)
   running_action_id = source.running_action_id;
 
   /* Frame connections */
-  // TODO: Fix for when the real frames are used -> sprite
-  //*animation_frame = *source.animation_frame;
-  //*thumbnail_frame = *source.thumbnail_frame;
+  sprite_anim_base = source.sprite_anim_base;
+  sprite_thumb_base = source.sprite_thumb_base;
 
   setBaseSkill(source.base);
   loadWorkingInfo();
@@ -267,16 +277,51 @@ void EditorSkill::addAction()
 //  }
 }
 
-void EditorSkill::buttonAnimEdit()
+/* Animation dialog edit trigger */
+void EditorSkill::buttonAnimEdit(bool clean_only)
 {
-  // TODO: PROPERLY IMPLEMENT
-  qDebug() << "TODO: ANIMATION FRAME EDIT";
+  /* Close and delete the dialog if button pressed */
+  if(dialog_anim != NULL)
+  {
+    dialog_anim->hide();
+    disconnect(dialog_anim, SIGNAL(ok()), this, SLOT(updateAnimation()));
+    delete dialog_anim;
+  }
+  dialog_anim = NULL;
+
+  if(!clean_only)
+  {
+    /* Create the new sprite dialog */
+    dialog_anim = new SpriteDialog(this, &sprite_anim, "", 0, false,
+                                   EditorEnumDb::SPRITE_ALL);
+    connect(dialog_anim, SIGNAL(ok()), this, SLOT(updateAnimation()));
+    dialog_anim->show();
+  }
 }
 
-void EditorSkill::buttonThumbEdit()
+/* Thumbnail dialog edit trigger */
+void EditorSkill::buttonThumbEdit(bool clean_only)
 {
-  // TODO: PROPERLY IMPLEMENT
-  qDebug() << "TODO: THUMBNAIL FRAME EDIT";
+  /* Delete the dialog, if it exists */
+  if(dialog_thumb != NULL)
+  {
+    dialog_thumb->hide();
+    disconnect(dialog_thumb, SIGNAL(ok()), this, SLOT(updateThumb()));
+    delete dialog_thumb;
+  }
+  dialog_thumb = NULL;
+
+  /* Make sure there's one frame in the thumbnail */
+  if(sprite_thumb.frameCount() == 0)
+    sprite_thumb.setPath(0, "");
+
+  if(!clean_only)
+  {
+    /* Create the new frame */
+    dialog_thumb = new FrameDialog(this, &sprite_thumb);
+    connect(dialog_thumb, SIGNAL(ok()), this, SLOT(updateThumb()));
+    dialog_thumb->show();
+  }
 }
 
 void EditorSkill::changeIndex(int x)
@@ -291,12 +336,15 @@ void EditorSkill::changeSkillActionIndex(int x)
 
 Skill EditorSkill::getEditedSkill()
 {
+  /* Clear pop-ups, if relevant */
+  buttonAnimEdit(true);
+  buttonThumbEdit(true);
+
   QString full_name = "";
   name = name_edit->text();
   if(working.getID() < 10)
     full_name.append("0");
   full_name.append(QString::number(working.getID()));
-  qDebug() << full_name;
   full_name.append(" : ");
   full_name.append(name);
   emit nameChange(full_name);
@@ -391,6 +439,9 @@ Skill EditorSkill::getEditedSkill()
   previous_skill_action_list = *skill_action_list;
 
   base = working;
+  sprite_anim_base = sprite_anim;
+  sprite_thumb_base = sprite_thumb;
+
   return base;
 }
 
@@ -482,6 +533,10 @@ void EditorSkill::loadWorkingInfo()
     scope_flag->setCurrentIndex(14);
   else if(working.getScope() == ActionScope::NO_SCOPE)
     scope_flag->setCurrentIndex(15);
+
+  /* Update sprite data */
+  updateAnimation();
+  updateThumb();
 }
 
 void EditorSkill::removeAction()
@@ -501,7 +556,14 @@ void EditorSkill::removeAction()
 
 void EditorSkill::resetWorkingSkill()
 {
+  /* Clean-up pop-ups */
+  buttonAnimEdit(true);
+  buttonThumbEdit(true);
+
+  /* Fix data */
   working = base;
+  sprite_anim = sprite_anim_base;
+  sprite_thumb = sprite_thumb_base;
   *skill_action_list = previous_skill_action_list;
   skill_actions->clear();
   for(int i=0; i<skill_action_list->size(); i++)
@@ -509,6 +571,8 @@ void EditorSkill::resetWorkingSkill()
     skill_actions->addItem(skill_action_list->at(i)->first);
     skill_actions->setCurrentRow(i);
   }
+
+  /* Re-load working info */
   loadWorkingInfo();
 }
 
@@ -516,7 +580,6 @@ void EditorSkill::setBaseSkill(Skill s)
 {
   base = s;
   setWorkingSkill(base);
-  loadWorkingInfo();
 }
 
 void EditorSkill::setNameAndID(QString str)
@@ -540,7 +603,44 @@ void EditorSkill::setTotalActionsList
 
 void EditorSkill::setWorkingSkill(Skill s)
 {
+  (void)s;
   working = base;
+  sprite_anim = sprite_anim_base;
+  sprite_thumb = sprite_thumb_base;
+
+  loadWorkingInfo();
+}
+
+/* Update the thumb and animation frame for skill */
+void EditorSkill::updateAnimation()
+{
+  QImage original = sprite_anim.getImage(0);
+  if(original.width() > 195 || original.height() > 195)
+  {
+    QPixmap scaled_image = sprite_anim.getPixmap(0, 195, 195);
+    lbl_anim_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_anim.getPixmap(0, original.width(), original.height());
+    lbl_anim_img->setPixmap(orig_image);
+  }
+}
+
+/* Update the thumb and animation frame for skill */
+void EditorSkill::updateThumb()
+{
+  QImage original = sprite_thumb.getImage(0);
+  if(original.width() > 195 || original.height() > 195)
+  {
+    QImage scaled_image = original.scaled(195, 195, Qt::KeepAspectRatio);
+    lbl_thumb_img->setPixmap(QPixmap::fromImage(scaled_image));
+  }
+  else
+  {
+    lbl_thumb_img->setPixmap(QPixmap::fromImage(original));
+  }
 }
 
 /*============================================================================
