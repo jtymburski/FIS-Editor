@@ -53,6 +53,11 @@ private:
   /* Testing string (May be removed) */
   QString test_string;
 
+  /* Actions */
+  QVector<int> actions_sel;
+  QVector<int> actions_sel_base;
+  QVector<EditorAction*> actions_total;
+
   /* The thumbnail control dialog */
   SpriteDialog* dialog_anim;
   FrameDialog* dialog_thumb;
@@ -63,33 +68,16 @@ private:
   EditorSprite sprite_thumb;
   EditorSprite sprite_thumb_base;
 
-  QVector<QPair<QString,EditorAction*>* >* total_action_list;
-  QVector<QPair<QString,EditorAction*>* >* skill_action_list;
-  QVector<QPair<QString,EditorAction*>* > previous_skill_action_list;
-
   QLabel* lbl_anim_img;
   QLabel* lbl_thumb_img;
 
-  QLabel* description_label;
   QTextEdit* description;
-
-  QLabel* cost_label;
   QLineEdit* cost_edit;
-
-  QLabel* chance_label;
   QLineEdit* chance_edit;
-
-  QLabel* cooldown_label;
   QLineEdit* cooldown_edit;
-
-  QLabel* value_label;
-  QLineEdit* value_edit;
-
-  QLabel* name_label;
-  QLineEdit* name_edit;
-
-  QLabel* message_label;
   QTextEdit* message_edit;
+  QLineEdit* name_edit;
+  QLineEdit* value_edit;
 
   QComboBox* primary_flag;
   QComboBox* secondary_flag;
@@ -98,40 +86,16 @@ private:
   QListWidget* total_actions;
   QListWidget* skill_actions;
 
-  QPushButton* add_action_to_skill;
-  QPushButton* remove_action_from_skill;
-
   QGroupBox* skill_flags;
   QCheckBox* skill_offensive;
   QCheckBox* skill_defensive;
   QCheckBox* skill_neutral;
-  QCheckBox* skill_altering;
-  QCheckBox* skill_damaging;
-  QCheckBox* skill_healing;
-  QCheckBox* skill_inflicting;
-  QCheckBox* skill_relieving;
-  QCheckBox* skill_reviving;
-  QCheckBox* skill_assigning;
-  QCheckBox* skill_valid;
+
+  QPushButton* add_action_to_skill;
+  QPushButton* remove_action_from_skill;
 
   QPushButton* save_skill;
   QPushButton* reset_skill;
-
-  QHBoxLayout* top_horizontal;
-  QHBoxLayout* bottom_horizontal;
-
-  QVBoxLayout* main_layout;
-  QHBoxLayout* layout;
-
-  /* Original Action */
-  //Action::Action base;
-
-  /* Action being worked on */
-  //Action::Action working;
-  int action_selection;
-  int skill_action_selection;
-
-  int running_action_id;
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -157,10 +121,6 @@ public slots:
   void buttonAnimEdit(bool clean_only = false);
   void buttonThumbEdit(bool clean_only = false);
 
-  /* Alters the index */
-  void changeIndex(int);
-  void changeSkillActionIndex(int);
-
   /* Returns the edited working skill */
   Skill getEditedSkill();
 
@@ -178,9 +138,6 @@ public slots:
 
   /* Sets name and ID, from colon delimited string */
   void setNameAndID(QString str);
-
-  /* Sets the action list */
-  void setTotalActionsList(QVector<QPair<QString,EditorAction*>* >* list);
 
   /* Sets the working skill */
   void setWorkingSkill(Skill);
@@ -202,11 +159,20 @@ public:
   /* Returns the name of the skill for listing */
   virtual QString getNameList();
 
+  /* Loads the object data */
+  virtual void load(XmlData data, int index);
+
+  /* Saves the object data */
+  virtual void save(FileHandler* fh, bool game_only = false);
+
   /* Sets the ID of the skill */
   virtual void setID(int id);
 
   /* Sets the name of the skill */
   virtual void setName(QString name);
+
+  /* Update actions */
+  void updateActions(QVector<EditorAction*> actions);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

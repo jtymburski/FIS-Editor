@@ -61,6 +61,10 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   connect(button_import, SIGNAL(clicked()), this, SLOT(importResource()));
   connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateResource()));
 
+  /* Save all button */
+  QPushButton* button_saveall = new QPushButton("Save All", this);
+  connect(button_saveall, SIGNAL(clicked()), this, SLOT(saveAll()));
+
   /* Configure the layout */
   layout = new QVBoxLayout(this);
   QLabel *label = new QLabel("Game Database", this);
@@ -69,6 +73,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   font.setBold(true);
   label->setFont(font);
   layout->addWidget(label);
+  layout->addWidget(button_saveall);
   layout->addWidget(view_top);
   layout->addWidget(view_bottom);
   QHBoxLayout* button_layout = new QHBoxLayout();
@@ -143,7 +148,7 @@ void GameDatabase::addAction(EditorAction* action)
 }
 
 /* Change objects trigger call */
-void GameDatabase::changeAction(int index, bool forced)
+void GameDatabase::changeAction(int index, bool forced, bool save)
 {
   bool proceed = forced;
 
@@ -161,7 +166,10 @@ void GameDatabase::changeAction(int index, bool forced)
       if(msg_box.exec() == QMessageBox::Yes)
       {
         proceed = true;
-        current_action->resetInfo();
+        if(save)
+          current_action->getEditedAction();
+        else
+          current_action->resetInfo();
       }
     }
     else
@@ -228,6 +236,13 @@ void GameDatabase::loadFinish()
 {
   for(int i = 0; i < data_action.size(); i++)
     data_action[i]->setBaseAction(data_action[i]->getBaseAction());
+}
+
+/* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updateSkills()
+{
+  for(int i = 0; i < data_skill.size(); i++)
+    data_skill[i]->updateActions(data_action);
 }
 
 /*============================================================================
@@ -310,6 +325,7 @@ void GameDatabase::createNewResource()
                        new EditorAction(data_action.last()->getID() + 1, name));
       else
         data_action.push_back(new EditorAction(0, name));
+      updateSkills();
       break;
     /* -- RACE -- */
     case 5:
@@ -346,6 +362,7 @@ void GameDatabase::createNewResource()
                          new EditorSkill(data_skill.last()->getID() + 1, name));
       else
         data_skill.push_back(new EditorSkill(0, name));
+      data_skill.last()->updateActions(data_action);
       break;
     /* -- EQUIPMENT -- */
     case 9:
@@ -447,6 +464,7 @@ void GameDatabase::deleteResource()
             changeAction(-1, true);
           delete data_action[index];
           data_action.remove(index);
+          updateSkills();
           break;
         /* -- RACE CLASS -- */
         case 5:
@@ -789,11 +807,29 @@ void GameDatabase::rowChange(int index)
   modifyBottomList(index);
 }
 
+/* Triggered by save all button */
+void GameDatabase::saveAll()
+{
+  /* Create warning about saving all */
+  QMessageBox msg_box;
+  msg_box.setText("This will save all core objects");
+  msg_box.setInformativeText("Are you sure?");
+  msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+  if(msg_box.exec() == QMessageBox::Yes)
+  {
+    changeAction(-1, true, true);
+  }
+}
+
 // TODO: Comment
 void GameDatabase::updateBottomListName(QString str)
 {
   (void)str;
   modifyBottomList(view_top->currentRow());
+
+  /* Update skills if the actions changed a name */
+  if(view_top->currentRow() == 4)
+    updateSkills();
 }
 
 /* Updates event objects in the map database class */
@@ -823,17 +859,23 @@ void GameDatabase::deleteAll()
   /* Get the current top view */
   int index = view_top->currentRow();
 
-  /* Action clean-up */
-  changeAction(-1, true);
-  for(int i = 0; i < data_action.size(); i++)
-    delete data_action[i];
-  data_action.clear();
+  /* Map clean-up */
+  emit changeMap(NULL);
+  for(int i = 0; i < data_map.size(); i++)
+    delete data_map[i];
+  data_map.clear();
 
-  /* Battle Class clean-up */
-  emit changeBattleclass(NULL);
-  for(int i = 0; i < data_battleclass.size(); i++)
-    delete data_battleclass[i];
-  data_battleclass.clear();
+  /* Party clean-up */
+  emit changeParty(NULL);
+  for(int i = 0; i < data_party.size(); i++)
+    delete data_party[i];
+  data_party.clear();
+
+  /* Person clean-up */
+  emit changePerson(NULL);
+  for(int i = 0; i < data_person.size(); i++)
+    delete data_person[i];
+  data_person.clear();
 
   /* Bubby clean-up */
   emit changeBubby(NULL);
@@ -853,23 +895,11 @@ void GameDatabase::deleteAll()
     delete data_item[i];
   data_item.clear();
 
-  /* Map clean-up */
-  emit changeMap(NULL);
-  for(int i = 0; i < data_map.size(); i++)
-    delete data_map[i];
-  data_map.clear();
-
-  /* Party clean-up */
-  emit changeParty(NULL);
-  for(int i = 0; i < data_party.size(); i++)
-    delete data_party[i];
-  data_party.clear();
-
-  /* Person clean-up */
-  emit changePerson(NULL);
-  for(int i = 0; i < data_person.size(); i++)
-    delete data_person[i];
-  data_person.clear();
+  /* Battle Class clean-up */
+  emit changeBattleclass(NULL);
+  for(int i = 0; i < data_battleclass.size(); i++)
+    delete data_battleclass[i];
+  data_battleclass.clear();
 
   /* Race clean-up */
   emit changeRace(NULL);
@@ -877,17 +907,23 @@ void GameDatabase::deleteAll()
     delete data_race[i];
   data_race.clear();
 
+  /* Skillset clean-up */
+  emit changeSkillset(NULL);
+  for(int i = 0; i < data_skillset.size(); i++)
+    delete data_skillset[i];
+  data_skillset.clear();
+
   /* Skill clean-up */
   emit changeSkill(NULL);
   for(int i = 0; i < data_skill.size(); i++)
     delete data_skill[i];
   data_skill.clear();
 
-  /* Skillset clean-up */
-  emit changeSkillset(NULL);
-  for(int i = 0; i < data_skillset.size(); i++)
-    delete data_skillset[i];
-  data_skillset.clear();
+  /* Action clean-up */
+  changeAction(-1, true);
+  for(int i = 0; i < data_action.size(); i++)
+    delete data_action[i];
+  data_action.clear();
 
   /* Reset the view */
   if(index == 0)

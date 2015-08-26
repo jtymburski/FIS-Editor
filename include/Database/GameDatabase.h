@@ -97,7 +97,7 @@ private:
   void addAction(EditorAction* action);
 
   /* Change objects trigger call */
-  void changeAction(int index, bool forced = false);
+  void changeAction(int index, bool forced = false, bool save = false);
 
   /* Get object, based on ID */
   EditorAction* getAction(int id);
@@ -107,6 +107,9 @@ private:
 
   /* Called upon load finish - for clean up */
   void loadFinish();
+
+  /* Update calls for objects (to fill in information required from others) */
+  void updateSkills();
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -164,6 +167,9 @@ public slots:
 
   /* Triggers on row change on top list -> shifts view */
   void rowChange(int);
+
+  /* Triggered by save all button */
+  void saveAll();
 
   /* Updates the bottom list -> when a name changes */
   void updateBottomListName(QString str);
