@@ -234,7 +234,8 @@ public:
   bool paint(int index, QPainter* painter, int x, int y, int w, int h);
 
   /* Saves the sprite data */
-  void save(FileHandler* fh, bool game_only = false, bool core_only = false);
+  void save(FileHandler* fh, bool game_only = false, bool core_only = false,
+            QString element = "");
 
   /* Sets the active frame index */
   void setActiveFrame(int index);

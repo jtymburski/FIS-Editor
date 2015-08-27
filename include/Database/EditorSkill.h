@@ -121,6 +121,9 @@ public slots:
   void buttonAnimEdit(bool clean_only = false);
   void buttonThumbEdit(bool clean_only = false);
 
+  /* Returns the base skill */
+  Skill getBaseSkill();
+
   /* Returns the edited working skill */
   Skill getEditedSkill();
 

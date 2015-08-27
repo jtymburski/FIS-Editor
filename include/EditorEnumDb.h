@@ -74,16 +74,16 @@ public:
 
   /* Enum For View Mode */
   enum ViewMode {MAPVIEW = 0,
-                 PERSONVIEW = 1,
-                 PARTYVIEW = 2,
-                 ITEMVIEW = 3,
-                 ACTIONVIEW = 4,
-                 RACEVIEW = 5,
+                 PARTYVIEW = 1,
+                 PERSONVIEW = 2,
+                 BUBBYVIEW = 3,
+                 EQUIPMENTVIEW = 4,
+                 ITEMVIEW = 5,
                  BATTLECLASSVIEW = 6,
-                 SKILLSETVIEW = 7,
-                 SKILLVIEW = 8,
-                 EQUIPMENTVIEW = 9,
-                 BUBBYVIEW = 10
+                 RACEVIEW = 7,
+                 SKILLSETVIEW = 8,
+                 SKILLVIEW = 9,
+                 ACTIONVIEW = 10
                 };
 };
 #endif // EDITORENUMDB_H

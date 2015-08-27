@@ -365,7 +365,7 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   /* Create buttons for loading */
   QPushButton* reset_button = new QPushButton("Reset");
   connect(reset_button,SIGNAL(pressed()),this,SLOT(resetInfo()));
-  QPushButton* save_button = new QPushButton("Save Changes");
+  QPushButton* save_button = new QPushButton("Save");
   connect(save_button,SIGNAL(pressed()),this,SLOT(getEditedAction()));
   /* Add the target flags box to the right layout */
   radio_layout->addWidget(target_flags_box);

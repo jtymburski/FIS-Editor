@@ -20,31 +20,34 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           view_map, SLOT(updatedMaps(QVector<QString>)));
 
+  view_party = new QWidget(this);
+  null_party = view_party;
+  addWidget(view_party);
+
   view_person = new QWidget(this);
   null_person = view_person;
   addWidget(view_person);
 
-  view_party = new QWidget(this);
-  null_party = view_party;
-  addWidget(view_party);
+  view_bubby = new QWidget(this);
+  null_bubby = view_bubby;
+  addWidget(view_bubby);
+
+  view_equipment = new QWidget(this);
+  null_equipment = view_equipment;
+  addWidget(view_equipment);
 
   view_item = new EditorItem(this);
   view_item->setDisabled(true);
   null_item = view_item;
   addWidget(view_item);
 
-  view_action = new EditorAction(this);
-  view_action->setDisabled(true);
-  null_action = view_action;
-  addWidget(view_action);
-  
-  view_race = new QWidget(this);
-  null_race = view_race;
-  addWidget(view_race);
-  
   view_battleclass = new QWidget(this);
   null_battleclass = view_battleclass;
   addWidget(view_battleclass);
+
+  view_race = new QWidget(this);
+  null_race = view_race;
+  addWidget(view_race);
   
   view_skillset = new EditorSkillset(this);
   view_skillset->setDisabled(true);
@@ -56,14 +59,11 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_skill = view_skill;
   addWidget(view_skill);
   
-  view_equipment = new QWidget(this);
-  null_equipment = view_equipment;
-  addWidget(view_equipment);
-  
-  view_bubby = new QWidget(this);
-  null_bubby = view_bubby;
-  addWidget(view_bubby);
-  
+  view_action = new EditorAction(this);
+  view_action->setDisabled(true);
+  null_action = view_action;
+  addWidget(view_action);
+
   view_person->setStyleSheet("background-color:red;");
   view_party->setStyleSheet("background-color:blue;");
   //view_item->setStyleSheet("background-color:green;");

@@ -96,9 +96,6 @@ Application::Application(QWidget* parent)
 
   setStyleSheet("QMainWindow::separator { background: rgb(153, 153, 153); \
                                           width: 1px; height: 1px; }");
-
-  /* TEMPORARY - TODO: REMOVE */
-  game_database->tempMake();
 }
 
 /*

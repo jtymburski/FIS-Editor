@@ -1125,11 +1125,13 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  *                          wrapper
  * Output: none
  */
-void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
+void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
+                        QString element)
 {
   QString base_path = EditorHelpers::getSpriteDir();
   base_path = base_path.left(base_path.indexOf("/sprites"));
   EditorSprite ref;
+  bool use_name = element.isEmpty();
 
   if(fh != NULL)
   {
@@ -1145,13 +1147,20 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only)
                sprite->isDirectionForward();
 
     if(!core_only)
-      fh->writeXmlElement("sprite", "id", getID());
+    {
+      if(use_name)
+        fh->writeXmlElement("sprite", "id", getID());
+      else
+        fh->writeXmlElement(element.toStdString());
+    }
     else if(animate || rotate || bright || color_r ||
             color_g || color_b || opac || dir)
+    {
       fh->writeXmlElement("sprite");
+    }
 
     /* Write sprite data */
-    if(!game_only && !core_only)
+    if(!game_only && !core_only && use_name)
       fh->writeXmlData("name", getName().toStdString());
     if(animate)
       fh->writeXmlData("animation", getAnimationTime().toInt());

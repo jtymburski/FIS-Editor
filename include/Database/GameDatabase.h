@@ -95,15 +95,19 @@ private:
 private:
   /* Add object in the correct spot in the array */
   void addAction(EditorAction* action);
+  void addSkill(EditorSkill* skill);
 
   /* Change objects trigger call */
   void changeAction(int index, bool forced = false, bool save = false);
+  void changeSkill(int index, bool forced = false, bool save = false);
 
   /* Get object, based on ID */
   EditorAction* getAction(int id);
+  EditorSkill* getSkill(int id);
 
-  /* Called to load action data */
+  /* Called to load object data */
   void loadAction(XmlData data, int index);
+  void loadSkill(XmlData data, int index);
 
   /* Called upon load finish - for clean up */
   void loadFinish();
@@ -196,9 +200,6 @@ public:
   /* Save the game */
   void save(FileHandler* fh, bool game_only = false,
             bool selected_map = false, int sub_index = -1);
-
-  /* Temp start - TODO: REMOVE */
-  void tempMake();
 };
 
 #endif // GAMEDATABASE_H

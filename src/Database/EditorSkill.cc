@@ -159,12 +159,12 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   layout->setRowMinimumHeight(11, 25);
 
   /* Save / Reset buttons */
-  save_skill = new QPushButton("Save Skill",this);
-  layout->addWidget(save_skill, 12, 5);
-  connect(save_skill,SIGNAL(clicked()),this,SLOT(getEditedSkill()));
-  reset_skill = new QPushButton("Reset Skill",this);
-  layout->addWidget(reset_skill, 12, 6);
+  reset_skill = new QPushButton("Reset",this);
+  layout->addWidget(reset_skill, 12, 5);
   connect(reset_skill,SIGNAL(clicked()),this,SLOT(resetWorkingSkill()));
+  save_skill = new QPushButton("Save",this);
+  layout->addWidget(save_skill, 12, 6);
+  connect(save_skill,SIGNAL(clicked()),this,SLOT(getEditedSkill()));
 
   /* Set-up the skill */
   setBaseSkill(Skill());
@@ -280,6 +280,12 @@ void EditorSkill::buttonThumbEdit(bool clean_only)
   }
 }
 
+/* Returns the base skill */
+Skill EditorSkill::getBaseSkill()
+{
+  return base;
+}
+
 Skill EditorSkill::getEditedSkill()
 {
   /* Clear pop-ups, if relevant */
@@ -295,7 +301,7 @@ Skill EditorSkill::getEditedSkill()
   full_name.append(name);
   emit nameChange(full_name);
 
-  working.setName(name_edit->text().toStdString());
+  //working.setName(name_edit->text().toStdString());
   working.setMessage(message_edit->toPlainText().toStdString());
   working.setDescription(description->toPlainText().toStdString());
   working.setCost(cost_edit->text().toInt());
@@ -384,7 +390,7 @@ Skill EditorSkill::getEditedSkill()
 
 void EditorSkill::loadWorkingInfo()
 {
-  name_edit->setText(QString::fromStdString(working.getName()));
+  name_edit->setText(name);
   message_edit->setText((QString::fromStdString(working.getMessage())));
   description->setText(QString::fromStdString(working.getDescription()));
   cost_edit->setText(QString::number(working.getCost()));
@@ -579,31 +585,105 @@ void EditorSkill::load(XmlData data, int index)
   /* Parse elements */
   if(data.getElement(index) == "name")
   {
-    // TODO: NAME DATA
+    setName(QString::fromStdString(data.getDataString()));
   }
   else if(data.getElement(index) == "action")
   {
-    // TODO: ACTION DATA
+    actions_sel_base.push_back(data.getDataInteger());
+    actions_sel = actions_sel_base;
   }
   else if(data.getElement(index) == "thumb")
   {
-    // TODO: THUMBNAIL FRAME DATA
+    sprite_thumb_base.setFramePath(0, EditorHelpers::getProjectDir() + "/" +
+                                  QString::fromStdString(data.getDataString()));
   }
   else if(data.getElement(index) == "animation")
   {
-    // TODO: ANIMATION SPRITE DATA
+    sprite_anim_base.load(data, index + 1);
   }
   else
   {
-    // TODO: SEND TO SKILL TO PARSE DATA
+    base.loadData(data, index, NULL,
+                  EditorHelpers::getProjectDir().toStdString() + "/");
   }
 }
 
 /* Saves the object data */
 void EditorSkill::save(FileHandler* fh, bool game_only)
 {
-  // TODO: COMMENT
-  qDebug() << "TODO: SAVE";
+  (void)game_only;
+
+  if(fh != NULL)
+  {
+    Skill blank;
+
+    fh->writeXmlElement("skill", "id", getID());
+    fh->writeXmlData("name", getName().toStdString());
+
+    /* Save data */
+    if(blank.getChance() != base.getChance())
+      fh->writeXmlData("chance", base.getChance());
+    if(blank.getCooldown() != base.getCooldown())
+      fh->writeXmlData("cooldown", (int)base.getCooldown());
+    if(blank.getCost() != base.getCost())
+      fh->writeXmlData("cost", (int)base.getCost());
+    if(blank.getDescription() != base.getDescription())
+      fh->writeXmlData("description", base.getDescription());
+    if(blank.getMessage() != base.getMessage())
+      fh->writeXmlData("message", base.getMessage());
+    if(blank.getValue() != base.getValue())
+      fh->writeXmlData("value", (int)base.getValue());
+
+    /* Primary Element*/
+    QString pri = QString::fromStdString(
+                                 Helpers::elementToString(base.getPrimary()));
+    if(blank.getPrimary() != base.getPrimary())
+      fh->writeXmlData("elem_pri", pri.toLower().toStdString());
+
+    /* Secondary Element */
+    QString sec = QString::fromStdString(
+                                 Helpers::elementToString(base.getSecondary()));
+    if(blank.getSecondary() != base.getSecondary())
+      fh->writeXmlData("elem_sec", sec.toLower().toStdString());
+
+    /* Scope */
+    QString scope = QString::fromStdString(
+                                 Helpers::actionScopeToStr(base.getScope()));
+    if(blank.getScope() != base.getScope())
+      fh->writeXmlData("scope", scope.toLower().toStdString());
+
+    /* Actions */
+    for(int i = 0; i < actions_sel_base.size(); i++)
+      fh->writeXmlData("action", actions_sel_base[i]);
+
+    /* Flags */
+    if(base.getFlag(SkillFlags::OFFENSIVE) ||
+       base.getFlag(SkillFlags::DEFENSIVE) ||
+       base.getFlag(SkillFlags::NEUTRAL))
+    {
+      fh->writeXmlElement("flags");
+
+      if(base.getFlag(SkillFlags::OFFENSIVE))
+        fh->writeXmlData("offensive", true);
+      if(base.getFlag(SkillFlags::DEFENSIVE))
+        fh->writeXmlData("defensive", true);
+      if(base.getFlag(SkillFlags::NEUTRAL))
+        fh->writeXmlData("neutral", true);
+
+      fh->writeXmlElementEnd();
+    }
+
+    /* Save the thumbnail */
+    if(!sprite_thumb_base.isAllNull() && sprite_thumb_base.frameCount() == 1)
+      fh->writeXmlData("thumb",
+           EditorHelpers::trimPath(sprite_thumb_base.getPath(0)).toStdString());
+
+    /* Save the animation data */
+    if(!sprite_anim_base.isAllNull())
+      sprite_anim_base.save(fh, game_only, false, "animation");
+
+    fh->writeXmlElementEnd();
+  }
 }
 
 /* Sets the ID of the skill */

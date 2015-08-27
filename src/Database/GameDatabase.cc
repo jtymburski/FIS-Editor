@@ -27,9 +27,9 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   view_top = new QListWidget(this);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Maps" << "Persons" << "Parties" << "Items" << "Actions"
-        << "Races" << "BattleClasses" << "Skill Sets" << "Skills"
-        << "Equipment" << "B.U.B.B.I.E's";
+  items << "Maps" << "Parties" << "Persons" << "B.U.B.B.I.E's" << "Equipments"
+        << "Items" << "Classes" << "Races" << "Skill Sets" << "Skills"
+        << "Actions";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   connect(view_top,SIGNAL(currentRowChanged(int)),
@@ -147,35 +147,51 @@ void GameDatabase::addAction(EditorAction* action)
     data_action.push_back(action);
 }
 
+/* Add object in the correct spot in the array */
+void GameDatabase::addSkill(EditorSkill* skill)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_skill.size() && !inserted); i++)
+  {
+    if(data_skill[i]->getID() > skill->getID())
+    {
+      data_skill.insert(i, skill);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_skill.push_back(skill);
+}
+
 /* Change objects trigger call */
 void GameDatabase::changeAction(int index, bool forced, bool save)
 {
   bool proceed = forced;
 
-  /* Check index */
-  if(!forced)
+  /* If current action is valid, either save or load */
+  if(current_action != NULL)
   {
-    if(current_action != NULL)
-    {
-      /* Create warning about changing action */
-      QMessageBox msg_box;
-      msg_box.setText(QString("Changing to another Action. All unsaved ") +
-                      QString("changes to the existing will be lost."));
-      msg_box.setInformativeText("Are you sure?");
-      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-      if(msg_box.exec() == QMessageBox::Yes)
-      {
-        proceed = true;
-        if(save)
-          current_action->getEditedAction();
-        else
-          current_action->resetInfo();
-      }
-    }
-    else
+    /* Create warning about changing action */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Action. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
     {
       proceed = true;
+      if(save)
+        current_action->getEditedAction();
+      else
+        current_action->resetInfo();
     }
+  }
+  else
+  {
+    proceed = true;
   }
 
   /* If proceed, change action */
@@ -192,12 +208,63 @@ void GameDatabase::changeAction(int index, bool forced, bool save)
   }
 }
 
+/* Change objects trigger call */
+void GameDatabase::changeSkill(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current action is valid, either save or load */
+  if(current_skill != NULL)
+  {
+    /* Create warning about changing action */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Skill. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_skill->getEditedSkill();
+      else
+        current_skill->resetWorkingSkill();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change skill */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_skill = data_skill[index];
+    else
+      current_skill = NULL;
+
+    /* Change object */
+    emit changeSkill(current_skill);
+  }
+}
+
 /* Get object, based on ID */
 EditorAction* GameDatabase::getAction(int id)
 {
   for(int i = 0; i < data_action.size(); i++)
     if(data_action[i]->getID() == id)
       return data_action[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
+EditorSkill* GameDatabase::getSkill(int id)
+{
+  for(int i = 0; i < data_skill.size(); i++)
+    if(data_skill[i]->getID() == id)
+      return data_skill[i];
   return NULL;
 }
 
@@ -231,11 +298,39 @@ void GameDatabase::loadAction(XmlData data, int index)
   }
 }
 
+/* Called to load object data */
+void GameDatabase::loadSkill(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorSkill* found_skill = getSkill(id);
+    if(found_skill == NULL)
+    {
+      found_skill = new EditorSkill(id, "New Skill");
+      addSkill(found_skill);
+    }
+    found_skill->load(data, index + 1);
+  }
+}
+
 /* Called upon load finish - for clean up */
 void GameDatabase::loadFinish()
 {
+  /* Actions finish */
   for(int i = 0; i < data_action.size(); i++)
     data_action[i]->setBaseAction(data_action[i]->getBaseAction());
+
+  /* Skills finish */
+  for(int i = 0; i < data_skill.size(); i++)
+  {
+    data_skill[i]->updateActions(data_action);
+    data_skill[i]->setBaseSkill(data_skill[i]->getBaseSkill());
+  }
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -283,7 +378,7 @@ void GameDatabase::createNewResource()
   switch(view_top->currentRow())
   {
     /* -- MAP -- */
-    case 0:
+    case EditorEnumDb::MAPVIEW:
       if(mapsize_dialog != NULL)
         delete mapsize_dialog;
       mapsize_dialog = EditorMap::createMapDialog(this);
@@ -292,7 +387,7 @@ void GameDatabase::createNewResource()
       mapsize_dialog->show();
       break;
     /* -- PERSON -- */
-    case 1:
+    case EditorEnumDb::PERSONVIEW:
       name = "New Person";
       if(data_person.size() > 0)
         data_person.push_back(
@@ -301,7 +396,7 @@ void GameDatabase::createNewResource()
         data_person.push_back(new EditorPerson(0, name));
       break;
     /* -- PARTY -- */
-    case 2:
+    case EditorEnumDb::PARTYVIEW:
       name = "New Party";
       if(data_party.size() > 0)
         data_party.push_back(
@@ -310,7 +405,7 @@ void GameDatabase::createNewResource()
         data_party.push_back(new EditorParty(0, name));
       break;
     /* -- ITEM -- */
-    case 3:
+    case EditorEnumDb::ITEMVIEW:
       name = "New Item";
       if(data_item.size() > 0)
         data_item.push_back(new EditorItem(data_item.last()->getID() + 1,name));
@@ -318,7 +413,7 @@ void GameDatabase::createNewResource()
         data_item.push_back(new EditorItem(0, name));
       break;
     /* -- ACTION -- */
-    case 4:
+    case EditorEnumDb::ACTIONVIEW:
       name = "New Action";
       if(data_action.size() > 0)
         data_action.push_back(
@@ -328,7 +423,7 @@ void GameDatabase::createNewResource()
       updateSkills();
       break;
     /* -- RACE -- */
-    case 5:
+    case EditorEnumDb::RACEVIEW:
       name = "New Race";
       if(data_race.size() > 0)
         data_race.push_back(
@@ -337,7 +432,7 @@ void GameDatabase::createNewResource()
         data_race.push_back(new EditorCategory(0, name));
       break;
     /* -- BATTLE CLASS -- */
-    case 6:
+    case EditorEnumDb::BATTLECLASSVIEW:
       name = "New Battle Class";
       if(data_battleclass.size() > 0)
         data_battleclass.push_back(
@@ -346,7 +441,7 @@ void GameDatabase::createNewResource()
         data_battleclass.push_back(new EditorCategory(0, name));
       break;
     /* -- SKILL SET -- */
-    case 7:
+    case EditorEnumDb::SKILLSETVIEW:
       name = "New Skill Set";
       if(data_skillset.size() > 0)
         data_skillset.push_back(
@@ -355,7 +450,7 @@ void GameDatabase::createNewResource()
         data_skillset.push_back(new EditorSkillset(0, name));
       break;
     /* -- SKILL -- */
-    case 8:
+    case EditorEnumDb::SKILLVIEW:
       name = "New Skill";
       if(data_skill.size() > 0)
         data_skill.push_back(
@@ -365,7 +460,7 @@ void GameDatabase::createNewResource()
       data_skill.last()->updateActions(data_action);
       break;
     /* -- EQUIPMENT -- */
-    case 9:
+    case EditorEnumDb::EQUIPMENTVIEW:
       name = "New Equipment";
       if(data_equipment.size() > 0)
         data_equipment.push_back(
@@ -374,7 +469,7 @@ void GameDatabase::createNewResource()
         data_equipment.push_back(new EditorEquipment(0, name));
       break;
     /* -- BUBBY -- */
-    case 10:
+    case EditorEnumDb::BUBBYVIEW:
       name = "New Bubby";
       if(data_bubby.size() > 0)
         data_bubby.push_back(
@@ -419,7 +514,7 @@ void GameDatabase::deleteResource()
       switch(view_top->currentRow())
       {
         /* -- MAP -- */
-        case 0:
+        case EditorEnumDb::MAPVIEW:
           if(data_map[index] == current_map)
           {
             emit changeMap(NULL);
@@ -429,7 +524,7 @@ void GameDatabase::deleteResource()
           data_map.remove(index);
           break;
         /* -- PERSON -- */
-        case 1:
+        case EditorEnumDb::PERSONVIEW:
           if(data_person[index] == current_person)
           {
             emit changePerson(NULL);
@@ -439,7 +534,7 @@ void GameDatabase::deleteResource()
           data_person.remove(index);
           break;
         /* -- PARTY -- */
-        case 2:
+        case EditorEnumDb::PARTYVIEW:
           if(data_party[index] == current_party)
           {
             emit changeParty(NULL);
@@ -449,7 +544,7 @@ void GameDatabase::deleteResource()
           data_party.remove(index);
           break;
         /* -- ITEM -- */
-        case 3:
+        case EditorEnumDb::ITEMVIEW:
           if(data_item[index] == current_item)
           {
             emit changeItem(NULL);
@@ -459,7 +554,7 @@ void GameDatabase::deleteResource()
           data_item.remove(index);
           break;
         /* -- ACTION -- */
-        case 4:
+        case EditorEnumDb::ACTIONVIEW:
           if(data_action[index] == current_action)
             changeAction(-1, true);
           delete data_action[index];
@@ -467,7 +562,7 @@ void GameDatabase::deleteResource()
           updateSkills();
           break;
         /* -- RACE CLASS -- */
-        case 5:
+        case EditorEnumDb::RACEVIEW:
           if(data_race[index] == current_race)
           {
             emit changeRace(NULL);
@@ -477,7 +572,7 @@ void GameDatabase::deleteResource()
           data_race.remove(index);
           break;
         /* -- BATTLE CLASS -- */
-        case 6:
+        case EditorEnumDb::BATTLECLASSVIEW:
           if(data_battleclass[index] == current_battleclass)
           {
             emit changeBattleclass(NULL);
@@ -487,7 +582,7 @@ void GameDatabase::deleteResource()
           data_battleclass.remove(index);
           break;
         /* -- SKILL SET -- */
-        case 7:
+        case EditorEnumDb::SKILLSETVIEW:
           if(data_skillset[index] == current_skillset)
           {
             emit changeSkillset(NULL);
@@ -497,17 +592,14 @@ void GameDatabase::deleteResource()
           data_skillset.remove(index);
           break;
         /* -- SKILL -- */
-        case 8:
+        case EditorEnumDb::SKILLVIEW:
           if(data_skill[index] == current_skill)
-          {
-            emit changeSkill(NULL);
-            current_skill = NULL;
-          }
+            changeSkill(-1, true);
           delete data_skill[index];
           data_skill.remove(index);
           break;
         /* -- EQUIPMENT -- */
-        case 9:
+        case EditorEnumDb::EQUIPMENTVIEW:
           if(data_equipment[index] == current_equipment)
           {
             emit changeEquipment(NULL);
@@ -517,7 +609,7 @@ void GameDatabase::deleteResource()
           data_equipment.remove(index);
           break;
         /* -- BUBBY -- */
-        case 10:
+        case EditorEnumDb::BUBBYVIEW:
           if(data_bubby[index] == current_bubby)
           {
             emit changeBubby(NULL);
@@ -552,7 +644,7 @@ void GameDatabase::duplicateResource()
     switch(view_top->currentRow())
     {
       /* -- MAP -- */
-      case 0:
+      case EditorEnumDb::MAPVIEW:
         data_map.push_back(new EditorMap(data_map.last()->getID() + 1,
                                          "TEMP", 0, 0));
         id = data_map.last()->getID();
@@ -561,61 +653,61 @@ void GameDatabase::duplicateResource()
         data_map.last()->setTileIcons(data_map[index]->getTileIcons());
         break;
       /* -- PERSON -- */
-      case 1:
+      case EditorEnumDb::PERSONVIEW:
         id = data_person.last()->getID();
         *data_person.last() = *data_person[index];
         data_person.last()->setID(id);
         break;
       /* -- PARTY -- */
-      case 2:
+      case EditorEnumDb::PARTYVIEW:
         id = data_party.last()->getID();
         *data_party.last() = *data_party[index];
         data_party.last()->setID(id);
         break;
       /* -- ITEM -- */
-      case 3:
+      case EditorEnumDb::ITEMVIEW:
         id = data_item.last()->getID();
         *data_item.last() = *data_item[index];
         data_item.last()->setID(id);
         break;
       /* -- ACTION -- */
-      case 4:
+      case EditorEnumDb::ACTIONVIEW:
         id = data_action.last()->getID();
         *data_action.last() = *data_action[index];
         data_action.last()->setID(id);
         break;
       /* -- RACE CLASS -- */
-      case 5:
+      case EditorEnumDb::RACEVIEW:
         id = data_race.last()->getID();
         *data_race.last() = *data_race[index];
         data_race.last()->setID(id);
         break;
       /* -- BATTLE CLASS -- */
-      case 6:
+      case EditorEnumDb::BATTLECLASSVIEW:
         id = data_battleclass.last()->getID();
         *data_battleclass.last() = *data_battleclass[index];
         data_battleclass.last()->setID(id);
         break;
       /* -- SKILL SET -- */
-      case 7:
+      case EditorEnumDb::SKILLSETVIEW:
         id = data_skillset.last()->getID();
         *data_skillset.last() = *data_skillset[index];
         data_skillset.last()->setID(id);
         break;
       /* -- SKILL -- */
-      case 8:
+      case EditorEnumDb::SKILLVIEW:
         id = data_skill.last()->getID();
         *data_skill.last() = *data_skill[index];
         data_skill.last()->setID(id);
         break;
       /* -- EQUIPMENT -- */
-      case 9:
+      case EditorEnumDb::EQUIPMENTVIEW:
         id = data_equipment.last()->getID();
         *data_equipment.last() = *data_equipment[index];
         data_equipment.last()->setID(id);
         break;
       /* -- BUBBY -- */
-      case 10:
+      case EditorEnumDb::BUBBYVIEW:
         id = data_bubby.last()->getID();
         *data_bubby.last() = *data_bubby[index];
         data_bubby.last()->setID(id);
@@ -643,7 +735,7 @@ void GameDatabase::listMenuRequested(const QPoint & pos)
 {
   (void)pos;
   /* Only proceed if it's the map set */
-  if(view_top->currentRow() == 0)
+  if(view_top->currentRow() == EditorEnumDb::MAPVIEW)
     rightclick_menu->exec(QCursor::pos());
 }
 
@@ -657,56 +749,55 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
   switch(view_top->currentRow())
   {
     /* -- MAP -- */
-    case 0:
+    case EditorEnumDb::MAPVIEW:
       current_map = data_map[index];
       emit changeMap(current_map);
       break;
     /* -- PERSON -- */
-    case 1:
+    case EditorEnumDb::PERSONVIEW:
       current_person = data_person[index];
       emit changePerson(current_person);
       break;
     /* -- PARTY -- */
-    case 2:
+    case EditorEnumDb::PARTYVIEW:
       current_party = data_party[index];
       emit changeParty(current_party);
       break;
     /* -- ITEM -- */
-    case 3:
+    case EditorEnumDb::ITEMVIEW:
       current_item = data_item[index];
       emit changeItem(current_item);
       break;
     /* -- ACTION -- */
-    case 4:
+    case EditorEnumDb::ACTIONVIEW:
       changeAction(index);
       break;
     /* -- RACE -- */
-    case 5:
+    case EditorEnumDb::RACEVIEW:
       current_race = data_race[index];
       emit changeRace(current_race);
       break;
     /* -- BATTLE CLASS -- */
-    case 6:
+    case EditorEnumDb::BATTLECLASSVIEW:
       current_battleclass = data_battleclass[index];
       emit changeBattleclass(current_battleclass);
       break;
     /* -- SKILL SET -- */
-    case 7:
+    case EditorEnumDb::SKILLSETVIEW:
       current_skillset = data_skillset[index];
       emit changeSkillset(current_skillset);
       break;
     /* -- SKILL -- */
-    case 8:
-      current_skill = data_skill[index];
-      emit changeSkill(current_skill);
+    case EditorEnumDb::SKILLVIEW:
+      changeSkill(index);
       break;
     /* -- EQUIPMENT -- */
-    case 9:
+    case EditorEnumDb::EQUIPMENTVIEW:
       current_equipment = data_equipment[index];
       emit changeEquipment(current_equipment);
       break;
     /* -- BUBBY -- */
-    case 10:
+    case EditorEnumDb::BUBBYVIEW:
       current_bubby = data_bubby[index];
       emit changeBubby(current_bubby);
       break;
@@ -740,70 +831,7 @@ void GameDatabase::renameMap()
 /* Row change on top list */
 void GameDatabase::rowChange(int index)
 {
-  switch(index)
-  {
-    /* -- MAP -- */
-    case 0:
-      emit changeMode(EditorEnumDb::MAPVIEW);
-      break;
-    /* -- PERSON -- */
-    case 1:
-      emit changeMode(EditorEnumDb::PERSONVIEW);
-      break;
-    /* -- PARTY -- */
-    case 2:
-      emit changeMode(EditorEnumDb::PARTYVIEW);
-      break;
-    /* -- ITEM -- */
-    case 3:
-      emit changeMode(EditorEnumDb::ITEMVIEW);
-      break;
-    /* -- ACTION -- */
-    case 4:
-      emit changeMode(EditorEnumDb::ACTIONVIEW);
-      break;
-    /* -- RACE -- */
-    case 5:
-      emit changeMode(EditorEnumDb::RACEVIEW);
-      break;
-    /* -- BATTLE CLASS -- */
-    case 6:
-      emit changeMode(EditorEnumDb::BATTLECLASSVIEW);
-      break;
-    /* -- SKILL SET -- */
-    case 7:
-      // TODO: Move to modifySelection()
-      emit changeMode(EditorEnumDb::SKILLSETVIEW);
-//      if(skillset_pair.size() != 0 && current_skillset_selection != -1)
-//      {
-//        current_name = &skillset_pair[current_skillset_selection]->first;
-//        skillset_pair.at(current_skillset_selection)->second->
-//                      setTotalSkillsList(skill_pair);
-//      }
-      break;
-    /* -- SKILL -- */
-    case 8:
-      // TODO: Move to modifySelection()
-      emit changeMode(EditorEnumDb::SKILLVIEW);
-//      if(skill_pair.size() != 0 && current_skill_selection != -1)
-//      {
-//        current_name = &skill_pair[current_skill_selection]->first;
-//        skill_pair.at(current_skill_selection)->second->
-//                      setTotalActionsList(&action_pair);
-//      }
-      break;
-    /* -- EQUIPMENT -- */
-    case 9:
-      emit changeMode(EditorEnumDb::EQUIPMENTVIEW);
-      break;
-    /* -- BUBBY -- */
-    case 10:
-      emit changeMode(EditorEnumDb::BUBBYVIEW);
-      break;
-    default:
-      break;
-  }
-
+  emit changeMode((EditorEnumDb::ViewMode)index);
   modifyBottomList(index);
 }
 
@@ -812,12 +840,16 @@ void GameDatabase::saveAll()
 {
   /* Create warning about saving all */
   QMessageBox msg_box;
-  msg_box.setText("This will save all core objects");
+  msg_box.setText("This will select \"Save\" in all game objects below");
   msg_box.setInformativeText("Are you sure?");
   msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   if(msg_box.exec() == QMessageBox::Yes)
   {
     changeAction(-1, true, true);
+    changeSkill(-1, true, true);
+
+    /* Fix back to visible row */
+    rowChange(view_top->currentRow());
   }
 }
 
@@ -828,7 +860,7 @@ void GameDatabase::updateBottomListName(QString str)
   modifyBottomList(view_top->currentRow());
 
   /* Update skills if the actions changed a name */
-  if(view_top->currentRow() == 4)
+  if(view_top->currentRow() == EditorEnumDb::ACTIONVIEW)
     updateSkills();
 }
 
@@ -914,7 +946,7 @@ void GameDatabase::deleteAll()
   data_skillset.clear();
 
   /* Skill clean-up */
-  emit changeSkill(NULL);
+  changeSkill(-1, true);
   for(int i = 0; i < data_skill.size(); i++)
     delete data_skill[i];
   data_skill.clear();
@@ -978,6 +1010,8 @@ void GameDatabase::load(FileHandler* fh)
           /* Action */
           if(data.getElement(2) == "action")
             loadAction(data, 2);
+          else if(data.getElement(2) == "skill")
+            loadSkill(data, 2);
         }
         /* If map element, add new map if it doesn't exist; then send
          * new information to map */
@@ -1007,7 +1041,7 @@ void GameDatabase::load(FileHandler* fh)
     } while(!done);
   }
 
-  /* CLean up core data */
+  /* Clean up core data */
   loadFinish();
 
   /* Clean up the maps */
@@ -1042,7 +1076,7 @@ void GameDatabase::modifyBottomList(int index)
   switch(index)
   {
     /* -- MAP -- */
-    case 0:
+    case EditorEnumDb::MAPVIEW:
       /* Fill the data */
       for(int i = 0; i < data_map.size(); i++)
       {
@@ -1052,7 +1086,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- PERSON -- */
-    case 1:
+    case EditorEnumDb::PERSONVIEW:
       /* Fill the data */
       for(int i = 0; i < data_person.size(); i++)
       {
@@ -1062,7 +1096,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- PARTY -- */
-    case 2:
+    case EditorEnumDb::PARTYVIEW:
       /* Fill the data */
       for(int i = 0; i < data_party.size(); i++)
       {
@@ -1072,7 +1106,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- ITEM -- */
-    case 3:
+    case EditorEnumDb::ITEMVIEW:
       /* Fill the data */
       for(int i = 0; i < data_item.size(); i++)
       {
@@ -1082,7 +1116,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- ACTION -- */
-    case 4:
+    case EditorEnumDb::ACTIONVIEW:
       /* Fill the data */
       for(int i = 0; i < data_action.size(); i++)
       {
@@ -1092,7 +1126,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- RACE -- */
-    case 5:
+    case EditorEnumDb::RACEVIEW:
       /* Fill the data */
       for(int i = 0; i < data_race.size(); i++)
       {
@@ -1102,7 +1136,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- BATTLE CLASS -- */
-    case 6:
+    case EditorEnumDb::BATTLECLASSVIEW:
       /* Fill the data */
       for(int i = 0; i < data_battleclass.size(); i++)
       {
@@ -1112,7 +1146,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- SKILL SET -- */
-    case 7:
+    case EditorEnumDb::SKILLSETVIEW:
       /* Fill the data */
       for(int i = 0; i < data_skillset.size(); i++)
       {
@@ -1122,7 +1156,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- SKILL -- */
-    case 8:
+    case EditorEnumDb::SKILLVIEW:
       /* Fill the data */
       for(int i = 0; i < data_skill.size(); i++)
       {
@@ -1132,7 +1166,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- EQUIPMENT -- */
-    case 9:
+    case EditorEnumDb::EQUIPMENTVIEW:
       /* Fill the data */
       for(int i = 0; i < data_equipment.size(); i++)
       {
@@ -1142,7 +1176,7 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- BUBBY -- */
-    case 10:
+    case EditorEnumDb::BUBBYVIEW:
       /* Fill the data */
       for(int i = 0; i < data_bubby.size(); i++)
       {
@@ -1233,6 +1267,10 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     for(int i = 0; i < data_action.size(); i++)
       data_action[i]->save(fh, game_only);
 
+    /* Skills */
+    for(int i = 0; i < data_skill.size(); i++)
+      data_skill[i]->save(fh, game_only);
+
     fh->writeXmlElementEnd();
 
     /* Maps */
@@ -1250,14 +1288,4 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
 
     fh->writeXmlElementEnd();
   }
-}
-
-/* Temp start - TODO: REMOVE */
-void GameDatabase::tempMake()
-{
-  data_map.push_back(new EditorMap(0, "TEST", 100, 100, &tile_icons));
-  current_map = data_map.last();
-  modifyBottomList(view_top->currentRow());
-  view_bottom->setCurrentRow(view_bottom->count() - 1);
-  emit changeMap(current_map);
 }
