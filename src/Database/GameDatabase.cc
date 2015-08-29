@@ -340,6 +340,13 @@ void GameDatabase::updateSkills()
     data_skill[i]->updateActions(data_action);
 }
 
+/* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updateSkillSets()
+{
+  for(int i = 0; i < data_skillset.size(); i++)
+    data_skillset[i]->updateSkills(data_skill);
+}
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -448,6 +455,7 @@ void GameDatabase::createNewResource()
                    new EditorSkillset(data_skillset.last()->getID() + 1, name));
       else
         data_skillset.push_back(new EditorSkillset(0, name));
+      data_skillset.last()->updateSkills(data_skill);
       break;
     /* -- SKILL -- */
     case EditorEnumDb::SKILLVIEW:
@@ -458,6 +466,7 @@ void GameDatabase::createNewResource()
       else
         data_skill.push_back(new EditorSkill(0, name));
       data_skill.last()->updateActions(data_action);
+      updateSkillSets();
       break;
     /* -- EQUIPMENT -- */
     case EditorEnumDb::EQUIPMENTVIEW:
@@ -597,6 +606,7 @@ void GameDatabase::deleteResource()
             changeSkill(-1, true);
           delete data_skill[index];
           data_skill.remove(index);
+          updateSkillSets();
           break;
         /* -- EQUIPMENT -- */
         case EditorEnumDb::EQUIPMENTVIEW:
@@ -859,9 +869,11 @@ void GameDatabase::updateBottomListName(QString str)
   (void)str;
   modifyBottomList(view_top->currentRow());
 
-  /* Update skills if the actions changed a name */
+  /* Update other interconnected objects */
   if(view_top->currentRow() == EditorEnumDb::ACTIONVIEW)
     updateSkills();
+  else if(view_top->currentRow() == EditorEnumDb::SKILLVIEW)
+    updateSkillSets();
 }
 
 /* Updates event objects in the map database class */

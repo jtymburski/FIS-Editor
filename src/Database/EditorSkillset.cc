@@ -10,60 +10,50 @@
 EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
 {
   /* Setup layout */
-  QVBoxLayout* main_layout = new QVBoxLayout(this);
-  QGridLayout* lists_layout = new QGridLayout();
-  QHBoxLayout* save_reset_layout = new QHBoxLayout();
+  QGridLayout* main_layout = new QGridLayout(this);
+  main_layout->setColumnStretch(0, 1);
+  main_layout->setColumnStretch(3, 2);
 
-  /* Setup data */
-  available_skill_index = -1;
-  working_skill_index = -1;
-  running_skill_id = 0;
+  /* Name */
+  edit_name = new QLineEdit(this);
+  edit_name->setPlaceholderText("Name");
+  edit_name->setAlignment(Qt::AlignHCenter);
+  connect(edit_name, SIGNAL(textEdited(QString)),
+          this, SLOT(nameEdited(QString)));
+  main_layout->addWidget(edit_name, 1, 1, 1, 2);
 
-  /* Setup lists */
-  available_set_list = new QListWidget(this);
-  working_set_list = new QListWidget(this);
+  /* Available List */
+  QLabel* lbl_avail = new QLabel("Available Skills", this);
+  main_layout->addWidget(lbl_avail, 2, 1, Qt::AlignHCenter);
+  list_available = new QListWidget(this);
+  list_available->setMaximumWidth(350);
+  main_layout->addWidget(list_available, 3, 1);
 
-  /* Setup labels */
-  QHBoxLayout* level_layout = new QHBoxLayout();
-  level_label = new QLabel("Level Active On",this);
-  level_layout->addWidget(level_label);
-  level_edit = new QLineEdit(this);
-  level_layout->addWidget(level_edit);
+  /* Used set list */
+  QLabel* lbl_used = new QLabel("Used Skills", this);
+  main_layout->addWidget(lbl_used, 2, 2, Qt::AlignHCenter);
+  list_used = new QListWidget(this);
+  list_used->setMaximumWidth(350);
+  main_layout->addWidget(list_used, 3, 2);
+
+  /* Add Remove Buttons of skills*/
+  btn_add = new QPushButton("Add To Skillset",this);
+  connect(btn_add, SIGNAL(clicked()), this, SLOT(addSkill()));
+  main_layout->addWidget(btn_add, 4, 1);
+  btn_remove = new QPushButton("Remove From Skill Set",this);
+  connect(btn_remove, SIGNAL(clicked()), this, SLOT(removeSkill()));
+  main_layout->addWidget(btn_remove, 4, 2);
+
+  /* 4th row spacer */
+  main_layout->setRowMinimumHeight(5, 25);
 
   /* Setup Buttons */
-  save = new QPushButton("Save Skill Set",this);
-  connect(save,SIGNAL(clicked()),this,SLOT(getEditedSkillset()));
-  reset = new QPushButton("Reset Skill Set",this);
-  connect(reset,SIGNAL(clicked()),this,SLOT(resetWorkingSkillset()));
-
-  add = new QPushButton("Add To Skillset",this);
-  connect(add,SIGNAL(clicked()),this,SLOT(addSkill()));
-  remove = new QPushButton("Remove From Skill Set",this);
-  connect(remove,SIGNAL(clicked()),this,SLOT(removeSkill()));
-
-  save_reset_layout->addWidget(save);
-  save_reset_layout->addWidget(reset);
-
-  lists_layout->addLayout(level_layout,0,1);
-  lists_layout->addWidget(available_set_list,1,0);
-  lists_layout->addWidget(working_set_list,1,1);
-  lists_layout->addWidget(add,2,0);
-  lists_layout->addWidget(remove,2,1);
-
-  main_layout->addLayout(lists_layout);
-  main_layout->addSpacing(32);
-  main_layout->addLayout(save_reset_layout);
-
-  /* Connections */
-  connect(working_set_list,SIGNAL(currentRowChanged(int)),
-          this,SLOT(setLevelBox(int)));
-
-  connect(level_edit,SIGNAL(textEdited(QString)),this,SLOT(setLevel(QString)));
-
-  connect(available_set_list,SIGNAL(currentRowChanged(int)),
-          this,SLOT(changeIndex(int)));
-  deletion = false;
-  setBaseSkillset(SkillSet());
+  QPushButton* btn_reset = new QPushButton("Reset",this);
+  connect(btn_reset, SIGNAL(clicked()), this, SLOT(resetWorking()));
+  main_layout->addWidget(btn_reset, 6, 1);
+  QPushButton* btn_save = new QPushButton("Save",this);
+  connect(btn_save, SIGNAL(clicked()), this, SLOT(saveWorking()));
+  main_layout->addWidget(btn_save, 6, 2);
 }
 
 /* Constructor function with id and name */
@@ -93,153 +83,109 @@ void EditorSkillset::copySelf(const EditorSkillset &source)
 {
   id = source.id;
   name = source.name;
-  deletion = source.deletion;
 
-  available_set_list = source.available_set_list;
-  working_set_list = source.working_set_list;
-  available_skill_index = source.available_skill_index;
-  working_skill_index = source.working_skill_index;
-  running_skill_id = source.running_skill_id;
+  /* List data */
+  set_base = source.set_base;
+  set_total = source.set_total;
+  set_working = set_base;
 
-  available_set = source.available_set;
-  working_set = source.working_set;
-  base_set = source.base_set;
-  previous_set = source.previous_set;
-  working_level_set = source.working_level_set;
-  previous_level_set = source.previous_level_set;
-  base_level_set = source.base_level_set;
+  loadWorkingInfo();
+}
 
-  setBaseSkillset(source.base);
+/* Loads working info into UI objects */
+void EditorSkillset::loadWorkingInfo()
+{
+  /* Name */
+  edit_name->setText(name);
+
+  /* Clear existing sets */
+  list_available->clear();
+  list_used->clear();
+
+  /* Checking array stack */
+  QVector<bool> working_used;
+  for(int i = 0; i < set_working.size(); i++)
+    working_used.push_back(false);
+
+  /* Set split info */
+  for(int i = 0; i < set_total.size(); i++)
+  {
+    bool found = false;
+
+    /* Loop through and see if it exists in stored array */
+    for(int j = 0; !found && j < set_working.size(); j++)
+    {
+      if(set_total[i]->getID() == set_working[j].first)
+      {
+        found = true;
+        working_used[j] = true;
+        list_used->addItem(skillString(set_total[i], set_working[j].second));
+      }
+    }
+
+    /* If not found, put in other array */
+    if(!found)
+      list_available->addItem(skillString(set_total[i]));
+  }
+
+  /* Check info to assert it is valid */
+  for(int i = working_used.size() - 1; i >= 0; i--)
+    if(!working_used[i])
+      set_working.remove(i);
+}
+
+/* Get Skill string */
+QString EditorSkillset::skillString(EditorSkill* skill, int lvl)
+{
+  QString info = "";
+
+  /* Basic string */
+  info += skill->getNameList();
+
+  /* Level */
+  if(lvl >= 0)
+    info = "LVL " + QString::number(lvl) + " - " + info;
+
+  return info;
 }
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-void EditorSkillset::setNameAndID(QString str)
-{
-  id = (str.split(" : ").at(0).toInt());
-  name = str.split(" : ").at(1);
-  //name_edit->setText(name);
-  setWorkingSkillset(base);
-}
-
-void EditorSkillset::setTotalSkillsList
-(QVector<QPair<QString,EditorSkill *>* > list)
-{
-  available_set = list;
-  available_set_list->clear();
-  QStringList skill_list;
-  for(int i=0; i<available_set.size(); i++)
-    skill_list << available_set.at(i)->first;
-  available_set_list->addItems(skill_list);
-}
-
-void EditorSkillset::setLevelBox(int row)
-{
-  if(row >= 0)
-  {
-    working_skill_index = row;
-    if(deletion)
-    {
-      working_skill_index -=1;
-      deletion = false;
-    }
-    level_edit->setText(QString::number(
-                                    working_level_set.at(working_skill_index)));
-  }
-
-}
-
-void EditorSkillset::setLevel(QString s)
-{
-  if(working_skill_index >= 0)
-  {
-    working_level_set.replace(working_skill_index,s.toInt());
-  }
-}
-
-void EditorSkillset::setWorkingSkillset(SkillSet s)
-{
-  working = base;
-}
-
-void EditorSkillset::setBaseSkillset(SkillSet s)
-{
-  base = s;
-  setWorkingSkillset(base);
-  loadWorkingInfo();
-}
-
-void EditorSkillset::loadWorkingInfo()
-{
-}
-
 void EditorSkillset::addSkill()
 {
-  if(available_skill_index >= 0)
-  {
-    deletion = false;
-    QListWidgetItem* current = available_set_list->item(available_skill_index);
-    working_set_list->addItem(current->text());
+  // TODO: FIX ADD
+}
 
-    working_set.push_back(new QPair<QString,EditorSkill*>
-                  (available_set_list->item(available_skill_index)->text(),
-                   new EditorSkill()));
-    working_level_set.push_back(0);
-  }
+/* Name changed trigger */
+void EditorSkillset::nameEdited(QString str)
+{
+  name = str;
+  emit nameChange(str);
 }
 
 void EditorSkillset::removeSkill()
 {
-  if(working_skill_index >= 0 &&
-     working_set.size() > 0 &&
-     working_level_set.size() > 0)
-  {
-    deletion = true;
-    working_level_set.remove(working_skill_index);
-    working_set.remove(working_skill_index);
-    working_set_list->takeItem(working_skill_index);
-    if(working_skill_index != 0)
-      working_skill_index--;
-  }
+  // TODO: FIX REMOVE
 }
 
-void EditorSkillset::changeIndex(int i)
+void EditorSkillset::resetWorking()
 {
-  available_skill_index = i;
+  set_working = set_base;
+  loadWorkingInfo();
 }
 
-SkillSet EditorSkillset::getEditedSkillset()
+void EditorSkillset::saveWorking()
 {
-  previous_set = working_set;
-  previous_level_set = working_level_set;
-  base_level_set = working_level_set;
-  base_set = working_set;
-
-  working.clear();
-  for(int i=0; i<working_set.size(); i++)
-  {
-    //TODO : Add actual skill pointers insetad of blanks
-    working.addSkill(new Skill(),working_level_set.at(i));
-  }
-  base = working;
-  return base;
+  set_base = set_working;
+  loadWorkingInfo();
 }
 
-void EditorSkillset::resetWorkingSkillset()
+void EditorSkillset::setNameAndID(QString str)
 {
-  deletion = false;
-  working = base;
-  working_set = previous_set;
-  working_level_set = previous_level_set;
-  qDebug()<<working_set.size()<<","<<working_level_set.size();
-  working_set_list->clear();
-  for(int i=0; i<working_set.size(); i++)
-  {
-    working_set_list->addItem(working_set.at(i)->first);
-    working_set_list->setCurrentRow(i);
-  }
+  id = (str.split(" : ").at(0).toInt());
+  name = str.split(" : ").at(1);
   loadWorkingInfo();
 }
 
@@ -280,6 +226,15 @@ void EditorSkillset::setID(int id)
 void EditorSkillset::setName(QString name)
 {
   this->name = name;
+  loadWorkingInfo();
+  emit nameChange(name);
+}
+
+/* Update skills */
+void EditorSkillset::updateSkills(QVector<EditorSkill*> skills)
+{
+  set_total = skills;
+  loadWorkingInfo();
 }
 
 /*============================================================================

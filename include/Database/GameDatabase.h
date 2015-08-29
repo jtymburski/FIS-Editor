@@ -114,6 +114,7 @@ private:
 
   /* Update calls for objects (to fill in information required from others) */
   void updateSkills();
+  void updateSkillSets();
 
 /*============================================================================
  * PROTECTED FUNCTIONS

@@ -41,56 +41,66 @@ private:
   /* Editor Name */
   QString name;
 
-  bool deletion;
+  /* Buttons */
+  QPushButton* btn_add;
+  QPushButton* btn_remove;
 
-  QListWidget* available_set_list;
-  QListWidget* working_set_list;
-  int available_skill_index;
-  int working_skill_index;
-  int running_skill_id;
+  /* Line Edits */
+  QLineEdit* edit_name;
 
-  SkillSet base;
-  SkillSet working;
+  /* List Widgets */
+  QListWidget* list_available;
+  QListWidget* list_used;
 
-  QVector<QPair<QString,EditorSkill*>* > available_set;
-  QVector<QPair<QString,EditorSkill*>* > working_set;
-  QVector<QPair<QString,EditorSkill*>* > base_set;
-  QVector<QPair<QString,EditorSkill*>* > previous_set;
-  QVector<int> working_level_set;
-  QVector<int> previous_level_set;
-  QVector<int> base_level_set;
+  /* Data sets */
+  QVector<QPair<int, int>> set_base;
+  QVector<EditorSkill*> set_total;
+  QVector<QPair<int, int>> set_working;
 
-  QLabel* level_label;
-  QLineEdit* level_edit;
-
-  QPushButton* add;
-  QPushButton* remove;
-
-  QPushButton* save;
-  QPushButton* reset;
-
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSkillset &source);
 
-public slots:
-  void setTotalSkillsList(QVector<QPair<QString,EditorSkill*>* > s);
-  void setBaseSkillset(SkillSet s);
-  void setWorkingSkillset(SkillSet s);
-  void setNameAndID(QString str);
+  /* Loads working info into UI objects */
   void loadWorkingInfo();
-  void setLevelBox(int);
-  void addSkill();
-  void removeSkill();
-  void changeIndex(int);
-  void setLevel(QString s);
 
-  SkillSet getEditedSkillset();
-  void resetWorkingSkillset();
+  /* Get Skill string */
+  QString skillString(EditorSkill* skill, int lvl = -1);
 
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
   void nameChange(QString);
 
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
+public slots:
+  /* Add skill to list trigger */
+  void addSkill();
+
+  /* Name changed trigger */
+  void nameEdited(QString str);
+
+  /* Remove skill from list trigger */
+  void removeSkill();
+
+  /* Resets the working set trigger */
+  void resetWorking();
+
+  /* Saves the working set trigger */
+  void saveWorking();
+
+  /* Set name and ID based on string */
+  void setNameAndID(QString str);
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
   /* Clone */
   EditorSkillset* clone();
@@ -110,7 +120,12 @@ public:
   /* Sets the name of the skillset */
   virtual void setName(QString name);
 
-/* Operator functions */
+  /* Update skills */
+  void updateSkills(QVector<EditorSkill*> skills);
+
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   /* The copy operator */
   EditorSkillset& operator= (const EditorSkillset &source);
