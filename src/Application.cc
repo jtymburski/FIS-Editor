@@ -168,6 +168,8 @@ void Application::setupTopMenu()
   /* Sets up the File menu actions */
   QAction* action_show_menu = new QAction("&Menu", this);
   action_show_menu->setIcon(QIcon(":/images/icons/32_database.png"));
+  action_show_menu->setCheckable(true);
+  action_show_menu->setChecked(true);
   action_new = new QAction("&New",this);
   action_new->setIcon(QIcon(":/images/icons/32_new.png"));
   action_new->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
