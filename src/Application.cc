@@ -477,10 +477,10 @@ void Application::play()
      game_view->getMapView()->getCurrentSubMap() >= 0)
   {
     /* Choose the file name and start */
-    //QString play_file = EditorHelpers::getProjectDir() +
-    //                    "/../Editor/exports/xXx_TMP_xXx.utv";
+    QString save_file = EditorHelpers::getProjectDir() +
+                        "/../Editor/exports/xXx_TMP_xXx.utv";
     QString play_file = "../Editor/exports/xXx_TMP_xXx.utv";
-    FileHandler fh(play_file.toStdString(), true, true);
+    FileHandler fh(save_file.toStdString(), true, true);
     fh.start();
 
     /* Save the current sub-map */

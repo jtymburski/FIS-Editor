@@ -8,6 +8,7 @@
 #define EDITORSKILLSET_H
 
 #include <QWidget>
+#include <QInputDialog>
 #include <QListWidget>
 #include <QLineEdit>
 #include <QLabel>
@@ -63,6 +64,9 @@ private:
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSkillset &source);
+
+  /* Get skill pointer, based on ID */
+  EditorSkill* getID(int id);
 
   /* Loads working info into UI objects */
   void loadWorkingInfo();

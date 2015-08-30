@@ -92,13 +92,24 @@ void EditorSkillset::copySelf(const EditorSkillset &source)
   loadWorkingInfo();
 }
 
+/* Get skill pointer, based on ID */
+EditorSkill* EditorSkillset::getID(int id)
+{
+  for(int i = 0; i < set_total.size(); i++)
+    if(set_total[i]->getID() == id)
+      return set_total[i];
+  return NULL;
+}
+
 /* Loads working info into UI objects */
 void EditorSkillset::loadWorkingInfo()
 {
   /* Name */
   edit_name->setText(name);
 
-  /* Clear existing sets */
+  /* Get indexes and Clear existing sets */
+  int index_avail = list_available->currentRow();
+  int index_used = list_used->currentRow();
   list_available->clear();
   list_used->clear();
 
@@ -128,6 +139,22 @@ void EditorSkillset::loadWorkingInfo()
       list_available->addItem(skillString(set_total[i]));
   }
 
+  /* Re-select list rows */
+  if(index_avail >= 0 && list_available->count() > 0)
+  {
+    if(list_available->count() > index_avail)
+      list_available->setCurrentRow(index_avail);
+    else
+      list_available->setCurrentRow(list_available->count() - 1);
+  }
+  if(index_used >= 0 && list_used->count() > 0)
+  {
+    if(list_used->count() > index_used)
+      list_used->setCurrentRow(index_used);
+    else
+      list_used->setCurrentRow(list_used->count() - 1);
+  }
+
   /* Check info to assert it is valid */
   for(int i = working_used.size() - 1; i >= 0; i--)
     if(!working_used[i])
@@ -155,7 +182,28 @@ QString EditorSkillset::skillString(EditorSkill* skill, int lvl)
 
 void EditorSkillset::addSkill()
 {
-  // TODO: FIX ADD
+  if(list_available->currentRow() >= 0)
+  {
+    bool ok;
+    int count = QInputDialog::getInt(this, "Level?",
+                                      "Skill Level Requirement:", 1, 1, 128,
+                                      1, &ok);
+    if(ok)
+    {
+      /* Get the item and find skill */
+      QString list_item = list_available->currentItem()->text();
+      QStringList list_split = list_item.split(':');
+      if(list_split.size() == 2)
+      {
+        /* Insert new skill */
+        int id = list_split.front().toInt();
+        set_working.push_back(QPair<int,int>(id, count));
+
+        /* Re-load working info */
+        loadWorkingInfo();
+      }
+    }
+  }
 }
 
 /* Name changed trigger */
@@ -167,7 +215,14 @@ void EditorSkillset::nameEdited(QString str)
 
 void EditorSkillset::removeSkill()
 {
-  // TODO: FIX REMOVE
+  if(list_used->currentRow() >= 0)
+  {
+    /* Remove index */
+    set_working.remove(list_used->currentRow());
+
+    /* Load info */
+    loadWorkingInfo();
+  }
 }
 
 void EditorSkillset::resetWorking()
