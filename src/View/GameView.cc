@@ -150,11 +150,10 @@ void GameView::setClassView(EditorCategory* class_cat)
              this, SIGNAL(nameChange(QString)));
 
   /* Set up the new view */
-  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_battleclass, class_cat);
   if(class_cat == NULL)
-    view_battleclass = null_battleclass;
-  else
-    view_battleclass = class_cat;
+    class_cat = null_battleclass;
+  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_battleclass, class_cat);
+  view_battleclass = class_cat;
   connect(view_battleclass, SIGNAL(nameChange(QString)),
           this, SIGNAL(nameChange(QString)));
 }
@@ -183,11 +182,10 @@ void GameView::setRaceView(EditorCategory* class_race)
              this, SIGNAL(nameChange(QString)));
 
   /* Set up the new view */
-  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_race, class_race);
   if(class_race == NULL)
-    view_race = null_race;
-  else
-    view_race = class_race;
+    class_race = null_race;
+  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_race, class_race);
+  view_race = class_race;
   connect(view_race, SIGNAL(nameChange(QString)),
           this, SIGNAL(nameChange(QString)));
 }
