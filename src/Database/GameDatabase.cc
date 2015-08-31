@@ -148,6 +148,44 @@ void GameDatabase::addAction(EditorAction* action)
 }
 
 /* Add object in the correct spot in the array */
+void GameDatabase::addClass(EditorCategory* cat_class)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_battleclass.size() && !inserted); i++)
+  {
+    if(data_battleclass[i]->getID() > cat_class->getID())
+    {
+      data_battleclass.insert(i, cat_class);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_battleclass.push_back(cat_class);
+}
+
+/* Add object in the correct spot in the array */
+void GameDatabase::addRace(EditorCategory* cat_race)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_race.size() && !inserted); i++)
+  {
+    if(data_race[i]->getID() > cat_race->getID())
+    {
+      data_race.insert(i, cat_race);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_race.push_back(cat_race);
+}
+
+/* Add object in the correct spot in the array */
 void GameDatabase::addSkill(EditorSkill* skill)
 {
   bool inserted = false;
@@ -224,6 +262,90 @@ void GameDatabase::changeAction(int index, bool forced, bool save)
 
     /* Change object */
     emit changeAction(current_action);
+  }
+}
+
+/* Change objects trigger call */
+void GameDatabase::changeClass(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current battle class is valid, either save or load */
+  if(current_battleclass != NULL)
+  {
+    /* Create warning about changing battle class */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another BattleClass. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_battleclass->saveWorking();
+      else
+        current_battleclass->resetWorking();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change battle class */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_battleclass = data_battleclass[index];
+    else
+      current_battleclass = NULL;
+
+    /* Change object */
+    emit changeBattleclass(current_battleclass);
+  }
+}
+
+/* Change objects trigger call */
+void GameDatabase::changeRace(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current race is valid, either save or load */
+  if(current_race != NULL)
+  {
+    /* Create warning about changing race */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Race. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_race->saveWorking();
+      else
+        current_race->resetWorking();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change race */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_race = data_race[index];
+    else
+      current_race = NULL;
+
+    /* Change object */
+    emit changeRace(current_race);
   }
 }
 
@@ -321,6 +443,24 @@ EditorAction* GameDatabase::getAction(int id)
 }
 
 /* Get object, based on ID */
+EditorCategory* GameDatabase::getClass(int id)
+{
+  for(int i = 0; i < data_battleclass.size(); i++)
+    if(data_battleclass[i]->getID() == id)
+      return data_battleclass[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
+EditorCategory* GameDatabase::getRace(int id)
+{
+  for(int i = 0; i < data_race.size(); i++)
+    if(data_race[i]->getID() == id)
+      return data_race[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
 EditorSkill* GameDatabase::getSkill(int id)
 {
   for(int i = 0; i < data_skill.size(); i++)
@@ -365,6 +505,46 @@ void GameDatabase::loadAction(XmlData data, int index)
       addAction(found_action);
     }
     found_action->load(data, index);
+  }
+}
+
+/* Called to load object data */
+void GameDatabase::loadClass(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorCategory* found_class = getClass(id);
+    if(found_class == NULL)
+    {
+      found_class = new EditorCategory(id, "New Class");
+      addClass(found_class);
+    }
+    found_class->load(data, index + 1);
+  }
+}
+
+/* Called to load object data */
+void GameDatabase::loadRace(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorCategory* found_race = getRace(id);
+    if(found_race == NULL)
+    {
+      found_race = new EditorCategory(id, "New Race");
+      addRace(found_race);
+    }
+    found_race->load(data, index + 1);
   }
 }
 
@@ -428,6 +608,14 @@ void GameDatabase::loadFinish()
     data_skillset[i]->updateSkills(data_skill);
     data_skillset[i]->resetWorking();
   }
+
+  /* Classes finish */
+  for(int i = 0; i < data_battleclass.size(); i++)
+    data_battleclass[i]->resetWorking();
+
+  /* Races finish */
+  for(int i = 0; i < data_race.size(); i++)
+    data_race[i]->resetWorking();
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -670,30 +858,21 @@ void GameDatabase::deleteResource()
         /* -- RACE CLASS -- */
         case EditorEnumDb::RACEVIEW:
           if(data_race[index] == current_race)
-          {
-            emit changeRace(NULL);
-            current_race = NULL;
-          }
+            changeRace(-1, true);
           delete data_race[index];
           data_race.remove(index);
           break;
         /* -- BATTLE CLASS -- */
         case EditorEnumDb::BATTLECLASSVIEW:
           if(data_battleclass[index] == current_battleclass)
-          {
-            emit changeBattleclass(NULL);
-            current_battleclass = NULL;
-          }
+            changeClass(-1, true);
           delete data_battleclass[index];
           data_battleclass.remove(index);
           break;
         /* -- SKILL SET -- */
         case EditorEnumDb::SKILLSETVIEW:
           if(data_skillset[index] == current_skillset)
-          {
-            emit changeSkillset(NULL);
-            current_skillset = NULL;
-          }
+            changeSkillSet(-1, true);
           delete data_skillset[index];
           data_skillset.remove(index);
           break;
@@ -881,13 +1060,11 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       break;
     /* -- RACE -- */
     case EditorEnumDb::RACEVIEW:
-      current_race = data_race[index];
-      emit changeRace(current_race);
+      changeRace(index);
       break;
     /* -- BATTLE CLASS -- */
     case EditorEnumDb::BATTLECLASSVIEW:
-      current_battleclass = data_battleclass[index];
-      emit changeBattleclass(current_battleclass);
+      changeClass(index);
       break;
     /* -- SKILL SET -- */
     case EditorEnumDb::SKILLSETVIEW:
@@ -965,6 +1142,16 @@ void GameDatabase::saveAll()
     changeSkillSet(-1, true, true);
     for(int i = 0; i < data_skillset.size(); i++)
       data_skillset[i]->saveWorking();
+
+    /* Classes */
+    changeClass(-1, true, true);
+    for(int i = 0; i < data_battleclass.size(); i++)
+      data_battleclass[i]->saveWorking();
+
+    /* Races */
+    changeRace(-1, true, true);
+    for(int i = 0; i < data_race.size(); i++)
+      data_race[i]->saveWorking();
 
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
@@ -1048,13 +1235,13 @@ void GameDatabase::deleteAll()
   data_item.clear();
 
   /* Battle Class clean-up */
-  emit changeBattleclass(NULL);
+  changeClass(-1, true);
   for(int i = 0; i < data_battleclass.size(); i++)
     delete data_battleclass[i];
   data_battleclass.clear();
 
   /* Race clean-up */
-  emit changeRace(NULL);
+  changeRace(-1, true);
   for(int i = 0; i < data_race.size(); i++)
     delete data_race[i];
   data_race.clear();
@@ -1130,6 +1317,10 @@ void GameDatabase::load(FileHandler* fh)
           /* Action */
           if(data.getElement(2) == "action")
             loadAction(data, 2);
+          else if(data.getElement(2) == "class")
+            loadClass(data, 2);
+          else if(data.getElement(2) == "race")
+            loadRace(data, 2);
           else if(data.getElement(2) == "skill")
             loadSkill(data, 2);
           else if(data.getElement(2) == "skillset")
@@ -1396,6 +1587,14 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Skill Sets */
     for(int i = 0; i < data_skillset.size(); i++)
       data_skillset[i]->save(fh, game_only);
+
+    /* Classes */
+    for(int i = 0; i < data_battleclass.size(); i++)
+      data_battleclass[i]->save(fh, game_only, "class");
+
+    /* Races */
+    for(int i = 0; i < data_race.size(); i++)
+      data_race[i]->save(fh, game_only, "race");
 
     fh->writeXmlElementEnd();
 

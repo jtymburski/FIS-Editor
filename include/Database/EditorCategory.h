@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -59,6 +60,7 @@ private:
   QCheckBox* chk_imp;
   QCheckBox* chk_power_def;
   QCheckBox* chk_power_grd;
+  bool chk_no_signals;
 
   /* Check Box Stack Widgets */
   QVector<QCheckBox*> chk_immunities;
@@ -74,12 +76,12 @@ private:
   QLineEdit* edit_id;
   QLineEdit* edit_name;
 
-  /* Line Edit Stack Widgets */
-  QVector<QLineEdit*> edit_atts_base;
-  QVector<QLineEdit*> edit_atts_max;
-
   /* Editor ID */
   int id;
+
+  /* Spin Box Stack Widgets */
+  QVector<QSpinBox*> spin_atts_base;
+  QVector<QSpinBox*> spin_atts_max;
 
   /* Text Edit Widgets */
   QTextEdit* text_desc;
@@ -125,12 +127,6 @@ public slots:
   void changedStatsBase(QString);
   void changedStatsMax(QString);
 
-  /* Resets the working set trigger */
-  void resetWorking();
-
-  /* Saves the working set trigger */
-  void saveWorking();
-
   /* Stat Preset Triggers */
   void statBasePreset(int index);
   void statMaxPreset(int index);
@@ -151,8 +147,15 @@ public:
   /* Loads the object data */
   void load(XmlData data, int index);
 
+  /* Resets the working set trigger */
+  void resetWorking();
+
   /* Saves the object data */
-  void save(FileHandler* fh, bool game_only = false);
+  void save(FileHandler* fh, bool game_only = false,
+            QString wrapper = "category");
+
+  /* Saves the working set trigger */
+  void saveWorking();
 
   /* Sets the ID of the category */
   virtual void setID(int id);

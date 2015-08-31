@@ -16,6 +16,12 @@ const int EditorCategory::kMAX_PRESETS = 6;
 
 EditorCategory::EditorCategory(QWidget *parent) : QWidget(parent)
 {
+  /* Properties of base data */
+  cat_base.triggerEditMode(true);
+  cat_curr.triggerEditMode(true);
+  chk_no_signals = false;
+
+  /* Layouts and info loading */
   createLayout();
   loadWorkingInfo();
 }
@@ -26,6 +32,7 @@ EditorCategory::EditorCategory(int id, QString name, QWidget* parent)
 {
   setID(id);
   setName(name);
+  saveWorking();
 }
 
 /* Copy constructor */
@@ -45,7 +52,9 @@ EditorCategory::~EditorCategory()
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorCategory::copySelf(const EditorCategory &source)
 {
-  //category = source.category;
+  cat_base = source.cat_base;
+  id = source.id;
+  resetWorking();
 }
 
 /* Creates interface layout */
@@ -54,7 +63,7 @@ void EditorCategory::createLayout()
   /* Layout */
   QGridLayout* layout = new QGridLayout(this);
   layout->setColumnStretch(7, 1);
-  layout->setRowMinimumHeight(7, 25);
+  layout->setRowMinimumHeight(7, 15);
   layout->setRowStretch(6, 1);
 
   /* ID */
@@ -201,6 +210,7 @@ void EditorCategory::createLayout()
   QGridLayout* layout_stats_base = new QGridLayout(box_stats_base);
   combo_stats_base = new QComboBox(this);
   combo_stats_base->addItems(stat_presets);
+  combo_stats_base->setCurrentIndex(kMAX_PRESETS);
   connect(combo_stats_base, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statBasePreset(int)));
   layout_stats_base->addWidget(combo_stats_base, 0, 0, 1, 2);
@@ -209,10 +219,12 @@ void EditorCategory::createLayout()
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
     layout_stats_base->addWidget(lbl, i + 1, 0);
-    edit_atts_base.push_back(new QLineEdit(this));
-    connect(edit_atts_base.back(), SIGNAL(textEdited(QString)),
+    spin_atts_base.push_back(new QSpinBox(this));
+    spin_atts_base.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
+    spin_atts_base.last()->setMaximum(AttributeSet::kMAX_VALUE);
+    connect(spin_atts_base.last(), SIGNAL(valueChanged(QString)),
             this, SLOT(changedStatsBase(QString)));
-    layout_stats_base->addWidget(edit_atts_base.back(), i + 1, 1);
+    layout_stats_base->addWidget(spin_atts_base.last(), i + 1, 1);
   }
   layout->addWidget(box_stats_base, 0, 5, 7, 1);
 
@@ -221,6 +233,7 @@ void EditorCategory::createLayout()
   QGridLayout* layout_stats_max = new QGridLayout(box_stats_max);
   combo_stats_max = new QComboBox(this);
   combo_stats_max->addItems(stat_presets);
+  combo_stats_max->setCurrentIndex(kMAX_PRESETS);
   connect(combo_stats_max, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statMaxPreset(int)));
   layout_stats_max->addWidget(combo_stats_max, 0, 0, 1, 2);
@@ -229,10 +242,12 @@ void EditorCategory::createLayout()
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
     layout_stats_max->addWidget(lbl, i + 1, 0);
-    edit_atts_max.push_back(new QLineEdit(this));
-    connect(edit_atts_max.back(), SIGNAL(textEdited(QString)),
+    spin_atts_max.push_back(new QSpinBox(this));
+    spin_atts_max.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
+    spin_atts_max.last()->setMaximum(AttributeSet::kMAX_VALUE);
+    connect(spin_atts_max.last(), SIGNAL(valueChanged(QString)),
             this, SLOT(changedStatsMax(QString)));
-    layout_stats_max->addWidget(edit_atts_max.back(), i + 1, 1);
+    layout_stats_max->addWidget(spin_atts_max.back(), i + 1, 1);
   }
   layout->addWidget(box_stats_max, 0, 6, 7, 1);
 
@@ -265,6 +280,7 @@ void EditorCategory::loadWorkingInfo()
   combo_qd->setCurrentIndex((int)cat_curr.getQDRegenRate());
 
   /* Flags */
+  chk_no_signals = true;
   chk_def->setChecked(cat_curr.getFlag(CategoryState::DEF_ENABLED));
   chk_e_big_arms->setChecked(cat_curr.getFlag(CategoryState::E_BIG_ARMS));
   chk_e_claws->setChecked(cat_curr.getFlag(CategoryState::E_CLAWS));
@@ -279,21 +295,31 @@ void EditorCategory::loadWorkingInfo()
   chk_imp->setChecked(cat_curr.getFlag(CategoryState::IMP_ENABLED));
   chk_power_def->setChecked(cat_curr.getFlag(CategoryState::POWER_DEFENDER));
   chk_power_grd->setChecked(cat_curr.getFlag(CategoryState::POWER_GUARDER));
+  chk_no_signals = false;
 
   /* Immunities */
   for(int i = 0; i < (int)Infliction::INVALID; i++)
+  {
+    chk_immunities[i]->blockSignals(true);
     chk_immunities[i]->setChecked(cat_curr.isImmune((Infliction)i));
+    chk_immunities[i]->blockSignals(false);
+  }
 
   /* Base Stats */
-  combo_stats_base->setCurrentIndex(kMAX_PRESETS);
   for(int i = 0; i < (int)Attribute::NONE; i++)
-    edit_atts_base[i]->setText(QString::number(
-                                           cat_curr.getMinSet().getStat(i)));
+  {
+    spin_atts_base[i]->blockSignals(true);
+    spin_atts_base[i]->setValue(cat_curr.getBaseSet().getStat(i));
+    spin_atts_base[i]->blockSignals(false);
+  }
 
   /* Max Stats */
-  combo_stats_max->setCurrentIndex(kMAX_PRESETS);
   for(int i = 0; i < (int)Attribute::NONE; i++)
-    edit_atts_max[i]->setText(QString::number(cat_curr.getMaxSet().getStat(i)));
+  {
+    spin_atts_max[i]->blockSignals(true);
+    spin_atts_max[i]->setValue(cat_curr.getTopSet().getStat(i));
+    spin_atts_max[i]->blockSignals(false);
+  }
 }
 
 /*============================================================================
@@ -303,91 +329,110 @@ void EditorCategory::loadWorkingInfo()
 /* Button Triggers */
 void EditorCategory::btnReset()
 {
-  qDebug() << "TODO RESET";
+  resetWorking();
 }
 
 /* Button Triggers */
 void EditorCategory::btnSave()
 {
-  qDebug() << "TODO SAVE";
+  saveWorking();
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedDenonym(QString denonym)
 {
-  qDebug() << "TODO CHANGED DENONYM: " << denonym;
+  cat_curr.setDenonym(denonym.toStdString());
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedDescription()
 {
-  qDebug() << "TODO CHANGED DESCRIPTION";
+  cat_curr.setDescription(text_desc->toPlainText().simplified().toStdString());
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedFlags(int)
 {
-  qDebug() << "TODO CHANGED FLAGS";
+  if(!chk_no_signals)
+  {
+    cat_curr.setFlag(CategoryState::DEF_ENABLED, chk_def->isChecked());
+    cat_curr.setFlag(CategoryState::E_BIG_ARMS, chk_e_big_arms->isChecked());
+    cat_curr.setFlag(CategoryState::E_CLAWS, chk_e_claws->isChecked());
+    cat_curr.setFlag(CategoryState::E_HEAVY_ARMOR,
+                     chk_e_heavy_armor->isChecked());
+    cat_curr.setFlag(CategoryState::E_LIGHT_ARMOR,
+                     chk_e_light_armor->isChecked());
+    cat_curr.setFlag(CategoryState::E_LONG_ARMS, chk_e_long_arms->isChecked());
+    cat_curr.setFlag(CategoryState::E_MID_ARMOR, chk_e_mid_armor->isChecked());
+    cat_curr.setFlag(CategoryState::E_SMALL_ARMS, chk_e_small_arms->isChecked());
+    cat_curr.setFlag(CategoryState::E_STAFF, chk_e_staff->isChecked());
+    cat_curr.setFlag(CategoryState::E_SWORD, chk_e_sword->isChecked());
+    cat_curr.setFlag(CategoryState::GRD_ENABLED, chk_grd->isChecked());
+    cat_curr.setFlag(CategoryState::IMP_ENABLED, chk_imp->isChecked());
+    cat_curr.setFlag(CategoryState::POWER_DEFENDER, chk_power_def->isChecked());
+    cat_curr.setFlag(CategoryState::POWER_GUARDER, chk_power_grd->isChecked());
+  }
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedImmunities(int)
 {
-  qDebug() << "TODO CHANGED IMMUNITIES";
+  for(int i = 0; i < chk_immunities.size(); i++)
+    cat_curr.setImmunity((Infliction)i, chk_immunities[i]->isChecked());
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedName(QString name)
 {
-  qDebug() << "TODO CHANGED NAME: " << name;
+  setName(name);
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedRegenQD(QString qd)
 {
-  qDebug() << "TODO CHANGED REGEN QD: " << qd;
+  cat_curr.setQDRegenRate(Helpers::regenRateFromStr(qd.toStdString()));
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedRegenVita(QString vita)
 {
-  qDebug() << "TODO CHANGED REGEN VITA: " << vita;
+  cat_curr.setVitaRegenRate(Helpers::regenRateFromStr(vita.toStdString()));
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedStatsBase(QString)
 {
-  qDebug() << "CHANGED BASE STATS";
+  combo_stats_base->setCurrentIndex(kMAX_PRESETS);
+  for(int i = 0; i < spin_atts_base.size(); i++)
+    cat_curr.getBaseSet().setStat((Attribute)i, spin_atts_base[i]->value());
 }
 
 /* Widget Change Triggers */
 void EditorCategory::changedStatsMax(QString)
 {
-  qDebug() << "CHANGED MAX STATS";
-}
-
-/* Resets the working set trigger */
-void EditorCategory::resetWorking()
-{
-  // TODO: Implementation
-}
-
-/* Saves the working set trigger */
-void EditorCategory::saveWorking()
-{
-  // TODO: Implementation
+  combo_stats_max->setCurrentIndex(kMAX_PRESETS);
+  for(int i = 0; i < spin_atts_max.size(); i++)
+    cat_curr.getTopSet().setStat((Attribute)i, spin_atts_max[i]->value());
 }
 
 /* Stat Preset Triggers */
 void EditorCategory::statBasePreset(int index)
 {
-  qDebug() << "STAT BASE PRESET: " << index;
+  if(index >= 0 && index < kMAX_PRESETS)
+  {
+    cat_curr.getBaseSet().buildAsPreset(index);
+    loadWorkingInfo();
+  }
 }
 
 /* Stat Preset Triggers */
 void EditorCategory::statMaxPreset(int index)
 {
-  qDebug() << "STAT MAX PRESET: " << index;
+  if(index >= 0 && index < kMAX_PRESETS)
+  {
+    cat_curr.getTopSet().buildAsPreset(index);
+    loadWorkingInfo();
+  }
 }
 
 /*============================================================================
@@ -415,27 +460,160 @@ QString EditorCategory::getNameList()
 /* Loads the object data */
 void EditorCategory::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  /* Parse elements */
+  cat_base.loadData(data, index, NULL);
+}
+
+/* Resets the working set trigger */
+void EditorCategory::resetWorking()
+{
+  cat_curr = cat_base;
+  setName(QString::fromStdString(cat_curr.getName()));
+  combo_stats_base->setCurrentIndex(kMAX_PRESETS);
+  combo_stats_max->setCurrentIndex(kMAX_PRESETS);
+  loadWorkingInfo();
 }
 
 /* Saves the object data */
-void EditorCategory::save(FileHandler* fh, bool game_only)
+void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
 {
-  // TODO: Implementation
+  (void)game_only;
+
+  if(fh != NULL)
+  {
+    /* Processing */
+    cat_base.triggerEditMode(false);
+    Category blank;
+
+    /* Wrapper */
+    fh->writeXmlElement(wrapper.toStdString(), "id", getID());
+
+    /* Name */
+    fh->writeXmlData("name", getName().toStdString());
+
+    /* Denonym */
+    if(cat_base.getDenonym() != blank.getDenonym())
+      fh->writeXmlData("denonym", cat_base.getDenonym());
+
+    /* Description */
+    if(cat_base.getDescription() != blank.getDescription())
+      fh->writeXmlData("description", cat_base.getDescription());
+
+    /* Vita Regen */
+    if(cat_base.getVitaRegenRate() != blank.getVitaRegenRate())
+      fh->writeXmlData("vita_regen",
+                       Helpers::regenRateToStr(cat_base.getVitaRegenRate()));
+
+    /* QD Regen */
+    if(cat_base.getQDRegenRate() != blank.getQDRegenRate())
+      fh->writeXmlData("qd_regen",
+                       Helpers::regenRateToStr(cat_base.getQDRegenRate()));
+
+    /* Flags */
+    fh->writeXmlElement("flags");
+    if(cat_base.getFlag(CategoryState::DEF_ENABLED) !=
+       blank.getFlag(CategoryState::DEF_ENABLED))
+      fh->writeXmlData("def_enabled",
+                       cat_base.getFlag(CategoryState::DEF_ENABLED));
+    if(cat_base.getFlag(CategoryState::E_BIG_ARMS) !=
+       blank.getFlag(CategoryState::E_BIG_ARMS))
+      fh->writeXmlData("e_big_arms",
+                       cat_base.getFlag(CategoryState::E_BIG_ARMS));
+    if(cat_base.getFlag(CategoryState::E_CLAWS) !=
+       blank.getFlag(CategoryState::E_CLAWS))
+      fh->writeXmlData("e_claws",
+                       cat_base.getFlag(CategoryState::E_CLAWS));
+    if(cat_base.getFlag(CategoryState::E_HEAVY_ARMOR) !=
+       blank.getFlag(CategoryState::E_HEAVY_ARMOR))
+      fh->writeXmlData("e_heavy_armor",
+                       cat_base.getFlag(CategoryState::E_HEAVY_ARMOR));
+    if(cat_base.getFlag(CategoryState::E_LIGHT_ARMOR) !=
+       blank.getFlag(CategoryState::E_LIGHT_ARMOR))
+      fh->writeXmlData("e_light_armor",
+                       cat_base.getFlag(CategoryState::E_LIGHT_ARMOR));
+    if(cat_base.getFlag(CategoryState::E_LONG_ARMS) !=
+       blank.getFlag(CategoryState::E_LONG_ARMS))
+      fh->writeXmlData("e_long_arms",
+                       cat_base.getFlag(CategoryState::E_LONG_ARMS));
+    if(cat_base.getFlag(CategoryState::E_MID_ARMOR) !=
+       blank.getFlag(CategoryState::E_MID_ARMOR))
+      fh->writeXmlData("e_mid_armor",
+                       cat_base.getFlag(CategoryState::E_MID_ARMOR));
+    if(cat_base.getFlag(CategoryState::E_SMALL_ARMS) !=
+       blank.getFlag(CategoryState::E_SMALL_ARMS))
+      fh->writeXmlData("e_small_arms",
+                       cat_base.getFlag(CategoryState::E_SMALL_ARMS));
+    if(cat_base.getFlag(CategoryState::E_STAFF) !=
+       blank.getFlag(CategoryState::E_STAFF))
+      fh->writeXmlData("e_staff",
+                       cat_base.getFlag(CategoryState::E_STAFF));
+    if(cat_base.getFlag(CategoryState::E_SWORD) !=
+       blank.getFlag(CategoryState::E_SWORD))
+      fh->writeXmlData("e_sword",
+                       cat_base.getFlag(CategoryState::E_SWORD));
+    if(cat_base.getFlag(CategoryState::GRD_ENABLED) !=
+       blank.getFlag(CategoryState::GRD_ENABLED))
+      fh->writeXmlData("grd_enabled",
+                       cat_base.getFlag(CategoryState::GRD_ENABLED));
+    if(cat_base.getFlag(CategoryState::IMP_ENABLED) !=
+       blank.getFlag(CategoryState::IMP_ENABLED))
+      fh->writeXmlData("imp_enabled",
+                       cat_base.getFlag(CategoryState::IMP_ENABLED));
+    if(cat_base.getFlag(CategoryState::POWER_DEFENDER) !=
+       blank.getFlag(CategoryState::POWER_DEFENDER))
+      fh->writeXmlData("power_defender",
+                       cat_base.getFlag(CategoryState::POWER_DEFENDER));
+    if(cat_base.getFlag(CategoryState::POWER_GUARDER) !=
+       blank.getFlag(CategoryState::POWER_GUARDER))
+      fh->writeXmlData("power_guarder",
+                       cat_base.getFlag(CategoryState::POWER_GUARDER));
+    fh->writeXmlElementEnd();
+
+    /* Immunities */
+    fh->writeXmlElement("immunities");
+    for(int i = 0; i < (int)Infliction::INVALID; i++)
+    {
+      Infliction curr = (Infliction)i;
+      if(cat_base.isImmune(curr) != blank.isImmune(curr))
+      {
+        QString ele = QString::fromStdString(Helpers::ailmentToStr(curr));
+        ele = ele.toLower();
+        fh->writeXmlData(ele.toStdString(), cat_base.isImmune(curr));
+      }
+    }
+    fh->writeXmlElementEnd();
+
+    /* Base Stats */
+    fh->writeXmlData("stats_base",
+                     AttributeSet::setToStr(cat_base.getBaseSet()));
+
+    /* Top Stats */
+    fh->writeXmlData("stats_max", AttributeSet::setToStr(cat_base.getTopSet()));
+
+    /* End Wrapper */
+    fh->writeXmlElementEnd();
+    cat_base.triggerEditMode();
+  }
+}
+
+/* Saves the working set trigger */
+void EditorCategory::saveWorking()
+{
+  cat_base = cat_curr;
 }
 
 /* Sets the ID of the category */
 void EditorCategory::setID(int id)
 {
   this->id = id;
-  loadWorkingInfo();
+  edit_id->setText(QString::number(id));
 }
 
 /* Sets the name of the category */
 void EditorCategory::setName(QString name)
 {
   cat_curr.setName(name.toStdString());
-  loadWorkingInfo();
+  edit_name->setText(QString::fromStdString(cat_curr.getName()));
   emit nameChange(name);
 }
 

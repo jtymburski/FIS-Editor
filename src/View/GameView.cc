@@ -184,7 +184,7 @@ void GameView::setRaceView(EditorCategory* class_race)
   /* Set up the new view */
   if(class_race == NULL)
     class_race = null_race;
-  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_race, class_race);
+  refreshView(EditorEnumDb::RACEVIEW, view_race, class_race);
   view_race = class_race;
   connect(view_race, SIGNAL(nameChange(QString)),
           this, SIGNAL(nameChange(QString)));
