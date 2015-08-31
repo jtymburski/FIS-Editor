@@ -66,7 +66,7 @@ protected:
   void copySelf(const EditorSkillset &source);
 
   /* Get skill pointer, based on ID */
-  EditorSkill* getID(int id);
+  EditorSkill* getByID(int id);
 
   /* Loads working info into UI objects */
   void loadWorkingInfo();
@@ -106,9 +106,6 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Clone */
-  EditorSkillset* clone();
-
   /* Returns the ID of the skillset */
   virtual int getID() const;
 

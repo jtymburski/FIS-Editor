@@ -384,10 +384,10 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 }
 
 /*
- * Description: Second constructor function. All parameters have blank defaults.
+ * Description: Second constructor function, with ID and name parameters.
  *
- * Inputs: int id - the id of the thing
- *         QString name - the name of the thing
+ * Inputs: int id - the id of the action
+ *         QString name - the name of the action
  *         QWidget* parent - the parent widget. Default to NULL
  */
 EditorAction::EditorAction(int id, QString name, QWidget* parent)

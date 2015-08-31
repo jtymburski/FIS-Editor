@@ -11,6 +11,11 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
 {
   /* Dialogs for animation and thumbs */
@@ -171,7 +176,13 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   getEditedSkill();
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the skill
+ *         QString name - the name of the skill
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorSkill::EditorSkill(int id, QString name, QWidget* parent)
            : EditorSkill(parent)
 {
@@ -180,12 +191,20 @@ EditorSkill::EditorSkill(int id, QString name, QWidget* parent)
   getEditedSkill();
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorSkill &source - the source object to copy
+ */
 EditorSkill::EditorSkill(const EditorSkill &source) : EditorSkill()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorSkill::~EditorSkill()
 {
   resetWorkingSkill();
@@ -195,7 +214,13 @@ EditorSkill::~EditorSkill()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorSkill &source - the source to copy from
+ * Output: none
+ */
 void EditorSkill::copySelf(const EditorSkill &source)
 {
   id = source.id;
@@ -218,6 +243,13 @@ void EditorSkill::copySelf(const EditorSkill &source)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/*
+ * Description: Adds an action to the skill. Triggered by push button. The added
+ *              action is based on the selected in the left hand list widget.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::addAction()
 {
   if(total_actions->count() > 0 && total_actions->currentRow() >= 0)
@@ -233,7 +265,14 @@ void EditorSkill::addAction()
   }
 }
 
-/* Animation dialog edit trigger */
+/*
+ * Description: Button trigger on animation sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorSkill::buttonAnimEdit(bool clean_only)
 {
   /* Close and delete the dialog if button pressed */
@@ -255,7 +294,13 @@ void EditorSkill::buttonAnimEdit(bool clean_only)
   }
 }
 
-/* Thumbnail dialog edit trigger */
+/*
+ * Description: Button trigger on thumbnail frame edit. This will open the
+ *              frame dialog for editing the chosen frame.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorSkill::buttonThumbEdit(bool clean_only)
 {
   /* Delete the dialog, if it exists */
@@ -280,12 +325,25 @@ void EditorSkill::buttonThumbEdit(bool clean_only)
   }
 }
 
-/* Returns the base skill */
+/*
+ * Description: Returns the base skill, stored in the class.
+ *
+ * Inputs: none
+ * Output: Skill - the base skill class object
+ */
 Skill EditorSkill::getBaseSkill()
 {
   return base;
 }
 
+/*
+ * Description: Updates the working skill with all the GUI element contents,
+ *              sets the working skill to the base skill, and returns the
+ *              working skill. This is equivalent to the save call.
+ *
+ * Inputs: none
+ * Output: Skill - the current skill data returned
+ */
 Skill EditorSkill::getEditedSkill()
 {
   /* Clear pop-ups, if relevant */
@@ -388,6 +446,13 @@ Skill EditorSkill::getEditedSkill()
   return base;
 }
 
+/*
+ * Description: Loads all the GUI elements with the contents from the working
+ *              Skill class.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::loadWorkingInfo()
 {
   name_edit->setText(name);
@@ -475,6 +540,14 @@ void EditorSkill::loadWorkingInfo()
   updateActions(actions_total);
 }
 
+/*
+ * Description: Removes an action in the skill. Triggered by push button. The
+ *              removed action is based on the selected in the right hand
+ *              list widget.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::removeAction()
 {
   if(skill_actions->count() > 0 && skill_actions->currentRow() >= 0)
@@ -484,6 +557,14 @@ void EditorSkill::removeAction()
   }
 }
 
+/*
+ * Description: Resets the working skill to the base data. This is equivalent
+ *              to selecting the reset button on the UI. The UI elements are
+ *              updated automatically on call.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::resetWorkingSkill()
 {
   /* Clean-up pop-ups */
@@ -500,12 +581,25 @@ void EditorSkill::resetWorkingSkill()
   loadWorkingInfo();
 }
 
+/*
+ * Description: Changes the base skill to the passed in skill.
+ *
+ * Inputs: Skill s - the new skill to use as a base reference
+ * Output: none
+ */
 void EditorSkill::setBaseSkill(Skill s)
 {
   base = s;
   setWorkingSkill(base);
 }
 
+/*
+ * Description: Sets the name and ID of this EditorSkill class based on the
+ *              colon delimited string from the parent list widget.
+ *
+ * Inputs: QString str - the comma delimited ID: Name
+ * Output: none
+ */
 void EditorSkill::setNameAndID(QString str)
 {
   base.setID(str.split(" : ").at(0).toInt());
@@ -514,6 +608,12 @@ void EditorSkill::setNameAndID(QString str)
   setWorkingSkill(base);
 }
 
+/*
+ * Description: Revises the working skill to the passed in parameter.
+ *
+ * Inputs: Skill s - the new skill to use as the working copy
+ * Output: none
+ */
 void EditorSkill::setWorkingSkill(Skill s)
 {
   (void)s;
@@ -525,7 +625,14 @@ void EditorSkill::setWorkingSkill(Skill s)
   loadWorkingInfo();
 }
 
-/* Update the thumb and animation frame for skill */
+/*
+ * Description: Slot called to trigger an update of the visible animation frame
+ *              in the UI. Triggered upon any changes to the animation sprite
+ *              object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::updateAnimation()
 {
   QImage original = sprite_anim.getImage(0);
@@ -542,7 +649,14 @@ void EditorSkill::updateAnimation()
   }
 }
 
-/* Update the thumb and animation frame for skill */
+/*
+ * Description: Slot called to trigger an update of the visible thumbnail frame
+ *              in the UI. Triggered upon any changes to the thumbnail sprite
+ *              object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkill::updateThumb()
 {
   QImage original = sprite_thumb.getImage(0);
@@ -561,25 +675,46 @@ void EditorSkill::updateThumb()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the ID of the skill */
+/*
+ * Description: Returns the ID of the skill
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorSkill::getID() const
 {
   return id;
 }
 
-/* Returns the name of the skill */
+/*
+ * Description: Returns the name of the skill
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorSkill::getName() const
 {
   return name;
 }
 
-/* Returns the name of the skill for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorSkill::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorSkill::load(XmlData data, int index)
 {
   /* Parse elements */
@@ -608,7 +743,13 @@ void EditorSkill::load(XmlData data, int index)
   }
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorSkill::save(FileHandler* fh, bool game_only)
 {
   (void)game_only;
@@ -686,20 +827,38 @@ void EditorSkill::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Sets the ID of the skill */
+/*
+ * Description: Sets the skill ID in the base class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorSkill::setID(int id)
 {
   this->id = id;
 }
 
-/* Sets the name of the skill */
+/*
+ * Description: Sets the name of the skill.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorSkill::setName(QString name)
 {
   this->name = name;
   name_edit->setText(name);
 }
 
-/* Update actions */
+/*
+ * Description: Updates the list of available actions within the skill. If this
+ *              list removes actions previously used, they are removed from the
+ *              working skill (only). If new ones are added, they are placed in
+ *              the available actions list.
+ *
+ * Inputs: QVector<EditorAction*> actions - all available actions created
+ * Output: none
+ */
 void EditorSkill::updateActions(QVector<EditorAction*> actions)
 {
   actions_total = actions;
@@ -764,7 +923,14 @@ void EditorSkill::updateActions(QVector<EditorAction*> actions)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorSkill.
+ *
+ * Inputs: const EditorSkill &source - the source class constructor
+ * Output: EditorSkill& - pointer to the copied class
+ */
 EditorSkill& EditorSkill::operator= (const EditorSkill &source)
 {
   /* Check for self assignment */

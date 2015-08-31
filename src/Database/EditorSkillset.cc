@@ -7,6 +7,11 @@
 #include "Database/EditorSkillset.h"
 #include <QDebug>
 
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
 {
   /* Setup layout */
@@ -56,7 +61,13 @@ EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
   main_layout->addWidget(btn_save, 6, 2);
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the skill set
+ *         QString name - the name of the skill set
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorSkillset::EditorSkillset(int id, QString name, QWidget* parent)
               : EditorSkillset(parent)
 {
@@ -64,12 +75,20 @@ EditorSkillset::EditorSkillset(int id, QString name, QWidget* parent)
   setName(name);
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorSkillset &source - the source object to copy
+ */
 EditorSkillset::EditorSkillset(const EditorSkillset &source) : EditorSkillset()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorSkillset::~EditorSkillset()
 {
 }
@@ -78,7 +97,13 @@ EditorSkillset::~EditorSkillset()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorSkillset &source - the source to copy from
+ * Output: none
+ */
 void EditorSkillset::copySelf(const EditorSkillset &source)
 {
   id = source.id;
@@ -92,8 +117,14 @@ void EditorSkillset::copySelf(const EditorSkillset &source)
   loadWorkingInfo();
 }
 
-/* Get skill pointer, based on ID */
-EditorSkill* EditorSkillset::getID(int id)
+/*
+ * Description: Returns the stored Editor Skill by the given ID. Null if not
+ *              found.
+ *
+ * Inputs: int id - the skill ID to search for
+ * Output: EditorSkill* - the found skill pointer
+ */
+EditorSkill* EditorSkillset::getByID(int id)
 {
   for(int i = 0; i < set_total.size(); i++)
     if(set_total[i]->getID() == id)
@@ -101,7 +132,13 @@ EditorSkill* EditorSkillset::getID(int id)
   return NULL;
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Skill Set information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkillset::loadWorkingInfo()
 {
   /* Name */
@@ -165,7 +202,15 @@ void EditorSkillset::loadWorkingInfo()
       set_working.remove(i);
 }
 
-/* Get Skill string */
+/*
+ * Description: Returns the formatted skill string for skills stored within
+ *              the set. If the lvl parameter is set, it will prepend a
+ *              "LVL # - " to the front of the string for storing in the list.
+ *
+ * Inputs: EditorSkill* skill - the skill to list
+ *         int lvl - the level before skill is usable. Default to -1 (invalid)
+ * Output: QString - the resulting string for listing
+ */
 QString EditorSkillset::skillString(EditorSkill* skill, int lvl)
 {
   QString info = "";
@@ -194,6 +239,15 @@ QString EditorSkillset::skillString(EditorSkill* skill, int lvl)
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/*
+ * Description: Adds a skill to the set. Triggered by push button. The added
+ *              skill is based on the selected in the left hand list widget.
+ *              Triggers a pop-up to force the user to select an activation
+ *              level.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkillset::addSkill()
 {
   if(list_available->currentRow() >= 0)
@@ -220,13 +274,27 @@ void EditorSkillset::addSkill()
   }
 }
 
-/* Name changed trigger */
+/*
+ * Description: Triggered when the name text field is edited. Updates the class
+ *              string and the listed string in the parent widget.
+ *
+ * Inputs: QString str - the new name string
+ * Output: none
+ */
 void EditorSkillset::nameEdited(QString str)
 {
   name = str;
   emit nameChange(str);
 }
 
+/*
+ * Description: Removes a skill to the set. Triggered by push button. The
+ *              removed skill is based on the selected in the right hand list
+ *              widget.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkillset::removeSkill()
 {
   if(list_used->currentRow() >= 0)
@@ -253,18 +321,39 @@ void EditorSkillset::removeSkill()
   }
 }
 
+/*
+ * Description: Resets the working information back to the base (last saved)
+ *              data. This will also automatically update all UI widgets with
+ *              the new data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkillset::resetWorking()
 {
   set_working = set_base;
   loadWorkingInfo();
 }
 
+/*
+ * Description: Saves the working information back to the base (last saved)
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorSkillset::saveWorking()
 {
   set_base = set_working;
-  loadWorkingInfo();
 }
 
+/*
+ * Description: Sets the name and ID of this EditorSkillset class based on the
+ *              colon delimited string from the parent list widget.
+ *
+ * Inputs: QString str - the comma delimited ID: Name
+ * Output: none
+ */
 void EditorSkillset::setNameAndID(QString str)
 {
   id = (str.split(" : ").at(0).toInt());
@@ -276,30 +365,46 @@ void EditorSkillset::setNameAndID(QString str)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-EditorSkillset* EditorSkillset::clone()
-{
-  return this;
-}
-
-/* Returns the ID of the skillset */
+/*
+ * Description: Returns the ID of the skillset
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorSkillset::getID() const
 {
   return id;
 }
 
-/* Returns the name of the skillset */
+/*
+ * Description: Returns the name of the skillset
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorSkillset::getName() const
 {
   return name;
 }
 
-/* Returns the name of the skillset for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorSkillset::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorSkillset::load(XmlData data, int index)
 {
   /* Parse elements */
@@ -323,7 +428,13 @@ void EditorSkillset::load(XmlData data, int index)
   }
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorSkillset::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
@@ -351,13 +462,23 @@ void EditorSkillset::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Sets the ID of the skillset */
+/*
+ * Description: Sets the skillset ID in the class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorSkillset::setID(int id)
 {
   this->id = id;
 }
 
-/* Sets the name of the skillset */
+/*
+ * Description: Sets the name of the skillset.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorSkillset::setName(QString name)
 {
   this->name = name;
@@ -365,7 +486,15 @@ void EditorSkillset::setName(QString name)
   emit nameChange(name);
 }
 
-/* Update skills */
+/*
+ * Description: Updates the list of available skills within the set. If this
+ *              list removes skills previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available skills list.
+ *
+ * Inputs: QVector<EditorSkill*> skills - all available skills created
+ * Output: none
+ */
 void EditorSkillset::updateSkills(QVector<EditorSkill*> skills)
 {
   set_total = skills;
@@ -376,7 +505,14 @@ void EditorSkillset::updateSkills(QVector<EditorSkill*> skills)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorSkillset.
+ *
+ * Inputs: const EditorSkillset &source - the source class constructor
+ * Output: EditorSkillset& - pointer to the copied class
+ */
 EditorSkillset& EditorSkillset::operator= (const EditorSkillset &source)
 {
   /* Check for self assignment */
