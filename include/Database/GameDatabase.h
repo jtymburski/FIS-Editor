@@ -96,18 +96,22 @@ private:
   /* Add object in the correct spot in the array */
   void addAction(EditorAction* action);
   void addSkill(EditorSkill* skill);
+  void addSkillSet(EditorSkillset* set);
 
   /* Change objects trigger call */
   void changeAction(int index, bool forced = false, bool save = false);
   void changeSkill(int index, bool forced = false, bool save = false);
+  void changeSkillSet(int index, bool forced = false, bool save = false);
 
   /* Get object, based on ID */
   EditorAction* getAction(int id);
   EditorSkill* getSkill(int id);
+  EditorSkillset* getSkillSet(int id);
 
   /* Called to load object data */
   void loadAction(XmlData data, int index);
   void loadSkill(XmlData data, int index);
+  void loadSkillSet(XmlData data, int index);
 
   /* Called upon load finish - for clean up */
   void loadFinish();

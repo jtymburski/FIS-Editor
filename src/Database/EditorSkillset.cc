@@ -139,6 +139,10 @@ void EditorSkillset::loadWorkingInfo()
       list_available->addItem(skillString(set_total[i]));
   }
 
+  /* Sort lists */
+  list_available->sortItems();
+  list_used->sortItems();
+
   /* Re-select list rows */
   if(index_avail >= 0 && list_available->count() > 0)
   {
@@ -171,7 +175,17 @@ QString EditorSkillset::skillString(EditorSkill* skill, int lvl)
 
   /* Level */
   if(lvl >= 0)
-    info = "LVL " + QString::number(lvl) + " - " + info;
+  {
+    /* Get string */
+    QString number = QString::number(lvl);
+    if(lvl < 100)
+      number = "0" + number;
+    if(lvl < 10)
+      number = "0" + number;
+
+    /* Change string */
+    info = "LVL " + number + " - " + info;
+  }
 
   return info;
 }
@@ -217,11 +231,25 @@ void EditorSkillset::removeSkill()
 {
   if(list_used->currentRow() >= 0)
   {
-    /* Remove index */
-    set_working.remove(list_used->currentRow());
+    /* Get the item and find the skill */
+    QString list_item = list_used->currentItem()->text();
+    QStringList list_split_1 = list_item.split('-');
+    if(list_split_1.size() == 2)
+    {
+      QStringList list_split_2 = list_split_1.back().split(':');
+      if(list_split_2.size() == 2)
+      {
+        int id = list_split_2.front().toInt();
 
-    /* Load info */
-    loadWorkingInfo();
+        /* Find it in the working set and delete */
+        for(int i = set_working.size() - 1; i >= 0; i--)
+          if(set_working[i].first == id)
+            set_working.remove(i);
+
+        /* Refresh working info */
+        loadWorkingInfo();
+      }
+    }
   }
 }
 
@@ -269,6 +297,58 @@ QString EditorSkillset::getName() const
 QString EditorSkillset::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
+}
+
+/* Loads the object data */
+void EditorSkillset::load(XmlData data, int index)
+{
+  /* Parse elements */
+  if(data.getElement(index) == "name")
+  {
+    name = QString::fromStdString(data.getDataString());
+    emit nameChange(name);
+  }
+  else if(data.getElement(index) == "skill")
+  {
+    QString element = QString::fromStdString(data.getDataString());
+    QStringList ele_split = element.split(',');
+    if(ele_split.size() == 2)
+    {
+      /* Get ID and level and attempt to add */
+      int id = ele_split.front().toInt();
+      int lvl = ele_split.back().toInt();
+      if(id >= 0 && lvl > 0)
+        set_base.push_back(QPair<int, int>(id, lvl));
+    }
+  }
+}
+
+/* Saves the object data */
+void EditorSkillset::save(FileHandler* fh, bool game_only)
+{
+  if(fh != NULL)
+  {
+    /* Base data */
+    fh->writeXmlElement("skillset", "id", getID());
+    if(!game_only)
+      fh->writeXmlData("name", getName().toStdString());
+
+    /* Skills in the set */
+    for(int i = 0; i < set_base.size(); i++)
+    {
+      /* Create the set string */
+      QString set = "";
+      set.append(QString::number(set_base[i].first));
+      set.append(',');
+      set.append(QString::number(set_base[i].second));
+
+      /* Write to file */
+      fh->writeXmlData("skill", set.toStdString());
+    }
+
+    /* Close element */
+    fh->writeXmlElementEnd();
+  }
 }
 
 /* Sets the ID of the skillset */

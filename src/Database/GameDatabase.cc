@@ -166,6 +166,25 @@ void GameDatabase::addSkill(EditorSkill* skill)
     data_skill.push_back(skill);
 }
 
+/* Add object in the correct spot in the array */
+void GameDatabase::addSkillSet(EditorSkillset* set)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_skillset.size() && !inserted); i++)
+  {
+    if(data_skillset[i]->getID() > set->getID())
+    {
+      data_skillset.insert(i, set);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_skillset.push_back(set);
+}
+
 /* Change objects trigger call */
 void GameDatabase::changeAction(int index, bool forced, bool save)
 {
@@ -213,7 +232,7 @@ void GameDatabase::changeSkill(int index, bool forced, bool save)
 {
   bool proceed = forced;
 
-  /* If current action is valid, either save or load */
+  /* If current skill is valid, either save or load */
   if(current_skill != NULL)
   {
     /* Create warning about changing action */
@@ -250,6 +269,48 @@ void GameDatabase::changeSkill(int index, bool forced, bool save)
   }
 }
 
+/* Change objects trigger call */
+void GameDatabase::changeSkillSet(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current skill set is valid, either save or load */
+  if(current_skillset != NULL)
+  {
+    /* Create warning about changing action */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Skill Set. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_skillset->saveWorking();
+      else
+        current_skillset->resetWorking();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change skill set */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_skillset = data_skillset[index];
+    else
+      current_skillset = NULL;
+
+    /* Change object */
+    emit changeSkillset(current_skillset);
+  }
+}
+
 /* Get object, based on ID */
 EditorAction* GameDatabase::getAction(int id)
 {
@@ -265,6 +326,15 @@ EditorSkill* GameDatabase::getSkill(int id)
   for(int i = 0; i < data_skill.size(); i++)
     if(data_skill[i]->getID() == id)
       return data_skill[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
+EditorSkillset* GameDatabase::getSkillSet(int id)
+{
+  for(int i = 0; i < data_skillset.size(); i++)
+    if(data_skillset[i]->getID() == id)
+      return data_skillset[i];
   return NULL;
 }
 
@@ -318,6 +388,26 @@ void GameDatabase::loadSkill(XmlData data, int index)
   }
 }
 
+/* Called to load object data */
+void GameDatabase::loadSkillSet(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorSkillset* found_set = getSkillSet(id);
+    if(found_set == NULL)
+    {
+      found_set = new EditorSkillset(id, "New Skill Set");
+      addSkillSet(found_set);
+    }
+    found_set->load(data, index + 1);
+  }
+}
+
 /* Called upon load finish - for clean up */
 void GameDatabase::loadFinish()
 {
@@ -330,6 +420,13 @@ void GameDatabase::loadFinish()
   {
     data_skill[i]->updateActions(data_action);
     data_skill[i]->setBaseSkill(data_skill[i]->getBaseSkill());
+  }
+
+  /* Skill Sets finish */
+  for(int i = 0; i < data_skillset.size(); i++)
+  {
+    data_skillset[i]->updateSkills(data_skill);
+    data_skillset[i]->resetWorking();
   }
 }
 
@@ -794,8 +891,7 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       break;
     /* -- SKILL SET -- */
     case EditorEnumDb::SKILLSETVIEW:
-      current_skillset = data_skillset[index];
-      emit changeSkillset(current_skillset);
+      changeSkillSet(index);
       break;
     /* -- SKILL -- */
     case EditorEnumDb::SKILLVIEW:
@@ -855,8 +951,20 @@ void GameDatabase::saveAll()
   msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   if(msg_box.exec() == QMessageBox::Yes)
   {
+    /* Actions */
     changeAction(-1, true, true);
+    for(int i = 0; i < data_action.size(); i++)
+      data_action[i]->getEditedAction();
+
+    /* Skills */
     changeSkill(-1, true, true);
+    for(int i = 0; i < data_skill.size(); i++)
+      data_skill[i]->getEditedSkill();
+
+    /* Skill Sets */
+    changeSkillSet(-1, true, true);
+    for(int i = 0; i < data_skillset.size(); i++)
+      data_skillset[i]->saveWorking();
 
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
@@ -952,7 +1060,7 @@ void GameDatabase::deleteAll()
   data_race.clear();
 
   /* Skillset clean-up */
-  emit changeSkillset(NULL);
+  changeSkillSet(-1, true);
   for(int i = 0; i < data_skillset.size(); i++)
     delete data_skillset[i];
   data_skillset.clear();
@@ -1024,6 +1132,8 @@ void GameDatabase::load(FileHandler* fh)
             loadAction(data, 2);
           else if(data.getElement(2) == "skill")
             loadSkill(data, 2);
+          else if(data.getElement(2) == "skillset")
+            loadSkillSet(data, 2);
         }
         /* If map element, add new map if it doesn't exist; then send
          * new information to map */
@@ -1282,6 +1392,10 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Skills */
     for(int i = 0; i < data_skill.size(); i++)
       data_skill[i]->save(fh, game_only);
+
+    /* Skill Sets */
+    for(int i = 0; i < data_skillset.size(); i++)
+      data_skillset[i]->save(fh, game_only);
 
     fh->writeXmlElementEnd();
 

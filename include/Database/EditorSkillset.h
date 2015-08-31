@@ -118,6 +118,12 @@ public:
   /* Returns the name of the skillset for listing */
   virtual QString getNameList();
 
+  /* Loads the object data */
+  virtual void load(XmlData data, int index);
+
+  /* Saves the object data */
+  virtual void save(FileHandler* fh, bool game_only = false);
+
   /* Sets the ID of the skillset */
   virtual void setID(int id);
 
