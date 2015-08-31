@@ -26,26 +26,26 @@ public:
 private:
   /* Blank views */
   EditorAction* null_action;
-  QWidget* null_battleclass;
+  EditorCategory* null_battleclass;
   QWidget* null_bubby;
   QWidget* null_equipment;
   EditorItem* null_item;
   QWidget* null_party;
   QWidget* null_person;
-  QWidget* null_race;
+  EditorCategory* null_race;
   EditorSkill* null_skill;
   EditorSkillset* null_skillset;
 
   /* The views, as they're set */
   EditorAction* view_action;
-  QWidget* view_battleclass;
+  EditorCategory* view_battleclass;
   QWidget* view_bubby;
   QWidget* view_equipment;
   EditorItem* view_item;
   MapView* view_map;
   QWidget* view_party;
   QWidget* view_person;
-  QWidget* view_race;
+  EditorCategory* view_race;
   EditorSkill* view_skill;
   EditorSkillset* view_skillset;
 
@@ -76,24 +76,22 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
-  /* Loads the image with a valid given path */
-//  void loadSprite(QString path);
-
-  /* View Get/Sets */
-  MapView* getMapView();
-  //void setMapView(MapView* view);
-
+  /* View gets */
   EditorAction* getActionView();
-  void setActionView(EditorAction* sprite);
-
-  EditorSkill* getSkillView();
-  void setSkillView(EditorSkill* action);
-
-  EditorSkillset* getSkillsetView();
-  void setSkillsetView(EditorSkillset* action);
-
+  EditorCategory* getClassView();
   EditorItem* getItemView();
+  MapView* getMapView();
+  EditorCategory* getRaceView();
+  EditorSkill* getSkillView();
+  EditorSkillset* getSkillsetView();
+
+  /* View sets */
+  void setActionView(EditorAction* sprite);
+  void setClassView(EditorCategory* class_cat);
   void setItemView(EditorItem* item);
+  void setRaceView(EditorCategory* class_race);
+  void setSkillView(EditorSkill* action);
+  void setSkillsetView(EditorSkillset* action);
 
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);

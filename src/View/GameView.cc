@@ -41,11 +41,13 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_item = view_item;
   addWidget(view_item);
 
-  view_battleclass = new QWidget(this);
+  view_battleclass = new EditorCategory(this);
+  view_battleclass->setDisabled(true);
   null_battleclass = view_battleclass;
   addWidget(view_battleclass);
 
-  view_race = new QWidget(this);
+  view_race = new EditorCategory(this);
+  view_race->setDisabled(true);
   null_race = view_race;
   addWidget(view_race);
   
@@ -66,12 +68,6 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
 
   view_person->setStyleSheet("background-color:red;");
   view_party->setStyleSheet("background-color:blue;");
-  //view_item->setStyleSheet("background-color:green;");
-  //view_action->setStyleSheet("background-color:black;");
-  view_race->setStyleSheet("background-color:purple;");
-  view_battleclass->setStyleSheet("background-color:pink;");
-  //view_skillset->setStyleSheet("background-color:orange;");
-  //view_skill->setStyleSheet("background-color:yellow;");
   view_equipment->setStyleSheet("background-color:violet;");
   view_bubby->setStyleSheet("background-color:black;");
 
@@ -87,22 +83,46 @@ GameView::~GameView()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/* Returns the Editor Action View */
+EditorAction* GameView::getActionView()
+{
+  return view_action;
+}
+
+/* Returns the Editor Class Category View */
+EditorCategory* GameView::getClassView()
+{
+  return view_battleclass;
+}
+
+/* Returns the Editor Item View */
+EditorItem* GameView::getItemView()
+{
+  return view_item;
+}
+
 /* Returns the MapView */
 MapView* GameView::getMapView()
 {
   return view_map;
 }
 
-/* Sets the map view */
-//void GameView::setMapView(MapView *view)
-//{
-//
-//}
-
-/* Returns the Editor Action View */
-EditorAction* GameView::getActionView()
+/* Returns the Editor Race Category View */
+EditorCategory* GameView::getRaceView()
 {
-  return view_action;
+  return view_race;
+}
+
+/* Returns the Editor Skill View */
+EditorSkill* GameView::getSkillView()
+{
+  return view_skill;
+}
+
+/* Returns the Editor Skillset View */
+EditorSkillset* GameView::getSkillsetView()
+{
+  return view_skillset;
 }
 
 /* Sets the Editor Action View */
@@ -122,32 +142,21 @@ void GameView::setActionView(EditorAction *action)
   //view_action->getEditedAction();
 }
 
-/* Returns the Editor Skill View */
-EditorSkill* GameView::getSkillView()
-{
-  return view_skill;
-}
-
-/* Sets the Editor Skill View */
-void GameView::setSkillView(EditorSkill *skill)
+/* Sets the Editor Class Category View */
+void GameView::setClassView(EditorCategory* class_cat)
 {
   /* Disconnect the old view */
-  disconnect(view_skill,SIGNAL(nameChange(QString)),
-          this,SIGNAL(nameChange(QString)));
-  if(skill == NULL)
-    skill = null_skill;
+  disconnect(view_battleclass, SIGNAL(nameChange(QString)),
+             this, SIGNAL(nameChange(QString)));
 
   /* Set up the new view */
-  refreshView(EditorEnumDb::SKILLVIEW, view_skill, skill);
-  view_skill = skill;
-  connect(view_skill,SIGNAL(nameChange(QString)),
-          this,SIGNAL(nameChange(QString)));
-}
-
-/* Returns the Editor Item View */
-EditorItem* GameView::getItemView()
-{
-  return view_item;
+  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_battleclass, class_cat);
+  if(class_cat == NULL)
+    view_battleclass = null_battleclass;
+  else
+    view_battleclass = class_cat;
+  connect(view_battleclass, SIGNAL(nameChange(QString)),
+          this, SIGNAL(nameChange(QString)));
 }
 
 /* Sets the Editor Skill View */
@@ -166,13 +175,38 @@ void GameView::setItemView(EditorItem *item)
           this,SIGNAL(nameChange(QString)));
 }
 
-
-/* Returns the Editor Skillset View */
-EditorSkillset* GameView::getSkillsetView()
+/* Sets the Editor Race Category View */
+void GameView::setRaceView(EditorCategory* class_race)
 {
-  return view_skillset;
+  /* Disconnect the old view */
+  disconnect(view_race, SIGNAL(nameChange(QString)),
+             this, SIGNAL(nameChange(QString)));
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::BATTLECLASSVIEW, view_race, class_race);
+  if(class_race == NULL)
+    view_race = null_race;
+  else
+    view_race = class_race;
+  connect(view_race, SIGNAL(nameChange(QString)),
+          this, SIGNAL(nameChange(QString)));
 }
 
+/* Sets the Editor Skill View */
+void GameView::setSkillView(EditorSkill *skill)
+{
+  /* Disconnect the old view */
+  disconnect(view_skill,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+  if(skill == NULL)
+    skill = null_skill;
+
+  /* Set up the new view */
+  refreshView(EditorEnumDb::SKILLVIEW, view_skill, skill);
+  view_skill = skill;
+  connect(view_skill,SIGNAL(nameChange(QString)),
+          this,SIGNAL(nameChange(QString)));
+}
 
 /* Sets the Editor Skillset View */
 void GameView::setSkillsetView(EditorSkillset *skillset)

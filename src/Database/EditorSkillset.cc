@@ -7,6 +7,10 @@
 #include "Database/EditorSkillset.h"
 #include <QDebug>
 
+/*============================================================================
+ * CONSTRUCTORS / DESTRUCTORS
+ *===========================================================================*/
+
 /*
  * Description: Main constructor function. All parameters have null defaults.
  *

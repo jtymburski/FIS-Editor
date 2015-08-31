@@ -575,7 +575,7 @@ void Application::setAction(EditorAction* action)
  */
 void Application::setBattleClass(EditorCategory* battle_class)
 {
-  qDebug() << "Battle Class: " << battle_class;
+  game_view->setClassView(battle_class);
 }
 
 /*
@@ -739,7 +739,7 @@ void Application::setPerson(EditorPerson* person)
  */
 void Application::setRace(EditorCategory* race)
 {
-  qDebug() << "Race: " << race;
+  game_view->setRaceView(race);
 }
 
 /*
