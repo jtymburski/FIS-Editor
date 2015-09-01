@@ -14,6 +14,11 @@ const int EditorCategory::kMAX_PRESETS = 6;
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorCategory::EditorCategory(QWidget *parent) : QWidget(parent)
 {
   /* Properties of base data */
@@ -26,7 +31,13 @@ EditorCategory::EditorCategory(QWidget *parent) : QWidget(parent)
   loadWorkingInfo();
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the category set
+ *         QString name - the name of the category set
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorCategory::EditorCategory(int id, QString name, QWidget* parent)
               : EditorCategory(parent)
 {
@@ -35,12 +46,20 @@ EditorCategory::EditorCategory(int id, QString name, QWidget* parent)
   saveWorking();
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorCategory &source - the source object to copy
+ */
 EditorCategory::EditorCategory(const EditorCategory &source) : EditorCategory()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorCategory::~EditorCategory()
 {
 }
@@ -49,7 +68,13 @@ EditorCategory::~EditorCategory()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorCategory &source - the source to copy from
+ * Output: none
+ */
 void EditorCategory::copySelf(const EditorCategory &source)
 {
   cat_base = source.cat_base;
@@ -57,7 +82,12 @@ void EditorCategory::copySelf(const EditorCategory &source)
   resetWorking();
 }
 
-/* Creates interface layout */
+/*
+ * Description: Creates the category layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::createLayout()
 {
   /* Layout */
@@ -260,7 +290,13 @@ void EditorCategory::createLayout()
   layout->addWidget(btn_save, 8, 6);
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Category information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::loadWorkingInfo()
 {
   /* ID */
@@ -326,31 +362,60 @@ void EditorCategory::loadWorkingInfo()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Resets data in Category.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::btnReset()
 {
   resetWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Saves data in Category.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::btnSave()
 {
   saveWorking();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the denonym line edit text is modified.
+ *              Updates the working data with the new denonym.
+ *
+ * Inputs: QString denonym - the new text
+ * Output: none
+ */
 void EditorCategory::changedDenonym(QString denonym)
 {
   cat_curr.setDenonym(denonym.toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the description text edit contents are
+ *              modified. Updates the working data with the new description.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::changedDescription()
 {
   cat_curr.setDescription(text_desc->toPlainText().simplified().toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when any flag check box is within the flag
+ *              group is modified. Internal private variable 'chk_no_signals'
+ *              inidicates if signals will be fired by checks. Default to false.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
 void EditorCategory::changedFlags(int)
 {
   if(!chk_no_signals)
@@ -374,32 +439,63 @@ void EditorCategory::changedFlags(int)
   }
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when any immunity check boxes are modified.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
 void EditorCategory::changedImmunities(int)
 {
   for(int i = 0; i < chk_immunities.size(); i++)
     cat_curr.setImmunity((Infliction)i, chk_immunities[i]->isChecked());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the name line edit text is modified.
+ *              Updates the working data with the new name.
+ *
+ * Inputs: QString name - the new text
+ * Output: none
+ */
 void EditorCategory::changedName(QString name)
 {
   setName(name);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the QD regen rate drop down changes the
+ *              active index. Updates the working data with the new qd rate.
+ *
+ * Inputs: QString qd - the new selected combo box text
+ * Output: none
+ */
 void EditorCategory::changedRegenQD(QString qd)
 {
   cat_curr.setQDRegenRate(Helpers::regenRateFromStr(qd.toStdString()));
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the vitality regen rate drop down changes
+ *              the active index. Updates the working data with the new
+ *              vitality rate.
+ *
+ * Inputs: QString vita - the new selected combo box text
+ * Output: none
+ */
 void EditorCategory::changedRegenVita(QString vita)
 {
   cat_curr.setVitaRegenRate(Helpers::regenRateFromStr(vita.toStdString()));
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when any one spin box of the base stat group set
+ *              is modified. Updates the working data with the base attribute
+ *              set.
+ *
+ * Inputs: QString - not used
+ * Output: none
+ */
 void EditorCategory::changedStatsBase(QString)
 {
   combo_stats_base->setCurrentIndex(kMAX_PRESETS);
@@ -407,7 +503,14 @@ void EditorCategory::changedStatsBase(QString)
     cat_curr.getBaseSet().setStat((Attribute)i, spin_atts_base[i]->value());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when any one spin box of the max stat group set
+ *              is modified. Updates the working data with the max attribute
+ *              set.
+ *
+ * Inputs: QString - not used
+ * Output: none
+ */
 void EditorCategory::changedStatsMax(QString)
 {
   combo_stats_max->setCurrentIndex(kMAX_PRESETS);
@@ -415,7 +518,14 @@ void EditorCategory::changedStatsMax(QString)
     cat_curr.getTopSet().setStat((Attribute)i, spin_atts_max[i]->value());
 }
 
-/* Stat Preset Triggers */
+/*
+ * Description: Slot triggered when the base preset drop down is modified. This
+ *              loads a preset attribute set into the base, which can then be
+ *              further modified.
+ *
+ * Inputs: int index - the index in the dropdown
+ * Output: none
+ */
 void EditorCategory::statBasePreset(int index)
 {
   if(index >= 0 && index < kMAX_PRESETS)
@@ -425,7 +535,14 @@ void EditorCategory::statBasePreset(int index)
   }
 }
 
-/* Stat Preset Triggers */
+/*
+ * Description: Slot triggered when the max preset drop down is modified. This
+ *              loads a preset attribute set into the base, which can then be
+ *              further modified.
+ *
+ * Inputs: int index - the index in the dropdown
+ * Output: none
+ */
 void EditorCategory::statMaxPreset(int index)
 {
   if(index >= 0 && index < kMAX_PRESETS)
@@ -439,32 +556,60 @@ void EditorCategory::statMaxPreset(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the ID of the category */
+/*
+ * Description: Returns the ID of the category
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorCategory::getID() const
 {
   return id;
 }
 
-/* Returns the name of the category */
+/*
+ * Description: Returns the name of the category
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorCategory::getName() const
 {
   return QString::fromStdString(cat_curr.getName());
 }
 
-/* Returns the name of the category for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorCategory::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorCategory::load(XmlData data, int index)
 {
   /* Parse elements */
   cat_base.loadData(data, index, NULL);
 }
 
-/* Resets the working set trigger */
+/*
+ * Description: Resets the working information back to the base (last saved)
+ *              data. This will also automatically update all UI widgets with
+ *              the new data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::resetWorking()
 {
   cat_curr = cat_base;
@@ -474,7 +619,13 @@ void EditorCategory::resetWorking()
   loadWorkingInfo();
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
 {
   (void)game_only;
@@ -596,20 +747,36 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
   }
 }
 
-/* Saves the working set trigger */
+/*
+ * Description: Saves the working information back to the base (last saved)
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorCategory::saveWorking()
 {
   cat_base = cat_curr;
 }
 
-/* Sets the ID of the category */
+/*
+ * Description: Sets the category ID in the class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorCategory::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
 }
 
-/* Sets the name of the category */
+/*
+ * Description: Sets the name of the category.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorCategory::setName(QString name)
 {
   cat_curr.setName(name.toStdString());
@@ -621,7 +788,14 @@ void EditorCategory::setName(QString name)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorCategory.
+ *
+ * Inputs: const EditorCategory &source - the source class constructor
+ * Output: EditorCategory& - pointer to the copied class
+ */
 EditorCategory& EditorCategory::operator= (const EditorCategory &source)
 {
   /* Check for self assignment */
