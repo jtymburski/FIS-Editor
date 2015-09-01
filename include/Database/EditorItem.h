@@ -7,19 +7,23 @@
 #ifndef EDITORITEM_H
 #define EDITORITEM_H
 
-#include <QWidget>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QTextEdit>
-#include <QGroupBox>
-#include <QCheckBox>
+#include <QPushButton>
 #include <QRadioButton>
-#include <QHBoxLayout>
+#include <QSpinBox>
+#include <QTextEdit>
 #include <QVBoxLayout>
-#include <QGridLayout>
+#include <QWidget>
 
 #include "Database/EditorTemplate.h"
+#include "Dialog/SpriteDialog.h"
 #include "EditorHelpers.h"
+#include "FileHandler.h"
 #include "Game/Player/Item.h"
 
 class EditorItem : public QWidget, public EditorTemplate
@@ -39,111 +43,108 @@ public:
   virtual ~EditorItem();
 
 private:
-  /* Corresponding Item */
-  Item item;
-  Item base;
-  Item working;
+  /* Check Box Widgets */
+  QCheckBox* chk_f_bubby;
+  QCheckBox* chk_f_consumed;
+  QCheckBox* chk_f_defensive;
+  QCheckBox* chk_f_equip;
+  QCheckBox* chk_f_gene;
+  QCheckBox* chk_f_healing;
+  QCheckBox* chk_f_key;
+  QCheckBox* chk_f_material;
+  QCheckBox* chk_f_money;
+  QCheckBox* chk_f_nocat;
+  QCheckBox* chk_f_offensive;
+  QCheckBox* chk_f_relieving;
+  QCheckBox* chk_f_skilllearn;
+  QCheckBox* chk_f_statalter;
+  QCheckBox* chk_m_digital;
+  QCheckBox* chk_m_electric;
+  QCheckBox* chk_m_fire;
+  QCheckBox* chk_m_forest;
+  QCheckBox* chk_m_ice;
+  QCheckBox* chk_m_nihil;
+
+  /* Combo Box Widgets */
+  QComboBox* combo_buff_preset;
+  QComboBox* combo_tier;
+  QComboBox* combo_use;
+
+  /* The thumbnail and animation frame(s) control dialogs */
+  SpriteDialog* dialog_anim;
+  FrameDialog* dialog_thumb;
+
+  /* Label Widgets */
+  QLabel* lbl_anim_img;
+  QLabel* lbl_thumb_img;
+
+  /* Line Edit Widgets */
+  QLineEdit* edit_brief_desc;
+  QLineEdit* edit_id;
+  QLineEdit* edit_msg;
+  QLineEdit* edit_name;
+  QLineEdit* edit_prefix;
 
   /* Editor ID */
   int id;
-  /* Editor Name */
-  QString name;
-  /* Set of Attributes */
-  //AttributeSet* buff_set;
 
-  /* Descriptions */
-  QLabel* brief_description_label;
-  QTextEdit* brief_description_edit;
-  QLabel* description_label;
-  QTextEdit* description_edit;
+  /* Item data */
+  Item item_base;
+  Item item_curr;
 
-  QGroupBox* composition_box;
-  QRadioButton* composition_wood;
-  QRadioButton* composition_steel;
-  QRadioButton* composition_brass;
-  QRadioButton* composition_titanium;
-  QRadioButton* composition_graphene;
-  QRadioButton* composition_physical;
-  QRadioButton* composition_nonphysical;
-  QCheckBox* composition_fire;
-  QCheckBox* composition_forest;
-  QCheckBox* composition_ice;
-  QCheckBox* composition_electric;
-  QCheckBox* composition_digital;
-  QCheckBox* composition_nihil;
+  /* Radio Button Widgets */
+  QRadioButton* radio_brass;
+  QRadioButton* radio_graphene;
+  QRadioButton* radio_nonphysical;
+  QRadioButton* radio_physical;
+  QRadioButton* radio_steel;
+  QRadioButton* radio_titanium;
+  QRadioButton* radio_wood;
 
-  QLabel* max_durability_label;
-  QLineEdit* max_durability_edit;
-  QLabel* durability_label;
-  QLineEdit* durability_edit;
+  /* Spin Box Widgets */
+  QVector<QSpinBox*> spin_buffs;
+  QSpinBox* spin_dura;
+  QSpinBox* spin_mass;
+  QSpinBox* spin_value;
 
-  QGroupBox* itemflags_box;
-  QCheckBox* itemflags_consumed;
-  QCheckBox* itemflags_offensive;
-  QCheckBox* itemflags_defensive;
-  QCheckBox* itemflags_equipment;
-  QCheckBox* itemflags_bubby;
-  QCheckBox* itemflags_keyitem;
-  QCheckBox* itemflags_material;
-  QCheckBox* itemflags_genecomp;
-  QCheckBox* itemflags_nocategory;
-  QCheckBox* itemflags_stataltering;
-  QCheckBox* itemflags_skilllearning;
-  QCheckBox* itemflags_healingitem;
-  QCheckBox* itemflags_relievingitem;
-  QCheckBox* itemflags_money;
+  /* Sprite data */
+  EditorSprite sprite_anim;
+  EditorSprite sprite_anim_base;
+  EditorSprite sprite_thumb;
+  EditorSprite sprite_thumb_base;
 
-  QGroupBox* itemtier_box;
-  QRadioButton* itemtier_trash;
-  QRadioButton* itemtier_common;
-  QRadioButton* itemtier_uncommon;
-  QRadioButton* itemtier_rare;
-  QRadioButton* itemtier_veryrare;
-  QRadioButton* itemtier_legendary;
-  QRadioButton* itemtier_none;
+  /* Text Edit Widgets */
+  QTextEdit* text_desc;
 
-  QLabel* mass_label;
-  QLineEdit* mass_edit;
-
-  QLabel* name_label;
-  QLineEdit* name_edit;
-
-  QLabel* prefix_label;
-  QLineEdit* prefix_edit;
-
-  QGroupBox* occasion_box;
-  QRadioButton* occasion_always;
-  QRadioButton* occasion_battle;
-  QRadioButton* occasion_menu;
-  QRadioButton* occasion_none;
-
-  QLabel* usingmessage_label;
-  QLineEdit* usingmessage_edit;
-  QLabel* value_label;
-  QLineEdit* value_edit;
-  QLabel* value_modifier;
-  QLineEdit* value_modifier_edit;
-
-  //TODO : Stuff to add after combination
-  // thumbnail
-  // using_skill
-  // using_animation
-  // using_sound
-
-
-
-
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorItem &source);
 
-public slots:
+  /* Creates interface layout */
+  void createLayout();
+
+  /* Loads working info into UI objects */
+  void loadWorkingInfo();
+
+/*============================================================================
+ * SIGNALS
+ *===========================================================================*/
 signals:
+  /* Name changed within item widget signal */
+  void nameChange(QString);
 
+/*============================================================================
+ * PUBLIC SLOTS
+ *===========================================================================*/
+public slots:
+
+/*============================================================================
+ * PUBLIC FUNCTIONS
+ *===========================================================================*/
 public:
-  /* Clone */
-  EditorItem* clone();
-
   /* Returns the ID of the item */
   virtual int getID() const;
 
@@ -153,13 +154,27 @@ public:
   /* Returns the name of the item for listing */
   virtual QString getNameList();
 
+  /* Loads the object data */
+  void load(XmlData data, int index);
+
+  /* Resets the working set trigger */
+  void resetWorking();
+
+  /* Saves the object data */
+  void save(FileHandler* fh, bool game_only = false);
+
+  /* Saves the working set trigger */
+  void saveWorking();
+
   /* Sets the ID of the item */
   virtual void setID(int id);
 
   /* Sets the name of the item */
   virtual void setName(QString name);
 
-/* Operator functions */
+/*============================================================================
+ * OPERATOR FUNCTIONS
+ *===========================================================================*/
 public:
   /* The copy operator */
   EditorItem& operator= (const EditorItem &source);

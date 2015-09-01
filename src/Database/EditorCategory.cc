@@ -25,6 +25,7 @@ EditorCategory::EditorCategory(QWidget *parent) : QWidget(parent)
   cat_base.triggerEditMode(true);
   cat_curr.triggerEditMode(true);
   chk_no_signals = false;
+  id = 0;
 
   /* Layouts and info loading */
   createLayout();
