@@ -167,6 +167,25 @@ void GameDatabase::addClass(EditorCategory* cat_class)
 }
 
 /* Add object in the correct spot in the array */
+void GameDatabase::addItem(EditorItem* item)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_item.size() && !inserted); i++)
+  {
+    if(data_item[i]->getID() > item->getID())
+    {
+      data_item.insert(i, item);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_item.push_back(item);
+}
+
+/* Add object in the correct spot in the array */
 void GameDatabase::addRace(EditorCategory* cat_race)
 {
   bool inserted = false;
@@ -304,6 +323,48 @@ void GameDatabase::changeClass(int index, bool forced, bool save)
 
     /* Change object */
     emit changeBattleclass(current_battleclass);
+  }
+}
+
+/* Change objects trigger call */
+void GameDatabase::changeItem(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current item is valid, either save or load */
+  if(current_item != NULL)
+  {
+    /* Create warning about changing item */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Item. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_item->saveWorking();
+      else
+        current_item->resetWorking();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change item */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_item = data_item[index];
+    else
+      current_item = NULL;
+
+    /* Change object */
+    emit changeItem(current_item);
   }
 }
 
@@ -452,6 +513,15 @@ EditorCategory* GameDatabase::getClass(int id)
 }
 
 /* Get object, based on ID */
+EditorItem* GameDatabase::getItem(int id)
+{
+  for(int i = 0; i < data_item.size(); i++)
+    if(data_item[i]->getID() == id)
+      return data_item[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
 EditorCategory* GameDatabase::getRace(int id)
 {
   for(int i = 0; i < data_race.size(); i++)
@@ -525,6 +595,26 @@ void GameDatabase::loadClass(XmlData data, int index)
       addClass(found_class);
     }
     found_class->load(data, index + 1);
+  }
+}
+
+/* Called to load object data */
+void GameDatabase::loadItem(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorItem* found_item = getItem(id);
+    if(found_item == NULL)
+    {
+      found_item = new EditorItem(id, "New Item");
+      addItem(found_item);
+    }
+    found_item->load(data, index + 1);
   }
 }
 
@@ -616,6 +706,13 @@ void GameDatabase::loadFinish()
   /* Races finish */
   for(int i = 0; i < data_race.size(); i++)
     data_race[i]->resetWorking();
+
+  /* Item finish */
+  for(int i = 0; i < data_item.size(); i++)
+  {
+    data_item[i]->updateSkills(data_skill);
+    data_item[i]->resetWorking();
+  }
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -849,10 +946,7 @@ void GameDatabase::deleteResource()
         /* -- ITEM -- */
         case EditorEnumDb::ITEMVIEW:
           if(data_item[index] == current_item)
-          {
-            emit changeItem(NULL);
-            current_item = NULL;
-          }
+            changeItem(-1, true);
           delete data_item[index];
           data_item.remove(index);
           break;
@@ -1061,8 +1155,7 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       break;
     /* -- ITEM -- */
     case EditorEnumDb::ITEMVIEW:
-      current_item = data_item[index];
-      emit changeItem(current_item);
+      changeItem(index);
       break;
     /* -- ACTION -- */
     case EditorEnumDb::ACTIONVIEW:
@@ -1163,6 +1256,11 @@ void GameDatabase::saveAll()
     for(int i = 0; i < data_race.size(); i++)
       data_race[i]->saveWorking();
 
+    /* Items */
+    changeItem(-1, true, true);
+    for(int i = 0; i < data_item.size(); i++)
+      data_item[i]->saveWorking();
+
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
   }
@@ -1244,7 +1342,7 @@ void GameDatabase::deleteAll()
   data_equipment.clear();
 
   /* Item clean-up */
-  emit changeItem(NULL);
+  changeItem(-1, true);
   for(int i = 0; i < data_item.size(); i++)
     delete data_item[i];
   data_item.clear();
@@ -1334,6 +1432,8 @@ void GameDatabase::load(FileHandler* fh)
             loadAction(data, 2);
           else if(data.getElement(2) == "class")
             loadClass(data, 2);
+          else if(data.getElement(2) == "item")
+            loadItem(data, 2);
           else if(data.getElement(2) == "race")
             loadRace(data, 2);
           else if(data.getElement(2) == "skill")
@@ -1610,6 +1710,10 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Races */
     for(int i = 0; i < data_race.size(); i++)
       data_race[i]->save(fh, game_only, "race");
+
+    /* Items */
+    for(int i = 0; i < data_item.size(); i++)
+      data_item[i]->save(fh, game_only);
 
     fh->writeXmlElementEnd();
 

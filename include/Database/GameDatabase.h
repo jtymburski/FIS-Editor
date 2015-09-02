@@ -96,6 +96,7 @@ private:
   /* Add object in the correct spot in the array */
   void addAction(EditorAction* action);
   void addClass(EditorCategory* cat_class);
+  void addItem(EditorItem* item);
   void addRace(EditorCategory* cat_race);
   void addSkill(EditorSkill* skill);
   void addSkillSet(EditorSkillset* set);
@@ -103,6 +104,7 @@ private:
   /* Change objects trigger call */
   void changeAction(int index, bool forced = false, bool save = false);
   void changeClass(int index, bool forced = false, bool save = false);
+  void changeItem(int index, bool forced = false, bool save = false);
   void changeRace(int index, bool forced = false, bool save = false);
   void changeSkill(int index, bool forced = false, bool save = false);
   void changeSkillSet(int index, bool forced = false, bool save = false);
@@ -110,6 +112,7 @@ private:
   /* Get object, based on ID */
   EditorAction* getAction(int id);
   EditorCategory* getClass(int id);
+  EditorItem* getItem(int id);
   EditorCategory* getRace(int id);
   EditorSkill* getSkill(int id);
   EditorSkillset* getSkillSet(int id);
@@ -117,6 +120,7 @@ private:
   /* Called to load object data */
   void loadAction(XmlData data, int index);
   void loadClass(XmlData data, int index);
+  void loadItem(XmlData data, int index);
   void loadRace(XmlData data, int index);
   void loadSkill(XmlData data, int index);
   void loadSkillSet(XmlData data, int index);

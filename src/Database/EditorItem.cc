@@ -65,7 +65,7 @@ void EditorItem::copySelf(const EditorItem &source)
   skill_id_base = source.skill_id_base;
   skill_total = source.skill_total;
 
-  loadWorkingInfo();
+  resetWorking();
 }
 
 /* Creates interface layout */
@@ -84,21 +84,21 @@ void EditorItem::createLayout()
   edit_id->setDisabled(true);
   layout->addWidget(edit_id, 0, 1);
 
-  /* Name */
-  QLabel* lbl_name = new QLabel("Name", this);
-  layout->addWidget(lbl_name, 1, 0);
-  edit_name = new QLineEdit(this);
-  connect(edit_name, SIGNAL(textEdited(QString)),
-          this, SLOT(changedName(QString)));
-  layout->addWidget(edit_name, 1, 1);
-
   /* Prefix */
   QLabel* lbl_prefix = new QLabel("Prefix", this);
-  layout->addWidget(lbl_prefix, 1, 2);
+  layout->addWidget(lbl_prefix, 1, 0);
   edit_prefix = new QLineEdit(this);
   connect(edit_prefix, SIGNAL(textEdited(QString)),
           this, SLOT(changedPrefix(QString)));
-  layout->addWidget(edit_prefix, 1, 3);
+  layout->addWidget(edit_prefix, 1, 1);
+
+  /* Name */
+  QLabel* lbl_name = new QLabel("Name", this);
+  layout->addWidget(lbl_name, 1, 2);
+  edit_name = new QLineEdit(this);
+  connect(edit_name, SIGNAL(textEdited(QString)),
+          this, SLOT(changedName(QString)));
+  layout->addWidget(edit_name, 1, 3);
 
   /* Brief Description */
   QLabel* lbl_brief_desc = new QLabel("Brief Description", this);
@@ -473,16 +473,27 @@ void EditorItem::updateConnected()
     {
       combo_skill->setEnabled(true);
       edit_msg->setEnabled(true);
+
+      /* Animation */
+      if(item_curr.getOccasion() == ActionOccasion::ALWAYS ||
+         item_curr.getOccasion() == ActionOccasion::BATTLE)
+      {
+        btn_anim_click->setEnabled(true);
+      }
+      else
+      {
+        buttonAnimEdit(true);
+        btn_anim_click->setDisabled(true);
+      }
     }
     else
     {
       combo_skill->setDisabled(true);
       edit_msg->setDisabled(true);
-    }
 
-    /* Animation */
-    btn_anim_click->setEnabled(true);
-    lbl_anim_img->setEnabled(true);
+      buttonAnimEdit(true);
+      btn_anim_click->setDisabled(true);
+    }
   }
   else
   {
@@ -495,7 +506,6 @@ void EditorItem::updateConnected()
     /* Animation */
     buttonAnimEdit(true);
     btn_anim_click->setDisabled(true);
-    lbl_anim_img->setDisabled(true);
   }
 
   /* ---- Just Consumable ---- */
@@ -859,7 +869,24 @@ QString EditorItem::getNameList()
 /* Loads the object data */
 void EditorItem::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  if(data.getElement(index) == "skill")
+  {
+    skill_id_base = data.getDataInteger();
+  }
+  else if(data.getElement(index) == "thumb")
+  {
+    sprite_thumb_base.setFramePath(0, EditorHelpers::getProjectDir() + "/" +
+                                  QString::fromStdString(data.getDataString()));
+  }
+  else if(data.getElement(index) == "animation")
+  {
+    sprite_anim_base.load(data, index + 1);
+  }
+  else
+  {
+    item_base.loadData(data, index, NULL,
+                       EditorHelpers::getProjectDir().toStdString() + "/");
+  }
 }
 
 /* Resets the working set trigger */
@@ -883,7 +910,155 @@ void EditorItem::resetWorking()
 /* Saves the object data */
 void EditorItem::save(FileHandler* fh, bool game_only)
 {
-  // TODO: Implementation
+  (void)game_only;
+
+  if(fh != NULL)
+  {
+    /* Processing */
+    Item blank;
+
+    /* Wrapper */
+    fh->writeXmlElement("item", "id", getID());
+
+    /* Name */
+    fh->writeXmlData("name", getName().toStdString());
+
+    /* Prefix */
+    if(item_base.getPrefix() != blank.getPrefix())
+      fh->writeXmlData("prefix", item_base.getPrefix());
+
+    /* Brief Description */
+    if(item_base.getBriefDescription() != blank.getBriefDescription())
+      fh->writeXmlData("brief_desc", item_base.getBriefDescription());
+
+    /* Description */
+    if(item_base.getDescription() != blank.getDescription())
+      fh->writeXmlData("description", item_base.getDescription());
+
+    /* Tier */
+    if(item_base.getItemTier() != blank.getItemTier())
+      fh->writeXmlData("tier", Helpers::tierToStr(item_base.getItemTier()));
+
+    /* Mass */
+    if(item_base.getMass() != blank.getMass())
+      fh->writeXmlData("mass", (int)item_base.getMass());
+
+    /* Value */
+    if(item_base.getValue() != blank.getValue())
+      fh->writeXmlData("value", (int)item_base.getValue());
+
+    /* Thumbnail */
+    if(!sprite_thumb_base.isAllNull() && sprite_thumb_base.frameCount() == 1)
+      fh->writeXmlData("thumb",
+           EditorHelpers::trimPath(sprite_thumb_base.getPath(0)).toStdString());
+
+    /* Category */
+    fh->writeXmlElement("flags");
+    if(item_base.getFlag(ItemFlags::CONSUMED))
+      fh->writeXmlData("consumed", true);
+    else if(item_base.getFlag(ItemFlags::MATERIAL))
+      fh->writeXmlData("material", true);
+    else if(item_base.getFlag(ItemFlags::KEY_ITEM))
+      fh->writeXmlData("key_item", true);
+    else
+      fh->writeXmlData("no_category", true);
+
+    /* Consumed and no category flags */
+    if(chk_f_statalter->isEnabled() &&
+       item_base.getFlag(ItemFlags::STAT_ALTERING) !=
+       blank.getFlag(ItemFlags::STAT_ALTERING))
+    {
+      fh->writeXmlData("stat_altering", true);
+    }
+    if(chk_f_skilllearn->isEnabled() &&
+       item_base.getFlag(ItemFlags::SKILL_LEARNING) !=
+       blank.getFlag(ItemFlags::SKILL_LEARNING))
+    {
+      fh->writeXmlData("skill_learning", true);
+    }
+    fh->writeXmlElementEnd();
+
+    /* Use */
+    if(combo_use->isEnabled() && item_base.getOccasion() != blank.getOccasion())
+    {
+      QString state = "";
+
+      if(item_base.getOccasion() == ActionOccasion::ALWAYS)
+        state = "always";
+      else if(item_base.getOccasion() == ActionOccasion::BATTLE)
+        state = "battle";
+      else if(item_base.getOccasion() == ActionOccasion::MENU)
+        state = "menu";
+      else
+        state = "none";
+
+      fh->writeXmlData("use", state.toStdString());
+    }
+
+    /* Use Message */
+    if(edit_msg->isEnabled() &&
+       item_base.getUseMessage() != blank.getUseMessage())
+    {
+      fh->writeXmlData("message", item_base.getUseMessage());
+    }
+
+    /* Skill */
+    if(combo_skill->isEnabled() && skill_id_base >= 0)
+      fh->writeXmlData("skill", skill_id_base);
+
+    /* Material */
+    if(box_material->isEnabled())
+    {
+      /* Base material */
+      QString mat_base = "";
+      if(radio_m_fire->isChecked())
+        mat_base = "fire";
+      else if(radio_m_forest->isChecked())
+        mat_base = "forest";
+      else if(radio_m_ice->isChecked())
+        mat_base = "ice";
+      else if(radio_m_electric->isChecked())
+        mat_base = "electric";
+      else if(radio_m_digital->isChecked())
+        mat_base = "digital";
+      else if(radio_m_nihil->isChecked())
+        mat_base = "void";
+      else
+        mat_base = "physical";
+
+      /* Secondary material */
+      QString mat_sec = "";
+      if(radio_m_wood->isChecked())
+        mat_sec = "wooden";
+      else if(radio_m_steel->isChecked())
+        mat_sec = "steel";
+      else if(radio_m_brass->isChecked())
+        mat_sec = "brass";
+      else if(radio_m_titanium->isChecked())
+        mat_sec = "titanium";
+      else if(radio_m_graphene->isChecked())
+        mat_sec = "graphene";
+
+      /* Write to file */
+      fh->writeXmlElement("material");
+      fh->writeXmlData(mat_base.toStdString(), true);
+      if(!mat_sec.isEmpty())
+        fh->writeXmlData(mat_sec.toStdString(), true);
+      fh->writeXmlElementEnd();
+    }
+
+    /* Animation */
+    if(!sprite_anim_base.isAllNull())
+      sprite_anim_base.save(fh, game_only, false, "animation");
+
+    /* Buff Set */
+    if(box_buff->isEnabled())
+      fh->writeXmlData("buff_set",
+                       AttributeSet::setToStr(item_base.getStats()));
+
+    /* End Wrapper */
+    fh->writeXmlElementEnd();
+  }
 }
 
 /* Saves the working set trigger */
