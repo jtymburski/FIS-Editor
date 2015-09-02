@@ -7,6 +7,7 @@
 #ifndef EDITORITEM_H
 #define EDITORITEM_H
 
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
@@ -20,6 +21,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Database/EditorSkill.h"
 #include "Database/EditorTemplate.h"
 #include "Dialog/SpriteDialog.h"
 #include "EditorHelpers.h"
@@ -43,30 +45,20 @@ public:
   virtual ~EditorItem();
 
 private:
+  /* Groupings */
+  QGroupBox* box_buff;
+  QGroupBox* box_material;
+
+  /* Button Widgets */
+  QPushButton* btn_anim_click;
+
   /* Check Box Widgets */
-  QCheckBox* chk_f_bubby;
-  QCheckBox* chk_f_consumed;
-  QCheckBox* chk_f_defensive;
-  QCheckBox* chk_f_equip;
-  QCheckBox* chk_f_gene;
-  QCheckBox* chk_f_healing;
-  QCheckBox* chk_f_key;
-  QCheckBox* chk_f_material;
-  QCheckBox* chk_f_money;
-  QCheckBox* chk_f_nocat;
-  QCheckBox* chk_f_offensive;
-  QCheckBox* chk_f_relieving;
   QCheckBox* chk_f_skilllearn;
   QCheckBox* chk_f_statalter;
-  QCheckBox* chk_m_digital;
-  QCheckBox* chk_m_electric;
-  QCheckBox* chk_m_fire;
-  QCheckBox* chk_m_forest;
-  QCheckBox* chk_m_ice;
-  QCheckBox* chk_m_nihil;
 
   /* Combo Box Widgets */
   QComboBox* combo_buff_preset;
+  QComboBox* combo_skill;
   QComboBox* combo_tier;
   QComboBox* combo_use;
 
@@ -93,17 +85,30 @@ private:
   Item item_curr;
 
   /* Radio Button Widgets */
-  QRadioButton* radio_brass;
-  QRadioButton* radio_graphene;
-  QRadioButton* radio_nonphysical;
-  QRadioButton* radio_physical;
-  QRadioButton* radio_steel;
-  QRadioButton* radio_titanium;
-  QRadioButton* radio_wood;
+  QRadioButton* radio_f_consumed;
+  QRadioButton* radio_f_key;
+  QRadioButton* radio_f_material;
+  QRadioButton* radio_f_nocat;
+  QRadioButton* radio_m_brass;
+  QRadioButton* radio_m_digital;
+  QRadioButton* radio_m_electric;
+  QRadioButton* radio_m_fire;
+  QRadioButton* radio_m_forest;
+  QRadioButton* radio_m_graphene;
+  QRadioButton* radio_m_ice;
+  QRadioButton* radio_m_nihil;
+  QRadioButton* radio_m_physical;
+  QRadioButton* radio_m_steel;
+  QRadioButton* radio_m_titanium;
+  QRadioButton* radio_m_wood;
+
+  /* Skill information */
+  int skill_id;
+  int skill_id_base;
+  QVector<EditorSkill*> skill_total;
 
   /* Spin Box Widgets */
   QVector<QSpinBox*> spin_buffs;
-  QSpinBox* spin_dura;
   QSpinBox* spin_mass;
   QSpinBox* spin_value;
 
@@ -115,6 +120,10 @@ private:
 
   /* Text Edit Widgets */
   QTextEdit* text_desc;
+
+  /*------------------- Constants -----------------------*/
+  const static int kFRAME_SIZE; /* Size of frame containing sprites */
+  const static int kMAX_PRESETS; /* Max number of legitimate presets */
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -129,6 +138,9 @@ protected:
   /* Loads working info into UI objects */
   void loadWorkingInfo();
 
+  /* Updates connected widgets with enabled and disabled statuses */
+  void updateConnected();
+
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
@@ -140,6 +152,35 @@ signals:
  * PUBLIC SLOTS
  *===========================================================================*/
 public slots:
+  /* Button Triggers */
+  void buttonAnimEdit(bool clean_only = false);
+  void btnReset();
+  void btnSave();
+  void buttonThumbEdit(bool clean_only = false);
+
+  /* Widget Change Triggers */
+  void changedBriefDescription(QString brief);
+  void changedBuffSet(int);
+  void changedDescription();
+  void changedElement();
+  void changedFlagCat();
+  void changedFlags(int);
+  void changedMass(int mass);
+  void changedMaterial();
+  void changedMessage(QString message);
+  void changedName(QString name);
+  void changedPrefix(QString prefix);
+  void changedSkill(int index);
+  void changedTier(int index);
+  void changedUse(int index);
+  void changedValue(int value);
+
+  /* Stat Preset Trigger */
+  void statBuffPreset(int index);
+
+  /* Update calls for frames and sprites */
+  void updateAnimation();
+  void updateThumb();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -171,6 +212,9 @@ public:
 
   /* Sets the name of the item */
   virtual void setName(QString name);
+
+  /* Update skills */
+  void updateSkills(QVector<EditorSkill*> skills);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

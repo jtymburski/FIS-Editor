@@ -619,6 +619,13 @@ void GameDatabase::loadFinish()
 }
 
 /* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updateItems()
+{
+  for(int i = 0; i < data_item.size(); i++)
+    data_item[i]->updateSkills(data_skill);
+}
+
+/* Update calls for objects (to fill in information required from others) */
 void GameDatabase::updateSkills()
 {
   for(int i = 0; i < data_skill.size(); i++)
@@ -703,6 +710,7 @@ void GameDatabase::createNewResource()
         data_item.push_back(new EditorItem(data_item.last()->getID() + 1,name));
       else
         data_item.push_back(new EditorItem(0, name));
+      data_item.last()->updateSkills(data_skill);
       break;
     /* -- ACTION -- */
     case EditorEnumDb::ACTIONVIEW:
@@ -751,6 +759,7 @@ void GameDatabase::createNewResource()
       else
         data_skill.push_back(new EditorSkill(0, name));
       data_skill.last()->updateActions(data_action);
+      updateItems();
       updateSkillSets();
       break;
     /* -- EQUIPMENT -- */
@@ -882,6 +891,7 @@ void GameDatabase::deleteResource()
             changeSkill(-1, true);
           delete data_skill[index];
           data_skill.remove(index);
+          updateItems();
           updateSkillSets();
           break;
         /* -- EQUIPMENT -- */
@@ -1166,9 +1176,14 @@ void GameDatabase::updateBottomListName(QString str)
 
   /* Update other interconnected objects */
   if(view_top->currentRow() == EditorEnumDb::ACTIONVIEW)
+  {
     updateSkills();
+  }
   else if(view_top->currentRow() == EditorEnumDb::SKILLVIEW)
+  {
+    updateItems();
     updateSkillSets();
+  }
 }
 
 /* Updates event objects in the map database class */

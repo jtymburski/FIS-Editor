@@ -106,6 +106,7 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Name changed within category widget signal */
   void nameChange(QString);
 
 /*============================================================================

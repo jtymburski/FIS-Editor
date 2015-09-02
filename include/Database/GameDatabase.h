@@ -125,6 +125,7 @@ private:
   void loadFinish();
 
   /* Update calls for objects (to fill in information required from others) */
+  void updateItems();
   void updateSkills();
   void updateSkillSets();
 
