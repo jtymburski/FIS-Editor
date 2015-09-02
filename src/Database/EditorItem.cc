@@ -15,6 +15,11 @@ const int EditorItem::kMAX_PRESETS = 6;
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorItem::EditorItem(QWidget *parent) : QWidget(parent)
 {
   dialog_anim = NULL;
@@ -33,7 +38,13 @@ EditorItem::EditorItem(QWidget *parent) : QWidget(parent)
   saveWorking();
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the item set
+ *         QString name - the name of the item set
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorItem::EditorItem(int id, QString name, QWidget* parent)
           : EditorItem(parent)
 {
@@ -42,12 +53,20 @@ EditorItem::EditorItem(int id, QString name, QWidget* parent)
   saveWorking();
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorItem &source - the source object to copy
+ */
 EditorItem::EditorItem(const EditorItem &source) : EditorItem()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorItem::~EditorItem()
 {
 }
@@ -56,7 +75,13 @@ EditorItem::~EditorItem()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorItem &source - the source to copy from
+ * Output: none
+ */
 void EditorItem::copySelf(const EditorItem &source)
 {
   item_base = source.item_base;
@@ -68,7 +93,12 @@ void EditorItem::copySelf(const EditorItem &source)
   resetWorking();
 }
 
-/* Creates interface layout */
+/*
+ * Description: Creates the item layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::createLayout()
 {
   /* Layout */
@@ -335,7 +365,13 @@ void EditorItem::createLayout()
   layout->addWidget(btn_save, 12, 6);
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Item information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::loadWorkingInfo()
 {
   /* ID */
@@ -452,7 +488,13 @@ void EditorItem::loadWorkingInfo()
   updateConnected();
 }
 
-/* Updates connected widgets with enabled and disabled statuses */
+/*
+ * Description: Updates the interconnected widget enable and disable status to
+ *              indicate what data can be edited by the UI interacting user.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::updateConnected()
 {
   /* ---- Consumable or No Category set ---- */
@@ -550,7 +592,14 @@ void EditorItem::updateConnected()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on animation sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorItem::buttonAnimEdit(bool clean_only)
 {
   /* Close and delete the dialog if button pressed */
@@ -572,19 +621,35 @@ void EditorItem::buttonAnimEdit(bool clean_only)
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Resets data in Item.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::btnReset()
 {
   resetWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Saves data in Item.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::btnSave()
 {
   saveWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on thumbnail frame edit. This will open the
+ *              frame dialog for editing the chosen frame.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorItem::buttonThumbEdit(bool clean_only)
 {
   /* Delete the dialog, if it exists */
@@ -609,13 +674,27 @@ void EditorItem::buttonThumbEdit(bool clean_only)
   }
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the brief description line edit text is
+ *              modified. Updates the working data with the new brief
+ *              description.
+ *
+ * Inputs: QString brief - the new text
+ * Output: none
+ */
 void EditorItem::changedBriefDescription(QString brief)
 {
   item_curr.setBriefDescription(brief.toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when any one spin box of the stat group set
+ *              is modified. Updates the working data with the attribute
+ *              set.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
 void EditorItem::changedBuffSet(int)
 {
   combo_buff_preset->setCurrentIndex(kMAX_PRESETS);
@@ -625,13 +704,26 @@ void EditorItem::changedBuffSet(int)
   item_curr.setBuffSet(set);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the description text edit contents are
+ *              modified. Updates the working data with the new description.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::changedDescription()
 {
   item_curr.setDescription(text_desc->toPlainText().simplified().toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when element material radio button options are
+ *              modified. Updates the working data with the new selected
+ *              material.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::changedElement()
 {
   /* Unset the old material elements */
@@ -660,7 +752,14 @@ void EditorItem::changedElement()
     item_curr.setMaterial(Material::NIHIL, true);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when flag category radio button options are
+ *              modified. Updates the working data with the new selected
+ *              item category.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::changedFlagCat()
 {
   /* Unset the old flag category */
@@ -683,7 +782,13 @@ void EditorItem::changedFlagCat()
   updateConnected();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the two check box flags of the item are
+ *              modified. Updates the working data with the additional flags.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
 void EditorItem::changedFlags(int)
 {
   bool previous_stat = item_curr.getFlag(ItemFlags::STAT_ALTERING);
@@ -716,14 +821,27 @@ void EditorItem::changedFlags(int)
   updateConnected();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the mass spin box is modified. Updates the
+ *              working data with the new item mass.
+ *
+ * Inputs: int mass - the new mass
+ * Output: none
+ */
 void EditorItem::changedMass(int mass)
 {
   if(mass >= 0)
     item_curr.setMass(mass);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when secondary material radio button options are
+ *              modified. Updates the working data with the new selected
+ *              material.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::changedMaterial()
 {
   /* Unset the old material */
@@ -746,25 +864,49 @@ void EditorItem::changedMaterial()
     item_curr.setMaterial(Material::GRAPHENE, true);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the use message line edit text is modified.
+ *              Updates the working data with the new use message.
+ *
+ * Inputs: QString message - the new text
+ * Output: none
+ */
 void EditorItem::changedMessage(QString message)
 {
   item_curr.setUseMessage(message.toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the name line edit text is modified.
+ *              Updates the working data with the new name.
+ *
+ * Inputs: QString name - the new text
+ * Output: none
+ */
 void EditorItem::changedName(QString name)
 {
   setName(name);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the prefix line edit text is modified.
+ *              Updates the working data with the new prefix.
+ *
+ * Inputs: QString prefix - the new text
+ * Output: none
+ */
 void EditorItem::changedPrefix(QString prefix)
 {
   item_curr.setPrefix(prefix.toStdString());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the skill combo box selection is changed.
+ *              This updates the connected skill in the working item.
+ *
+ * Inputs: int index - the combo box index
+ * Output: none
+ */
 void EditorItem::changedSkill(int index)
 {
   if(index > 0)
@@ -773,13 +915,25 @@ void EditorItem::changedSkill(int index)
     skill_id = -1;
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the tier combo box selection is changed.
+ *              This updates the connected tier in the working item.
+ *
+ * Inputs: int index - the combo box index
+ * Output: none
+ */
 void EditorItem::changedTier(int index)
 {
   item_curr.setItemTier((ItemTier)index);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the use (occasion) combo box selection is
+ *              changed. This updates the connected use in the working item.
+ *
+ * Inputs: int index - the combo box index
+ * Output: none
+ */
 void EditorItem::changedUse(int index)
 {
   item_curr.setOccasion((ActionOccasion)index);
@@ -788,14 +942,27 @@ void EditorItem::changedUse(int index)
   updateConnected();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the value spin box is modified. Updates the
+ *              working data with the new item value.
+ *
+ * Inputs: int value - the new value
+ * Output: none
+ */
 void EditorItem::changedValue(int value)
 {
   if(value >= 0)
     item_curr.setValue(value);
 }
 
-/* Stat Preset Trigger */
+/*
+ * Description: Slot triggered when the buff preset combo box is modified. This
+ *              loads a preset attribute set into the buff set, which can then
+ *              be further modified by the UI.
+ *
+ * Inputs: int index - the index in the combo box
+ * Output: none
+ */
 void EditorItem::statBuffPreset(int index)
 {
   if(index >= 0 && index < kMAX_PRESETS)
@@ -807,7 +974,14 @@ void EditorItem::statBuffPreset(int index)
   }
 }
 
-/* Update calls for frames and sprites */
+/*
+ * Description: Slot called to trigger an update of the visible animation frame
+ *              in the UI. Triggered upon any changes to the animation sprite
+ *              object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::updateAnimation()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -826,7 +1000,14 @@ void EditorItem::updateAnimation()
   }
 }
 
-/* Update calls for frames and sprites */
+/*
+ * Description: Slot called to trigger an update of the visible thumbnail frame
+ *              in the UI. Triggered upon any changes to the thumbnail sprite
+ *              object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::updateThumb()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -848,25 +1029,46 @@ void EditorItem::updateThumb()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the ID of the item */
+/*
+ * Description: Returns the ID of the item
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorItem::getID() const
 {
   return id;
 }
 
-/* Returns the name of the item */
+/*
+ * Description: Returns the name of the item
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorItem::getName() const
 {
   return QString::fromStdString(item_curr.getName());
 }
 
-/* Returns the name of the item for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorItem::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorItem::load(XmlData data, int index)
 {
   if(data.getElement(index) == "skill")
@@ -889,7 +1091,14 @@ void EditorItem::load(XmlData data, int index)
   }
 }
 
-/* Resets the working set trigger */
+/*
+ * Description: Resets the working information back to the base (last saved)
+ *              data. This will also automatically update all UI widgets with
+ *              the new data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::resetWorking()
 {
   buttonAnimEdit(true);
@@ -907,11 +1116,15 @@ void EditorItem::resetWorking()
   loadWorkingInfo();
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorItem::save(FileHandler* fh, bool game_only)
 {
-  (void)game_only;
-
   if(fh != NULL)
   {
     /* Processing */
@@ -1061,7 +1274,13 @@ void EditorItem::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Saves the working set trigger */
+/*
+ * Description: Saves the working information back to the base (last saved)
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorItem::saveWorking()
 {
   buttonAnimEdit(true);
@@ -1074,14 +1293,24 @@ void EditorItem::saveWorking()
   skill_id_base = skill_id;
 }
 
-/* Sets the ID of the item */
+/*
+ * Description: Sets the item ID in the class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorItem::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
 }
 
-/* Sets the name of the item */
+/*
+ * Description: Sets the name of the item.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorItem::setName(QString name)
 {
   item_curr.setName(name.toStdString());
@@ -1089,7 +1318,15 @@ void EditorItem::setName(QString name)
   emit nameChange(name);
 }
 
-/* Update skills */
+/*
+ * Description: Updates the list of available skills within the item. If this
+ *              list removes skills previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available skills list.
+ *
+ * Inputs: QVector<EditorSkill*> skills - all available skills created
+ * Output: none
+ */
 void EditorItem::updateSkills(QVector<EditorSkill*> skills)
 {
   skill_total = skills;
@@ -1100,7 +1337,14 @@ void EditorItem::updateSkills(QVector<EditorSkill*> skills)
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorItem.
+ *
+ * Inputs: const EditorItem &source - the source class constructor
+ * Output: EditorItem& - pointer to the copied class
+ */
 EditorItem& EditorItem::operator= (const EditorItem &source)
 {
   /* Check for self assignment */
