@@ -731,7 +731,7 @@ void Application::setPassWestCursor(bool checked)
  */
 void Application::setPerson(EditorPerson* person)
 {
-  qDebug() << "Person: " << person;
+  game_view->setPersonView(person);
 }
 
 /*

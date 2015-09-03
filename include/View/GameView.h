@@ -10,7 +10,6 @@
 
 #include <QStackedWidget>
 #include "View/MapView.h"
-#include "Database/EditorSkillset.h"
 #include "Database/GameDatabase.h"
 
 class GameView : public QStackedWidget
@@ -31,7 +30,8 @@ private:
   QWidget* null_equipment;
   EditorItem* null_item;
   QWidget* null_party;
-  QWidget* null_person;
+  EditorPerson* null_person;
+  //QWidget* null_person;
   EditorCategory* null_race;
   EditorSkill* null_skill;
   EditorSkillset* null_skillset;
@@ -44,7 +44,8 @@ private:
   EditorItem* view_item;
   MapView* view_map;
   QWidget* view_party;
-  QWidget* view_person;
+  EditorPerson* view_person;
+  //QWidget* view_person;
   EditorCategory* view_race;
   EditorSkill* view_skill;
   EditorSkillset* view_skillset;
@@ -81,6 +82,7 @@ public slots:
   EditorCategory* getClassView();
   EditorItem* getItemView();
   MapView* getMapView();
+  EditorPerson* getPersonView();
   EditorCategory* getRaceView();
   EditorSkill* getSkillView();
   EditorSkillset* getSkillsetView();
@@ -89,6 +91,7 @@ public slots:
   void setActionView(EditorAction* sprite);
   void setClassView(EditorCategory* class_cat);
   void setItemView(EditorItem* item);
+  void setPersonView(EditorPerson* person); // TODO
   void setRaceView(EditorCategory* class_race);
   void setSkillView(EditorSkill* action);
   void setSkillsetView(EditorSkillset* action);

@@ -34,8 +34,7 @@ EditorItem::EditorItem(QWidget *parent) : QWidget(parent)
 
   /* Layout */
   createLayout();
-  resetWorking();
-  saveWorking();
+  loadWorkingInfo();
 }
 
 /*

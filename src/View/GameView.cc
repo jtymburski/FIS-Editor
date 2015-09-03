@@ -24,7 +24,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_party = view_party;
   addWidget(view_party);
 
-  view_person = new QWidget(this);
+  view_person = new EditorPerson(this);
+  view_person->setDisabled(true);
   null_person = view_person;
   addWidget(view_person);
 
@@ -66,7 +67,6 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_action = view_action;
   addWidget(view_action);
 
-  view_person->setStyleSheet("background-color:red;");
   view_party->setStyleSheet("background-color:blue;");
   view_equipment->setStyleSheet("background-color:violet;");
   view_bubby->setStyleSheet("background-color:black;");
@@ -107,6 +107,12 @@ MapView* GameView::getMapView()
   return view_map;
 }
 
+/* Returns the Editor Person View */
+EditorPerson* GameView::getPersonView()
+{
+  return view_person;
+}
+
 /* Returns the Editor Race Category View */
 EditorCategory* GameView::getRaceView()
 {
@@ -139,7 +145,6 @@ void GameView::setActionView(EditorAction *action)
   view_action = action;
   connect(view_action,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
-  //view_action->getEditedAction();
 }
 
 /* Sets the Editor Class Category View */
@@ -172,6 +177,22 @@ void GameView::setItemView(EditorItem *item)
   view_item = item;
   connect(view_item,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
+}
+
+/* Sets the Editor Person View */
+void GameView::setPersonView(EditorPerson* person)
+{
+  /* Disconnect the old view */
+  disconnect(view_person, SIGNAL(nameChange(QString)),
+             this, SIGNAL(nameChange(QString)));
+
+  /* Set up the new view */
+  if(person == NULL)
+    person = null_person;
+  refreshView(EditorEnumDb::PERSONVIEW, view_person, person);
+  view_person = person;
+  connect(view_person, SIGNAL(nameChange(QString)),
+          this, SIGNAL(nameChange(QString)));
 }
 
 /* Sets the Editor Race Category View */
