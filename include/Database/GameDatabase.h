@@ -130,6 +130,7 @@ private:
 
   /* Update calls for objects (to fill in information required from others) */
   void updateItems();
+  void updatePersons();
   void updateSkills();
   void updateSkillSets();
 

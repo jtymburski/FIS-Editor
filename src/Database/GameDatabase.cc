@@ -723,6 +723,17 @@ void GameDatabase::updateItems()
 }
 
 /* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updatePersons()
+{
+  for(int i = 0; i < data_person.size(); i++)
+  {
+    data_person[i]->updateClasses(data_battleclass, false);
+    data_person[i]->updateItems(data_item, false);
+    data_person[i]->updateRaces(data_race);
+  }
+}
+
+/* Update calls for objects (to fill in information required from others) */
 void GameDatabase::updateSkills()
 {
   for(int i = 0; i < data_skill.size(); i++)
@@ -790,6 +801,9 @@ void GameDatabase::createNewResource()
                        new EditorPerson(data_person.last()->getID() + 1, name));
       else
         data_person.push_back(new EditorPerson(0, name));
+      data_person.last()->updateClasses(data_battleclass, false);
+      data_person.last()->updateItems(data_item, false);
+      data_person.last()->updateRaces(data_race);
       break;
     /* -- PARTY -- */
     case EditorEnumDb::PARTYVIEW:
@@ -808,6 +822,7 @@ void GameDatabase::createNewResource()
       else
         data_item.push_back(new EditorItem(0, name));
       data_item.last()->updateSkills(data_skill);
+      updatePersons();
       break;
     /* -- ACTION -- */
     case EditorEnumDb::ACTIONVIEW:
@@ -827,6 +842,7 @@ void GameDatabase::createNewResource()
                        new EditorCategory(data_race.last()->getID() + 1, name));
       else
         data_race.push_back(new EditorCategory(0, name));
+      updatePersons();
       break;
     /* -- BATTLE CLASS -- */
     case EditorEnumDb::BATTLECLASSVIEW:
@@ -836,6 +852,7 @@ void GameDatabase::createNewResource()
                 new EditorCategory(data_battleclass.last()->getID() + 1, name));
       else
         data_battleclass.push_back(new EditorCategory(0, name));
+      updatePersons();
       break;
     /* -- SKILL SET -- */
     case EditorEnumDb::SKILLSETVIEW:
@@ -949,6 +966,7 @@ void GameDatabase::deleteResource()
             changeItem(-1, true);
           delete data_item[index];
           data_item.remove(index);
+          updatePersons();
           break;
         /* -- ACTION -- */
         case EditorEnumDb::ACTIONVIEW:
@@ -964,6 +982,7 @@ void GameDatabase::deleteResource()
             changeRace(-1, true);
           delete data_race[index];
           data_race.remove(index);
+          updatePersons();
           break;
         /* -- BATTLE CLASS -- */
         case EditorEnumDb::BATTLECLASSVIEW:
@@ -971,6 +990,7 @@ void GameDatabase::deleteResource()
             changeClass(-1, true);
           delete data_battleclass[index];
           data_battleclass.remove(index);
+          updatePersons();
           break;
         /* -- SKILL SET -- */
         case EditorEnumDb::SKILLSETVIEW:
@@ -1281,6 +1301,15 @@ void GameDatabase::updateBottomListName(QString str)
   {
     updateItems();
     updateSkillSets();
+  }
+  else if(view_top->currentRow() == EditorEnumDb::BATTLECLASSVIEW ||
+          view_top->currentRow() == EditorEnumDb::RACEVIEW)
+  {
+    updatePersons();
+  }
+  else if(view_top->currentRow() == EditorEnumDb::ITEMVIEW)
+  {
+    updatePersons();
   }
 }
 

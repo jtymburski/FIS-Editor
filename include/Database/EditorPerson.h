@@ -89,6 +89,8 @@ private:
   QVector<EditorCategory*> race_total;
 
   /* Spin Box Widgets */
+  QSpinBox* spin_actionx;
+  QSpinBox* spin_actiony;
   QSpinBox* spin_credits;
   QSpinBox* spin_xp;
 
@@ -103,6 +105,7 @@ private:
   EditorSprite sprite_tp_base;
 
   /*------------------- Constants -----------------------*/
+  const static int kELEMENT_COUNT; /* Number of elements */
   const static int kFRAME_SIZE; /* Size of frame containing sprites */
 
 /*============================================================================
@@ -115,8 +118,14 @@ protected:
   /* Creates interface layout */
   void createLayout();
 
+  /* Gets element index for combo box */
+  int getElementIndex(Element ele, ElementCurve curve);
+
   /* Loads working info into UI objects */
   void loadWorkingInfo();
+
+  /* Update used working item list */
+  void updateUsedItems();
 
 /*============================================================================
  * SIGNALS
@@ -129,6 +138,37 @@ signals:
  * PUBLIC SLOTS
  *===========================================================================*/
 public slots:
+  /* Button Triggers */
+  void btnActionSprite(bool clean_only = false);
+  void btnDialogSprite(bool clean_only = false);
+  void btnFirstPerson(bool clean_only = false);
+  void btnItemAdd();
+  void btnItemRemove();
+  void btnReset();
+  void btnSave();
+  void btnThirdPerson(bool clean_only = false);
+
+  /* Widget Change Triggers */
+  void changedActionX(int value);
+  void changedActionY(int value);
+  void changedClass(int index);
+  void changedCredits(int value);
+  void changedExperience(int value);
+  void changedFlags(int);
+  void changedName(QString name);
+  void changedPrimary(QString text);
+  void changedRace(int index);
+  void changedSecondary(QString text);
+
+  /* List Index Widget Changes */
+  void listAllIndexChanged(int index);
+  void listUsedIndexChanged(int index);
+
+  /* Update calls for sprites */
+  void updateActionSprite(); // SpriteDialog
+  void updateDialogSprite(); // SpriteDialog
+  void updateFirstPerson(); // SpriteDialog
+  void updateThirdPerson(); // SpriteDialog
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -162,9 +202,12 @@ public:
   virtual void setName(QString name);
 
   /* Update Calls for data */
-  void updateClasses(QVector<EditorCategory*> classes); // TODO
-  void updateItems(QVector<EditorItem*> items); // TODO
-  void updateRaces(QVector<EditorCategory*> races); // TODO
+  void updateClasses(QVector<EditorCategory*> classes,
+                     bool update_working = true);
+  void updateItems(QVector<EditorItem*> items,
+                   bool update_working = true);
+  void updateRaces(QVector<EditorCategory*> races,
+                   bool update_working = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
