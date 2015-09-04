@@ -17,6 +17,7 @@ const int EditorPerson::kFRAME_SIZE = 200;
 
 EditorPerson::EditorPerson(QWidget* parent) : QWidget(parent)
 {
+  chk_no_signals = false;
   class_id = -1;
   class_id_base = -1;
   dialog_sprite = NULL;
@@ -58,8 +59,24 @@ EditorPerson::~EditorPerson()
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorPerson::copySelf(const EditorPerson &source)
 {
-  // TODO: Implementation
-  //person = source.person;
+  /* Core data */
+  person_base = source.person_base;
+  id = source.id;
+
+  /* Sub data */
+  sprite_as_base = source.sprite_as_base;
+  sprite_ds_base = source.sprite_ds_base;
+  sprite_fp_base = source.sprite_fp_base;
+  sprite_tp_base = source.sprite_tp_base;
+
+  class_id_base = source.class_id_base;
+  class_total = source.class_total;
+  item_ids_base = source.item_ids_base;
+  item_total = source.item_total;
+  race_id_base = source.race_id_base;
+  race_total = source.race_total;
+
+  resetWorking();
 }
 
 /* Creates interface layout */
@@ -368,10 +385,12 @@ void EditorPerson::loadWorkingInfo()
   combo_race->blockSignals(false);
 
   /* Flags */
+  chk_no_signals = true;
   chk_gain_xp->setChecked(person_curr.getPFlag(PState::CAN_GAIN_EXP));
   chk_lvl_up->setChecked(person_curr.getPFlag(PState::CAN_LEVEL_UP));
   chk_learn_skills->setChecked(person_curr.getPFlag(PState::CAN_LEARN_SKILLS));
   chk_change_equip->setChecked(person_curr.getPFlag(PState::CAN_CHANGE_EQUIP));
+  chk_no_signals = false;
 
   /* First Person Sprite */
   updateFirstPerson();
@@ -511,11 +530,16 @@ void EditorPerson::btnFirstPerson(bool clean_only)
 /* Button Triggers */
 void EditorPerson::btnItemAdd()
 {
-  if(list_items_all->currentRow() >= 0)
+  if(list_items_all->currentRow() >= 0 &&
+     list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
   {
     item_ids.push_back(item_total[list_items_all->currentRow()]->getID());
     qSort(item_ids);
     updateUsedItems();
+
+    /* Check the button */
+    if(list_items_used->count() >= (int)Person::kMAX_ITEM_DROPS)
+      btn_item_add->setDisabled(true);
   }
 }
 
@@ -526,6 +550,10 @@ void EditorPerson::btnItemRemove()
   {
     item_ids.remove(list_items_used->currentRow());
     updateUsedItems();
+
+    /* Check the button */
+    if(list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
+      btn_item_add->setEnabled(true);
   }
 }
 
@@ -600,10 +628,13 @@ void EditorPerson::changedExperience(int value)
 /* Widget Change Triggers */
 void EditorPerson::changedFlags(int)
 {
-  person_curr.setPFlag(PState::CAN_CHANGE_EQUIP, chk_change_equip->isChecked());
-  person_curr.setPFlag(PState::CAN_GAIN_EXP, chk_gain_xp->isChecked());
-  person_curr.setPFlag(PState::CAN_LEARN_SKILLS, chk_learn_skills->isChecked());
-  person_curr.setPFlag(PState::CAN_LEVEL_UP, chk_lvl_up->isChecked());
+  if(!chk_no_signals)
+  {
+    person_curr.setPFlag(PState::CAN_CHANGE_EQUIP, chk_change_equip->isChecked());
+    person_curr.setPFlag(PState::CAN_GAIN_EXP, chk_gain_xp->isChecked());
+    person_curr.setPFlag(PState::CAN_LEARN_SKILLS, chk_learn_skills->isChecked());
+    person_curr.setPFlag(PState::CAN_LEVEL_UP, chk_lvl_up->isChecked());
+  }
 }
 
 /* Widget Change Triggers */
@@ -654,7 +685,7 @@ void EditorPerson::changedSecondary(QString text)
 /* List Index Widget Changes */
 void EditorPerson::listAllIndexChanged(int index)
 {
-  if(index >= 0)
+  if(index >= 0 && list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
     btn_item_add->setEnabled(true);
   else
     btn_item_add->setDisabled(true);
@@ -770,7 +801,41 @@ QString EditorPerson::getNameList()
 /* Loads the object data */
 void EditorPerson::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  /* Parse elements */
+  if(data.getElement(index) == "class")
+  {
+    class_id_base = data.getDataInteger();
+  }
+  else if(data.getElement(index) == "loot" &&
+          data.getElement(index+1) == "item")
+  {
+    item_ids_base.push_back(data.getDataInteger());
+  }
+  else if(data.getElement(index) == "race")
+  {
+    race_id_base = data.getDataInteger();
+  }
+  else if(data.getElement(index) == "sprite_action")
+  {
+    sprite_as_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_dialog")
+  {
+    sprite_ds_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_fp")
+  {
+    sprite_fp_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_tp")
+  {
+    sprite_tp_base.load(data, index + 1);
+  }
+  else
+  {
+    person_base.loadData(data, index, NULL,
+                         EditorHelpers::getProjectDir().toStdString() + "/");
+  }
 }
 
 /* Resets the working set trigger */
@@ -796,7 +861,117 @@ void EditorPerson::resetWorking()
 /* Saves the object data */
 void EditorPerson::save(FileHandler* fh, bool game_only)
 {
-  // TODO: Implementation
+  if(fh != NULL)
+  {
+    /* Processing */
+    Person blank;
+
+    /* Wrapper */
+    fh->writeXmlElement("person", "id", getID());
+
+    /* Name */
+    fh->writeXmlData("name", getName().toStdString());
+
+    /* Primary Element */
+    if(blank.getPrimary() != person_base.getPrimary() ||
+       blank.getPrimaryCurve() != person_base.getPrimaryCurve())
+    {
+      QString elem = QString::fromStdString(Helpers::elementToString(
+                                                     person_base.getPrimary()));
+      elem = elem.toLower();
+      elem += "," + QString::fromStdString(Helpers::curveToString(
+                                                person_base.getPrimaryCurve()));
+
+      fh->writeXmlData("elem_pri", elem.toStdString());
+    }
+
+    /* Secondary Element */
+    if(blank.getSecondary() != person_base.getSecondary() ||
+       blank.getSecondaryCurve() != person_base.getSecondaryCurve())
+    {
+      QString elem = QString::fromStdString(Helpers::elementToString(
+                                                   person_base.getSecondary()));
+      elem = elem.toLower();
+      elem += "," + QString::fromStdString(Helpers::curveToString(
+                                              person_base.getSecondaryCurve()));
+
+      fh->writeXmlData("elem_sec", elem.toStdString());
+    }
+
+    /* Class */
+    if(class_id_base >= 0)
+      fh->writeXmlData("class", class_id_base);
+
+    /* Race */
+    if(race_id_base >= 0)
+      fh->writeXmlData("race", race_id_base);
+
+    /* Flags */
+    if(blank.getPFlag(PState::CAN_GAIN_EXP) !=
+       person_base.getPFlag(PState::CAN_GAIN_EXP))
+    {
+      fh->writeXmlData("can_gain_exp",
+                       person_base.getPFlag(PState::CAN_GAIN_EXP));
+    }
+    if(blank.getPFlag(PState::CAN_CHANGE_EQUIP) !=
+       person_base.getPFlag(PState::CAN_CHANGE_EQUIP))
+    {
+      fh->writeXmlData("can_change_equip",
+                       person_base.getPFlag(PState::CAN_CHANGE_EQUIP));
+    }
+    if(blank.getPFlag(PState::CAN_LEVEL_UP) !=
+       person_base.getPFlag(PState::CAN_LEVEL_UP))
+    {
+      fh->writeXmlData("can_level_up",
+                       person_base.getPFlag(PState::CAN_LEVEL_UP));
+    }
+    if(blank.getPFlag(PState::CAN_LEARN_SKILLS) !=
+       person_base.getPFlag(PState::CAN_LEARN_SKILLS))
+    {
+      fh->writeXmlData("can_learn_skills",
+                       person_base.getPFlag(PState::CAN_LEARN_SKILLS));
+    }
+
+    /* Sprites */
+    if(!sprite_as_base.isAllNull())
+      sprite_as_base.save(fh, game_only, false, "sprite_action");
+    if(!sprite_ds_base.isAllNull())
+      sprite_ds_base.save(fh, game_only, false, "sprite_dialog");
+    if(!sprite_fp_base.isAllNull())
+      sprite_fp_base.save(fh, game_only, false, "sprite_fp");
+    if(!sprite_tp_base.isAllNull())
+      sprite_tp_base.save(fh, game_only, false, "sprite_tp");
+
+    /* Action X Y */
+    if(blank.getActionX() != person_base.getActionX())
+      fh->writeXmlData("sprite_action_x", person_base.getActionX());
+    if(blank.getActionY() != person_base.getActionY())
+      fh->writeXmlData("sprite_action_y", person_base.getActionY());
+
+    /* Loot */
+    if(person_base.getCreditDrop() > 0 || person_base.getExpDrop() > 0 ||
+       item_ids_base.size() > 0)
+    {
+      fh->writeXmlElement("loot");
+
+      /* Credits */
+      if(person_base.getCreditDrop() > 0)
+        fh->writeXmlData("credit", (int)person_base.getCreditDrop());
+
+      /* Experience */
+      if(person_base.getExpDrop() > 0)
+        fh->writeXmlData("exp", (int)person_base.getExpDrop());
+
+      /* Items */
+      for(int i = 0; i < item_ids_base.size(); i++)
+        fh->writeXmlData("item", item_ids_base[i]);
+
+      fh->writeXmlElementEnd();
+    }
+
+    /* End Wrapper */
+    fh->writeXmlElementEnd();
+  }
 }
 
 /* Saves the working set trigger */

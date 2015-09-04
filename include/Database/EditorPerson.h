@@ -42,6 +42,7 @@ private:
   QCheckBox* chk_gain_xp;
   QCheckBox* chk_learn_skills;
   QCheckBox* chk_lvl_up;
+  bool chk_no_signals;
 
   /* Class information */
   int class_id;
