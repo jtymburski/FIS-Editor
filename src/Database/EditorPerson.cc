@@ -15,6 +15,11 @@ const int EditorPerson::kFRAME_SIZE = 200;
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorPerson::EditorPerson(QWidget* parent) : QWidget(parent)
 {
   chk_no_signals = false;
@@ -33,7 +38,13 @@ EditorPerson::EditorPerson(QWidget* parent) : QWidget(parent)
   loadWorkingInfo();
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the person
+ *         QString name - the name of the person
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorPerson::EditorPerson(int id, QString name, QWidget* parent)
             : EditorPerson(parent)
 {
@@ -42,12 +53,20 @@ EditorPerson::EditorPerson(int id, QString name, QWidget* parent)
   saveWorking();
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorPerson &source - the source object to copy
+ */
 EditorPerson::EditorPerson(const EditorPerson &source) : EditorPerson()
 {
   copySelf(source);
 }
 
+/*
+ * Description: Destructor function
+ */
 EditorPerson::~EditorPerson()
 {
 }
@@ -56,7 +75,13 @@ EditorPerson::~EditorPerson()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorPerson &source - the source to copy from
+ * Output: none
+ */
 void EditorPerson::copySelf(const EditorPerson &source)
 {
   /* Core data */
@@ -79,7 +104,12 @@ void EditorPerson::copySelf(const EditorPerson &source)
   resetWorking();
 }
 
-/* Creates interface layout */
+/*
+ * Description: Creates the person layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::createLayout()
 {
   /* Layout */
@@ -253,40 +283,40 @@ void EditorPerson::createLayout()
   layout->addWidget(btn_tp, 8, 2, 1, 2,
                     Qt::AlignRight | Qt::AlignTop);
 
-  /* Dialog Image */
-  QLabel* lbl_ds = new QLabel("Dialog Person", this);
-  layout->addWidget(lbl_ds, 0, 4, 1, 2, Qt::AlignHCenter);
-  lbl_ds_img = new QLabel(this);
-  lbl_ds_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-  lbl_ds_img->setStyleSheet("border: 1px solid #b9b5b2");
-  lbl_ds_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_ds_img, 1, 4, 6, 2);
-  QPushButton* btn_ds = new QPushButton(this);
-  btn_ds->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_ds->setIconSize(QSize(24,24));
-  btn_ds->setMaximumSize(30, 30);
-  connect(btn_ds, SIGNAL(clicked()), this, SLOT(btnDialogSprite()));
-  layout->addWidget(btn_ds, 1, 4, 6, 2,
-                    Qt::AlignRight | Qt::AlignTop);
-
   /* Action Image */
   QLabel* lbl_as = new QLabel("Action Person", this);
-  layout->addWidget(lbl_as, 7, 4, 1, 2, Qt::AlignHCenter);
+  layout->addWidget(lbl_as, 0, 4, 1, 2, Qt::AlignHCenter);
   lbl_as_img = new QLabel(this);
   lbl_as_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
   lbl_as_img->setStyleSheet("border: 1px solid #b9b5b2");
   lbl_as_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_as_img, 8, 4, 1, 2);
+  layout->addWidget(lbl_as_img, 1, 4, 6, 2);
   QPushButton* btn_as = new QPushButton(this);
   btn_as->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_as->setIconSize(QSize(24,24));
   btn_as->setMaximumSize(30, 30);
   connect(btn_as, SIGNAL(clicked()), this, SLOT(btnActionSprite()));
-  layout->addWidget(btn_as, 8, 4, 1, 2,
+  layout->addWidget(btn_as, 1, 4, 6, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Dialog Image */
+  QLabel* lbl_ds = new QLabel("Dialog Person", this);
+  layout->addWidget(lbl_ds, 7, 4, 1, 2, Qt::AlignHCenter);
+  lbl_ds_img = new QLabel(this);
+  lbl_ds_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_ds_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_ds_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_ds_img, 8, 4, 1, 2);
+  QPushButton* btn_ds = new QPushButton(this);
+  btn_ds->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_ds->setIconSize(QSize(24,24));
+  btn_ds->setMaximumSize(30, 30);
+  connect(btn_ds, SIGNAL(clicked()), this, SLOT(btnDialogSprite()));
+  layout->addWidget(btn_ds, 8, 4, 1, 2,
                     Qt::AlignRight | Qt::AlignTop);
 
   /* Action X */
-  QLabel* lbl_actionx = new QLabel("Action X", this);
+  QLabel* lbl_actionx = new QLabel("Dialog X", this);
   layout->addWidget(lbl_actionx, 9, 4);
   spin_actionx = new QSpinBox(this);
   spin_actionx->setMinimum(0);
@@ -296,7 +326,7 @@ void EditorPerson::createLayout()
   layout->addWidget(spin_actionx, 9, 5);
 
   /* Action Y */
-  QLabel* lbl_actiony = new QLabel("Action Y", this);
+  QLabel* lbl_actiony = new QLabel("Dialog Y", this);
   layout->addWidget(lbl_actiony, 10, 4);
   spin_actiony = new QSpinBox(this);
   spin_actiony->setMinimum(0);
@@ -314,7 +344,15 @@ void EditorPerson::createLayout()
   layout->addWidget(btn_save, 13, 9);
 }
 
-/* Gets element index for combo box */
+/*
+ * Description: Returns the index in the element combo box (primary or
+ *              secondary) for the list constructed that combines the element
+ *              and the curve.
+ *
+ * Inputs: Element ele - the element of the index
+ *         ElementCurve curve - the curve of the index
+ * Output: int - the index in the dropdown of the element and curve
+ */
 int EditorPerson::getElementIndex(Element ele, ElementCurve curve)
 {
   /* Determine element index */
@@ -333,7 +371,13 @@ int EditorPerson::getElementIndex(Element ele, ElementCurve curve)
   return 0;
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Person information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::loadWorkingInfo()
 {
   /* ID */
@@ -421,7 +465,15 @@ void EditorPerson::loadWorkingInfo()
   updateUsedItems();
 }
 
-/* Update used working item list */
+/*
+ * Description: Updates the used working item list to cross reference with the
+ *              selected indexes in the item array. If the index is not found
+ *              in the total list of items, it deletes it from the used item
+ *              list.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateUsedItems()
 {
   int index = list_items_used->currentRow();
@@ -464,7 +516,14 @@ void EditorPerson::updateUsedItems()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on action sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnActionSprite(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -485,7 +544,14 @@ void EditorPerson::btnActionSprite(bool clean_only)
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on dialog sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnDialogSprite(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -506,7 +572,14 @@ void EditorPerson::btnDialogSprite(bool clean_only)
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on first person sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnFirstPerson(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -527,7 +600,14 @@ void EditorPerson::btnFirstPerson(bool clean_only)
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on item add for list widget displaying all items
+ *              that can be included as loot. Will update the used items list
+ *              if a valid item is added.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::btnItemAdd()
 {
   if(list_items_all->currentRow() >= 0 &&
@@ -543,7 +623,14 @@ void EditorPerson::btnItemAdd()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on item remove for list widget displaying used
+ *              items that are included as loot. Will update the used items
+ *              list if a valid item is removed.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::btnItemRemove()
 {
   if(list_items_used->currentRow() >= 0)
@@ -557,19 +644,36 @@ void EditorPerson::btnItemRemove()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Resets data in Person.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::btnReset()
 {
   resetWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by save button. Saves data in Person.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::btnSave()
 {
   saveWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on third person sprite edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnThirdPerson(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -590,19 +694,37 @@ void EditorPerson::btnThirdPerson(bool clean_only)
   }
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the action x spin box is modified. Updates
+ *              the working data with the new action x location.
+ *
+ * Inputs: int value - the new action x for top left of dialog sprite
+ * Output: none
+ */
 void EditorPerson::changedActionX(int value)
 {
   person_curr.setActionXY(value, person_curr.getActionY());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the action y spin box is modified. Updates
+ *              the working data with the new action y location.
+ *
+ * Inputs: int value - the new action y for top left of dialog sprite
+ * Output: none
+ */
 void EditorPerson::changedActionY(int value)
 {
   person_curr.setActionXY(person_curr.getActionX(), value);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the class drop down selection is modified.
+ *              Updates the working data with the new class ID.
+ *
+ * Inputs: int index - the new index in the combo box
+ * Output: none
+ */
 void EditorPerson::changedClass(int index)
 {
   if(index > 0)
@@ -611,21 +733,39 @@ void EditorPerson::changedClass(int index)
     class_id = -1;
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the loot credit amount is modified. Updates
+ *              the working data with the new credit amount
+ *
+ * Inputs: int value - the newly modified credit value
+ * Output: none
+ */
 void EditorPerson::changedCredits(int value)
 {
   person_curr.setLoot(value, person_curr.getExpDrop(),
                       person_curr.getItemDrops());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the loot XP amount is modified. Updates
+ *              the working data with the new XP amount
+ *
+ * Inputs: int value - the newly modified XP value
+ * Output: none
+ */
 void EditorPerson::changedExperience(int value)
 {
   person_curr.setLoot(person_curr.getCreditDrop(), value,
                       person_curr.getItemDrops());
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the four check box flags of the person are
+ *              modified. Updates the working data with the additional flags.
+ *
+ * Inputs: int - not used
+ * Output: none
+ */
 void EditorPerson::changedFlags(int)
 {
   if(!chk_no_signals)
@@ -637,13 +777,26 @@ void EditorPerson::changedFlags(int)
   }
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the name line edit text is modified.
+ *              Updates the working data with the new name.
+ *
+ * Inputs: QString name - the new text
+ * Output: none
+ */
 void EditorPerson::changedName(QString name)
 {
   setName(name);
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the primary element/curve selection for
+ *              the person is modified. The two parts are delimited by '-'.
+ *              Updates the working data with the new primary element and curve
+ *
+ * Inputs: QString text - the text of the new index in the combo box
+ * Output: none
+ */
 void EditorPerson::changedPrimary(QString text)
 {
   QStringList split = text.split('-');
@@ -658,7 +811,13 @@ void EditorPerson::changedPrimary(QString text)
   }
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the race drop down selection is modified.
+ *              Updates the working data with the new race ID.
+ *
+ * Inputs: int index - the new index in the combo box
+ * Output: none
+ */
 void EditorPerson::changedRace(int index)
 {
   if(index > 0)
@@ -667,7 +826,15 @@ void EditorPerson::changedRace(int index)
     race_id = -1;
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the secondary element/curve selection for
+ *              the person is modified. The two parts are delimited by '-'.
+ *              Updates the working data with the new secondary element and
+ *              curve
+ *
+ * Inputs: QString text - the text of the new index in the combo box
+ * Output: none
+ */
 void EditorPerson::changedSecondary(QString text)
 {
   QStringList split = text.split('-');
@@ -682,7 +849,14 @@ void EditorPerson::changedSecondary(QString text)
   }
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the loot item list of
+ *              all available items is changed. Enables or disables the add
+ *              button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorPerson::listAllIndexChanged(int index)
 {
   if(index >= 0 && list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
@@ -691,7 +865,13 @@ void EditorPerson::listAllIndexChanged(int index)
     btn_item_add->setDisabled(true);
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the loot item list of
+ *              used items is changed. Enables or disables the remove button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorPerson::listUsedIndexChanged(int index)
 {
   if(index >= 0)
@@ -700,7 +880,14 @@ void EditorPerson::listUsedIndexChanged(int index)
     btn_item_rem->setDisabled(true);
 }
 
-/* Update calls for sprites */
+/*
+ * Description: Slot called to trigger an update of the visible action sprite
+ *              frame in the UI. Triggered upon any changes to the action
+ *              sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateActionSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -719,7 +906,14 @@ void EditorPerson::updateActionSprite()
   }
 }
 
-/* Update calls for sprites */
+/*
+ * Description: Slot called to trigger an update of the visible dialog sprite
+ *              frame in the UI. Triggered upon any changes to the dialog
+ *              sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateDialogSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -738,7 +932,14 @@ void EditorPerson::updateDialogSprite()
   }
 }
 
-/* Update calls for sprites */
+/*
+ * Description: Slot called to trigger an update of the visible first person
+ *              frame in the UI. Triggered upon any changes to the first
+ *              person sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateFirstPerson()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -757,7 +958,14 @@ void EditorPerson::updateFirstPerson()
   }
 }
 
-/* Update calls for sprites */
+/*
+ * Description: Slot called to trigger an update of the visible third person
+ *              frame in the UI. Triggered upon any changes to the third
+ *              person sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateThirdPerson()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -780,25 +988,46 @@ void EditorPerson::updateThirdPerson()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the ID of the person */
+/*
+ * Description: Returns the ID of the person
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorPerson::getID() const
 {
   return id;
 }
 
-/* Returns the name of the person */
+/*
+ * Description: Returns the name of the person
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorPerson::getName() const
 {
   return QString::fromStdString(person_curr.getName());
 }
 
-/* Returns the name of the person for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorPerson::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorPerson::load(XmlData data, int index)
 {
   /* Parse elements */
@@ -838,7 +1067,14 @@ void EditorPerson::load(XmlData data, int index)
   }
 }
 
-/* Resets the working set trigger */
+/*
+ * Description: Resets the working information back to the base (last saved)
+ *              data. This will also automatically update all UI widgets with
+ *              the new data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::resetWorking()
 {
   btnActionSprite(true);
@@ -858,7 +1094,13 @@ void EditorPerson::resetWorking()
   loadWorkingInfo();
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorPerson::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
@@ -907,6 +1149,7 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
       fh->writeXmlData("race", race_id_base);
 
     /* Flags */
+    fh->writeXmlElement("flags");
     if(blank.getPFlag(PState::CAN_GAIN_EXP) !=
        person_base.getPFlag(PState::CAN_GAIN_EXP))
     {
@@ -931,6 +1174,7 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
       fh->writeXmlData("can_learn_skills",
                        person_base.getPFlag(PState::CAN_LEARN_SKILLS));
     }
+    fh->writeXmlElementEnd();
 
     /* Sprites */
     if(!sprite_as_base.isAllNull())
@@ -974,7 +1218,13 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
   }
 }
 
-/* Saves the working set trigger */
+/*
+ * Description: Saves the working information back to the base (last saved)
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::saveWorking()
 {
   btnActionSprite(true);
@@ -990,14 +1240,24 @@ void EditorPerson::saveWorking()
   race_id_base = race_id;
 }
 
-/* Sets the ID of the person */
+/*
+ * Description: Sets the person ID in the class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorPerson::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
 }
 
-/* Sets the name of the person */
+/*
+ * Description: Sets the name of the person.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorPerson::setName(QString name)
 {
   person_curr.setName(name.toStdString());
@@ -1005,7 +1265,15 @@ void EditorPerson::setName(QString name)
   emit nameChange(name);
 }
 
-/* Update Calls for data */
+/*
+ * Description: Updates the list of available classes within the person. If this
+ *              list removes classes previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available classes drop down.
+ *
+ * Inputs: QVector<EditorCategory*> classes - all available classes created
+ * Output: none
+ */
 void EditorPerson::updateClasses(QVector<EditorCategory*> classes,
                                  bool update_working)
 {
@@ -1014,7 +1282,15 @@ void EditorPerson::updateClasses(QVector<EditorCategory*> classes,
     loadWorkingInfo();
 }
 
-/* Update Calls for data */
+/*
+ * Description: Updates the list of available items within the person. If this
+ *              list removes items previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available items list .
+ *
+ * Inputs: QVector<EditorItem*> items - all available items created
+ * Output: none
+ */
 void EditorPerson::updateItems(QVector<EditorItem*> items, bool update_working)
 {
   item_total = items;
@@ -1022,7 +1298,15 @@ void EditorPerson::updateItems(QVector<EditorItem*> items, bool update_working)
     loadWorkingInfo();
 }
 
-/* Update Calls for data */
+/*
+ * Description: Updates the list of available races within the person. If this
+ *              list removes races previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available races drop down.
+ *
+ * Inputs: QVector<EditorCategory*> races - all available races created
+ * Output: none
+ */
 void EditorPerson::updateRaces(QVector<EditorCategory*> races,
                                bool update_working)
 {
@@ -1035,7 +1319,14 @@ void EditorPerson::updateRaces(QVector<EditorCategory*> races,
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorPerson.
+ *
+ * Inputs: const EditorPerson &source - the source class constructor
+ * Output: EditorPerson& - pointer to the copied class
+ */
 EditorPerson& EditorPerson::operator= (const EditorPerson &source)
 {
   /* Check for self assignment */

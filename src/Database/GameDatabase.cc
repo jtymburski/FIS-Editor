@@ -186,6 +186,25 @@ void GameDatabase::addItem(EditorItem* item)
 }
 
 /* Add object in the correct spot in the array */
+void GameDatabase::addPerson(EditorPerson* person)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_person.size() && !inserted); i++)
+  {
+    if(data_person[i]->getID() > person->getID())
+    {
+      data_person.insert(i, person);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, insert at tail */
+  if(!inserted)
+    data_person.push_back(person);
+}
+
+/* Add object in the correct spot in the array */
 void GameDatabase::addRace(EditorCategory* cat_race)
 {
   bool inserted = false;
@@ -369,6 +388,48 @@ void GameDatabase::changeItem(int index, bool forced, bool save)
 }
 
 /* Change objects trigger call */
+void GameDatabase::changePerson(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+
+  /* If current person is valid, either save or load */
+  if(current_person != NULL)
+  {
+    /* Create warning about changing person */
+    QMessageBox msg_box;
+    msg_box.setText(QString("Changing to another Person. All unsaved ") +
+                    QString("changes to the existing will be lost."));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if(forced || msg_box.exec() == QMessageBox::Yes)
+    {
+      proceed = true;
+      if(save)
+        current_person->saveWorking();
+      else
+        current_person->resetWorking();
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change person */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_person = data_person[index];
+    else
+      current_person = NULL;
+
+    /* Change object */
+    emit changePerson(current_person);
+  }
+}
+
+/* Change objects trigger call */
 void GameDatabase::changeRace(int index, bool forced, bool save)
 {
   bool proceed = forced;
@@ -522,6 +583,15 @@ EditorItem* GameDatabase::getItem(int id)
 }
 
 /* Get object, based on ID */
+EditorPerson* GameDatabase::getPerson(int id)
+{
+  for(int i = 0; i < data_person.size(); i++)
+    if(data_person[i]->getID() == id)
+      return data_person[i];
+  return NULL;
+}
+
+/* Get object, based on ID */
 EditorCategory* GameDatabase::getRace(int id)
 {
   for(int i = 0; i < data_race.size(); i++)
@@ -615,6 +685,26 @@ void GameDatabase::loadItem(XmlData data, int index)
       addItem(found_item);
     }
     found_item->load(data, index + 1);
+  }
+}
+
+/* Called to load object data */
+void GameDatabase::loadPerson(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorPerson* found_person = getPerson(id);
+    if(found_person == NULL)
+    {
+      found_person = new EditorPerson(id, "New Person");
+      addPerson(found_person);
+    }
+    found_person->load(data, index + 1);
   }
 }
 
@@ -713,6 +803,15 @@ void GameDatabase::loadFinish()
     data_item[i]->updateSkills(data_skill);
     data_item[i]->resetWorking();
   }
+
+  /* Persons finish */
+  for(int i = 0; i < data_person.size(); i++)
+  {
+    data_person[i]->updateClasses(data_battleclass, false);
+    data_person[i]->updateItems(data_item, false);
+    data_person[i]->updateRaces(data_race, false);
+    data_person[i]->resetWorking();
+  }
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -793,6 +892,15 @@ void GameDatabase::createNewResource()
               this, SLOT(createNewMap()));
       mapsize_dialog->show();
       break;
+    /* -- PARTY -- */
+    case EditorEnumDb::PARTYVIEW:
+      name = "New Party";
+      if(data_party.size() > 0)
+        data_party.push_back(
+                         new EditorParty(data_party.last()->getID() + 1, name));
+      else
+        data_party.push_back(new EditorParty(0, name));
+      break;
     /* -- PERSON -- */
     case EditorEnumDb::PERSONVIEW:
       name = "New Person";
@@ -804,15 +912,6 @@ void GameDatabase::createNewResource()
       data_person.last()->updateClasses(data_battleclass, false);
       data_person.last()->updateItems(data_item, false);
       data_person.last()->updateRaces(data_race);
-      break;
-    /* -- PARTY -- */
-    case EditorEnumDb::PARTYVIEW:
-      name = "New Party";
-      if(data_party.size() > 0)
-        data_party.push_back(
-                         new EditorParty(data_party.last()->getID() + 1, name));
-      else
-        data_party.push_back(new EditorParty(0, name));
       break;
     /* -- ITEM -- */
     case EditorEnumDb::ITEMVIEW:
@@ -909,7 +1008,7 @@ void GameDatabase::deleteResource()
 {
   if(view_bottom->currentRow() >= 0)
   {
-    int index = view_bottom->currentRow();
+    int index = view_bottom-> currentRow();
 
     /* Get the category */
     QString category = view_top->currentItem()->text();
@@ -940,16 +1039,6 @@ void GameDatabase::deleteResource()
           delete data_map[index];
           data_map.remove(index);
           break;
-        /* -- PERSON -- */
-        case EditorEnumDb::PERSONVIEW:
-          if(data_person[index] == current_person)
-          {
-            emit changePerson(NULL);
-            current_person = NULL;
-          }
-          delete data_person[index];
-          data_person.remove(index);
-          break;
         /* -- PARTY -- */
         case EditorEnumDb::PARTYVIEW:
           if(data_party[index] == current_party)
@@ -959,6 +1048,13 @@ void GameDatabase::deleteResource()
           }
           delete data_party[index];
           data_party.remove(index);
+          break;
+        /* -- PERSON -- */
+        case EditorEnumDb::PERSONVIEW:
+          if(data_person[index] == current_person)
+            changePerson(-1, true);
+          delete data_person[index];
+          data_person.remove(index);
           break;
         /* -- ITEM -- */
         case EditorEnumDb::ITEMVIEW:
@@ -1062,17 +1158,17 @@ void GameDatabase::duplicateResource()
         data_map.last()->setID(id);
         data_map.last()->setTileIcons(data_map[index]->getTileIcons());
         break;
-      /* -- PERSON -- */
-      case EditorEnumDb::PERSONVIEW:
-        id = data_person.last()->getID();
-        *data_person.last() = *data_person[index];
-        data_person.last()->setID(id);
-        break;
       /* -- PARTY -- */
       case EditorEnumDb::PARTYVIEW:
         id = data_party.last()->getID();
         *data_party.last() = *data_party[index];
         data_party.last()->setID(id);
+        break;
+      /* -- PERSON -- */
+      case EditorEnumDb::PERSONVIEW:
+        id = data_person.last()->getID();
+        *data_person.last() = *data_person[index];
+        data_person.last()->setID(id);
         break;
       /* -- ITEM -- */
       case EditorEnumDb::ITEMVIEW:
@@ -1163,15 +1259,14 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       current_map = data_map[index];
       emit changeMap(current_map);
       break;
-    /* -- PERSON -- */
-    case EditorEnumDb::PERSONVIEW:
-      current_person = data_person[index];
-      emit changePerson(current_person);
-      break;
     /* -- PARTY -- */
     case EditorEnumDb::PARTYVIEW:
       current_party = data_party[index];
       emit changeParty(current_party);
+      break;
+    /* -- PERSON -- */
+    case EditorEnumDb::PERSONVIEW:
+      changePerson(index);
       break;
     /* -- ITEM -- */
     case EditorEnumDb::ITEMVIEW:
@@ -1281,6 +1376,11 @@ void GameDatabase::saveAll()
     for(int i = 0; i < data_item.size(); i++)
       data_item[i]->saveWorking();
 
+    /* Persons */
+    changePerson(-1, true, true);
+    for(int i = 0; i < data_person.size(); i++)
+      data_person[i]->saveWorking();
+
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
   }
@@ -1353,7 +1453,7 @@ void GameDatabase::deleteAll()
   data_party.clear();
 
   /* Person clean-up */
-  emit changePerson(NULL);
+  changePerson(-1, true);
   for(int i = 0; i < data_person.size(); i++)
     delete data_person[i];
   data_person.clear();
@@ -1463,6 +1563,8 @@ void GameDatabase::load(FileHandler* fh)
             loadClass(data, 2);
           else if(data.getElement(2) == "item")
             loadItem(data, 2);
+          else if(data.getElement(2) == "person")
+            loadPerson(data, 2);
           else if(data.getElement(2) == "race")
             loadRace(data, 2);
           else if(data.getElement(2) == "skill")
@@ -1743,6 +1845,10 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     /* Items */
     for(int i = 0; i < data_item.size(); i++)
       data_item[i]->save(fh, game_only);
+
+    /* Persons */
+    for(int i = 0; i < data_person.size(); i++)
+      data_person[i]->save(fh, game_only);
 
     fh->writeXmlElementEnd();
 
