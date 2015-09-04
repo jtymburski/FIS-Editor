@@ -663,7 +663,7 @@ void Application::setMap(EditorMap* map)
  */
 void Application::setParty(EditorParty* party)
 {
-  qDebug() << "Party: " << party;
+  game_view->setPartyView(party);
 }
 
 /*

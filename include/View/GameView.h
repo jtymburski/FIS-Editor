@@ -29,9 +29,8 @@ private:
   QWidget* null_bubby;
   QWidget* null_equipment;
   EditorItem* null_item;
-  QWidget* null_party;
+  EditorParty* null_party;
   EditorPerson* null_person;
-  //QWidget* null_person;
   EditorCategory* null_race;
   EditorSkill* null_skill;
   EditorSkillset* null_skillset;
@@ -43,9 +42,8 @@ private:
   QWidget* view_equipment;
   EditorItem* view_item;
   MapView* view_map;
-  QWidget* view_party;
+  EditorParty* view_party;
   EditorPerson* view_person;
-  //QWidget* view_person;
   EditorCategory* view_race;
   EditorSkill* view_skill;
   EditorSkillset* view_skillset;
@@ -82,6 +80,7 @@ public slots:
   EditorCategory* getClassView();
   EditorItem* getItemView();
   MapView* getMapView();
+  EditorParty* getPartyView();
   EditorPerson* getPersonView();
   EditorCategory* getRaceView();
   EditorSkill* getSkillView();
@@ -91,7 +90,8 @@ public slots:
   void setActionView(EditorAction* sprite);
   void setClassView(EditorCategory* class_cat);
   void setItemView(EditorItem* item);
-  void setPersonView(EditorPerson* person); // TODO
+  void setPartyView(EditorParty* party);
+  void setPersonView(EditorPerson* person);
   void setRaceView(EditorCategory* class_race);
   void setSkillView(EditorSkill* action);
   void setSkillsetView(EditorSkillset* action);

@@ -166,10 +166,10 @@ public slots:
   void listUsedIndexChanged(int index);
 
   /* Update calls for sprites */
-  void updateActionSprite(); // SpriteDialog
-  void updateDialogSprite(); // SpriteDialog
-  void updateFirstPerson(); // SpriteDialog
-  void updateThirdPerson(); // SpriteDialog
+  void updateActionSprite();
+  void updateDialogSprite();
+  void updateFirstPerson();
+  void updateThirdPerson();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

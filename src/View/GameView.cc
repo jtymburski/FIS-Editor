@@ -20,7 +20,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           view_map, SLOT(updatedMaps(QVector<QString>)));
 
-  view_party = new QWidget(this);
+  view_party = new EditorParty(this);
+  view_party->setDisabled(true);
   null_party = view_party;
   addWidget(view_party);
 
@@ -67,7 +68,6 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_action = view_action;
   addWidget(view_action);
 
-  view_party->setStyleSheet("background-color:blue;");
   view_equipment->setStyleSheet("background-color:violet;");
   view_bubby->setStyleSheet("background-color:black;");
 
@@ -105,6 +105,12 @@ EditorItem* GameView::getItemView()
 MapView* GameView::getMapView()
 {
   return view_map;
+}
+
+/* Returns the Editor Party View */
+EditorParty* GameView::getPartyView()
+{
+  return view_party;
 }
 
 /* Returns the Editor Person View */
@@ -177,6 +183,22 @@ void GameView::setItemView(EditorItem *item)
   view_item = item;
   connect(view_item,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
+}
+
+/* Sets the Editor Party View */
+void GameView::setPartyView(EditorParty* party)
+{
+  /* Disconnect the old view */
+  disconnect(view_party, SIGNAL(nameChange(QString)),
+             this, SIGNAL(nameChange(QString)));
+
+  /* Set up the new view */
+  if(party == NULL)
+    party = null_party;
+  refreshView(EditorEnumDb::PARTYVIEW, view_party, party);
+  view_party = party;
+  connect(view_party, SIGNAL(nameChange(QString)),
+          this, SIGNAL(nameChange(QString)));
 }
 
 /* Sets the Editor Person View */
