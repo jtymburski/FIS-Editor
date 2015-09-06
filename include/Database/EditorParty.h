@@ -90,7 +90,6 @@ protected:
   int getInvMass();
   int getInvMassRemain();
   EditorItem* getItem(int id);
-  //QPair<int,int>* getItemCurr(int id);
 
   /* Loads working info into UI objects */
   void loadWorkingInfo();
@@ -127,9 +126,11 @@ public slots:
 
   /* List Index Widget Changes */
   void listItemAllChanged(int index);
+  void listItemAllDClicked(QListWidgetItem*);
   void listItemEdited(QListWidgetItem*);
   void listItemUsedChanged(int index);
   void listPersonAllChanged(int index);
+  void listPersonAllDClicked(QListWidgetItem*);
   void listPersonEdited(QListWidgetItem*);
   void listPersonUsedChanged(int index);
 

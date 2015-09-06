@@ -51,9 +51,18 @@ EditorParty::~EditorParty()
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorParty::copySelf(const EditorParty &source)
 {
-  // TODO: Implementation
-  //name = source.name;
-  //party = source.party;
+  /* Core data */
+  party_base = source.party_base;
+  id = source.id;
+  name_base = source.name_base;
+
+  /* Sub data */
+  item_set_base = source.item_set_base;
+  items_all = source.items_all;
+  person_set_base = source.person_set_base;
+  persons_all = source.persons_all;
+
+  resetWorking();
 }
 
 /* Creates interface layout */
@@ -110,6 +119,8 @@ void EditorParty::createLayout()
   list_items_all = new QListWidget(this);
   connect(list_items_all, SIGNAL(currentRowChanged(int)),
           this, SLOT(listItemAllChanged(int)));
+  connect(list_items_all, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(listItemAllDClicked(QListWidgetItem*)));
   layout->addWidget(list_items_all, 5, 0, 1, 2);
   list_items_used = new QListWidget(this);
   connect(list_items_used, SIGNAL(currentRowChanged(int)),
@@ -134,6 +145,8 @@ void EditorParty::createLayout()
   list_persons_all = new QListWidget(this);
   connect(list_persons_all, SIGNAL(currentRowChanged(int)),
           this, SLOT(listPersonAllChanged(int)));
+  connect(list_persons_all, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+          this, SLOT(listPersonAllDClicked(QListWidgetItem*)));
   layout->addWidget(list_persons_all, 2, 3, 4, 1);
   list_persons_used = new QListWidget(this);
   connect(list_persons_used, SIGNAL(currentRowChanged(int)),
@@ -187,17 +200,6 @@ EditorItem* EditorParty::getItem(int id)
   return NULL;
 }
 
-/* Returns item by ID - from total list */
-//QPair<int,int>* EditorParty::getItemCurr(int id)
-//{
-  //if(item_set.contains(id))
-  //  return item_set.value(id);
-  //for(int i = 0; i < item_set.size(); i++)
-  //  if(item_set[i].first == id)
-  //    return &item_set[i];
-//  return NULL;
-//}
-
 /* Loads working info into UI objects */
 void EditorParty::loadWorkingInfo()
 {
@@ -234,11 +236,13 @@ void EditorParty::sortPersons()
 
   /* Go through map and add back to set */
   person_set.clear();
-  QMapIterator<int,int> i(sort_set);
-  while(i.hasNext())
+  QList<int> keys = sort_set.uniqueKeys();
+  for(int i = 0; i < keys.size(); i++)
   {
-    i.next();
-    person_set.push_back(QPair<int,int>(i.key(), i.value()));
+    QList<int> vals = sort_set.values(keys[i]);
+    qSort(vals);
+    for(int j = 0; j < vals.size(); j++)
+      person_set.push_back(QPair<int,int>(keys[i],vals[j]));
   }
 }
 
@@ -371,7 +375,7 @@ void EditorParty::btnItemAdd()
         if(max > 0)
         {
           bool ok;
-          int count = QInputDialog::getInt(this, "Count?", "ItemCount:", 1, 1,
+          int count = QInputDialog::getInt(this, "Count?", "Item Count:", 1, 1,
                                            max, 1, &ok);
           if(ok)
           {
@@ -418,8 +422,6 @@ void EditorParty::btnItemRemove()
 /* Button Triggers */
 void EditorParty::btnPersonAdd()
 {
-  // TODO: ADD LIMITER FOR WHEN PARTY IS ACTUALLY FULL?
-
   if(list_persons_all->currentRow() >= 0)
   {
     if(person_set.size() < (int)party_curr.getMaxSize())
@@ -495,9 +497,48 @@ void EditorParty::listItemAllChanged(int index)
 }
 
 /* List Index Widget Changes */
+void EditorParty::listItemAllDClicked(QListWidgetItem*)
+{
+  btnItemAdd();
+}
+
+/* List Index Widget Changes */
 void EditorParty::listItemEdited(QListWidgetItem*)
 {
-  qDebug() << "TODO: DOUBLE CLICK ITEM";
+  if(list_items_used->currentRow() >= 0)
+  {
+    QString list_item = list_items_used->currentItem()->text();
+    QStringList list_split = list_item.split(':');
+    if(list_split.size() == 2)
+    {
+      /* Try to find item first */
+      int item_id = list_split.front().toInt();
+      bool exists = item_set.contains(item_id);
+      if(exists)
+      {
+        EditorItem* ref = getItem(item_id);
+        int max = Inventory::kMIN_EACH_ITEM - item_set.value(item_id);
+        if(ref->getMass() > 0)
+        {
+          int item_fit = (int)(getInvMassRemain() * 1.0 / ref->getMass());
+          if(item_fit < max)
+            max = item_fit;
+        }
+        max += item_set.value(item_id);
+
+        /* Get new count */
+        bool ok;
+        int count = QInputDialog::getInt(this, "Count?", "Item Count:",
+                                         item_set.value(item_id), 1,
+                                         max, 1, &ok);
+        if(ok)
+        {
+          item_set.insert(item_id, count);
+          updateItemList();
+        }
+      }
+    }
+  }
 }
 
 /* List Index Widget Changes */
@@ -519,9 +560,29 @@ void EditorParty::listPersonAllChanged(int index)
 }
 
 /* List Index Widget Changes */
+void EditorParty::listPersonAllDClicked(QListWidgetItem*)
+{
+  btnPersonAdd();
+}
+
+/* List Index Widget Changes */
 void EditorParty::listPersonEdited(QListWidgetItem*)
 {
-  qDebug() << "TODO: DOUBLE CLICK PERSON";
+  int index = list_persons_used->currentRow();
+
+  if(index >= 0 && index < person_set.size())
+  {
+    /* Get the new level */
+    bool ok;
+    int lvl = QInputDialog::getInt(this, "Level?", "Person Level:",
+                                   person_set[index].second, 1,
+                                   EditorEnumDb::kMAX_PERSON_LVL, 1, &ok);
+    if(ok)
+    {
+      person_set[index].second = lvl;
+      updatePersonList();
+    }
+  }
 }
 
 /* List Index Widget Changes */
@@ -558,7 +619,41 @@ QString EditorParty::getNameList()
 /* Loads the object data */
 void EditorParty::load(XmlData data, int index)
 {
-  // TODO: Implementation
+  /* Parse elements */
+  if(data.getElement(index) == "name")
+  {
+    name_base = QString::fromStdString(data.getDataString());
+  }
+  else if(data.getElement(index) == "person")
+  {
+    QString set = QString::fromStdString(data.getDataString());
+    QStringList split_set = set.split(',');
+    if(split_set.size() == 2)
+    {
+      int person_id = split_set.front().toInt();
+      int person_lvl = split_set.back().toInt();
+      if(person_lvl > 0)
+        person_set_base.push_back(QPair<int,int>(person_id, person_lvl));
+    }
+  }
+  else if(data.getElement(index) == "inventory" &&
+          data.getElement(index + 1) == "item")
+  {
+    QString set = QString::fromStdString(data.getDataString());
+    QStringList split_set = set.split(',');
+    if(split_set.size() == 2)
+    {
+      int item_id = split_set.front().toInt();
+      int item_count = split_set.back().toInt();
+      if(item_count > 0)
+        item_set_base.insert(item_id, item_count);
+    }
+  }
+  else
+  {
+    party_base.loadData(data, index, NULL,
+                        EditorHelpers::getProjectDir().toStdString() + "/");
+  }
 }
 
 /* Resets the working set trigger */
@@ -578,7 +673,47 @@ void EditorParty::resetWorking()
 /* Saves the object data */
 void EditorParty::save(FileHandler* fh, bool game_only)
 {
-  // TODO: Implementation
+  if(fh != NULL)
+  {
+    /* Wrapper */
+    fh->writeXmlElement("party", "id", getID());
+
+    /* Name */
+    if(!game_only)
+      fh->writeXmlData("name", name_base.toStdString());
+
+    /* Type */
+    QString type = QString::fromStdString(Helpers::partyTypeToStr(
+                                                    party_base.getPartyType()));
+    type = type.toLower();
+    fh->writeXmlData("type", type.toStdString());
+
+    /* Persons */
+    for(int i = 0; i < person_set_base.size(); i++)
+    {
+      QString set = QString::number(person_set_base[i].first) + "," +
+                    QString::number(person_set_base[i].second);
+      fh->writeXmlData("person", set.toStdString());
+    }
+
+    /* Inventory */
+    if(item_set_base.size() > 0)
+    {
+      fh->writeXmlElement("inventory");
+
+      /* Go through all items */
+      QMapIterator<int,int> i(item_set_base);
+      while(i.hasNext())
+      {
+        i.next();
+        QString set = QString::number(i.key()) + "," +
+                      QString::number(i.value());
+        fh->writeXmlData("item", set.toStdString());
+      }
+
+      fh->writeXmlElementEnd();
+    }
+  }
 }
 
 /* Saves the working set trigger */

@@ -1425,7 +1425,6 @@ void GameDatabase::updateBottomListName(QString str)
   }
   else if(view_top->currentRow() == EditorEnumDb::ITEMVIEW)
   {
-    qDebug() << "UPDATE ITEM";
     updateParties();
     updatePersons();
   }
