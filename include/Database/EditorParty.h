@@ -7,6 +7,7 @@
 #ifndef EDITORPARTY_H
 #define EDITORPARTY_H
 
+#include <QInputDialog>
 #include <QWidget>
 
 #include "Database/EditorPerson.h"
@@ -48,8 +49,8 @@ private:
   int id;
 
   /* Item Information */
-  QVector<QPair<int,int>> item_set;
-  QVector<QPair<int,int>> item_set_base;
+  QMap<int,int> item_set;
+  QMap<int,int> item_set_base;
   QVector<EditorItem*> items_all;
 
   /* Label Widgets - just for displaying text */
@@ -85,8 +86,21 @@ protected:
   /* Creates interface layout */
   void createLayout();
 
+  /* Returns calculated mass of inventory and items by ID */
+  int getInvMass();
+  int getInvMassRemain();
+  EditorItem* getItem(int id);
+  //QPair<int,int>* getItemCurr(int id);
+
   /* Loads working info into UI objects */
   void loadWorkingInfo();
+
+  /* Sort Person Set */
+  void sortPersons();
+
+  /* Update object lists */
+  void updateItemList();
+  void updatePersonList();
 
 /*============================================================================
  * SIGNALS

@@ -258,8 +258,8 @@ void EditorSkillset::addSkill()
   {
     bool ok;
     int count = QInputDialog::getInt(this, "Level?",
-                                      "Skill Level Requirement:", 1, 1, 128,
-                                      1, &ok);
+                                     "Skill Level Requirement:", 1, 1,
+                                     EditorEnumDb::kMAX_PERSON_LVL, 1, &ok);
     if(ok)
     {
       /* Get the item and find skill */

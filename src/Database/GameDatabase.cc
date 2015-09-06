@@ -822,6 +822,16 @@ void GameDatabase::updateItems()
 }
 
 /* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updateParties()
+{
+  for(int i = 0; i < data_party.size(); i++)
+  {
+    data_party[i]->updateItems(data_item, false);
+    data_party[i]->updatePersons(data_person);
+  }
+}
+
+/* Update calls for objects (to fill in information required from others) */
 void GameDatabase::updatePersons()
 {
   for(int i = 0; i < data_person.size(); i++)
@@ -900,6 +910,8 @@ void GameDatabase::createNewResource()
                          new EditorParty(data_party.last()->getID() + 1, name));
       else
         data_party.push_back(new EditorParty(0, name));
+      data_party.last()->updateItems(data_item, false);
+      data_party.last()->updatePersons(data_person);
       break;
     /* -- PERSON -- */
     case EditorEnumDb::PERSONVIEW:
@@ -912,6 +924,7 @@ void GameDatabase::createNewResource()
       data_person.last()->updateClasses(data_battleclass, false);
       data_person.last()->updateItems(data_item, false);
       data_person.last()->updateRaces(data_race);
+      updateParties();
       break;
     /* -- ITEM -- */
     case EditorEnumDb::ITEMVIEW:
@@ -921,6 +934,7 @@ void GameDatabase::createNewResource()
       else
         data_item.push_back(new EditorItem(0, name));
       data_item.last()->updateSkills(data_skill);
+      updateParties();
       updatePersons();
       break;
     /* -- ACTION -- */
@@ -1055,6 +1069,7 @@ void GameDatabase::deleteResource()
             changePerson(-1, true);
           delete data_person[index];
           data_person.remove(index);
+          updateParties();
           break;
         /* -- ITEM -- */
         case EditorEnumDb::ITEMVIEW:
@@ -1062,6 +1077,7 @@ void GameDatabase::deleteResource()
             changeItem(-1, true);
           delete data_item[index];
           data_item.remove(index);
+          updateParties();
           updatePersons();
           break;
         /* -- ACTION -- */
@@ -1409,7 +1425,13 @@ void GameDatabase::updateBottomListName(QString str)
   }
   else if(view_top->currentRow() == EditorEnumDb::ITEMVIEW)
   {
+    qDebug() << "UPDATE ITEM";
+    updateParties();
     updatePersons();
+  }
+  else if(view_top->currentRow() == EditorEnumDb::PERSONVIEW)
+  {
+    updateParties();
   }
 }
 

@@ -1040,6 +1040,17 @@ int EditorItem::getID() const
 }
 
 /*
+ * Description: Returns the mass of the item
+ *
+ * Inputs: none
+ * Output: int - the mass of the item
+ */
+int EditorItem::getMass()
+{
+  return item_curr.getMass();
+}
+
+/*
  * Description: Returns the name of the item
  *
  * Inputs: none
@@ -1290,6 +1301,7 @@ void EditorItem::saveWorking()
   sprite_anim_base = sprite_anim;
   sprite_thumb_base = sprite_thumb;
   skill_id_base = skill_id;
+  setName(getName());
 }
 
 /*

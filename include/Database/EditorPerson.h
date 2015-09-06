@@ -105,6 +105,7 @@ private:
   EditorSprite sprite_tp;
   EditorSprite sprite_tp_base;
 
+public:
   /*------------------- Constants -----------------------*/
   const static int kELEMENT_COUNT; /* Number of elements */
   const static int kFRAME_SIZE; /* Size of frame containing sprites */

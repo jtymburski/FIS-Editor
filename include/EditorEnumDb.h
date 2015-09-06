@@ -13,6 +13,11 @@
 class EditorEnumDb
 {
 public:
+  /* ---- Constants ---- */
+
+  const static int kMAX_PERSON_LVL = 127; /* The max level of a person */
+
+  /* ---- Enumerations ---- */
 
   /* Enum for sprite/image border modes */
   enum Border {STANDARD, HOVERED, SELECTED};

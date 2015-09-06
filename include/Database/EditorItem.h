@@ -189,6 +189,9 @@ public:
   /* Returns the ID of the item */
   virtual int getID() const;
 
+  /* Returns the mass of the item */
+  int getMass();
+
   /* Returns the name of the item */
   virtual QString getName() const;
 
