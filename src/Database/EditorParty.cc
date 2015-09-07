@@ -11,7 +11,11 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Base constructor function */
+/*
+ * Description: Main constructor function. All parameters have null defaults.
+ *
+ * Inputs: QWidget* parent - the parent widget. Default to NULL
+ */
 EditorParty::EditorParty(QWidget *parent) : QWidget(parent)
 {
   /* Base data */
@@ -24,7 +28,13 @@ EditorParty::EditorParty(QWidget *parent) : QWidget(parent)
   loadWorkingInfo();
 }
 
-/* Constructor function with id and name */
+/*
+ * Description: Second constructor function, with ID and name parameters.
+ *
+ * Inputs: int id - the id of the party
+ *         QString name - the name of the party
+ *         QWidget* parent - the parent widget. Default to NULL
+ */
 EditorParty::EditorParty(int id, QString name, QWidget* parent)
            : EditorParty(parent)
 {
@@ -33,13 +43,20 @@ EditorParty::EditorParty(int id, QString name, QWidget* parent)
   saveWorking();
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const EditorParty &source - the source object to copy
+ */
 EditorParty::EditorParty(const EditorParty &source) : EditorParty()
 {
   copySelf(source);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 EditorParty::~EditorParty()
 {
 }
@@ -48,7 +65,13 @@ EditorParty::~EditorParty()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: EditorParty &source - the source to copy from
+ * Output: none
+ */
 void EditorParty::copySelf(const EditorParty &source)
 {
   /* Core data */
@@ -65,7 +88,12 @@ void EditorParty::copySelf(const EditorParty &source)
   resetWorking();
 }
 
-/* Creates interface layout */
+/*
+ * Description: Creates the party layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::createLayout()
 {
   /* Layout */
@@ -166,7 +194,13 @@ void EditorParty::createLayout()
   layout->addWidget(btn_save, 8, 4);
 }
 
-/* Returns calculated mass of inventory */
+/*
+ * Description: Returns the total inventory mass of all items added in the
+ *              working party inventory.
+ *
+ * Inputs: none
+ * Output: int - the total mass value
+ */
 int EditorParty::getInvMass()
 {
   int total = 0;
@@ -183,7 +217,13 @@ int EditorParty::getInvMass()
   return total;
 }
 
-/* Returns calculated mass remaining of inventory */
+/*
+ * Description: Returns the remaining mass available in the inventory to add
+ *              new items.
+ *
+ * Inputs: none
+ * Output: int - the remaining mass value
+ */
 int EditorParty::getInvMassRemain()
 {
   int mass = getInvMass();
@@ -191,7 +231,14 @@ int EditorParty::getInvMassRemain()
   return (limit - mass);
 }
 
-/* Returns item by ID - from total list */
+/*
+ * Description: Returns the Editor Item pointer for the corresponding ID. This
+ *              accesses the list of all items and not just the items added to
+ *              the inventory.
+ *
+ * Inputs: int id - the ID to find the item for
+ * Output: EditorItem* - the found item. NULL if not found
+ */
 EditorItem* EditorParty::getItem(int id)
 {
   for(int i = 0; i < items_all.size(); i++)
@@ -200,7 +247,13 @@ EditorItem* EditorParty::getItem(int id)
   return NULL;
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Party information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::loadWorkingInfo()
 {
   /* ID */
@@ -225,7 +278,13 @@ void EditorParty::loadWorkingInfo()
   updatePersonList();
 }
 
-/* Sort Person Set */
+/*
+ * Description: Sorts the list of working persons set first by ID from least
+ *              to greatest and then by level, from lowest to highest.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::sortPersons()
 {
   QMap<int,int> sort_set;
@@ -246,7 +305,15 @@ void EditorParty::sortPersons()
   }
 }
 
-/* Update object lists */
+/*
+ * Description: Updates the used working item list to cross reference with the
+ *              selected indexes in the item array. If the index is not found
+ *              in the total list of items, it deletes it from the used item
+ *              list.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::updateItemList()
 {
   int index = list_items_used->currentRow();
@@ -294,7 +361,15 @@ void EditorParty::updateItemList()
                     QString::number(party_curr.getInventory()->getMassLimit()));
 }
 
-/* Update object lists */
+/*
+ * Description: Updates the used working person list to cross reference with the
+ *              selected indexes in the person array. If the index is not found
+ *              in the total list of persons, it deletes it from the used person
+ *              list.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::updatePersonList()
 {
   int index = list_persons_used->currentRow();
@@ -343,7 +418,14 @@ void EditorParty::updatePersonList()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on item add for list widget displaying all items
+ *              that can be included in the inventory. Will update the used
+ *              items list if a valid item is added.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnItemAdd()
 {
   if(list_items_all->currentRow() >= 0)
@@ -402,7 +484,14 @@ void EditorParty::btnItemAdd()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on item remove for list widget displaying used
+ *              items that are included in the inventory. Will update the used
+ *              items list if a valid item is removed.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnItemRemove()
 {
   if(list_items_used->currentRow() >= 0)
@@ -419,7 +508,14 @@ void EditorParty::btnItemRemove()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on person add for list widget displaying all
+ *              persons that can be included in the party. Will update the used
+ *              persons list if a valid person is added.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnPersonAdd()
 {
   if(list_persons_all->currentRow() >= 0)
@@ -451,7 +547,14 @@ void EditorParty::btnPersonAdd()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Button trigger on person remove for list widget displaying used
+ *              persons that are included in the party. Will update the used
+ *              persons list if a valid person is removed.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnPersonRemove()
 {
   if(list_persons_used->currentRow() >= 0)
@@ -461,19 +564,35 @@ void EditorParty::btnPersonRemove()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by reset button. Resets data in Party.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnReset()
 {
   resetWorking();
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot triggered by save button. Saves data in Party.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::btnSave()
 {
   saveWorking();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the classification drop down selection is
+ *              modified. Updates the working data with the new classification.
+ *
+ * Inputs: QString index - the new index in the combo box (string name)
+ * Output: none
+ */
 void EditorParty::changedClassify(QString index)
 {
   party_curr.setPartyType(Helpers::partyTypeFromStr(index.toStdString()));
@@ -481,13 +600,26 @@ void EditorParty::changedClassify(QString index)
   updatePersonList();
 }
 
-/* Widget Change Triggers */
+/*
+ * Description: Slot triggered when the name line edit text is modified.
+ *              Updates the working data with the new name.
+ *
+ * Inputs: QString name - the new text
+ * Output: none
+ */
 void EditorParty::changedName(QString name)
 {
   setName(name);
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the inventory item
+ *              list of all available items is changed. Enables or disables the
+ *              add button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorParty::listItemAllChanged(int index)
 {
   if(index >= 0)
@@ -496,13 +628,27 @@ void EditorParty::listItemAllChanged(int index)
     btn_item_add->setDisabled(true);
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the inventory item
+ *              list of all available items is double clicked. Triggers the
+ *              add command (the same as clicking the "add item" button).
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void EditorParty::listItemAllDClicked(QListWidgetItem*)
 {
   btnItemAdd();
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the inventory item
+ *              list of used items is double clicked. Triggers an edit on the
+ *              number of items of that type that are included in the inventory.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void EditorParty::listItemEdited(QListWidgetItem*)
 {
   if(list_items_used->currentRow() >= 0)
@@ -541,7 +687,14 @@ void EditorParty::listItemEdited(QListWidgetItem*)
   }
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the inventory item
+ *              list of used items is changed. Enables or disables the remove
+ *              button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorParty::listItemUsedChanged(int index)
 {
   if(index >= 0)
@@ -550,7 +703,14 @@ void EditorParty::listItemUsedChanged(int index)
     btn_item_rem->setDisabled(true);
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the party person
+ *              list of all available persons is changed. Enables or disables
+ *              the add button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorParty::listPersonAllChanged(int index)
 {
   if(index >= 0)
@@ -559,13 +719,28 @@ void EditorParty::listPersonAllChanged(int index)
     btn_person_add->setDisabled(true);
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the party person
+ *              list of all available persons is double clicked. Triggers the
+ *              add command (the same as clicking the "add person" button).
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void EditorParty::listPersonAllDClicked(QListWidgetItem*)
 {
   btnPersonAdd();
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the party person
+ *              list of used persons is double clicked. Triggers an edit on the
+ *              level of the person of that type that are included in the
+ *              party.
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void EditorParty::listPersonEdited(QListWidgetItem*)
 {
   int index = list_persons_used->currentRow();
@@ -585,7 +760,14 @@ void EditorParty::listPersonEdited(QListWidgetItem*)
   }
 }
 
-/* List Index Widget Changes */
+/*
+ * Description: Slot triggered when the selected index in the party person
+ *              list of used persons is changed. Enables or disables the remove
+ *              button.
+ *
+ * Inputs: int index - the new list index
+ * Output: none
+ */
 void EditorParty::listPersonUsedChanged(int index)
 {
   if(index >= 0)
@@ -598,25 +780,46 @@ void EditorParty::listPersonUsedChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the ID of the party */
+/*
+ * Description: Returns the ID of the party
+ *
+ * Inputs: none
+ * Output: int - the ID
+ */
 int EditorParty::getID() const
 {
   return id;
 }
 
-/* Returns the name of the party */
+/*
+ * Description: Returns the name of the party
+ *
+ * Inputs: none
+ * Output: QString - the name
+ */
 QString EditorParty::getName() const
 {
   return name_curr;
 }
 
-/* Returns the name of the party for listing */
+/*
+ * Description: Get the listing name string which includes the ID and name
+ *
+ * Inputs: none
+ * Output: QString - the name list
+ */
 QString EditorParty::getNameList()
 {
   return EditorHelpers::getListString(getID(), getName());
 }
 
-/* Loads the object data */
+/*
+ * Description: Loads the object data from the XML struct and offset index.
+ *
+ * Inputs: XmlData data - the XML data tree struct
+ *         int index - the offset index into the struct
+ * Output: none
+ */
 void EditorParty::load(XmlData data, int index)
 {
   /* Parse elements */
@@ -656,7 +859,14 @@ void EditorParty::load(XmlData data, int index)
   }
 }
 
-/* Resets the working set trigger */
+/*
+ * Description: Resets the working information back to the base (last saved)
+ *              data. This will also automatically update all UI widgets with
+ *              the new data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::resetWorking()
 {
   /* Reset the data */
@@ -670,7 +880,13 @@ void EditorParty::resetWorking()
   loadWorkingInfo();
 }
 
-/* Saves the object data */
+/*
+ * Description: Saves the object data to the file handling pointer.
+ *
+ * Inputs: FileHandler* fh - the file handling pointer
+ *         bool game_only - true if the data should include game only relevant
+ * Output: none
+ */
 void EditorParty::save(FileHandler* fh, bool game_only)
 {
   if(fh != NULL)
@@ -713,10 +929,19 @@ void EditorParty::save(FileHandler* fh, bool game_only)
 
       fh->writeXmlElementEnd();
     }
+
+    /* End Wrapper */
+    fh->writeXmlElementEnd();
   }
 }
 
-/* Saves the working set trigger */
+/*
+ * Description: Saves the working information back to the base (last saved)
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorParty::saveWorking()
 {
   /* Save the data */
@@ -726,14 +951,24 @@ void EditorParty::saveWorking()
   name_base = name_curr;
 }
 
-/* Sets the ID of the party */
+/*
+ * Description: Sets the party ID in the class.
+ *
+ * Inputs: int id - the new id
+ * Output: none
+ */
 void EditorParty::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
 }
 
-/* Sets the name of the party */
+/*
+ * Description: Sets the name of the party.
+ *
+ * Inputs: QString name - the name text
+ * Output: none
+ */
 void EditorParty::setName(QString name)
 {
   name_curr = name;
@@ -741,7 +976,16 @@ void EditorParty::setName(QString name)
   emit nameChange(name);
 }
 
-/* Update Calls for data */
+/*
+ * Description: Updates the list of available items within the party. If this
+ *              list removes items previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available items list widget.
+ *
+ * Inputs: QVector<EditorItem*> items - all available items created
+ *         bool update_working - true to update working widget. default true
+ * Output: none
+ */
 void EditorParty::updateItems(QVector<EditorItem*> items,
                               bool update_working)
 {
@@ -750,7 +994,16 @@ void EditorParty::updateItems(QVector<EditorItem*> items,
     loadWorkingInfo();
 }
 
-/* Update Calls for data */
+/*
+ * Description: Updates the list of available persons within the party. If this
+ *              list removes persons previously used, they are removed from the
+ *              working set (only). If new ones are added, they are placed in
+ *              the available persons list widget.
+ *
+ * Inputs: QVector<EditorPerson*> persons - all available persons created
+ *         bool update_working - true to update working widget. default true
+ * Output: none
+ */
 void EditorParty::updatePersons(QVector<EditorPerson*> persons,
                                 bool update_working)
 {
@@ -763,7 +1016,14 @@ void EditorParty::updatePersons(QVector<EditorPerson*> persons,
  * OPERATOR FUNCTIONS
  *===========================================================================*/
 
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              EditorParty.
+ *
+ * Inputs: const EditorParty &source - the source class constructor
+ * Output: EditorParty& - pointer to the copied class
+ */
 EditorParty& EditorParty::operator= (const EditorParty &source)
 {
   /* Check for self assignment */

@@ -1272,6 +1272,7 @@ void EditorPerson::setName(QString name)
  *              the available classes drop down.
  *
  * Inputs: QVector<EditorCategory*> classes - all available classes created
+ *         bool update_working - true to update working widget. default true
  * Output: none
  */
 void EditorPerson::updateClasses(QVector<EditorCategory*> classes,
@@ -1289,6 +1290,7 @@ void EditorPerson::updateClasses(QVector<EditorCategory*> classes,
  *              the available items list .
  *
  * Inputs: QVector<EditorItem*> items - all available items created
+ *         bool update_working - true to update working widget. default true
  * Output: none
  */
 void EditorPerson::updateItems(QVector<EditorItem*> items, bool update_working)
@@ -1305,6 +1307,7 @@ void EditorPerson::updateItems(QVector<EditorItem*> items, bool update_working)
  *              the available races drop down.
  *
  * Inputs: QVector<EditorCategory*> races - all available races created
+ *         bool update_working - true to update working widget. default true
  * Output: none
  */
 void EditorPerson::updateRaces(QVector<EditorCategory*> races,

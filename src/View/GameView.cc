@@ -68,7 +68,7 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_action = view_action;
   addWidget(view_action);
 
-  view_equipment->setStyleSheet("background-color:violet;");
+  view_equipment->setStyleSheet("background-color:black;");
   view_bubby->setStyleSheet("background-color:black;");
 
   setViewMode(EditorEnumDb::MAPVIEW);

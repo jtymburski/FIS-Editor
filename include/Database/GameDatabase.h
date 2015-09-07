@@ -97,6 +97,7 @@ private:
   void addAction(EditorAction* action);
   void addClass(EditorCategory* cat_class);
   void addItem(EditorItem* item);
+  void addParty(EditorParty* party);
   void addPerson(EditorPerson* person);
   void addRace(EditorCategory* cat_race);
   void addSkill(EditorSkill* skill);
@@ -106,6 +107,7 @@ private:
   void changeAction(int index, bool forced = false, bool save = false);
   void changeClass(int index, bool forced = false, bool save = false);
   void changeItem(int index, bool forced = false, bool save = false);
+  void changeParty(int index, bool forced = false, bool save = false);
   void changePerson(int index, bool forced = false, bool save = false);
   void changeRace(int index, bool forced = false, bool save = false);
   void changeSkill(int index, bool forced = false, bool save = false);
@@ -115,6 +117,7 @@ private:
   EditorAction* getAction(int id);
   EditorCategory* getClass(int id);
   EditorItem* getItem(int id);
+  EditorParty* getParty(int id);
   EditorPerson* getPerson(int id);
   EditorCategory* getRace(int id);
   EditorSkill* getSkill(int id);
@@ -124,6 +127,7 @@ private:
   void loadAction(XmlData data, int index);
   void loadClass(XmlData data, int index);
   void loadItem(XmlData data, int index);
+  void loadParty(XmlData data, int index);
   void loadPerson(XmlData data, int index);
   void loadRace(XmlData data, int index);
   void loadSkill(XmlData data, int index);
