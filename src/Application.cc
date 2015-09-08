@@ -466,6 +466,7 @@ bool Application::newGame()
   if(reply == QMessageBox::Yes)
   {
     game_database->deleteAll();
+    game_database->createStartObjects();
     return true;
   }
   return false;

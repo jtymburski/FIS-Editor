@@ -961,6 +961,23 @@ void EditorParty::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
+
+  /* ID checks for data not allowed to be changed */
+  if(id == (int)Party::kID_SLEUTH ||
+     id == (int)Party::kID_BEARACKS)
+  {
+    if(id == (int)Party::kID_SLEUTH)
+      combo_classify->setCurrentIndex((int)PartyType::SLEUTH);
+    else
+      combo_classify->setCurrentIndex((int)PartyType::BEARACKS);
+    combo_classify->setDisabled(true);
+    edit_name->setDisabled(true);
+  }
+  else
+  {
+    combo_classify->setEnabled(true);
+    edit_name->setEnabled(true);
+  }
 }
 
 /*

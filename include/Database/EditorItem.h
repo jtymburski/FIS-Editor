@@ -47,6 +47,7 @@ public:
 private:
   /* Groupings */
   QGroupBox* box_buff;
+  QGroupBox* box_flags;
   QGroupBox* box_material;
 
   /* Button Widgets */
@@ -79,6 +80,9 @@ private:
 
   /* Editor ID */
   int id;
+
+  /* Protected flag */
+  bool is_protected;
 
   /* Item data */
   Item item_base;

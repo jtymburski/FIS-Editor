@@ -25,6 +25,7 @@ EditorItem::EditorItem(QWidget *parent) : QWidget(parent)
   dialog_anim = NULL;
   dialog_thumb = NULL;
   id = 0;
+  is_protected = false;
   skill_id = -1;
   skill_id_base = -1;
 
@@ -239,7 +240,7 @@ void EditorItem::createLayout()
                     Qt::AlignRight | Qt::AlignTop);
 
   /* Flags GROUP */
-  QGroupBox* box_flags = new QGroupBox("Flags", this);
+  box_flags = new QGroupBox("Flags", this);
   QVBoxLayout* layout_flags = new QVBoxLayout(box_flags);
   radio_f_nocat = new QRadioButton("No Category", this);
   connect(radio_f_nocat, SIGNAL(clicked()), this, SLOT(changedFlagCat()));
@@ -496,94 +497,97 @@ void EditorItem::loadWorkingInfo()
  */
 void EditorItem::updateConnected()
 {
-  /* ---- Consumable or No Category set ---- */
-  if(radio_f_consumed->isChecked() || radio_f_nocat->isChecked())
+  if(!is_protected)
   {
-    chk_f_skilllearn->setEnabled(true);
-    combo_use->setEnabled(true);
-    if(chk_f_skilllearn->isChecked())
+    /* ---- Consumable or No Category set ---- */
+    if(radio_f_consumed->isChecked() || radio_f_nocat->isChecked())
     {
-      combo_use->setCurrentIndex((int)ActionOccasion::MENU);
-      combo_use->setDisabled(true);
-    }
-
-    /* Check use */
-    if(item_curr.getOccasion() == ActionOccasion::ALWAYS ||
-       item_curr.getOccasion() == ActionOccasion::BATTLE ||
-       item_curr.getOccasion() == ActionOccasion::MENU)
-    {
-      combo_skill->setEnabled(true);
-      edit_msg->setEnabled(true);
-
-      /* Animation */
-      if(item_curr.getOccasion() == ActionOccasion::ALWAYS ||
-         item_curr.getOccasion() == ActionOccasion::BATTLE)
+      chk_f_skilllearn->setEnabled(true);
+      combo_use->setEnabled(true);
+      if(chk_f_skilllearn->isChecked())
       {
-        btn_anim_click->setEnabled(true);
+        combo_use->setCurrentIndex((int)ActionOccasion::MENU);
+        combo_use->setDisabled(true);
+      }
+
+      /* Check use */
+      if(item_curr.getOccasion() == ActionOccasion::ALWAYS ||
+         item_curr.getOccasion() == ActionOccasion::BATTLE ||
+         item_curr.getOccasion() == ActionOccasion::MENU)
+      {
+        combo_skill->setEnabled(true);
+        edit_msg->setEnabled(true);
+
+        /* Animation */
+        if(item_curr.getOccasion() == ActionOccasion::ALWAYS ||
+           item_curr.getOccasion() == ActionOccasion::BATTLE)
+        {
+          btn_anim_click->setEnabled(true);
+        }
+        else
+        {
+          buttonAnimEdit(true);
+          btn_anim_click->setDisabled(true);
+        }
       }
       else
       {
+        combo_skill->setDisabled(true);
+        edit_msg->setDisabled(true);
+
         buttonAnimEdit(true);
         btn_anim_click->setDisabled(true);
       }
     }
     else
     {
+      chk_f_skilllearn->setChecked(false);
+      chk_f_skilllearn->setDisabled(true);
       combo_skill->setDisabled(true);
+      combo_use->setDisabled(true);
       edit_msg->setDisabled(true);
 
+      /* Animation */
       buttonAnimEdit(true);
       btn_anim_click->setDisabled(true);
     }
-  }
-  else
-  {
-    chk_f_skilllearn->setChecked(false);
-    chk_f_skilllearn->setDisabled(true);
-    combo_skill->setDisabled(true);
-    combo_use->setDisabled(true);
-    edit_msg->setDisabled(true);
 
-    /* Animation */
-    buttonAnimEdit(true);
-    btn_anim_click->setDisabled(true);
-  }
+    /* ---- Just Consumable ---- */
+    if(radio_f_consumed->isChecked())
+    {
+      chk_f_statalter->setEnabled(true);
+      box_buff->setEnabled(chk_f_statalter->isChecked());
+    }
+    else
+    {
+      chk_f_statalter->setChecked(false);
+      box_buff->setEnabled(false);
+      chk_f_statalter->setDisabled(true);
+    }
 
-  /* ---- Just Consumable ---- */
-  if(radio_f_consumed->isChecked())
-  {
-    chk_f_statalter->setEnabled(true);
-    box_buff->setEnabled(chk_f_statalter->isChecked());
-  }
-  else
-  {
-    chk_f_statalter->setChecked(false);
-    box_buff->setEnabled(false);
-    chk_f_statalter->setDisabled(true);
-  }
+    /* ---- Just Materials ---- */
+    if(radio_f_material->isChecked())
+    {
+      box_material->setEnabled(true);
+    }
+    else
+    {
+      box_material->setDisabled(true);
+    }
 
-  /* ---- Just Materials ---- */
-  if(radio_f_material->isChecked())
-  {
-    box_material->setEnabled(true);
-  }
-  else
-  {
-    box_material->setDisabled(true);
-  }
-
-  /* ---- Just Key Items ---- */
-  if(radio_f_key->isChecked())
-  {
-    spin_mass->setValue(0);
-    spin_mass->setDisabled(true);
-    spin_value->setValue(0);
-    spin_value->setDisabled(true);
-  }
-  else
-  {
-    spin_mass->setEnabled(true);
-    spin_value->setEnabled(true);
+    /* ---- Just Key Items ---- */
+    if(radio_f_key->isChecked())
+    {
+      spin_mass->setValue(0);
+      spin_mass->setDisabled(true);
+      spin_value->setValue(0);
+      spin_value->setDisabled(true);
+    }
+    else
+    {
+      spin_mass->setEnabled(true);
+      spin_value->setEnabled(true);
+    }
   }
 }
 
@@ -1314,6 +1318,41 @@ void EditorItem::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
+
+  /* ID checks for data not allowed to be changed */
+  if(id == (int)Item::kID_MONEY)
+  {
+    is_protected = true;
+
+    box_flags->setDisabled(true);
+
+    combo_tier->setDisabled(true);
+    combo_use->setDisabled(true);
+
+    edit_name->setDisabled(true);
+
+    spin_mass->setDisabled(true);
+    spin_value->setDisabled(true);
+
+    /* Set spin value */
+    spin_value->blockSignals(true);
+    spin_value->setValue(1);
+    spin_value->blockSignals(false);
+  }
+  else
+  {
+    is_protected = false;
+
+    box_flags->setEnabled(true);
+
+    combo_tier->setEnabled(true);
+    combo_use->setEnabled(true);
+
+    edit_name->setEnabled(true);
+
+    spin_mass->setEnabled(true);
+    spin_value->setEnabled(true);
+  }
 }
 
 /*

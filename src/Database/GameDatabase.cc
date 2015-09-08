@@ -99,6 +99,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   tile_icons.nopassW = new QPixmap(":/images/nopass_W.png");
 
   setMaximumWidth(190);
+  createStartObjects();
 }
 
 GameDatabase::~GameDatabase()
@@ -688,6 +689,38 @@ EditorSkillset* GameDatabase::getSkillSet(int id)
   return NULL;
 }
 
+/* Check if the core object is protected */
+bool GameDatabase::isObjectProtected()
+{
+  int index = view_bottom->currentRow();
+  bool is_protected = false;
+
+  /* Check current object */
+  if(view_top->currentRow() == EditorEnumDb::SKILLSETVIEW)
+  {
+    if(data_skillset[index]->getID() == (int)SkillSet::kID_BUBBIFIED)
+      is_protected = true;
+  }
+  else if(view_top->currentRow() == EditorEnumDb::ITEMVIEW)
+  {
+    if(data_item[index]->getID() == (int)Item::kID_MONEY)
+      is_protected = true;
+  }
+  else if(view_top->currentRow() == EditorEnumDb::PERSONVIEW)
+  {
+    if(data_person[index]->getID() == (int)Person::kID_PLAYER)
+      is_protected = true;
+  }
+  else if(view_top->currentRow() == EditorEnumDb::PARTYVIEW)
+  {
+    if(data_party[index]->getID() == (int)Party::kID_SLEUTH ||
+       data_party[index]->getID() == (int)Party::kID_BEARACKS)
+      is_protected = true;
+  }
+
+  return is_protected;
+}
+
 /* Called to load action data */
 void GameDatabase::loadAction(XmlData data, int index)
 {
@@ -1120,130 +1153,143 @@ void GameDatabase::deleteResource()
 {
   if(view_bottom->currentRow() >= 0)
   {
-    int index = view_bottom-> currentRow();
-
-    /* Get the category */
-    QString category = view_top->currentItem()->text();
-    QString name = view_bottom->currentItem()->text();
-
-    /* Check if it's the bottom row */
-    bool bottom = false;
-    if((index + 1) == view_bottom->count())
-      bottom = true;
-
-    /* Create warning about deleting */
-    QMessageBox msg_box;
-    msg_box.setText("Deleting \"" + name + "\" from " + category + ".");
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(msg_box.exec() == QMessageBox::Yes)
+    if(!isObjectProtected())
     {
-      /* Switch through what to do */
-      switch(view_top->currentRow())
-      {
-        /* -- MAP -- */
-        case EditorEnumDb::MAPVIEW:
-          if(data_map[index] == current_map)
-          {
-            emit changeMap(NULL);
-            current_map = NULL;
-          }
-          delete data_map[index];
-          data_map.remove(index);
-          break;
-        /* -- PARTY -- */
-        case EditorEnumDb::PARTYVIEW:
-          if(data_party[index] == current_party)
-            changeParty(-1, true);
-          delete data_party[index];
-          data_party.remove(index);
-          break;
-        /* -- PERSON -- */
-        case EditorEnumDb::PERSONVIEW:
-          if(data_person[index] == current_person)
-            changePerson(-1, true);
-          delete data_person[index];
-          data_person.remove(index);
-          updateParties();
-          break;
-        /* -- ITEM -- */
-        case EditorEnumDb::ITEMVIEW:
-          if(data_item[index] == current_item)
-            changeItem(-1, true);
-          delete data_item[index];
-          data_item.remove(index);
-          updateParties();
-          updatePersons();
-          break;
-        /* -- ACTION -- */
-        case EditorEnumDb::ACTIONVIEW:
-          if(data_action[index] == current_action)
-            changeAction(-1, true);
-          delete data_action[index];
-          data_action.remove(index);
-          updateSkills();
-          break;
-        /* -- RACE CLASS -- */
-        case EditorEnumDb::RACEVIEW:
-          if(data_race[index] == current_race)
-            changeRace(-1, true);
-          delete data_race[index];
-          data_race.remove(index);
-          updatePersons();
-          break;
-        /* -- BATTLE CLASS -- */
-        case EditorEnumDb::BATTLECLASSVIEW:
-          if(data_battleclass[index] == current_battleclass)
-            changeClass(-1, true);
-          delete data_battleclass[index];
-          data_battleclass.remove(index);
-          updatePersons();
-          break;
-        /* -- SKILL SET -- */
-        case EditorEnumDb::SKILLSETVIEW:
-          if(data_skillset[index] == current_skillset)
-            changeSkillSet(-1, true);
-          delete data_skillset[index];
-          data_skillset.remove(index);
-          break;
-        /* -- SKILL -- */
-        case EditorEnumDb::SKILLVIEW:
-          if(data_skill[index] == current_skill)
-            changeSkill(-1, true);
-          delete data_skill[index];
-          data_skill.remove(index);
-          updateItems();
-          updateSkillSets();
-          break;
-        /* -- EQUIPMENT -- */
-        case EditorEnumDb::EQUIPMENTVIEW:
-          if(data_equipment[index] == current_equipment)
-          {
-            emit changeEquipment(NULL);
-            current_equipment = NULL;
-          }
-          delete data_equipment[index];
-          data_equipment.remove(index);
-          break;
-        /* -- BUBBY -- */
-        case EditorEnumDb::BUBBYVIEW:
-          if(data_bubby[index] == current_bubby)
-          {
-            emit changeBubby(NULL);
-            current_bubby = NULL;
-          }
-          delete data_bubby[index];
-          data_bubby.remove(index);
-          break;
-        default:
-          break;
-      }
+      int index = view_bottom-> currentRow();
 
-      /* Update list */
-      modifyBottomList(view_top->currentRow());
-      if(bottom)
-        view_bottom->setCurrentRow(view_bottom->count() - 1);
+      /* Get the category */
+      QString category = view_top->currentItem()->text();
+      QString name = view_bottom->currentItem()->text();
+
+      /* Check if it's the bottom row */
+      bool bottom = false;
+      if((index + 1) == view_bottom->count())
+        bottom = true;
+
+      /* Create warning about deleting */
+      QMessageBox msg_box;
+      msg_box.setText("Deleting \"" + name + "\" from " + category + ".");
+      msg_box.setInformativeText("Are you sure?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      if(msg_box.exec() == QMessageBox::Yes)
+      {
+        /* Switch through what to do */
+        switch(view_top->currentRow())
+        {
+          /* -- MAP -- */
+          case EditorEnumDb::MAPVIEW:
+            if(data_map[index] == current_map)
+            {
+              emit changeMap(NULL);
+              current_map = NULL;
+            }
+            delete data_map[index];
+            data_map.remove(index);
+            break;
+          /* -- PARTY -- */
+          case EditorEnumDb::PARTYVIEW:
+            if(data_party[index] == current_party)
+              changeParty(-1, true);
+            delete data_party[index];
+            data_party.remove(index);
+            break;
+          /* -- PERSON -- */
+          case EditorEnumDb::PERSONVIEW:
+            if(data_person[index] == current_person)
+              changePerson(-1, true);
+            delete data_person[index];
+            data_person.remove(index);
+            updateParties();
+            break;
+          /* -- ITEM -- */
+          case EditorEnumDb::ITEMVIEW:
+            if(data_item[index] == current_item)
+              changeItem(-1, true);
+            delete data_item[index];
+            data_item.remove(index);
+            updateParties();
+            updatePersons();
+            break;
+          /* -- ACTION -- */
+          case EditorEnumDb::ACTIONVIEW:
+            if(data_action[index] == current_action)
+              changeAction(-1, true);
+            delete data_action[index];
+            data_action.remove(index);
+            updateSkills();
+            break;
+          /* -- RACE CLASS -- */
+          case EditorEnumDb::RACEVIEW:
+            if(data_race[index] == current_race)
+              changeRace(-1, true);
+            delete data_race[index];
+            data_race.remove(index);
+            updatePersons();
+            break;
+          /* -- BATTLE CLASS -- */
+          case EditorEnumDb::BATTLECLASSVIEW:
+            if(data_battleclass[index] == current_battleclass)
+              changeClass(-1, true);
+            delete data_battleclass[index];
+            data_battleclass.remove(index);
+            updatePersons();
+            break;
+          /* -- SKILL SET -- */
+          case EditorEnumDb::SKILLSETVIEW:
+            if(data_skillset[index] == current_skillset)
+              changeSkillSet(-1, true);
+            delete data_skillset[index];
+            data_skillset.remove(index);
+            break;
+          /* -- SKILL -- */
+          case EditorEnumDb::SKILLVIEW:
+            if(data_skill[index] == current_skill)
+              changeSkill(-1, true);
+            delete data_skill[index];
+            data_skill.remove(index);
+            updateItems();
+            updateSkillSets();
+            break;
+          /* -- EQUIPMENT -- */
+          case EditorEnumDb::EQUIPMENTVIEW:
+            if(data_equipment[index] == current_equipment)
+            {
+              emit changeEquipment(NULL);
+              current_equipment = NULL;
+            }
+            delete data_equipment[index];
+            data_equipment.remove(index);
+            break;
+          /* -- BUBBY -- */
+          case EditorEnumDb::BUBBYVIEW:
+            if(data_bubby[index] == current_bubby)
+            {
+              emit changeBubby(NULL);
+              current_bubby = NULL;
+            }
+            delete data_bubby[index];
+            data_bubby.remove(index);
+            break;
+          default:
+            break;
+        }
+
+        /* Update list */
+        modifyBottomList(view_top->currentRow());
+        if(bottom)
+          view_bottom->setCurrentRow(view_bottom->count() - 1);
+      }
     }
+    else
+    {
+      QMessageBox::information(this, "Delete Failed", tr("Selected core ") +
+                               tr("object is protected and cannot be deleted"));
+    }
+  }
+  else
+  {
+    QMessageBox::information(this, "Delete Failed",
+                             "No core object selected to delete");
   }
 }
 
@@ -1553,6 +1599,17 @@ void GameDatabase::updateEventObjects()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/* Create the starting point */
+void GameDatabase::createStartObjects()
+{
+  addSkillSet(new EditorSkillset(SkillSet::kID_BUBBIFIED, "Bubbified Skills"));
+  addItem(new EditorItem(Item::kID_MONEY, "Money"));
+  addPerson(new EditorPerson(Person::kID_PLAYER, "Player"));
+  addParty(new EditorParty(Party::kID_SLEUTH, "Player Sleuth"));
+  addParty(new EditorParty(Party::kID_BEARACKS, "Player Bearacks"));
+  rowChange(view_top->currentRow());
+}
 
 /* Delete the game */
 void GameDatabase::deleteAll()

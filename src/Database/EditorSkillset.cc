@@ -475,6 +475,16 @@ void EditorSkillset::save(FileHandler* fh, bool game_only)
 void EditorSkillset::setID(int id)
 {
   this->id = id;
+
+  /* ID checks for data not allowed to be changed */
+  if(id == (int)SkillSet::kID_BUBBIFIED)
+  {
+    edit_name->setDisabled(true);
+  }
+  else
+  {
+    edit_name->setEnabled(true);
+  }
 }
 
 /*

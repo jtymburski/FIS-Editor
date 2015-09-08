@@ -33,6 +33,9 @@ public:
   virtual ~EditorPerson();
 
 private:
+  /* Group Box Widgets */
+  QGroupBox* box_flags;
+
   /* Button Widgets */
   QPushButton* btn_item_add;
   QPushButton* btn_item_rem;

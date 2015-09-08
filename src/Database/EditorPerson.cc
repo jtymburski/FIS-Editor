@@ -189,7 +189,7 @@ void EditorPerson::createLayout()
   layout->addWidget(combo_race);
 
   /* Flags */
-  QGroupBox* box_flags = new QGroupBox("Flags", this);
+  box_flags = new QGroupBox("Flags", this);
   QVBoxLayout* layout_flags = new QVBoxLayout(box_flags);
   chk_gain_xp = new QCheckBox("Can Gain XP", this);
   connect(chk_gain_xp, SIGNAL(stateChanged(int)),
@@ -1250,6 +1250,32 @@ void EditorPerson::setID(int id)
 {
   this->id = id;
   edit_id->setText(QString::number(id));
+
+  /* ID checks for data not allowed to be changed */
+  if(id == (int)Person::kID_PLAYER)
+  {
+    box_flags->setDisabled(true);
+
+    edit_name->setDisabled(true);
+
+    list_items_all->setDisabled(true);
+    list_items_used->setDisabled(true);
+
+    spin_credits->setDisabled(true);
+    spin_xp->setDisabled(true);
+  }
+  else
+  {
+    box_flags->setEnabled(true);
+
+    edit_name->setEnabled(true);
+
+    list_items_all->setEnabled(true);
+    list_items_used->setEnabled(true);
+
+    spin_credits->setEnabled(true);
+    spin_xp->setEnabled(true);
+  }
 }
 
 /*

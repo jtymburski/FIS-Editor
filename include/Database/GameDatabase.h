@@ -123,6 +123,9 @@ private:
   EditorSkill* getSkill(int id);
   EditorSkillset* getSkillSet(int id);
 
+  /* Check if the core object is protected */
+  bool isObjectProtected();
+
   /* Called to load object data */
   void loadAction(XmlData data, int index);
   void loadClass(XmlData data, int index);
@@ -213,6 +216,9 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Create the starting point */
+  void createStartObjects();
+
   /* Delete the game */
   void deleteAll();
 
