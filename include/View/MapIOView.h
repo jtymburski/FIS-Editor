@@ -156,6 +156,7 @@ public:
   /* Updates list in IO dialog, needed for event control */
   void updateListItems(QVector<QString> list);
   void updateListMaps(QVector<QString> list);
+  void updateListParties(QVector<QString> list);
   void updateListSubmaps(QVector<QString> list);
   void updateListThings(QVector<QString> list);
 

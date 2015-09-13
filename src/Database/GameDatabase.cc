@@ -1594,6 +1594,12 @@ void GameDatabase::updateEventObjects()
   for(int i = 0; i < data_map.size(); i++)
     map_list.push_back(data_map[i]->getNameList());
   emit updatedMaps(map_list);
+
+  /* List of parties */
+  QVector<QString> party_list;
+  for(int i = 0; i < data_party.size(); i++)
+    party_list.push_back(data_party[i]->getNameList());
+  emit updatedParties(party_list);
 }
 
 /*============================================================================

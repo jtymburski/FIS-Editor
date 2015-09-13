@@ -67,6 +67,7 @@ signals:
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+  void updatedParties(QVector<QString> parties);
 
   /* Updates event objects in the map database class */
   void updateEventObjects();
@@ -98,10 +99,6 @@ public slots:
 
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
-
-  /* Updates event objects in the map database or view class */
-  void updateEventObjectsDb();
-  void updateEventObjectsView();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

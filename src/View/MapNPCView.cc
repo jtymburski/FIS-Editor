@@ -698,6 +698,18 @@ void MapNPCView::updateListMaps(QVector<QString> list)
 }
 
 /*
+ * Description: Sets the list of maps, used for the party dropdown
+ *
+ * Inputs: QVector<QString> - list of all parties (for selected dropdown)
+ * Output: none
+ */
+void MapNPCView::updateListParties(QVector<QString> list)
+{
+  if(instance_dialog != NULL)
+    instance_dialog->setListParties(list);
+}
+
+/*
  * Description: Sets the list of sub-maps, used for event creation.
  *
  * Inputs: QVector<QString> - list of all sub-maps (for teleport event)

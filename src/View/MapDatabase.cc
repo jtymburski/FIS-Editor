@@ -544,6 +544,27 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
   }
 }
 
+/* Updated data from higher up in the stack */
+void MapDatabase::updatedParties(QVector<QString> parties)
+{
+  if(mode_for_data == EditorEnumDb::THING_VIEW)
+  {
+    view_thing->updateListParties(parties);
+  }
+  else if(mode_for_data == EditorEnumDb::IO_VIEW)
+  {
+    view_io->updateListParties(parties);
+  }
+  else if(mode_for_data == EditorEnumDb::PERSON_VIEW)
+  {
+    view_person->updateListParties(parties);
+  }
+  else if(mode_for_data == EditorEnumDb::NPC_VIEW)
+  {
+    view_npc->updateListParties(parties);
+  }
+}
+
 /* Updates the path nodes in the list widget */
 // TODO: Comment
 void MapDatabase::updatePathNodes()

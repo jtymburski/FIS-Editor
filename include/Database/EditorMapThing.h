@@ -85,6 +85,9 @@ public:
   /* Returns the event object of the thing */
   Event getEvent() const;
 
+  /* Returns the game object reference ID. -1 if unset */
+  int getGameID() const;
+
   /* Gets the ID for the thing */
   virtual int getID() const;
 
@@ -133,6 +136,9 @@ public:
 
   /* Sets the interaction event */
   void setEvent(Event event);
+
+  /* Sets the game object reference ID. -1 if unset */
+  void setGameID(int id);
 
   /* Sets the thing id (Backend) */
   virtual void setID(int id);

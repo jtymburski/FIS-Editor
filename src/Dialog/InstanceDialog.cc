@@ -171,23 +171,32 @@ void InstanceDialog::createLayout()
           this, SLOT(changedDescription()));
   layout->addWidget(edit_description, 2, 1, 2, 3);
 
+  /* Upper Game Party Connection */
+  QLabel* lbl_party = new QLabel("Party", this);
+  layout->addWidget(lbl_party, 4, 0);
+  combo_party = new QComboBox(this);
+  combo_party->addItem("None");
+  connect(combo_party, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(comboPartyChange(int)));
+  layout->addWidget(combo_party, 4, 1, 1, 3);
+
   /* Speed settings */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
   {
     QLabel* lbl_speed = new QLabel("Speed", this);
-    layout->addWidget(lbl_speed, 4, 0);
+    layout->addWidget(lbl_speed, 5, 0);
     spin_speed = new QSpinBox(this);
     spin_speed->setMinimum(0);
     spin_speed->setMaximum(256);
     connect(spin_speed, SIGNAL(valueChanged(int)),
             this, SLOT(speedChanged(int)));
-    layout->addWidget(spin_speed, 4, 1);
+    layout->addWidget(spin_speed, 5, 1);
     lbl_speed_result = new QLabel("X ms/tile");
-    layout->addWidget(lbl_speed_result, 4, 2);
+    layout->addWidget(lbl_speed_result, 5, 2);
     box_base_speed = new QCheckBox("Use Base", this);
     connect(box_base_speed, SIGNAL(stateChanged(int)),
             this, SLOT(checkBaseSpeed(int)));
-    layout->addWidget(box_base_speed, 4, 3);
+    layout->addWidget(box_base_speed, 5, 3);
   }
 
   /* Events only relevant if not IO */
@@ -199,14 +208,14 @@ void InstanceDialog::createLayout()
             this, SLOT(checkBaseChange(int)));
     //if(thing_type == EditorEnumDb::IO)
     //  box_base_event->setDisabled(true);
-    layout->addWidget(box_base_event, 5, 1, 1, 2);
+    layout->addWidget(box_base_event, 6, 1, 1, 2);
 
     /* Event View */
     event_view = new EventView(event_ctrl, this);
     connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
             this, SLOT(editConversation(Conversation*,bool)));
     connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-    layout->addWidget(event_view, 6, 0, 1, 4);
+    layout->addWidget(event_view, 7, 0, 1, 4);
   }
 
   /* Movement section only relevant if npc */
@@ -263,7 +272,7 @@ void InstanceDialog::createLayout()
     list_nodes = new QListWidget(this);
     connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(editNode(QListWidgetItem*)));
-    layout->addWidget(list_nodes, 5, 5, 2, 4);
+    layout->addWidget(list_nodes, 5, 5, 3, 4);
 
     btn_offset = 5;
   }
@@ -273,16 +282,16 @@ void InstanceDialog::createLayout()
   QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
   btn_base_edit->setMaximumWidth(75);
   connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
-  layout->addWidget(btn_base_edit, 8, 0);
+  layout->addWidget(btn_base_edit, 9, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 8, 2 + btn_offset);
+  layout->addWidget(btn_ok, 9, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   btn_cancel->setMaximumWidth(75);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 8, 3 + btn_offset);
+  layout->addWidget(btn_cancel, 9, 3 + btn_offset);
 
   /* Dialog control */
   if(thing_type == EditorEnumDb::THING)
@@ -319,10 +328,30 @@ void InstanceDialog::setup()
 
   /* Layout setup */
   createLayout();
+  updateData();
+}
 
+/*
+ * Description: Updates the data in the widgets. setup() must be called
+ *              prior. Assumes signals have been blocked as needed.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void InstanceDialog::updateData()
+{
   /* Name and descrip */
   line_name->setText(thing_working->getName());
   edit_description->setPlainText(thing_working->getDescription());
+
+  /* Game ID Party */
+  combo_party->setCurrentIndex(0);
+  for(int i = 0; i < list_parties.size(); i++)
+  {
+    int id = list_parties[i].split(":").front().toInt();
+    if(id == thing_working->getGameID())
+      combo_party->setCurrentIndex(i + 1);
+  }
 
   /* Speed */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
@@ -631,6 +660,22 @@ void InstanceDialog::comboAlgorithmChange(int index)
 }
 
 /*
+ * Description: Slot triggered when the combo box for the selected party of
+ *              the thing is changed. This changes the party index.
+ *
+ * Inputs: int index - the new index in the combo box
+ * Output: none
+ */
+void InstanceDialog::comboPartyChange(int index)
+{
+  if(index > 0)
+    thing_working->setGameID(combo_party->currentText().split(":")
+                                                       .front().toInt());
+  else
+    thing_working->setGameID(-1);
+}
+
+/*
  * Description: Slot triggered when the combo box for the tracking type of the
  *              movement of the npc is changed. This changes how the npc reacts
  *              when a player comes in the vicinity of the npc.
@@ -789,6 +834,24 @@ void InstanceDialog::speedChanged(int value)
 EventView* InstanceDialog::getEventView()
 {
   return event_view;
+}
+
+/*
+ * Description: Sets the list of parties, used for selecting linked game objs
+ *
+ * Inputs: QVector<QString> - list of all parties
+ * Output: none
+ */
+void InstanceDialog::setListParties(QVector<QString> parties)
+{
+  list_parties = parties;
+  combo_party->blockSignals(true);
+  combo_party->clear();
+  combo_party->addItem("None");
+  for(int i = 0; i < list_parties.size(); i++)
+    combo_party->addItem(list_parties[i]);
+  updateData();
+  combo_party->blockSignals(false);
 }
 
 /*

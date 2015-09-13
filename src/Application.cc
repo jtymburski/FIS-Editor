@@ -75,6 +75,8 @@ Application::Application(QWidget* parent)
           game_view, SIGNAL(updatedItems(QVector<QString>)));
   connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
+  connect(game_database, SIGNAL(updatedParties(QVector<QString>)),
+          game_view, SIGNAL(updatedParties(QVector<QString>)));
   connect(game_view->getMapView(), SIGNAL(disableControl(bool)),
           this, SLOT(disableControl(bool)));
   connect(game_view->getMapView(), SIGNAL(layerChanged(EditorEnumDb::Layer)),

@@ -81,6 +81,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   setDescription(source.getDescription());
   event_base = source.event_base;
   setEvent(EventHandler::copyEvent(source.event));
+  setGameID(source.getGameID());
   setID(source.getID());
   setName(source.getName());
   setVisibility(source.isVisible());
@@ -122,6 +123,10 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     if(base->getDescription() != getDescription())
       fh->writeXmlData("description", getDescription().toStdString());
 
+    /* Check game ID */
+    if(getGameID() >= 0)
+      fh->writeXmlData("game_id", getGameID());
+
     /* Event save, if relevant (isBaseEvent() is true) */
     if(!event_base)
     {
@@ -137,6 +142,10 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     fh->writeXmlData("description", getDescription().toStdString());
     if(default_thing.isVisible() != isVisible())
       fh->writeXmlData("visible", isVisible());
+
+    /* Check game ID */
+    if(getGameID() >= 0)
+      fh->writeXmlData("game_id", getGameID());
 
     /* Save the dialog image */
     if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
@@ -247,6 +256,17 @@ Event EditorMapThing::getEvent() const
   if(isBaseEvent())
     return base->event;
   return event;
+}
+
+/*
+ * Description: Returns the core game ID that is connected with the map thing.
+ *
+ * Inputs: none
+ * Output: int - the game ID. -1 if unset
+ */
+int EditorMapThing::getGameID() const
+{
+  return thing.getGameID();
 }
 
 /*
@@ -413,6 +433,10 @@ void EditorMapThing::load(XmlData data, int index)
       event = *edit_event.getEvent();
     event_base = false;
   }
+  else if(element == "game_id" || element == "core_id")
+  {
+    setGameID(data.getDataInteger());
+  }
   else if(element == "image")
   {
     dialog_image.deleteAllFrames();
@@ -563,6 +587,17 @@ void EditorMapThing::setEvent(Event event)
 {
   this->event = EventHandler::deleteEvent(this->event);
   this->event = event;
+}
+
+/*
+ * Description: Sets the game upper level reference ID in the base class.
+ *
+ * Inputs: int id - the new reference id. Less than 0 is invalid
+ * Output: none
+ */
+void EditorMapThing::setGameID(int id)
+{
+  thing.setGameID(id);
 }
 
 /*

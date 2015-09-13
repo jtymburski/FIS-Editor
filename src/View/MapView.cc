@@ -484,6 +484,14 @@ void MapView::updatedMaps(QVector<QString> maps)
     event_view->setListMaps(maps);
 }
 
+/* Updated data to pass into map database */
+// TODO: Comment
+void MapView::updatedParties(QVector<QString> parties)
+{
+  if(data_db)
+    map_database->updatedParties(parties);
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/

@@ -42,6 +42,7 @@ private:
 
   /* Combo box control for algorithms and tracking */
   QComboBox* combo_algorithm;
+  QComboBox* combo_party;
   QComboBox* combo_tracking;
 
   /* The conversation dialog */
@@ -62,6 +63,9 @@ private:
 
   /* The node list */
   QListWidget* list_nodes;
+
+  /* The list of objects used in possible events */
+  QVector<QString> list_parties;
 
   /* The speed control value */
   QSpinBox* spin_speed;
@@ -92,6 +96,9 @@ private:
   /* Called on initial set-up of the class */
   void setup();
 
+  /* Update the class data */
+  void updateData();
+
   /* Updates the list of nodes */
   void updateNodes();
 
@@ -110,7 +117,6 @@ signals:
   void editBase(EditorMapThing* thing);
 
   /* Ok pressed */
-  void ok(); // TODO: REMOVE
   void ok(QString name_list);
 
   /* Path edit start trigger */
@@ -140,6 +146,7 @@ public slots:
 
   /* Combo box triggers */
   void comboAlgorithmChange(int index);
+  void comboPartyChange(int index);
   void comboTrackingChange(int index);
 
   /* Edit conversation trigger */
@@ -153,7 +160,7 @@ public slots:
   void selectTileConvo();
 
   /* Speed changed */
-  void speedChanged(int value); // TODO
+  void speedChanged(int value);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -162,11 +169,14 @@ public:
   /* Returns the event view widget */
   EventView* getEventView();
 
+  /* Sets the list of parties, used for event creation */
+  void setListParties(QVector<QString> parties);
+
   /* Sets the working thing to the original */
   void updateOriginal();
 
   /* Update path finished */
-  void updatePathFinished(); // TODO
+  void updatePathFinished();
 
   /* Update the selected tile for the thing */
   void updateSelectedTile(int id, int x, int y);

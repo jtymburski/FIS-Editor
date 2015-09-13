@@ -92,8 +92,6 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   /* Next item data: Is base - write core data */
   if(getBaseItem() == NULL)
   {
-    if(getCoreID() >= 0)
-      fh->writeXmlData("game_id", getCoreID());
     if(default_item.isWalkover() != isWalkover())
       fh->writeXmlData("walkover", isWalkover());
   }
@@ -119,17 +117,6 @@ EditorMapItem* EditorMapItem::getBaseItem() const
   if(getBaseThing() != NULL)
     return (EditorMapItem*)getBaseThing();
   return NULL;
-}
-
-/*
- * Description: Returns the core ID that is connected with the map item.
- *
- * Inputs: none
- * Output: int - the core ID. -1 if unset
- */
-int EditorMapItem::getCoreID()
-{
-  return item.getGameID();
 }
 
 /*
@@ -167,11 +154,7 @@ void EditorMapItem::load(XmlData data, int index)
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
-  if(element == "core_id" || element == "game_id")
-  {
-    setCoreID(data.getDataInteger());
-  }
-  else if(element == "count")
+  if(element == "count")
   {
     setCount(data.getDataInteger());
   }
@@ -218,18 +201,6 @@ void EditorMapItem::setBase(EditorMapItem* item)
     thing = item;
 
   EditorMapThing::setBase(thing);
-}
-
-/*
- * Description: Sets the ID of the core game item that is connected with this
- *              map item.
- *
- * Inputs: int id - the id of the core game ID item
- * Output: none
- */
-void EditorMapItem::setCoreID(int id)
-{
-  item.setGameID(id);
 }
 
 /*

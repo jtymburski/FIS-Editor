@@ -171,6 +171,7 @@ signals:
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+  void updatedParties(QVector<QString> parties);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

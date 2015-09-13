@@ -19,6 +19,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
           view_map, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           view_map, SLOT(updatedMaps(QVector<QString>)));
+  connect(this, SIGNAL(updatedParties(QVector<QString>)),
+          view_map, SLOT(updatedParties(QVector<QString>)));
 
   view_party = new EditorParty(this);
   view_party->setDisabled(true);
@@ -271,20 +273,6 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
 {
   mode = v;
   setCurrentIndex(static_cast<int>(v));
-}
-
-/* Updates event objects in the map database or view class */
-// TODO: Comment
-void GameView::updateEventObjectsDb()
-{
-
-}
-
-/* Updates event objects in the map database or view class */
-// TODO: Comment
-void GameView::updateEventObjectsView()
-{
-
 }
 
 /*============================================================================

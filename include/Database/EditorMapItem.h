@@ -56,9 +56,6 @@ public:
   /* Gets the base item of the item */
   EditorMapItem* getBaseItem() const;
 
-  /* Returns the core (game representation) ID. -1 if unset */
-  int getCoreID();
-
   /* Returns the count of how many of these items are available */
   uint32_t getCount();
 
@@ -73,9 +70,6 @@ public:
 
   /* Sets the base reference item */
   void setBase(EditorMapItem* item);
-  
-  /* Sets the core (game representation) ID. If invalid, sets to -1 */
-  void setCoreID(int id);
   
   /* Sets the number of this item */
   void setCount(uint32_t count);

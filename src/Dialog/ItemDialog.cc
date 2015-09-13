@@ -177,7 +177,7 @@ void ItemDialog::updateData()
   for(int i = 0; i < list_items.size(); i++)
   {
     int id = list_items[i].split(":").front().toInt();
-    if(id == item_working->getCoreID())
+    if(id == item_working->getGameID())
       box_core->setCurrentIndex(i + 1);
   }
 }
@@ -301,9 +301,9 @@ void ItemDialog::changedName(QString name)
 void ItemDialog::coreItemChanged(int index)
 {
   if(index > 0)
-    item_working->setCoreID(box_core->currentText().split(":").front().toInt());
+    item_working->setGameID(box_core->currentText().split(":").front().toInt());
   else
-    item_working->setCoreID(-1);
+    item_working->setGameID(-1);
 }
 
 /*

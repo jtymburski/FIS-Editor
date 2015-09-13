@@ -143,6 +143,7 @@ public slots:
   /* Updated data from higher up in the stack */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+  void updatedParties(QVector<QString> parties);
 
   /* Updates the path nodes in the list widget */
   void updatePathNodes();
