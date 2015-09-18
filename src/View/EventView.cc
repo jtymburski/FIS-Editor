@@ -72,6 +72,7 @@ void EventView::createLayout(bool conversation_enabled)
   combo_category->addItem("Execute Battle");
   combo_category->addItem("Switch Maps");
   combo_category->addItem("Teleport Thing");
+  combo_category->addItem("Just Sound");
   if(conversation_enabled)
     combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
@@ -157,6 +158,12 @@ void EventView::createLayout(bool conversation_enabled)
   layout_tele->addWidget(lbl_tele_thing, 1, 0);
   layout_tele->addWidget(tele_thing, 1, 1);
 
+  /* Widget for blank control */
+  QWidget* widget_sound = new QWidget(this);
+  QLabel* lbl_sound = new QLabel("SOUND - TODO", this);
+  QVBoxLayout* layout_sound = new QVBoxLayout(widget_sound);
+  layout_sound->addWidget(lbl_sound, 0, Qt::AlignCenter);
+
   /* Widget for conversation control */
   QWidget* widget_convo;
   if(conversation_enabled)
@@ -209,6 +216,7 @@ void EventView::createLayout(bool conversation_enabled)
   view_stack->addWidget(widget_battle);
   view_stack->addWidget(widget_map);
   view_stack->addWidget(widget_teleport);
+  view_stack->addWidget(widget_sound);
   if(conversation_enabled)
     view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
@@ -505,32 +513,42 @@ void EventView::categoryChanged(int index)
 //  /* Parse the return value */
 //  if(ret == QMessageBox::Yes)
 //  {
-    view_stack->setCurrentIndex(index);
 
-    if(event != NULL)
+  /* Restrict sound widget - TODO */
+  if(index == (int)EventClassifier::JUSTSOUND)
+  {
+    index = (int)EventClassifier::NOEVENT;
+    combo_category->blockSignals(true);
+    combo_category->setCurrentIndex(index);
+    combo_category->blockSignals(false);
+  }
+
+  view_stack->setCurrentIndex(index);
+
+  if(event != NULL)
+  {
+    if((int)event->getEventType() != index)
     {
-      if((int)event->getEventType() != index)
-      {
-        /* Change the event */
-        if(index == (int)EventClassifier::GIVEITEM)
-          event->setEventGiveItem();
-        else if(index == (int)EventClassifier::NOEVENT)
-          event->setEventBlank();
-        else if(index == (int)EventClassifier::NOTIFICATION)
-          event->setEventNotification();
-        else if(index == (int)EventClassifier::RUNBATTLE)
-          event->setEventStartBattle();
-        else if(index == (int)EventClassifier::RUNMAP)
-          event->setEventStartMap();
-        else if(index == (int)EventClassifier::STARTCONVO)
-          event->setEventConversation();
-        else if(index == (int)EventClassifier::TELEPORTTHING)
-          event->setEventTeleport();
-      }
-
-      /* Update the layout */
-      setLayoutData();
+      /* Change the event */
+      if(index == (int)EventClassifier::GIVEITEM)
+        event->setEventGiveItem();
+      else if(index == (int)EventClassifier::NOEVENT)
+        event->setEventBlank();
+      else if(index == (int)EventClassifier::NOTIFICATION)
+        event->setEventNotification();
+      else if(index == (int)EventClassifier::RUNBATTLE)
+        event->setEventStartBattle();
+      else if(index == (int)EventClassifier::RUNMAP)
+        event->setEventStartMap();
+      else if(index == (int)EventClassifier::STARTCONVO)
+        event->setEventConversation();
+      else if(index == (int)EventClassifier::TELEPORTTHING)
+        event->setEventTeleport();
     }
+
+    /* Update the layout */
+    setLayoutData();
+  }
 //  }
 //  else
 //  {

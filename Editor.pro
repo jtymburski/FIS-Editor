@@ -87,6 +87,8 @@ SOURCES += \
     ../Project/src/Frame.cc \
     ../Project/src/Helpers.cc \
     ../Project/src/Md5.cc \
+    ../Project/src/Sound.cc \
+    ../Project/src/SoundHandler.cc \
     ../Project/src/Sprite.cc \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
@@ -179,6 +181,8 @@ HEADERS += \
     ../Project/include/Frame.h \
     ../Project/include/Helpers.h \
     ../Project/include/Md5.h \
+    ../Project/include/Sound.h \
+    ../Project/include/SoundHandler.h \
     ../Project/include/Sprite.h \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
