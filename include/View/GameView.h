@@ -25,6 +25,7 @@ public:
 private:
   /* Blank views */
   EditorAction* null_action;
+  EditorSounds* null_audio;
   EditorCategory* null_battleclass;
   QWidget* null_bubby;
   QWidget* null_equipment;
@@ -37,6 +38,7 @@ private:
 
   /* The views, as they're set */
   EditorAction* view_action;
+  EditorSounds* view_audio;
   EditorCategory* view_battleclass;
   QWidget* view_bubby;
   QWidget* view_equipment;
@@ -106,6 +108,9 @@ public slots:
 public:
   /* Refresh View */
   void refreshView(EditorEnumDb::ViewMode mode, QWidget* old,
-                   QWidget* replacement);
+                   QWidget* replacement, bool change_view = true);
+
+  /* Sets the permanent views */
+  void setViewAudio(EditorSounds* view);
 };
 #endif // GAMEVIEW_H

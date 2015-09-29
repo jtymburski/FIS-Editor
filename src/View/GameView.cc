@@ -22,6 +22,9 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   connect(this, SIGNAL(updatedParties(QVector<QString>)),
           view_map, SLOT(updatedParties(QVector<QString>)));
 
+  QWidget* blank_widget1 = new QWidget(this);
+  addWidget(blank_widget1);
+
   view_party = new EditorParty(this);
   view_party->setDisabled(true);
   null_party = view_party;
@@ -70,6 +73,15 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_action = view_action;
   addWidget(view_action);
 
+  QWidget* blank_widget2 = new QWidget(this);
+  addWidget(blank_widget2);
+
+  view_audio = new EditorSounds(this);
+  view_audio->setDisabled(true);
+  null_audio = view_audio;
+  addWidget(view_audio);
+
+  /* Temporary styling */
   view_equipment->setStyleSheet("background-color:black;");
   view_bubby->setStyleSheet("background-color:black;");
 
@@ -281,9 +293,17 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
 
 /* Refresh view */
 void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
-                           QWidget *replacement)
+                           QWidget *replacement, bool change_view)
 {
   removeWidget(old);
   insertWidget(static_cast<int>(mode), replacement);
-  setViewMode(mode);
+  if(change_view)
+    setViewMode(mode);
+}
+
+/* Sets the permanent views */
+void GameView::setViewAudio(EditorSounds* view)
+{
+  refreshView(EditorEnumDb::AUDIOVIEW, view_audio, view, false);
+  view_audio = view;
 }

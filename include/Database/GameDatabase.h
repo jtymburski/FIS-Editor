@@ -17,17 +17,18 @@
 #include <QVector>
 #include <QWidget>
 
-#include "EditorEnumDb.h"
-#include "Database/EditorMap.h"
-#include "Database/EditorPerson.h"
-#include "Database/EditorParty.h"
-#include "Database/EditorItem.h"
 #include "Database/EditorAction.h"
+#include "Database/EditorBubby.h"
 #include "Database/EditorCategory.h"
+#include "Database/EditorEquipment.h"
+#include "Database/EditorItem.h"
+#include "Database/EditorMap.h"
+#include "Database/EditorParty.h"
+#include "Database/EditorPerson.h"
 #include "Database/EditorSkillset.h"
 #include "Database/EditorSkill.h"
-#include "Database/EditorEquipment.h"
-#include "Database/EditorBubby.h"
+#include "Database/EditorSounds.h"
+#include "EditorEnumDb.h"
 #include "FileHandler.h"
 
 class GameDatabase : public QWidget
@@ -42,10 +43,10 @@ public:
 
 private:
   /* Buttons at bottom of database */
-  QPushButton* button_new;
   QPushButton* button_delete;
-  QPushButton* button_import;
   QPushButton* button_duplicate;
+  QPushButton* button_import;
+  QPushButton* button_new;
 
   /* Currently selected object */
   EditorAction* current_action;
@@ -62,6 +63,7 @@ private:
 
   /* Vector for actual data in bottom list, populated from game xml data */
   QVector<EditorAction*> data_action;
+  EditorSounds* data_audio;
   QVector<EditorCategory*> data_battleclass;
   QVector<EditorBubby*> data_bubby;
   QVector<EditorEquipment*> data_equipment;
@@ -225,6 +227,9 @@ public:
 
   /* Get current map */
   EditorMap* getCurrentMap();
+
+  /* Returns the audio view, for connection */
+  EditorSounds* getViewAudio();
 
   /* Load the game */
   void load(FileHandler* fh);

@@ -23,13 +23,16 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   current_skillset = NULL;
   mapsize_dialog = NULL;
 
+  /* Create views that will always exist */
+  data_audio = new EditorSounds(this);
+
   /* Top view set-up */
   view_top = new QListWidget(this);
   view_top->setEditTriggers(QAbstractItemView::NoEditTriggers);
   QStringList items;
-  items << "Maps" << "Parties" << "Persons" << "B.U.B.B.I.E's" << "Equipments"
-        << "Items" << "Classes" << "Races" << "Skill Sets" << "Skills"
-        << "Actions";
+  items << "Maps" << "--" << "Parties" << "Persons" << "B.U.B.B.I.E's"
+        << "Equipments" << "Items" << "Classes" << "Races" << "Skill Sets"
+        << "Skills" << "Actions" << "--" << "Music / Sound";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   connect(view_top,SIGNAL(currentRowChanged(int)),
@@ -1490,6 +1493,14 @@ void GameDatabase::rowChange(int index)
 {
   emit changeMode((EditorEnumDb::ViewMode)index);
   modifyBottomList(index);
+
+  /* Modify enable status depending on index */
+  bool is_invalid = (index == (int)EditorEnumDb::BLANKVIEW1 ||
+                     index == (int)EditorEnumDb::BLANKVIEW2 ||
+                     index == (int)EditorEnumDb::AUDIOVIEW);
+  button_new->setEnabled(!is_invalid);
+  button_import->setEnabled(!is_invalid);
+  view_bottom->setEnabled(!is_invalid);
 }
 
 /* Triggered by save all button */
@@ -1701,6 +1712,12 @@ void GameDatabase::deleteAll()
 EditorMap* GameDatabase::getCurrentMap()
 {
   return current_map;
+}
+
+/* Returns the audio view, for connection */
+EditorSounds* GameDatabase::getViewAudio()
+{
+  return data_audio;
 }
 
 /* Load the game */

@@ -50,6 +50,7 @@ SOURCES += \
     src/Database/EditorPerson.cc \
     src/Database/EditorSkill.cc \
     src/Database/EditorSkillset.cc \
+    src/Database/EditorSounds.cc \
     src/Database/EditorSprite.cc \
     src/Database/EditorTile.cc \
     src/Database/EditorTileSprite.cc \
@@ -141,6 +142,7 @@ HEADERS += \
     include/Database/EditorPerson.h \
     include/Database/EditorSkill.h \
     include/Database/EditorSkillset.h \
+    include/Database/EditorSounds.h \
     include/Database/EditorSprite.h \
     include/Database/EditorTemplate.h \
     include/Database/EditorTile.h \
