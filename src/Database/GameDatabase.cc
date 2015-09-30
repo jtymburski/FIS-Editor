@@ -24,7 +24,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   mapsize_dialog = NULL;
 
   /* Create views that will always exist */
-  data_audio = new EditorSounds(this);
+  data_sounds = new SoundView(this);
 
   /* Top view set-up */
   view_top = new QListWidget(this);
@@ -1715,9 +1715,9 @@ EditorMap* GameDatabase::getCurrentMap()
 }
 
 /* Returns the audio view, for connection */
-EditorSounds* GameDatabase::getViewAudio()
+SoundView* GameDatabase::getViewAudio()
 {
-  return data_audio;
+  return data_sounds;
 }
 
 /* Load the game */

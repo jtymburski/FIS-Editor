@@ -25,7 +25,6 @@ public:
 private:
   /* Blank views */
   EditorAction* null_action;
-  EditorSounds* null_audio;
   EditorCategory* null_battleclass;
   QWidget* null_bubby;
   QWidget* null_equipment;
@@ -35,10 +34,10 @@ private:
   EditorCategory* null_race;
   EditorSkill* null_skill;
   EditorSkillset* null_skillset;
+  SoundView* null_sounds;
 
   /* The views, as they're set */
   EditorAction* view_action;
-  EditorSounds* view_audio;
   EditorCategory* view_battleclass;
   QWidget* view_bubby;
   QWidget* view_equipment;
@@ -49,6 +48,7 @@ private:
   EditorCategory* view_race;
   EditorSkill* view_skill;
   EditorSkillset* view_skillset;
+  SoundView* view_sounds;
 
   EditorEnumDb::ViewMode mode;
 
@@ -111,6 +111,6 @@ public:
                    QWidget* replacement, bool change_view = true);
 
   /* Sets the permanent views */
-  void setViewAudio(EditorSounds* view);
+  void setViewAudio(SoundView* view);
 };
 #endif // GAMEVIEW_H

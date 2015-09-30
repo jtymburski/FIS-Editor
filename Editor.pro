@@ -50,7 +50,7 @@ SOURCES += \
     src/Database/EditorPerson.cc \
     src/Database/EditorSkill.cc \
     src/Database/EditorSkillset.cc \
-    src/Database/EditorSounds.cc \
+    src/Database/EditorSound.cc \
     src/Database/EditorSprite.cc \
     src/Database/EditorTile.cc \
     src/Database/EditorTileSprite.cc \
@@ -82,6 +82,7 @@ SOURCES += \
     src/View/RawImage.cc \
     src/View/RawImageList.cc \
     src/View/RawImageView.cc \
+    src/View/SoundView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
     ../Project/src/FileHandler.cc \
@@ -142,7 +143,7 @@ HEADERS += \
     include/Database/EditorPerson.h \
     include/Database/EditorSkill.h \
     include/Database/EditorSkillset.h \
-    include/Database/EditorSounds.h \
+    include/Database/EditorSound.h \
     include/Database/EditorSprite.h \
     include/Database/EditorTemplate.h \
     include/Database/EditorTile.h \
@@ -175,6 +176,7 @@ HEADERS += \
     include/View/RawImage.h \
     include/View/RawImageList.h \
     include/View/RawImageView.h \
+    include/View/SoundView.h \
     include/View/SpriteView.h \
     include/View/SpriteViewList.h \
     ../Project/include/EnumDb.h \

@@ -1,38 +1,37 @@
 /*******************************************************************************
- * Class Name: EditorSounds
- * Date Created: September 28, 2015
+ * Class Name: EditorSound
+ * Date Created: September 29, 2015
  * Inheritance: QWidget
- * Description: Sound and music handler within the Editor
+ * Description: Editor Sound storage interface
  ******************************************************************************/
-#ifndef EDITORSOUNDS_H
-#define EDITORSOUNDS_H
+#ifndef EDITORSOUND_H
+#define EDITORSOUND_H
 
-#include <QGridLayout>
 //#include <QInputDialog>
-#include <QLabel>
 #include <QWidget>
 
 //#include "Database/EditorPerson.h"
-//#include "Database/EditorTemplate.h"
-//#include "EditorHelpers.h"
+#include "Database/EditorTemplate.h"
+#include "EditorHelpers.h"
 #include "FileHandler.h"
 //#include "Game/Player/Party.h"
+#include "Sound.h"
 
-class EditorSounds : public QWidget
+class EditorSound : public QWidget, public EditorTemplate
 {
   Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSounds(QWidget* parent = NULL);
+  EditorSound(QWidget* parent = nullptr);
 
   /* Constructor function with id and name */
-  //EditorParty(int id, QString name, QWidget* parent = NULL);
+  EditorSound(int id, QString name, QWidget* parent = nullptr);
 
   /* Copy constructor */
-  EditorSounds(const EditorSounds &source);
+  EditorSound(const EditorSound &source);
 
   /* Destructor function */
-  ~EditorSounds();
+  virtual ~EditorSound();
 
 private:
   /* Button Widgets */
@@ -49,7 +48,7 @@ private:
   //QLineEdit* edit_name;
 
   /* Editor ID */
-  //int id;
+  int id;
 
   /* Item Information */
   //QMap<int,int> item_set;
@@ -67,12 +66,12 @@ private:
   //QListWidget* list_persons_used;
 
   /* Editor name */
-  //QString name_base;
-  //QString name_curr;
+  QString name_base;
+  QString name_curr;
 
-  /* The reference party for data */
-  //Party party_base;
-  //Party party_curr;
+  /* The reference sound for data */
+  Sound sound_base;
+  Sound sound_curr;
 
   /* Person Information */
   //QVector<QPair<int,int>> person_set;
@@ -84,13 +83,21 @@ private:
  *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
-  void copySelf(const EditorSounds &source);
+  void copySelf(const EditorSound &source);
 
   /* Creates interface layout */
   void createLayout();
 
+  /* Returns calculated mass of inventory and items by ID */
+  //int getInvMass();
+  //int getInvMassRemain();
+  //EditorItem* getItem(int id);
+
   /* Loads working info into UI objects */
   void loadWorkingInfo();
+
+  /* Sort Person Set */
+  //void sortPersons();
 
   /* Update object lists */
   //void updateItemList();
@@ -100,8 +107,8 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Name changed within player widget signal */
-  //void nameChange(QString);
+  /* Name changed within sound widget signal */
+  void nameChange(QString);
 
 /*============================================================================
  * PUBLIC SLOTS
@@ -134,13 +141,13 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the ID of the party */
-  //virtual int getID() const;
+  virtual int getID() const;
 
   /* Returns the name of the party */
-  //virtual QString getName() const;
+  virtual QString getName() const;
 
   /* Returns the name of the party for listing */
-  //virtual QString getNameList();
+  virtual QString getNameList();
 
   /* Loads the object data */
   void load(XmlData data, int index);
@@ -155,10 +162,10 @@ public:
   void saveWorking();
 
   /* Sets the ID of the party */
-  //virtual void setID(int id);
+  virtual void setID(int id);
 
   /* Sets the name of the party */
-  //virtual void setName(QString name);
+  virtual void setName(QString name);
 
   /* Update Calls for data */
   //void updateItems(QVector<EditorItem*> items,
@@ -171,7 +178,7 @@ public:
  *===========================================================================*/
 public:
   /* The copy operator */
-  EditorSounds& operator= (const EditorSounds &source);
+  EditorSound& operator= (const EditorSound &source);
 };
 
-#endif // EDITORSOUNDS_H
+#endif // EDITORSOUND_H

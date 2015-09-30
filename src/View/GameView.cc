@@ -76,12 +76,14 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   QWidget* blank_widget2 = new QWidget(this);
   addWidget(blank_widget2);
 
-  view_audio = new EditorSounds(this);
-  view_audio->setDisabled(true);
-  null_audio = view_audio;
-  addWidget(view_audio);
+  view_sounds = new SoundView(this);
+  view_sounds->setDisabled(true);
+  null_sounds = view_sounds;
+  addWidget(view_sounds);
 
-  /* Temporary styling */
+  /* Styling, as required */
+  blank_widget1->setStyleSheet("background-color:black;");
+  blank_widget2->setStyleSheet("background-color:black;");
   view_equipment->setStyleSheet("background-color:black;");
   view_bubby->setStyleSheet("background-color:black;");
 
@@ -302,8 +304,8 @@ void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
 }
 
 /* Sets the permanent views */
-void GameView::setViewAudio(EditorSounds* view)
+void GameView::setViewAudio(SoundView* view)
 {
-  refreshView(EditorEnumDb::AUDIOVIEW, view_audio, view, false);
-  view_audio = view;
+  refreshView(EditorEnumDb::AUDIOVIEW, view_sounds, view, false);
+  view_sounds = view;
 }
