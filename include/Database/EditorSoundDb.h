@@ -1,43 +1,43 @@
 /*******************************************************************************
- * Class Name: EditorSound
- * Date Created: September 29, 2015
+ * Class Name: EditorSoundDb
+ * Date Created: October 1, 2015
  * Inheritance: QWidget
- * Description: Editor Sound storage interface
+ * Description: Sound and music handler within the Editor. Controls the data
+ *              and the overall view
  ******************************************************************************/
-#ifndef EDITORSOUND_H
-#define EDITORSOUND_H
+#ifndef EDITORSOUNDDB_H
+#define EDITORSOUNDDB_H
 
-//#include <QGridLayout>
+#include <QGridLayout>
 //#include <QInputDialog>
-//#include <QLabel>
-//#include <QPushButton>
-//#include <QSlider>
-//#include <QSpinBox>
-#include <QString>
-//#include <QTextEdit>
-//#include <QWidget>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QWidget>
 
 //#include "Database/EditorPerson.h"
-#include "Database/EditorTemplate.h"
-#include "EditorHelpers.h"
+//#include "Database/EditorSound.h"
+//#include "Database/EditorTemplate.h"
+//#include "EditorHelpers.h"
 #include "FileHandler.h"
 //#include "Game/Player/Party.h"
-#include "Sound.h"
+#include "View/SoundView.h"
 
-class EditorSound : public EditorTemplate
+class EditorSoundDb : public QWidget
 {
+  Q_OBJECT
 public:
   /* Constructor Function */
-  EditorSound();
+  EditorSoundDb(QWidget* parent = NULL);
 
   /* Constructor function with id and name */
-  EditorSound(int id, QString name);
+  //EditorParty(int id, QString name, QWidget* parent = NULL);
 
   /* Copy constructor */
-  EditorSound(const EditorSound &source);
+  EditorSoundDb(const EditorSoundDb &source);
 
   /* Destructor function */
-  virtual ~EditorSound();
+  ~EditorSoundDb();
 
 private:
   /* Button Widgets */
@@ -54,7 +54,7 @@ private:
   //QLineEdit* edit_name;
 
   /* Editor ID */
-  int id;
+  //int id;
 
   /* Item Information */
   //QMap<int,int> item_set;
@@ -72,12 +72,12 @@ private:
   //QListWidget* list_persons_used;
 
   /* Editor name */
-  QString name;
+  //QString name_base;
   //QString name_curr;
 
-  /* The reference sound for data */
-  Sound sound_ref;
-  //Sound sound_curr;
+  /* The reference party for data */
+  //Party party_base;
+  //Party party_curr;
 
   /* Person Information */
   //QVector<QPair<int,int>> person_set;
@@ -89,21 +89,13 @@ private:
  *===========================================================================*/
 protected:
   /* Copy function, to be called by a copy or equal operator constructor */
-  void copySelf(const EditorSound &source);
+  void copySelf(const EditorSoundDb &source);
 
   /* Creates interface layout */
-  //void createLayout();
-
-  /* Returns calculated mass of inventory and items by ID */
-  //int getInvMass();
-  //int getInvMassRemain();
-  //EditorItem* getItem(int id);
+  void createLayout();
 
   /* Loads working info into UI objects */
-  //void loadWorkingInfo();
-
-  /* Sort Person Set */
-  //void sortPersons();
+  void loadWorkingInfo();
 
   /* Update object lists */
   //void updateItemList();
@@ -112,14 +104,14 @@ protected:
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
-//signals:
-  /* Name changed within sound widget signal */
-//  void nameChange(QString);
+signals:
+  /* Name changed within player widget signal */
+  //void nameChange(QString);
 
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
-//public slots:
+public slots:
   /* Button Triggers */
   //void btnItemAdd();
   //void btnItemRemove();
@@ -147,31 +139,31 @@ protected:
  *===========================================================================*/
 public:
   /* Returns the ID of the party */
-  virtual int getID() const;
+  //virtual int getID() const;
 
   /* Returns the name of the party */
-  virtual QString getName() const;
+  //virtual QString getName() const;
 
   /* Returns the name of the party for listing */
-  virtual QString getNameList();
+  //virtual QString getNameList();
 
   /* Loads the object data */
   void load(XmlData data, int index);
 
   /* Resets the working set trigger */
-  //void resetWorking();
+  void resetWorking();
 
   /* Saves the object data */
   void save(FileHandler* fh, bool game_only = false);
 
   /* Saves the working set trigger */
-  //void saveWorking();
+  void saveWorking();
 
   /* Sets the ID of the party */
-  virtual void setID(int id);
+  //virtual void setID(int id);
 
   /* Sets the name of the party */
-  virtual void setName(QString name);
+  //virtual void setName(QString name);
 
   /* Update Calls for data */
   //void updateItems(QVector<EditorItem*> items,
@@ -184,7 +176,7 @@ public:
  *===========================================================================*/
 public:
   /* The copy operator */
-  EditorSound& operator= (const EditorSound &source);
+  EditorSoundDb& operator= (const EditorSoundDb &source);
 };
 
-#endif // EDITORSOUND_H
+#endif // EDITORSOUNDDB_H

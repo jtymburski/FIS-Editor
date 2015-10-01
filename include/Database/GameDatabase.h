@@ -27,9 +27,9 @@
 #include "Database/EditorPerson.h"
 #include "Database/EditorSkillset.h"
 #include "Database/EditorSkill.h"
+#include "Database/EditorSoundDb.h"
 #include "EditorEnumDb.h"
 #include "FileHandler.h"
-#include "View/SoundView.h"
 
 class GameDatabase : public QWidget
 {
@@ -73,7 +73,7 @@ private:
   QVector<EditorCategory*> data_race;
   QVector<EditorSkill*> data_skill;
   QVector<EditorSkillset*> data_skillset;
-  SoundView* data_sounds;
+  EditorSoundDb* data_sounds;
 
   /* Layout */
   QVBoxLayout* layout;
@@ -228,8 +228,8 @@ public:
   /* Get current map */
   EditorMap* getCurrentMap();
 
-  /* Returns the audio view, for connection */
-  SoundView* getViewAudio();
+  /* Returns the sound database, for connection */
+  EditorSoundDb* getSoundDatabase();
 
   /* Load the game */
   void load(FileHandler* fh);

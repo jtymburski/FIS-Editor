@@ -2,22 +2,27 @@
  * Class Name: SoundView
  * Date Created: September 28, 2015
  * Inheritance: QWidget
- * Description: Sound and music handler view within the Editor
+ * Description: The controller which takes an EditorSound and offers editing,
+ *              playing, and saving capacity.
  ******************************************************************************/
 #ifndef SOUNDVIEW_H
 #define SOUNDVIEW_H
 
 #include <QGridLayout>
-//#include <QInputDialog>
+#include <QInputDialog>
 #include <QLabel>
-#include <QListWidget>
 #include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
+//#include <QString>
+#include <QTextEdit>
 #include <QWidget>
 
 //#include "Database/EditorPerson.h"
+#include "Database/EditorSound.h"
 //#include "Database/EditorTemplate.h"
 //#include "EditorHelpers.h"
-#include "FileHandler.h"
+//#include "FileHandler.h"
 //#include "Game/Player/Party.h"
 
 class SoundView : public QWidget
@@ -25,10 +30,10 @@ class SoundView : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  SoundView(QWidget* parent = NULL);
+  SoundView(QWidget* parent = nullptr);
 
-  /* Constructor function with id and name */
-  //EditorParty(int id, QString name, QWidget* parent = NULL);
+  /* Constructor function with Editor Sound reference */
+  SoundView(EditorSound* sound, QWidget* parent = nullptr);
 
   /* Copy constructor */
   SoundView(const SoundView &source);
@@ -75,6 +80,10 @@ private:
   /* The reference party for data */
   //Party party_base;
   //Party party_curr;
+
+  /* The reference sound for data */
+  EditorSound* sound_base;
+  EditorSound* sound_curr;
 
   /* Person Information */
   //QVector<QPair<int,int>> person_set;
@@ -145,13 +154,13 @@ public:
   //virtual QString getNameList();
 
   /* Loads the object data */
-  void load(XmlData data, int index);
+  //void load(XmlData data, int index);
 
   /* Resets the working set trigger */
   void resetWorking();
 
   /* Saves the object data */
-  void save(FileHandler* fh, bool game_only = false);
+  //void save(FileHandler* fh, bool game_only = false);
 
   /* Saves the working set trigger */
   void saveWorking();

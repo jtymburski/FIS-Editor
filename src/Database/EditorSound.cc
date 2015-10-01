@@ -11,25 +11,17 @@
  *===========================================================================*/
 
 /* Constructor Function */
-EditorSound::EditorSound(QWidget* parent) : QWidget(parent)
+EditorSound::EditorSound()
 {
-  /* Base data */
   id = 0;
-  name_base = "Blank";
-  name_curr = name_base;
-
-  /* Layout */
-  createLayout();
-  loadWorkingInfo();
+  name = "New Sound";
 }
 
 /* Constructor function with id and name */
-EditorSound::EditorSound(int id, QString name, QWidget* parent)
-           : EditorSound(parent)
+EditorSound::EditorSound(int id, QString name) : EditorSound()
 {
   setID(id);
   setName(name);
-  saveWorking();
 }
 
 /* Copy constructor */
@@ -49,18 +41,6 @@ EditorSound::~EditorSound()
   
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorSound::copySelf(const EditorSound &source)
-{
-  // TODO
-}
-
-/* Creates interface layout */
-void EditorSound::createLayout()
-{
-  // TODO
-}
-
-/* Loads working info into UI objects */
-void EditorSound::loadWorkingInfo()
 {
   // TODO
 }
@@ -85,7 +65,7 @@ int EditorSound::getID() const
 /* Returns the name of the party */
 QString EditorSound::getName() const
 {
-  return name_curr;
+  return name;
 }
 
 /* Returns the name of the party for listing */
@@ -101,10 +81,9 @@ void EditorSound::load(XmlData data, int index)
 }
 
 /* Resets the working set trigger */
-void EditorSound::resetWorking()
-{
-  // TODO
-}
+//void EditorSound::resetWorking()
+//{
+//}
 
 /* Saves the object data */
 void EditorSound::save(FileHandler* fh, bool game_only)
@@ -113,24 +92,20 @@ void EditorSound::save(FileHandler* fh, bool game_only)
 }
 
 /* Saves the working set trigger */
-void EditorSound::saveWorking()
-{
-  // TODO
-}
+//void EditorSound::saveWorking()
+//{
+//}
 
 /* Sets the ID of the party */
 void EditorSound::setID(int id)
 {
   this->id = id;
-  //edit_id->setText(QString::number(id));
 }
 
 /* Sets the name of the party */
 void EditorSound::setName(QString name)
 {
-  name_curr = name;
-  //edit_name->setText(name);
-  emit nameChange(name);
+  this->name = name;
 }
 
 /*============================================================================

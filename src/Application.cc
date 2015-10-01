@@ -63,7 +63,7 @@ Application::Application(QWidget* parent)
 
   game_view = new GameView(this);
   setCentralWidget(game_view);
-  game_view->setViewAudio(game_database->getViewAudio());
+  game_view->setViewSounds(game_database->getSoundDatabase());
   game_view->setGeometry(QApplication::desktop()->availableGeometry());
 
   /* Connections between game view and game database */

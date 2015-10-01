@@ -34,7 +34,7 @@ private:
   EditorCategory* null_race;
   EditorSkill* null_skill;
   EditorSkillset* null_skillset;
-  SoundView* null_sounds;
+  EditorSoundDb* null_sounds;
 
   /* The views, as they're set */
   EditorAction* view_action;
@@ -48,7 +48,7 @@ private:
   EditorCategory* view_race;
   EditorSkill* view_skill;
   EditorSkillset* view_skillset;
-  SoundView* view_sounds;
+  EditorSoundDb* view_sounds;
 
   EditorEnumDb::ViewMode mode;
 
@@ -111,6 +111,6 @@ public:
                    QWidget* replacement, bool change_view = true);
 
   /* Sets the permanent views */
-  void setViewAudio(SoundView* view);
+  void setViewSounds(EditorSoundDb* view);
 };
 #endif // GAMEVIEW_H

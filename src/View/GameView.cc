@@ -76,7 +76,7 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   QWidget* blank_widget2 = new QWidget(this);
   addWidget(blank_widget2);
 
-  view_sounds = new SoundView(this);
+  view_sounds = new EditorSoundDb(this);
   view_sounds->setDisabled(true);
   null_sounds = view_sounds;
   addWidget(view_sounds);
@@ -304,7 +304,7 @@ void GameView::refreshView(EditorEnumDb::ViewMode mode, QWidget *old,
 }
 
 /* Sets the permanent views */
-void GameView::setViewAudio(SoundView* view)
+void GameView::setViewSounds(EditorSoundDb* view)
 {
   refreshView(EditorEnumDb::AUDIOVIEW, view_sounds, view, false);
   view_sounds = view;
