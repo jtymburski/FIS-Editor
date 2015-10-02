@@ -7,21 +7,11 @@
 #ifndef EDITORSOUND_H
 #define EDITORSOUND_H
 
-//#include <QGridLayout>
-//#include <QInputDialog>
-//#include <QLabel>
-//#include <QPushButton>
-//#include <QSlider>
-//#include <QSpinBox>
 #include <QString>
-//#include <QTextEdit>
-//#include <QWidget>
 
-//#include "Database/EditorPerson.h"
 #include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "FileHandler.h"
-//#include "Game/Player/Party.h"
 #include "Sound.h"
 
 class EditorSound : public EditorTemplate
@@ -31,7 +21,7 @@ public:
   EditorSound();
 
   /* Constructor function with id and name */
-  EditorSound(int id, QString name);
+  EditorSound(int id, QString name = "New Sound");
 
   /* Copy constructor */
   EditorSound(const EditorSound &source);
@@ -40,49 +30,17 @@ public:
   virtual ~EditorSound();
 
 private:
-  /* Button Widgets */
-  //QPushButton* btn_item_add;
-  //QPushButton* btn_item_rem;
-  //QPushButton* btn_person_add;
-  //QPushButton* btn_person_rem;
-
-  /* Combo Box Widgets */
-  //QComboBox* combo_classify;
-
-  /* Line Edit Widgets */
-  //QLineEdit* edit_id;
-  //QLineEdit* edit_name;
+  /* File reference */
+  QString file_name;
 
   /* Editor ID */
   int id;
 
-  /* Item Information */
-  //QMap<int,int> item_set;
-  //QMap<int,int> item_set_base;
-  //QVector<EditorItem*> items_all;
-
-  /* Label Widgets - just for displaying text */
-  //QLabel* lbl_inv_details;
-  //QLabel* lbl_person_details;
-
-  /* List Widgets */
-  //QListWidget* list_items_all;
-  //QListWidget* list_items_used;
-  //QListWidget* list_persons_all;
-  //QListWidget* list_persons_used;
-
   /* Editor name */
   QString name;
-  //QString name_curr;
 
   /* The reference sound for data */
   Sound sound_ref;
-  //Sound sound_curr;
-
-  /* Person Information */
-  //QVector<QPair<int,int>> person_set;
-  //QVector<QPair<int,int>> person_set_base;
-  //QVector<EditorPerson*> persons_all;
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -91,93 +49,49 @@ protected:
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSound &source);
 
-  /* Creates interface layout */
-  //void createLayout();
-
-  /* Returns calculated mass of inventory and items by ID */
-  //int getInvMass();
-  //int getInvMassRemain();
-  //EditorItem* getItem(int id);
-
-  /* Loads working info into UI objects */
-  //void loadWorkingInfo();
-
-  /* Sort Person Set */
-  //void sortPersons();
-
-  /* Update object lists */
-  //void updateItemList();
-  //void updatePersonList();
-
-/*============================================================================
- * SIGNALS
- *===========================================================================*/
-//signals:
-  /* Name changed within sound widget signal */
-//  void nameChange(QString);
-
-/*============================================================================
- * PUBLIC SLOTS
- *===========================================================================*/
-//public slots:
-  /* Button Triggers */
-  //void btnItemAdd();
-  //void btnItemRemove();
-  //void btnPersonAdd();
-  //void btnPersonRemove();
-  //void btnReset();
-  //void btnSave();
-
-  /* Widget Change Triggers */
-  //void changedClassify(QString index);
-  //void changedName(QString name);
-
-  /* List Index Widget Changes */
-  //void listItemAllChanged(int index);
-  //void listItemAllDClicked(QListWidgetItem*);
-  //void listItemEdited(QListWidgetItem*);
-  //void listItemUsedChanged(int index);
-  //void listPersonAllChanged(int index);
-  //void listPersonAllDClicked(QListWidgetItem*);
-  //void listPersonEdited(QListWidgetItem*);
-  //void listPersonUsedChanged(int index);
-
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the ID of the party */
+  /* Returns the sound fade time */
+  uint32_t getFadeTime() const;
+
+  /* Returns the sound reference file name: trimmed */
+  QString getFileName() const;
+
+  /* Returns the ID of the sound */
   virtual int getID() const;
 
-  /* Returns the name of the party */
+  /* Returns the name of the sound */
   virtual QString getName() const;
 
-  /* Returns the name of the party for listing */
+  /* Returns the name of the sound for listing */
   virtual QString getNameList();
+
+  /* Returns the sound volume */
+  uint8_t getVolume() const;
 
   /* Loads the object data */
   void load(XmlData data, int index);
 
-  /* Resets the working set trigger */
-  //void resetWorking();
-
   /* Saves the object data */
-  void save(FileHandler* fh, bool game_only = false);
+  void save(FileHandler* fh, bool game_only = false, QString type = "sound");
 
-  /* Saves the working set trigger */
-  //void saveWorking();
+  /* Sets the sound fade time */
+  void setFadeTime(uint32_t time);
 
-  /* Sets the ID of the party */
+  /* Sets the sound reference file name */
+  bool setFileName(QString name);
+  bool setFileNameFull(QString name);
+
+  /* Sets the ID of the sound */
   virtual void setID(int id);
 
-  /* Sets the name of the party */
+  /* Sets the name of the sound */
   virtual void setName(QString name);
 
-  /* Update Calls for data */
-  //void updateItems(QVector<EditorItem*> items,
-  //                 bool update_working = true);
-  //void updatePersons(QVector<EditorPerson*> persons,
-  //                   bool update_working = true);
+  /* Sets the volume of the sound */
+  void setVolume(uint8_t volume);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

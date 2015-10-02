@@ -33,7 +33,7 @@ EditorSoundDb::~EditorSoundDb()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /* Copy function, to be called by a copy or equal operator constructor */
 void EditorSoundDb::copySelf(const EditorSoundDb &source)
 {
@@ -121,7 +121,7 @@ void EditorSoundDb::loadWorkingInfo()
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
-  
+
 /* Button Triggers */
 //void btnItemAdd();
 
@@ -156,7 +156,7 @@ void EditorSoundDb::saveWorking()
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /* The copy operator */
 EditorSoundDb& EditorSoundDb::operator= (const EditorSoundDb &source)
 {

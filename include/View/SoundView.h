@@ -8,22 +8,17 @@
 #ifndef SOUNDVIEW_H
 #define SOUNDVIEW_H
 
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QInputDialog>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
-//#include <QString>
-#include <QTextEdit>
 #include <QWidget>
 
-//#include "Database/EditorPerson.h"
 #include "Database/EditorSound.h"
-//#include "Database/EditorTemplate.h"
-//#include "EditorHelpers.h"
-//#include "FileHandler.h"
-//#include "Game/Player/Party.h"
 
 class SoundView : public QWidget
 {
@@ -43,52 +38,28 @@ public:
 
 private:
   /* Button Widgets */
-  //QPushButton* btn_item_add;
-  //QPushButton* btn_item_rem;
-  //QPushButton* btn_person_add;
-  //QPushButton* btn_person_rem;
-
-  /* Combo Box Widgets */
-  //QComboBox* combo_classify;
+  QPushButton* btn_file;
+  QPushButton* btn_play;
+  QPushButton* btn_repeat;
 
   /* Line Edit Widgets */
-  //QLineEdit* edit_id;
-  //QLineEdit* edit_name;
-
-  /* Editor ID */
-  //int id;
-
-  /* Item Information */
-  //QMap<int,int> item_set;
-  //QMap<int,int> item_set_base;
-  //QVector<EditorItem*> items_all;
+  QLineEdit* edit_name;
 
   /* Label Widgets - just for displaying text */
-  //QLabel* lbl_inv_details;
-  //QLabel* lbl_person_details;
+  QLabel* lbl_file_name;
+  QLabel* lbl_id_num;
+  QLabel* lbl_vol_value;
 
-  /* List Widgets */
-  //QListWidget* list_items_all;
-  //QListWidget* list_items_used;
-  //QListWidget* list_persons_all;
-  //QListWidget* list_persons_used;
-
-  /* Editor name */
-  //QString name_base;
-  //QString name_curr;
-
-  /* The reference party for data */
-  //Party party_base;
-  //Party party_curr;
+  /* Slider Widget */
+  QSlider* slid_vol;
 
   /* The reference sound for data */
   EditorSound* sound_base;
   EditorSound* sound_curr;
 
-  /* Person Information */
-  //QVector<QPair<int,int>> person_set;
-  //QVector<QPair<int,int>> person_set_base;
-  //QVector<EditorPerson*> persons_all;
+  /* Spin Box Widget */
+  QSpinBox* spin_fade;
+  QSpinBox* spin_margin;
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -103,42 +74,31 @@ protected:
   /* Loads working info into UI objects */
   void loadWorkingInfo();
 
-  /* Update object lists */
-  //void updateItemList();
-  //void updatePersonList();
-
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Name changed within player widget signal */
-  //void nameChange(QString);
+  /* Name changed within sound widget signal */
+  void nameChange(QString);
 
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
 public slots:
   /* Button Triggers */
-  //void btnItemAdd();
-  //void btnItemRemove();
-  //void btnPersonAdd();
-  //void btnPersonRemove();
-  //void btnReset();
-  //void btnSave();
+  void btnFileSelect();
+  void btnPlay(bool checked);
+  void btnReset();
+  void btnSave();
 
-  /* Widget Change Triggers */
-  //void changedClassify(QString index);
-  //void changedName(QString name);
+  /* Fade Time Changed */
+  void changedFadeTime(int time);
 
-  /* List Index Widget Changes */
-  //void listItemAllChanged(int index);
-  //void listItemAllDClicked(QListWidgetItem*);
-  //void listItemEdited(QListWidgetItem*);
-  //void listItemUsedChanged(int index);
-  //void listPersonAllChanged(int index);
-  //void listPersonAllDClicked(QListWidgetItem*);
-  //void listPersonEdited(QListWidgetItem*);
-  //void listPersonUsedChanged(int index);
+  /* Name Text Changed */
+  void changedName(QString name);
+
+  /* Volume Value Changed */
+  void volumeChanged(int volume);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -153,14 +113,8 @@ public:
   /* Returns the name of the party for listing */
   //virtual QString getNameList();
 
-  /* Loads the object data */
-  //void load(XmlData data, int index);
-
   /* Resets the working set trigger */
   void resetWorking();
-
-  /* Saves the object data */
-  //void save(FileHandler* fh, bool game_only = false);
 
   /* Saves the working set trigger */
   void saveWorking();
@@ -170,12 +124,6 @@ public:
 
   /* Sets the name of the party */
   //virtual void setName(QString name);
-
-  /* Update Calls for data */
-  //void updateItems(QVector<EditorItem*> items,
-  //                 bool update_working = true);
-  //void updatePersons(QVector<EditorPerson*> persons,
-  //                   bool update_working = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
