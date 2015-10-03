@@ -70,6 +70,7 @@ public:
 
   /* Returns the sound volume */
   uint8_t getVolume() const;
+  int getVolumePercent() const;
 
   /* Loads the object data */
   void load(XmlData data, int index);

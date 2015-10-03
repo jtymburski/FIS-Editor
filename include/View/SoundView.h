@@ -13,9 +13,12 @@
 #include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMediaPlayer>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
+#include <QTimer>
 #include <QWidget>
 
 #include "Database/EditorSound.h"
@@ -50,6 +53,9 @@ private:
   QLabel* lbl_id_num;
   QLabel* lbl_vol_value;
 
+  /* Player Widget */
+  QMediaPlayer player;
+
   /* Slider Widget */
   QSlider* slid_vol;
 
@@ -61,6 +67,16 @@ private:
   QSpinBox* spin_fade;
   QSpinBox* spin_margin;
 
+  /* Timers */
+  QTimer timer_fade;
+  QTimer timer_replay;
+
+  /* Volume reference */
+  float vol_ref;
+
+  /*------------------- Constants -----------------------*/
+  const static int kFADE_INTERVAL; /* The fade interval, in milliseconds */
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -71,8 +87,14 @@ protected:
   /* Creates interface layout */
   void createLayout();
 
+  /* Enable edit sound information widget portion */
+  void enableEditWidgets(bool enable);
+
   /* Loads working info into UI objects */
   void loadWorkingInfo();
+
+  /* Stops playing audio, if relevant */
+  void stop();
 
 /*============================================================================
  * SIGNALS
@@ -87,7 +109,8 @@ signals:
 public slots:
   /* Button Triggers */
   void btnFileSelect();
-  void btnPlay(bool checked);
+  void btnPlay();
+  void btnRepeat(bool checked);
   void btnReset();
   void btnSave();
 
@@ -96,6 +119,11 @@ public slots:
 
   /* Name Text Changed */
   void changedName(QString name);
+
+  /* Player triggers */
+  void playerFadeIn();
+  void playerRepeat();
+  void playerStateChanged(QMediaPlayer::State state);
 
   /* Volume Value Changed */
   void volumeChanged(int volume);
@@ -113,11 +141,17 @@ public:
   /* Returns the name of the party for listing */
   //virtual QString getNameList();
 
+  /* Returns if the sound is playing */
+  bool isPlaying();
+
   /* Resets the working set trigger */
   void resetWorking();
 
   /* Saves the working set trigger */
   void saveWorking();
+
+  /* Sets the edit sound */
+  void setEditSound(EditorSound* sound);
 
   /* Sets the ID of the party */
   //virtual void setID(int id);

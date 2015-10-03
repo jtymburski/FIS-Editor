@@ -26,7 +26,7 @@ win32 {
 
 QMAKE_CXXFLAGS += -std=c++1y
 QMAKE_CXX_FLAGS_WARN_ON += -Wall
-QT += opengl widgets #phonon network xml, core and gui are default
+QT += opengl widgets multimedia #phonon network xml, core and gui are default
 
 SOURCES += \
     src/Main.cc \

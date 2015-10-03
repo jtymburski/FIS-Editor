@@ -136,11 +136,22 @@ QString EditorSound::getNameList()
  * Description: Returns the volume of the sound file, in the range 0-128.
  *
  * Inputs: none
- * Output: uint32_t - the volume
+ * Output: uint8_t - the volume
  */
 uint8_t EditorSound::getVolume() const
 {
   return sound_ref.getVolume();
+}
+
+/*
+ * Description: Returns the volume of the sound file, in the range 0-100%.
+ *
+ * Inputs: none
+ * Output: int - percent
+ */
+int EditorSound::getVolumePercent() const
+{
+  return (getVolume() * 100 / MIX_MAX_VOLUME);
 }
 
 /*

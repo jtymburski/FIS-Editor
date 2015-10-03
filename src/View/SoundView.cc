@@ -8,6 +8,9 @@
 #include "View/SoundView.h"
 #include <QDebug>
 
+/* Constant Implementation - see header file for descriptions */
+const int SoundView::kFADE_INTERVAL = 25;
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -17,6 +20,9 @@ SoundView::SoundView(QWidget* parent) : QWidget(parent)
 {
   sound_base = nullptr;
   sound_curr = new EditorSound();
+  timer_fade.setSingleShot(false);
+  timer_replay.setSingleShot(true);
+  vol_ref = 0.0;
 
   createLayout();
 
@@ -30,7 +36,7 @@ SoundView::SoundView(QWidget* parent) : QWidget(parent)
 /* Constructor function with Editor Sound reference */
 SoundView::SoundView(EditorSound* sound, QWidget* parent) : SoundView(parent)
 {
-  // TODO: deal with sound pointer
+  setEditSound(sound);
 }
 
 /* Copy constructor */
@@ -137,24 +143,26 @@ void SoundView::createLayout()
 
   /* Player - Play/Stop Button */
   btn_play = new QPushButton(this);
-  btn_play->setCheckable(true);
+  //btn_play->setCheckable(true);
   QPixmap img_icon(":/images/sound_play.png");
   QIcon btn_icon(img_icon);
   btn_play->setIcon(btn_icon);
   btn_play->setIconSize(img_icon.rect().size());
-  connect(btn_play, SIGNAL(clicked(bool)), this, SLOT(btnPlay(bool)));
+  connect(btn_play, SIGNAL(clicked()), this, SLOT(btnPlay()));
   layout->addWidget(btn_play, 1, 7, 2, 1, Qt::AlignHCenter);
 
   /* Player - Repeat Button */
   btn_repeat = new QPushButton("Repeat", this);
   btn_repeat->setCheckable(true);
   btn_repeat->setMaximumWidth(img_icon.rect().width() + 20);
+  connect(btn_repeat, SIGNAL(clicked(bool)), this, SLOT(btnRepeat(bool)));
   layout->addWidget(btn_repeat, 3, 7, Qt::AlignHCenter);
 
   /* Player - Delay Margin */
   spin_margin = new QSpinBox(this);
   spin_margin->setMinimum(0);
   spin_margin->setMaximum(10000);
+  spin_margin->setDisabled(true);
   layout->addWidget(spin_margin, 4, 7, Qt::AlignHCenter);
 
   /* Horizontal Separator */
@@ -170,6 +178,27 @@ void SoundView::createLayout()
   QPushButton* btn_save = new QPushButton(tr("Save"), this);
   connect(btn_save, SIGNAL(clicked()), this, SLOT(btnSave()));
   layout->addWidget(btn_save, 5, 5);
+
+  /* Final connections */
+  connect(&player, SIGNAL(stateChanged(QMediaPlayer::State)),
+          this, SLOT(playerStateChanged(QMediaPlayer::State)));
+  connect(&timer_fade, SIGNAL(timeout()), this, SLOT(playerFadeIn()));
+  connect(&timer_replay, SIGNAL(timeout()), this, SLOT(playerRepeat()));
+}
+
+/* Enable edit sound information widget portion */
+void SoundView::enableEditWidgets(bool enable)
+{
+  /* Sound information */
+  edit_name->setEnabled(enable);
+  btn_file->setEnabled(enable);
+  slid_vol->setEnabled(enable);
+  spin_fade->setEnabled(enable);
+
+  /* Play information */
+  btn_repeat->setEnabled(enable);
+  if(btn_repeat->isChecked())
+    spin_margin->setEnabled(enable);
 }
 
 /* Loads working info into UI objects */
@@ -186,6 +215,9 @@ void SoundView::loadWorkingInfo()
 
     /* File Path */
     lbl_file_name->setText(sound_curr->getFileName());
+    if(!sound_curr->getFileName().isEmpty())
+      player.setMedia(QUrl::fromLocalFile(EditorHelpers::getProjectDir() +
+                                          "/" + sound_curr->getFileName()));
 
     /* Volume */
     slid_vol->setValue(sound_curr->getVolume());
@@ -203,10 +235,21 @@ void SoundView::loadWorkingInfo()
   }
 }
 
+/* Stops playing audio, if relevant */
+void SoundView::stop()
+{
+  /* Stop playing */
+  timer_fade.stop();
+  player.stop();
+  timer_replay.stop();
+  btn_play->setIcon(QIcon(QPixmap(":/images/sound_play.png")));
+  enableEditWidgets(true);
+}
+
 /*============================================================================
  * PUBLIC SLOTS
  *===========================================================================*/
-  
+
 /* Button Triggers */
 void SoundView::btnFileSelect()
 {
@@ -220,14 +263,55 @@ void SoundView::btnFileSelect()
     {
       sound_curr->setFileNameFull(file);
       lbl_file_name->setText(sound_curr->getFileName());
+      player.setMedia(QUrl::fromLocalFile(EditorHelpers::getProjectDir() +
+                                          "/" + sound_curr->getFileName()));
     }
   }
 }
 
 /* Button Triggers */
-void SoundView::btnPlay(bool checked)
+void SoundView::btnPlay()
 {
-  qDebug() << "TODO: PLAY - " << checked;
+  /* Is Stopped - Can trigger a play */
+  if(player.state() == QMediaPlayer::StoppedState && !timer_replay.isActive())
+  {
+    /* If the file name is set, trigger sound */
+    if(!sound_curr->getFileName().isEmpty())
+    {
+      /* Set volume */
+      if(spin_fade->value() == 0)
+        player.setVolume(sound_curr->getVolumePercent());
+      else
+        player.setVolume(0);
+
+      /* Trigger play */
+      player.play();
+
+      /* If volume is at 0, start fading timer */
+      if(player.volume() == 0)
+      {
+        vol_ref = 0.0;
+        timer_fade.start(kFADE_INTERVAL);
+      }
+    }
+    /* Otherwise, pop up warning */
+    else
+    {
+      QMessageBox::information(this, "Failed to Play",
+                               "No sound file path was set");
+    }
+  }
+  /* Is playing or paused - stop it */
+  else
+  {
+    stop();
+  }
+}
+
+/* Button Triggers */
+void SoundView::btnRepeat(bool checked)
+{
+  spin_margin->setEnabled(checked);
 }
 
 /* Button Triggers */
@@ -235,6 +319,7 @@ void SoundView::btnReset()
 {
   if(sound_curr != nullptr && sound_base != nullptr)
   {
+    stop();
     *sound_curr = *sound_base;
     loadWorkingInfo();
   }
@@ -268,6 +353,57 @@ void SoundView::changedName(QString name)
   }
 }
 
+/* Player triggers */
+void SoundView::playerFadeIn()
+{
+  /* Initial calculations */
+  bool finished = false;
+  float time_split = spin_fade->value() * 1.0 / kFADE_INTERVAL;
+  float vol_interval = sound_curr->getVolumePercent() / time_split;
+  vol_ref += vol_interval;
+  if((int)vol_ref > sound_curr->getVolumePercent())
+  {
+    finished = true;
+    vol_ref = (int)sound_curr->getVolumePercent();
+  }
+
+  /* Change volume */
+  player.setVolume((int)vol_ref);
+
+  /* Stop timer, if relevant */
+  if(finished)
+    timer_fade.stop();
+}
+
+/* Player triggers */
+void SoundView::playerRepeat()
+{
+  player.play();
+}
+
+/* Player triggers */
+void SoundView::playerStateChanged(QMediaPlayer::State state)
+{
+  if(state == QMediaPlayer::PlayingState)
+  {
+    btn_play->setIcon(QIcon(QPixmap(":/images/sound_stop.png")));
+    enableEditWidgets(false);
+  }
+  else
+  {
+    /* If repeat is enabled, repeat */
+    if(btn_repeat->isChecked())
+    {
+      timer_replay.start(spin_margin->value());
+    }
+    /* Otherwise, no repeat */
+    else
+    {
+      stop();
+    }
+  }
+}
+
 /* Volume Value Changed */
 void SoundView::volumeChanged(int volume)
 {
@@ -285,6 +421,13 @@ void SoundView::volumeChanged(int volume)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns if the sound is playing */
+bool SoundView::isPlaying()
+{
+  return (player.state() == QMediaPlayer::PlayingState ||
+          timer_replay.isActive());
+}
+
 /* Resets the working set trigger */
 void SoundView::resetWorking()
 {
@@ -295,6 +438,12 @@ void SoundView::resetWorking()
 void SoundView::saveWorking()
 {
   btnSave();
+}
+
+/* Sets the edit sound */
+void SoundView::setEditSound(EditorSound* sound)
+{
+
 }
 
 /*============================================================================
