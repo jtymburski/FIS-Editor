@@ -41,10 +41,8 @@ public:
 
 private:
   /* Button Widgets */
-  //QPushButton* btn_item_add;
-  //QPushButton* btn_item_rem;
-  //QPushButton* btn_person_add;
-  //QPushButton* btn_person_rem;
+  QPushButton* btn_m_custom_rem;
+  QPushButton* btn_s_custom_rem;
 
   /* Combo Box Widgets */
   //QComboBox* combo_classify;
@@ -66,23 +64,29 @@ private:
   //QLabel* lbl_person_details;
 
   /* List Widgets */
-  //QListWidget* list_items_all;
-  //QListWidget* list_items_used;
-  //QListWidget* list_persons_all;
-  //QListWidget* list_persons_used;
+  QListWidget* list_m_custom;
+  QListWidget* list_m_reserve;
+  QListWidget* list_s_custom;
+  QListWidget* list_s_reserve;
 
   /* Editor name */
   //QString name_base;
   //QString name_curr;
 
-  /* The reference party for data */
-  //Party party_base;
-  //Party party_curr;
+  /* Music Information */
+  QVector<EditorSound*> music_custom;
+  EditorSound* music_custom_curr;
+  QVector<EditorSound*> music_reserved;
+  EditorSound* music_reserved_curr;
 
-  /* Person Information */
-  //QVector<QPair<int,int>> person_set;
-  //QVector<QPair<int,int>> person_set_base;
-  //QVector<EditorPerson*> persons_all;
+  /* Sound Information */
+  QVector<EditorSound*> sound_custom;
+  EditorSound* sound_custom_curr;
+  QVector<EditorSound*> sound_reserved;
+  EditorSound* sound_reserved_curr;
+
+  /* Sound view widget / controller */
+  SoundView* view_sound;
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -93,6 +97,13 @@ protected:
 
   /* Creates interface layout */
   void createLayout();
+
+  /* Create reserved sounds */
+  void createReserved();
+
+  /* Loads list with applicable information */
+  void loadList(QListWidget* list, QVector<EditorSound*>* chunks,
+                EditorSound* current = nullptr);
 
   /* Loads working info into UI objects */
   void loadWorkingInfo();
@@ -113,26 +124,21 @@ signals:
  *===========================================================================*/
 public slots:
   /* Button Triggers */
-  //void btnItemAdd();
-  //void btnItemRemove();
-  //void btnPersonAdd();
-  //void btnPersonRemove();
-  //void btnReset();
-  //void btnSave();
+  void btnMusicAdd();
+  void btnMusicRemove();
+  void btnSoundAdd();
+  void btnSoundRemove();
 
   /* Widget Change Triggers */
-  //void changedClassify(QString index);
-  //void changedName(QString name);
+  void changedName(QString name);
 
   /* List Index Widget Changes */
-  //void listItemAllChanged(int index);
-  //void listItemAllDClicked(QListWidgetItem*);
-  //void listItemEdited(QListWidgetItem*);
-  //void listItemUsedChanged(int index);
-  //void listPersonAllChanged(int index);
-  //void listPersonAllDClicked(QListWidgetItem*);
-  //void listPersonEdited(QListWidgetItem*);
-  //void listPersonUsedChanged(int index);
+  void listMusicChanged(int index);
+  void listMusicCustomDouble(QListWidgetItem*);
+  void listMusicReserveDouble(QListWidgetItem*);
+  void listSoundChanged(int index);
+  void listSoundCustomDouble(QListWidgetItem*);
+  void listSoundReserveDouble(QListWidgetItem*);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -151,13 +157,13 @@ public:
   void load(XmlData data, int index);
 
   /* Resets the working set trigger */
-  void resetWorking();
+  //void resetWorking();
 
   /* Saves the object data */
   void save(FileHandler* fh, bool game_only = false);
 
   /* Saves the working set trigger */
-  void saveWorking();
+  //void saveWorking();
 
   /* Sets the ID of the party */
   //virtual void setID(int id);

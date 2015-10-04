@@ -38,6 +38,7 @@ private:
 
   /* Editor name */
   QString name;
+  bool name_locked;
 
   /* The reference sound for data */
   Sound sound_ref;
@@ -72,6 +73,9 @@ public:
   uint8_t getVolume() const;
   int getVolumePercent() const;
 
+  /* Returns the name lock */
+  bool isNameLocked();
+
   /* Loads the object data */
   void load(XmlData data, int index);
 
@@ -91,6 +95,9 @@ public:
   /* Sets the name of the sound */
   virtual void setName(QString name);
 
+  /* Sets the name lock, if relevant */
+  void setNameLock(bool name_locked);
+
   /* Sets the volume of the sound */
   void setVolume(uint8_t volume);
 
@@ -100,6 +107,14 @@ public:
 public:
   /* The copy operator */
   EditorSound& operator= (const EditorSound &source);
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+public:
+  /* Sort Compare */
+  static bool greaterThan(EditorSound* s1, EditorSound* s2);
+  static bool lessThan(EditorSound* s1, EditorSound* s2);
 };
 
 #endif // EDITORSOUND_H

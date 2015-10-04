@@ -21,6 +21,7 @@ EditorSound::EditorSound()
   file_name = "";
   id = 0;
   name = "New Sound";
+  name_locked = false;
 }
 
 /*
@@ -68,6 +69,7 @@ void EditorSound::copySelf(const EditorSound &source)
   file_name = source.file_name;
   id = source.id;
   name = source.name;
+  name_locked = source.name_locked;
   sound_ref = source.sound_ref;
 }
 
@@ -152,6 +154,17 @@ uint8_t EditorSound::getVolume() const
 int EditorSound::getVolumePercent() const
 {
   return (getVolume() * 100 / MIX_MAX_VOLUME);
+}
+
+/*
+ * Description: Returns if the name should be restricted from the user editing.
+ *
+ * Inputs: none
+ * Output: bool - true if name is locked
+ */
+bool EditorSound::isNameLocked()
+{
+  return name_locked;
 }
 
 /*
@@ -288,7 +301,19 @@ void EditorSound::setID(int id)
  */
 void EditorSound::setName(QString name)
 {
-  this->name = name;
+  if(!name_locked)
+    this->name = name;
+}
+
+/*
+ * Description: Sets if the name should be locked from editing by the user
+ *
+ * Inputs: bool name_locked - true if the name should be locked
+ * Output: none
+ */
+void EditorSound::setNameLock(bool name_locked)
+{
+  this->name_locked = name_locked;
 }
 
 /*
@@ -325,4 +350,20 @@ EditorSound& EditorSound::operator= (const EditorSound &source)
 
   /* Return the copied object */
   return *this;
+}
+
+/*============================================================================
+ * PUBLIC STATIC FUNCTIONS
+ *===========================================================================*/
+
+/* Sort Compare */
+bool EditorSound::greaterThan(EditorSound* s1, EditorSound* s2)
+{
+  return (s1->getID() > s2->getID());
+}
+
+/* Sort Compare */
+bool EditorSound::lessThan(EditorSound* s1, EditorSound* s2)
+{
+  return (s1->getID() < s2->getID());
 }

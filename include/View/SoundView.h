@@ -45,6 +45,9 @@ private:
   QPushButton* btn_play;
   QPushButton* btn_repeat;
 
+  /* Changed sensor */
+  bool changed;
+
   /* Line Edit Widgets */
   QLineEdit* edit_name;
 
@@ -132,14 +135,8 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the ID of the party */
-  //virtual int getID() const;
-
-  /* Returns the name of the party */
-  //virtual QString getName() const;
-
-  /* Returns the name of the party for listing */
-  //virtual QString getNameList();
+  /* Returns if the sound has been edited but not saved */
+  bool isChanged();
 
   /* Returns if the sound is playing */
   bool isPlaying();
@@ -152,12 +149,6 @@ public:
 
   /* Sets the edit sound */
   void setEditSound(EditorSound* sound);
-
-  /* Sets the ID of the party */
-  //virtual void setID(int id);
-
-  /* Sets the name of the party */
-  //virtual void setName(QString name);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

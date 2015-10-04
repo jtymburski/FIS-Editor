@@ -15,9 +15,15 @@ const int SoundView::kFADE_INTERVAL = 25;
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor Function */
+/*
+ * Description: Primary constructor with only one parameter: the parent widget.
+ *              Default to null.
+ *
+ * Inputs: QWidget* parent - the parent widget
+ */
 SoundView::SoundView(QWidget* parent) : QWidget(parent)
 {
+  changed = false;
   sound_base = nullptr;
   sound_curr = new EditorSound();
   timer_fade.setSingleShot(false);
@@ -25,30 +31,38 @@ SoundView::SoundView(QWidget* parent) : QWidget(parent)
   vol_ref = 0.0;
 
   createLayout();
-
-  // TODO: TESTING - REMOVE
-  sound_base = new EditorSound(1200);
-  *sound_curr = *sound_base;
-
   loadWorkingInfo();
 }
 
-/* Constructor function with Editor Sound reference */
+/*
+ * Description: Second constructor with two parameters: the sound chunk and
+ *              the parent widget. Parent widget is default to null.
+ *
+ * Inputs: EditorSound* sound - the sound data for one chunk
+ *         QWidget* parent - the parent widget
+ */
 SoundView::SoundView(EditorSound* sound, QWidget* parent) : SoundView(parent)
 {
   setEditSound(sound);
 }
 
-/* Copy constructor */
+/*
+ * Description: Copy constructor. Calls the blank constructor and then copies
+ *              the data from the source.
+ *
+ * Inputs: const SoundView &source - the source object to copy
+ */
 SoundView::SoundView(const SoundView &source) : SoundView()
 {
   copySelf(source);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 SoundView::~SoundView()
 {
-  sound_base = nullptr;
+  setEditSound(nullptr);
 
   delete sound_curr;
   sound_curr = nullptr;
@@ -58,13 +72,28 @@ SoundView::~SoundView()
  * PROTECTED FUNCTIONS
  *===========================================================================*/
   
-/* Copy function, to be called by a copy or equal operator constructor */
+/*
+ * Description: Copies all data from source editor object to this editor
+ *              object.
+ *
+ * Inputs: SoundView &source - the source to copy from
+ * Output: none
+ */
 void SoundView::copySelf(const SoundView &source)
 {
-  // TODO
+  setEditSound(source.sound_base);
+
+  /* Sound references */
+  btn_repeat->setChecked(source.btn_repeat->isChecked());
+  spin_margin->setValue(source.spin_margin->value());
 }
 
-/* Creates interface layout */
+/*
+ * Description: Creates the sound view layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::createLayout()
 {
   /* Layout */
@@ -148,13 +177,15 @@ void SoundView::createLayout()
   QIcon btn_icon(img_icon);
   btn_play->setIcon(btn_icon);
   btn_play->setIconSize(img_icon.rect().size());
+  btn_play->setMaximumSize(img_icon.rect().width() + 5,
+                           img_icon.rect().height() + 5);
   connect(btn_play, SIGNAL(clicked()), this, SLOT(btnPlay()));
   layout->addWidget(btn_play, 1, 7, 2, 1, Qt::AlignHCenter);
 
   /* Player - Repeat Button */
   btn_repeat = new QPushButton("Repeat", this);
   btn_repeat->setCheckable(true);
-  btn_repeat->setMaximumWidth(img_icon.rect().width() + 20);
+  btn_repeat->setMaximumWidth(img_icon.rect().width() + 30);
   connect(btn_repeat, SIGNAL(clicked(bool)), this, SLOT(btnRepeat(bool)));
   layout->addWidget(btn_repeat, 3, 7, Qt::AlignHCenter);
 
@@ -186,7 +217,13 @@ void SoundView::createLayout()
   connect(&timer_replay, SIGNAL(timeout()), this, SLOT(playerRepeat()));
 }
 
-/* Enable edit sound information widget portion */
+/*
+ * Description: Enable or disable the editable widgets based on the widgets that
+ *              are not to be edited while playing.
+ *
+ * Inputs: bool enable - true if widgets enabled. false if disabled.
+ * Output: none
+ */
 void SoundView::enableEditWidgets(bool enable)
 {
   /* Sound information */
@@ -201,11 +238,17 @@ void SoundView::enableEditWidgets(bool enable)
     spin_margin->setEnabled(enable);
 }
 
-/* Loads working info into UI objects */
+/*
+ * Description: Loads all the UI elements with the contents from the working
+ *              Sound View information.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::loadWorkingInfo()
 {
   /* Load data */
-  if(sound_curr != nullptr)
+  if(sound_base != nullptr)
   {
     /* ID */
     lbl_id_num->setText(QString::number(sound_curr->getID()));
@@ -227,6 +270,7 @@ void SoundView::loadWorkingInfo()
 
     /* Enable widget */
     setEnabled(true);
+    changed = false;
   }
   else
   {
@@ -235,7 +279,13 @@ void SoundView::loadWorkingInfo()
   }
 }
 
-/* Stops playing audio, if relevant */
+/*
+ * Description: Triggers the sound player to stop and handles all visual
+ *              results of the stop.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::stop()
 {
   /* Stop playing */
@@ -250,7 +300,13 @@ void SoundView::stop()
  * PUBLIC SLOTS
  *===========================================================================*/
 
-/* Button Triggers */
+/*
+ * Description: Slot trigger on file select button in edit half of sound widget.
+ *              Opens QFileDialog for selection and if valid, sets it.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::btnFileSelect()
 {
   if(sound_curr != nullptr)
@@ -265,11 +321,19 @@ void SoundView::btnFileSelect()
       lbl_file_name->setText(sound_curr->getFileName());
       player.setMedia(QUrl::fromLocalFile(EditorHelpers::getProjectDir() +
                                           "/" + sound_curr->getFileName()));
+      changed = true;
     }
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot trigger on play button in play half of sound widget. This
+ *              depends on if its playing or if its stopped; it will do the
+ *              opposite.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::btnPlay()
 {
   /* Is Stopped - Can trigger a play */
@@ -308,52 +372,93 @@ void SoundView::btnPlay()
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot trigger on button repeat toggle on play half of widget.
+ *              If true, the margin spinner widget is enabled.
+ *
+ * Inputs: bool checked - true if pressed, false if out
+ * Output: none
+ */
 void SoundView::btnRepeat(bool checked)
 {
   spin_margin->setEnabled(checked);
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot trigger on selecting the sound chunk reset button. Resets
+ *              all data back to the base chunk. Note it will stop the playing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::btnReset()
 {
   if(sound_curr != nullptr && sound_base != nullptr)
   {
     stop();
     *sound_curr = *sound_base;
+    emit changedName(sound_curr->getName());
     loadWorkingInfo();
+    changed = false;
   }
 }
 
-/* Button Triggers */
+/*
+ * Description: Slot trigger on selecting the sound chunk save button. Saves
+ *              all data back to the base chunk.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::btnSave()
 {
   if(sound_curr != nullptr && sound_base != nullptr)
   {
     *sound_base = *sound_curr;
+    changed = false;
   }
 }
 
-/* Fade Time Changed */
+/*
+ * Description: Slot trigger when the fade time spinner is changed on the data
+ *              half of the widget.
+ *
+ * Inputs: int time - the fade time, in milliseconds (for in and out)
+ * Output: none
+ */
 void SoundView::changedFadeTime(int time)
 {
   if(sound_curr != nullptr && time >= 0)
   {
     sound_curr->setFadeTime(time);
+    changed = true;
   }
 }
 
-/* Name Text Changed */
+/*
+ * Description: Slot trigger when the name is changed or edited.
+ *
+ * Inputs: QString name - the new name
+ * Output: none
+ */
 void SoundView::changedName(QString name)
 {
   if(sound_curr != nullptr)
   {
     sound_curr->setName(name);
     emit nameChange(name);
+    changed = true;
   }
 }
 
-/* Player triggers */
+/*
+ * Description: Slot trigger when the fade in timer is triggered and increments
+ *              the volume. Used to simulate a fade in. Will not fade out on
+ *              stop.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::playerFadeIn()
 {
   /* Initial calculations */
@@ -375,13 +480,26 @@ void SoundView::playerFadeIn()
     timer_fade.stop();
 }
 
-/* Player triggers */
+/*
+ * Description: Slot triggers when the end of the sequence is reached and
+ *              the repeat timer is timed out and triggering. Only if repeat
+ *              is enabled.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::playerRepeat()
 {
   player.play();
 }
 
-/* Player triggers */
+/*
+ * Description: Slot triggers when the play state is changed. Used to change
+ *              the visual and also trigger a repeat, if relevant.
+ *
+ * Inputs: QMediaPlayer::State state - the new player state
+ * Output: none
+ */
 void SoundView::playerStateChanged(QMediaPlayer::State state)
 {
   if(state == QMediaPlayer::PlayingState)
@@ -404,7 +522,14 @@ void SoundView::playerStateChanged(QMediaPlayer::State state)
   }
 }
 
-/* Volume Value Changed */
+/*
+ * Description: Slot triggered when the volume slider is modified. This will
+ *              occur prior to releasing the click, updates the label, and
+ *              sets the new value.
+ *
+ * Inputs: int volume - the new volume value (between 0-128)
+ * Output: none
+ */
 void SoundView::volumeChanged(int volume)
 {
   /* Update label */
@@ -414,6 +539,7 @@ void SoundView::volumeChanged(int volume)
   if(sound_curr != nullptr)
   {
     sound_curr->setVolume(volume);
+    changed = true;
   }
 }
 
@@ -421,36 +547,86 @@ void SoundView::volumeChanged(int volume)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns if the sound is playing */
+/*
+ * Description: Returns true if the sound chunk is set and has been changed but
+ *              not saved. Used for warnings on higher level classes.
+ *
+ * Inputs: none
+ * Output: bool - true if the sound view has unsaved changes.
+ */
+bool SoundView::isChanged()
+{
+  if(sound_base != nullptr)
+    return changed;
+  return false;
+}
+
+/*
+ * Description: Returns true if the sound is playing or if it's timing on a
+ *              repeat spin.
+ *
+ * Inputs: none
+ * Output: bool - true if it is playing
+ */
 bool SoundView::isPlaying()
 {
   return (player.state() == QMediaPlayer::PlayingState ||
           timer_replay.isActive());
 }
 
-/* Resets the working set trigger */
+/*
+ * Description: Slot triggered by reset button. Resets data in the Editor Sound.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::resetWorking()
 {
   btnReset();
 }
 
-/* Saves the working set trigger */
+/*
+ * Description: Slot triggered by save button. Saves data in the Editor Sound.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void SoundView::saveWorking()
 {
   btnSave();
 }
 
-/* Sets the edit sound */
+/*
+ * Descritption: Sets the editing sound chunk within the class. If not null,
+ *               it sets the data, and enables the widget. Otherwise, it
+ *               disables the widget.
+ *
+ * Inputs: EditorSound* sound - the sound chunk to edit
+ * Output: none
+ */
 void SoundView::setEditSound(EditorSound* sound)
 {
+  stop();
 
+  sound_base = sound;
+  changed = false;
+  if(sound_base != nullptr)
+    *sound_curr = *sound_base;
+  loadWorkingInfo();
 }
 
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
   
-/* The copy operator */
+/*
+ * Description: Copy operator construction. This is called when the variable
+ *              already exists and equal operator used with another
+ *              SoundView.
+ *
+ * Inputs: const SoundView &source - the source class constructor
+ * Output: SoundView& - pointer to the copied class
+ */
 SoundView& SoundView::operator= (const SoundView &source)
 {
   /* Check for self assignment */
