@@ -54,6 +54,9 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Clears class data back to default */
+  void clear();
+
   /* Returns the sound fade time */
   uint32_t getFadeTime() const;
 

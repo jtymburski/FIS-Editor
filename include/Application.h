@@ -106,6 +106,10 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
+  /* Create progress dialog */
+  QProgressDialog* createProgressDialog(int total_count, QString title_text,
+                                        QString label_text);
+
   /* Export application to run in Univursa */
   void exportGame(QString filename);
 

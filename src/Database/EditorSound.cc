@@ -78,6 +78,21 @@ void EditorSound::copySelf(const EditorSound &source)
  *===========================================================================*/
 
 /*
+ * Description: Clears class data back to default.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorSound::clear()
+{
+  EditorSound default_sound;
+
+  setFadeTime(default_sound.getFadeTime());
+  setFileName(default_sound.getFileName());
+  setVolume(default_sound.getVolume());
+}
+
+/*
  * Description: Returns the fade time of the sound file, in milliseconds.
  *
  * Inputs: none
@@ -214,27 +229,33 @@ void EditorSound::save(FileHandler* fh, bool game_only, QString type)
     /* Processing */
     EditorSound blank;
 
-    /* Wrapper */
-    fh->writeXmlElement(type.toStdString(), "id", getID());
+    /* Determine if save */
+    bool fade_change = blank.getFadeTime() != getFadeTime();
+    bool vol_change = blank.getVolume() != getVolume();
+    if(!game_only || !file_name.isEmpty() || fade_change || vol_change)
+    {
+      /* Wrapper */
+      fh->writeXmlElement(type.toStdString(), "id", getID());
 
-    /* Name */
-    if(!game_only)
-      fh->writeXmlData("name", getName().toStdString());
+      /* Name */
+      if(!game_only)
+        fh->writeXmlData("name", getName().toStdString());
 
-    /* Path */
-    if(!file_name.isEmpty())
-      fh->writeXmlData("path", getFileName().toStdString());
+      /* Path */
+      if(!file_name.isEmpty())
+        fh->writeXmlData("path", getFileName().toStdString());
 
-    /* Fade Time */
-    if(blank.getFadeTime() != getFadeTime())
-      fh->writeXmlData("fade", (int)getFadeTime());
+      /* Fade Time */
+      if(fade_change)
+        fh->writeXmlData("fade", (int)getFadeTime());
 
-    /* Volume */
-    if(blank.getVolume() != getVolume())
-      fh->writeXmlData("vol", (int)getVolume());
+      /* Volume */
+      if(vol_change)
+        fh->writeXmlData("vol", (int)getVolume());
 
-    /* End Wrapper */
-    fh->writeXmlElementEnd();
+      /* End Wrapper */
+      fh->writeXmlElementEnd();
+    }
   }
 }
 
@@ -263,6 +284,10 @@ bool EditorSound::setFileName(QString name)
   {
     file_name = name;
     return true;
+  }
+  else if(name.isEmpty())
+  {
+    file_name = name;
   }
   return false;
 }

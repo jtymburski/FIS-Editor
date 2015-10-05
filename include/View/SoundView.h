@@ -121,7 +121,7 @@ public slots:
   void changedFadeTime(int time);
 
   /* Name Text Changed */
-  void changedName(QString name);
+  void changedName(QString);
 
   /* Player triggers */
   void playerFadeIn();

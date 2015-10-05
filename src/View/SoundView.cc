@@ -227,7 +227,8 @@ void SoundView::createLayout()
 void SoundView::enableEditWidgets(bool enable)
 {
   /* Sound information */
-  edit_name->setEnabled(enable);
+  if(!sound_curr->isNameLocked())
+    edit_name->setEnabled(enable);
   btn_file->setEnabled(enable);
   slid_vol->setEnabled(enable);
   spin_fade->setEnabled(enable);
@@ -255,6 +256,7 @@ void SoundView::loadWorkingInfo()
 
     /* Name */
     edit_name->setText(sound_curr->getName());
+    edit_name->setDisabled(sound_curr->isNameLocked());
 
     /* File Path */
     lbl_file_name->setText(sound_curr->getFileName());
@@ -397,7 +399,6 @@ void SoundView::btnReset()
   {
     stop();
     *sound_curr = *sound_base;
-    emit changedName(sound_curr->getName());
     loadWorkingInfo();
     changed = false;
   }
@@ -414,7 +415,10 @@ void SoundView::btnSave()
 {
   if(sound_curr != nullptr && sound_base != nullptr)
   {
+    bool name_diff = (sound_base->getName() != sound_curr->getName());
     *sound_base = *sound_curr;
+    if(name_diff)
+      emit nameChange(sound_base->getName());
     changed = false;
   }
 }
@@ -446,7 +450,6 @@ void SoundView::changedName(QString name)
   if(sound_curr != nullptr)
   {
     sound_curr->setName(name);
-    emit nameChange(name);
     changed = true;
   }
 }

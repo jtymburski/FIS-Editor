@@ -9,18 +9,14 @@
 #define EDITORSOUNDDB_H
 
 #include <QGridLayout>
-//#include <QInputDialog>
 #include <QLabel>
 #include <QListWidget>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QWidget>
 
-//#include "Database/EditorPerson.h"
-//#include "Database/EditorSound.h"
-//#include "Database/EditorTemplate.h"
-//#include "EditorHelpers.h"
 #include "FileHandler.h"
-//#include "Game/Player/Party.h"
 #include "View/SoundView.h"
 
 class EditorSoundDb : public QWidget
@@ -29,9 +25,6 @@ class EditorSoundDb : public QWidget
 public:
   /* Constructor Function */
   EditorSoundDb(QWidget* parent = NULL);
-
-  /* Constructor function with id and name */
-  //EditorParty(int id, QString name, QWidget* parent = NULL);
 
   /* Copy constructor */
   EditorSoundDb(const EditorSoundDb &source);
@@ -44,34 +37,11 @@ private:
   QPushButton* btn_m_custom_rem;
   QPushButton* btn_s_custom_rem;
 
-  /* Combo Box Widgets */
-  //QComboBox* combo_classify;
-
-  /* Line Edit Widgets */
-  //QLineEdit* edit_id;
-  //QLineEdit* edit_name;
-
-  /* Editor ID */
-  //int id;
-
-  /* Item Information */
-  //QMap<int,int> item_set;
-  //QMap<int,int> item_set_base;
-  //QVector<EditorItem*> items_all;
-
-  /* Label Widgets - just for displaying text */
-  //QLabel* lbl_inv_details;
-  //QLabel* lbl_person_details;
-
   /* List Widgets */
   QListWidget* list_m_custom;
   QListWidget* list_m_reserve;
   QListWidget* list_s_custom;
   QListWidget* list_s_reserve;
-
-  /* Editor name */
-  //QString name_base;
-  //QString name_curr;
 
   /* Music Information */
   QVector<EditorSound*> music_custom;
@@ -88,10 +58,16 @@ private:
   /* Sound view widget / controller */
   SoundView* view_sound;
 
+  /*------------------- Constants -----------------------*/
+  const static int kCUSTOM_ID_START; /* Start of all custom IDs */
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
 protected:
+  /* Clear all data */
+  void clearAll(bool reserved = true);
+
   /* Copy function, to be called by a copy or equal operator constructor */
   void copySelf(const EditorSoundDb &source);
 
@@ -101,16 +77,20 @@ protected:
   /* Create reserved sounds */
   void createReserved();
 
+  /* Get calls for data */
+  EditorSound* getMusic(int id, bool create = true);
+  EditorSound* getSound(int id, bool create = true);
+
   /* Loads list with applicable information */
   void loadList(QListWidget* list, QVector<EditorSound*>* chunks,
                 EditorSound* current = nullptr);
 
   /* Loads working info into UI objects */
-  void loadWorkingInfo();
+  void loadWorkingInfo(bool custom_music = true, bool custom_sound = true,
+                       bool reserved = true);
 
-  /* Update object lists */
-  //void updateItemList();
-  //void updatePersonList();
+  /* Sound edit warning, if changed */
+  bool soundEditWarning();
 
 /*============================================================================
  * SIGNALS
@@ -133,49 +113,40 @@ public slots:
   void changedName(QString name);
 
   /* List Index Widget Changes */
-  void listMusicChanged(int index);
+  void listMusicCustomChanged(int index);
   void listMusicCustomDouble(QListWidgetItem*);
+  void listMusicReserveChanged(int index);
   void listMusicReserveDouble(QListWidgetItem*);
-  void listSoundChanged(int index);
+  void listSoundCustomChanged(int index);
   void listSoundCustomDouble(QListWidgetItem*);
+  void listSoundReserveChanged(int index);
   void listSoundReserveDouble(QListWidgetItem*);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the ID of the party */
-  //virtual int getID() const;
+  /* Clears editable data within the sound database */
+  void clear();
 
-  /* Returns the name of the party */
-  //virtual QString getName() const;
+  /* Returns the list of data; for use elsewhere */
+  QVector<QString> getListMusic();
+  QVector<QString> getListSound();
 
-  /* Returns the name of the party for listing */
-  //virtual QString getNameList();
+  /* Returns total save count resource */
+  int getSaveCount();
 
   /* Loads the object data */
   void load(XmlData data, int index);
 
   /* Resets the working set trigger */
-  //void resetWorking();
+  void resetWorking();
 
   /* Saves the object data */
-  void save(FileHandler* fh, bool game_only = false);
+  void save(FileHandler* fh, QProgressDialog* dialog, bool game_only = false);
 
   /* Saves the working set trigger */
-  //void saveWorking();
-
-  /* Sets the ID of the party */
-  //virtual void setID(int id);
-
-  /* Sets the name of the party */
-  //virtual void setName(QString name);
-
-  /* Update Calls for data */
-  //void updateItems(QVector<EditorItem*> items,
-  //                 bool update_working = true);
-  //void updatePersons(QVector<EditorPerson*> persons,
-  //                   bool update_working = true);
+  void saveWorking();
 
 /*============================================================================
  * OPERATOR FUNCTIONS

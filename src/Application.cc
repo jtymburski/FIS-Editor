@@ -114,6 +114,34 @@ Application::~Application()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
+/* Create progress dialog */
+QProgressDialog* Application::createProgressDialog(int total_count,
+                                                   QString title_text,
+                                                   QString label_text)
+{
+  /* Create dialog */
+  QProgressDialog* progress_dialog = new QProgressDialog("", "Cancel", 0,
+                                                         total_count, this);
+  progress_dialog->setWindowTitle(title_text);
+  progress_dialog->setLabelText(label_text);
+  //progress_dialog->setCancelButton(nullptr);
+  progress_dialog->setWindowModality(Qt::WindowModal);
+  //progress_dialog->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint |
+  //                             Qt::WindowTitleHint| Qt::WindowSystemMenuHint);
+
+  /* Disable cancel button */
+  QList<QPushButton*> list = progress_dialog->findChildren<QPushButton*>();
+  if(list.size() > 0)
+    list.at(0)->setDisabled(true);
+
+  /* Set settings and finally value */
+  progress_dialog->setMinimumDuration(0);
+  progress_dialog->setValue(0);
+  //progress_dialog->show();
+
+  return progress_dialog;
+}
+
 /* Export application to run in Univursa */
 void Application::exportGame(QString filename)
 {
@@ -121,11 +149,20 @@ void Application::exportGame(QString filename)
   FileHandler fh(filename.toStdString(), true, true);
   fh.start();
 
+  /* Get the count */
+  int count = game_database->getSaveCount();
+
+  /* Create the progress dialog */
+  QProgressDialog* progress_dialog = createProgressDialog(count, "Exporting",
+                                                          "Exporting Game...");
+
   /* Write the data */
-  game_database->save(&fh, true);
+  game_database->save(&fh, progress_dialog, true);
+  progress_dialog->setValue(count);
 
   /* Finish the file write */
   fh.stop();
+  delete progress_dialog;
 }
 
 /* Load application */
@@ -137,12 +174,21 @@ void Application::loadApp(QString filename)
     FileHandler fh(file_name.toStdString(), false, true);
     bool success = fh.start();
 
+    /* Get count */
+    int count = fh.getCount();
+
+    /* Create progress dialog */
+    QProgressDialog* progress_dialog = createProgressDialog(count, "Loading",
+                                                            "Loading Game...");
+
     /* Load the info into the game database */
     if(success)
-      game_database->load(&fh);
+      game_database->load(&fh, progress_dialog);
+    progress_dialog->setValue(count);
 
     /* Finish the file read */
     fh.stop();
+    delete progress_dialog;
   }
 }
 
@@ -153,11 +199,20 @@ void Application::saveApp()
   FileHandler fh(file_name.toStdString(), true, true);
   fh.start();
 
+  /* Get the count */
+  int count = game_database->getSaveCount();
+
+  /* Create the progress dialog */
+  QProgressDialog* progress_dialog = createProgressDialog(count, "Saving",
+                                                          "Saving Game...");
+
   /* Write the data */
-  game_database->save(&fh);
+  game_database->save(&fh, progress_dialog);
+  progress_dialog->setValue(count);
 
   /* Finish the file write */
   fh.stop();
+  delete progress_dialog;
 }
 
 /*
@@ -469,6 +524,7 @@ bool Application::newGame()
   {
     game_database->deleteAll();
     game_database->createStartObjects();
+    file_name = "";
     return true;
   }
   return false;
@@ -488,13 +544,21 @@ void Application::play()
     FileHandler fh(save_file.toStdString(), true, true);
     fh.start();
 
+    /* Get the count */
+    int count = game_database->getSaveCount();
+
+    /* Create the progress dialog */
+    QProgressDialog* progress_dialog = createProgressDialog(count, "Exporting",
+                                                           "Exporting Game...");
     /* Save the current sub-map */
-    game_database->save(&fh, true);
+    game_database->save(&fh, progress_dialog, true);
         // Note: commented out to export all subs - change by re-appending
         //, true, game_view->getMapView()->getCurrentSubMap());
+    progress_dialog->setValue(count);
 
     /* Finish the write */
     fh.stop();
+    delete progress_dialog;
 
     /* Determine which execute program to use */
     QString exec_program = "./Univursa";
@@ -533,6 +597,7 @@ void Application::play()
   }
 }
 
+/* Play execution finished */
 void Application::playFinished(int)
 {
   QString play_file = EditorHelpers::getProjectDir() +
@@ -542,7 +607,7 @@ void Application::playFinished(int)
   QFile::remove(play_file);
 }
 
-/* Save and save as action */
+/* Save Action */
 void Application::save()
 {
   if(file_name == "")
@@ -551,6 +616,7 @@ void Application::save()
     saveApp();
 }
 
+/* Save As Action */
 void Application::saveAs()
 {
   QString file = QFileDialog::getSaveFileName(this, "Save Game Editor File As",

@@ -225,6 +225,9 @@ public:
   /* Delete the game */
   void deleteAll();
 
+  /* Get save count */
+  int getSaveCount(bool selected_map = false, int sub_index = -1);
+
   /* Get current map */
   EditorMap* getCurrentMap();
 
@@ -232,13 +235,13 @@ public:
   EditorSoundDb* getSoundDatabase();
 
   /* Load the game */
-  void load(FileHandler* fh);
+  void load(FileHandler* fh, QProgressDialog* dialog);
 
   /* Modifies the bottom list with the passed in index */
   void modifyBottomList(int index);
 
   /* Save the game */
-  void save(FileHandler* fh, bool game_only = false,
+  void save(FileHandler* fh, QProgressDialog* dialog, bool game_only = false,
             bool selected_map = false, int sub_index = -1);
 };
 

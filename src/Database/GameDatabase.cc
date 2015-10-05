@@ -1553,6 +1553,9 @@ void GameDatabase::saveAll()
     for(int i = 0; i < data_party.size(); i++)
       data_party[i]->saveWorking();
 
+    /* Music / Sound */
+    data_sounds->saveWorking();
+
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
   }
@@ -1700,12 +1703,45 @@ void GameDatabase::deleteAll()
     delete data_action[i];
   data_action.clear();
 
+  /* Music / Sound clean-up */
+  data_sounds->clear();
+
   /* Reset the view */
   if(index == 0)
     view_top->setCurrentRow(1);
   else
     view_top->setCurrentRow(0);
   view_top->setCurrentRow(index);
+}
+
+/* Get save count */
+int GameDatabase::getSaveCount(bool selected_map, int sub_index)
+{
+  int count = 0;
+
+  /* Map data */
+  if(!selected_map)
+  {
+    for(int i = 0; i < data_map.size(); i++)
+      count += data_map[i]->getSaveCount();
+  }
+  else if(current_map != nullptr)
+  {
+    count += current_map->getSaveCount(sub_index);
+  }
+
+  /* Core data */
+  count += data_action.size();
+  count += data_skill.size();
+  count += data_skillset.size();
+  count += data_battleclass.size();
+  count += data_race.size();
+  count += data_item.size();
+  count += data_person.size();
+  count += data_party.size();
+  count += data_sounds->getSaveCount();
+
+  return count;
 }
 
 /* Get current map */
@@ -1721,7 +1757,7 @@ EditorSoundDb* GameDatabase::getSoundDatabase()
 }
 
 /* Load the game */
-void GameDatabase::load(FileHandler* fh)
+void GameDatabase::load(FileHandler* fh, QProgressDialog* dialog)
 {
   if(fh != NULL)
   {
@@ -1729,19 +1765,6 @@ void GameDatabase::load(FileHandler* fh)
     bool done = false;
     bool read_success = true;
     bool success = true;
-
-    /* Initiate the progress dialog for loading */
-    QProgressDialog progress("", "", 0, fh->getCount(), this);
-    progress.setWindowTitle("Loading");
-    progress.setCancelButton(NULL);
-    progress.setLabelText("Loading Game...");
-    progress.setWindowModality(Qt::WindowModal);
-    int value = 0;
-    progress.setValue(value);
-    progress.setMinimumDuration(0);
-    progress.setWindowFlags(Qt::Window | Qt::CustomizeWindowHint |
-                            Qt::WindowTitleHint| Qt::WindowSystemMenuHint);
-    progress.show();
 
     /* Loop through all elements */
     do
@@ -1751,7 +1774,16 @@ void GameDatabase::load(FileHandler* fh)
       success &= read_success;
 
       /* Only validate if wrapped within game and successful read */
-      if(success && data.getElement(0) == "game")
+      if(success && data.getElement(0) == "app")
+      {
+        /* Music and Sound */
+        if(data.getElement(1) == "music" ||
+           data.getElement(1) == "sound")
+        {
+          data_sounds->load(data, 1);
+        }
+      }
+      else if(success && data.getElement(0) == "game")
       {
         /* If core game data, parse */
         if(data.getElement(1) == "core")
@@ -1798,7 +1830,7 @@ void GameDatabase::load(FileHandler* fh)
         }
       }
 
-      progress.setValue(++value);
+      dialog->setValue(dialog->value() + 1);
     } while(!done);
   }
 
@@ -1970,44 +2002,21 @@ void GameDatabase::modifyBottomList(int index)
 }
 
 /* Save the game */
-void GameDatabase::save(FileHandler* fh, bool game_only,
-                        bool selected_map, int sub_index)
+void GameDatabase::save(FileHandler* fh, QProgressDialog* dialog,
+                        bool game_only, bool selected_map, int sub_index)
 {
-  if(fh != NULL)
+  if(fh != nullptr && dialog != nullptr)
   {
-    /* Determine total number of things to be saved */
-    int count = 0;
-    if(!selected_map)
-    {
-      for(int i = 0; i < data_map.size(); i++)
-        count += data_map[i]->getSaveCount();
-    }
-    else if(current_map != NULL)
-    {
-      count += current_map->getSaveCount(sub_index);
-    }
+    /* -- Write application data -- */
+    fh->writeXmlElement("app");
 
-    /* Create the new save dialog */
-    QProgressDialog progress("", "", 0, count, this);
-    if(game_only)
-    {
-      progress.setWindowTitle("Exporting");
-      progress.setLabelText("Exporting Game...");
-    }
-    else
-    {
-      progress.setWindowTitle("Saving");
-      progress.setLabelText("Saving Game...");
-    }
-    progress.setCancelButton(NULL);
-    progress.setWindowModality(Qt::WindowModal);
-    progress.setMinimumDuration(0);
-    progress.setValue(0);
-    progress.setWindowFlags(Qt::Window | Qt::CustomizeWindowHint |
-                            Qt::WindowTitleHint| Qt::WindowSystemMenuHint);
-    progress.show();
+    /* Music and Sound */
+    data_sounds->save(fh, dialog, game_only);
 
-    /* Write starting element */
+    /* -- Write end application data -- */
+    fh->writeXmlElementEnd();
+
+    /* -- Write game data -- */
     fh->writeXmlElement("game");
 
     /* Core data */
@@ -2015,35 +2024,59 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
 
     /* Actions */
     for(int i = 0; i < data_action.size(); i++)
+    {
       data_action[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Skills */
     for(int i = 0; i < data_skill.size(); i++)
+    {
       data_skill[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Skill Sets */
     for(int i = 0; i < data_skillset.size(); i++)
+    {
       data_skillset[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Classes */
     for(int i = 0; i < data_battleclass.size(); i++)
+    {
       data_battleclass[i]->save(fh, game_only, "class");
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Races */
     for(int i = 0; i < data_race.size(); i++)
+    {
       data_race[i]->save(fh, game_only, "race");
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Items */
     for(int i = 0; i < data_item.size(); i++)
+    {
       data_item[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Persons */
     for(int i = 0; i < data_person.size(); i++)
+    {
       data_person[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Parties */
     for(int i = 0; i < data_party.size(); i++)
+    {
       data_party[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     fh->writeXmlElementEnd();
 
@@ -2052,14 +2085,15 @@ void GameDatabase::save(FileHandler* fh, bool game_only,
     if(!selected_map)
     {
       for(int i = 0; i < data_map.size(); i++)
-        data_map[i]->save(fh, &progress, game_only);
+        data_map[i]->save(fh, dialog, game_only);
     }
     /* Otherwise, save the single map */
     else if(current_map != NULL)
     {
-      current_map->save(fh, &progress, game_only, sub_index);
+      current_map->save(fh, dialog, game_only, sub_index);
     }
 
+    /* -- Write end game data -- */
     fh->writeXmlElementEnd();
   }
 }
