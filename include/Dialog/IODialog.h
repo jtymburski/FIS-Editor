@@ -80,6 +80,9 @@ private:
   /* Event pop-up */
   QDialog* pop_event;
 
+  /* Sound information, for dropdown */
+  QList<QString> sound_list;
+
   /* Spin Boxes */
   QSpinBox* spin_inactive;
 
@@ -142,10 +145,11 @@ public slots:
   void changedComboInteract(int index);
   void changedComboState(int index);
 
-  /* Changed text and integers edit widgets */
+  /* Changed triggers in widgets */
   void changedDescription();
   void changedInactive(int i);
   void changedName(QString name);
+  void changedSound(const QString &text);
 
   /* Check inactive time changed */
   void checkInactive(int state);
@@ -169,6 +173,12 @@ public slots:
 public:
   /* Returns the event view widget */
   EventView* getEventView();
+
+  /* Returns the list of sounds, being used */
+  QList<QString> getListSounds();
+
+  /* Set the list of sounds, used for dropdown and in event */
+  void setListSounds(QList<QString> sounds);
 
   /* Sets the working IO to the original */
   void updateOriginal();

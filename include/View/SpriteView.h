@@ -84,7 +84,7 @@ public slots:
   void editSprite(EditorSprite* edit = NULL);
 
   /* Slot fill and triggers for sound list */
-  void soundFill(QVector<QString> sound_list);
+  void soundFill(QList<QString> sound_list);
 
   /* Updates the sprite list */
   void updateList();

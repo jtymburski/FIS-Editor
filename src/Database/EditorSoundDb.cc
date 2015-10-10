@@ -559,7 +559,7 @@ void EditorSoundDb::btnMusicRemove()
 
       /* Proceed to delete */
       delete delete_music;
-      music_custom.removeAt(index);
+      music_custom.remove(index);
       loadWorkingInfo(true, false, false);
     }
   }
@@ -627,7 +627,7 @@ void EditorSoundDb::btnSoundRemove()
 
       /* Proceed to delete */
       delete delete_sound;
-      sound_custom.removeAt(index);
+      sound_custom.remove(index);
       loadWorkingInfo(false, true, false);
     }
   }
@@ -869,11 +869,11 @@ void EditorSoundDb::clear()
  *              selection.
  *
  * Inputs: bool include_none - true to include a "None" option at front of list
- * Output: QVector<QString> - the name list of the music chunks
+ * Output: QList<QString> - the name list of the music chunks
  */
-QVector<QString> EditorSoundDb::getListMusic(bool include_none)
+QList<QString> EditorSoundDb::getListMusic(bool include_none)
 {
-  QVector<QString> list;
+  QList<QString> list;
 
   /* Reserved music first */
   for(int i = 0; i < music_reserved.size(); i++)
@@ -896,11 +896,11 @@ QVector<QString> EditorSoundDb::getListMusic(bool include_none)
  *              selection.
  *
  * Inputs: bool include_none - true to include a "None" option at front of list
- * Output: QVector<QString> - the name list of the music chunks
+ * Output: QList<QString> - the name list of the music chunks
  */
-QVector<QString> EditorSoundDb::getListSound(bool include_none)
+QList<QString> EditorSoundDb::getListSound(bool include_none)
 {
-  QVector<QString> list;
+  QList<QString> list;
 
   /* Reserved sound first */
   for(int i = 0; i < sound_reserved.size(); i++)
@@ -956,7 +956,8 @@ void EditorSoundDb::load(XmlData data, int index)
       /* Get/Create the music chunk and then update */
       EditorSound* edit_music = getMusic(id_int);
       if(edit_music != nullptr)
-        edit_music->load(data, index + 1);
+        if(edit_music->load(data, index + 1))
+          loadWorkingInfo(true, false, true);
     }
   }
   else if(data.getElement(index) == "sound")
@@ -968,7 +969,8 @@ void EditorSoundDb::load(XmlData data, int index)
       /* Get/Create the music chunk and then update */
       EditorSound* edit_sound = getSound(id_int);
       if(edit_sound != nullptr)
-        edit_sound->load(data, index + 1);
+        if(edit_sound->load(data, index + 1))
+          loadWorkingInfo(false, true, true);
     }
   }
 }

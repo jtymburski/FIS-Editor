@@ -152,5 +152,6 @@ public:
 
   /* Updates list in item dialog, needed for event control */
   void updateListItems(QVector<QString> list);
+  void updateListSounds(QList<QString> list);
 };
 #endif // MAPITEMVIEW_H

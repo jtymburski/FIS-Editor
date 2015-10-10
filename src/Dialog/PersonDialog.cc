@@ -186,6 +186,8 @@ void PersonDialog::createLayout(bool instance)
   QLabel* lbl_sound = new QLabel("Sound:", this);
   layout->addWidget(lbl_sound, 2, 4);
   combo_sound = new QComboBox(this);
+  connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(changedSound(QString)));
   layout->addWidget(combo_sound, 2, 5, 1, 2);
 
   /* Matrix selection views */
@@ -232,6 +234,7 @@ void PersonDialog::createLayout(bool instance)
  */
 void PersonDialog::updateData()
 {
+  /* Core data */
   line_description->setText(person_working->getDescription());
   line_name->setText(person_working->getName());
   if(person_working->isVisible())
@@ -246,6 +249,24 @@ void PersonDialog::updateData()
   matrix_view->setMatrix(person_working->getState(matrix_surface,
                                                   matrix_direction));
   matrix_view->setEnabled(enabled);
+
+  /* Sound data - find index */
+  int index = -1;
+  for(int i = 0; i < sound_list.size(); i++)
+  {
+    QStringList str_split = sound_list[i].split(':');
+    if(str_split.size() >= 2)
+      if(str_split.front().toInt() == person_working->getSoundID())
+        index = i;
+  }
+
+  /* Sound data - load into combo */
+  combo_sound->blockSignals(true);
+  combo_sound->clear();
+  combo_sound->addItems(QStringList(sound_list));
+  if(index >= 0)
+    combo_sound->setCurrentIndex(index);
+  combo_sound->blockSignals(false);
 }
 
 /*============================================================================
@@ -352,6 +373,29 @@ void PersonDialog::changedDescription(QString description)
 void PersonDialog::changedName(QString name)
 {
   person_working->setName(name);
+}
+
+/*
+ * Description: Slot triggered on the combo box selection changed, which updates
+ *              the stored sound ID within the working object.
+ *
+ * Inputs: QString text - the new sound row selection
+ * Output: none
+ */
+void PersonDialog::changedSound(const QString &text)
+{
+  QStringList str_list = text.split(':');
+
+  /* If the list is two long, it is proper format - 001: Sound Example */
+  if(str_list.size() >= 2)
+  {
+    person_working->setSoundID(str_list.front().toInt());
+  }
+  /* Otherwise, unset the sound ID */
+  else
+  {
+    person_working->setSoundID(-1);
+  }
 }
 
 /*
@@ -523,6 +567,31 @@ void PersonDialog::visibilityChanged(int index)
 EventView* PersonDialog::getEventView()
 {
   return event_view;
+}
+
+/*
+ * Description: Returns a list of sounds being used in the person presently.
+ *              Used when required for neighboring calls.
+ *
+ * Inputs: none
+ * Output: QList<QString> - the sound string list
+ */
+QList<QString> PersonDialog::getListSounds()
+{
+  return sound_list;
+}
+
+/*
+ * Description: Sets the list of sounds, to be used within the person dialog for
+ *              the drop down selection and within the event.
+ *
+ * Inputs: QList<QString> sounds - the sound string list
+ * Output: none
+ */
+void PersonDialog::setListSounds(QList<QString> sounds)
+{
+  sound_list = sounds;
+  updateData();
 }
 
 /*

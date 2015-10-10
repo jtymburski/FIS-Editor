@@ -161,6 +161,7 @@ public:
   void updateListItems(QVector<QString> list);
   void updateListMaps(QVector<QString> list);
   void updateListParties(QVector<QString> list);
+  void updateListSounds(QList<QString> list);
   void updateListSubmaps(QVector<QString> list);
   void updateListThings(QVector<QString> list);
 

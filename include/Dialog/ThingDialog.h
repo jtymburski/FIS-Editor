@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include <QGridLayout>
+#include <QStringList>
 
 #include "Database/EditorMapThing.h"
 #include "Dialog/ConvoDialog.h"
@@ -52,6 +53,9 @@ private:
 
   /* Matrix view and control */
   MatrixView* matrix_view;
+
+  /* Sound information, for dropdown */
+  QList<QString> sound_list;
 
   /* The working and original thing */
   EditorMapThing* thing_original;
@@ -97,9 +101,10 @@ public slots:
   void buttonFrameEdit();
   void buttonOk();
 
-  /* Changed text in line edits */
+  /* Changed triggers in widgets */
   void changedDescription(QString description);
   void changedName(QString name);
+  void changedSound(const QString &text);
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
@@ -120,6 +125,12 @@ public slots:
 public:
   /* Returns the event view widget */
   EventView* getEventView();
+
+  /* Returns the list of sounds, being used */
+  QList<QString> getListSounds();
+
+  /* Set the list of sounds, used for dropdown and in event */
+  void setListSounds(QList<QString> sounds);
 
   /* Sets the working thing to the original */
   void updateOriginal();

@@ -109,11 +109,9 @@ signals:
   /* Select tile trigger to map render */
   void selectTile();
 
-  /* Trigger handles with sounds */
-  void soundFillTrigger();
-
   /* Updates event objects in this class */
   void updateEventObjects();
+  void updateSoundObjects();
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -143,10 +141,6 @@ public slots:
   /* Sends the selected tile to the appropriate thing pop-up */
   void sendSelectedTile(int id, int x, int y);
 
-  /* Sound trigger and fill slot from various views */
-  void soundFill(QVector<QString> sound_list);
-  void soundFillTrigger(EditorEnumDb::MapObjectMode mode);
-
   /* Update all lists */
   void updateAllLists();
 
@@ -154,12 +148,16 @@ public slots:
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   void updatedParties(QVector<QString> parties);
+  void updatedSounds(QList<QString> sounds);
 
   /* Updates the path nodes in the list widget */
   void updatePathNodes();
 
   /* Updates based on selected index */
   void updateSelected(int index);
+
+  /* Sound trigger and fill slot from various views */
+  void updateSoundObjects(EditorEnumDb::MapObjectMode mode);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

@@ -71,7 +71,7 @@ void MapDatabase::setupMain()
   connect(view_sprite, SIGNAL(changeLayer(EditorEnumDb::Layer)),
           this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_sprite, SIGNAL(soundFillTrigger(EditorEnumDb::MapObjectMode)),
-          this, SLOT(soundFillTrigger(EditorEnumDb::MapObjectMode)));
+          this, SLOT(updateSoundObjects(EditorEnumDb::MapObjectMode)));
 
   /* IO connections */
   connect(view_io, SIGNAL(changeLayer(EditorEnumDb::Layer)),
@@ -308,6 +308,7 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
   {
     /* Set who called the update */
     mode_for_data = view;
+    sound_fill_mode = view;
 
     /* Compile list */
     QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
@@ -342,6 +343,7 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
 
     /* Emit signal to get other lists (items and maps) */
     emit updateEventObjects();
+    updateSoundObjects(view);
   }
 }
 
@@ -490,21 +492,6 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
   }
 }
 
-/* Sound trigger and fill slot from various views */
-// TODO: Add Future Views when needed
-void MapDatabase::soundFill(QVector<QString> sound_list)
-{
-  if(sound_fill_mode == EditorEnumDb::SPRITE_VIEW && view_sprite != nullptr)
-    view_sprite->soundFill(sound_list);
-}
-
-/* Sound trigger slot from various views */
-void MapDatabase::soundFillTrigger(EditorEnumDb::MapObjectMode mode)
-{
-  sound_fill_mode = mode;
-  emit soundFillTrigger();
-}
-
 /* Update all lists */
 void MapDatabase::updateAllLists()
 {
@@ -580,6 +567,25 @@ void MapDatabase::updatedParties(QVector<QString> parties)
   {
     view_npc->updateListParties(parties);
   }
+}
+
+/* Sound trigger and fill slot from various views */
+// TODO: Comment
+void MapDatabase::updatedSounds(QList<QString> sounds)
+{
+  if(sound_fill_mode == EditorEnumDb::SPRITE_VIEW && view_sprite != nullptr)
+    view_sprite->soundFill(sounds);
+  else if(sound_fill_mode == EditorEnumDb::THING_VIEW && view_thing != nullptr)
+    view_thing->updateListSounds(sounds);
+  else if(sound_fill_mode == EditorEnumDb::IO_VIEW && view_io != nullptr)
+    view_io->updateListSounds(sounds);
+  else if(sound_fill_mode == EditorEnumDb::ITEM_VIEW && view_item != nullptr)
+    view_item->updateListSounds(sounds);
+  else if(sound_fill_mode == EditorEnumDb::PERSON_VIEW &&
+          view_person != nullptr)
+    view_person->updateListSounds(sounds);
+  else if(sound_fill_mode == EditorEnumDb::NPC_VIEW && view_npc != nullptr)
+    view_npc->updateListSounds(sounds);
 }
 
 /* Updates the path nodes in the list widget */
@@ -680,6 +686,13 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->show();
   }
+}
+
+/* Sound trigger slot from various views */
+void MapDatabase::updateSoundObjects(EditorEnumDb::MapObjectMode mode)
+{
+  sound_fill_mode = mode;
+  emit updateSoundObjects();
 }
 
 /*============================================================================

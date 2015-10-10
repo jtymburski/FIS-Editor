@@ -733,6 +733,18 @@ void MapIOView::updateListParties(QVector<QString> list)
 }
 
 /*
+ * Description: Sets the list of sounds, used for the sound dropdown
+ *
+ * Inputs: QList<QString> list - list of all sound resources available
+ * Output: none
+ */
+void MapIOView::updateListSounds(QList<QString> list)
+{
+  if(io_dialog != nullptr)
+    io_dialog->setListSounds(list);
+}
+
+/*
  * Description: Sets the list of sub-maps, used for event creation.
  *
  * Inputs: QVector<QString> - list of all sub-maps (for teleport event)

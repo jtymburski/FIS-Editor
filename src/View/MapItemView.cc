@@ -671,3 +671,15 @@ void MapItemView::updateListItems(QVector<QString> list)
   if(item_dialog != NULL)
     item_dialog->setListItems(list);
 }
+
+/*
+ * Description: Sets the list of sounds, used for the sound dropdown
+ *
+ * Inputs: QList<QString> list - list of all sound resources available
+ * Output: none
+ */
+void MapItemView::updateListSounds(QList<QString> list)
+{
+  if(item_dialog != nullptr)
+    item_dialog->setListSounds(list);
+}

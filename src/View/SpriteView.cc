@@ -181,10 +181,10 @@ void SpriteView::editSprite(EditorSprite* edit)
 /*
  * Description: Function call to add sound list to sprite dialog, if set
  *
- * Inputs: QVector<QString> sound_list - list of all sound resources available
+ * Inputs: QList<QString> sound_list - list of all sound resources available
  * Output: none
  */
-void SpriteView::soundFill(QVector<QString> sound_list)
+void SpriteView::soundFill(QList<QString> sound_list)
 {
   if(sprite_dialog != nullptr)
     sprite_dialog->soundFill(sound_list);

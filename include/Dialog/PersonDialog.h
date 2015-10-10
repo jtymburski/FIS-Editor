@@ -64,6 +64,9 @@ private:
   EditorMapPerson* person_original;
   EditorMapPerson* person_working;
 
+  /* Sound information, for dropdown */
+  QList<QString> sound_list;
+
   /* The speed control value */
   QSpinBox* spin_speed;
 
@@ -110,9 +113,10 @@ public slots:
   void buttonFrameEdit();
   void buttonOk();
 
-  /* Changed text in line edits */
+  /* Changed triggers in widgets */
   void changedDescription(QString description);
   void changedName(QString name);
+  void changedSound(const QString &text);
 
   /* Direction change for matrix */
   void directionChange(QString text);
@@ -142,6 +146,12 @@ public slots:
 public:
   /* Returns the event view widget */
   EventView* getEventView();
+
+  /* Returns the list of sounds, being used */
+  QList<QString> getListSounds();
+
+  /* Set the list of sounds, used for dropdown and in event */
+  void setListSounds(QList<QString> sounds);
 
   /* Sets the working thing to the original */
   void updateOriginal();

@@ -54,6 +54,9 @@ private:
   /* Matrix view and control */
   MatrixView* matrix_view;
 
+  /* Sound information, for dropdown */
+  QList<QString> sound_list;
+
 public:
   /*------------------- Constants -----------------------*/
   const static int kMAX_COUNT; /* Maximum number of items */
@@ -91,10 +94,11 @@ public slots:
   void buttonFrameEdit();
   void buttonOk();
 
-  /* Changed text in line edits */
+  /* Changed triggers in widgets */
   void changedCount(int count);
   void changedDescription(QString description);
   void changedName(QString name);
+  void changedSound(const QString &text);
 
   /* Core item status changed */
   void coreItemChanged(int index);
@@ -109,8 +113,14 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the list of sounds, being used */
+  QList<QString> getListSounds();
+
   /* Sets the list of items, used for event creation */
   void setListItems(QVector<QString> items);
+
+  /* Set the list of sounds, used for dropdown and in event */
+  void setListSounds(QList<QString> sounds);
 
   /* Sets the working item to the original */
   void updateOriginal();

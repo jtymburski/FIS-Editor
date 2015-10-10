@@ -113,12 +113,14 @@ void MapView::setupLeftBar()
   map_database = new MapDatabase(this);
   connect(map_database, SIGNAL(updateEventObjects()),
           this, SLOT(updateEventObjectsDb()));
+  connect(map_database, SIGNAL(updateSoundObjects()),
+          this, SIGNAL(updateSoundObjects()));
+
   connect(map_database, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SLOT(ensureVisible(QGraphicsItem*)));
   connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
           this, SLOT(pathEditTrigger(EditorNPCPath*)));
-  connect(map_database, SIGNAL(soundFillTrigger()),
-          this, SIGNAL(soundFillTrigger()));
+
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
@@ -414,14 +416,6 @@ void MapView::setCurrentTile(int x, int y)
   map_data->showMessage(mapsize);
 }
 
-/* Sound trigger to map database with new sound list */
-// TODO: Comment
-void MapView::soundFill(QVector<QString> sound_list)
-{
-  if(map_database != nullptr)
-    map_database->soundFill(sound_list);
-}
-
 /* Tile enter/exit event slots */
 // TODO: Comment
 void MapView::tileEventEnter()
@@ -500,6 +494,14 @@ void MapView::updatedParties(QVector<QString> parties)
 {
   if(data_db)
     map_database->updatedParties(parties);
+}
+
+/* Sound trigger to map database with new sound list */
+// TODO: Comment
+void MapView::updatedSounds(QList<QString> sound_list)
+{
+  if(map_database != nullptr)
+    map_database->updatedSounds(sound_list);
 }
 
 /*============================================================================

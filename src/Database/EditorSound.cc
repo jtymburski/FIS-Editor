@@ -187,10 +187,12 @@ bool EditorSound::isNameLocked()
  *
  * Inputs: XmlData data - the XML data tree struct
  *         int index - the offset index into the struct
- * Output: none
+ * Output: bool - true if name was updated
  */
-void EditorSound::load(XmlData data, int index)
+bool EditorSound::load(XmlData data, int index)
 {
+  bool name_updated = false;
+
   /* Parse elements */
   if(data.getElement(index) == "fade")
   {
@@ -201,6 +203,7 @@ void EditorSound::load(XmlData data, int index)
   else if(data.getElement(index) == "name")
   {
     setName(QString::fromStdString(data.getDataString()));
+    name_updated = true;
   }
   else if(data.getElement(index) == "path")
   {
@@ -212,6 +215,8 @@ void EditorSound::load(XmlData data, int index)
     if(volume >= 0 && volume <= 255)
       setVolume(static_cast<uint8_t>(volume));
   }
+
+  return name_updated;
 }
 
 /*

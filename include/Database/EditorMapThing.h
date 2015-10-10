@@ -101,6 +101,9 @@ public:
   virtual QString getNameList();
   QString getNameList(bool shortened);
 
+  /* Returns the sound reference ID */
+  int getSoundID() const;
+
   /* Returns the x and y coordinate of the thing */
   int getX();
   int getY();
@@ -145,6 +148,9 @@ public:
 
   /* Sets the user submitted name */
   virtual void setName(QString name);
+
+  /* Sets the connected sound ID */
+  void setSoundID(int id);
 
   /* Sets the rendering tile icons */
   virtual void setTileIcons(TileIcons* icons);

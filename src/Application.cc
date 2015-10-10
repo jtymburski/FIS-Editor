@@ -69,18 +69,21 @@ Application::Application(QWidget* parent)
   /* Connections between game view and game database */
   connect(game_view,SIGNAL(nameChange(QString)),game_database,
           SLOT(updateBottomListName(QString)));
-  connect(game_database, SIGNAL(soundFill(QVector<QString>)),
-          game_view, SIGNAL(soundFill(QVector<QString>)));
-  connect(game_view, SIGNAL(soundFillTrigger()),
-          game_database, SLOT(soundFillTrigger()));
+
   connect(game_view, SIGNAL(updateEventObjects()),
           game_database, SLOT(updateEventObjects()));
+  connect(game_view, SIGNAL(updateSoundObjects()),
+          game_database, SLOT(updateSoundObjects()));
+
   connect(game_database, SIGNAL(updatedItems(QVector<QString>)),
           game_view, SIGNAL(updatedItems(QVector<QString>)));
   connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
   connect(game_database, SIGNAL(updatedParties(QVector<QString>)),
           game_view, SIGNAL(updatedParties(QVector<QString>)));
+  connect(game_database, SIGNAL(updatedSounds(QList<QString>)),
+          game_view, SIGNAL(updatedSounds(QList<QString>)));
+
   connect(game_view->getMapView(), SIGNAL(disableControl(bool)),
           this, SLOT(disableControl(bool)));
   connect(game_view->getMapView(), SIGNAL(layerChanged(EditorEnumDb::Layer)),

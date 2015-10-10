@@ -128,15 +128,9 @@ signals:
   /* Passes the editor sprite up */
   void sendUpEditorSprite(EditorSprite* e);
 
-  /* Trigger handles with sounds */
-  void soundFillTrigger();
-
-  /* Updated data to pass into map database */
-  //void updatedItems(QVector<QString> items);
-  //void updatedMaps(QVector<QString> maps);
-
   /* Updates event objects in the map database or view class */
   void updateEventObjects();
+  void updateSoundObjects();
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
@@ -166,9 +160,6 @@ public slots:
   /* Sets the status bar to have the current tile hovered over */
   void setCurrentTile(int,int);
 
-  /* Sound trigger to map database with new sound list */
-  void soundFill(QVector<QString> sound_list);
-
   /* Tile enter/exit event slots */
   void tileEventEnter();
   void tileEventExit();
@@ -180,6 +171,7 @@ public slots:
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   void updatedParties(QVector<QString> parties);
+  void updatedSounds(QList<QString> sound_list);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

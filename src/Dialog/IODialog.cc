@@ -136,6 +136,8 @@ void IODialog::createLayout(bool instance)
   QLabel* lbl_sound = new QLabel("Sound:", this);
   layout->addWidget(lbl_sound, 5, 0);
   combo_sound = new QComboBox(this);
+  connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(changedSound(QString)));
   layout->addWidget(combo_sound, 5, 1, 1, 3);
 
   /* State selection */
@@ -289,6 +291,24 @@ void IODialog::updateData()
   /* States */
   for(int i = 0; i < io_working->getStates().size(); i++)
     combo_state->addItem(io_working->getStateName(i));
+
+  /* Sound data - find index */
+  int index = -1;
+  for(int i = 0; i < sound_list.size(); i++)
+  {
+    QStringList str_split = sound_list[i].split(':');
+    if(str_split.size() >= 2)
+      if(str_split.front().toInt() == io_working->getSoundID())
+        index = i;
+  }
+
+  /* Sound data - load into combo */
+  combo_sound->blockSignals(true);
+  combo_sound->clear();
+  combo_sound->addItems(QStringList(sound_list));
+  if(index >= 0)
+    combo_sound->setCurrentIndex(index);
+  combo_sound->blockSignals(false);
 }
 
 /*============================================================================
@@ -741,6 +761,29 @@ void IODialog::changedName(QString name)
 }
 
 /*
+ * Description: Slot triggered on the combo box selection changed, which updates
+ *              the stored sound ID within the working object.
+ *
+ * Inputs: QString text - the new sound row selection
+ * Output: none
+ */
+void IODialog::changedSound(const QString &text)
+{
+  QStringList str_list = text.split(':');
+
+  /* If the list is two long, it is proper format - 001: Sound Example */
+  if(str_list.size() >= 2)
+  {
+    io_working->setSoundID(str_list.front().toInt());
+  }
+  /* Otherwise, unset the sound ID */
+  else
+  {
+    io_working->setSoundID(-1);
+  }
+}
+
+/*
  * Description: Slot triggered when the inactive disable/enable check box
  *              changes state.
  *
@@ -877,6 +920,31 @@ void IODialog::visibilityChanged(int index)
 EventView* IODialog::getEventView()
 {
   return event_view;
+}
+
+/*
+ * Description: Returns a list of sounds being used in the IO presently.
+ *              Used when required for neighboring calls.
+ *
+ * Inputs: none
+ * Output: QList<QString> - the sound string list
+ */
+QList<QString> IODialog::getListSounds()
+{
+  return sound_list;
+}
+
+/*
+ * Description: Sets the list of sounds, to be used within the IO dialog for
+ *              the drop down selection and within the event.
+ *
+ * Inputs: QList<QString> sounds - the sound string list
+ * Output: none
+ */
+void IODialog::setListSounds(QList<QString> sounds)
+{
+  sound_list = sounds;
+  updateData();
 }
 
 /*

@@ -84,6 +84,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   setGameID(source.getGameID());
   setID(source.getID());
   setName(source.getName());
+  setSoundID(source.getSoundID());
   setVisibility(source.isVisible());
 
   /* Copy the visual data */
@@ -146,6 +147,10 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     /* Check game ID */
     if(getGameID() >= 0)
       fh->writeXmlData("game_id", getGameID());
+
+    /* Check sound ID */
+    if(getSoundID() >= 0)
+      fh->writeXmlData("sound_id", getSoundID());
 
     /* Save the dialog image */
     if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
@@ -337,6 +342,20 @@ QString EditorMapThing::getNameList(bool shortened)
 }
 
 /*
+ * Description: Returns the reference sound ID for the thing. If less than 0,
+ *              it is unset.
+ *
+ * Inputs: none
+ * Output: int - the connected sound ID
+ */
+int EditorMapThing::getSoundID() const
+{
+  if(base != nullptr)
+    return base->getSoundID();
+  return thing.getSoundID();
+}
+
+/*
  * Description: Returns the X coordinate for the top left of the thing
  *              (in tile units)
  *
@@ -454,6 +473,10 @@ void EditorMapThing::load(XmlData data, int index)
   else if(element == "sprites")
   {
     matrix->load(data, index + 1);
+  }
+  else if(element == "sound_id")
+  {
+    setSoundID(data.getDataInteger());
   }
   else if(element == "startpoint")
   {
@@ -621,6 +644,18 @@ void EditorMapThing::setID(int id)
 void EditorMapThing::setName(QString name)
 {
   thing.setName(name.toStdString());
+}
+
+/*
+ * Description: Sets the connected sound ID. If the passed in ID is less than 0,
+ *              it unsets the sound ID.
+ *
+ * Inputs: int id - the new connected sound ID
+ * Output: none
+ */
+void EditorMapThing::setSoundID(int id)
+{
+  thing.setSoundID(id);
 }
 
 /*

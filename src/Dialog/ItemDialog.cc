@@ -112,6 +112,8 @@ void ItemDialog::createLayout(bool instance)
   QLabel* lbl_sound = new QLabel("Sound:", this);
   layout->addWidget(lbl_sound, 4, 0);
   combo_sound = new QComboBox(this);
+  connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(changedSound(QString)));
   layout->addWidget(combo_sound, 4, 1, 1, 6);
 
   /* Core ID */
@@ -179,6 +181,7 @@ void ItemDialog::updateData()
     box_walkover->setCurrentIndex(0);
 
   /* Game Item */
+  box_core->blockSignals(true);
   box_core->setCurrentIndex(0);
   for(int i = 0; i < list_items.size(); i++)
   {
@@ -186,6 +189,25 @@ void ItemDialog::updateData()
     if(id == item_working->getGameID())
       box_core->setCurrentIndex(i + 1);
   }
+  box_core->blockSignals(false);
+
+  /* Sound data - find index */
+  int index = -1;
+  for(int i = 0; i < sound_list.size(); i++)
+  {
+    QStringList str_split = sound_list[i].split(':');
+    if(str_split.size() >= 2)
+      if(str_split.front().toInt() == item_working->getSoundID())
+        index = i;
+  }
+
+  /* Sound data - load into combo */
+  combo_sound->blockSignals(true);
+  combo_sound->clear();
+  combo_sound->addItems(QStringList(sound_list));
+  if(index >= 0)
+    combo_sound->setCurrentIndex(index);
+  combo_sound->blockSignals(false);
 }
 
 /*============================================================================
@@ -298,6 +320,29 @@ void ItemDialog::changedName(QString name)
 }
 
 /*
+ * Description: Slot triggered on the combo box selection changed, which updates
+ *              the stored sound ID within the working object.
+ *
+ * Inputs: QString text - the new sound row selection
+ * Output: none
+ */
+void ItemDialog::changedSound(const QString &text)
+{
+  QStringList str_list = text.split(':');
+
+  /* If the list is two long, it is proper format - 001: Sound Example */
+  if(str_list.size() >= 2)
+  {
+    item_working->setSoundID(str_list.front().toInt());
+  }
+  /* Otherwise, unset the sound ID */
+  else
+  {
+    item_working->setSoundID(-1);
+  }
+}
+
+/*
  * Description: Slot triggered when the core item drop down changes selection.
  *              Updates the ID in the stored class.
  *
@@ -341,6 +386,18 @@ void ItemDialog::walkoverChanged(int index)
  *===========================================================================*/
 
 /*
+ * Description: Returns a list of sounds being used in the item presently.
+ *              Used when required for neighboring calls.
+ *
+ * Inputs: none
+ * Output: QList<QString> - the sound string list
+ */
+QList<QString> ItemDialog::getListSounds()
+{
+  return sound_list;
+}
+
+/*
  * Description: Sets the list of items, used for event creation
  *
  * Inputs: QVector<QString> - list of all items (for give item event)
@@ -356,6 +413,24 @@ void ItemDialog::setListItems(QVector<QString> items)
     box_core->addItem(list_items[i]);
   updateData();
   box_core->blockSignals(false);
+}
+
+/*
+ * Description: Sets the list of sounds, to be used within the item dialog for
+ *              the drop down selection and within the event.
+ *
+ * Inputs: QList<QString> sounds - the sound string list
+ * Output: none
+ */
+void ItemDialog::setListSounds(QList<QString> sounds)
+{
+  /* Replace first element, if "None", with appropriate description for items */
+  if(sounds.size() > 0 && sounds.first() == "None")
+    sounds[0] = "Game Default";
+
+  /* Set the elements and update the data */
+  sound_list = sounds;
+  updateData();
 }
 
 /*

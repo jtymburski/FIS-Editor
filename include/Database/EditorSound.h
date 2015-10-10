@@ -80,7 +80,7 @@ public:
   bool isNameLocked();
 
   /* Loads the object data */
-  void load(XmlData data, int index);
+  bool load(XmlData data, int index);
 
   /* Saves the object data */
   void save(FileHandler* fh, bool game_only = false, QString type = "sound");

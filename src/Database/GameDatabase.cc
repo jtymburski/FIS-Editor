@@ -1561,14 +1561,6 @@ void GameDatabase::saveAll()
   }
 }
 
-/* Trigger handles with sounds */
-// TODO: Comment
-void GameDatabase::soundFillTrigger()
-{
-  if(data_sounds != nullptr)
-    emit soundFill(data_sounds->getListSound());
-}
-
 // TODO: Comment
 void GameDatabase::updateBottomListName(QString str)
 {
@@ -1622,6 +1614,14 @@ void GameDatabase::updateEventObjects()
   for(int i = 0; i < data_party.size(); i++)
     party_list.push_back(data_party[i]->getNameList());
   emit updatedParties(party_list);
+}
+
+/* Trigger handles with sounds */
+// TODO: Comment
+void GameDatabase::updateSoundObjects()
+{
+  if(data_sounds != nullptr)
+    emit updatedSounds(data_sounds->getListSound());
 }
 
 /*============================================================================

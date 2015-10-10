@@ -50,7 +50,7 @@ private:
   QComboBox* combo_sound;
 
   /* Data stacks */
-  QVector<QString> data_sounds;
+  QList<QString> data_sounds;
 
   /* Direction combo box */
   QComboBox* direction_input;
@@ -104,7 +104,7 @@ public slots:
   void setToDefault();
 
   /* Sound Fill */
-  void soundFill(QVector<QString> sound_list);
+  void soundFill(QList<QString> sound_list);
 
   /* Updates the current working sprite */
   void updateWorkingSprite();

@@ -464,10 +464,10 @@ void SpriteDialog::setToDefault()
  * Description: Takes the sound list and fills it into the combo box. This is
  *              called on initial construction.
  *
- * Inputs: QVector<QString> sound_list - the sound list to load in
+ * Inputs: QList<QString> sound_list - the sound list to load in
  * Output: none
  */
-void SpriteDialog::soundFill(QVector<QString> sound_list)
+void SpriteDialog::soundFill(QList<QString> sound_list)
 {
   data_sounds = sound_list;
 
