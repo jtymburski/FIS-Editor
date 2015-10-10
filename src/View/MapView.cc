@@ -117,6 +117,8 @@ void MapView::setupLeftBar()
           this, SLOT(ensureVisible(QGraphicsItem*)));
   connect(map_database, SIGNAL(pathEditTrigger(EditorNPCPath*)),
           this, SLOT(pathEditTrigger(EditorNPCPath*)));
+  connect(map_database, SIGNAL(soundFillTrigger()),
+          this, SIGNAL(soundFillTrigger()));
 
   /* Sets up the dock which contains the sprites and images tabs */
   QDockWidget* dock = new QDockWidget("Toolbox");
@@ -410,6 +412,14 @@ void MapView::setCurrentTile(int x, int y)
   }
 
   map_data->showMessage(mapsize);
+}
+
+/* Sound trigger to map database with new sound list */
+// TODO: Comment
+void MapView::soundFill(QVector<QString> sound_list)
+{
+  if(map_database != nullptr)
+    map_database->soundFill(sound_list);
 }
 
 /* Tile enter/exit event slots */

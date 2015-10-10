@@ -69,6 +69,10 @@ Application::Application(QWidget* parent)
   /* Connections between game view and game database */
   connect(game_view,SIGNAL(nameChange(QString)),game_database,
           SLOT(updateBottomListName(QString)));
+  connect(game_database, SIGNAL(soundFill(QVector<QString>)),
+          game_view, SIGNAL(soundFill(QVector<QString>)));
+  connect(game_view, SIGNAL(soundFillTrigger()),
+          game_database, SLOT(soundFillTrigger()));
   connect(game_view, SIGNAL(updateEventObjects()),
           game_database, SLOT(updateEventObjects()));
   connect(game_database, SIGNAL(updatedItems(QVector<QString>)),

@@ -80,6 +80,7 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Has the sprite changed? */
   void spriteChanged();
 
 /*============================================================================
@@ -215,6 +216,9 @@ public:
   /* Get the number of paths that are similar, to be optimized */
   int getSmartCount();
 
+  /* Gets the reference sound ID */
+  int getSoundID();
+
   /* Gets the sprite for alteration */
   Sprite* getSprite();
 
@@ -248,6 +252,9 @@ public:
 
   /* Sets the sprite path */
   void setPath(int index, QString path);
+
+  /* Sets the reference sound ID */
+  void setSoundID(int id);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

@@ -13,6 +13,10 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
 {
   view_map = new MapView(this);
   addWidget(view_map);
+  connect(this, SIGNAL(soundFill(QVector<QString>)),
+          view_map, SLOT(soundFill(QVector<QString>)));
+  connect(view_map, SIGNAL(soundFillTrigger()),
+          this, SIGNAL(soundFillTrigger()));
   connect(view_map, SIGNAL(updateEventObjects()),
           this, SIGNAL(updateEventObjects()));
   connect(this, SIGNAL(updatedItems(QVector<QString>)),

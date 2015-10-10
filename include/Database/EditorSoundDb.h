@@ -130,8 +130,8 @@ public:
   void clear();
 
   /* Returns the list of data; for use elsewhere */
-  QVector<QString> getListMusic();
-  QVector<QString> getListSound();
+  QVector<QString> getListMusic(bool include_none = true);
+  QVector<QString> getListSound(bool include_none = true);
 
   /* Returns total save count resource */
   int getSaveCount();

@@ -66,6 +66,10 @@ signals:
   /* Emits upon name change to game object */
   void nameChange(QString);
 
+  /* Trigger handles with sounds */
+  void soundFill(QVector<QString> sound_list);
+  void soundFillTrigger();
+
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);

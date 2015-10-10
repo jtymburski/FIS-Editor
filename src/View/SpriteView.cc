@@ -167,12 +167,27 @@ void SpriteView::editSprite(EditorSprite* edit)
   if(edit != NULL)
     current = edit;
 
-  /* Delete the old and create the new dialog */
+  /* Delete the old dialog */
   if(sprite_dialog != NULL)
     delete sprite_dialog;
+
+  /* Create the new dialog */
   sprite_dialog = new SpriteDialog(this, current, "",0, false);
   connect(sprite_dialog, SIGNAL(ok()), this, SLOT(updateList()));
+  emit soundFillTrigger(EditorEnumDb::SPRITE_VIEW);
   sprite_dialog->show();
+}
+
+/*
+ * Description: Function call to add sound list to sprite dialog, if set
+ *
+ * Inputs: QVector<QString> sound_list - list of all sound resources available
+ * Output: none
+ */
+void SpriteView::soundFill(QVector<QString> sound_list)
+{
+  if(sprite_dialog != nullptr)
+    sprite_dialog->soundFill(sound_list);
 }
 
 /*

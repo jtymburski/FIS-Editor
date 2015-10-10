@@ -170,6 +170,9 @@ signals:
   void changeSkill(EditorSkill* skill);
   void changeSkillset(EditorSkillset* skill_set);
 
+  /* Trigger handles with sounds */
+  void soundFill(QVector<QString> sound_list);
+
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
@@ -208,6 +211,9 @@ public slots:
 
   /* Triggered by save all button */
   void saveAll();
+
+  /* Trigger handles with sounds */
+  void soundFillTrigger();
 
   /* Updates the bottom list -> when a name changes */
   void updateBottomListName(QString str);

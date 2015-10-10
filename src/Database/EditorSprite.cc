@@ -922,6 +922,19 @@ int EditorSprite::getSmartCount()
 }
 
 /*
+ * Description: Returns the reference sound ID. If less than 0, not valid.
+ *
+ * Inputs: none
+ * Output: int - the reference sound ID
+ */
+int EditorSprite::getSoundID()
+{
+  if(sprite != nullptr)
+    return sprite->getSoundID();
+  return -1;
+}
+
+/*
  * Description: Returns the actual sprite
  *
  * Output: The Sprite for in-game
@@ -1038,6 +1051,10 @@ void EditorSprite::load(XmlData data, int index)
       }
     }
   }
+  else if(element == "sound_id")
+  {
+    setSoundID(data.getDataInteger());
+  }
 }
 
 /*
@@ -1145,6 +1162,7 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
     bool opac = ref.getSprite()->getOpacity() != sprite->getOpacity();
     bool dir = ref.getSprite()->isDirectionForward() !=
                sprite->isDirectionForward();
+    bool sound_id = (getSoundID() >= 0);
 
     if(!core_only)
     {
@@ -1154,7 +1172,7 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
         fh->writeXmlElement(element.toStdString());
     }
     else if(animate || rotate || bright || color_r ||
-            color_g || color_b || opac || dir)
+            color_g || color_b || opac || dir || sound_id)
     {
       fh->writeXmlElement("sprite");
     }
@@ -1178,7 +1196,8 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
       fh->writeXmlData("opacity", sprite->getOpacity());
     if(dir)
       fh->writeXmlData("forward", sprite->isDirectionForward());
-    //fh->writeXmlData("sound", NULL); // TODO
+    if(sound_id)
+      fh->writeXmlData("sound_id", getSoundID());
 
     /* Write frame data */
     if(!core_only)
@@ -1197,7 +1216,7 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
     }
   }
 }
-  
+
 /*
  * Description: Sets the active frame index. If out of range, no sprite will be
  *              rendered but this call will still set it.
@@ -1240,7 +1259,9 @@ void EditorSprite::setMaximumFrames(int count)
 /*
  * Description: Sets the frame path
  *
- * Input: The frames path
+ * Input: int index - the frame location to insert
+ *        QString path - the path to insert
+ * Output: none
  */
 void EditorSprite::setPath(int index, QString path)
 {
@@ -1263,6 +1284,18 @@ void EditorSprite::setPath(int index, QString path)
     frame_info.push_back(info);
   else
     frame_info.insert(index, info);
+}
+
+/*
+ * Description: Sets the reference sound ID. If less than 0, unsets it.
+ *
+ * Inputs: int id - the new reference ID
+ * Output: none
+ */
+void EditorSprite::setSoundID(int id)
+{
+  if(sprite != nullptr)
+    sprite->setSoundID(id);
 }
 
 /*=============================================================================

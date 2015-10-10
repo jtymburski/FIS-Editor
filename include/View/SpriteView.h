@@ -67,6 +67,9 @@ signals:
   /* Sends up the Editor Sprite */
   void sendUpEditorSprite(EditorSprite* sprite);
 
+  /* Trigger handles with sounds */
+  void soundFillTrigger(EditorEnumDb::MapObjectMode mode);
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -79,6 +82,9 @@ public slots:
 
   /* Opens the sprite editing dialog */
   void editSprite(EditorSprite* edit = NULL);
+
+  /* Slot fill and triggers for sound list */
+  void soundFill(QVector<QString> sound_list);
 
   /* Updates the sprite list */
   void updateList();

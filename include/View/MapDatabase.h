@@ -55,6 +55,9 @@ private:
   QMenu* path_menu;
   EditorNPCPath* path_working;
 
+  /* Sound Fill Mode */
+  EditorEnumDb::MapObjectMode sound_fill_mode;
+
   /* The Views */
   MapIOView* view_io;
   MapItemView* view_item;
@@ -106,6 +109,9 @@ signals:
   /* Select tile trigger to map render */
   void selectTile();
 
+  /* Trigger handles with sounds */
+  void soundFillTrigger();
+
   /* Updates event objects in this class */
   void updateEventObjects();
 
@@ -136,6 +142,10 @@ public slots:
 
   /* Sends the selected tile to the appropriate thing pop-up */
   void sendSelectedTile(int id, int x, int y);
+
+  /* Sound trigger and fill slot from various views */
+  void soundFill(QVector<QString> sound_list);
+  void soundFillTrigger(EditorEnumDb::MapObjectMode mode);
 
   /* Update all lists */
   void updateAllLists();

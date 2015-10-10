@@ -1561,6 +1561,14 @@ void GameDatabase::saveAll()
   }
 }
 
+/* Trigger handles with sounds */
+// TODO: Comment
+void GameDatabase::soundFillTrigger()
+{
+  if(data_sounds != nullptr)
+    emit soundFill(data_sounds->getListSound());
+}
+
 // TODO: Comment
 void GameDatabase::updateBottomListName(QString str)
 {

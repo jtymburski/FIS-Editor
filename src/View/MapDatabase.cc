@@ -70,6 +70,8 @@ void MapDatabase::setupMain()
           view_sprite,SLOT(addEditorSprite(EditorSprite*)));
   connect(view_sprite, SIGNAL(changeLayer(EditorEnumDb::Layer)),
           this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
+  connect(view_sprite, SIGNAL(soundFillTrigger(EditorEnumDb::MapObjectMode)),
+          this, SLOT(soundFillTrigger(EditorEnumDb::MapObjectMode)));
 
   /* IO connections */
   connect(view_io, SIGNAL(changeLayer(EditorEnumDb::Layer)),
@@ -486,6 +488,21 @@ void MapDatabase::sendSelectedTile(int id, int x, int y)
   {
     view_npc->updateSelectedTile(id, x, y);
   }
+}
+
+/* Sound trigger and fill slot from various views */
+// TODO: Add Future Views when needed
+void MapDatabase::soundFill(QVector<QString> sound_list)
+{
+  if(sound_fill_mode == EditorEnumDb::SPRITE_VIEW && view_sprite != nullptr)
+    view_sprite->soundFill(sound_list);
+}
+
+/* Sound trigger slot from various views */
+void MapDatabase::soundFillTrigger(EditorEnumDb::MapObjectMode mode)
+{
+  sound_fill_mode = mode;
+  emit soundFillTrigger();
 }
 
 /* Update all lists */

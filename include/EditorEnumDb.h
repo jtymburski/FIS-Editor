@@ -59,7 +59,7 @@ public:
   /* Map interactive object type */
   enum MapIOType {IO_STATE, IO_TRANSITION};
   
-  /* Map object mode */
+  /* Map object mode - map database */
   enum MapObjectMode {RAW_VIEW = 0,
                       SPRITE_VIEW = 1,
                       THING_VIEW = 2,
@@ -77,7 +77,7 @@ public:
                     THING_RENDER_PLUS, THING_RENDER_MINUS,
                     THING_PASS_ALL};
 
-  /* Enum For View Mode */
+  /* Enum For View Mode - game database */
   enum ViewMode {MAPVIEW = 0,
                  BLANKVIEW1 = 1,
                  PARTYVIEW = 2,

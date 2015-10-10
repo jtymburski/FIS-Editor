@@ -46,6 +46,12 @@ private:
   FrameList* frame_list;
   QScrollArea* frame_scrollwrapper;
 
+  /* Sound selection combo box */
+  QComboBox* combo_sound;
+
+  /* Data stacks */
+  QVector<QString> data_sounds;
+
   /* Direction combo box */
   QComboBox* direction_input;
 
@@ -75,27 +81,33 @@ protected:
   void closeEvent(QCloseEvent *);
 
 /*============================================================================
+ * SIGNALS
+ *===========================================================================*/
+signals:
+  /* Ok pressed */
+  void ok();
+
+  /* Sends up the Editor Sprite */
+  void sendUpEditorSprite(EditorSprite* sprite);
+
+/*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
   /* destroys the current working sprite */
   void destroyWorkingSprite();
 
+  /* Set sound ID slot from combo box */
+  void setSoundID(const QString & text);
+
   /* Set sprite values to default */
   void setToDefault();
 
+  /* Sound Fill */
+  void soundFill(QVector<QString> sound_list);
+
   /* Updates the current working sprite */
   void updateWorkingSprite();
-
-/*============================================================================
- * SIGNALS
- *===========================================================================*/
-signals:
-  /* Sends up the Editor Sprite */
-  void sendUpEditorSprite(EditorSprite* sprite);
-
-  /* Ok pressed */
-  void ok();
 };
 
 #endif // SPRITEDIALOG_H

@@ -868,10 +868,10 @@ void EditorSoundDb::clear()
  *              stack. Used throughout the program in other widgets for music
  *              selection.
  *
- * Inputs: none
+ * Inputs: bool include_none - true to include a "None" option at front of list
  * Output: QVector<QString> - the name list of the music chunks
  */
-QVector<QString> EditorSoundDb::getListMusic()
+QVector<QString> EditorSoundDb::getListMusic(bool include_none)
 {
   QVector<QString> list;
 
@@ -883,6 +883,10 @@ QVector<QString> EditorSoundDb::getListMusic()
   for(int i = 0; i < music_custom.size(); i++)
     list.push_back(music_custom[i]->getNameList());
 
+  /* None option */
+  if(include_none)
+    list.push_front("None");
+
   return list;
 }
 
@@ -891,10 +895,10 @@ QVector<QString> EditorSoundDb::getListMusic()
  *              stack. Used throughout the program in other widgets for sound
  *              selection.
  *
- * Inputs: none
+ * Inputs: bool include_none - true to include a "None" option at front of list
  * Output: QVector<QString> - the name list of the music chunks
  */
-QVector<QString> EditorSoundDb::getListSound()
+QVector<QString> EditorSoundDb::getListSound(bool include_none)
 {
   QVector<QString> list;
 
@@ -905,6 +909,10 @@ QVector<QString> EditorSoundDb::getListSound()
   /* Custom sound second */
   for(int i = 0; i < sound_custom.size(); i++)
     list.push_back(sound_custom[i]->getNameList());
+
+  /* None option */
+  if(include_none)
+    list.push_front("None");
 
   return list;
 }
