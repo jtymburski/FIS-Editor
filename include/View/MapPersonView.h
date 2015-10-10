@@ -61,6 +61,10 @@ private:
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
+  /* Delete pop-up */
+  void deletePopBase();
+  void deletePopInstance();
+
   /* Opens the person editing dialog */
   void editPerson(EditorMapPerson* sub_person = NULL);
 

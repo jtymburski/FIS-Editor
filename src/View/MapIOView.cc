@@ -127,6 +127,46 @@ void MapIOView::createLayout()
 }
 
 /*
+ * Description: Deletes the base dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapIOView::deletePopBase()
+{
+  if(io_dialog != nullptr)
+  {
+    disconnect(io_dialog, SIGNAL(ok()), this, SLOT(updateIOs()));
+    disconnect(io_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    delete io_dialog;
+    io_dialog = nullptr;
+  }
+}
+
+/*
+ * Description: Deletes the instance dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapIOView::deletePopInstance()
+{
+  if(instance_dialog != nullptr)
+  {
+    disconnect(instance_dialog, SIGNAL(ok(QString)),
+               this, SLOT(ioInstanceUpdate(QString)));
+    disconnect(instance_dialog,
+               SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+               this, SLOT(editBaseIO(EditorMapThing*)));
+    delete instance_dialog;
+    instance_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit IO dialog, on an existing IO in the list
  *              (either base or instance).
  *
@@ -139,21 +179,14 @@ void MapIOView::editIO(EditorMapIO* sub_io)
   if(sub_io != NULL)
     current = sub_io;
 
+  /* Delete all existing pop-ups first */
+  deletePopBase();
+  deletePopInstance();
+
   /* -- Is an instance -- */
   if(current->getBaseIO() != NULL)
   {
-    /* Delete the old and create the new instance dialog */
-    if(instance_dialog != NULL)
-    {
-      disconnect(instance_dialog, SIGNAL(ok(QString)),
-                 this, SLOT(ioInstanceUpdate(QString)));
-      disconnect(instance_dialog,
-                 SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-                 this, SLOT(editBaseIO(EditorMapThing*)));
-      delete instance_dialog;
-    }
+    /* Create the new instance dialog */
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok(QString)),
             this, SLOT(ioInstanceUpdate(QString)));
@@ -166,14 +199,7 @@ void MapIOView::editIO(EditorMapIO* sub_io)
   /* -- Is a base -- */
   else
   {
-    /* Delete the old and create the new IO dialog */
-    if(io_dialog != NULL)
-    {
-      disconnect(io_dialog, SIGNAL(ok()), this, SLOT(updateIOs()));
-      disconnect(io_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      delete io_dialog;
-    }
+    /* Create the new base dialog */
     io_dialog = new IODialog(current, this);
     connect(io_dialog, SIGNAL(ok()), this, SLOT(updateIOs()));
     connect(io_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -282,6 +308,7 @@ void MapIOView::deleteInstance()
  */
 void MapIOView::editBaseIO(EditorMapThing* base)
 {
+  /* Trigger edit on base */
   if(base != NULL)
     editIO((EditorMapIO*)base);
 }

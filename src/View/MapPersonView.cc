@@ -127,6 +127,46 @@ void MapPersonView::createLayout()
 }
 
 /*
+ * Description: Deletes the base dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapPersonView::deletePopBase()
+{
+  if(person_dialog != nullptr)
+  {
+    disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
+    disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    delete person_dialog;
+    person_dialog = nullptr;
+  }
+}
+
+/*
+ * Description: Deletes the instance dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapPersonView::deletePopInstance()
+{
+  if(instance_dialog != nullptr)
+  {
+    disconnect(instance_dialog, SIGNAL(ok(QString)),
+               this, SLOT(personInstanceUpdate(QString)));
+    disconnect(
+          instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+          this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+               this, SLOT(editBasePerson(EditorMapThing*)));
+    delete instance_dialog;
+    instance_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit person dialog, on an existing person in the list
  *              (either base or instance).
  *
@@ -139,20 +179,14 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
   if(sub_person != NULL)
     current = sub_person;
 
+  /* Delete all existing pop-ups first */
+  deletePopBase();
+  deletePopInstance();
+
   /* -- Is an instance -- */
   if(current->getBasePerson() != NULL)
   {
-    if(instance_dialog != NULL)
-    {
-      disconnect(instance_dialog, SIGNAL(ok(QString)),
-                 this, SLOT(personInstanceUpdate(QString)));
-      disconnect(
-            instance_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-            this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-                 this, SLOT(editBasePerson(EditorMapThing*)));
-      delete instance_dialog;
-    }
+    /* Create the new instance dialog */
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok(QString)),
             this, SLOT(personInstanceUpdate(QString)));
@@ -165,14 +199,7 @@ void MapPersonView::editPerson(EditorMapPerson* sub_person)
   /* -- Is a base -- */
   else
   {
-    /* Delete the old and create the new dialog */
-    if(person_dialog != NULL)
-    {
-      disconnect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
-      disconnect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      delete person_dialog;
-    }
+    /* Create the new base dialog */
     person_dialog = new PersonDialog(current, this);
     connect(person_dialog, SIGNAL(ok()), this, SLOT(updatePersons()));
     connect(person_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -281,6 +308,7 @@ void MapPersonView::deleteInstance()
  */
 void MapPersonView::editBasePerson(EditorMapThing* base)
 {
+  /* Trigger edit on base */
   if(base != NULL)
     editPerson((EditorMapPerson*)base);
 }

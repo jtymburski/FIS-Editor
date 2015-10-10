@@ -127,6 +127,46 @@ void MapThingView::createLayout()
 }
 
 /*
+ * Description: Deletes the base dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapThingView::deletePopBase()
+{
+  if(thing_dialog != nullptr)
+  {
+    disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
+    disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    delete thing_dialog;
+    thing_dialog = nullptr;
+  }
+}
+
+/*
+ * Description: Deletes the instance dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapThingView::deletePopInstance()
+{
+  if(instance_dialog != nullptr)
+  {
+    disconnect(instance_dialog, SIGNAL(ok(QString)),
+               this, SLOT(thingInstanceUpdate(QString)));
+    disconnect(instance_dialog,
+               SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+               this, SLOT(editBaseThing(EditorMapThing*)));
+    delete instance_dialog;
+    instance_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit thing dialog, on an existing thing in the list
  *              (either base or instance).
  *
@@ -139,21 +179,14 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
   if(sub_thing != NULL)
     current = sub_thing;
 
+  /* Delete all existing pop-ups first */
+  deletePopBase();
+  deletePopInstance();
+
   /* -- Is an instance -- */
   if(current->getBaseThing() != NULL)
   {
-    /* Delete the old and create the new instance dialog */
-    if(instance_dialog != NULL)
-    {
-      disconnect(instance_dialog, SIGNAL(ok(QString)),
-                 this, SLOT(thingInstanceUpdate(QString)));
-      disconnect(instance_dialog,
-                 SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-                 this, SLOT(editBaseThing(EditorMapThing*)));
-      delete instance_dialog;
-    }
+    /* Create the new instance dialog */
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok(QString)),
             this, SLOT(thingInstanceUpdate(QString)));
@@ -166,14 +199,7 @@ void MapThingView::editThing(EditorMapThing* sub_thing)
   /* -- Is a base -- */
   else
   {
-    /* Delete the old and create the new thing dialog */
-    if(thing_dialog != NULL)
-    {
-      disconnect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
-      disconnect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      delete thing_dialog;
-    }
+    /* Create the new thing dialog */
     thing_dialog = new ThingDialog(current, this);
     connect(thing_dialog, SIGNAL(ok()), this, SLOT(updateThings()));
     connect(thing_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -282,6 +308,7 @@ void MapThingView::deleteInstance()
  */
 void MapThingView::editBaseThing(EditorMapThing* base)
 {
+  /* Trigger edit on base */
   if(base != NULL)
     editThing(base);
 }

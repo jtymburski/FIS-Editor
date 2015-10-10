@@ -132,6 +132,12 @@ void IODialog::createLayout(bool instance)
           this, SLOT(changedDescription()));
   layout->addWidget(text_description, 4, 1, 1, 3);
 
+  /* The sound widget */
+  QLabel* lbl_sound = new QLabel("Sound:", this);
+  layout->addWidget(lbl_sound, 5, 0);
+  combo_sound = new QComboBox(this);
+  layout->addWidget(combo_sound, 5, 1, 1, 3);
+
   /* State selection */
   QLabel* lbl_state = new QLabel("State", this);
   layout->addWidget(lbl_state, 0, 4, 1, 1);
@@ -174,12 +180,12 @@ void IODialog::createLayout(bool instance)
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 5, 0, 3, 1);
+  layout->addWidget(lbl_frame, 6, 0, 2, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 5, 1, 3, 3);
+  layout->addWidget(lbl_frame_img, 6, 1, 2, 3);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -187,7 +193,7 @@ void IODialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 5, 3, 3, 1, Qt::AlignTop);
+  layout->addWidget(btn_frame_click, 6, 3, 2, 1, Qt::AlignTop);
 
   /* Matrix View */
   matrix_view = new MatrixView(NULL, this);

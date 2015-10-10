@@ -105,6 +105,7 @@ void PersonDialog::createLayout(bool instance)
   QGridLayout* layout = new QGridLayout(this);
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setColumnStretch(2, 1);
+  layout->setColumnStretch(5, 1);
 
   /* The ID widget */
   QLabel* lbl_id = new QLabel("ID:", this);
@@ -120,7 +121,7 @@ void PersonDialog::createLayout(bool instance)
   line_name = new QLineEdit("", this);
   connect(line_name, SIGNAL(textEdited(QString)),
           this, SLOT(changedName(QString)));
-  layout->addWidget(line_name, 1, 1, 1, 2);
+  layout->addWidget(line_name, 1, 1, 1, 3);
 
   /* The visibility widget */
   QLabel* lbl_visible = new QLabel("Visible:", this);
@@ -133,14 +134,6 @@ void PersonDialog::createLayout(bool instance)
   connect(box_visible, SIGNAL(currentIndexChanged(int)),
           this, SLOT(visibilityChanged(int)));
   layout->addWidget(box_visible, 2, 1);
-
-  /* The description widget */
-  QLabel* lbl_description = new QLabel("Description:", this);
-  layout->addWidget(lbl_description, 3, 0);
-  line_description = new QLineEdit("", this);
-  connect(line_description, SIGNAL(textEdited(QString)),
-          this, SLOT(changedDescription(QString)));
-  layout->addWidget(line_description, 3, 1, 1, 5);
 
   /* The speed widget */
   QLabel* lbl_speed = new QLabel("Speed:", this);
@@ -180,6 +173,20 @@ void PersonDialog::createLayout(bool instance)
   connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
   connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+
+  /* The description widget */
+  QLabel* lbl_description = new QLabel("Description:", this);
+  layout->addWidget(lbl_description, 1, 4);
+  line_description = new QLineEdit("", this);
+  connect(line_description, SIGNAL(textEdited(QString)),
+          this, SLOT(changedDescription(QString)));
+  layout->addWidget(line_description, 1, 5, 1, 3);
+
+  /* The sound widget */
+  QLabel* lbl_sound = new QLabel("Sound:", this);
+  layout->addWidget(lbl_sound, 2, 4);
+  combo_sound = new QComboBox(this);
+  layout->addWidget(combo_sound, 2, 5, 1, 2);
 
   /* Matrix selection views */
   QComboBox* box_ground = new QComboBox(this);

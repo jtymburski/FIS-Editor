@@ -58,6 +58,9 @@ private:
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
+  /* Delete pop-up */
+  void deletePopBase();
+
   /* Opens the item editing dialog */
   void editItem(EditorMapItem* sub_item = NULL);
 

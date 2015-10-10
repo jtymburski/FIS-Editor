@@ -33,6 +33,9 @@ private:
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
 
+  /* Combo Box sound widget */
+  QComboBox* combo_sound;
+
   /* Event view and control */
   EditorEvent* event_ctrl;
   EventView* event_view;

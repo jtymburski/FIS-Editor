@@ -34,6 +34,9 @@ private:
   /* Is the item a walkover? */
   QComboBox* box_walkover;
 
+  /* Combo Box Widget for Sound selection */
+  QComboBox* combo_sound;
+
   /* The frame control dialog */
   FrameDialog* frame_dialog;
 

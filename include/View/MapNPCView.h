@@ -61,6 +61,10 @@ private:
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
+  /* Delete pop-up */
+  void deletePopBase();
+  void deletePopInstance();
+
   /* Opens the npc editing dialog */
   void editNPC(EditorMapNPC* sub_npc = NULL);
 

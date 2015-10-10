@@ -127,6 +127,48 @@ void MapNPCView::createLayout()
 }
 
 /*
+ * Description: Deletes the base dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapNPCView::deletePopBase()
+{
+  if(npc_dialog != NULL)
+  {
+    disconnect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
+    disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    delete npc_dialog;
+    npc_dialog = nullptr;
+  }
+}
+
+/*
+ * Description: Deletes the instance dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapNPCView::deletePopInstance()
+{
+  if(instance_dialog != nullptr)
+  {
+    disconnect(instance_dialog, SIGNAL(ok(QString)),
+               this, SLOT(npcInstanceUpdate(QString)));
+    disconnect(instance_dialog,
+               SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+               this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    disconnect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
+               this, SIGNAL(pathEditStart(EditorNPCPath*)));
+    disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+               this, SLOT(editBaseNPC(EditorMapThing*)));
+    delete instance_dialog;
+    instance_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit npc dialog, on an existing npc in the list
  *              (either base or instance).
  *
@@ -139,23 +181,14 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
   if(sub_npc != NULL)
     current = sub_npc;
 
+  /* Delete all existing pop-ups first */
+  deletePopBase();
+  deletePopInstance();
+
   /* -- Is an instance -- */
   if(current->getBasePerson() != NULL)
   {
-    /* Delete the old and create the new dialog */
-    if(instance_dialog != NULL)
-    {
-      disconnect(instance_dialog, SIGNAL(ok(QString)),
-                 this, SLOT(npcInstanceUpdate(QString)));
-      disconnect(instance_dialog,
-                 SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      disconnect(instance_dialog, SIGNAL(pathEditStart(EditorNPCPath*)),
-                 this, SIGNAL(pathEditStart(EditorNPCPath*)));
-      disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
-                 this, SLOT(editBaseNPC(EditorMapThing*)));
-      delete instance_dialog;
-    }
+    /* Create the new instance dialog */
     instance_dialog = new InstanceDialog(current, this);
     connect(instance_dialog, SIGNAL(ok(QString)),
             this, SLOT(npcInstanceUpdate(QString)));
@@ -170,14 +203,7 @@ void MapNPCView::editNPC(EditorMapNPC* sub_npc)
   /* -- Is a base -- */
   else
   {
-    /* Delete the old and create the new dialog */
-    if(npc_dialog != NULL)
-    {
-      disconnect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
-      disconnect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
-                 this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
-      delete npc_dialog;
-    }
+    /* Create the new base dialog */
     npc_dialog = new PersonDialog(current, this);
     connect(npc_dialog, SIGNAL(ok()), this, SLOT(updateNPCs()));
     connect(npc_dialog, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
@@ -286,6 +312,7 @@ void MapNPCView::deleteInstance()
  */
 void MapNPCView::editBaseNPC(EditorMapThing* base)
 {
+  /* Trigger edit on base */
   if(base != NULL)
     editNPC((EditorMapNPC*)base);
 }

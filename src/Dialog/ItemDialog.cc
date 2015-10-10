@@ -108,6 +108,12 @@ void ItemDialog::createLayout(bool instance)
           this, SLOT(changedDescription(QString)));
   layout->addWidget(line_description, 3, 1, 1, 7);
 
+  /* The sound widget */
+  QLabel* lbl_sound = new QLabel("Sound:", this);
+  layout->addWidget(lbl_sound, 4, 0);
+  combo_sound = new QComboBox(this);
+  layout->addWidget(combo_sound, 4, 1, 1, 6);
+
   /* Core ID */
   QLabel* lbl_core = new QLabel("Game Item:", this);
   layout->addWidget(lbl_core, 0, 4, 1, 1);

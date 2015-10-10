@@ -36,16 +36,17 @@ private:
   /* Check boxes */
   QCheckBox* box_inactive_disable;
 
-  /* Combo boxes */
-  QComboBox* combo_interaction;
-  QComboBox* combo_state;
-
   /* Buttons that require external control */
   QPushButton* btn_enter;
   QPushButton* btn_exit;
   QPushButton* btn_minus;
   QPushButton* btn_use;
   QPushButton* btn_walkover;
+
+  /* Combo boxes */
+  QComboBox* combo_interaction;
+  QComboBox* combo_sound;
+  QComboBox* combo_state;
 
   /* The conversation dialog */
   ConvoDialog* convo_dialog;

@@ -30,6 +30,9 @@ private:
   /* The visible control box */
   QComboBox* box_visible;
 
+  /* Combo Box Widget for Sound */
+  QComboBox* combo_sound;
+
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
 

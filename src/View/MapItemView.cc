@@ -126,6 +126,22 @@ void MapItemView::createLayout()
 }
 
 /*
+ * Description: Deletes the base dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapItemView::deletePopBase()
+{
+  if(item_dialog != nullptr)
+  {
+    disconnect(item_dialog, SIGNAL(ok()), this, SLOT(updateItems()));
+    delete item_dialog;
+    item_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit item dialog, on an existing item in the list
  *              (either base or instance).
  *
@@ -137,6 +153,9 @@ void MapItemView::editItem(EditorMapItem* sub_item)
   EditorMapItem* current = getSelected();
   if(sub_item != NULL)
     current = sub_item;
+
+  /* Delete all existing pop-ups first */
+  deletePopBase();
 
   /* -- Is an instance -- */
   if(current->getBaseItem() != NULL)
@@ -151,12 +170,7 @@ void MapItemView::editItem(EditorMapItem* sub_item)
   /* -- Is a base -- */
   else
   {
-    /* Delete the old and create the new dialog */
-    if(item_dialog != NULL)
-    {
-      disconnect(item_dialog, SIGNAL(ok()), this, SLOT(updateItems()));
-      delete item_dialog;
-    }
+    /* Create the new base dialog */
     item_dialog = new ItemDialog(current, this);
     connect(item_dialog, SIGNAL(ok()), this, SLOT(updateItems()));
     item_dialog->show();
@@ -257,6 +271,7 @@ void MapItemView::deleteInstance()
 
 /*
  * Description: Triggers by instance dialog to edit base of the instant.
+ *              Currently not used
  *
  * Inputs: EditorMapItem* base - the base item to edit
  * Output: none
