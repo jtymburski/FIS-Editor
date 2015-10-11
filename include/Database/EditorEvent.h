@@ -91,6 +91,9 @@ public:
   /* Returns the string notification. If not that event, data is blank */
   QString getNotification();
 
+  /* Returns the soun reference ID, for the related event */
+  int getSoundID();
+
   /* Returns the start map ID, for the related event */
   int getStartMapID();
 
@@ -130,6 +133,9 @@ public:
 
   /* Sets the event to notification text */
   bool setEventNotification(QString notification = "Blank");
+
+  /* Sets the event to strictly a sound event */
+  bool setEventSound(int sound_id);
 
   /* Sets the event to start battle */
   bool setEventStartBattle();

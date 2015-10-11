@@ -433,6 +433,19 @@ QString EditorEvent::getNotification()
 }
 
 /*
+ * Description: Returns the connected sound ID from the event.
+ *
+ * Inputs: none
+ * Output: int - the connected sound ID
+ */
+int EditorEvent::getSoundID()
+{
+  if(event.classification != EventClassifier::NOEVENT)
+    return event.sound_id;
+  return -1;
+}
+
+/*
  * Description: Returns the trigger map ID for the switching map event. If
  *              it's not the switch map event, -1 is returned.
  *
@@ -877,6 +890,20 @@ bool EditorEvent::setEventNotification(QString notification)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets the event in the class to the just sound trigger event,
+ *              with a passed in connected sound ID.
+ *
+ * Inputs: int sound_id - the connected sound ID
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventSound(int sound_id)
+{
+  setEventBlank();
+  event = handler.createSoundEvent(sound_id);
+  return true;
 }
 
 /*
