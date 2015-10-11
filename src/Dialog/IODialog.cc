@@ -289,8 +289,12 @@ void IODialog::updateData()
   }
 
   /* States */
+  combo_state->blockSignals(true);
+  combo_state->clear();
   for(int i = 0; i < io_working->getStates().size(); i++)
     combo_state->addItem(io_working->getStateName(i));
+  changedComboState(0);
+  combo_state->blockSignals(false);
 
   /* Sound data - find index */
   int index = -1;

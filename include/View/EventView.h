@@ -43,6 +43,9 @@ private:
   /* The category of the event view */
   QComboBox* combo_category;
 
+  /* Sound selection widget */
+  QComboBox* combo_sound;
+
   /* The conversation event - convo tree */
   QTreeWidget* convo_tree;
 

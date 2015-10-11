@@ -160,7 +160,7 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for blank control */
   QWidget* widget_sound = new QWidget(this);
-  QLabel* lbl_sound = new QLabel("SOUND - TODO", this);
+  QLabel* lbl_sound = new QLabel("NO SETTINGS", this);
   QVBoxLayout* layout_sound = new QVBoxLayout(widget_sound);
   layout_sound->addWidget(lbl_sound, 0, Qt::AlignCenter);
 
@@ -221,12 +221,22 @@ void EventView::createLayout(bool conversation_enabled)
     view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
+  /* Sound widget */
+  QHBoxLayout* sound_layout = new QHBoxLayout();
+  sound_layout->setContentsMargins(8, 0, 8, 0);
+  QLabel* lbl_sound_2 = new QLabel("Sound:", this);
+  sound_layout->addWidget(lbl_sound_2);
+  combo_sound = new QComboBox(this);
+  combo_sound->setDisabled(true);
+  sound_layout->addWidget(combo_sound, 1);
+  layout->addLayout(sound_layout);
+
   /* Configure parent widget */
   setFrameStyle(QFrame::Panel);
   setLayout(layout);
   setLineWidth(1);
-  setMaximumSize(352, 192);
-  setMinimumSize(352, 192);
+  setMaximumSize(352, 236); // (352, 192)
+  setMinimumSize(352, 236); // (352, 192)
 }
 
 /*
@@ -514,17 +524,22 @@ void EventView::categoryChanged(int index)
 //  if(ret == QMessageBox::Yes)
 //  {
 
-  /* Restrict sound widget - TODO */
-  if(index == (int)EventClassifier::JUSTSOUND)
-  {
-    index = (int)EventClassifier::NOEVENT;
-    combo_category->blockSignals(true);
-    combo_category->setCurrentIndex(index);
-    combo_category->blockSignals(false);
-  }
+  /* Restrict sound widget - TODO REMOVE */
+  //if(index == (int)EventClassifier::JUSTSOUND)
+  //{
+  //  index = (int)EventClassifier::NOEVENT;
+  //  combo_category->blockSignals(true);
+  //  combo_category->setCurrentIndex(index);
+  //  combo_category->blockSignals(false);
+  //}
 
+  /* Update the stack */
   view_stack->setCurrentIndex(index);
 
+  /* If anything except no classification, enables sound widget */
+  combo_sound->setEnabled(index != (int)EventClassifier::NOEVENT);
+
+  /* Update the event */
   if(event != NULL)
   {
     if((int)event->getEventType() != index)
