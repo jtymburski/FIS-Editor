@@ -833,7 +833,9 @@ void IODialog::editConversation(Conversation* convo, bool is_option)
   convo_dialog->setListThings(getEventView()->getListThings());
   convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
   convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-  convo_dialog->getEventView()->setListSubmaps(getEventView()->getListSubmaps());
+  convo_dialog->getEventView()->setListSounds(getListSounds());
+  convo_dialog->getEventView()->setListSubmaps(
+                                      getEventView()->getListSubmaps());
   connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
           this, SLOT(selectTileConvo()));
   connect(convo_dialog, SIGNAL(success()),
@@ -947,8 +949,13 @@ QList<QString> IODialog::getListSounds()
  */
 void IODialog::setListSounds(QList<QString> sounds)
 {
+  /* Base data */
   sound_list = sounds;
   updateData();
+
+  /* Event view data */
+  if(event_view != nullptr)
+    event_view->setListSounds(sounds);
 }
 
 /*

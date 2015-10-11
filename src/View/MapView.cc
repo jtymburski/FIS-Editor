@@ -100,6 +100,7 @@ void MapView::fillEventWithData()
 
     data_db = false;
     emit updateEventObjects();
+    emit updateSoundObjects();
   }
 }
 
@@ -114,7 +115,7 @@ void MapView::setupLeftBar()
   connect(map_database, SIGNAL(updateEventObjects()),
           this, SLOT(updateEventObjectsDb()));
   connect(map_database, SIGNAL(updateSoundObjects()),
-          this, SIGNAL(updateSoundObjects()));
+          this, SLOT(updateSoundObjectsDb()));
 
   connect(map_database, SIGNAL(ensureVisible(QGraphicsItem*)),
           this, SLOT(ensureVisible(QGraphicsItem*)));
@@ -468,6 +469,14 @@ void MapView::updateEventObjectsDb()
   emit updateEventObjects();
 }
 
+/* Updates sound objects in the map database */
+// TODO: Comment
+void MapView::updateSoundObjectsDb()
+{
+  data_db = true;
+  emit updateSoundObjects();
+}
+
 /* Updated data to pass into map database */
 // TODO: Comment
 void MapView::updatedItems(QVector<QString> items)
@@ -500,8 +509,10 @@ void MapView::updatedParties(QVector<QString> parties)
 // TODO: Comment
 void MapView::updatedSounds(QList<QString> sound_list)
 {
-  if(map_database != nullptr)
+  if(data_db)
     map_database->updatedSounds(sound_list);
+  else
+    event_view->setListSounds(sound_list);
 }
 
 /*============================================================================

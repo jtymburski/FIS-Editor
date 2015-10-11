@@ -746,6 +746,8 @@ void MapNPCView::updateListSounds(QList<QString> list)
 {
   if(npc_dialog != nullptr)
     npc_dialog->setListSounds(list);
+  if(instance_dialog != nullptr)
+    instance_dialog->getEventView()->setListSounds(list);
 }
 
 /*

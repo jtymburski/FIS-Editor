@@ -164,8 +164,9 @@ public slots:
   void tileEventEnter();
   void tileEventExit();
 
-  /* Updates event objects in the map database */
+  /* Updates event/sound objects in the map database */
   void updateEventObjectsDb();
+  void updateSoundObjectsDb();
 
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);

@@ -745,6 +745,8 @@ void MapPersonView::updateListSounds(QList<QString> list)
 {
   if(person_dialog != nullptr)
     person_dialog->setListSounds(list);
+  if(instance_dialog != nullptr)
+    instance_dialog->getEventView()->setListSounds(list);
 }
 
 /*

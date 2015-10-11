@@ -724,6 +724,7 @@ void InstanceDialog::editConversation(Conversation* convo, bool is_option)
   convo_dialog->setListThings(getEventView()->getListThings());
   convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
   convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+  convo_dialog->getEventView()->setListSounds(getEventView()->getListSounds());
   convo_dialog->getEventView()->setListSubmaps(
                                            getEventView()->getListSubmaps());
   connect(convo_dialog->getEventView(), SIGNAL(selectTile()),

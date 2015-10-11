@@ -773,6 +773,10 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       fh->writeXmlElementEnd();
     }
 
+    /* -- SOUND REFERENCE: TYPICAL FOR ALL -- */
+    if(event.classification != EventClassifier::NOEVENT && getSoundID() >= 0)
+      fh->writeXmlData("sound_id", getSoundID());
+
     if(!no_preface)
       fh->writeXmlElementEnd();
   }
@@ -842,13 +846,14 @@ void EditorEvent::setEventBlank(bool delete_event)
  *              deletion). Otherwise, one is generated.
  *
  * Inputs: Conversation* convo - starting conversation tree
+ *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if event changed to conversation
  */
-bool EditorEvent::setEventConversation(Conversation* convo)
+bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
 {
   /* Create the new conversation */
   setEventBlank();
-  event = handler.createConversationEvent(convo);
+  event = handler.createConversationEvent(convo, sound_id);
   event.convo->text = "First Entry.";
   conversation = event.convo;
   return true;
@@ -861,14 +866,15 @@ bool EditorEvent::setEventConversation(Conversation* convo)
  *
  * Inputs: int id - the id of the item to give (game side)
  *         int count - the number of items to give on trigger
+ *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventGiveItem(int id, int count)
+bool EditorEvent::setEventGiveItem(int id, int count, int sound_id)
 {
   if(id >= 0 && count > 0)
   {
     setEventBlank();
-    event = handler.createGiveItemEvent(id, count);
+    event = handler.createGiveItemEvent(id, count, sound_id);
     return true;
   }
   return false;
@@ -879,14 +885,16 @@ bool EditorEvent::setEventGiveItem(int id, int count)
  *              with a passed in notification string (not empty).
  *
  * Inputs: QString notification - the notification string on trigger
+ *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the notification event was created
  */
-bool EditorEvent::setEventNotification(QString notification)
+bool EditorEvent::setEventNotification(QString notification, int sound_id)
 {
   if(!notification.isEmpty())
   {
     setEventBlank();
-    event = handler.createNotificationEvent(notification.toStdString());
+    event = handler.createNotificationEvent(notification.toStdString(),
+                                            sound_id);
     return true;
   }
   return false;
@@ -911,13 +919,13 @@ bool EditorEvent::setEventSound(int sound_id)
  *              input necessary since it's triggered from the source and trigger
  *              things.
  *
- * Inputs: none
+ * Inputs: int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the battle event was created
  */
-bool EditorEvent::setEventStartBattle()
+bool EditorEvent::setEventStartBattle(int sound_id)
 {
   setEventBlank();
-  event = handler.createStartBattleEvent();
+  event = handler.createStartBattleEvent(sound_id);
   return true;
 }
 
@@ -927,14 +935,15 @@ bool EditorEvent::setEventStartBattle()
  *              location.
  *
  * Inputs: int id - the id of the map to trigger start
+ *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventStartMap(int id)
+bool EditorEvent::setEventStartMap(int id, int sound_id)
 {
   if(id >= 0)
   {
     setEventBlank();
-    event = handler.createStartMapEvent(id);
+    event = handler.createStartMapEvent(id, sound_id);
     return true;
   }
   return false;
@@ -948,14 +957,16 @@ bool EditorEvent::setEventStartMap(int id)
  *         int section_id - the sub-map ID to teleport to
  *         int x - the x tile location in the sub-map
  *         int y - the y tile location in the sub-map
+ *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y)
+bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
+                                   int sound_id)
 {
   if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
   {
     setEventBlank();
-    event = handler.createTeleportEvent(thing_id, x, y, section_id);
+    event = handler.createTeleportEvent(thing_id, x, y, section_id, sound_id);
     return true;
   }
   return false;

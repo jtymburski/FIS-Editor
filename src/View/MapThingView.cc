@@ -742,6 +742,8 @@ void MapThingView::updateListSounds(QList<QString> list)
 {
   if(thing_dialog != nullptr)
     thing_dialog->setListSounds(list);
+  if(instance_dialog != nullptr)
+    instance_dialog->getEventView()->setListSounds(list);
 }
 
 /*

@@ -126,26 +126,29 @@ public:
   void setEventBlank(bool delete_event = true);
 
   /* Sets the conversation event */
-  bool setEventConversation(Conversation* convo = NULL);
+  bool setEventConversation(Conversation* convo = NULL,
+                            int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to give item */
-  bool setEventGiveItem(int id = 0, int count = 1);
+  bool setEventGiveItem(int id = 0, int count = 1,
+                        int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to notification text */
-  bool setEventNotification(QString notification = "Blank");
+  bool setEventNotification(QString notification = "Blank",
+                            int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to strictly a sound event */
-  bool setEventSound(int sound_id);
+  bool setEventSound(int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to start battle */
-  bool setEventStartBattle();
+  bool setEventStartBattle(int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to start map */
-  bool setEventStartMap(int id = 0);
+  bool setEventStartMap(int id = 0, int sound_id = EventHandler::kUNSET_ID);
 
   /* Sets the event to teleport a thing */
-  bool setEventTeleport(int thing_id = 0, int section_id = 0,
-                        int x = 0, int y = 0);
+  bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
+                        int y = 0, int sound_id = EventHandler::kUNSET_ID);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

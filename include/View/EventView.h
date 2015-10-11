@@ -62,6 +62,7 @@ private:
   /* The list of objects used in possible events */
   QVector<QString> list_items;
   QVector<QString> list_maps;
+  QList<QString> list_sounds;
   QVector<QString> list_submaps;
   QVector<QString> list_things;
 
@@ -122,6 +123,9 @@ public slots:
   /* The change map button press */
   void changeMapChanged(int index);
 
+  /* Sound reference updated */
+  void changedSound(const QString & text);
+
   /* Conversation item double clicked trigger */
   void convoDoubleClick(QTreeWidgetItem*, int);
 
@@ -162,6 +166,7 @@ public:
   /* Returns the list of objects, used for event creation */
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
+  QList<QString> getListSounds();
   QVector<QString> getListSubmaps();
   QVector<QString> getListThings();
 
@@ -171,6 +176,7 @@ public:
   /* Sets the list of objects, used for event creation */
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
+  void setListSounds(QList<QString> sounds);
   void setListSubmaps(QVector<QString> sub_maps);
   void setListThings(QVector<QString> things);
 

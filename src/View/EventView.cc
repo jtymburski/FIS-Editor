@@ -228,6 +228,8 @@ void EventView::createLayout(bool conversation_enabled)
   sound_layout->addWidget(lbl_sound_2);
   combo_sound = new QComboBox(this);
   combo_sound->setDisabled(true);
+  connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(changedSound(QString)));
   sound_layout->addWidget(combo_sound, 1);
   layout->addLayout(sound_layout);
 
@@ -440,6 +442,27 @@ void EventView::setLayoutData()
         tele_thing->setCurrentIndex(0);
     }
 
+    /* Data for sounds */
+    if(event->getEventType() != EventClassifier::NOEVENT)
+    {
+      int index = -1;
+      if(event->getSoundID() >= 0)
+      {
+        for(int i = 0; i < list_sounds.size(); i++)
+        {
+          QStringList str_list = list_sounds[i].split(':');
+          if(str_list.size() >= 2)
+            if(str_list.front().toInt() == event->getSoundID())
+              index = i;
+        }
+      }
+
+      if(index >= 0)
+        combo_sound->setCurrentIndex(index);
+      else
+        combo_sound->setCurrentIndex(0);
+    }
+
     /* Enable the widget */
     combo_category->setEnabled(true);
   }
@@ -547,6 +570,8 @@ void EventView::categoryChanged(int index)
       /* Change the event */
       if(index == (int)EventClassifier::GIVEITEM)
         event->setEventGiveItem();
+      else if(index == (int)EventClassifier::JUSTSOUND)
+        event->setEventSound();
       else if(index == (int)EventClassifier::NOEVENT)
         event->setEventBlank();
       else if(index == (int)EventClassifier::NOTIFICATION)
@@ -587,6 +612,17 @@ void EventView::changeMapChanged(int index)
     if(list.size() == 2)
       event->setEventStartMap(list.front().toInt());
   }
+}
+
+/*
+ * Description: Triggers when the sound combo box is changed.
+ *
+ * Inputs: QString text - the new entry in the combo box
+ * Output: none
+ */
+void EventView::changedSound(const QString & text)
+{
+  // TODO
 }
 
 /*
@@ -977,6 +1013,17 @@ QVector<QString> EventView::getListMaps()
 }
 
 /*
+ * Description: Returns the list of sounds, used for event creation.
+ *
+ * Inputs: none
+ * Output: QList<QString> - list of all sounds (for all valid events)
+ */
+QList<QString> EventView::getListSounds()
+{
+  return list_sounds;
+}
+
+/*
  * Description: Returns the list of sub-maps, used for event creation.
  *
  * Inputs: none
@@ -1049,6 +1096,23 @@ void EventView::setListMaps(QVector<QString> maps)
     map_name->addItem(list_maps[i]);
   setLayoutData();
   map_name->blockSignals(false);
+}
+
+/*
+ * Description: Sets the list of sounds, used for event creation
+ *
+ * Inputs: QList<QString> - list of all sounds (for all valid events)
+ * Output: none
+ */
+void EventView::setListSounds(QList<QString> sounds)
+{
+  list_sounds = sounds;
+  combo_sound->blockSignals(true);
+  combo_sound->clear();
+  for(int i = 0; i < list_sounds.size(); i++)
+    combo_sound->addItem(list_sounds[i]);
+  setLayoutData();
+  combo_sound->blockSignals(false);
 }
 
 /*
