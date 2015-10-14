@@ -286,6 +286,7 @@ void MapView::editConversation(Conversation* convo, bool is_option)
   convo_dialog->setListThings(event_view->getListThings(), false);
   convo_dialog->getEventView()->setListItems(event_view->getListItems());
   convo_dialog->getEventView()->setListMaps(event_view->getListMaps());
+  convo_dialog->getEventView()->setListSounds(event_view->getListSounds());
   convo_dialog->getEventView()->setListSubmaps(event_view->getListSubmaps());
   connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
           this, SLOT(selectTileConvo()));

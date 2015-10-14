@@ -336,7 +336,16 @@ void EventView::setLayoutData()
   {
     /* Set the selected category */
     if((int)event->getEventType() != combo_category->currentIndex())
+    {
+      //combo_category->blockSignals(true);
       combo_category->setCurrentIndex((int)event->getEventType());
+      //int index = (int)event->getEventType();
+      //combo_category->setCurrentIndex(index);
+      //view_stack->setCurrentIndex(index);
+      //combo_sound->setEnabled(index != (int)EventClassifier::NOEVENT);
+
+      //combo_category->blockSignals(false);
+    }
 
     /* Set the data, based on the event */
     if(event->getEventType() == EventClassifier::GIVEITEM)
@@ -443,7 +452,8 @@ void EventView::setLayoutData()
     }
 
     /* Data for sounds */
-    if(event->getEventType() != EventClassifier::NOEVENT)
+    if(event->getEventType() != EventClassifier::NOEVENT &&
+       list_sounds.size() > 0)
     {
       int index = -1;
       if(event->getSoundID() >= 0)
@@ -610,7 +620,7 @@ void EventView::changeMapChanged(int index)
   {
     QStringList list = list_maps[index].split(":");
     if(list.size() == 2)
-      event->setEventStartMap(list.front().toInt());
+      event->setEventStartMap(list.front().toInt(), event->getSoundID());
   }
 }
 
@@ -622,7 +632,18 @@ void EventView::changeMapChanged(int index)
  */
 void EventView::changedSound(const QString & text)
 {
-  // TODO
+  QStringList str_list = text.split(':');
+
+  /* If the list is two long, it is proper format - 001: Sound Example */
+  if(str_list.size() >= 2)
+  {
+    event->setSoundID(str_list.front().toInt());
+  }
+  /* Otherwise, unset the sound ID */
+  else
+  {
+    event->setSoundID(-1);
+  }
 }
 
 /*
@@ -686,7 +707,7 @@ void EventView::convoMenuRequested(QPoint point)
  */
 void EventView::giveCountChanged(int index)
 {
-  event->setEventGiveItem(event->getGiveItemID(), index);
+  event->setEventGiveItem(event->getGiveItemID(), index, event->getSoundID());
 }
 
 /*
@@ -702,7 +723,8 @@ void EventView::giveItemChanged(int index)
   {
     QStringList list = list_items[index].split(":");
     if(list.size() == 2)
-      event->setEventGiveItem(list.front().toInt(), event->getGiveItemCount());
+      event->setEventGiveItem(list.front().toInt(), event->getGiveItemCount(),
+                              event->getSoundID());
   }
 }
 
@@ -715,7 +737,8 @@ void EventView::giveItemChanged(int index)
  */
 void EventView::notificationTextChanged()
 {
-  event->setEventNotification(notification_edit->toPlainText());
+  event->setEventNotification(notification_edit->toPlainText(),
+                              event->getSoundID());
 }
 
 /*
@@ -953,7 +976,8 @@ void EventView::teleportThingChanged(int index)
     QStringList list = list_things[index].split(":");
     if(list.size() == 2)
       event->setEventTeleport(list.front().toInt(), event->getTeleportSection(),
-                              event->getTeleportX(), event->getTeleportY());
+                              event->getTeleportX(), event->getTeleportY(),
+                              event->getSoundID());
   }
 }
 
@@ -1170,7 +1194,8 @@ void EventView::updateSelectedTile(int id, int x, int y)
 {
   if(event != NULL)
   {
-    event->setEventTeleport(event->getTeleportThingID(), id, x, y);
+    event->setEventTeleport(event->getTeleportThingID(), id, x, y,
+                            event->getSoundID());
     setLayoutData();
   }
 }

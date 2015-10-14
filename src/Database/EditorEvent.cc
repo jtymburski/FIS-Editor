@@ -221,9 +221,14 @@ QString EditorEvent::recursiveConversationFind(Conversation* ref,
 void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
                                    QString index)
 {
+  bool first_call = false;
+
   /* If conversation is NULL, load in base conversation */
   if(convo == NULL)
+  {
     convo = event.convo;
+    first_call = true;
+  }
 
   /* Proceed if not NULL */
   if(convo != NULL)
@@ -233,6 +238,8 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
     /* Conversation Data */
     fh->writeXmlData("text", convo->text);
     fh->writeXmlData("id", convo->thing_id);
+    if(first_call && getSoundID() >= 0)
+      fh->writeXmlData("sound_id", getSoundID());
     if(convo->action_event.classification != EventClassifier::NOEVENT)
     {
       EditorEvent convo_event(convo->action_event);
@@ -730,18 +737,47 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       /* Data */
       fh->writeXmlData("id", getGiveItemID());
       fh->writeXmlData("count", getGiveItemCount());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
 
       fh->writeXmlElementEnd();
+    }
+    /* -- JUST SOUND EVENT -- */
+    else if(event.classification == EventClassifier::JUSTSOUND)
+    {
+      if(getSoundID() >= 0)
+        fh->writeXmlData("justsound", getSoundID());
     }
     /* -- NOTIFICATION EVENT -- */
     else if(event.classification == EventClassifier::NOTIFICATION)
     {
-      fh->writeXmlData("notification", getNotification().toStdString());
+      if(getSoundID() >= 0)
+      {
+        fh->writeXmlElement("notification");
+
+        fh->writeXmlData("text", getNotification().toStdString());
+        fh->writeXmlData("sound_id", getSoundID());
+
+        fh->writeXmlElementEnd();
+      }
+      else
+      {
+        fh->writeXmlData("notification", getNotification().toStdString());
+      }
     }
     /* -- EXECUTE BATTLE EVENT -- */
     else if(event.classification == EventClassifier::RUNBATTLE)
     {
-      fh->writeXmlData("startbattle", "blank");
+      if(getSoundID() >= 0)
+      {
+        fh->writeXmlElement("startbattle");
+        fh->writeXmlData("sound_id", getSoundID());
+        fh->writeXmlElementEnd();
+      }
+      else
+      {
+        fh->writeXmlData("startbattle", "blank");
+      }
     }
     /* -- EXECUTE MAP EVENT -- */
     else if(event.classification == EventClassifier::RUNMAP)
@@ -750,6 +786,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
 
       /* Data */
       fh->writeXmlData("id", getStartMapID());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
 
       fh->writeXmlElementEnd();
     }
@@ -769,13 +807,11 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       fh->writeXmlData("section", getTeleportSection());
       if(getTeleportThingID() != 0)
         fh->writeXmlData("id", getTeleportThingID());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
 
       fh->writeXmlElementEnd();
     }
-
-    /* -- SOUND REFERENCE: TYPICAL FOR ALL -- */
-    if(event.classification != EventClassifier::NOEVENT && getSoundID() >= 0)
-      fh->writeXmlData("sound_id", getSoundID());
 
     if(!no_preface)
       fh->writeXmlElementEnd();
@@ -968,6 +1004,25 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
     setEventBlank();
     event = handler.createTeleportEvent(thing_id, x, y, section_id, sound_id);
     return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the sound ID for the event; only if the event has already
+ *              been set-up as a valid event (not NOEVENT)
+ *
+ * Inputs: int id - the new event ID
+ * Output: none
+ */
+bool EditorEvent::setSoundID(int id)
+{
+  if(event.classification != EventClassifier::NOEVENT)
+  {
+    if(id >= 0)
+      event.sound_id = id;
+    else
+      event.sound_id = Sound::kUNSET_ID;
   }
   return false;
 }

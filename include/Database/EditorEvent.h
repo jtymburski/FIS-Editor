@@ -150,6 +150,9 @@ public:
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
                         int y = 0, int sound_id = EventHandler::kUNSET_ID);
 
+  /* Sets the sound ID, for the event */
+  bool setSoundID(int id);
+
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
