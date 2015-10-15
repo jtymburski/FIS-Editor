@@ -74,6 +74,7 @@ SOURCES += \
     src/View/MapDatabase.cc \
     src/View/MapIOView.cc \
     src/View/MapItemView.cc \
+    src/View/MapMusicView.cc \
     src/View/MapNPCView.cc \
     src/View/MapPersonView.cc \
     src/View/MapRender.cc \
@@ -169,6 +170,7 @@ HEADERS += \
     include/View/MapDatabase.h \
     include/View/MapIOView.h \
     include/View/MapItemView.h \
+    include/View/MapMusicView.h \
     include/View/MapNPCView.h \
     include/View/MapPersonView.h \
     include/View/MapRender.h \

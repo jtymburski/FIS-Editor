@@ -15,6 +15,7 @@
 #include "Dialog/NodeDialog.h"
 #include "View/MapIOView.h"
 #include "View/MapItemView.h"
+#include "View/MapMusicView.h"
 #include "View/MapNPCView.h"
 #include "View/MapPersonView.h"
 #include "View/MapThingView.h"
@@ -61,6 +62,7 @@ private:
   /* The Views */
   MapIOView* view_io;
   MapItemView* view_item;
+  MapMusicView* view_music;
   MapNPCView* view_npc;
   MapPersonView* view_person;
   RawImageView* view_raw;

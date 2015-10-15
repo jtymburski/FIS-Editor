@@ -51,7 +51,7 @@ void MapDatabase::setupMain()
   combo_top = new QComboBox(widget_main);
   QStringList items;
   items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects"
-        << "Items" << "Persons" << "NPCs";
+        << "Items" << "Persons" << "NPCs" << "Music";
   combo_top->addItems(items);
   connect(combo_top, SIGNAL(currentIndexChanged(int)),
           this, SLOT(updateSelected(int)));
@@ -59,6 +59,7 @@ void MapDatabase::setupMain()
   /* Sets up the various views */
   view_io = new MapIOView(widget_main);
   view_item = new MapItemView(widget_main);
+  view_music = new MapMusicView(widget_main);
   view_npc = new MapNPCView(widget_main);
   view_person = new MapPersonView(widget_main);
   view_raw = new RawImageView(widget_main);
@@ -149,6 +150,7 @@ void MapDatabase::setupMain()
   layout->addWidget(view_item);
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
+  layout->addWidget(view_music);
 }
 
 /* Set-up path editor widget */
@@ -619,6 +621,7 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->hide();
+    view_music->hide();
 
     /* Raw view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -635,6 +638,7 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->hide();
+    view_music->hide();
   }
   else if(index == EditorEnumDb::THING_VIEW)
   {
@@ -645,6 +649,7 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->hide();
+    view_music->hide();
   }
   else if(index == EditorEnumDb::IO_VIEW)
   {
@@ -655,6 +660,7 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->hide();
+    view_music->hide();
   }
   else if(index == EditorEnumDb::ITEM_VIEW)
   {
@@ -665,6 +671,7 @@ void MapDatabase::updateSelected(int index)
     view_item->show();
     view_person->hide();
     view_npc->hide();
+    view_music->hide();
   }
   else if(index == EditorEnumDb::PERSON_VIEW)
   {
@@ -675,6 +682,7 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->show();
     view_npc->hide();
+    view_music->hide();
   }
   else if(index == EditorEnumDb::NPC_VIEW)
   {
@@ -685,6 +693,24 @@ void MapDatabase::updateSelected(int index)
     view_item->hide();
     view_person->hide();
     view_npc->show();
+    view_music->hide();
+  }
+  else if(index == EditorEnumDb::MUSIC_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_io->hide();
+    view_item->hide();
+    view_person->hide();
+    view_npc->hide();
+    view_music->show();
+
+    /* Music view has no buttons enabled */
+    button_delete->setEnabled(false);
+    button_duplicate->setEnabled(false);
+    button_import->setEnabled(false);
+    button_new->setEnabled(false);
   }
 }
 

@@ -66,7 +66,8 @@ public:
                       IO_VIEW = 3,
                       ITEM_VIEW = 4,
                       PERSON_VIEW = 5,
-                      NPC_VIEW = 6
+                      NPC_VIEW = 6,
+                      MUSIC_VIEW = 7
                      };
 
   /* Sprite edit mode */
