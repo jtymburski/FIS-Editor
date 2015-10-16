@@ -72,7 +72,7 @@ void MapDatabase::setupMain()
   connect(view_sprite, SIGNAL(changeLayer(EditorEnumDb::Layer)),
           this, SIGNAL(changeLayer(EditorEnumDb::Layer)));
   connect(view_sprite, SIGNAL(soundFillTrigger(EditorEnumDb::MapObjectMode)),
-          this, SLOT(updateSoundObjects(EditorEnumDb::MapObjectMode)));
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
 
   /* IO connections */
   connect(view_io, SIGNAL(changeLayer(EditorEnumDb::Layer)),
@@ -123,6 +123,10 @@ void MapDatabase::setupMain()
           this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
   connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
+
+  /* Music connections */
+  connect(view_music, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
 
   /* Push buttons at the bottom of the layout */
   button_delete = new QPushButton("Delete", widget_main);
@@ -310,7 +314,6 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
   {
     /* Set who called the update */
     mode_for_data = view;
-    sound_fill_mode = view;
 
     /* Compile list */
     QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
@@ -343,9 +346,16 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
       view_npc->updateListThings(thing_list);
     }
 
-    /* Emit signal to get other lists (items and maps) */
-    emit updateEventObjects();
-    updateSoundObjects(view);
+    /* Emit signal to get other lists (items, maps, sound, music) */
+    if(view != EditorEnumDb::MUSIC_VIEW)
+    {
+      emit updateEventObjects();
+      emit updateSoundObjects();
+    }
+    else
+    {
+      emit updateMusicObjects();
+    }
   }
 }
 
@@ -502,6 +512,7 @@ void MapDatabase::updateAllLists()
   view_item->updateList();
   view_person->updateList();
   view_npc->updateList();
+  view_music->updateData();
 }
 
 /* Updated data from higher up in the stack */
@@ -551,6 +562,13 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
 }
 
 /* Updated data from higher up in the stack */
+void MapDatabase::updatedMusic(QList<QString> music)
+{
+  if(mode_for_data == EditorEnumDb::MUSIC_VIEW)
+    view_music->updateListMusic(music);
+}
+
+/* Updated data from higher up in the stack */
 void MapDatabase::updatedParties(QVector<QString> parties)
 {
   if(mode_for_data == EditorEnumDb::THING_VIEW)
@@ -575,18 +593,18 @@ void MapDatabase::updatedParties(QVector<QString> parties)
 // TODO: Comment
 void MapDatabase::updatedSounds(QList<QString> sounds)
 {
-  if(sound_fill_mode == EditorEnumDb::SPRITE_VIEW && view_sprite != nullptr)
+  if(mode_for_data == EditorEnumDb::SPRITE_VIEW && view_sprite != nullptr)
     view_sprite->soundFill(sounds);
-  else if(sound_fill_mode == EditorEnumDb::THING_VIEW && view_thing != nullptr)
+  else if(mode_for_data == EditorEnumDb::THING_VIEW && view_thing != nullptr)
     view_thing->updateListSounds(sounds);
-  else if(sound_fill_mode == EditorEnumDb::IO_VIEW && view_io != nullptr)
+  else if(mode_for_data == EditorEnumDb::IO_VIEW && view_io != nullptr)
     view_io->updateListSounds(sounds);
-  else if(sound_fill_mode == EditorEnumDb::ITEM_VIEW && view_item != nullptr)
+  else if(mode_for_data == EditorEnumDb::ITEM_VIEW && view_item != nullptr)
     view_item->updateListSounds(sounds);
-  else if(sound_fill_mode == EditorEnumDb::PERSON_VIEW &&
+  else if(mode_for_data == EditorEnumDb::PERSON_VIEW &&
           view_person != nullptr)
     view_person->updateListSounds(sounds);
-  else if(sound_fill_mode == EditorEnumDb::NPC_VIEW && view_npc != nullptr)
+  else if(mode_for_data == EditorEnumDb::NPC_VIEW && view_npc != nullptr)
     view_npc->updateListSounds(sounds);
 }
 
@@ -711,14 +729,10 @@ void MapDatabase::updateSelected(int index)
     button_duplicate->setEnabled(false);
     button_import->setEnabled(false);
     button_new->setEnabled(false);
-  }
-}
 
-/* Sound trigger slot from various views */
-void MapDatabase::updateSoundObjects(EditorEnumDb::MapObjectMode mode)
-{
-  sound_fill_mode = mode;
-  emit updateSoundObjects();
+    /* Data check */
+    fillWithData(EditorEnumDb::MUSIC_VIEW);
+  }
 }
 
 /*============================================================================
@@ -782,4 +796,7 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the npc view */
   view_npc->setEditorMap(editing_map);
+
+  /* Add to the music view */
+  view_music->setEditorMap(editing_map);
 }

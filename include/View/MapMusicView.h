@@ -75,9 +75,6 @@ private:
   /* Opens the thing editing dialog */
   //void editThing(EditorMapThing* sub_thing = NULL);
 
-  /* Refreshes the entire data set within the widget */
-  void updateData();
-
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -94,7 +91,7 @@ signals:
   //void ensureVisible(QGraphicsItem* item);
 
   /* Triggers the update the data of objects for use in events */
-  //void fillWithData(EditorEnumDb::MapObjectMode view);
+  void fillWithData(EditorEnumDb::MapObjectMode view);
 
   /* Triggers for the select tile on the given view mode */
   //void selectTile(EditorEnumDb::MapObjectMode view);
@@ -133,6 +130,9 @@ public slots:
   /* Update thing instances in view */
   //void thingInstanceUpdate(QString name_list);
 
+  /* Refreshes the entire data set within the widget */
+  void updateData();
+
   /* Refreshes the editor thing list in the view */
   //void updateList();
 
@@ -145,6 +145,9 @@ public slots:
 public:
   /* Deletes the selected thing */
   //bool deleteThing();
+
+  /* Returns data, as required */
+  QList<QString> getDataMusic();
 
   /* Duplicates the selected thing */
   //bool duplicateThing();

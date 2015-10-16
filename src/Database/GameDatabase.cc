@@ -65,7 +65,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateResource()));
 
   /* Save all button */
-  QPushButton* button_saveall = new QPushButton("Save All", this);
+  QPushButton* button_saveall = new QPushButton("Process All", this);
   connect(button_saveall, SIGNAL(clicked()), this, SLOT(saveAll()));
 
   /* Configure the layout */
@@ -1614,6 +1614,14 @@ void GameDatabase::updateEventObjects()
   for(int i = 0; i < data_party.size(); i++)
     party_list.push_back(data_party[i]->getNameList());
   emit updatedParties(party_list);
+}
+
+/* Trigger handles sending music data to other classes */
+// TODO: Comment
+void GameDatabase::updateMusicObjects()
+{
+  if(data_sounds != nullptr)
+    emit updatedMusic(data_sounds->getListMusic());
 }
 
 /* Trigger handles with sounds */

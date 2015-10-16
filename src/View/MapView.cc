@@ -114,6 +114,8 @@ void MapView::setupLeftBar()
   map_database = new MapDatabase(this);
   connect(map_database, SIGNAL(updateEventObjects()),
           this, SLOT(updateEventObjectsDb()));
+  connect(map_database, SIGNAL(updateMusicObjects()),
+          this, SIGNAL(updateMusicObjects()));
   connect(map_database, SIGNAL(updateSoundObjects()),
           this, SLOT(updateSoundObjectsDb()));
 
@@ -124,7 +126,7 @@ void MapView::setupLeftBar()
 
 
   /* Sets up the dock which contains the sprites and images tabs */
-  QDockWidget* dock = new QDockWidget("Toolbox");
+  QDockWidget* dock = new QDockWidget("Map Toolbox");
   dock->setAllowedAreas(Qt::LeftDockWidgetArea);
   dock->setWidget(map_database);
   addDockWidget(Qt::LeftDockWidgetArea,dock);
@@ -496,6 +498,13 @@ void MapView::updatedMaps(QVector<QString> maps)
     map_database->updatedMaps(maps);
   else
     event_view->setListMaps(maps);
+}
+
+/* Updated data to pass into map database */
+// TODO: Comment
+void MapView::updatedMusic(QList<QString> music_list)
+{
+  map_database->updatedMusic(music_list);
 }
 
 /* Updated data to pass into map database */

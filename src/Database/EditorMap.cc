@@ -525,6 +525,8 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
     sub_maps.last()->path_top = NULL;
+    sub_maps.last()->music = source.sub_maps[i]->music;
+    sub_maps.last()->weather = source.sub_maps[i]->weather;
     for(int j = 0; j < source.sub_maps[i]->tiles.size(); j++)
     {
       QVector<EditorTile*> row;
@@ -1909,6 +1911,8 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
   if(copy_map != NULL && new_map != NULL)
   {
     new_map->name = copy_map->name;
+    new_map->music = copy_map->music;
+    new_map->weather = copy_map->weather;
 
     /* Delete all tiles in the new map -> not relevant */
     for(int i = 0; i < new_map->tiles.size(); i++)
@@ -4078,7 +4082,8 @@ bool EditorMap::setCurrentMap(int index)
         for(int j = 0; j < sub_maps[index]->tiles[i].size(); j++)
           sub_maps[index]->tiles[i][j]->setHover(false);
 
-    /* Trigger thing instance update */
+    /* Trigger all instance updates - connected in widgets */
+    emit activeSubChanged();
     emit ioInstanceChanged("");
     emit itemInstanceChanged("");
     emit npcInstanceChanged("");
@@ -4627,6 +4632,7 @@ int EditorMap::setMap(int id, QString name,
       info->name = name;
       info->tiles = tiles;
       info->path_top = NULL;
+      info->weather = -1;
 
       /* If near, insert the information into the index */
       if(near)

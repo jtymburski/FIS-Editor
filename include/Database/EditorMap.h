@@ -37,6 +37,9 @@ struct SubMapInfo
   QVector<EditorMapNPC*> npcs;
   QVector<EditorMapPerson*> persons;
   QVector<EditorMapThing*> things;
+
+  QVector<int> music;
+  int weather;
 };
 
 class EditorMap : public QObject, public EditorTemplate
@@ -162,6 +165,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Active sub-map changed */
+  void activeSubChanged();
+
   /* IO instant changed */
   void ioInstanceChanged(QString name_list);
 

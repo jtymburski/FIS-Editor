@@ -72,6 +72,8 @@ Application::Application(QWidget* parent)
 
   connect(game_view, SIGNAL(updateEventObjects()),
           game_database, SLOT(updateEventObjects()));
+  connect(game_view, SIGNAL(updateMusicObjects()),
+          game_database, SLOT(updateMusicObjects()));
   connect(game_view, SIGNAL(updateSoundObjects()),
           game_database, SLOT(updateSoundObjects()));
 
@@ -79,6 +81,8 @@ Application::Application(QWidget* parent)
           game_view, SIGNAL(updatedItems(QVector<QString>)));
   connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
+  connect(game_database, SIGNAL(updatedMusic(QList<QString>)),
+          game_view, SIGNAL(updatedMusic(QList<QString>)));
   connect(game_database, SIGNAL(updatedParties(QVector<QString>)),
           game_view, SIGNAL(updatedParties(QVector<QString>)));
   connect(game_database, SIGNAL(updatedSounds(QList<QString>)),

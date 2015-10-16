@@ -70,6 +70,11 @@ public:
   /* Returns the valid file split */
   static QList<QString> getValidFileSplit(QString file, bool* base = NULL);
 
+  /* Returns the index of the passed in integer compared to a list of strings
+   * with the string namelist format ('000: blah blah') */
+  static int indexOf(int id, QList<QString> list);
+  static int indexOf(int id, QVector<QString> list);
+
   /* Normalize two points to top left and bottom right and return rect */
   static QRectF normalizePoints(QPointF point1, QPointF point2);
 

@@ -331,6 +331,47 @@ QList<QString> EditorHelpers::getValidFileSplit(QString file, bool* base)
 }
 
 /*
+ * Description: Takes a reference ID and a list of strings and returns the index
+ *              of the found connected string. If none found, -1 is returned.
+ *              The approved strings are in the format of '000: blah blah' and
+ *              it extracts the ID from the front.
+ *
+ * Inputs: int id - the reference ID to find
+ *         QList<QString> list - the list to search through
+ * Output: int - the found index. -1 if not found
+ */
+int EditorHelpers::indexOf(int id, QList<QString> list)
+{
+  int found_index = -1;
+
+  /* Go through the list */
+  for(int i = 0; found_index < 0 && i < list.size(); i++)
+  {
+    QStringList str_list = list[i].split(':');
+    if(str_list.size() >= 2)
+      if(str_list.front().toInt() == id)
+        found_index = i;
+  }
+
+  return found_index;
+}
+
+/*
+ * Description: Takes a reference ID and a list of strings and returns the index
+ *              of the found connected string. If none found, -1 is returned.
+ *              The approved strings are in the format of '000: blah blah' and
+ *              it extracts the ID from the front.
+ *
+ * Inputs: int id - the reference ID to find
+ *         QVector<QString> list - the list to search through
+ * Output: int - the found index. -1 if not found
+ */
+int EditorHelpers::indexOf(int id, QVector<QString> list)
+{
+  return indexOf(id, QList<QString>::fromVector(list));
+}
+
+/*
  * Description: Normalize two points to create an entirely positive rect that
  *              corresponds to the two points using QRectF.
  *

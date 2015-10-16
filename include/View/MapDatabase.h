@@ -56,9 +56,6 @@ private:
   QMenu* path_menu;
   EditorNPCPath* path_working;
 
-  /* Sound Fill Mode */
-  EditorEnumDb::MapObjectMode sound_fill_mode;
-
   /* The Views */
   MapIOView* view_io;
   MapItemView* view_item;
@@ -113,6 +110,7 @@ signals:
 
   /* Updates event objects in this class */
   void updateEventObjects();
+  void updateMusicObjects();
   void updateSoundObjects();
 
 /*============================================================================
@@ -149,6 +147,7 @@ public slots:
   /* Updated data from higher up in the stack */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+  void updatedMusic(QList<QString> music);
   void updatedParties(QVector<QString> parties);
   void updatedSounds(QList<QString> sounds);
 
@@ -157,9 +156,6 @@ public slots:
 
   /* Updates based on selected index */
   void updateSelected(int index);
-
-  /* Sound trigger and fill slot from various views */
-  void updateSoundObjects(EditorEnumDb::MapObjectMode mode);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

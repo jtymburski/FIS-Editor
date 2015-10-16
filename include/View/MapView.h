@@ -130,6 +130,7 @@ signals:
 
   /* Updates event objects in the map database or view class */
   void updateEventObjects();
+  void updateMusicObjects();
   void updateSoundObjects();
 
 /*============================================================================
@@ -171,6 +172,7 @@ public slots:
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
+  void updatedMusic(QList<QString> music_list);
   void updatedParties(QVector<QString> parties);
   void updatedSounds(QList<QString> sound_list);
 
