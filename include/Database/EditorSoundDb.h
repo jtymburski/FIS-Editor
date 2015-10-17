@@ -96,8 +96,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Name changed within player widget signal */
-  //void nameChange(QString);
+  /* Addition, removal, or name change triggers on music/sound lists */
+  void changedMusicList();
+  void changedSoundList();
 
 /*============================================================================
  * PUBLIC SLOTS

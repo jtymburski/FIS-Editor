@@ -527,6 +527,9 @@ void EditorSoundDb::btnMusicAdd()
   music_custom.insert(index, new_music);
   loadWorkingInfo(true, false, false);
   list_m_custom->setCurrentRow(index);
+
+  /* Trigger on music update */
+  emit changedMusicList();
 }
 
 /*
@@ -562,6 +565,9 @@ void EditorSoundDb::btnMusicRemove()
       music_custom.remove(index);
       loadWorkingInfo(true, false, false);
     }
+
+    /* Trigger on music update */
+    emit changedMusicList();
   }
 }
 
@@ -595,6 +601,9 @@ void EditorSoundDb::btnSoundAdd()
   sound_custom.insert(index, new_sound);
   loadWorkingInfo(false, true, false);
   list_s_custom->setCurrentRow(index);
+
+  /* Trigger on sound update */
+  emit changedSoundList();
 }
 
 /*
@@ -630,6 +639,9 @@ void EditorSoundDb::btnSoundRemove()
       sound_custom.remove(index);
       loadWorkingInfo(false, true, false);
     }
+
+    /* Trigger on sound update */
+    emit changedSoundList();
   }
 }
 
@@ -643,6 +655,10 @@ void EditorSoundDb::btnSoundRemove()
 void EditorSoundDb::changedName(QString)
 {
   loadWorkingInfo();
+
+  /* Trigger on both lists */
+  emit changedMusicList();
+  emit changedSoundList();
 }
 
 /*

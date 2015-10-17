@@ -25,6 +25,10 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 
   /* Create views that will always exist */
   data_sounds = new EditorSoundDb(this);
+  connect(data_sounds, SIGNAL(changedMusicList()),
+          this, SLOT(listMusicUpdated()));
+  connect(data_sounds, SIGNAL(changedSoundList()),
+          this, SLOT(listSoundUpdated()));
 
   /* Top view set-up */
   view_top = new QListWidget(this);
@@ -946,6 +950,9 @@ void GameDatabase::loadFinish()
     data_party[i]->updatePersons(data_person, false);
     data_party[i]->resetWorking();
   }
+
+  /* Update music */
+  emit updatedMusic(data_sounds->getListMusic());
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -1403,6 +1410,19 @@ void GameDatabase::listMenuRequested(const QPoint & pos)
   /* Only proceed if it's the map set */
   if(view_top->currentRow() == EditorEnumDb::MAPVIEW)
     rightclick_menu->exec(QCursor::pos());
+}
+
+/* List updates, from widgets */
+void GameDatabase::listMusicUpdated()
+{
+  if(data_sounds != nullptr)
+    emit updatedMusic(data_sounds->getListMusic());
+}
+
+/* List updates, from widgets */
+void GameDatabase::listSoundUpdated()
+{
+  /* Not used right now */
 }
 
 /* Double click on an element */

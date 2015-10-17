@@ -9,13 +9,6 @@
 #include "View/MapMusicView.h"
 #include <QDebug>
 
-// TODO: Need to have this update anytime the music list is modified.
-// My first idea is each time it shows but there is the case where it will be
-// visible and the dev goes to game database and switches to music, adds a
-// bunch and then returns to map in gameDB which won't have the updates...
-// Review
-
-
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
@@ -33,6 +26,7 @@ MapMusicView::MapMusicView(QWidget* parent) : QWidget(parent)
 /* Destructor function */
 MapMusicView::~MapMusicView()
 {
+  setEditorMap(nullptr);
 }
 
 /*============================================================================
@@ -56,6 +50,8 @@ void MapMusicView::createLayout()
   QLabel* lbl_weather = new QLabel("Weather", this);
   layout_weather->addWidget(lbl_weather);
   combo_weather = new QComboBox(this);
+  connect(combo_weather, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(changedWeather(QString)));
   layout_weather->addWidget(combo_weather, 1);
   layout->addLayout(layout_weather);
 
@@ -69,15 +65,22 @@ void MapMusicView::createLayout()
   QLabel* lbl_avail = new QLabel("Available Music:", this);
   layout->addWidget(lbl_avail);
   list_avail = new QListWidget(this);
+  connect(list_avail, SIGNAL(currentRowChanged(int)),
+          this, SLOT(changedListUpper(int)));
   layout->addWidget(list_avail);
 
   /* Selection buttons */
   QHBoxLayout* layout_btns = new QHBoxLayout();
   btn_add = new QPushButton("Add", this);
   btn_add->setDisabled(true);
+  btn_add->setDefault(true);
+  connect(btn_add, SIGNAL(clicked()),
+          this, SLOT(buttonAdd()));
   layout_btns->addWidget(btn_add);
   btn_rem = new QPushButton("Remove", this);
   btn_rem->setDisabled(true);
+  connect(btn_rem, SIGNAL(clicked()),
+          this, SLOT(buttonRemove()));
   layout_btns->addWidget(btn_rem);
   layout->addLayout(layout_btns);
 
@@ -85,6 +88,8 @@ void MapMusicView::createLayout()
   QLabel* lbl_used = new QLabel("Sub-Map Music:", this);
   layout->addWidget(lbl_used);
   list_used = new QListWidget(this);
+  connect(list_used, SIGNAL(currentRowChanged(int)),
+          this, SLOT(changedListLower(int)));
   layout->addWidget(list_used);
 }
 
@@ -92,15 +97,84 @@ void MapMusicView::createLayout()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
+/* Button control triggers */
+void MapMusicView::buttonAdd()
+{
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
+     list_avail->currentRow() >= 0)
+  {
+    QString curr_item = list_avail->currentItem()->text();
+    QStringList str_split = curr_item.split(':');
+    if(str_split.size() >= 2)
+    {
+      editor_map->getCurrentMap()->music.push_back(str_split.front().toInt());
+      updateData();
+    }
+  }
+}
+
+/* Button control triggers */
+void MapMusicView::buttonRemove()
+{
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
+     list_used->currentRow() >= 0)
+  {
+    QString curr_item = list_used->currentItem()->text();
+    QStringList str_split = curr_item.split(':');
+    if(str_split.size() >= 2)
+    {
+      int id = str_split.front().toInt();
+      int index = editor_map->getCurrentMap()->music.indexOf(id);
+      if(index >= 0)
+      {
+        editor_map->getCurrentMap()->music.remove(index);
+        updateData();
+      }
+    }
+  }
+}
+
+/* Changed triggers in widgets */
+void MapMusicView::changedListLower(int row)
+{
+  if(row >= 0)
+    btn_rem->setEnabled(true);
+  else
+    btn_rem->setDisabled(true);
+}
+
+/* Changed triggers in widgets */
+void MapMusicView::changedListUpper(int row)
+{
+  if(row >= 0)
+    btn_add->setEnabled(true);
+  else
+    btn_add->setDisabled(true);
+}
+
+/* Changed triggers in widgets */
+void MapMusicView::changedWeather(const QString & text)
+{
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
+  {
+    QStringList str_list = text.split(':');
+    if(str_list.size() >= 2)
+      editor_map->getCurrentMap()->weather = str_list.front().toInt();
+    else
+      editor_map->getCurrentMap()->weather = -1;
+  }
+}
+
 /* Refreshes the info in the lower half of the widget */
 void MapMusicView::updateData()
 {
-  qDebug() << "Updating Data";
+  bool valid_map = (editor_map != nullptr &&
+                    editor_map->getCurrentMap() != nullptr);
 
   /* Weather data - find index */
   int weather_index = -1;
-  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
-     music_list.size() > 0 && editor_map->getCurrentMap()->weather >= 0)
+  if(valid_map && music_list.size() > 0 &&
+     editor_map->getCurrentMap()->weather >= 0)
   {
     /* Try and find index */
     for(int i = 0; i < music_list.size(); i++)
@@ -112,7 +186,8 @@ void MapMusicView::updateData()
     }
 
     /* If not found, reset weather back to default */
-    editor_map->getCurrentMap()->weather = -1;
+    if(weather_index < 0)
+      editor_map->getCurrentMap()->weather = -1;
   }
 
   /* Weather combo box */
@@ -128,8 +203,7 @@ void MapMusicView::updateData()
   list_avail->clear();
   int index_bot = list_used->currentRow();
   list_used->clear();
-  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
-     music_list.size() > 0)
+  if(valid_map && music_list.size() > 0)
   {
     QVector<bool> valid_list;
     SubMapInfo* map = editor_map->getCurrentMap();
@@ -169,20 +243,42 @@ void MapMusicView::updateData()
     }
 
     /* Restore indexes */
-    if(index_top >= 0)
+    if(list_avail->count() > 0 && index_top >= 0)
     {
       if(index_top < list_avail->count())
         list_avail->setCurrentRow(index_top);
       else
         list_avail->setCurrentRow(list_avail->count() - 1);
     }
-    if(index_bot >= 0)
+    else
+    {
+      btn_add->setDisabled(true);
+    }
+    if(list_used->count() > 0 && index_bot >= 0)
     {
       if(index_bot < list_used->count())
-        list_used->setCurrentRow(index_top);
+        list_used->setCurrentRow(index_bot);
       else
         list_used->setCurrentRow(list_used->count() - 1);
     }
+    else
+    {
+      btn_rem->setDisabled(true);
+    }
+  }
+
+  /* Widget Enables */
+  if(valid_map)
+  {
+    combo_weather->setEnabled(true);
+    list_avail->setEnabled(true);
+    list_used->setEnabled(true);
+  }
+  else
+  {
+    combo_weather->setDisabled(true);
+    list_avail->setDisabled(true);
+    list_used->setDisabled(true);
   }
 }
 
@@ -224,13 +320,11 @@ void MapMusicView::setEditorMap(EditorMap* map)
 
   /* Update data */
   updateData();
-  qDebug() << "Updating Editor Map";
 }
 
 /* Updates list in thing dialog, needed for event control */
 void MapMusicView::updateListMusic(QList<QString> list)
 {
   music_list = list;
-  qDebug() << "Updating Music List";
   updateData();
 }

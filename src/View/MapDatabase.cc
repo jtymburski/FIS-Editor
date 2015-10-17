@@ -124,10 +124,6 @@ void MapDatabase::setupMain()
   connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
 
-  /* Music connections */
-  connect(view_music, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
-          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
-
   /* Push buttons at the bottom of the layout */
   button_delete = new QPushButton("Delete", widget_main);
   button_duplicate = new QPushButton("Duplicate", widget_main);
@@ -564,8 +560,12 @@ void MapDatabase::updatedMaps(QVector<QString> maps)
 /* Updated data from higher up in the stack */
 void MapDatabase::updatedMusic(QList<QString> music)
 {
-  if(mode_for_data == EditorEnumDb::MUSIC_VIEW)
-    view_music->updateListMusic(music);
+  /* Made it such that whenever called, it updates the music list, since
+   * it's the only one. If it ever changes where there is two, evaluate.
+   * The reason for this was the requirement of music view in map needs to be
+   * updated whenever music is changed - trigger by gamedb */
+  //if(mode_for_data == EditorEnumDb::MUSIC_VIEW)
+  view_music->updateListMusic(music);
 }
 
 /* Updated data from higher up in the stack */
@@ -730,8 +730,8 @@ void MapDatabase::updateSelected(int index)
     button_import->setEnabled(false);
     button_new->setEnabled(false);
 
-    /* Data check */
-    fillWithData(EditorEnumDb::MUSIC_VIEW);
+    if(view_music->getDataMusic().size() == 0)
+      emit updateMusicObjects();
   }
 }
 

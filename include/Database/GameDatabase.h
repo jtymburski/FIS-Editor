@@ -199,6 +199,10 @@ public slots:
   /* Right click list menu on bottom list */
   void listMenuRequested(const QPoint & pos);
 
+  /* List updates, from widgets */
+  void listMusicUpdated();
+  void listSoundUpdated();
+
   /* Triggers on double click of the bottom list -> updates view */
   void modifySelection(QListWidgetItem* item);
 
