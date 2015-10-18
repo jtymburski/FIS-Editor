@@ -245,6 +245,8 @@ EditorSprite* EditorMapThing::getDialogImage()
     /* Make sure only one frame is in the dialog image */
     while(dialog_image.frameCount() > 1)
       dialog_image.deleteFrame(dialog_image.frameCount() - 1);
+    if(dialog_image.frameCount() == 0)
+      dialog_image.setPath(0, "");
 
     return &dialog_image;
   }

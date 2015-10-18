@@ -637,6 +637,20 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   {
     setMap(map->id, map->name, map->tiles.size(), data.getDataInteger());
   }
+  /* -------------- MUSIC ----------------*/
+  else if(element == "music")
+  {
+    int music_id = data.getDataInteger();
+    if(music_id >= 0)
+      map->music.push_back(music_id);
+  }
+  /* -------------- WEATHER ----------------*/
+  else if(element == "weather")
+  {
+    int music_id = data.getDataInteger();
+    if(music_id >= 0)
+      map->weather = music_id;
+  }
   /* -------------- TILES -------------- */
   else if((element == "base" || element == "enhancer" ||
            element == "lower" || element == "upper") &&
@@ -1227,6 +1241,13 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
     fh->writeXmlData("name", map->name.toStdString());
   fh->writeXmlData("width", map->tiles.size());
   fh->writeXmlData("height", map->tiles.front().size());
+
+  /* Add music and weather IDs */
+  for(int i = 0; i < map->music.size(); i++)
+    if(map->music[i] >= 0)
+      fh->writeXmlData("music", map->music[i]);
+  if(map->weather >= 0)
+    fh->writeXmlData("weather", map->weather);
 
   /* Sprite/Pass initial starting point - fill starting arrays */
   QList<QList<QList<QPoint>>> pass_stack;

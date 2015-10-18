@@ -157,13 +157,15 @@ void FrameDialog::replaceFrame()
 {
   QString path = sprite_working->getPath(framenumber);
   if(path.isEmpty())
-    path = EditorHelpers::getSpriteDir();
+    path = EditorHelpers::getPreviousPath();
 
   QString filename = QFileDialog::getOpenFileName(this,
                                    tr("Select A Frame To Replace This"),
                                    path, tr("Image Files (*.png)"));
   if(filename != "")
   {
+    EditorHelpers::setPreviousPath(filename);
+
     sprite_working->setFramePath(framenumber,filename);
     framelabel->update();
   }
@@ -192,9 +194,10 @@ void FrameDialog::setVerticalFlip(bool toggle)
 }
 
 /*
- * Description: Sets the angle
+ * Description: Sets the angle to 0 degrees
  *
- * Input: Angle string
+ * Inputs: none
+ * Output: none
  */
 void FrameDialog::set0()
 {
@@ -202,18 +205,36 @@ void FrameDialog::set0()
   framelabel->update();
 }
 
+/*
+ * Description: Sets the angle to 90 degrees
+ *
+ * Inputs: none
+ * Output: none
+ */
 void FrameDialog::set90()
 {
   sprite_working->setFrameAngle(framenumber, 90);
   framelabel->update();
 }
 
+/*
+ * Description: Sets the angle to 180 degrees
+ *
+ * Inputs: none
+ * Output: none
+ */
 void FrameDialog::set180()
 {
   sprite_working->setFrameAngle(framenumber, 180);
   framelabel->update();
 }
 
+/*
+ * Description: Sets the angle to 270 degrees
+ *
+ * Inputs: none
+ * Output: none
+ */
 void FrameDialog::set270()
 {
   sprite_working->setFrameAngle(framenumber, 270);

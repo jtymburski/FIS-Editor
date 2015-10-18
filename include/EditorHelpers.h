@@ -12,6 +12,7 @@
 #include <QPixmap>
 #include <QPointF>
 #include <QRectF>
+#include <QString>
 
 #include "EditorEnumDb.h"
 
@@ -34,6 +35,9 @@ class EditorHelpers
 /*============================================================================
  * PUBLIC VARIABLES
  *===========================================================================*/
+public:
+  /* Previous path used */
+  static QString previous_path;
 
 /*============================================================================
  * PUBLIC STATIC FUNCTIONS
@@ -57,6 +61,9 @@ public:
   static QString getPassabilityStr(bool north, bool east,
                                    bool south, bool west);
   static QString getPassabilityStr(int passability_num);
+
+  /* Returns the previous path used for file access */
+  static QString getPreviousPath();
 
   /* Returns the project directory, based on the location of the editor */
   static QString getProjectDir();
@@ -85,6 +92,9 @@ public:
   /* Rectilinear split */
   static QList<QPair<QString, QString>> rectilinearSplit(
                                                        QList<QPoint> point_set);
+
+  /* Sets the previous path used for file access */
+  static void setPreviousPath(QString path, bool includes_file = true); // TODO
 
   /* Trim path */
   static QString trimPath(QString path);

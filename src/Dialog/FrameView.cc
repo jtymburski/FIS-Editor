@@ -74,39 +74,30 @@ void FrameView::mouseDoubleClickEvent(QMouseEvent *event)
 {
   if((event->buttons() & Qt::LeftButton) && current_sprite != NULL)
   {
-    QString path = "";
-    switch(type)
+    /* If it's a frame, edit it */
+    if(type == EditorEnumDb::FRAME)
     {
-      case EditorEnumDb::FRAME:
-        emit editFrame(position_current);
-        break;
-      case EditorEnumDb::HEAD:
-        path = QFileDialog::getOpenFileName(this,
-                                    tr("Select A Frame To Add To The Head"),
-                                    EditorHelpers::getSpriteDir(),
-                                    tr("Image Files (*.png)"));
-        if(path != "")
+      emit editFrame(position_current);
+    }
+    /* Otherwise, if not in view mode, its tail, mid, or head */
+    else if(type != EditorEnumDb::VIEWONLY)
+    {
+      QString path = QFileDialog::getOpenFileName(
+                                          this, tr("Select A Frame To Add"),
+                                          EditorHelpers::getPreviousPath(),
+                                          tr("Image Files (*.png)"));
+      if(path != "")
+      {
+        EditorHelpers::setPreviousPath(path);
+
+        /* Choose the appropriate signal */
+        if(type == EditorEnumDb::HEAD)
           emit addHead(path);
-        break;
-      case EditorEnumDb::MIDPOINT:
-        path = QFileDialog::getOpenFileName(this,
-                                    tr("Select A Frame To Add To A Midpoint"),
-                                    EditorHelpers::getSpriteDir(),
-                                    tr("Image Files (*.png)"));
-        if(path != "")
+        else if(type == EditorEnumDb::MIDPOINT)
           emit addMidpoint(path, position_after);
-        break;
-      case EditorEnumDb::TAIL:
-        path = QFileDialog::getOpenFileName(this,
-                                    tr("Select A Frame To Add To The Tail"),
-                                    EditorHelpers::getSpriteDir(),
-                                    tr("Image Files (*.png)"));
-        if(path != "")
+        else if(type == EditorEnumDb::TAIL)
           emit addTail(path);
-        break;
-      case EditorEnumDb::VIEWONLY:
-      default:
-        break;
+      }
     }
   }
 }

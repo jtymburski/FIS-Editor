@@ -13,7 +13,13 @@
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
   
-/* Constructor Function */
+/*
+ * Description: Constructor function. Creates the music view, which is the
+ *              side bar within the left map database. Controls sub-map music
+ *              and weather audio selection.
+ *
+ * Inputs: QWidget* parent - the parent widget
+ */
 MapMusicView::MapMusicView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
@@ -23,7 +29,9 @@ MapMusicView::MapMusicView(QWidget* parent) : QWidget(parent)
   createLayout();
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 MapMusicView::~MapMusicView()
 {
   setEditorMap(nullptr);
@@ -33,7 +41,12 @@ MapMusicView::~MapMusicView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
   
-/* Creates the layout - only called on initial construction */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapMusicView::createLayout()
 {
   /* Layout */
@@ -97,7 +110,13 @@ void MapMusicView::createLayout()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the add button. Moves a selected ID from the
+ *              available sound list to add to sub-map music stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapMusicView::buttonAdd()
 {
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
@@ -113,7 +132,13 @@ void MapMusicView::buttonAdd()
   }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the remove button. Removes a selected ID from the
+ *              sub-music stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapMusicView::buttonRemove()
 {
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
@@ -134,7 +159,13 @@ void MapMusicView::buttonRemove()
   }
 }
 
-/* Changed triggers in widgets */
+/*
+ * Description: Slot triggered on lower list changed selection. Enables or
+ *              disables the remove button.
+ *
+ * Inputs: int row - the new row index in the list
+ * Output: none
+ */
 void MapMusicView::changedListLower(int row)
 {
   if(row >= 0)
@@ -143,7 +174,13 @@ void MapMusicView::changedListLower(int row)
     btn_rem->setDisabled(true);
 }
 
-/* Changed triggers in widgets */
+/*
+ * Description: Slot triggered on upper list changed selection. Enables or
+ *              disables the remove button.
+ *
+ * Inputs: int row - the new row index in the list
+ * Output: none
+ */
 void MapMusicView::changedListUpper(int row)
 {
   if(row >= 0)
@@ -152,7 +189,14 @@ void MapMusicView::changedListUpper(int row)
     btn_add->setDisabled(true);
 }
 
-/* Changed triggers in widgets */
+/*
+ * Description: Slot triggered on changed selection of the sub-map weather
+ *              audio in the drop-down. Updates the current sub-map with the
+ *              new weather ID.
+ *
+ * Inputs: QString text - the new selected entry text
+ * Output: none
+ */
 void MapMusicView::changedWeather(const QString & text)
 {
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
@@ -165,7 +209,13 @@ void MapMusicView::changedWeather(const QString & text)
   }
 }
 
-/* Refreshes the info in the lower half of the widget */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapMusicView::updateData()
 {
   bool valid_map = (editor_map != nullptr &&
@@ -285,20 +335,38 @@ void MapMusicView::updateData()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  
-/* Returns data, as required */
+
+/*
+ * Description: Returns the stack of music reference listing stored within the
+ *              view.
+ *
+ * Inputs: none
+ * Output: QList<QString> - the music reference list
+ */
 QList<QString> MapMusicView::getDataMusic()
 {
   return music_list;
 }
 
-/* Gets the editor map */
+/*
+ * Description: Returns the editor map, which contains all the sub-map music
+ *              data.
+ *
+ * Inputs: none
+ * Output: EditorMap* - pointer to the editor map. NULL if none set.
+ */
 EditorMap* MapMusicView::getEditorMap()
 {
   return editor_map;
 }
 
-/* Sets the editor map, which contains the data needed */
+/*
+ * Description: Sets the control editor map. This contains the things, sprites
+ *              and all data relevant to display.
+ *
+ * Inputs: EditorMap* map - the map to use for control
+ * Output: none
+ */
 void MapMusicView::setEditorMap(EditorMap* map)
 {
   /* If existing editor map is not NULL, undo */
@@ -322,7 +390,12 @@ void MapMusicView::setEditorMap(EditorMap* map)
   updateData();
 }
 
-/* Updates list in thing dialog, needed for event control */
+/*
+ * Description: Sets the list of music, used throughout the widget
+ *
+ * Inputs: QList<QString> list - list of all music resources available
+ * Output: none
+ */
 void MapMusicView::updateListMusic(QList<QString> list)
 {
   music_list = list;

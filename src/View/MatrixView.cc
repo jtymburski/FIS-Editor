@@ -768,6 +768,7 @@ void MatrixView::initMatrixPlace()
 {
   stopAnimation();
 
+  last_path = EditorHelpers::getPreviousPath();
   QString path = QFileDialog::getOpenFileName(this,
                                               tr("Select a matrix sprite"),
                                               last_path,
@@ -775,6 +776,7 @@ void MatrixView::initMatrixPlace()
   if(path != "" && matrix != NULL)
   {
     last_path = path;
+    EditorHelpers::setPreviousPath(last_path);
 
     /* If growth limited, just take single image */
     if(no_grow)

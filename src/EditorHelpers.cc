@@ -9,6 +9,13 @@
 #include <QDebug>
 
 /*============================================================================
+ * PUBLIC VARIABLES
+ *===========================================================================*/
+
+/* Previous path used */
+QString EditorHelpers::previous_path = "";
+
+/*============================================================================
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 
@@ -225,6 +232,21 @@ QString EditorHelpers::getPassabilityStr(int passability_num)
   if(passability.size() > 0)
     passability.chop(1);
   return passability;
+}
+
+/*
+ * Description: Returns the previous sprite path, used for file access.
+ *
+ * Inputs: none
+ * Output: QString - the previous sprite path
+ */
+QString EditorHelpers::getPreviousPath()
+{
+  if(previous_path.isEmpty())
+    previous_path = getSpriteDir();
+
+  //qDebug() << "GET: " << previous_path;
+  return previous_path;
 }
 
 /*
@@ -559,6 +581,30 @@ QList<QPair<QString,QString>> EditorHelpers::rectilinearSplit(
   }
 
   return set;
+}
+
+/*
+ * Description: Sets the previous sprite path to the passed path. If the
+ *              bool parameter is true, the passed path has a file portion to
+ *              be removed prior.
+ *
+ * Inputs: QString path - the path to set the new path to
+ *         bool includes_file - true if the path includes the file portion
+ * Output: none
+ */
+void EditorHelpers::setPreviousPath(QString path, bool includes_file)
+{
+  /* Trim path, if it includes file */
+  if(includes_file)
+  {
+    std::string std_path = path.toStdString();
+    std_path = std_path.substr(0, std_path.find_last_of("\\/"));
+    path = QString::fromStdString(std_path);
+  }
+
+  /* Set it */
+  previous_path = path;
+  //qDebug() << "SET: " << previous_path;
 }
 
 /*
