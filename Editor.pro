@@ -108,7 +108,6 @@ SOURCES += \
     ../Project/src/Game/Map/Tile.cc \
     ../Project/src/Game/Map/TileSprite.cc \
     ../Project/src/Game/Player/Action.cc \
-    ../Project/src/Game/Battle/AIModule.cc \
     ../Project/src/Game/Player/AttributeSet.cc \
     ../Project/src/Game/Player/Bubby.cc \
     ../Project/src/Game/Player/Category.cc \
@@ -205,7 +204,6 @@ HEADERS += \
     ../Project/include/Game/Map/SpriteMatrix.h \
     ../Project/include/Game/Map/Tile.h \
     ../Project/include/Game/Map/TileSprite.h \
-    ../Project/include/Game/Battle/AIModule.h \
     ../Project/include/Game/Player/AttributeSet.h \
     ../Project/include/Game/Player/Action.h \
     ../Project/include/Game/Player/Bubby.h \
