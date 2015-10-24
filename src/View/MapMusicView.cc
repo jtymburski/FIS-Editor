@@ -276,7 +276,7 @@ void MapMusicView::updateData()
     for(int i = valid_list.size() - 1; i >= 0; i--)
     {
       if(!valid_list[i])
-        map->music.removeAt(i);
+        map->music.remove(i);
     }
 
     /* Proceed to update views */
