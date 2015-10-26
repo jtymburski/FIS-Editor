@@ -862,7 +862,7 @@ void EventView::rightClickInsertAfter()
 {
   if(!rightclick_index.isEmpty())
   {
-    Conversation after = EventHandler::createEmptyConversation();
+    Conversation after = EventSet::createBlankConversation();
     after.text = "New Entry - After";
     QString index = EditorEvent::convertConversationIndex(rightclick_index);
     QString new_index = event->insertConversationAfter(index, after);
@@ -890,7 +890,7 @@ void EventView::rightClickInsertBefore()
 {
   if(!rightclick_index.isEmpty())
   {
-    Conversation before = EventHandler::createEmptyConversation();
+    Conversation before = EventSet::createBlankConversation();
     before.text = "New Entry - Before";
     QString index = EditorEvent::convertConversationIndex(rightclick_index);
     QString new_index = event->insertConversationBefore(index, before);
@@ -929,7 +929,7 @@ void EventView::rightClickInsertOption()
       new_index += "2";
 
       /* Set the new conversation option */
-      Conversation option = EventHandler::createEmptyConversation();
+      Conversation option = EventSet::createBlankConversation();
       option.text = "New Entry - Option";
       event->setConversation(new_index, option);
       setLayoutData();

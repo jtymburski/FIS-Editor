@@ -34,7 +34,7 @@ IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
   {
     *io_working = *io_original;
   }
-  event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
 
   /* Layout setup */
   createLayout(edit_io->getBaseIO() != NULL);
@@ -398,7 +398,7 @@ void IODialog::buttonEventEnter()
   EditorState* state = io_working->getState(combo_state->currentIndex());
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(state->event_enter));
+    event_ctrl->setEvent(EventSet::copyEvent(state->event_enter));
     event_view->updateEvent();
     pop_event->show();
     editing_event = ENTER;
@@ -423,7 +423,7 @@ void IODialog::buttonEventExit()
   EditorState* state = io_working->getState(combo_state->currentIndex());
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(state->event_exit));
+    event_ctrl->setEvent(EventSet::copyEvent(state->event_exit));
     event_view->updateEvent();
     pop_event->show();
     editing_event = EXIT;
@@ -489,7 +489,7 @@ void IODialog::buttonEventUse()
   EditorState* state = io_working->getState(combo_state->currentIndex());
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(state->event_use));
+    event_ctrl->setEvent(EventSet::copyEvent(state->event_use));
     event_view->updateEvent();
     pop_event->show();
     editing_event = USE;
@@ -514,7 +514,7 @@ void IODialog::buttonEventWalkover()
   EditorState* state = io_working->getState(combo_state->currentIndex());
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(state->event_walkover));
+    event_ctrl->setEvent(EventSet::copyEvent(state->event_walkover));
     event_view->updateEvent();
     pop_event->show();
     editing_event = WALKOVER;

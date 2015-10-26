@@ -14,7 +14,7 @@
 #include <QVector>
 
 #include "FileHandler.h"
-#include "Game/EventHandler.h"
+#include "Game/EventSet.h"
 
 class EditorEvent
 {
@@ -37,9 +37,6 @@ private:
 
   /* The event to be edited by this class */
   Event event;
-  
-  /* The event handler and controller */
-  EventHandler handler;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -80,9 +77,6 @@ public:
 
   /* Returns the event type */
   EventClassifier getEventType();
-
-  /* Returns the event handler */
-  EventHandler* getEventHandler();
 
   /* Returns data relating to the give item event. If none, data is invalid */
   int getGiveItemCount();
@@ -127,28 +121,28 @@ public:
 
   /* Sets the conversation event */
   bool setEventConversation(Conversation* convo = NULL,
-                            int sound_id = EventHandler::kUNSET_ID);
+                            int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to give item */
   bool setEventGiveItem(int id = 0, int count = 1,
-                        int sound_id = EventHandler::kUNSET_ID);
+                        int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to notification text */
   bool setEventNotification(QString notification = "Blank",
-                            int sound_id = EventHandler::kUNSET_ID);
+                            int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to strictly a sound event */
-  bool setEventSound(int sound_id = EventHandler::kUNSET_ID);
+  bool setEventSound(int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to start battle */
-  bool setEventStartBattle(int sound_id = EventHandler::kUNSET_ID);
+  bool setEventStartBattle(int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to start map */
-  bool setEventStartMap(int id = 0, int sound_id = EventHandler::kUNSET_ID);
+  bool setEventStartMap(int id = 0, int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
-                        int y = 0, int sound_id = EventHandler::kUNSET_ID);
+                        int y = 0, int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the sound ID, for the event */
   bool setSoundID(int id);

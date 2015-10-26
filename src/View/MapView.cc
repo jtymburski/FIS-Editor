@@ -48,7 +48,7 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
   pop_event = new QDialog(this);
   pop_event->setWindowTitle("Event Edit");
   QGridLayout* e_layout = new QGridLayout(pop_event);
-  event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
   event_view = new EventView(event_ctrl, pop_event);
   connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
@@ -432,7 +432,7 @@ void MapView::tileEventEnter()
   event_tile = editing_map->getHoverInfo()->hover_tile;
   if(event_tile != NULL)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventEnter()));
+    event_ctrl->setEvent(EventSet::copyEvent(event_tile->getEventEnter()));
     event_view->updateEvent();
     pop_event->setWindowTitle("Enter Event Edit");
     pop_event->show();
@@ -454,7 +454,7 @@ void MapView::tileEventExit()
   event_tile = editing_map->getHoverInfo()->hover_tile;
   if(event_tile != NULL)
   {
-    event_ctrl->setEvent(EventHandler::copyEvent(event_tile->getEventExit()));
+    event_ctrl->setEvent(EventSet::copyEvent(event_tile->getEventExit()));
     event_view->updateEvent();
     pop_event->setWindowTitle("Exit Event Edit");
     pop_event->show();

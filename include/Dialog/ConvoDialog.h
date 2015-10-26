@@ -16,7 +16,7 @@
 #include <QPushButton>
 #include <QTextEdit>
 
-#include "Game/EventHandler.h"
+#include "Game/EventSet.h"
 #include "View/EventView.h"
 
 class ConvoDialog : public QDialog

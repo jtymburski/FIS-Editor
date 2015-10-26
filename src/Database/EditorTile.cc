@@ -37,8 +37,8 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   y_pos = y;
 
   /* Event control */
-  event_enter = EventHandler::createEventTemplate();
-  event_exit = EventHandler::createEventTemplate();
+  event_enter = EventSet::createBlankEvent();
+  event_exit = EventSet::createBlankEvent();
 
   /* Layer control */
   TileRenderInfo temp;
@@ -129,8 +129,8 @@ void EditorTile::copySelf(const EditorTile &source)
   y_pos = source.y_pos;
 
   /* Copy events */
-  setEventEnter(EventHandler::copyEvent(source.getEventEnter()));
-  setEventExit(EventHandler::copyEvent(source.getEventExit()));
+  setEventEnter(EventSet::copyEvent(source.getEventEnter()));
+  setEventExit(EventSet::copyEvent(source.getEventExit()));
 
   /* Copy base */
   layer_base.sprite = source.layer_base.sprite;
@@ -2105,7 +2105,7 @@ void EditorTile::unplace(EditorSprite* sprite)
  */
 void EditorTile::unsetEventEnter()
 {
-  event_enter = EventHandler::deleteEvent(event_enter);
+  event_enter = EventSet::deleteEvent(event_enter);
 }
 
 /*
@@ -2117,7 +2117,7 @@ void EditorTile::unsetEventEnter()
  */
 void EditorTile::unsetEventExit()
 {
-  event_exit = EventHandler::deleteEvent(event_exit);
+  event_exit = EventSet::deleteEvent(event_exit);
 }
 
 /*

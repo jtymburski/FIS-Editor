@@ -585,7 +585,7 @@ bool EditorMapIO::setEventEnter(int index, Event event)
   EditorState* state = getState(index);
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    state->event_enter = EventHandler::deleteEvent(state->event_enter);
+    state->event_enter = EventSet::deleteEvent(state->event_enter);
     state->event_enter = event;
     return true;
   }
@@ -604,7 +604,7 @@ bool EditorMapIO::setEventExit(int index, Event event)
   EditorState* state = getState(index);
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    state->event_exit = EventHandler::deleteEvent(state->event_exit);
+    state->event_exit = EventSet::deleteEvent(state->event_exit);
     state->event_exit = event;
     return true;
   }
@@ -623,7 +623,7 @@ bool EditorMapIO::setEventUse(int index, Event event)
   EditorState* state = getState(index);
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    state->event_use = EventHandler::deleteEvent(state->event_use);
+    state->event_use = EventSet::deleteEvent(state->event_use);
     state->event_use = event;
     return true;
   }
@@ -642,7 +642,7 @@ bool EditorMapIO::setEventWalkover(int index, Event event)
   EditorState* state = getState(index);
   if(state != NULL && state->type == EditorEnumDb::IO_STATE)
   {
-    state->event_walkover = EventHandler::deleteEvent(state->event_walkover);
+    state->event_walkover = EventSet::deleteEvent(state->event_walkover);
     state->event_walkover = event;
     return true;
   }
@@ -694,10 +694,10 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
       ref->interact = state->interact;
 
       /* Event state data */
-      ref->event_enter = EventHandler::copyEvent(state->event_enter);
-      ref->event_exit = EventHandler::copyEvent(state->event_exit);
-      ref->event_use = EventHandler::copyEvent(state->event_use);
-      ref->event_walkover = EventHandler::copyEvent(state->event_walkover);
+      ref->event_enter = EventSet::copyEvent(state->event_enter);
+      ref->event_exit = EventSet::copyEvent(state->event_exit);
+      ref->event_use = EventSet::copyEvent(state->event_use);
+      ref->event_walkover = EventSet::copyEvent(state->event_walkover);
     }
     /* Otherwise, this new pointer replaces the existing and the existing is
      * deleted. */
@@ -811,10 +811,10 @@ EditorState* EditorMapIO::createBlankState()
   state->matrix = new EditorMatrix();
   state->type = EditorEnumDb::IO_STATE;
   state->interact = MapState::NOINTERACTION;
-  state->event_enter = EventHandler::createEventTemplate();
-  state->event_exit = EventHandler::createEventTemplate();
-  state->event_use = EventHandler::createEventTemplate();
-  state->event_walkover = EventHandler::createEventTemplate();
+  state->event_enter = EventSet::createBlankEvent();
+  state->event_exit = EventSet::createBlankEvent();
+  state->event_use = EventSet::createBlankEvent();
+  state->event_walkover = EventSet::createBlankEvent();
 
   return state;
 }
@@ -833,10 +833,10 @@ void EditorMapIO::deleteState(EditorState* state)
   {
     /* Delete memory in structure */
     delete state->matrix;
-    EventHandler::deleteEvent(state->event_enter);
-    EventHandler::deleteEvent(state->event_exit);
-    EventHandler::deleteEvent(state->event_use);
-    EventHandler::deleteEvent(state->event_walkover);
+    EventSet::deleteEvent(state->event_enter);
+    EventSet::deleteEvent(state->event_exit);
+    EventSet::deleteEvent(state->event_use);
+    EventSet::deleteEvent(state->event_walkover);
 
     /* Delete state structure */
     delete state;

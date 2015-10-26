@@ -24,7 +24,7 @@ EditorMapThing::EditorMapThing(int id, QString name, QString description)
 {
   base = NULL;
   matrix = new EditorMatrix(1, 1, false);
-  event = EventHandler::createEventTemplate();
+  event = EventSet::createBlankEvent();
   event_base = true;
   x = 0;
   y = 0;
@@ -56,7 +56,7 @@ EditorMapThing::EditorMapThing(const EditorMapThing &source) : EditorMapThing()
 EditorMapThing::~EditorMapThing()
 {
   base = NULL;
-  EventHandler::deleteEvent(event);
+  EventSet::deleteEvent(event);
   if(matrix != NULL)
     delete matrix;
   matrix = NULL;
@@ -80,7 +80,7 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
   setBase(source.getBaseThing());
   setDescription(source.getDescription());
   event_base = source.event_base;
-  setEvent(EventHandler::copyEvent(source.event));
+  setEvent(EventSet::copyEvent(source.event));
   setGameID(source.getGameID());
   setID(source.getID());
   setName(source.getName());
@@ -610,7 +610,7 @@ void EditorMapThing::setDialogImage(QString path)
  */
 void EditorMapThing::setEvent(Event event)
 {
-  this->event = EventHandler::deleteEvent(this->event);
+  this->event = EventSet::deleteEvent(this->event);
   this->event = event;
 }
 

@@ -33,11 +33,11 @@ ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
   {
     *thing_working = *thing_original;
     event_ctrl = new EditorEvent(
-                           EventHandler::copyEvent(thing_original->getEvent()));
+                               EventSet::copyEvent(thing_original->getEvent()));
   }
   else
   {
-    event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
   }
 
   /* Layout setup */

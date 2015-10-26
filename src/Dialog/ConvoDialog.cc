@@ -28,7 +28,7 @@ ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
 {
   /* Initialize variables */
   convo_original = edit_convo;
-  convo_working.action_event = EventHandler::createEventTemplate();
+  convo_working.action_event = EventSet::createBlankEvent();
   convo_working.category = DialogCategory::TEXT;
   convo_working.text = "";
   convo_working.thing_id = 0;
@@ -142,7 +142,7 @@ void ConvoDialog::updateData()
 void ConvoDialog::closeEvent(QCloseEvent*)
 {
   convo_original = NULL;
-  convo_working = EventHandler::createEmptyConversation();
+  convo_working = EventSet::createBlankConversation();
 }
 
 /*============================================================================

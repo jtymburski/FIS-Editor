@@ -322,9 +322,9 @@ void InstanceDialog::setup()
   /* Set-up the event */
   if(thing_original != NULL && thing_type != EditorEnumDb::IO)
     event_ctrl = new EditorEvent(
-                           EventHandler::copyEvent(thing_original->getEvent()));
+                           EventSet::copyEvent(thing_original->getEvent()));
   else
-    event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
 
   /* Layout setup */
   createLayout();
@@ -569,8 +569,7 @@ void InstanceDialog::checkBaseChange(int state)
 
   /* Update the event accordingly */
   EditorEvent* old_event = event_ctrl;
-  event_ctrl = new EditorEvent(
-                            EventHandler::copyEvent(thing_working->getEvent()));
+  event_ctrl = new EditorEvent(EventSet::copyEvent(thing_working->getEvent()));
   event_view->setEvent(event_ctrl);
 
   /* Handle the old event */

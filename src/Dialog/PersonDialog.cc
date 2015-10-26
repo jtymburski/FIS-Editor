@@ -37,11 +37,11 @@ PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
   {
     *person_working = *person_original;
     event_ctrl = new EditorEvent(
-                          EventHandler::copyEvent(person_original->getEvent()));
+                              EventSet::copyEvent(person_original->getEvent()));
   }
   else
   {
-    event_ctrl = new EditorEvent(EventHandler::createEventTemplate());
+    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
   }
 
   /* Layout setup */

@@ -21,7 +21,7 @@
 EditorEvent::EditorEvent()
 {
   conversation = NULL;
-  event = handler.createBlankEvent();
+  event = EventSet::createBlankEvent();
 }
 
 /*
@@ -139,7 +139,7 @@ Conversation* EditorEvent::convoManipulator(QString index, bool generate,
           /* Generate, if one doesn't exist */
           if(generate)
             while(current->next.size() < int_set[i])
-              current->next.push_back(EventHandler::createEmptyConversation());
+              current->next.push_back(EventSet::createBlankConversation());
 
           previous = current;
           current = &previous->next[int_set[i]-1];
@@ -174,7 +174,7 @@ Conversation* EditorEvent::convoManipulator(QString index, bool generate,
  */
 void EditorEvent::copySelf(const EditorEvent &source)
 {
-  event = EventHandler::copyEvent(source.event);
+  event = EventSet::copyEvent(source.event);
   conversation = event.convo;
 }
 
@@ -279,7 +279,7 @@ QString EditorEvent::deleteConversation(QString index)
       /* If previous is NULL, it's head. Just delete all data */
       if(previous == NULL)
       {
-        current->action_event = EventHandler::createEventTemplate();
+        current->action_event = EventSet::createBlankEvent();
         current->category = DialogCategory::TEXT;
         current->next.clear();
         current->text = "";
@@ -386,17 +386,6 @@ EventClassifier EditorEvent::getEventType()
 }
 
 /*
- * Description: Returns the current event handler, set-up in this class.
- *
- * Inputs: none
- * Output: EventHandler* - pointer to the event handling control class
- */
-EventHandler* EditorEvent::getEventHandler()
-{
-  return &handler;
-}
-
-/*
  * Description: Returns the give item event item count. If it's not the
  *              give item event, -1 is returned.
  *
@@ -405,8 +394,9 @@ EventHandler* EditorEvent::getEventHandler()
  */
 int EditorEvent::getGiveItemCount()
 {
-  if(event.classification == EventClassifier::GIVEITEM)
-    return event.ints[EventHandler::kGIVE_ITEM_COUNT];
+  int id,count;
+  if(EventSet::dataEventGiveItem(event, id, count))
+    return count;
   return -1;
 }
 
@@ -419,8 +409,9 @@ int EditorEvent::getGiveItemCount()
  */
 int EditorEvent::getGiveItemID()
 {
-  if(event.classification == EventClassifier::GIVEITEM)
-    return event.ints[EventHandler::kGIVE_ITEM_ID];
+  int id,count;
+  if(EventSet::dataEventGiveItem(event, id, count))
+    return id;
   return -1;
 }
 
@@ -434,8 +425,9 @@ int EditorEvent::getGiveItemID()
  */
 QString EditorEvent::getNotification()
 {
-  if(event.classification == EventClassifier::NOTIFICATION)
-    return QString::fromStdString(event.strings.front());
+  std::string notification;
+  if(EventSet::dataEventNotification(event, notification))
+    return QString::fromStdString(notification);
   return "";
 }
 
@@ -461,8 +453,9 @@ int EditorEvent::getSoundID()
  */
 int EditorEvent::getStartMapID()
 {
-  if(event.classification == EventClassifier::RUNMAP)
-    return event.ints.front();
+  int id;
+  if(EventSet::dataEventStartMap(event, id))
+    return id;
   return -1;
 }
 
@@ -476,8 +469,9 @@ int EditorEvent::getStartMapID()
  */
 int EditorEvent::getTeleportSection()
 {
-  if(event.classification == EventClassifier::TELEPORTTHING)
-    return event.ints[EventHandler::kTELEPORT_SECTION];
+  int thing_id,x,y,section_id;
+  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
+    return section_id;
   return -1;
 }
 
@@ -490,8 +484,9 @@ int EditorEvent::getTeleportSection()
  */
 int EditorEvent::getTeleportThingID()
 {
-  if(event.classification == EventClassifier::TELEPORTTHING)
-    return event.ints[EventHandler::kTELEPORT_ID];
+  int thing_id,x,y,section_id;
+  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
+    return thing_id;
   return -1;
 }
 
@@ -504,8 +499,9 @@ int EditorEvent::getTeleportThingID()
  */
 int EditorEvent::getTeleportX()
 {
-  if(event.classification == EventClassifier::TELEPORTTHING)
-    return event.ints[EventHandler::kTELEPORT_X];
+  int thing_id,x,y,section_id;
+  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
+    return x;
   return -1;
 }
 
@@ -518,8 +514,9 @@ int EditorEvent::getTeleportX()
  */
 int EditorEvent::getTeleportY()
 {
-  if(event.classification == EventClassifier::TELEPORTTHING)
-    return event.ints[EventHandler::kTELEPORT_Y];
+  int thing_id,x,y,section_id;
+  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
+    return y;
   return -1;
 }
 
@@ -622,7 +619,7 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
           if(index == "1")
           {
             /* Create the new base conversation */
-            Conversation base = EventHandler::createEmptyConversation();
+            Conversation base = EventSet::createBlankConversation();
             base.action_event = conversation->action_event;
             base.category = conversation->category;
             base.next = conversation->next;
@@ -660,7 +657,7 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
         if(index == "1")
         {
           /* Create the new base conversation */
-          Conversation base = EventHandler::createEmptyConversation();
+          Conversation base = EventSet::createBlankConversation();
           base.action_event = conversation->action_event;
           base.category = conversation->category;
           base.next = conversation->next;
@@ -707,7 +704,7 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
  */
 void EditorEvent::load(XmlData data, int index)
 {
-  event = handler.updateEvent(event, data, index, 0);
+  event = EventSet::updateEvent(event, data, index, 0);
 }
 
 /*
@@ -871,8 +868,8 @@ void EditorEvent::setEvent(Event event)
 void EditorEvent::setEventBlank(bool delete_event)
 {
   if(delete_event)
-    event = EventHandler::deleteEvent(event);
-  event = handler.createBlankEvent();
+    event = EventSet::deleteEvent(event);
+  event = EventSet::createBlankEvent();
   conversation = NULL;
 }
 
@@ -889,7 +886,7 @@ bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
 {
   /* Create the new conversation */
   setEventBlank();
-  event = handler.createConversationEvent(convo, sound_id);
+  event = EventSet::createEventConversation(convo, sound_id);
   event.convo->text = "First Entry.";
   conversation = event.convo;
   return true;
@@ -910,7 +907,7 @@ bool EditorEvent::setEventGiveItem(int id, int count, int sound_id)
   if(id >= 0 && count > 0)
   {
     setEventBlank();
-    event = handler.createGiveItemEvent(id, count, sound_id);
+    event = EventSet::createEventGiveItem(id, count, sound_id);
     return true;
   }
   return false;
@@ -929,8 +926,8 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
   if(!notification.isEmpty())
   {
     setEventBlank();
-    event = handler.createNotificationEvent(notification.toStdString(),
-                                            sound_id);
+    event = EventSet::createEventNotification(notification.toStdString(),
+                                              sound_id);
     return true;
   }
   return false;
@@ -946,7 +943,7 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
 bool EditorEvent::setEventSound(int sound_id)
 {
   setEventBlank();
-  event = handler.createSoundEvent(sound_id);
+  event = EventSet::createEventSound(sound_id);
   return true;
 }
 
@@ -961,7 +958,7 @@ bool EditorEvent::setEventSound(int sound_id)
 bool EditorEvent::setEventStartBattle(int sound_id)
 {
   setEventBlank();
-  event = handler.createStartBattleEvent(sound_id);
+  event = EventSet::createEventStartBattle(sound_id);
   return true;
 }
 
@@ -979,7 +976,7 @@ bool EditorEvent::setEventStartMap(int id, int sound_id)
   if(id >= 0)
   {
     setEventBlank();
-    event = handler.createStartMapEvent(id, sound_id);
+    event = EventSet::createEventStartMap(id, sound_id);
     return true;
   }
   return false;
@@ -1002,7 +999,7 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
   if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
   {
     setEventBlank();
-    event = handler.createTeleportEvent(thing_id, x, y, section_id, sound_id);
+    event = EventSet::createEventTeleport(thing_id, x, y, section_id, sound_id);
     return true;
   }
   return false;
@@ -1022,7 +1019,7 @@ bool EditorEvent::setSoundID(int id)
     if(id >= 0)
       event.sound_id = id;
     else
-      event.sound_id = Sound::kUNSET_ID;
+      event.sound_id = EventSet::kUNSET_ID;
   }
   return false;
 }
@@ -1132,7 +1129,7 @@ bool EditorEvent::couldBeOption(QString base_index, int child_count)
  */
 Conversation EditorEvent::createConversation(QString text, int id, Event event)
 {
-  Conversation convo = EventHandler::createEmptyConversation();
+  Conversation convo = EventSet::createBlankConversation();
   convo.text = text.toStdString();
   convo.thing_id = id;
   if(event.classification != EventClassifier::STARTCONVO)
@@ -1160,7 +1157,7 @@ Conversation EditorEvent::createConversation(QString text, int id, Event event,
   /* Loop through options */
   for(int i = 0; i < options.size(); i++)
   {
-    convo.next.push_back(EventHandler::createEmptyConversation());
+    convo.next.push_back(EventSet::createBlankConversation());
     convo.next.back().text = options[i].first.toStdString();
     if(options[i].second.classification != EventClassifier::STARTCONVO)
       convo.next.back().action_event = options[i].second;

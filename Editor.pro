@@ -97,6 +97,7 @@ SOURCES += \
     ../Project/src/TinyXML.cc \
     ../Project/src/XmlData.cc \
     ../Project/src/Game/EventHandler.cc \
+    ../Project/src/Game/EventSet.cc \
     ../Project/src/Game/KeyHandler.cc \
     ../Project/src/Game/Map/MapInteractiveObject.cc \
     ../Project/src/Game/Map/MapItem.cc \
@@ -194,6 +195,7 @@ HEADERS += \
     ../Project/include/TinyXML.h \
     ../Project/include/XmlData.h \
     ../Project/include/Game/EventHandler.h \
+    ../Project/include/Game/EventSet.h \
     ../Project/include/Game/KeyHandler.h \
     ../Project/include/Game/Map/MapInteractiveObject.h \
     ../Project/include/Game/Map/MapItem.h \
