@@ -801,7 +801,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       /* Data */
       fh->writeXmlData("x", getTeleportX());
       fh->writeXmlData("y", getTeleportY());
-      fh->writeXmlData("section", getTeleportSection());
+      if(getTeleportSection() >= 0)
+        fh->writeXmlData("section", getTeleportSection());
       if(getTeleportThingID() != 0)
         fh->writeXmlData("id", getTeleportThingID());
       if(getSoundID() >= 0)
