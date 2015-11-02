@@ -460,6 +460,36 @@ int EditorEvent::getStartMapID()
 }
 
 /*
+ * Description: Returns the take item event item count. If it's not the
+ *              take item event, -1 is returned.
+ *
+ * Inputs: none
+ * Output: int - number of items to be taken in the event
+ */
+int EditorEvent::getTakeItemCount()
+{
+  int id,count;
+  if(EventSet::dataEventTakeItem(event, id, count))
+    return count;
+  return -1;
+}
+
+/*
+ * Description: Returns the take item event item ID. If it's not the take item
+ *              event, -1 is returned.
+ *
+ * Inputs: none
+ * Output: int - the ID of the item, to be taken
+ */
+int EditorEvent::getTakeItemID()
+{
+  int id,count;
+  if(EventSet::dataEventTakeItem(event, id, count))
+    return id;
+  return -1;
+}
+
+/*
  * Description: Returns the sub-map section that the teleport event will
  *              be sent to. If it's not the teleport thing event, -1 is
  *              returned.
@@ -793,6 +823,19 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     {
       saveConversation(fh);
     }
+    /* -- TAKE ITEM EVENT -- */
+    if(event.classification == EventClassifier::TAKEITEM)
+    {
+      fh->writeXmlElement("takeitem");
+
+      /* Data */
+      fh->writeXmlData("id", getTakeItemID());
+      fh->writeXmlData("count", getTakeItemCount());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+
+      fh->writeXmlElementEnd();
+    }
     /* -- TELEPORT THING EVENT -- */
     else if(event.classification == EventClassifier::TELEPORTTHING)
     {
@@ -978,6 +1021,27 @@ bool EditorEvent::setEventStartMap(int id, int sound_id)
   {
     setEventBlank();
     event = EventSet::createEventStartMap(id, sound_id);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the event in the class to the take item event, with a
+ *              passed in ID of the item and count (ID needs to be greater
+ *              than or equal to 0 and count greater than 0).
+ *
+ * Inputs: int id - the id of the item to take (game side)
+ *         int count - the number of items to take on trigger
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventTakeItem(int id, int count, int sound_id)
+{
+  if(id >= 0 && count > 0)
+  {
+    setEventBlank();
+    event = EventSet::createEventTakeItem(id, count, sound_id);
     return true;
   }
   return false;

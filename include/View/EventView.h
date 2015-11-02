@@ -76,6 +76,10 @@ private:
   QString rightclick_index;
   QMenu* rightclick_menu;
 
+  /* Take item event control widgets */
+  QSpinBox* take_count;
+  QComboBox* take_name;
+
   /* Teleport event - view text boxes for map location and thing */
   QLineEdit* tele_map;
   QComboBox* tele_thing;
@@ -148,6 +152,10 @@ public slots:
   void rightClickInsertAfter();
   void rightClickInsertBefore();
   void rightClickInsertOption();
+
+  /* The give item event slot changes */
+  void takeCountChanged(int index);
+  void takeItemChanged(int index);
 
   /* The teleport event button presses */
   void teleportMapPressed();

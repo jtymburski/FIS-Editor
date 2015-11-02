@@ -91,6 +91,10 @@ public:
   /* Returns the start map ID, for the related event */
   int getStartMapID();
 
+  /* Returns data relating to the take item event. If none, data is invalid */
+  int getTakeItemCount();
+  int getTakeItemID();
+
   /* Returns data relating to the teleport event. If none, data is invalid */
   int getTeleportSection();
   int getTeleportThingID();
@@ -139,6 +143,10 @@ public:
 
   /* Sets the event to start map */
   bool setEventStartMap(int id = 0, int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to take item */
+  bool setEventTakeItem(int id = 0, int count = 1,
+                        int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,

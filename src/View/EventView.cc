@@ -73,6 +73,7 @@ void EventView::createLayout(bool conversation_enabled)
   combo_category->addItem("Switch Maps");
   combo_category->addItem("Teleport Thing");
   combo_category->addItem("Just Sound");
+  combo_category->addItem("Take Item");
   if(conversation_enabled)
     combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
@@ -158,11 +159,31 @@ void EventView::createLayout(bool conversation_enabled)
   layout_tele->addWidget(lbl_tele_thing, 1, 0);
   layout_tele->addWidget(tele_thing, 1, 1);
 
-  /* Widget for blank control */
+  /* Widget for sound control */
   QWidget* widget_sound = new QWidget(this);
   QLabel* lbl_sound = new QLabel("NO SETTINGS", this);
   QVBoxLayout* layout_sound = new QVBoxLayout(widget_sound);
   layout_sound->addWidget(lbl_sound, 0, Qt::AlignCenter);
+
+  /* Widget for take item control */
+  QWidget* widget_take = new QWidget(this);
+  QLabel* lbl_take_item = new QLabel("Item:", this);
+  QLabel* lbl_take_count = new QLabel("Count:", this);
+  take_name = new QComboBox(this);
+  take_name->setMinimumWidth(200);
+  connect(take_name, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(takeItemChanged(int)));
+  take_count = new QSpinBox(this);
+  take_count->setMinimum(1);
+  take_count->setMaximum(100000);
+  connect(take_count, SIGNAL(valueChanged(int)),
+          this, SLOT(takeCountChanged(int)));
+  QGridLayout* layout_take = new QGridLayout(widget_take);
+  layout_take->addWidget(lbl_take_item, 0, 0);
+  layout_take->addWidget(take_name, 0, 1, 1, 2);
+  layout_take->addWidget(lbl_take_count, 1, 0);
+  layout_take->addWidget(take_count, 1, 1);
+  layout_take->setColumnStretch(2, 1);
 
   /* Widget for conversation control */
   QWidget* widget_convo;
@@ -217,6 +238,7 @@ void EventView::createLayout(bool conversation_enabled)
   view_stack->addWidget(widget_map);
   view_stack->addWidget(widget_teleport);
   view_stack->addWidget(widget_sound);
+  view_stack->addWidget(widget_take);
   if(conversation_enabled)
     view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
@@ -413,6 +435,29 @@ void EventView::setLayoutData()
         convo_tree->resizeColumnToContents(0);
       }
     }
+    if(event->getEventType() == EventClassifier::TAKEITEM)
+    {
+      take_count->setValue(event->getTakeItemCount());
+
+      /* Attempt to find the item name in the combo box */
+      int index = -1;
+      for(int i = 0; i < list_items.size(); i++)
+      {
+        QStringList set = list_items[i].split(":");
+        if(set.size() == 2)
+        {
+          if(set.front().toInt() == event->getTakeItemID())
+          {
+            take_name->setCurrentIndex(i);
+            index = i;
+          }
+        }
+      }
+
+      /* If index < 0 (not found), set to first */
+      if(index < 0)
+        take_name->setCurrentIndex(0);
+    }
     else if(event->getEventType() == EventClassifier::TELEPORTTHING)
     {
       /* Attempt to find the map name in the combo box */
@@ -592,6 +637,8 @@ void EventView::categoryChanged(int index)
         event->setEventStartMap();
       else if(index == (int)EventClassifier::STARTCONVO)
         event->setEventConversation();
+      else if(index == (int)EventClassifier::TAKEITEM)
+        event->setEventTakeItem();
       else if(index == (int)EventClassifier::TELEPORTTHING)
         event->setEventTeleport();
     }
@@ -950,6 +997,36 @@ void EventView::rightClickInsertOption()
 }
 
 /*
+ * Description: Slot which triggers when the take item count widget in the take
+ *              item event is changed. Updates the event
+ *
+ * Inputs: int index - the count value
+ * Output: none
+ */
+void EventView::takeCountChanged(int index)
+{
+  event->setEventTakeItem(event->getTakeItemID(), index, event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers when the take item ID changes in the combo
+ *              box. Updates the event
+ *
+ * Inputs: int index - the index in the combo box
+ * Output: none
+ */
+void EventView::takeItemChanged(int index)
+{
+  if(index >= 0 && index < list_items.size())
+  {
+    QStringList list = list_items[index].split(":");
+    if(list.size() == 2)
+      event->setEventTakeItem(list.front().toInt(), event->getTakeItemCount(),
+                              event->getSoundID());
+  }
+}
+
+/*
  * Description: Slot which triggers when the select tile on map is pressed.
  *              Triggers selectTile() which is picked up by the parent and
  *              triggers a hide and then select tile before re-showing.
@@ -1096,13 +1173,27 @@ void EventView::setEvent(EditorEvent* event)
  */
 void EventView::setListItems(QVector<QString> items)
 {
+  /* Set new data */
   list_items = items;
+
+  /* Block signals */
   item_name->blockSignals(true);
+  take_name->blockSignals(true);
+
+  /* Give Items */
   item_name->clear();
   for(int i = 0; i < list_items.size(); i++)
     item_name->addItem(list_items[i]);
+
+  /* Take Items */
+  take_name->clear();
+  for(int i = 0; i < list_items.size(); i++)
+    take_name->addItem(list_items[i]);
+
+  /* Update and unblock */
   setLayoutData();
   item_name->blockSignals(false);
+  take_name->blockSignals(false);
 }
 
 /*

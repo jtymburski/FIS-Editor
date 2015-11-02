@@ -1461,6 +1461,7 @@ void EditorTile::setEventEnter(Event event, bool just_update)
   if(!just_update)
     unsetEventEnter();
   event_enter = event;
+  update();
 }
 
 /*
@@ -1477,6 +1478,7 @@ void EditorTile::setEventExit(Event event, bool just_update)
   if(!just_update)
     unsetEventExit();
   event_exit = event;
+  update();
 }
 
 /*
