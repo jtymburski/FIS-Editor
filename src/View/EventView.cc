@@ -74,6 +74,9 @@ void EventView::createLayout(bool conversation_enabled)
   combo_category->addItem("Teleport Thing");
   combo_category->addItem("Just Sound");
   combo_category->addItem("Take Item");
+  combo_category->addItem("Unlock: Thing");
+  combo_category->addItem("Unlock: Tile");
+  combo_category->addItem("Unlock: IO");
   if(conversation_enabled)
     combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
@@ -185,6 +188,24 @@ void EventView::createLayout(bool conversation_enabled)
   layout_take->addWidget(take_count, 1, 1);
   layout_take->setColumnStretch(2, 1);
 
+  /* Widget for unlock thing control */
+  QWidget* widget_unlock_thing = new QWidget(this);
+  QLabel* lbl_unlock_thing = new QLabel("TODO", this);
+  QVBoxLayout* layout_unlock_thing = new QVBoxLayout(widget_unlock_thing);
+  layout_unlock_thing->addWidget(lbl_unlock_thing, 0, Qt::AlignCenter);
+
+  /* Widget for unlock tile control */
+  QWidget* widget_unlock_tile = new QWidget(this);
+  QLabel* lbl_unlock_tile = new QLabel("TODO", this);
+  QVBoxLayout* layout_unlock_tile = new QVBoxLayout(widget_unlock_tile);
+  layout_unlock_tile->addWidget(lbl_unlock_tile, 0, Qt::AlignCenter);
+
+  /* Widget for unlock io control */
+  QWidget* widget_unlock_io = new QWidget(this);
+  QLabel* lbl_unlock_io = new QLabel("TODO", this);
+  QVBoxLayout* layout_unlock_io = new QVBoxLayout(widget_unlock_io);
+  layout_unlock_io->addWidget(lbl_unlock_io, 0, Qt::AlignCenter);
+
   /* Widget for conversation control */
   QWidget* widget_convo;
   if(conversation_enabled)
@@ -239,6 +260,9 @@ void EventView::createLayout(bool conversation_enabled)
   view_stack->addWidget(widget_teleport);
   view_stack->addWidget(widget_sound);
   view_stack->addWidget(widget_take);
+  view_stack->addWidget(widget_unlock_thing);
+  view_stack->addWidget(widget_unlock_tile);
+  view_stack->addWidget(widget_unlock_io);
   if(conversation_enabled)
     view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
@@ -641,6 +665,12 @@ void EventView::categoryChanged(int index)
         event->setEventTakeItem();
       else if(index == (int)EventClassifier::TELEPORTTHING)
         event->setEventTeleport();
+      else if(index == (int)EventClassifier::UNLOCKIO)
+        qDebug() << "TODO: Unlock IO Event - Setup";
+      else if(index == (int)EventClassifier::UNLOCKTHING)
+        qDebug() << "TODO: Unlock Thing Event - Setup";
+      else if(index == (int)EventClassifier::UNLOCKTILE)
+        qDebug() << "TODO: Unlock Tile Event - Setup";
     }
 
     /* Update the layout */
