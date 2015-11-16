@@ -49,7 +49,8 @@ EditorEvent::EditorEvent(const EditorEvent &source) : EditorEvent()
  */
 EditorEvent::~EditorEvent()
 {
-  setEventBlank(false);
+  setEventBlank();
+  //setEventBlank(false);
   conversation = NULL;
 }
 
@@ -174,6 +175,7 @@ Conversation* EditorEvent::convoManipulator(QString index, bool generate,
  */
 void EditorEvent::copySelf(const EditorEvent &source)
 {
+  event = EventSet::deleteEvent(event);
   event = EventSet::copyEvent(source.event);
   conversation = event.convo;
 }
@@ -898,9 +900,12 @@ void EditorEvent::setEvent(Event event)
   setEventBlank();
 
   /* Create new event */
-  this->event = event;
+  this->event = EventSet::copyEvent(event);
   if(event.classification == EventClassifier::STARTCONVO)
-    conversation = event.convo;
+    conversation = this->event.convo;
+  //this->event = event;
+  //if(event.classification == EventClassifier::STARTCONVO)
+  //  conversation = event.convo;
 }
 
 /*

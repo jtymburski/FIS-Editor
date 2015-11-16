@@ -450,8 +450,10 @@ void EditorMapThing::load(XmlData data, int index)
   {
     EditorEvent edit_event(event);
     edit_event.load(data, index + 1);
+    event = EventSet::deleteEvent(event);
     if(edit_event.getEvent() != NULL)
       event = *edit_event.getEvent();
+    edit_event.setEventBlank(false);
     event_base = false;
   }
   else if(element == "game_id" || element == "core_id")

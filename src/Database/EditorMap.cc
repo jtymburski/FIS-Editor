@@ -737,14 +737,16 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
         EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
         edit_event.load(data, index + 3);
         if(edit_event.getEvent() != NULL)
-          map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), true);
+          map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), false);
+        edit_event.setEventBlank(false);
       }
       else if(category == "exit")
       {
         EditorEvent edit_event(map->tiles[x][y]->getEventExit());
         edit_event.load(data, index + 3);
         if(edit_event.getEvent() != NULL)
-          map->tiles[x][y]->setEventExit(*edit_event.getEvent(), true);
+          map->tiles[x][y]->setEventExit(*edit_event.getEvent(), false);
+        edit_event.setEventBlank(false);
       }
     }
   }

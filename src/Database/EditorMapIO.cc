@@ -502,32 +502,40 @@ void EditorMapIO::load(XmlData data, int index)
         {
           EditorEvent event(state->event_enter);
           event.load(data, index + 3);
+          state->event_enter = EventSet::deleteEvent(state->event_enter);
           if(event.getEvent() != NULL)
             state->event_enter = *event.getEvent();
+          event.setEventBlank(false);
         }
         /* ---- EXIT EVENT ---- */
         else if(element3 == "exitevent")
         {
           EditorEvent event(state->event_exit);
           event.load(data, index + 3);
+          state->event_exit = EventSet::deleteEvent(state->event_exit);
           if(event.getEvent() != NULL)
             state->event_exit = *event.getEvent();
+          event.setEventBlank(false);
         }
         /* ---- USE EVENT ---- */
         else if(element3 == "useevent")
         {
           EditorEvent event(state->event_use);
           event.load(data, index + 3);
+          state->event_use = EventSet::deleteEvent(state->event_use);
           if(event.getEvent() != NULL)
             state->event_use = *event.getEvent();
+          event.setEventBlank(false);
         }
         /* ---- WALKOVER EVENT ---- */
         else if(element3 == "walkoverevent")
         {
           EditorEvent event(state->event_walkover);
           event.load(data, index + 3);
+          state->event_walkover = EventSet::deleteEvent(state->event_walkover);
           if(event.getEvent() != NULL)
             state->event_walkover = *event.getEvent();
+          event.setEventBlank(false);
         }
       }
     }

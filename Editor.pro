@@ -37,7 +37,9 @@ SOURCES += \
     src/Database/EditorCategory.cc \
     src/Database/EditorEquipment.cc \
     src/Database/EditorEvent.cc \
+    src/Database/EditorEventSet.cc \
     src/Database/EditorItem.cc \
+    src/Database/EditorLock.cc \
     src/Database/EditorMap.cc \
     src/Database/EditorMapIO.cc \
     src/Database/EditorMapItem.cc \
@@ -132,7 +134,9 @@ HEADERS += \
     include/Database/EditorCategory.h \
     include/Database/EditorEquipment.h \
     include/Database/EditorEvent.h \
+    include/Database/EditorEventSet.h \
     include/Database/EditorItem.h \
+    include/Database/EditorLock.h \
     include/Database/EditorMap.h \
     include/Database/EditorMapIO.h \
     include/Database/EditorMapItem.h \
