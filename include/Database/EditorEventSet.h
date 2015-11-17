@@ -9,9 +9,7 @@
 #ifndef EDITOREVENTSET_H
 #define EDITOREVENTSET_H
 
-//#include <QPair>
 #include <QString>
-//#include <QStringList>
 #include <QVector>
 
 #include "Database/EditorEvent.h"
@@ -25,7 +23,7 @@ public:
   EditorEventSet();
 
   /* Constructor function - with input event */
-  EditorEventSet(const EventSet& set);
+  EditorEventSet(EventSet& set);
 
   /* Copy constructor */
   EditorEventSet(const EditorEventSet &source);
@@ -67,7 +65,7 @@ public:
 
   /* Returns the event set conversion of the Editor Event Set. This creates
    * copy of data for storage elsewhere (to be managed by caller) */
-  EventSet* getEventSet();
+  EventSet getEventSet();
 
   /* Access getters for unlocked event(s) */
   QVector<EditorEvent> getEventUnlocked();
@@ -95,7 +93,7 @@ public:
   bool setEventLocked(EditorEvent new_event, bool delete_event = true);
 
   /* Set for the event set */
-  bool setEventSet(const EventSet& set, bool delete_prev = true);
+  bool setEventSet(EventSet& set, bool delete_prev = true);
 
   /* Setters for unlocked event(s) */
   bool setEventUnlocked(int index, Event new_event, bool replace = false,
