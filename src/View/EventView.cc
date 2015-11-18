@@ -283,8 +283,8 @@ void EventView::createLayout(bool conversation_enabled)
   setFrameStyle(QFrame::Panel);
   setLayout(layout);
   setLineWidth(1);
-  setMaximumSize(352, 236); // (352, 192)
-  setMinimumSize(352, 236); // (352, 192)
+  setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
+  setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
 }
 
 /*

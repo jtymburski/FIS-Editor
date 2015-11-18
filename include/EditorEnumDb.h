@@ -15,6 +15,8 @@ class EditorEnumDb
 public:
   /* ---- Constants ---- */
 
+  const static int kEVENT_VIEW_H = 236; /* Height of event view widget */
+  const static int kEVENT_VIEW_W = 352; /* Width of event view widget */
   const static int kMAX_PERSON_LVL = 127; /* The max level of a person */
 
   /* ---- Enumerations ---- */

@@ -101,6 +101,9 @@ public:
   int getTeleportX();
   int getTeleportY();
 
+  /* Returns a text list summary of the event */
+  QString getTextSummary(QString prefix = "Event: ");
+
   /* Insert conversations at index control points. Fails if invalid point */
   QString insertConversationAfter(QString index, Conversation convo,
                                   bool option_node = false);

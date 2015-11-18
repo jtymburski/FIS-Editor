@@ -31,6 +31,9 @@
 #include "EditorEnumDb.h"
 #include "FileHandler.h"
 
+// TODO: REMOVE - TESTING
+#include "View/LockView.h"
+
 class GameDatabase : public QWidget
 {
   Q_OBJECT

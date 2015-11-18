@@ -72,6 +72,7 @@ SOURCES += \
     src/Dialog/ThingDialog.cc \
     src/View/EventView.cc \
     src/View/GameView.cc \
+    src/View/LockView.cc \
     src/View/MapControl.cc \
     src/View/MapDatabase.cc \
     src/View/MapIOView.cc \
@@ -170,6 +171,7 @@ HEADERS += \
     include/Dialog/ThingDialog.h \
     include/View/EventView.h \
     include/View/GameView.h \
+    include/View/LockView.h \
     include/View/MapControl.h \
     include/View/MapDatabase.h \
     include/View/MapIOView.h \

@@ -141,6 +141,25 @@ LockedState EditorLock::getLockType()
 }
 
 /*
+ * Description: Returns the text based summary of what defines the Editor Lock
+ *
+ * Inputs: QString prefix - the text to prepend. Default "Lock: "
+ * Output: QString - the returned string description
+ */
+QString EditorLock::getTextSummary(QString prefix)
+{
+  QString content = "";
+  if(getLockType() == LockedState::ITEM)
+    content = "Have Item ID " + QString::number(getHaveItemID());
+  else if(getLockType() == LockedState::TRIGGER)
+    content = "Trigger";
+  else
+    content = "None";
+
+  return (prefix + content);
+}
+
+/*
  * Description: Returns if the lock event is set and if flagged as permanent.
  *              This defines if during the game, the lock is unlocked, it stays
  *              unlocked infinitely.

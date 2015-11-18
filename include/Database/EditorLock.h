@@ -55,6 +55,9 @@ public:
   /* Returns the lock type */
   LockedState getLockType();
 
+  /* Returns a text list summary of the lock */
+  QString getTextSummary(QString prefix = "Lock: ");
+
   /* Returns if the lock is set to be permanent */
   bool isPermanent();
 
@@ -72,7 +75,7 @@ public:
   void setLockBlank();
 
   /* Sets the lock struct to a have item based lock */
-  bool setLockHaveItem(int id = EventSet::kUNSET_ID, int count = 1,
+  bool setLockHaveItem(int id = 0, int count = 1,
                        bool consume = true, bool permanent = true);
 
   /* Sets the lock struct to a trigger based lock */

@@ -1399,8 +1399,17 @@ void GameDatabase::duplicateResource()
 void GameDatabase::importResource()
 {
   // TODO: Future
-  QMessageBox::information(this, "Notification",
-                           "Coming soon to a production near you!");
+  //QMessageBox::information(this, "Notification",
+  //                         "Coming soon to a production near you!");
+
+  // TODO: REMOVE - TESTING
+  QDialog* pop_test = new QDialog(this);
+  pop_test->setWindowTitle("Lock Test");
+  QVBoxLayout* pop_layout = new QVBoxLayout(pop_test);
+  EditorLock* lock = new EditorLock();
+  LockView* view = new LockView(lock, pop_test);
+  pop_layout->addWidget(view);
+  pop_test->show();
 }
 
 /* Right click list menu on bottom list */

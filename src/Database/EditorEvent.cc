@@ -553,6 +553,43 @@ int EditorEvent::getTeleportY()
 }
 
 /*
+ * Description: Returns the text based summary of what defines the Editor Event
+ *
+ * Inputs: QString prefix - the text to prepend. Default "Event: "
+ * Output: QString - the returned string description
+ */
+QString EditorEvent::getTextSummary(QString prefix)
+{
+  QString content = "";
+  if(getEventType() == EventClassifier::GIVEITEM)
+    content = "Give Item";
+  else if(getEventType() == EventClassifier::NOTIFICATION)
+    content = "Notification";
+  else if(getEventType() == EventClassifier::RUNBATTLE)
+    content = "Start Battle";
+  else if(getEventType() == EventClassifier::RUNMAP)
+    content = "Switch Map";
+  else if(getEventType() == EventClassifier::TELEPORTTHING)
+    content = "Teleport Thing";
+  else if(getEventType() == EventClassifier::JUSTSOUND)
+    content = "Sound Trigger";
+  else if(getEventType() == EventClassifier::TAKEITEM)
+    content = "Take Item";
+  else if(getEventType() == EventClassifier::UNLOCKTHING)
+    content = "Unlock Thing";
+  else if(getEventType() == EventClassifier::UNLOCKTILE)
+    content = "Unlock Tile";
+  else if(getEventType() == EventClassifier::UNLOCKIO)
+    content = "Unlock IO";
+  else if(getEventType() == EventClassifier::STARTCONVO)
+    content = "Conversation";
+  else
+    content = "None";
+
+  return (prefix + content);
+}
+
+/*
  * Description: Inserts a passed in conversation node after the index node
  *              passed in. If the index is on a bad path on the tree, it fails.
  *              If option_node is set, a node with children can be passed in
