@@ -120,6 +120,9 @@ void LockView::createLayout()
   setFrameStyle(QFrame::Panel);
   setLayout(layout);
   setLineWidth(1);
+  QPalette palette;
+  palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
+  setPalette(palette);
   setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
   setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
 }

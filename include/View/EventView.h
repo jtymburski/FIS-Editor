@@ -14,6 +14,8 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QStackedWidget>
@@ -22,7 +24,8 @@
 #include <QVBoxLayout>
 
 #include "Database/EditorEvent.h"
-#include "Database/GameDatabase.h"
+//#include "Database/GameDatabase.h"
+#include "EditorEnumDb.h"
 
 class EventView : public QFrame
 {
@@ -50,7 +53,7 @@ private:
   QTreeWidget* convo_tree;
 
   /* Game database */
-  GameDatabase* database;
+  //GameDatabase* database;
 
   /* The connected event - original and working version */
   EditorEvent* event;

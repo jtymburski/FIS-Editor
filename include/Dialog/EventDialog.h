@@ -15,6 +15,7 @@
 //#include <QHeaderView>
 //#include <QLabel>
 //#include <QLineEdit>
+#include <QListWidget>
 //#include <QPushButton>
 //#include <QSpinBox>
 //#include <QStackedWidget>
@@ -44,6 +45,12 @@ private:
   //QAction* action_delete;
   //QAction* action_option;
 
+  /* Push button widgets */
+  QPushButton* btn_down;
+  QPushButton* btn_edit;
+  QPushButton* btn_rem;
+  QPushButton* btn_up;
+
   /* The category of the event view */
   //QComboBox* combo_category;
 
@@ -66,12 +73,12 @@ private:
   //QSpinBox* item_count;
   //QComboBox* item_name;
 
-  /* The list of objects used in possible events */
-  //QVector<QString> list_items;
-  //QVector<QString> list_maps;
-  //QList<QString> list_sounds;
-  //QVector<QString> list_submaps;
-  //QVector<QString> list_things;
+  /* Label widgets */
+  QLabel* lbl_lock_event;
+  QLabel* lbl_lock;
+
+  /* List widgets */
+  QListWidget* list_unlock_events;
 
   /* Switch maps event - map name view box */
   //QComboBox* map_name;
@@ -84,7 +91,8 @@ private:
   //QMenu* rightclick_menu;
 
   /* The connected editor event set - to be modified by the view */
-  EditorEventSet* set;
+  EditorEventSet* set_original;
+  EditorEventSet* set_working;
 
   /* Take item event control widgets */
   //QSpinBox* take_count;
@@ -99,7 +107,7 @@ private:
   LockView* view_lock;
 
   /* View stack for sub-widgets */
-  //QStackedWidget* view_stack;
+  QStackedWidget* view_stack;
 
   /* Waiting for sub-map data */
   bool waiting_convo;
@@ -204,7 +212,8 @@ public:
   QVector<QString> getListThings();
 
   /* Returns the event set */
-  EditorEventSet* getEventSet();
+  EditorEventSet* getSetOriginal();
+  EditorEventSet* getSetWorking();
 
   /* Returns views */
   EventView* getViewEvent();
@@ -221,7 +230,7 @@ public:
   void setListThings(QVector<QString> things);
 
   /* Sets the event set */
-  EditorEventSet* setEventSet(EditorEventSet* set);
+  void setEventSet(EditorEventSet* set);
 
   /* Updates the event set */
   void updateSet();

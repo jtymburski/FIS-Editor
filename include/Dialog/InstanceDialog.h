@@ -9,10 +9,14 @@
 #ifndef INSTANCEDIALOG_H
 #define INSTANCEDIALOG_H
 
+#include <QCheckBox>
 #include <QCloseEvent>
 #include <QDialog>
 #include <QGridLayout>
+#include <QListWidget>
+#include <QMessageBox>
 
+#include "Database/EditorMapIO.h"
 #include "Database/EditorMapNPC.h"
 #include "Dialog/ConvoDialog.h"
 #include "Dialog/NodeDialog.h"

@@ -32,6 +32,7 @@
 #include "FileHandler.h"
 
 // TODO: REMOVE - TESTING
+#include "Dialog/EventDialog.h"
 #include "View/LockView.h"
 
 class GameDatabase : public QWidget

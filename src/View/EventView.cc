@@ -25,7 +25,7 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
          : QFrame(parent)
 {
   /* Initialize variables */
-  database = NULL;
+  //database = NULL;
   this->event = NULL;
   rightclick_index = "";
 
@@ -283,6 +283,9 @@ void EventView::createLayout(bool conversation_enabled)
   setFrameStyle(QFrame::Panel);
   setLayout(layout);
   setLineWidth(1);
+  QPalette palette;
+  palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
+  setPalette(palette);
   setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
   setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
 }

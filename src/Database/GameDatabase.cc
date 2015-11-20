@@ -1403,13 +1403,17 @@ void GameDatabase::importResource()
   //                         "Coming soon to a production near you!");
 
   // TODO: REMOVE - TESTING
-  QDialog* pop_test = new QDialog(this);
-  pop_test->setWindowTitle("Lock Test");
-  QVBoxLayout* pop_layout = new QVBoxLayout(pop_test);
-  EditorLock* lock = new EditorLock();
-  LockView* view = new LockView(lock, pop_test);
-  pop_layout->addWidget(view);
-  pop_test->show();
+  //QDialog* pop_test = new QDialog(this);
+  //pop_test->setWindowTitle("Lock Test");
+  //QVBoxLayout* pop_layout = new QVBoxLayout(pop_test);
+  //EditorLock* lock = new EditorLock();
+  //LockView* view = new LockView(lock, pop_test);
+  //pop_layout->addWidget(view);
+  //pop_test->show();
+
+  // TODO: REMOVE - TESTING 2
+  EventDialog* dialog = new EventDialog(nullptr, this);
+  dialog->show();
 }
 
 /* Right click list menu on bottom list */
