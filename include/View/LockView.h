@@ -67,8 +67,8 @@ private:
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
+  /* Updated trigger */
+  void updated();
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS

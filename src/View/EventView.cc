@@ -678,6 +678,7 @@ void EventView::categoryChanged(int index)
 
     /* Update the layout */
     setLayoutData();
+    emit updated();
   }
 //  }
 //  else
@@ -700,7 +701,9 @@ void EventView::changeMapChanged(int index)
   {
     QStringList list = list_maps[index].split(":");
     if(list.size() == 2)
+    {
       event->setEventStartMap(list.front().toInt(), event->getSoundID());
+    }
   }
 }
 
@@ -803,8 +806,10 @@ void EventView::giveItemChanged(int index)
   {
     QStringList list = list_items[index].split(":");
     if(list.size() == 2)
+    {
       event->setEventGiveItem(list.front().toInt(), event->getGiveItemCount(),
                               event->getSoundID());
+    }
   }
 }
 

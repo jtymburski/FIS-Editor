@@ -216,6 +216,7 @@ void LockView::categoryChanged(int index)
 
     /* Update the layout */
     setLayoutData();
+    emit updated();
   }
 }
 

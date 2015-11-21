@@ -87,7 +87,7 @@ public:
   /* Saves the event data */
   void save(FileHandler* fh, bool game_only = false,
             QString preface = "eventset", bool no_preface = false);
-  
+
   /* Setters for locked event */
   bool setEventLocked(Event new_event, bool delete_event = true);
   bool setEventLocked(EditorEvent new_event, bool delete_event = true);

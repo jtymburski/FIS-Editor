@@ -45,6 +45,9 @@ private:
   //QAction* action_delete;
   //QAction* action_option;
 
+  /* Combo box for unlock parse category */
+  QComboBox* box_unlock;
+
   /* Push button widgets */
   QPushButton* btn_down;
   QPushButton* btn_edit;
@@ -129,6 +132,16 @@ private:
   /* Set layout data */
   void setLayoutData();
 
+  /* Set view information */
+  void setViewEvent(EditorEvent* event = nullptr);
+  void setViewLock(EditorLock* lock = nullptr);
+
+  /* Update data for the various areas */
+  void updateDataAll();
+  void updateDataLock();
+  void updateDataLockEvent();
+  void updateDataUnlocks();
+
   /* Update conversation data */
   //void updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
   //                     bool option = false);
@@ -140,6 +153,9 @@ signals:
   /* Edit conversation trigger */
   //void editConversation(Conversation* convo, bool is_option);
 
+  /* Ok pressed */
+  void ok();
+
   /* Select tile trigger */
   void selectTile();
 
@@ -147,6 +163,17 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* Button control triggers */
+  void btnAddUnlock();
+  void btnCancel();
+  void btnDownUnlock();
+  void btnEditLock();
+  void btnEditLockEvent();
+  void btnEditUnlock();
+  void btnOk();
+  void btnRemoveUnlock();
+  void btnUpUnlock();
+
   /* Category changed */
   //void categoryChanged(int index);
 
@@ -168,6 +195,10 @@ public slots:
   /* The give item event slot changes */
   //void giveCountChanged(int index);
   //void giveItemChanged(int index);
+
+  /* Unlock list changes */
+  void listUnlockChange(int current_row);
+  void listUnlockDouble(QListWidgetItem*);
 
   /* The notification event text changes */
   //void notificationTextChanged();
@@ -194,8 +225,15 @@ public slots:
   //void teleportMapPressed();
   //void teleportThingChanged(int index);
 
+  /* Unlock parse changed */
+  void unlockParseChanged(int index);
+
   /* Update the layout trigger */
   //void updateConversation();
+
+  /* Update view data associated to the lock or event */
+  void updateEvent();
+  void updateLock();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

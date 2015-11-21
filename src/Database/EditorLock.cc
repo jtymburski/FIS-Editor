@@ -150,7 +150,7 @@ QString EditorLock::getTextSummary(QString prefix)
 {
   QString content = "";
   if(getLockType() == LockedState::ITEM)
-    content = "Have Item ID " + QString::number(getHaveItemID());
+    content = "Have Item";// ID " + QString::number(getHaveItemID());
   else if(getLockType() == LockedState::TRIGGER)
     content = "Trigger";
   else
