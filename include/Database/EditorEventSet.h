@@ -34,7 +34,8 @@ public:
 private:
   /* Event sets */
   EditorEvent event_locked;
-  QVector<EditorEvent> events_unlocked;
+  QVector<EditorEvent*> events_unlocked;
+  //QVector<EditorEvent> events_unlocked;
 
   /* Locked status struct */
   EditorLock lock_data;
@@ -68,7 +69,7 @@ public:
   EventSet getEventSet();
 
   /* Access getters for unlocked event(s) */
-  QVector<EditorEvent> getEventUnlocked();
+  QVector<EditorEvent*> getEventUnlocked();
   EditorEvent* getEventUnlocked(int index);
   int getEventUnlockedTotal();
 
@@ -107,6 +108,10 @@ public:
 
   /* Sets the unlocked state */
   bool setUnlockedState(UnlockedState state);
+
+  /* Shift unlocked events in list */
+  int shiftUnlockedDown(int index);
+  int shiftUnlockedUp(int index);
 
   /* Unset calls */
   bool unsetEventLocked(bool delete_event = true);

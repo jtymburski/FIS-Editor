@@ -8,24 +8,10 @@
 #ifndef EVENTDIALOG_H
 #define EVENTDIALOG_H
 
-//#include <QComboBox>
 #include <QDialog>
-//#include <QFrame>
-//#include <QGridLayout>
-//#include <QHeaderView>
-//#include <QLabel>
-//#include <QLineEdit>
 #include <QListWidget>
-//#include <QPushButton>
-//#include <QSpinBox>
-//#include <QStackedWidget>
-//#include <QTextEdit>
-//#include <QTreeWidget>
-//#include <QVBoxLayout>
 
-//#include "Database/EditorEvent.h"
 #include "Database/EditorEventSet.h"
-//#include "Database/GameDatabase.h"
 #include "Dialog/ConvoDialog.h"
 #include "View/EventView.h"
 #include "View/LockView.h"
@@ -41,10 +27,6 @@ public:
   ~EventDialog();
 
 private:
-  /* Right click actions that can be disabled */
-  //QAction* action_delete;
-  //QAction* action_option;
-
   /* Combo box for unlock parse category */
   QComboBox* box_unlock;
 
@@ -54,27 +36,8 @@ private:
   QPushButton* btn_rem;
   QPushButton* btn_up;
 
-  /* The category of the event view */
-  //QComboBox* combo_category;
-
-  /* Sound selection widget */
-  //QComboBox* combo_sound;
-
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
-
-  /* The conversation event - convo tree */
-  //QTreeWidget* convo_tree;
-
-  /* Game database */
-  //GameDatabase* database;
-
-  /* The connected event - original and working version */
-  //EditorEvent* event;
-
-  /* Give item event control widgets */
-  //QSpinBox* item_count;
-  //QComboBox* item_name;
 
   /* Label widgets */
   QLabel* lbl_lock_event;
@@ -83,27 +46,9 @@ private:
   /* List widgets */
   QListWidget* list_unlock_events;
 
-  /* Switch maps event - map name view box */
-  //QComboBox* map_name;
-
-  /* Notification event text edit box */
-  //QTextEdit* notification_edit;
-
-  /* Right click menu on conversation dialog */
-  //QString rightclick_index;
-  //QMenu* rightclick_menu;
-
   /* The connected editor event set - to be modified by the view */
   EditorEventSet* set_original;
   EditorEventSet* set_working;
-
-  /* Take item event control widgets */
-  //QSpinBox* take_count;
-  //QComboBox* take_name;
-
-  /* Teleport event - view text boxes for map location and thing */
-  //QLineEdit* tele_map;
-  //QComboBox* tele_thing;
 
   /* The view event and lock widgets */
   EventView* view_event;
@@ -123,12 +68,6 @@ private:
   /* Creates the layout and widgets for this controller */
   void createLayout();
 
-  /* Returns the convesation item, based on the index, of the tree widget */
-  //QTreeWidgetItem* getConvo(QString base_index);
-
-  /* Returns the conversation index of the tree widget */
-  //QString getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent = NULL);
-
   /* Set layout data */
   void setLayoutData();
 
@@ -142,17 +81,10 @@ private:
   void updateDataLockEvent();
   void updateDataUnlocks();
 
-  /* Update conversation data */
-  //void updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
-  //                     bool option = false);
-
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
 signals:
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
-
   /* Ok pressed */
   void ok();
 
@@ -174,62 +106,19 @@ public slots:
   void btnRemoveUnlock();
   void btnUpUnlock();
 
-  /* Category changed */
-  //void categoryChanged(int index);
-
-  /* The change map button press */
-  //void changeMapChanged(int index);
-
-  /* Sound reference updated */
-  //void changedSound(const QString & text);
-
-  /* Conversation item double clicked trigger */
-  //void convoDoubleClick(QTreeWidgetItem*, int);
-
-  /* The convo menu requested - on right click */
-  //void convoMenuRequested(QPoint point);
-
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
-
-  /* The give item event slot changes */
-  //void giveCountChanged(int index);
-  //void giveItemChanged(int index);
 
   /* Unlock list changes */
   void listUnlockChange(int current_row);
   void listUnlockDouble(QListWidgetItem*);
 
-  /* The notification event text changes */
-  //void notificationTextChanged();
-
-  /* Resize the QTreeWidget for the items */
-  //void resizeTree(QTreeWidgetItem*);
-
-  /* The right click slots, for conversation */
-  //void rightClickDelete();
-  //void rightClickEdit();
-  //void rightClickInsertAfter();
-  //void rightClickInsertBefore();
-  //void rightClickInsertOption();
-
   /* Select tile trigger */
   void selectTileConvo();
   void selectTileMain();
 
-  /* The give item event slot changes */
-  //void takeCountChanged(int index);
-  //void takeItemChanged(int index);
-
-  /* The teleport event button presses */
-  //void teleportMapPressed();
-  //void teleportThingChanged(int index);
-
   /* Unlock parse changed */
   void unlockParseChanged(int index);
-
-  /* Update the layout trigger */
-  //void updateConversation();
 
   /* Update view data associated to the lock or event */
   void updateEvent();
@@ -239,9 +128,6 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
-  /* Returns the event */
-  //EditorEvent* getEvent();
-
   /* Returns the list of objects, used for event creation */
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
@@ -256,9 +142,6 @@ public:
   /* Returns views */
   EventView* getViewEvent();
   LockView* getViewLock();
-
-  /* Sets the editor event */
-  //void setEvent(EditorEvent* event);
 
   /* Sets the list of objects, used for event creation */
   void setListItems(QVector<QString> items);

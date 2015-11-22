@@ -6,13 +6,18 @@
  *              EditorEventSet class - within a QDialog widget.
  ******************************************************************************/
 #include "Dialog/EventDialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
 
-/* Constructor function */
+/*
+ * Description: The main event dialog to handle the editor event set.
+ *
+ * Inputs: EditorEventSet& set - the set to edit within the dialog
+ *         QWidget* parent - the parent widget
+ */
 EventDialog::EventDialog(EditorEventSet* set, QWidget* parent)
            : QDialog(parent)
 {
@@ -29,7 +34,9 @@ EventDialog::EventDialog(EditorEventSet* set, QWidget* parent)
   setEventSet(set);
 }
 
-/* Destructor function */
+/*
+ * Description: Dstructor function
+ */
 EventDialog::~EventDialog()
 {
   setEventSet(nullptr);
@@ -41,7 +48,12 @@ EventDialog::~EventDialog()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Creates the layout and widgets for this controller */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::createLayout()
 {
   /* General dialog control */
@@ -149,7 +161,13 @@ void EventDialog::createLayout()
   setFixedSize(minimumSizeHint());
 }
 
-/* Set layout data */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::setLayoutData()
 {
   /* Update lock */
@@ -164,9 +182,18 @@ void EventDialog::setLayoutData()
   updateDataUnlocks();
 }
 
-/* Set view information */
+/*
+ * Description: Sets the event view with the new event widget
+ *
+ * Inputs: EditorEvent* event - the editor event widget
+ * Output: none
+ */
 void EventDialog::setViewEvent(EditorEvent* event)
 {
+  /* Make sure the sub-dialogs are removed */
+  editConversation(nullptr, false);
+
+  /* Update the unlock */
   if(event != view_event->getEvent())
   {
     view_event->setEvent(event);
@@ -178,9 +205,18 @@ void EventDialog::setViewEvent(EditorEvent* event)
   updateDataAll();
 }
 
-/* Set view information */
+/*
+ * Description: Sets the lock view with the new lock widget
+ *
+ * Inputs: EditorLock* lock - the editor lock widget
+ * Output: none
+ */
 void EventDialog::setViewLock(EditorLock* lock)
 {
+  /* Make sure the sub-dialogs are removed */
+  editConversation(nullptr, false);
+
+  /* Update the lock */
   if(lock != view_lock->getLock())
   {
     view_lock->setLock(lock);
@@ -192,7 +228,12 @@ void EventDialog::setViewLock(EditorLock* lock)
   updateDataAll();
 }
 
-/* Update data for the various areas */
+/*
+ * Description: Update all data lock and events within the set view
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateDataAll()
 {
   updateDataLock();
@@ -200,7 +241,12 @@ void EventDialog::updateDataAll()
   updateDataUnlocks();
 }
 
-/* Update data for the various areas */
+/*
+ * Description: Update the data for the lock within the set widget
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateDataLock()
 {
   lbl_lock->setText(set_working->getLockedState()->getTextSummary());
@@ -215,7 +261,12 @@ void EventDialog::updateDataLock()
   lbl_lock->setFont(font);
 }
 
-/* Update data for the various areas */
+/*
+ * Description: Update the data for the lock event within the set widget
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateDataLockEvent()
 {
   lbl_lock_event->setText(set_working->getEventLocked()->getTextSummary());
@@ -230,7 +281,12 @@ void EventDialog::updateDataLockEvent()
   lbl_lock_event->setFont(font);
 }
 
-/* Update data for the various areas */
+/*
+ * Description: Update the data for the unlock events within the set widget
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateDataUnlocks()
 {
   /* Remove old items */
@@ -268,8 +324,14 @@ void EventDialog::updateDataUnlocks()
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
-/* Button control triggers */
+
+/*
+ * Description: Button slot on the add an unlock event buttn. Adds the unlock
+ *              event to the tail of the existing sets of events.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnAddUnlock()
 {
   /* Add event and update data */
@@ -280,31 +342,69 @@ void EventDialog::btnAddUnlock()
   list_unlock_events->setCurrentRow(list_unlock_events->count() - 1);
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the cancel button. Just closes the dialog and
+ *              doesn't save the changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnCancel()
 {
+  editConversation(nullptr, false);
   close();
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the move the current unlock event down within
+ *              the list. Shifts the event one point down lower towards the
+ *              bottom of the set of unlock events.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnDownUnlock()
 {
-  // TODO
+  int selected = set_working->shiftUnlockedDown(
+                                      list_unlock_events->currentRow());
+  if(selected >= 0)
+  {
+    updateDataUnlocks();
+    list_unlock_events->setCurrentRow(selected);
+  }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on edit lock data of the set. This edits the
+ *              current lock and puts it in the right view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnEditLock()
 {
   setViewLock(set_working->getLockedState());
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on edit lock event data of the set. This edits the
+ *              one lock event and puts it in the right view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnEditLockEvent()
 {
   setViewEvent(set_working->getEventLocked());
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on edit unlock event data of the set. This edits the
+ *              current selected unlock event and puts it in the right view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnEditUnlock()
 {
   if(list_unlock_events->currentRow() >= 0)
@@ -316,38 +416,105 @@ void EventDialog::btnEditUnlock()
   }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the ok button. Emits ok prior to closing the
+ *              dialog. The ok gets handled by the widget parent, which
+ *              updates any uses of the event set prior to accepting changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnOk()
 {
+  editConversation(nullptr, false);
   updateSet();
   emit ok();
   close();
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the remove an unlock event. This removes the
+ *              selected unlock event from the working set and moves the
+ *              remainder up in the list.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnRemoveUnlock()
 {
   if(list_unlock_events->currentRow() >= 0)
   {
-    setViewEvent();
+    EditorEvent* curr = set_working->getEventUnlocked(
+                                              list_unlock_events->currentRow());
+    if(view_event->getEvent() == curr)
+      setViewEvent();
     set_working->unsetEventUnlocked(list_unlock_events->currentRow());
     updateDataUnlocks();
   }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button slot on the move the current unlock event up within
+ *              the list. Shifts the event one point higher towards the
+ *              bottom of the set of unlock events.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::btnUpUnlock()
 {
-  // TODO
+  int selected = set_working->shiftUnlockedUp(list_unlock_events->currentRow());
+  if(selected >= 0)
+  {
+    updateDataUnlocks();
+    list_unlock_events->setCurrentRow(selected);
+  }
 }
 
-/* Edit conversation trigger */
+/*
+ * Description: Edits the current conversation instance trigger. Triggered
+ *              from EventView. Required to lock out the pop-up.
+ *
+ * Inputs: Conversation* convo - the conversation segment to edit
+ *         bool is_option - true if the segment is an option
+ * Output: none
+ */
 void EventDialog::editConversation(Conversation* convo, bool is_option)
 {
+  if(convo_dialog != NULL)
+  {
+    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+               this, SLOT(selectTileConvo()));
+    disconnect(convo_dialog, SIGNAL(success()),
+               view_event, SLOT(updateConversation()));
+    delete convo_dialog;
+  }
+  convo_dialog = NULL;
 
+  /* Create the new conversation dialog */
+  if(convo != nullptr)
+  {
+    convo_dialog = new ConvoDialog(convo, is_option, this);
+    convo_dialog->setListThings(getListThings());
+    convo_dialog->getEventView()->setListItems(getListItems());
+    convo_dialog->getEventView()->setListMaps(getListMaps());
+    convo_dialog->getEventView()->setListSounds(getListSounds());
+    convo_dialog->getEventView()->setListSubmaps(getListSubmaps());
+    connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+            this, SLOT(selectTileConvo()));
+    connect(convo_dialog, SIGNAL(success()),
+            view_event, SLOT(updateConversation()));
+    convo_dialog->show();
+  }
 }
 
-/* Unlock list changes */
+/*
+ * Description: Slot which triggers when the selected unlock event in the list
+ *              changes. Updates enabled/disabled buttons.
+ *
+ * Inputs: int current_row - the new selected row in the list
+ * Output: none
+ */
 void EventDialog::listUnlockChange(int current_row)
 {
   /* Edit and remove buttons */
@@ -362,38 +529,82 @@ void EventDialog::listUnlockChange(int current_row)
                        current_row < (list_unlock_events->count() - 1));
 }
 
-/* Unlock list changes */
+/*
+ * Description: Slot which triggers when the user double clicks on the unlock
+ *              event list. Calls btnEditUnlock()
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
 void EventDialog::listUnlockDouble(QListWidgetItem*)
 {
   btnEditUnlock();
 }
 
-/* Select tile trigger */
+/*
+ * Description: Triggers the select tile dialog for the conversation in the
+ *              event view in the pop-up. This hides the pop-up and waits for a
+ *              tile to be selected on the map render.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::selectTileConvo()
 {
-
+  if(convo_dialog != nullptr)
+  {
+    convo_dialog->hide();
+    selectTileMain();
+    waiting_convo = true;
+  }
 }
 
-/* Select tile trigger */
+/*
+ * Description: Triggers the select tile dialog for the pop-up. This hides the
+ *              pop-up and waits for a tile to be selected on the map render.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::selectTileMain()
 {
-
+  waiting_convo = false;
+  waiting_for_submap = true;
+  hide();
+  emit selectTile();
 }
 
-/* Unlock parse changed */
+/*
+ * Description: Slot which triggers when the selected unlock parse state
+ *              changes.
+ *
+ * Inputs: int index - the new selected row in the drop down
+ * Output: none
+ */
 void EventDialog::unlockParseChanged(int index)
 {
   set_working->setUnlockedState(static_cast<UnlockedState>(index));
 }
 
-/* Update view data associated to the lock or event */
+/*
+ * Description: Updates the viewable events within the set, the unlocked and
+ *              locked.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateEvent()
 {
   updateDataLockEvent();
   updateDataUnlocks();
 }
 
-/* Update view data associated to the lock or event */
+/*
+ * Description: Updates the viewable lock within the set.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateLock()
 {
   updateDataLock();
@@ -403,92 +614,172 @@ void EventDialog::updateLock()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
 QVector<QString> EventDialog::getListItems()
 {
   return view_event->getListItems();
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
 QVector<QString> EventDialog::getListMaps()
 {
   return view_event->getListMaps();
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns a list of sounds being used in the event dialog.
+ *              Used when required for neighboring calls.
+ *
+ * Inputs: none
+ * Output: QList<QString> - the sound string list
+ */
 QList<QString> EventDialog::getListSounds()
 {
   return view_event->getListSounds();
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
 QVector<QString> EventDialog::getListSubmaps()
 {
   return view_event->getListSubmaps();
 }
 
-/* Returns the list of objects, used for event creation */
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
 QVector<QString> EventDialog::getListThings()
 {
   return view_event->getListThings();
 }
 
-/* Returns the event set */
+/*
+ * Description: Returns a reference to the original editor event set being
+ *              edited within the event dialog
+ *
+ * Inputs: none
+ * Output: EditorEventSet* - the original set reference
+ */
 EditorEventSet* EventDialog::getSetOriginal()
 {
   return set_original;
 }
 
-/* Returns the event set */
+/*
+ * Description: Returns a reference to the working editor event set being
+ *              edited within the event dialog
+ *
+ * Inputs: none
+ * Output: EditorEventSet* - the working set reference
+ */
 EditorEventSet* EventDialog::getSetWorking()
 {
   return set_working;
 }
 
-/* Returns views */
+/*
+ * Description: Returns the event view that is used within the dialog
+ *
+ * Inputs: none
+ * Output: EventView* - the reference event view widget from within
+ */
 EventView* EventDialog::getViewEvent()
 {
   return view_event;
 }
 
-/* Returns views */
+/*
+ * Description: Returns the lock view that is used within the dialog
+ *
+ * Inputs: none
+ * Output: LockView* - the reference lock view widget from within
+ */
 LockView* EventDialog::getViewLock()
 {
   return view_lock;
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
 void EventDialog::setListItems(QVector<QString> items)
 {
   view_event->setListItems(items);
   view_lock->setListItems(items);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
 void EventDialog::setListMaps(QVector<QString> maps)
 {
   view_event->setListMaps(maps);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of sounds, to be used within the event dialog for
+ *              the drop down selection and within the event.
+ *
+ * Inputs: QList<QString> sounds - the sound string list
+ * Output: none
+ */
 void EventDialog::setListSounds(QList<QString> sounds)
 {
   view_event->setListSounds(sounds);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
 void EventDialog::setListSubmaps(QVector<QString> sub_maps)
 {
   view_event->setListSubmaps(sub_maps);
 }
 
-/* Sets the list of objects, used for event creation */
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
 void EventDialog::setListThings(QVector<QString> things)
 {
   view_event->setListThings(things);
 }
 
-/* Sets the event set */
+/*
+ * Description: Sets the event set that gets viewed within the event dialog.
+ *              The previous set is not saved and removed.
+ *
+ * Inputs: EditorEventSet* set - the editor event set to edit
+ * Output: none
+ */
 void EventDialog::setEventSet(EditorEventSet* set)
 {
   set_original = set;
@@ -497,7 +788,13 @@ void EventDialog::setEventSet(EditorEventSet* set)
   setLayoutData();
 }
 
-/* Updates the event set */
+/*
+ * Description: Updates the editor event set. Triggered by an external class
+ *              when it modifies the reference event.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventDialog::updateSet()
 {
   if(set_original != nullptr)
@@ -506,8 +803,31 @@ void EventDialog::updateSet()
   }
 }
 
-/* Update the selected tile for the thing */
+/*
+ * Description: Updates the dialog with the tile which was selected on the
+ *              sub-map. This shows the pop-up and updates the event with the
+ *              new location. If it was triggered from the embedded event view,
+ *              it passes the updated location to it.
+ *
+ * Inputs: int id - the ID of the sub-map
+ *         int x - the x tile location in the sub-map
+ *         int y - the y tile location in the sub-map
+ * Output: none
+ */
 void EventDialog::updateSelectedTile(int id, int x, int y)
 {
-  // TODO
+  if(waiting_for_submap)
+  {
+    waiting_for_submap = false;
+    show();
+    if(waiting_convo)
+    {
+      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+      convo_dialog->show();
+    }
+    else
+    {
+      view_event->updateSelectedTile(id, x, y);
+    }
+  }
 }

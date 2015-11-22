@@ -74,7 +74,7 @@ void EditorEventSet::copySelf(const EditorEventSet &source)
 
   /* Unlocked event(s) */
   for(int i = 0; i < source.events_unlocked.size(); i++)
-    addEventUnlocked(EditorEvent(source.events_unlocked[i]));
+    addEventUnlocked(EditorEvent(*source.events_unlocked[i]));
 
   /* Lock data */
   lock_data = source.lock_data;
@@ -110,7 +110,8 @@ bool EditorEventSet::addEventUnlocked(Event new_event)
  */
 bool EditorEventSet::addEventUnlocked(EditorEvent new_event)
 {
-  events_unlocked.push_back(new_event);
+  EditorEvent* event_ptr = new EditorEvent(new_event);
+  events_unlocked.push_back(event_ptr);
   return true;
 }
 
@@ -158,7 +159,7 @@ EventSet EditorEventSet::getEventSet()
   /* Unlocked events */
   for(int i = 0; i < events_unlocked.size(); i++)
     new_set.addEventUnlocked(EventSet::copyEvent(
-                                               *events_unlocked[i].getEvent()));
+                                             *events_unlocked[i]->getEvent()));
 
   /* Locked data */
   new_set.setLocked(*lock_data.getLock());
@@ -173,10 +174,10 @@ EventSet EditorEventSet::getEventSet()
  * Description: Returns the stack of events if the set is unlocked.
  *
  * Inputs: none
- * Output: std::vector<EditorEvent> - the editor event(s) associated with the
- *                                    unlocked status
+ * Output: QVector<EditorEvent*> - the editor event(s) associated with the
+ *                                 unlocked status
  */
-QVector<EditorEvent> EditorEventSet::getEventUnlocked()
+QVector<EditorEvent*> EditorEventSet::getEventUnlocked()
 {
   return events_unlocked;
 }
@@ -192,7 +193,7 @@ QVector<EditorEvent> EditorEventSet::getEventUnlocked()
 EditorEvent* EditorEventSet::getEventUnlocked(int index)
 {
   if(index >= 0 && index < getEventUnlockedTotal())
-    return &events_unlocked[index];
+    return events_unlocked[index];
   return nullptr;
 }
 
@@ -246,7 +247,7 @@ bool EditorEventSet::isEmpty()
   /* Check unlocked */
   bool unlocked_valid = false;
   for(int i = 0; i < events_unlocked.size(); i++)
-    unlocked_valid |= (events_unlocked[i].getEventType() !=
+    unlocked_valid |= (events_unlocked[i]->getEventType() !=
                        EventClassifier::NOEVENT);
 
   return (event_locked.getEventType() == EventClassifier::NOEVENT &&
@@ -295,10 +296,10 @@ void EditorEventSet::save(FileHandler* fh, bool game_only,
     /* Unlocked event(s) */
     for(int i = 0; i < events_unlocked.size(); i++)
     {
-      if(events_unlocked[i].getEventType() != EventClassifier::NOEVENT)
+      if(events_unlocked[i]->getEventType() != EventClassifier::NOEVENT)
       {
         fh->writeXmlElement("unlockevent", "id", i);
-        events_unlocked[i].save(fh, game_only, "", true);
+        events_unlocked[i]->save(fh, game_only, "", true);
         fh->writeXmlElementEnd();
       }
     }
@@ -377,7 +378,7 @@ bool EditorEventSet::setEventSet(EventSet& set, bool delete_prev)
   /* Unlocked events */
   std::vector<Event*> unlocked_events = set.getEventUnlockedRef(true);
   for(uint32_t i = 0; i < unlocked_events.size(); i++)
-    events_unlocked.push_back(EditorEvent(*unlocked_events[i]));
+    addEventUnlocked(*unlocked_events[i]);
 
   /* Locked struct */
   Locked lock_struct = set.getLockedState();
@@ -442,13 +443,14 @@ bool EditorEventSet::setEventUnlocked(int index, EditorEvent new_event,
       /* If in range, find and replace */
       if(index < events_unlocked.size())
       {
-        events_unlocked[index].setEventBlank(delete_event);
-        events_unlocked[index] = new_event;
+        events_unlocked[index]->setEventBlank(delete_event);
+        delete events_unlocked[index];
+        events_unlocked[index] = new EditorEvent(new_event);
       }
       /* Otherwise, append */
       else
       {
-        events_unlocked.push_back(new_event);
+        events_unlocked.push_back(new EditorEvent(new_event));
       }
     }
     /* -- Insert only -- */
@@ -457,9 +459,9 @@ bool EditorEventSet::setEventUnlocked(int index, EditorEvent new_event,
 
       /* If in range, insert. Otherwise, append */
       if(index < events_unlocked.size())
-        events_unlocked.insert(index, new_event);
+        events_unlocked.insert(index, new EditorEvent(new_event));
       else
-        events_unlocked.push_back(new_event);
+        events_unlocked.push_back(new EditorEvent(new_event));
     }
 
     success = true;
@@ -507,6 +509,52 @@ bool EditorEventSet::setUnlockedState(UnlockedState state)
 }
 
 /*
+ * Description: Shift the selected unlock index down in the list.
+ *
+ * Inputs: int index - the current index in the unlocked list
+ * Output: int - the new index. -1 if not changed
+ */
+int EditorEventSet::shiftUnlockedDown(int index)
+{
+  /* Ensure index is in range */
+  if(index >= 0 && index < (events_unlocked.size() - 1))
+  {
+    /* Remove the old index */
+    EditorEvent* event_shift = events_unlocked[index];
+    events_unlocked.remove(index);
+
+    /* Find the new index and insert */
+    int new_index = index + 1;
+    events_unlocked.insert(new_index, event_shift);
+    return new_index;
+  }
+  return -1;
+}
+
+/*
+ * Description: Shift the selected unlock index up in the list.
+ *
+ * Inputs: int index - the current index in the unlocked list
+ * Output: int - the new index. -1 if not changed
+ */
+int EditorEventSet::shiftUnlockedUp(int index)
+{
+  /* Ensure index is in range */
+  if(index > 0 && index < events_unlocked.size())
+  {
+    /* Remove the old index */
+    EditorEvent* event_shift = events_unlocked[index];
+    events_unlocked.remove(index);
+
+    /* Find the new index and insert */
+    int new_index = index - 1;
+    events_unlocked.insert(new_index, event_shift);
+    return new_index;
+  }
+  return -1;
+}
+
+/*
  * Description: Unsets the locked event and replaces it with a blank one.
  *
  * Inputs: bool delete_event - true if the data should be deleted
@@ -531,7 +579,8 @@ bool EditorEventSet::unsetEventUnlocked(int index, bool delete_event)
 {
   if(index >= 0 && index < events_unlocked.size())
   {
-    events_unlocked[index].setEventBlank(delete_event);
+    events_unlocked[index]->setEventBlank(delete_event);
+    delete events_unlocked[index];
     events_unlocked.remove(index);
     return true;
   }
@@ -548,7 +597,10 @@ bool EditorEventSet::unsetEventUnlocked(int index, bool delete_event)
 bool EditorEventSet::unsetEventUnlocked(bool delete_events)
 {
   for(int i = 0; i < events_unlocked.size(); i++)
-    events_unlocked[i].setEventBlank(delete_events);
+  {
+    events_unlocked[i]->setEventBlank(delete_events);
+    delete events_unlocked[i];
+  }
   events_unlocked.clear();
   return true;
 }
