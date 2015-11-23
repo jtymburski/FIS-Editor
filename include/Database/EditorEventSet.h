@@ -76,6 +76,9 @@ public:
   /* Returns the locked state struct */
   EditorLock* getLockedState();
 
+  /* Returns a text list summary of the event set */
+  QVector<QString> getTextSummary();
+
   /* Returns the unlocked state enum */
   UnlockedState getUnlockedState();
 

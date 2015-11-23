@@ -701,9 +701,9 @@ void MapThingView::setEditorMap(EditorMap* map)
 void MapThingView::updateListItems(QVector<QString> list)
 {
   if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListItems(list);
+    thing_dialog->setListItems(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListItems(list);
+    instance_dialog->setListItems(list);
 }
 
 /*
@@ -715,9 +715,9 @@ void MapThingView::updateListItems(QVector<QString> list)
 void MapThingView::updateListMaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListMaps(list);
+    thing_dialog->setListMaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListMaps(list);
+    instance_dialog->setListMaps(list);
 }
 
 /*
@@ -743,7 +743,7 @@ void MapThingView::updateListSounds(QList<QString> list)
   if(thing_dialog != nullptr)
     thing_dialog->setListSounds(list);
   if(instance_dialog != nullptr)
-    instance_dialog->getEventView()->setListSounds(list);
+    instance_dialog->setListSounds(list);
 }
 
 /*
@@ -755,9 +755,9 @@ void MapThingView::updateListSounds(QList<QString> list)
 void MapThingView::updateListSubmaps(QVector<QString> list)
 {
   if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListSubmaps(list);
+    thing_dialog->setListSubmaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListSubmaps(list);
+    instance_dialog->setListSubmaps(list);
 }
 
 /*
@@ -769,9 +769,9 @@ void MapThingView::updateListSubmaps(QVector<QString> list)
 void MapThingView::updateListThings(QVector<QString> list)
 {
   if(thing_dialog != NULL)
-    thing_dialog->getEventView()->setListThings(list);
+    thing_dialog->setListThings(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListThings(list);
+    instance_dialog->setListThings(list);
 }
 
 /*

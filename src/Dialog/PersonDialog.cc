@@ -22,7 +22,8 @@
 PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
            : QDialog(parent)
 {
-  convo_dialog = NULL;
+  //convo_dialog = NULL;
+  event_dialog = nullptr;
   frame_dialog = NULL;
   waiting_for_submap = false;
 
@@ -36,13 +37,13 @@ PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
   if(person_original != NULL)
   {
     *person_working = *person_original;
-    event_ctrl = new EditorEvent(
-                              EventSet::copyEvent(person_original->getEvent()));
+    //event_ctrl = new EditorEvent(
+    //                          EventSet::copyEvent(person_original->getEvent()));
   }
-  else
-  {
-    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
-  }
+  //else
+  //{
+  //  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
+  //}
 
   /* Layout setup */
   createLayout(edit_person->getBasePerson() != NULL);
@@ -58,10 +59,10 @@ PersonDialog::~PersonDialog()
   person_original = NULL;
 
   /* Delete event controller */
-  event_view->setEvent(NULL);
-  event_ctrl->setEventBlank();
-  delete event_ctrl;
-  event_ctrl = NULL;
+  //event_view->setEvent(NULL);
+  //event_ctrl->setEventBlank();
+  //delete event_ctrl;
+  //event_ctrl = NULL;
 
   /* Delete working thing */
   if(person_working != NULL)
@@ -166,13 +167,18 @@ void PersonDialog::createLayout(bool instance)
   layout->addWidget(btn_frame_click, 5, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
-  event_view = new EventView(event_ctrl, this);
-  if(instance)
-    event_view->setDisabled(true);
-  layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+  QLabel* lbl_event_frame = new QLabel(this);
+  lbl_event_frame->setFrameStyle(QFrame::Panel | QFrame::Plain);
+  lbl_event_frame->setFixedSize(EditorEnumDb::kEVENT_VIEW_W,
+                                EditorEnumDb::kEVENT_VIEW_H);
+  layout->addWidget(lbl_event_frame, 7, 0, 2, 4, Qt::AlignBottom);
+  //event_view = new EventView(event_ctrl, this);
+  //if(instance)
+  //  event_view->setDisabled(true);
+  //layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
+  //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+  //        this, SLOT(editConversation(Conversation*,bool)));
+  //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
@@ -252,9 +258,9 @@ void PersonDialog::updateData()
 
   /* Sound data - find index */
   int index = -1;
-  for(int i = 0; i < sound_list.size(); i++)
+  for(int i = 0; i < list_sounds.size(); i++)
   {
-    QStringList str_split = sound_list[i].split(':');
+    QStringList str_split = list_sounds[i].split(':');
     if(str_split.size() >= 2)
       if(str_split.front().toInt() == person_working->getSoundID())
         index = i;
@@ -263,7 +269,7 @@ void PersonDialog::updateData()
   /* Sound data - load into combo */
   combo_sound->blockSignals(true);
   combo_sound->clear();
-  combo_sound->addItems(QStringList(sound_list));
+  combo_sound->addItems(QStringList(list_sounds));
   if(index >= 0)
     combo_sound->setCurrentIndex(index);
   combo_sound->blockSignals(false);
@@ -283,7 +289,7 @@ void PersonDialog::updateData()
 void PersonDialog::closeEvent(QCloseEvent* event)
 {
   matrix_view->setMatrix(NULL);
-  event_ctrl->setEventBlank();
+  //event_ctrl->setEventBlank();
   if(person_working != NULL)
     delete person_working;
   person_working = NULL;
@@ -347,7 +353,7 @@ void PersonDialog::buttonOk()
 
   /* Proceed to ok() */
   emit ok();
-  event_ctrl->setEventBlank(false);
+  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -427,32 +433,32 @@ void PersonDialog::directionChange(QString text)
  *         bool is_option - true if the segment is an option
  * Output: none
  */
-void PersonDialog::editConversation(Conversation* convo, bool is_option)
-{
-  if(convo_dialog != NULL)
-  {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               event_view, SLOT(updateConversation()));
-    delete convo_dialog;
-  }
-  convo_dialog = NULL;
+//void PersonDialog::editConversation(Conversation* convo, bool is_option)
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//               this, SLOT(selectTileConvo()));
+//    disconnect(convo_dialog, SIGNAL(success()),
+//               event_view, SLOT(updateConversation()));
+//    delete convo_dialog;
+//  }
+//  convo_dialog = NULL;
 
-  /* Create the new conversation dialog */
-  convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(getEventView()->getListThings());
-  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-  convo_dialog->getEventView()->setListSounds(getListSounds());
-  convo_dialog->getEventView()->setListSubmaps(
-                                           getEventView()->getListSubmaps());
-  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-          this, SLOT(selectTileConvo()));
-  connect(convo_dialog, SIGNAL(success()),
-          event_view, SLOT(updateConversation()));
-  convo_dialog->show();
-}
+//  /* Create the new conversation dialog */
+//  convo_dialog = new ConvoDialog(convo, is_option, this);
+//  convo_dialog->setListThings(getEventView()->getListThings());
+//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
+//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+//  convo_dialog->getEventView()->setListSounds(getListSounds());
+//  convo_dialog->getEventView()->setListSubmaps(
+//                                           getEventView()->getListSubmaps());
+//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//          this, SLOT(selectTileConvo()));
+//  connect(convo_dialog, SIGNAL(success()),
+//          event_view, SLOT(updateConversation()));
+//  convo_dialog->show();
+//}
 
 /*
  * Description: Triggers the select tile dialog for the pop-up. This hides the
@@ -463,7 +469,7 @@ void PersonDialog::editConversation(Conversation* convo, bool is_option)
  */
 void PersonDialog::selectTile()
 {
-  waiting_convo = false;
+  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile(EditorEnumDb::PERSON_VIEW);
@@ -477,15 +483,15 @@ void PersonDialog::selectTile()
  * Inputs: none
  * Output: none
  */
-void PersonDialog::selectTileConvo()
-{
-  if(convo_dialog != NULL)
-  {
-    selectTile();
-    waiting_convo = true;
-    convo_dialog->hide();
-  }
-}
+//void PersonDialog::selectTileConvo()
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    selectTile();
+//    waiting_convo = true;
+//    convo_dialog->hide();
+//  }
+//}
 
 /*
  * Description: Triggered when the speed changes in the data scroller. Updates
@@ -559,15 +565,44 @@ void PersonDialog::visibilityChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns the event dialog widget */
+// TODO: Comment
+EventDialog* PersonDialog::getEventDialog()
+{
+  return event_dialog;
+}
+
 /*
  * Description: Returns the event view within the person dialog.
  *
  * Inputs: none
  * Output: EventView* - the event view widget for the current person
  */
-EventView* PersonDialog::getEventView()
+//EventView* PersonDialog::getEventView()
+//{
+//  return event_view;
+//}
+
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
+QVector<QString> PersonDialog::getListItems()
 {
-  return event_view;
+  return list_items;
+}
+
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
+QVector<QString> PersonDialog::getListMaps()
+{
+  return list_maps;
 }
 
 /*
@@ -579,7 +614,59 @@ EventView* PersonDialog::getEventView()
  */
 QList<QString> PersonDialog::getListSounds()
 {
-  return sound_list;
+  return list_sounds;
+}
+
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
+QVector<QString> PersonDialog::getListSubmaps()
+{
+  return list_submaps;
+}
+
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
+QVector<QString> PersonDialog::getListThings()
+{
+  return list_things;
+}
+
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
+void PersonDialog::setListItems(QVector<QString> items)
+{
+  list_items = items;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListItems(items);
+}
+
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
+void PersonDialog::setListMaps(QVector<QString> maps)
+{
+  list_maps = maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListMaps(maps);
 }
 
 /*
@@ -592,12 +679,42 @@ QList<QString> PersonDialog::getListSounds()
 void PersonDialog::setListSounds(QList<QString> sounds)
 {
   /* Base data */
-  sound_list = sounds;
+  list_sounds = sounds;
   updateData();
 
-  /* Event view data */
-  if(event_view != nullptr)
-    event_view->setListSounds(sounds);
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSounds(sounds);
+}
+
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
+void PersonDialog::setListSubmaps(QVector<QString> sub_maps)
+{
+  list_submaps = sub_maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSubmaps(sub_maps);
+}
+
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
+void PersonDialog::setListThings(QVector<QString> things)
+{
+  list_things = things;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListThings(things);
 }
 
 /*
@@ -613,7 +730,7 @@ void PersonDialog::updateOriginal()
   if(person_original != NULL)
   {
     *person_original = *person_working;
-    person_original->setEvent(*event_ctrl->getEvent());
+    //person_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -634,14 +751,16 @@ void PersonDialog::updateSelectedTile(int id, int x, int y)
   {
     waiting_for_submap = false;
     show();
-    if(waiting_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      event_view->updateSelectedTile(id, x, y);
-    }
+    if(event_dialog != nullptr)
+      event_dialog->updateSelectedTile(id, x, y);
+//    if(waiting_convo)
+//    {
+//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+//      convo_dialog->show();
+//    }
+//    else
+//    {
+//      event_view->updateSelectedTile(id, x, y);
+//    }
   }
 }

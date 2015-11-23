@@ -22,7 +22,8 @@
 ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
-  convo_dialog = NULL;
+  //convo_dialog = NULL;
+  event_dialog = nullptr;
   frame_dialog = NULL;
   waiting_for_submap = false;
 
@@ -32,13 +33,13 @@ ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
   if(thing_original != NULL)
   {
     *thing_working = *thing_original;
-    event_ctrl = new EditorEvent(
-                               EventSet::copyEvent(thing_original->getEvent()));
+    //event_ctrl = new EditorEvent(
+    //                           EventSet::copyEvent(thing_original->getEvent()));
   }
-  else
-  {
-    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
-  }
+  //else
+  //{
+  //  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
+  //}
 
   /* Layout setup */
   createLayout(edit_thing->getBaseThing() != NULL);
@@ -54,10 +55,10 @@ ThingDialog::~ThingDialog()
   thing_original = NULL;
 
   /* Delete event controller */
-  event_view->setEvent(NULL);
-  event_ctrl->setEventBlank();
-  delete event_ctrl;
-  event_ctrl = NULL;
+  //event_view->setEvent(NULL);
+  //event_ctrl->setEventBlank();
+  //delete event_ctrl;
+  //event_ctrl = NULL;
 
   /* Delete working thing */
   if(thing_working != NULL)
@@ -115,7 +116,7 @@ void ThingDialog::createLayout(bool instance)
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
   layout->addWidget(lbl_frame, 4, 0, 2, 1);
   lbl_frame_img = new QLabel(this);
-  lbl_frame_img->setMinimumSize(200, 200);
+  //lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
   layout->addWidget(lbl_frame_img, 4, 1, 2, 3);
@@ -129,13 +130,24 @@ void ThingDialog::createLayout(bool instance)
   layout->addWidget(btn_frame_click, 4, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
-  event_view = new EventView(event_ctrl, this);
-  if(instance)
-    event_view->setDisabled(true);
+  event_view = new EventSetView(nullptr, this);
+  connect(event_view, SIGNAL(editSet(EditorEventSet*)),
+          this, SLOT(editEventSet(EditorEventSet*)));
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+
+//  QLabel* lbl_event_frame = new QLabel(this);
+//  lbl_event_frame->setFrameStyle(QFrame::Panel | QFrame::Plain);
+//  lbl_event_frame->setFixedSize(EditorEnumDb::kEVENT_VIEW_W,
+//                                EditorEnumDb::kEVENT_VIEW_H);
+//  layout->addWidget(lbl_event_frame, 6, 0, 2, 4, Qt::AlignBottom);
+
+  //event_view = new EventView(event_ctrl, this);
+  //if(instance)
+  //  event_view->setDisabled(true);
+  //layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
+  //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+  //        this, SLOT(editConversation(Conversation*,bool)));
+  //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
@@ -192,9 +204,9 @@ void ThingDialog::updateData()
 
   /* Sound data - find index */
   int index = -1;
-  for(int i = 0; i < sound_list.size(); i++)
+  for(int i = 0; i < list_sounds.size(); i++)
   {
-    QStringList str_split = sound_list[i].split(':');
+    QStringList str_split = list_sounds[i].split(':');
     if(str_split.size() >= 2)
       if(str_split.front().toInt() == thing_working->getSoundID())
         index = i;
@@ -203,10 +215,13 @@ void ThingDialog::updateData()
   /* Sound data - load into combo */
   combo_sound->blockSignals(true);
   combo_sound->clear();
-  combo_sound->addItems(QStringList(sound_list));
+  combo_sound->addItems(QStringList(list_sounds));
   if(index >= 0)
     combo_sound->setCurrentIndex(index);
   combo_sound->blockSignals(false);
+
+  /* Event view */
+  event_view->setEventSet(thing_working->getEventSet());
 }
 
 /*============================================================================
@@ -222,7 +237,7 @@ void ThingDialog::updateData()
  */
 void ThingDialog::closeEvent(QCloseEvent* event)
 {
-  event_ctrl->setEventBlank();
+  //event_ctrl->setEventBlank();
   if(thing_working != NULL)
     delete thing_working;
   thing_working = NULL;
@@ -284,7 +299,7 @@ void ThingDialog::buttonOk()
 
   /* Proceed to ok() */
   emit ok();
-  event_ctrl->setEventBlank(false);
+  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -343,31 +358,62 @@ void ThingDialog::changedSound(const QString &text)
  *         bool is_option - true if the segment is an option
  * Output: none
  */
-void ThingDialog::editConversation(Conversation* convo, bool is_option)
+//void ThingDialog::editConversation(Conversation* convo, bool is_option)
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//               this, SLOT(selectTileConvo()));
+//    disconnect(convo_dialog, SIGNAL(success()),
+//               event_view, SLOT(updateConversation()));
+//    delete convo_dialog;
+//  }
+//  convo_dialog = NULL;
+//
+//  /* Create the new conversation dialog */
+//  convo_dialog = new ConvoDialog(convo, is_option, this);
+//  convo_dialog->setListThings(getEventView()->getListThings());
+//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
+//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+//  convo_dialog->getEventView()->setListSounds(getListSounds());
+//  convo_dialog->getEventView()->setListSubmaps(
+//                                      getEventView()->getListSubmaps());
+//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//          this, SLOT(selectTileConvo()));
+//  connect(convo_dialog, SIGNAL(success()),
+//          event_view, SLOT(updateConversation()));
+//  convo_dialog->show();
+//}
+
+/* Edit event set trigger */
+// TODO: Comment
+void ThingDialog::editEventSet(EditorEventSet* set)
 {
-  if(convo_dialog != NULL)
+  if(event_dialog != nullptr)
   {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               event_view, SLOT(updateConversation()));
-    delete convo_dialog;
+    disconnect(event_dialog, SIGNAL(selectTile()),
+               this, SLOT(selectTile()));
+    disconnect(event_dialog, SIGNAL(ok()),
+               event_view, SLOT(eventUpdated()));
+    delete event_dialog;
   }
-  convo_dialog = NULL;
+  event_dialog = NULL;
 
   /* Create the new conversation dialog */
-  convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(getEventView()->getListThings());
-  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-  convo_dialog->getEventView()->setListSounds(getListSounds());
-  convo_dialog->getEventView()->setListSubmaps(
-                                      getEventView()->getListSubmaps());
-  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-          this, SLOT(selectTileConvo()));
-  connect(convo_dialog, SIGNAL(success()),
-          event_view, SLOT(updateConversation()));
-  convo_dialog->show();
+  if(set != nullptr)
+  {
+    event_dialog = new EventDialog(set, this);
+    event_dialog->setListItems(list_items);
+    event_dialog->setListMaps(list_maps);
+    event_dialog->setListSounds(list_sounds);
+    event_dialog->setListSubmaps(list_submaps);
+    event_dialog->setListThings(list_things);
+    connect(event_dialog, SIGNAL(selectTile()),
+            this, SLOT(selectTile()));
+    connect(event_dialog, SIGNAL(ok()),
+            event_view, SLOT(eventUpdated()));
+    event_dialog->show();
+  }
 }
 
 /*
@@ -400,7 +446,7 @@ void ThingDialog::updateFrame()
  */
 void ThingDialog::selectTile()
 {
-  waiting_convo = false;
+  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile(EditorEnumDb::THING_VIEW);
@@ -414,15 +460,15 @@ void ThingDialog::selectTile()
  * Inputs: none
  * Output: none
  */
-void ThingDialog::selectTileConvo()
-{
-  if(convo_dialog != NULL)
-  {
-    selectTile();
-    waiting_convo = true;
-    convo_dialog->hide();
-  }
-}
+//void ThingDialog::selectTileConvo()
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    selectTile();
+//    waiting_convo = true;
+//    convo_dialog->hide();
+//  }
+//}
 
 /*
  * Description: The drop down for visibility of the thing changed slot. This
@@ -443,15 +489,77 @@ void ThingDialog::visibilityChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns the event dialog widget */
+// TODO: Comment
+EventDialog* ThingDialog::getEventDialog()
+{
+  return event_dialog;
+}
+
 /*
  * Description: Returns the event view within the thing dialog.
  *
  * Inputs: none
  * Output: EventView* - the event view widget for the current thing
  */
-EventView* ThingDialog::getEventView()
+//EventView* ThingDialog::getEventView()
+//{
+//  return event_view;
+//}
+
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
+QVector<QString> ThingDialog::getListItems()
 {
-  return event_view;
+  return list_items;
+}
+
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
+QVector<QString> ThingDialog::getListMaps()
+{
+  return list_maps;
+}
+
+/*
+ * Description: Returns the list of sounds, used for dialog and event creation.
+ *
+ * Inputs: none
+ * Output: QList<QString> - list of all sounds (for all valid events, dialog)
+ */
+QList<QString> ThingDialog::getListSounds()
+{
+  return list_sounds;
+}
+
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
+QVector<QString> ThingDialog::getListSubmaps()
+{
+  return list_submaps;
+}
+
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
+QVector<QString> ThingDialog::getListThings()
+{
+  return list_things;
 }
 
 /*
@@ -461,9 +569,39 @@ EventView* ThingDialog::getEventView()
  * Inputs: none
  * Output: QList<QString> - the sound string list
  */
-QList<QString> ThingDialog::getListSounds()
+//QList<QString> ThingDialog::getListSounds()
+//{
+//  return sound_list;
+//}
+
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
+void ThingDialog::setListItems(QVector<QString> items)
 {
-  return sound_list;
+  list_items = items;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListItems(items);
+}
+
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
+void ThingDialog::setListMaps(QVector<QString> maps)
+{
+  list_maps = maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListMaps(maps);
 }
 
 /*
@@ -476,12 +614,42 @@ QList<QString> ThingDialog::getListSounds()
 void ThingDialog::setListSounds(QList<QString> sounds)
 {
   /* Base data */
-  sound_list = sounds;
+  list_sounds = sounds;
   updateData();
 
-  /* Event view data */
-  if(event_view != nullptr)
-    event_view->setListSounds(sounds);
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSounds(sounds);
+}
+
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
+void ThingDialog::setListSubmaps(QVector<QString> sub_maps)
+{
+  list_submaps = sub_maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSubmaps(sub_maps);
+}
+
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
+void ThingDialog::setListThings(QVector<QString> things)
+{
+  list_things = things;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListThings(things);
 }
 
 /*
@@ -497,7 +665,7 @@ void ThingDialog::updateOriginal()
   if(thing_original != NULL)
   {
     *thing_original = *thing_working;
-    thing_original->setEvent(*event_ctrl->getEvent());
+    //thing_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -518,14 +686,16 @@ void ThingDialog::updateSelectedTile(int id, int x, int y)
   {
     waiting_for_submap = false;
     show();
-    if(waiting_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      event_view->updateSelectedTile(id, x, y);
-    }
+    if(event_dialog != nullptr)
+      event_dialog->updateSelectedTile(id, x, y);
+    //if(waiting_convo)
+    //{
+    //  convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+    //  convo_dialog->show();
+    //}
+    //else
+    //{
+    //  event_view->updateSelectedTile(id, x, y);
+    //}
   }
 }

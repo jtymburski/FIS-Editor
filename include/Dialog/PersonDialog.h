@@ -12,8 +12,9 @@
 #include <QGridLayout>
 
 #include "Database/EditorMapPerson.h"
-#include "Dialog/ConvoDialog.h"
-#include "View/EventView.h"
+//#include "Dialog/ConvoDialog.h"
+#include "Dialog/EventDialog.h"
+//#include "View/EventView.h"
 #include "View/MatrixView.h"
 
 class PersonDialog : public QDialog
@@ -34,11 +35,14 @@ private:
   QComboBox* combo_sound;
 
   /* The conversation dialog */
-  ConvoDialog* convo_dialog;
+  //ConvoDialog* convo_dialog;
 
   /* Event view and control */
-  EditorEvent* event_ctrl;
-  EventView* event_view;
+  //EditorEvent* event_ctrl;
+  //EventView* event_view;
+
+  /* The event set dialog */
+  EventDialog* event_dialog;
 
   /* The frame control dialog */
   FrameDialog* frame_dialog;
@@ -53,6 +57,13 @@ private:
   /* Speed result label */
   QLabel* lbl_speed_result;
 
+  /* The list of objects used in possible events */
+  QVector<QString> list_items;
+  QVector<QString> list_maps;
+  QList<QString> list_sounds;
+  QVector<QString> list_submaps;
+  QVector<QString> list_things;
+
   /* Matrix control */
   Direction matrix_direction;
   MapPerson::SurfaceClassifier matrix_surface;
@@ -65,13 +76,13 @@ private:
   EditorMapPerson* person_working;
 
   /* Sound information, for dropdown */
-  QList<QString> sound_list;
+  //QList<QString> sound_list;
 
   /* The speed control value */
   QSpinBox* spin_speed;
 
   /* Waiting for sub-map data */
-  bool waiting_convo;
+  //bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -122,11 +133,11 @@ public slots:
   void directionChange(QString text);
 
   /* Edit conversation trigger */
-  void editConversation(Conversation* convo, bool is_option);
+  //void editConversation(Conversation* convo, bool is_option);
 
   /* Select tile trigger */
   void selectTile();
-  void selectTileConvo();
+  //void selectTileConvo();
 
   /* Speed changed */
   void speedChanged(int value);
@@ -144,14 +155,31 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the event dialog widget */
+  EventDialog* getEventDialog();
+
   /* Returns the event view widget */
-  EventView* getEventView();
+  //EventView* getEventView();
+
+  /* Returns the list of objects, used for dialog and event creation */
+  QVector<QString> getListItems();
+  QVector<QString> getListMaps();
+  QList<QString> getListSounds();
+  QVector<QString> getListSubmaps();
+  QVector<QString> getListThings();
 
   /* Returns the list of sounds, being used */
-  QList<QString> getListSounds();
+  //QList<QString> getListSounds();
+
+  /* Sets the list of objects, used for dialog and event creation */
+  void setListItems(QVector<QString> items);
+  void setListMaps(QVector<QString> maps);
+  void setListSounds(QList<QString> sounds);
+  void setListSubmaps(QVector<QString> sub_maps);
+  void setListThings(QVector<QString> things);
 
   /* Set the list of sounds, used for dropdown and in event */
-  void setListSounds(QList<QString> sounds);
+  //void setListSounds(QList<QString> sounds);
 
   /* Sets the working thing to the original */
   void updateOriginal();

@@ -704,9 +704,9 @@ void MapPersonView::setEditorMap(EditorMap* map)
 void MapPersonView::updateListItems(QVector<QString> list)
 {
   if(person_dialog != NULL)
-    person_dialog->getEventView()->setListItems(list);
+    person_dialog->setListItems(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListItems(list);
+    instance_dialog->setListItems(list);
 }
 
 /*
@@ -718,9 +718,9 @@ void MapPersonView::updateListItems(QVector<QString> list)
 void MapPersonView::updateListMaps(QVector<QString> list)
 {
   if(person_dialog != NULL)
-    person_dialog->getEventView()->setListMaps(list);
+    person_dialog->setListMaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListMaps(list);
+    instance_dialog->setListMaps(list);
 }
 
 /*
@@ -746,7 +746,7 @@ void MapPersonView::updateListSounds(QList<QString> list)
   if(person_dialog != nullptr)
     person_dialog->setListSounds(list);
   if(instance_dialog != nullptr)
-    instance_dialog->getEventView()->setListSounds(list);
+    instance_dialog->setListSounds(list);
 }
 
 /*
@@ -758,9 +758,9 @@ void MapPersonView::updateListSounds(QList<QString> list)
 void MapPersonView::updateListSubmaps(QVector<QString> list)
 {
   if(person_dialog != NULL)
-    person_dialog->getEventView()->setListSubmaps(list);
+    person_dialog->setListSubmaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListSubmaps(list);
+    instance_dialog->setListSubmaps(list);
 }
 
 /*
@@ -772,9 +772,9 @@ void MapPersonView::updateListSubmaps(QVector<QString> list)
 void MapPersonView::updateListThings(QVector<QString> list)
 {
   if(person_dialog != NULL)
-    person_dialog->getEventView()->setListThings(list);
+    person_dialog->setListThings(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListThings(list);
+    instance_dialog->setListThings(list);
 }
 
 /*

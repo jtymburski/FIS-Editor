@@ -705,9 +705,9 @@ void MapNPCView::setEditorMap(EditorMap* map)
 void MapNPCView::updateListItems(QVector<QString> list)
 {
   if(npc_dialog != NULL)
-    npc_dialog->getEventView()->setListItems(list);
+    npc_dialog->setListItems(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListItems(list);
+    instance_dialog->setListItems(list);
 }
 
 /*
@@ -719,9 +719,9 @@ void MapNPCView::updateListItems(QVector<QString> list)
 void MapNPCView::updateListMaps(QVector<QString> list)
 {
   if(npc_dialog != NULL)
-    npc_dialog->getEventView()->setListMaps(list);
+    npc_dialog->setListMaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListMaps(list);
+    instance_dialog->setListMaps(list);
 }
 
 /*
@@ -747,7 +747,7 @@ void MapNPCView::updateListSounds(QList<QString> list)
   if(npc_dialog != nullptr)
     npc_dialog->setListSounds(list);
   if(instance_dialog != nullptr)
-    instance_dialog->getEventView()->setListSounds(list);
+    instance_dialog->setListSounds(list);
 }
 
 /*
@@ -759,9 +759,9 @@ void MapNPCView::updateListSounds(QList<QString> list)
 void MapNPCView::updateListSubmaps(QVector<QString> list)
 {
   if(npc_dialog != NULL)
-    npc_dialog->getEventView()->setListSubmaps(list);
+    npc_dialog->setListSubmaps(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListSubmaps(list);
+    instance_dialog->setListSubmaps(list);
 }
 
 /*
@@ -773,9 +773,9 @@ void MapNPCView::updateListSubmaps(QVector<QString> list)
 void MapNPCView::updateListThings(QVector<QString> list)
 {
   if(npc_dialog != NULL)
-    npc_dialog->getEventView()->setListThings(list);
+    npc_dialog->setListThings(list);
   if(instance_dialog != NULL)
-    instance_dialog->getEventView()->setListThings(list);
+    instance_dialog->setListThings(list);
 }
 
 /*

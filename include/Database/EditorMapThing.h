@@ -8,6 +8,7 @@
 #ifndef EDITORMAPTHING_H
 #define EDITORMAPTHING_H
 
+#include "Database/EditorEventSet.h"
 #include "Database/EditorMatrix.h"
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
@@ -34,7 +35,8 @@ private:
   EditorSprite dialog_image;
 
   /* The event */
-  Event event;
+  EditorEventSet set;
+  //Event event; // TODO: Remove
   bool event_base;
 
   /* The view matrix */
@@ -82,8 +84,11 @@ public:
   /* Returns the dialog image for the thing */
   EditorSprite* getDialogImage();
 
+  /* Returns the event set of the thing */
+  EditorEventSet* getEventSet();
+
   /* Returns the event object of the thing */
-  Event getEvent() const;
+  //Event getEvent() const; // TODO: REMOVE
 
   /* Returns the game object reference ID. -1 if unset */
   int getGameID() const;
@@ -138,7 +143,10 @@ public:
   void setDialogImage(QString path);
 
   /* Sets the interaction event */
-  void setEvent(Event event);
+  //void setEvent(Event event); // TODO: Remove
+
+  /* Sets the interaction event set */
+  void setEventSet(EditorEventSet set);
 
   /* Sets the game object reference ID. -1 if unset */
   void setGameID(int id);

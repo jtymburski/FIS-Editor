@@ -71,6 +71,7 @@ SOURCES += \
     src/Dialog/PersonDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/ThingDialog.cc \
+    src/View/EventSetView.cc \
     src/View/EventView.cc \
     src/View/GameView.cc \
     src/View/LockView.cc \
@@ -171,6 +172,7 @@ HEADERS += \
     include/Dialog/PersonDialog.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/ThingDialog.h \
+    include/View/EventSetView.h \
     include/View/EventView.h \
     include/View/GameView.h \
     include/View/LockView.h \

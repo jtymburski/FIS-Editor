@@ -115,11 +115,11 @@ InstanceDialog::~InstanceDialog()
   thing_original = NULL;
 
   /* Delete event controller */
-  if(thing_type != EditorEnumDb::IO)
-    event_view->setEvent(NULL);
-  event_ctrl->setEventBlank();
-  delete event_ctrl;
-  event_ctrl = NULL;
+  //if(thing_type != EditorEnumDb::IO)
+  //  event_view->setEvent(NULL);
+  //event_ctrl->setEventBlank();
+  //delete event_ctrl;
+  //event_ctrl = NULL;
 
   /* Delete working thing */
   if(thing_working != NULL)
@@ -211,11 +211,16 @@ void InstanceDialog::createLayout()
     layout->addWidget(box_base_event, 6, 1, 1, 2);
 
     /* Event View */
-    event_view = new EventView(event_ctrl, this);
-    connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-            this, SLOT(editConversation(Conversation*,bool)));
-    connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-    layout->addWidget(event_view, 7, 0, 1, 4);
+    QLabel* lbl_event_frame = new QLabel(this);
+    lbl_event_frame->setFrameStyle(QFrame::Panel | QFrame::Plain);
+    lbl_event_frame->setFixedSize(EditorEnumDb::kEVENT_VIEW_W,
+                                  EditorEnumDb::kEVENT_VIEW_H);
+    layout->addWidget(lbl_event_frame, 7, 0, 1, 4, Qt::AlignHCenter);
+    //event_view = new EventView(event_ctrl, this);
+    //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+    //        this, SLOT(editConversation(Conversation*,bool)));
+    //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+    //layout->addWidget(event_view, 7, 0, 1, 4);
   }
 
   /* Movement section only relevant if npc */
@@ -314,17 +319,17 @@ void InstanceDialog::createLayout()
 void InstanceDialog::setup()
 {
   /* Variable clean-up */
-  convo_dialog = NULL;
-  waiting_convo = false;
+  //convo_dialog = NULL;
+  //waiting_convo = false;
   waiting_for_submap = false;
   waiting_path = false;
 
   /* Set-up the event */
-  if(thing_original != NULL && thing_type != EditorEnumDb::IO)
-    event_ctrl = new EditorEvent(
-                           EventSet::copyEvent(thing_original->getEvent()));
-  else
-    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
+//  if(thing_original != NULL && thing_type != EditorEnumDb::IO)
+//    event_ctrl = new EditorEvent(
+//                           EventSet::copyEvent(thing_original->getEvent()));
+//  else
+//    event_ctrl = new EditorEvent(EventSet::createBlankEvent());
 
   /* Layout setup */
   createLayout();
@@ -366,7 +371,7 @@ void InstanceDialog::updateData()
   {
     box_base_event->blockSignals(true);
     box_base_event->setChecked(thing_working->isBaseEvent());
-    event_view->setEnabled(!thing_working->isBaseEvent());
+    //event_view->setEnabled(!thing_working->isBaseEvent());
     box_base_event->blockSignals(false);
   }
 
@@ -434,7 +439,7 @@ void InstanceDialog::updateNodes()
  */
 void InstanceDialog::closeEvent(QCloseEvent* event)
 {
-  event_ctrl->setEventBlank();
+  //event_ctrl->setEventBlank();
   if(thing_working != NULL)
     delete thing_working;
   thing_working = NULL;
@@ -520,7 +525,7 @@ void InstanceDialog::buttonOk()
   /* Proceed to ok() */
   updateOriginal();
   emit ok(thing_original->getNameList());
-  event_ctrl->setEventBlank(false);
+  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -565,24 +570,24 @@ void InstanceDialog::checkBaseChange(int state)
 
   /* If base is checked, event is disabled. Otherwise, enabled */
   thing_working->setUseBaseEvent(state == Qt::Checked);
-  event_view->setEnabled(state == Qt::Unchecked);
+  //event_view->setEnabled(state == Qt::Unchecked);
 
   /* Update the event accordingly */
-  EditorEvent* old_event = event_ctrl;
-  event_ctrl = new EditorEvent(EventSet::copyEvent(thing_working->getEvent()));
-  event_view->setEvent(event_ctrl);
+  //EditorEvent* old_event = event_ctrl;
+  //event_ctrl = new EditorEvent(EventSet::copyEvent(thing_working->getEvent()));
+  //event_view->setEvent(event_ctrl);
 
   /* Handle the old event */
-  if(was_instance)
-  {
-    thing_working->setEvent(*old_event->getEvent());
-    old_event->setEventBlank(false);
-  }
-  else
-  {
-    old_event->setEventBlank();
-  }
-  delete old_event;
+//  if(was_instance)
+//  {
+//    thing_working->setEvent(*old_event->getEvent());
+//    old_event->setEventBlank(false);
+//  }
+//  else
+//  {
+//    old_event->setEventBlank();
+//  }
+//  delete old_event;
 }
 
 /*
@@ -706,32 +711,32 @@ void InstanceDialog::comboTrackingChange(int index)
  *         bool is_option - true if the segment is an option
  * Output: none
  */
-void InstanceDialog::editConversation(Conversation* convo, bool is_option)
-{
-  if(convo_dialog != NULL)
-  {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               event_view, SLOT(updateConversation()));
-    delete convo_dialog;
-  }
-  convo_dialog = NULL;
+//void InstanceDialog::editConversation(Conversation* convo, bool is_option)
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//               this, SLOT(selectTileConvo()));
+//    disconnect(convo_dialog, SIGNAL(success()),
+//               event_view, SLOT(updateConversation()));
+//    delete convo_dialog;
+//  }
+//  convo_dialog = NULL;
 
-  /* Create the new conversation dialog */
-  convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(getEventView()->getListThings());
-  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-  convo_dialog->getEventView()->setListSounds(getEventView()->getListSounds());
-  convo_dialog->getEventView()->setListSubmaps(
-                                           getEventView()->getListSubmaps());
-  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-          this, SLOT(selectTileConvo()));
-  connect(convo_dialog, SIGNAL(success()),
-          event_view, SLOT(updateConversation()));
-  convo_dialog->show();
-}
+//  /* Create the new conversation dialog */
+//  convo_dialog = new ConvoDialog(convo, is_option, this);
+//  convo_dialog->setListThings(getEventView()->getListThings());
+//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
+//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+//  convo_dialog->getEventView()->setListSounds(getEventView()->getListSounds());
+//  convo_dialog->getEventView()->setListSubmaps(
+//                                           getEventView()->getListSubmaps());
+//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//          this, SLOT(selectTileConvo()));
+//  connect(convo_dialog, SIGNAL(success()),
+//          event_view, SLOT(updateConversation()));
+//  convo_dialog->show();
+//}
 
 /*
  * Description: Edits a single node in the instance widget, with the NodeDialog.
@@ -772,7 +777,7 @@ void InstanceDialog::editNode(QListWidgetItem*)
  */
 void InstanceDialog::selectTile()
 {
-  waiting_convo = false;
+  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
 
@@ -793,15 +798,15 @@ void InstanceDialog::selectTile()
  * Inputs: none
  * Output: none
  */
-void InstanceDialog::selectTileConvo()
-{
-  if(convo_dialog != NULL)
-  {
-    selectTile();
-    waiting_convo = true;
-    convo_dialog->hide();
-  }
-}
+//void InstanceDialog::selectTileConvo()
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    selectTile();
+//    waiting_convo = true;
+//    convo_dialog->hide();
+//  }
+//}
 
 /*
  * Description: Slot triggered when the speed spinner value changes. Updates the
@@ -825,15 +830,118 @@ void InstanceDialog::speedChanged(int value)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns the event dialog widget */
+// TODO: Comment
+EventDialog* InstanceDialog::getEventDialog()
+{
+  return event_dialog;
+}
+
 /*
  * Description: Returns the event view within the person dialog.
  *
  * Inputs: none
  * Output: EventView* - the event view widget for the current person
  */
-EventView* InstanceDialog::getEventView()
+//EventView* InstanceDialog::getEventView()
+//{
+//  return event_view;
+//}
+
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
+QVector<QString> InstanceDialog::getListItems()
 {
-  return event_view;
+  return list_items;
+}
+
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
+QVector<QString> InstanceDialog::getListMaps()
+{
+  return list_maps;
+}
+
+/*
+ * Description: Returns the list of parties, used for the dialog.
+ *
+ * Inputs: none
+ * Output: QList<QString> - list of all parties for instance connection
+ */
+QVector<QString> InstanceDialog::getListParties()
+{
+  return list_parties;
+}
+
+/*
+ * Description: Returns the list of sounds, used for dialog and event creation.
+ *
+ * Inputs: none
+ * Output: QList<QString> - list of all sounds (for all valid events, dialog)
+ */
+QList<QString> InstanceDialog::getListSounds()
+{
+  return list_sounds;
+}
+
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
+QVector<QString> InstanceDialog::getListSubmaps()
+{
+  return list_submaps;
+}
+
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
+QVector<QString> InstanceDialog::getListThings()
+{
+  return list_things;
+}
+
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
+void InstanceDialog::setListItems(QVector<QString> items)
+{
+  list_items = items;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListItems(items);
+}
+
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
+void InstanceDialog::setListMaps(QVector<QString> maps)
+{
+  list_maps = maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListMaps(maps);
 }
 
 /*
@@ -852,6 +960,52 @@ void InstanceDialog::setListParties(QVector<QString> parties)
     combo_party->addItem(list_parties[i]);
   updateData();
   combo_party->blockSignals(false);
+}
+
+/*
+ * Description: Sets the list of sounds, to be used within the event.
+ *
+ * Inputs: QList<QString> sounds - the sound string list
+ * Output: none
+ */
+void InstanceDialog::setListSounds(QList<QString> sounds)
+{
+  /* Base data */
+  list_sounds = sounds;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSounds(sounds);
+}
+
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
+void InstanceDialog::setListSubmaps(QVector<QString> sub_maps)
+{
+  list_submaps = sub_maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSubmaps(sub_maps);
+}
+
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
+void InstanceDialog::setListThings(QVector<QString> things)
+{
+  list_things = things;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListThings(things);
 }
 
 /*
@@ -877,8 +1031,8 @@ void InstanceDialog::updateOriginal()
       *((EditorMapIO*)thing_original) = *((EditorMapIO*)thing_working);
 
     /* Fix the event */
-    if(thing_type != EditorEnumDb::IO && !box_base_event->isChecked())
-      thing_original->setEvent(*event_ctrl->getEvent());
+//    if(thing_type != EditorEnumDb::IO && !box_base_event->isChecked())
+//      thing_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -916,14 +1070,16 @@ void InstanceDialog::updateSelectedTile(int id, int x, int y)
   {
     waiting_for_submap = false;
     show();
-    if(waiting_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      event_view->updateSelectedTile(id, x, y);
-    }
+    if(event_dialog != nullptr)
+      event_dialog->updateSelectedTile(id, x, y);
+//    if(waiting_convo)
+//    {
+//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+//      convo_dialog->show();
+//    }
+//    else
+//    {
+//      event_view->updateSelectedTile(id, x, y);
+//    }
   }
 }

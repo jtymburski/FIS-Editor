@@ -7,6 +7,7 @@
  *              locations where it's used.
  ******************************************************************************/
 #include "Database/EditorEventSet.h"
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -128,7 +129,7 @@ void EditorEventSet::clear(bool delete_data)
   unsetEventLocked(delete_data);
   unsetEventUnlocked(delete_data);
   unsetLocked();
-  unlocked_state = UnlockedState::NONE;
+  //unlocked_state = UnlockedState::ORDERED;
 }
 
 /*
@@ -219,6 +220,37 @@ int EditorEventSet::getEventUnlockedTotal()
 EditorLock* EditorEventSet::getLockedState()
 {
   return &lock_data;
+}
+
+/* Returns a text list summary of the event set */
+// TODO: Comment
+QVector<QString> EditorEventSet::getTextSummary()
+{
+  QVector<QString> stack;
+
+  /* Lock struct */
+  stack.push_back(lock_data.getTextSummary());
+
+  /* Lock event */
+  stack.push_back(event_locked.getTextSummary("Lock Event: "));
+
+  /* Unlock event(s) */
+  QString unlock = "Unlock Events: ";
+  if(events_unlocked.size() > 0)
+    unlock += events_unlocked.front()->getTextSummary("Category ");
+  else
+    unlock += "None";
+  if(events_unlocked.size() > 1)
+  {
+    unlock += " and ";
+    if(events_unlocked.size() > 2)
+      unlock += QString::number(events_unlocked.size() - 1) + " others";
+    else
+      unlock += events_unlocked[1]->getTextSummary("Category ");
+  }
+  stack.push_back(unlock);
+
+  return stack;
 }
 
 /*
