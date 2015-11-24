@@ -322,6 +322,25 @@ void EventDialog::updateDataUnlocks()
 }
 
 /*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+
+/*
+ * Description: The re-implementation of the close event for the dialog. Cleans
+ *              up the existing event references and deletes memory.
+ *
+ * Inputs: QCloseEvent* event - the close event (accepted after clean-up)
+ * Output: none
+ */
+void EventDialog::closeEvent(QCloseEvent* event)
+{
+  editConversation(nullptr, false);
+  setEventSet(nullptr);
+
+  event->accept();
+}
+
+/*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
@@ -351,7 +370,6 @@ void EventDialog::btnAddUnlock()
  */
 void EventDialog::btnCancel()
 {
-  editConversation(nullptr, false);
   close();
 }
 

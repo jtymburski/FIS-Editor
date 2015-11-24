@@ -12,8 +12,9 @@
 #include <QGridLayout>
 
 #include "Database/EditorMapIO.h"
-#include "Dialog/ConvoDialog.h"
-#include "View/EventView.h"
+//#include "Dialog/ConvoDialog.h"
+#include "Dialog/EventDialog.h"
+//#include "View/EventView.h"
 #include "View/MatrixView.h"
 
 class IODialog : public QDialog
@@ -49,14 +50,17 @@ private:
   QComboBox* combo_state;
 
   /* The conversation dialog */
-  ConvoDialog* convo_dialog;
+  //ConvoDialog* convo_dialog;
 
   /* Editing event */
   EditEvent editing_event;
 
+  /* The event set dialog */
+  EventDialog* event_dialog;
+
   /* Event view and control */
-  EditorEvent* event_ctrl;
-  EventView* event_view;
+  //EditorEvent* event_ctrl;
+  //EventView* event_view;
 
   /* The frame control dialog */
   FrameDialog* frame_dialog;
@@ -74,14 +78,21 @@ private:
   /* The line edit for io data */
   QLineEdit* line_name;
 
+  /* The list of objects used in possible events */
+  QVector<QString> list_items;
+  QVector<QString> list_maps;
+  QList<QString> list_sounds;
+  QVector<QString> list_submaps;
+  QVector<QString> list_things;
+
   /* Matrix view and control */
   MatrixView* matrix_view;
 
   /* Event pop-up */
-  QDialog* pop_event;
+  //QDialog* pop_event;
 
   /* Sound information, for dropdown */
-  QList<QString> sound_list;
+  //QList<QString> sound_list;
 
   /* Spin Boxes */
   QSpinBox* spin_inactive;
@@ -93,7 +104,7 @@ private:
   QTextEdit* text_description;
 
   /* Waiting for sub-map data */
-  bool waiting_convo;
+  //bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -129,7 +140,7 @@ signals:
 public slots:
   /* Button control triggers */
   void buttonCancel();
-  void buttonEventCancel();
+  //void buttonEventCancel();
   void buttonEventEnter();
   void buttonEventExit();
   void buttonEventOk();
@@ -155,11 +166,14 @@ public slots:
   void checkInactive(int state);
 
   /* Edit conversation trigger */
-  void editConversation(Conversation* convo, bool is_option);
+  //void editConversation(Conversation* convo, bool is_option);
+
+  /* Edit event set trigger */
+  void editEventSet(EditorEventSet* set);
 
   /* Select tile trigger */
   void selectTile();
-  void selectTileConvo();
+  //void selectTileConvo();
 
   /* Update the frame for the IO */
   void updateFrame();
@@ -171,14 +185,25 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the event dialog widget */
+  EventDialog* getEventDialog();
+
   /* Returns the event view widget */
-  EventView* getEventView();
+  //EventView* getEventView();
 
-  /* Returns the list of sounds, being used */
+  /* Returns the list of objects, used for dialog and event creation */
+  QVector<QString> getListItems();
+  QVector<QString> getListMaps();
   QList<QString> getListSounds();
+  QVector<QString> getListSubmaps();
+  QVector<QString> getListThings();
 
-  /* Set the list of sounds, used for dropdown and in event */
+  /* Sets the list of objects, used for dialog and event creation */
+  void setListItems(QVector<QString> items);
+  void setListMaps(QVector<QString> maps);
   void setListSounds(QList<QString> sounds);
+  void setListSubmaps(QVector<QString> sub_maps);
+  void setListThings(QVector<QString> things);
 
   /* Sets the working IO to the original */
   void updateOriginal();

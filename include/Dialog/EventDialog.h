@@ -8,6 +8,7 @@
 #ifndef EVENTDIALOG_H
 #define EVENTDIALOG_H
 
+#include <QCloseEvent>
 #include <QDialog>
 #include <QListWidget>
 
@@ -80,6 +81,13 @@ private:
   void updateDataLock();
   void updateDataLockEvent();
   void updateDataUnlocks();
+
+/*============================================================================
+ * PROTECTED FUNCTIONS
+ *===========================================================================*/
+protected:
+  /* Custom close event */
+  void closeEvent(QCloseEvent* event);
 
 /*============================================================================
  * SIGNALS

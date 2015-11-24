@@ -12,9 +12,8 @@
 #include <QGridLayout>
 
 #include "Database/EditorMapPerson.h"
-//#include "Dialog/ConvoDialog.h"
 #include "Dialog/EventDialog.h"
-//#include "View/EventView.h"
+#include "View/EventSetView.h"
 #include "View/MatrixView.h"
 
 class PersonDialog : public QDialog
@@ -34,12 +33,8 @@ private:
   /* Combo Box Widget for Sound */
   QComboBox* combo_sound;
 
-  /* The conversation dialog */
-  //ConvoDialog* convo_dialog;
-
   /* Event view and control */
-  //EditorEvent* event_ctrl;
-  //EventView* event_view;
+  EventSetView* event_view;
 
   /* The event set dialog */
   EventDialog* event_dialog;
@@ -75,14 +70,10 @@ private:
   EditorMapPerson* person_original;
   EditorMapPerson* person_working;
 
-  /* Sound information, for dropdown */
-  //QList<QString> sound_list;
-
   /* The speed control value */
   QSpinBox* spin_speed;
 
   /* Waiting for sub-map data */
-  //bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -132,12 +123,11 @@ public slots:
   /* Direction change for matrix */
   void directionChange(QString text);
 
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
+  /* Edit event set trigger */
+  void editEventSet(EditorEventSet* set);
 
   /* Select tile trigger */
   void selectTile();
-  //void selectTileConvo();
 
   /* Speed changed */
   void speedChanged(int value);
@@ -158,9 +148,6 @@ public:
   /* Returns the event dialog widget */
   EventDialog* getEventDialog();
 
-  /* Returns the event view widget */
-  //EventView* getEventView();
-
   /* Returns the list of objects, used for dialog and event creation */
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
@@ -168,18 +155,12 @@ public:
   QVector<QString> getListSubmaps();
   QVector<QString> getListThings();
 
-  /* Returns the list of sounds, being used */
-  //QList<QString> getListSounds();
-
   /* Sets the list of objects, used for dialog and event creation */
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
   void setListSounds(QList<QString> sounds);
   void setListSubmaps(QVector<QString> sub_maps);
   void setListThings(QVector<QString> things);
-
-  /* Set the list of sounds, used for dropdown and in event */
-  //void setListSounds(QList<QString> sounds);
 
   /* Sets the working thing to the original */
   void updateOriginal();

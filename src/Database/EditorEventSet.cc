@@ -235,18 +235,19 @@ QVector<QString> EditorEventSet::getTextSummary()
   stack.push_back(event_locked.getTextSummary("Lock Event: "));
 
   /* Unlock event(s) */
-  QString unlock = "Unlock Events: ";
+  QString unlock = "Unlock Events (" +
+                   QString::number(events_unlocked.size()) + ")";
   if(events_unlocked.size() > 0)
-    unlock += events_unlocked.front()->getTextSummary("Category ");
-  else
-    unlock += "None";
-  if(events_unlocked.size() > 1)
   {
-    unlock += " and ";
-    if(events_unlocked.size() > 2)
-      unlock += QString::number(events_unlocked.size() - 1) + " others";
-    else
-      unlock += events_unlocked[1]->getTextSummary("Category ");
+    unlock += ": " + events_unlocked.front()->getTextSummary("");
+    if(events_unlocked.size() > 1)
+    {
+      unlock += " and ";
+      if(events_unlocked.size() > 2)
+        unlock += QString::number(events_unlocked.size() - 1) + " others ";
+      else
+        unlock += events_unlocked[1]->getTextSummary("");
+    }
   }
   stack.push_back(unlock);
 

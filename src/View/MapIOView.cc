@@ -701,7 +701,7 @@ void MapIOView::setEditorMap(EditorMap* map)
 void MapIOView::updateListItems(QVector<QString> list)
 {
   if(io_dialog != NULL)
-    io_dialog->getEventView()->setListItems(list);
+    io_dialog->setListItems(list);
   //if(instance_dialog != NULL)
   //  instance_dialog->getEventView()->setListItems(list);
 }
@@ -715,7 +715,7 @@ void MapIOView::updateListItems(QVector<QString> list)
 void MapIOView::updateListMaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
-    io_dialog->getEventView()->setListMaps(list);
+    io_dialog->setListMaps(list);
   //if(instance_dialog != NULL)
   //  instance_dialog->getEventView()->setListMaps(list);
 }
@@ -753,7 +753,7 @@ void MapIOView::updateListSounds(QList<QString> list)
 void MapIOView::updateListSubmaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
-    io_dialog->getEventView()->setListSubmaps(list);
+    io_dialog->setListSubmaps(list);
   //if(instance_dialog != NULL)
   //  instance_dialog->getEventView()->setListSubmaps(list);
 }
@@ -767,7 +767,7 @@ void MapIOView::updateListSubmaps(QVector<QString> list)
 void MapIOView::updateListThings(QVector<QString> list)
 {
   if(io_dialog != NULL)
-    io_dialog->getEventView()->setListThings(list);
+    io_dialog->setListThings(list);
   //if(instance_dialog != NULL)
   //  instance_dialog->getEventView()->setListThings(list);
 }

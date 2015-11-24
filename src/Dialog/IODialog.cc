@@ -21,8 +21,9 @@
  */
 IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
 {
-  convo_dialog = NULL;
+  //convo_dialog = NULL;
   editing_event = NOEVENT;
+  event_dialog = nullptr;
   frame_dialog = NULL;
   state_index = 0;
   waiting_for_submap = false;
@@ -34,7 +35,7 @@ IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
   {
     *io_working = *io_original;
   }
-  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
+  //event_ctrl = new EditorEvent(EventSet::createBlankEvent());
 
   /* Layout setup */
   createLayout(edit_io->getBaseIO() != NULL);
@@ -50,10 +51,10 @@ IODialog::~IODialog()
   io_original = NULL;
 
   /* Delete event controller */
-  buttonEventCancel();
-  event_view->setEvent(NULL);
-  delete event_ctrl;
-  event_ctrl = NULL;
+  //buttonEventCancel();
+  //event_view->setEvent(NULL);
+  //delete event_ctrl;
+  //event_ctrl = NULL;
 
   /* Delete working IO */
   if(io_working != NULL)
@@ -223,23 +224,23 @@ void IODialog::createLayout(bool instance)
   layout->addWidget(group_events, 7, 4, 1, 4);
 
   /* Event View */
-  pop_event = new QDialog(this);
-  pop_event->setWindowTitle("Event Edit");
-  QGridLayout* e_layout = new QGridLayout(pop_event);
-  event_view = new EventView(event_ctrl, pop_event);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-  e_layout->addWidget(event_view, 0, 0, 1, 4);
-  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
-  btn_event_ok->setDefault(true);
-  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(buttonEventOk()));
-  e_layout->addWidget(btn_event_ok, 1, 2);
-  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
-  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(buttonEventCancel()));
-  e_layout->addWidget(btn_event_cancel, 1, 3);
-  pop_event->setLayout(e_layout);
-  pop_event->hide();
+//  pop_event = new QDialog(this);
+//  pop_event->setWindowTitle("Event Edit");
+//  QGridLayout* e_layout = new QGridLayout(pop_event);
+//  event_view = new EventView(event_ctrl, pop_event);
+//  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
+//          this, SLOT(editConversation(Conversation*,bool)));
+//  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+//  e_layout->addWidget(event_view, 0, 0, 1, 4);
+//  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
+//  btn_event_ok->setDefault(true);
+//  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(buttonEventOk()));
+//  e_layout->addWidget(btn_event_ok, 1, 2);
+//  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
+//  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(buttonEventCancel()));
+//  e_layout->addWidget(btn_event_cancel, 1, 3);
+//  pop_event->setLayout(e_layout);
+//  pop_event->hide();
 
   /* The button control */
   layout->setRowMinimumHeight(8, 25);
@@ -270,7 +271,6 @@ void IODialog::updateData()
   /* Description */
   text_description->setPlainText(io_working->getDescription());
 
-
   /* Visibility */
   if(io_working->isVisible())
     box_visible->setCurrentIndex(1);
@@ -298,9 +298,9 @@ void IODialog::updateData()
 
   /* Sound data - find index */
   int index = -1;
-  for(int i = 0; i < sound_list.size(); i++)
+  for(int i = 0; i < list_sounds.size(); i++)
   {
-    QStringList str_split = sound_list[i].split(':');
+    QStringList str_split = list_sounds[i].split(':');
     if(str_split.size() >= 2)
       if(str_split.front().toInt() == io_working->getSoundID())
         index = i;
@@ -309,7 +309,7 @@ void IODialog::updateData()
   /* Sound data - load into combo */
   combo_sound->blockSignals(true);
   combo_sound->clear();
-  combo_sound->addItems(QStringList(sound_list));
+  combo_sound->addItems(QStringList(list_sounds));
   if(index >= 0)
     combo_sound->setCurrentIndex(index);
   combo_sound->blockSignals(false);
@@ -329,13 +329,17 @@ void IODialog::updateData()
 void IODialog::closeEvent(QCloseEvent* event)
 {
   /* Close pop-ups */
-  buttonEventCancel();
+  //buttonEventCancel();
 
   /* Clean up events */
-  event_ctrl->setEventBlank();
-  if(io_working != NULL)
-    delete io_working;
-  io_working = NULL;
+  //event_ctrl->setEventBlank();
+  //if(io_working != NULL)
+  //  delete io_working;
+  //io_working = NULL;
+
+  /* Close and remove all references */
+  editEventSet(nullptr);
+  io_original = nullptr;
 
   /* Finalize close */
   event->accept();
@@ -364,21 +368,21 @@ void IODialog::buttonCancel()
  * Inputs: none
  * Output: none
  */
-void IODialog::buttonEventCancel()
-{
-  if(editing_event != NOEVENT)
-  {
-    /* If conversation dialog is visible, hide it first */
-    if(convo_dialog != NULL && convo_dialog->isVisible())
-      convo_dialog->buttonCancel();
+//void IODialog::buttonEventCancel()
+//{
+//  if(editing_event != NOEVENT)
+//  {
+//    /* If conversation dialog is visible, hide it first */
+//    if(convo_dialog != NULL && convo_dialog->isVisible())
+//      convo_dialog->buttonCancel();
 
-    /* Then the event pop-up */
-    pop_event->hide();
-    event_ctrl->setEventBlank();
-    event_view->update();
-    editing_event = NOEVENT;
-  }
-}
+//    /* Then the event pop-up */
+//    pop_event->hide();
+//    event_ctrl->setEventBlank();
+//    event_view->update();
+//    editing_event = NOEVENT;
+//  }
+//}
 
 /*
  * Description: Button slot on the enter event button in the dialog. Triggers
@@ -390,19 +394,21 @@ void IODialog::buttonEventCancel()
  */
 void IODialog::buttonEventEnter()
 {
-  /* Close the pop-up if open */
-  if(editing_event != NOEVENT)
-    buttonEventCancel();
+  qDebug() << "TODO: EVENT ENTER";
 
-  /* Set the event and open the new pop-up */
-  EditorState* state = io_working->getState(combo_state->currentIndex());
-  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-  {
-    event_ctrl->setEvent(EventSet::copyEvent(state->event_enter));
-    event_view->updateEvent();
-    pop_event->show();
-    editing_event = ENTER;
-  }
+//  /* Close the pop-up if open */
+//  if(editing_event != NOEVENT)
+//    buttonEventCancel();
+
+//  /* Set the event and open the new pop-up */
+//  EditorState* state = io_working->getState(combo_state->currentIndex());
+//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+//  {
+//    event_ctrl->setEvent(EventSet::copyEvent(state->event_enter));
+//    event_view->updateEvent();
+//    pop_event->show();
+//    editing_event = ENTER;
+//  }
 }
 
 /*
@@ -415,19 +421,21 @@ void IODialog::buttonEventEnter()
  */
 void IODialog::buttonEventExit()
 {
-  /* Close the pop-up if open */
-  if(editing_event != NOEVENT)
-    buttonEventCancel();
+  qDebug() << "TODO: EVENT EXIT";
 
-  /* Set the event and open the new pop-up */
-  EditorState* state = io_working->getState(combo_state->currentIndex());
-  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-  {
-    event_ctrl->setEvent(EventSet::copyEvent(state->event_exit));
-    event_view->updateEvent();
-    pop_event->show();
-    editing_event = EXIT;
-  }
+//  /* Close the pop-up if open */
+//  if(editing_event != NOEVENT)
+//    buttonEventCancel();
+
+//  /* Set the event and open the new pop-up */
+//  EditorState* state = io_working->getState(combo_state->currentIndex());
+//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+//  {
+//    event_ctrl->setEvent(EventSet::copyEvent(state->event_exit));
+//    event_view->updateEvent();
+//    pop_event->show();
+//    editing_event = EXIT;
+//  }
 }
 
 /*
@@ -440,35 +448,37 @@ void IODialog::buttonEventExit()
  */
 void IODialog::buttonEventOk()
 {
-  if(editing_event != NOEVENT)
-  {
-    /* If conversation dialog is visible, hide it first */
-    if(convo_dialog != NULL && convo_dialog->isVisible())
-      convo_dialog->buttonCancel();
+  qDebug() << "TODO: EVENT OK";
 
-    /* Hide pop-up */
-    pop_event->hide();
+//  if(editing_event != NOEVENT)
+//  {
+//    /* If conversation dialog is visible, hide it first */
+//    if(convo_dialog != NULL && convo_dialog->isVisible())
+//      convo_dialog->buttonCancel();
 
-    /* Set the event */
-    int index = combo_state->currentIndex();
-    bool success = false;
-    if(editing_event == ENTER)
-      success = io_working->setEventEnter(index, *event_ctrl->getEvent());
-    else if(editing_event == EXIT)
-      success = io_working->setEventExit(index, *event_ctrl->getEvent());
-    else if(editing_event == USE)
-      success = io_working->setEventUse(index, *event_ctrl->getEvent());
-    else if(editing_event == WALKOVER)
-      success = io_working->setEventWalkover(index, *event_ctrl->getEvent());
+//    /* Hide pop-up */
+//    pop_event->hide();
 
-    /* Update IO Dialog */
-    changedComboState(index);
+//    /* Set the event */
+//    int index = combo_state->currentIndex();
+//    bool success = false;
+//    if(editing_event == ENTER)
+//      success = io_working->setEventEnter(index, *event_ctrl->getEvent());
+//    else if(editing_event == EXIT)
+//      success = io_working->setEventExit(index, *event_ctrl->getEvent());
+//    else if(editing_event == USE)
+//      success = io_working->setEventUse(index, *event_ctrl->getEvent());
+//    else if(editing_event == WALKOVER)
+//      success = io_working->setEventWalkover(index, *event_ctrl->getEvent());
 
-    /* Clear out the event control and view class */
-    event_ctrl->setEventBlank(!success);
-    event_view->update();
-    editing_event = NOEVENT;
-  }
+//    /* Update IO Dialog */
+//    changedComboState(index);
+
+//    /* Clear out the event control and view class */
+//    event_ctrl->setEventBlank(!success);
+//    event_view->update();
+//    editing_event = NOEVENT;
+//  }
 }
 
 /*
@@ -481,19 +491,21 @@ void IODialog::buttonEventOk()
  */
 void IODialog::buttonEventUse()
 {
-  /* Close the pop-up if open */
-  if(editing_event != NOEVENT)
-    buttonEventCancel();
+  qDebug() << "TODO: EVENT USE";
 
-  /* Set the event and open the new pop-up */
-  EditorState* state = io_working->getState(combo_state->currentIndex());
-  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-  {
-    event_ctrl->setEvent(EventSet::copyEvent(state->event_use));
-    event_view->updateEvent();
-    pop_event->show();
-    editing_event = USE;
-  }
+//  /* Close the pop-up if open */
+//  if(editing_event != NOEVENT)
+//    buttonEventCancel();
+
+//  /* Set the event and open the new pop-up */
+//  EditorState* state = io_working->getState(combo_state->currentIndex());
+//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+//  {
+//    event_ctrl->setEvent(EventSet::copyEvent(state->event_use));
+//    event_view->updateEvent();
+//    pop_event->show();
+//    editing_event = USE;
+//  }
 }
 
 /*
@@ -506,19 +518,21 @@ void IODialog::buttonEventUse()
  */
 void IODialog::buttonEventWalkover()
 {
-  /* Close the pop-up if open */
-  if(editing_event != NOEVENT)
-    buttonEventCancel();
+  qDebug() << "TODO: EVENT WALKOVER";
 
-  /* Set the event and open the new pop-up */
-  EditorState* state = io_working->getState(combo_state->currentIndex());
-  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-  {
-    event_ctrl->setEvent(EventSet::copyEvent(state->event_walkover));
-    event_view->updateEvent();
-    pop_event->show();
-    editing_event = WALKOVER;
-  }
+//  /* Close the pop-up if open */
+//  if(editing_event != NOEVENT)
+//    buttonEventCancel();
+
+//  /* Set the event and open the new pop-up */
+//  EditorState* state = io_working->getState(combo_state->currentIndex());
+//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
+//  {
+//    event_ctrl->setEvent(EventSet::copyEvent(state->event_walkover));
+//    event_view->updateEvent();
+//    pop_event->show();
+//    editing_event = WALKOVER;
+//  }
 }
 
 /*
@@ -555,10 +569,11 @@ void IODialog::buttonFrameEdit()
 void IODialog::buttonOk()
 {
   /* Consolidate before closing */
+  editEventSet(nullptr);
   io_working->consolidate(state_index);
 
   emit ok();
-  event_ctrl->setEventBlank(false);
+  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -816,31 +831,67 @@ void IODialog::checkInactive(int state)
  *         bool is_option - true if the segment is an option
  * Output: none
  */
-void IODialog::editConversation(Conversation* convo, bool is_option)
+//void IODialog::editConversation(Conversation* convo, bool is_option)
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//               this, SLOT(selectTileConvo()));
+//    disconnect(convo_dialog, SIGNAL(success()),
+//               event_view, SLOT(updateConversation()));
+//    delete convo_dialog;
+//  }
+//  convo_dialog = NULL;
+
+//  /* Create the new conversation dialog */
+//  convo_dialog = new ConvoDialog(convo, is_option, this);
+//  convo_dialog->setListThings(getEventView()->getListThings());
+//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
+//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
+//  convo_dialog->getEventView()->setListSounds(getListSounds());
+//  convo_dialog->getEventView()->setListSubmaps(
+//                                      getEventView()->getListSubmaps());
+//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
+//          this, SLOT(selectTileConvo()));
+//  connect(convo_dialog, SIGNAL(success()),
+//          event_view, SLOT(updateConversation()));
+//  convo_dialog->show();
+//}
+
+/*
+ * Description: Edits the current event set instance trigger. Triggered
+ *              from EventSetView. Required to lock out the pop-up.
+ *
+ * Inputs: EditorEventSet* set - the editing set
+ * Output: none
+ */
+void IODialog::editEventSet(EditorEventSet* set)
 {
-  if(convo_dialog != NULL)
+  if(event_dialog != nullptr)
   {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               event_view, SLOT(updateConversation()));
-    delete convo_dialog;
+    disconnect(event_dialog, SIGNAL(selectTile()),
+               this, SLOT(selectTile()));
+    disconnect(event_dialog, SIGNAL(ok()),
+               this, SLOT(buttonEventOk()));
+    delete event_dialog;
   }
-  convo_dialog = NULL;
+  event_dialog = NULL;
 
   /* Create the new conversation dialog */
-  convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(getEventView()->getListThings());
-  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-  convo_dialog->getEventView()->setListSounds(getListSounds());
-  convo_dialog->getEventView()->setListSubmaps(
-                                      getEventView()->getListSubmaps());
-  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-          this, SLOT(selectTileConvo()));
-  connect(convo_dialog, SIGNAL(success()),
-          event_view, SLOT(updateConversation()));
-  convo_dialog->show();
+  if(set != nullptr)
+  {
+    event_dialog = new EventDialog(set, this);
+    event_dialog->setListItems(list_items);
+    event_dialog->setListMaps(list_maps);
+    event_dialog->setListSounds(list_sounds);
+    event_dialog->setListSubmaps(list_submaps);
+    event_dialog->setListThings(list_things);
+    connect(event_dialog, SIGNAL(selectTile()),
+            this, SLOT(selectTile()));
+    connect(event_dialog, SIGNAL(ok()),
+            this, SLOT(buttonEventOk()));
+    event_dialog->show();
+  }
 }
 
 /*
@@ -873,10 +924,10 @@ void IODialog::updateFrame()
  */
 void IODialog::selectTile()
 {
-  waiting_convo = false;
+  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
-  pop_event->hide();
+  //pop_event->hide();
   emit selectTile(EditorEnumDb::IO_VIEW);
 }
 
@@ -888,15 +939,15 @@ void IODialog::selectTile()
  * Inputs: none
  * Output: none
  */
-void IODialog::selectTileConvo()
-{
-  if(convo_dialog != NULL)
-  {
-    selectTile();
-    waiting_convo = true;
-    convo_dialog->hide();
-  }
-}
+//void IODialog::selectTileConvo()
+//{
+//  if(convo_dialog != NULL)
+//  {
+//    selectTile();
+//    waiting_convo = true;
+//    convo_dialog->hide();
+//  }
+//}
 
 /*
  * Description: The drop down for visibility of the IO changed slot. This
@@ -918,14 +969,47 @@ void IODialog::visibilityChanged(int index)
  *===========================================================================*/
 
 /*
+ * Description: Returns the event dialog used within the IO dialog.
+ *
+ * Inputs: none
+ * Output: EventDialog* - the event dialog widget for the current IO
+ */
+EventDialog* IODialog::getEventDialog()
+{
+  return event_dialog;
+}
+
+/*
  * Description: Returns the event view within the IO dialog.
  *
  * Inputs: none
  * Output: EventView* - the event view widget for the current IO
  */
-EventView* IODialog::getEventView()
+//EventView* IODialog::getEventView()
+//{
+//  return event_view;
+//}
+
+/*
+ * Description: Returns the list of items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for give item event)
+ */
+QVector<QString> IODialog::getListItems()
 {
-  return event_view;
+  return list_items;
+}
+
+/*
+ * Description: Returns the list of maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all maps (for change map event)
+ */
+QVector<QString> IODialog::getListMaps()
+{
+  return list_maps;
 }
 
 /*
@@ -937,7 +1021,59 @@ EventView* IODialog::getEventView()
  */
 QList<QString> IODialog::getListSounds()
 {
-  return sound_list;
+  return list_sounds;
+}
+
+/*
+ * Description: Returns the list of sub-maps, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ */
+QVector<QString> IODialog::getListSubmaps()
+{
+  return list_submaps;
+}
+
+/*
+ * Description: Returns the list of things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for teleport event)
+ */
+QVector<QString> IODialog::getListThings()
+{
+  return list_things;
+}
+
+/*
+ * Description: Sets the list of items, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all items (for give item event)
+ * Output: none
+ */
+void IODialog::setListItems(QVector<QString> items)
+{
+  list_items = items;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListItems(items);
+}
+
+/*
+ * Description: Sets the list of maps, used for event creation
+ *
+ * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Output: none
+ */
+void IODialog::setListMaps(QVector<QString> maps)
+{
+  list_maps = maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListMaps(maps);
 }
 
 /*
@@ -950,12 +1086,42 @@ QList<QString> IODialog::getListSounds()
 void IODialog::setListSounds(QList<QString> sounds)
 {
   /* Base data */
-  sound_list = sounds;
+  list_sounds = sounds;
   updateData();
 
-  /* Event view data */
-  if(event_view != nullptr)
-    event_view->setListSounds(sounds);
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSounds(sounds);
+}
+
+/*
+ * Description: Sets the list of sub-maps, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: none
+ */
+void IODialog::setListSubmaps(QVector<QString> sub_maps)
+{
+  list_submaps = sub_maps;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListSubmaps(sub_maps);
+}
+
+/*
+ * Description: Sets the list of things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all things (for teleport event)
+ * Output: none
+ */
+void IODialog::setListThings(QVector<QString> things)
+{
+  list_things = things;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListThings(things);
 }
 
 /*
@@ -992,15 +1158,17 @@ void IODialog::updateSelectedTile(int id, int x, int y)
   {
     waiting_for_submap = false;
     show();
-    pop_event->show();
-    if(waiting_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      event_view->updateSelectedTile(id, x, y);
-    }
+    if(event_dialog != nullptr)
+      event_dialog->updateSelectedTile(id, x, y);
+//    pop_event->show();
+//    if(waiting_convo)
+//    {
+//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
+//      convo_dialog->show();
+//    }
+//    else
+//    {
+//      event_view->updateSelectedTile(id, x, y);
+//    }
   }
 }

@@ -12,6 +12,13 @@
  *===========================================================================*/
 
 /* Constructor function */
+/*
+ * Description: Constructor function for instantiating the event set view with
+ *              an EditorEventSet and a parent widget.
+ *
+ * Inputs: EditorEventSet* event_set - the event set data from handler
+ *         QWidget* parent - the parent widget
+ */
 EventSetView::EventSetView(EditorEventSet* event_set, QWidget* parent)
             : QFrame(parent)
 {
@@ -22,7 +29,9 @@ EventSetView::EventSetView(EditorEventSet* event_set, QWidget* parent)
   setEventSet(event_set);
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 EventSetView::~EventSetView()
 {
   setEventSet(nullptr);
@@ -32,7 +41,12 @@ EventSetView::~EventSetView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
   
-/* Creates the layout and widgets for this controller */
+/*
+ * Description: Creates the dialog layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventSetView::createLayout()
 {
   /* Layout */
@@ -69,7 +83,13 @@ void EventSetView::createLayout()
   setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H - 50);
 }
 
-/* Set layout data */
+/*
+ * Description: Updates the data in the widgets. CreateLayout() must be called
+ *              prior.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventSetView::setLayoutData()
 {
   /* Event set is valid */
@@ -115,14 +135,25 @@ void EventSetView::setLayoutData()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
   
-/* Button control triggers */
+/*
+ * Description: Button slot on the edit set button. This is triggered for
+ *              the event dialog within the parent class.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventSetView::buttonEdit()
 {
   if(event_set != nullptr)
     emit editSet(event_set);
 }
 
-/* Event updated trigger */
+/*
+ * Description: Updates the event set pointer data visible within the widget
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventSetView::eventUpdated()
 {
   setLayoutData();
@@ -132,13 +163,24 @@ void EventSetView::eventUpdated()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the event set */
+/*
+ * Description: Returns the event set used within the widget.
+ *
+ * Inputs: none
+ * Output: EditorEventSet* - the event set data class for the current parent
+ *                           object
+ */
 EditorEventSet* EventSetView::getEventSet()
 {
   return event_set;
 }
 
-/* Sets the event set */
+/*
+ * Description: Sets the event set to visualize using the widget
+ *
+ * Inputs: EditorEventSet* set - the event set to visualize in the widget
+ * Output: none
+ */
 void EventSetView::setEventSet(EditorEventSet* set)
 {
   event_set = set;

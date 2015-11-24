@@ -18,10 +18,9 @@
 
 #include "Database/EditorMapIO.h"
 #include "Database/EditorMapNPC.h"
-//#include "Dialog/ConvoDialog.h"
 #include "Dialog/EventDialog.h"
 #include "Dialog/NodeDialog.h"
-//#include "View/EventView.h"
+#include "View/EventSetView.h"
 
 class InstanceDialog : public QDialog
 {
@@ -57,8 +56,7 @@ private:
   QTextEdit* edit_description;
 
   /* Event view and control */
-  //EditorEvent* event_ctrl;
-  //EventView* event_view;
+  EventSetView* event_view;
 
   /* The event set dialog */
   EventDialog* event_dialog;
@@ -162,8 +160,8 @@ public slots:
   void comboPartyChange(int index);
   void comboTrackingChange(int index);
 
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
+  /* Edit event set trigger */
+  void editEventSet(EditorEventSet* set);
 
   /* Edit Single Node trigger */
   void editNode(QListWidgetItem*);
@@ -181,9 +179,6 @@ public slots:
 public:
   /* Returns the event dialog widget */
   EventDialog* getEventDialog();
-
-  /* Returns the event view widget */
-  //EventView* getEventView();
 
   /* Returns the list of objects, used for dialog and event creation */
   QVector<QString> getListItems();

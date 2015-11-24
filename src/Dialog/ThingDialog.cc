@@ -6,7 +6,7 @@
  *              related to it. Allows manipulation of the data.
  ******************************************************************************/
 #include "Dialog/ThingDialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -22,7 +22,6 @@
 ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
            : QDialog(parent)
 {
-  //convo_dialog = NULL;
   event_dialog = nullptr;
   frame_dialog = NULL;
   waiting_for_submap = false;
@@ -33,13 +32,7 @@ ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
   if(thing_original != NULL)
   {
     *thing_working = *thing_original;
-    //event_ctrl = new EditorEvent(
-    //                           EventSet::copyEvent(thing_original->getEvent()));
   }
-  //else
-  //{
-  //  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
-  //}
 
   /* Layout setup */
   createLayout(edit_thing->getBaseThing() != NULL);
@@ -53,12 +46,6 @@ ThingDialog::ThingDialog(EditorMapThing* edit_thing, QWidget* parent)
 ThingDialog::~ThingDialog()
 {
   thing_original = NULL;
-
-  /* Delete event controller */
-  //event_view->setEvent(NULL);
-  //event_ctrl->setEventBlank();
-  //delete event_ctrl;
-  //event_ctrl = NULL;
 
   /* Delete working thing */
   if(thing_working != NULL)
@@ -134,20 +121,6 @@ void ThingDialog::createLayout(bool instance)
   connect(event_view, SIGNAL(editSet(EditorEventSet*)),
           this, SLOT(editEventSet(EditorEventSet*)));
   layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
-
-//  QLabel* lbl_event_frame = new QLabel(this);
-//  lbl_event_frame->setFrameStyle(QFrame::Panel | QFrame::Plain);
-//  lbl_event_frame->setFixedSize(EditorEnumDb::kEVENT_VIEW_W,
-//                                EditorEnumDb::kEVENT_VIEW_H);
-//  layout->addWidget(lbl_event_frame, 6, 0, 2, 4, Qt::AlignBottom);
-
-  //event_view = new EventView(event_ctrl, this);
-  //if(instance)
-  //  event_view->setDisabled(true);
-  //layout->addWidget(event_view, 6, 0, 2, 4, Qt::AlignBottom);
-  //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-  //        this, SLOT(editConversation(Conversation*,bool)));
-  //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
@@ -237,10 +210,8 @@ void ThingDialog::updateData()
  */
 void ThingDialog::closeEvent(QCloseEvent* event)
 {
-  //event_ctrl->setEventBlank();
-  if(thing_working != NULL)
-    delete thing_working;
-  thing_working = NULL;
+  editEventSet(nullptr);
+  thing_original = nullptr;
 
   event->accept();
 }
@@ -295,11 +266,11 @@ void ThingDialog::buttonFrameEdit()
 void ThingDialog::buttonOk()
 {
   /* Trim the matrix before accepting the sprites */
+  editEventSet(nullptr);
   matrix_view->buttonTrim();
 
   /* Proceed to ok() */
   emit ok();
-  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -351,42 +322,12 @@ void ThingDialog::changedSound(const QString &text)
 }
 
 /*
- * Description: Edits the current conversation instance trigger. Triggered
- *              from EventView. Required to lock out the pop-up.
+ * Description: Edits the current event set instance trigger. Triggered
+ *              from EventSetView. Required to lock out the pop-up.
  *
- * Inputs: Conversation* convo - the conversation segment to edit
- *         bool is_option - true if the segment is an option
+ * Inputs: EditorEventSet* set - the editing set
  * Output: none
  */
-//void ThingDialog::editConversation(Conversation* convo, bool is_option)
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//               this, SLOT(selectTileConvo()));
-//    disconnect(convo_dialog, SIGNAL(success()),
-//               event_view, SLOT(updateConversation()));
-//    delete convo_dialog;
-//  }
-//  convo_dialog = NULL;
-//
-//  /* Create the new conversation dialog */
-//  convo_dialog = new ConvoDialog(convo, is_option, this);
-//  convo_dialog->setListThings(getEventView()->getListThings());
-//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-//  convo_dialog->getEventView()->setListSounds(getListSounds());
-//  convo_dialog->getEventView()->setListSubmaps(
-//                                      getEventView()->getListSubmaps());
-//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//          this, SLOT(selectTileConvo()));
-//  connect(convo_dialog, SIGNAL(success()),
-//          event_view, SLOT(updateConversation()));
-//  convo_dialog->show();
-//}
-
-/* Edit event set trigger */
-// TODO: Comment
 void ThingDialog::editEventSet(EditorEventSet* set)
 {
   if(event_dialog != nullptr)
@@ -446,29 +387,10 @@ void ThingDialog::updateFrame()
  */
 void ThingDialog::selectTile()
 {
-  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile(EditorEnumDb::THING_VIEW);
 }
-
-/*
- * Description: Triggers the select tile dialog for the conversation in the
- *              event view in the pop-up. This hides the pop-up and waits for a
- *              tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-//void ThingDialog::selectTileConvo()
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    selectTile();
-//    waiting_convo = true;
-//    convo_dialog->hide();
-//  }
-//}
 
 /*
  * Description: The drop down for visibility of the thing changed slot. This
@@ -489,23 +411,16 @@ void ThingDialog::visibilityChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the event dialog widget */
-// TODO: Comment
+/*
+ * Description: Returns the event dialog used within the thing dialog.
+ *
+ * Inputs: none
+ * Output: EventDialog* - the event dialog widget for the current thing
+ */
 EventDialog* ThingDialog::getEventDialog()
 {
   return event_dialog;
 }
-
-/*
- * Description: Returns the event view within the thing dialog.
- *
- * Inputs: none
- * Output: EventView* - the event view widget for the current thing
- */
-//EventView* ThingDialog::getEventView()
-//{
-//  return event_view;
-//}
 
 /*
  * Description: Returns the list of items, used for event creation.
@@ -561,18 +476,6 @@ QVector<QString> ThingDialog::getListThings()
 {
   return list_things;
 }
-
-/*
- * Description: Returns a list of sounds being used in the thing presently.
- *              Used when required for neighboring calls.
- *
- * Inputs: none
- * Output: QList<QString> - the sound string list
- */
-//QList<QString> ThingDialog::getListSounds()
-//{
-//  return sound_list;
-//}
 
 /*
  * Description: Sets the list of items, used for event creation
@@ -665,7 +568,6 @@ void ThingDialog::updateOriginal()
   if(thing_original != NULL)
   {
     *thing_original = *thing_working;
-    //thing_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -688,14 +590,5 @@ void ThingDialog::updateSelectedTile(int id, int x, int y)
     show();
     if(event_dialog != nullptr)
       event_dialog->updateSelectedTile(id, x, y);
-    //if(waiting_convo)
-    //{
-    //  convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-    //  convo_dialog->show();
-    //}
-    //else
-    //{
-    //  event_view->updateSelectedTile(id, x, y);
-    //}
   }
 }

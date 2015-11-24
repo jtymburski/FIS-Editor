@@ -22,7 +22,6 @@
 PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
            : QDialog(parent)
 {
-  //convo_dialog = NULL;
   event_dialog = nullptr;
   frame_dialog = NULL;
   waiting_for_submap = false;
@@ -37,13 +36,7 @@ PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
   if(person_original != NULL)
   {
     *person_working = *person_original;
-    //event_ctrl = new EditorEvent(
-    //                          EventSet::copyEvent(person_original->getEvent()));
   }
-  //else
-  //{
-  //  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
-  //}
 
   /* Layout setup */
   createLayout(edit_person->getBasePerson() != NULL);
@@ -57,12 +50,6 @@ PersonDialog::PersonDialog(EditorMapPerson* edit_person, QWidget* parent)
 PersonDialog::~PersonDialog()
 {
   person_original = NULL;
-
-  /* Delete event controller */
-  //event_view->setEvent(NULL);
-  //event_ctrl->setEventBlank();
-  //delete event_ctrl;
-  //event_ctrl = NULL;
 
   /* Delete working thing */
   if(person_working != NULL)
@@ -167,18 +154,10 @@ void PersonDialog::createLayout(bool instance)
   layout->addWidget(btn_frame_click, 5, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
-  QLabel* lbl_event_frame = new QLabel(this);
-  lbl_event_frame->setFrameStyle(QFrame::Panel | QFrame::Plain);
-  lbl_event_frame->setFixedSize(EditorEnumDb::kEVENT_VIEW_W,
-                                EditorEnumDb::kEVENT_VIEW_H);
-  layout->addWidget(lbl_event_frame, 7, 0, 2, 4, Qt::AlignBottom);
-  //event_view = new EventView(event_ctrl, this);
-  //if(instance)
-  //  event_view->setDisabled(true);
-  //layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
-  //connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-  //        this, SLOT(editConversation(Conversation*,bool)));
-  //connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
+  event_view = new EventSetView(nullptr, this);
+  connect(event_view, SIGNAL(editSet(EditorEventSet*)),
+          this, SLOT(editEventSet(EditorEventSet*)));
+  layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);
@@ -273,6 +252,9 @@ void PersonDialog::updateData()
   if(index >= 0)
     combo_sound->setCurrentIndex(index);
   combo_sound->blockSignals(false);
+
+  /* Event view */
+  event_view->setEventSet(person_working->getEventSet());
 }
 
 /*============================================================================
@@ -288,11 +270,9 @@ void PersonDialog::updateData()
  */
 void PersonDialog::closeEvent(QCloseEvent* event)
 {
+  editEventSet(nullptr);
   matrix_view->setMatrix(NULL);
-  //event_ctrl->setEventBlank();
-  if(person_working != NULL)
-    delete person_working;
-  person_working = NULL;
+  person_original = nullptr;
 
   event->accept();
 }
@@ -353,7 +333,6 @@ void PersonDialog::buttonOk()
 
   /* Proceed to ok() */
   emit ok();
-  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -426,39 +405,40 @@ void PersonDialog::directionChange(QString text)
 }
 
 /*
- * Description: Edits the current conversation instance trigger. Triggered
- *              from EventView. Required to lock out the pop-up.
+ * Description: Edits the current event set instance trigger. Triggered
+ *              from EventSetView. Required to lock out the pop-up.
  *
- * Inputs: Conversation* convo - the conversation segment to edit
- *         bool is_option - true if the segment is an option
+ * Inputs: EditorEventSet* set - the editing set
  * Output: none
  */
-//void PersonDialog::editConversation(Conversation* convo, bool is_option)
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//               this, SLOT(selectTileConvo()));
-//    disconnect(convo_dialog, SIGNAL(success()),
-//               event_view, SLOT(updateConversation()));
-//    delete convo_dialog;
-//  }
-//  convo_dialog = NULL;
+void PersonDialog::editEventSet(EditorEventSet* set)
+{
+  if(event_dialog != nullptr)
+  {
+    disconnect(event_dialog, SIGNAL(selectTile()),
+               this, SLOT(selectTile()));
+    disconnect(event_dialog, SIGNAL(ok()),
+               event_view, SLOT(eventUpdated()));
+    delete event_dialog;
+  }
+  event_dialog = nullptr;
 
-//  /* Create the new conversation dialog */
-//  convo_dialog = new ConvoDialog(convo, is_option, this);
-//  convo_dialog->setListThings(getEventView()->getListThings());
-//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-//  convo_dialog->getEventView()->setListSounds(getListSounds());
-//  convo_dialog->getEventView()->setListSubmaps(
-//                                           getEventView()->getListSubmaps());
-//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//          this, SLOT(selectTileConvo()));
-//  connect(convo_dialog, SIGNAL(success()),
-//          event_view, SLOT(updateConversation()));
-//  convo_dialog->show();
-//}
+  /* Create the new conversation dialog */
+  if(set != nullptr)
+  {
+    event_dialog = new EventDialog(set, this);
+    event_dialog->setListItems(list_items);
+    event_dialog->setListMaps(list_maps);
+    event_dialog->setListSounds(list_sounds);
+    event_dialog->setListSubmaps(list_submaps);
+    event_dialog->setListThings(list_things);
+    connect(event_dialog, SIGNAL(selectTile()),
+            this, SLOT(selectTile()));
+    connect(event_dialog, SIGNAL(ok()),
+            event_view, SLOT(eventUpdated()));
+    event_dialog->show();
+  }
+}
 
 /*
  * Description: Triggers the select tile dialog for the pop-up. This hides the
@@ -469,29 +449,10 @@ void PersonDialog::directionChange(QString text)
  */
 void PersonDialog::selectTile()
 {
-  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile(EditorEnumDb::PERSON_VIEW);
 }
-
-/*
- * Description: Triggers the select tile dialog for the conversation in the
- *              event view in the pop-up. This hides the pop-up and waits for a
- *              tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-//void PersonDialog::selectTileConvo()
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    selectTile();
-//    waiting_convo = true;
-//    convo_dialog->hide();
-//  }
-//}
 
 /*
  * Description: Triggered when the speed changes in the data scroller. Updates
@@ -565,23 +526,16 @@ void PersonDialog::visibilityChanged(int index)
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the event dialog widget */
-// TODO: Comment
+/*
+ * Description: Returns the event dialog used within the person dialog.
+ *
+ * Inputs: none
+ * Output: EventDialog* - the event dialog widget for the current person
+ */
 EventDialog* PersonDialog::getEventDialog()
 {
   return event_dialog;
 }
-
-/*
- * Description: Returns the event view within the person dialog.
- *
- * Inputs: none
- * Output: EventView* - the event view widget for the current person
- */
-//EventView* PersonDialog::getEventView()
-//{
-//  return event_view;
-//}
 
 /*
  * Description: Returns the list of items, used for event creation.
@@ -730,7 +684,6 @@ void PersonDialog::updateOriginal()
   if(person_original != NULL)
   {
     *person_original = *person_working;
-    //person_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -753,14 +706,5 @@ void PersonDialog::updateSelectedTile(int id, int x, int y)
     show();
     if(event_dialog != nullptr)
       event_dialog->updateSelectedTile(id, x, y);
-//    if(waiting_convo)
-//    {
-//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-//      convo_dialog->show();
-//    }
-//    else
-//    {
-//      event_view->updateSelectedTile(id, x, y);
-//    }
   }
 }
