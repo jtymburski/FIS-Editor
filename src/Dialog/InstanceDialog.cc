@@ -350,12 +350,8 @@ void InstanceDialog::updateData()
   {
     box_base_event->blockSignals(true);
     box_base_event->setChecked(thing_working->isBaseEvent());
-    if(thing_working->isBaseEvent())
-      event_view->setEventSet(thing_working->getBaseThing()->getEventSet());
-    else
-      event_view->setEventSet(thing_working->getEventSet());
+    event_view->setEventSet(thing_working->getEventSet());
     event_view->setEnabled(!thing_working->isBaseEvent());
-    //event_view->setEnabled(!thing_working->isBaseEvent());
     box_base_event->blockSignals(false);
   }
 
@@ -546,20 +542,14 @@ void InstanceDialog::checkBaseChange(int state)
 {
   /* If base is checked, event is disabled. Otherwise, enabled */
   thing_working->setUseBaseEvent(state == Qt::Checked);
-  event_view->setEnabled(state == Qt::Unchecked);
 
   /* Set the event */
   if(state == Qt::Unchecked)
-  {
     thing_working->setEventSet(*thing_working->getBaseThing()->getEventSet());
-    event_view->setEventSet(thing_working->getEventSet());
-    event_view->setEnabled(true);
-  }
-  else
-  {
-    event_view->setEventSet(thing_working->getBaseThing()->getEventSet());
-    event_view->setDisabled(true);
-  }
+
+  /* Update the view */
+  event_view->setEventSet(thing_working->getEventSet());
+  event_view->setEnabled(state == Qt::Unchecked);
 }
 
 /*

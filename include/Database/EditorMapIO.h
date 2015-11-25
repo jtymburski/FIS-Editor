@@ -21,10 +21,23 @@ struct EditorState
   EditorEnumDb::MapIOType type;
   MapState::InteractionState interact;
   
+  // TODO: REMOVE
   Event event_enter;
   Event event_exit;
   Event event_use;
   Event event_walkover;
+
+  /* Base utilize */
+  bool base_enter;
+  bool base_exit;
+  bool base_use;
+  bool base_walkover;
+
+  /* Event Sets */
+  EditorEventSet set_enter;
+  EditorEventSet set_exit;
+  EditorEventSet set_use;
+  EditorEventSet set_walkover;
 };
 
 /*
@@ -85,6 +98,12 @@ public:
   /* Gets the base ref of the io */
   EditorMapIO* getBaseIO() const;
 
+  /* Returns event sets for the different state indexes */
+  //EditorEventSet* getEventEnter(int index); // TODO: Implement
+  //EditorEventSet* getEventExit(int index); // TODO: Implement
+  //EditorEventSet* getEventUse(int index); // TODO: Implement
+  //EditorEventSet* getEventWalkover(int index); // TODO: Implement
+
   /* Returns the inactive time before returning down the state path (ms) */
   int getInactiveTime() const;
 
@@ -110,10 +129,10 @@ public:
   void setBase(EditorMapIO* base_io);
 
   /* Sets the events */
-  bool setEventEnter(int index, Event event);
-  bool setEventExit(int index, Event event);
-  bool setEventUse(int index, Event event);
-  bool setEventWalkover(int index, Event event);
+  bool setEventEnter(int index, Event event); // TODO: Revise
+  bool setEventExit(int index, Event event); // TODO: Revise
+  bool setEventUse(int index, Event event); // TODO: Revise
+  bool setEventWalkover(int index, Event event); // TODO: Revise
 
   /* Sets the inactive time before the state returns down the state path (ms) */
   void setInactiveTime(int time);

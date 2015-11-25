@@ -142,33 +142,39 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
           action = "walkon";
         fh->writeXmlData("interaction", action.toStdString());
 
-        /* Enter event */
-        if(states[i]->event_enter.classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent event(states[i]->event_enter);
-          event.save(fh, game_only, "enterevent");
-        }
+//        /* Enter event */ // TODO: REMOVE
+//        if(states[i]->event_enter.classification != EventClassifier::NOEVENT)
+//        {
+//          EditorEvent event(states[i]->event_enter);
+//          event.save(fh, game_only, "enterevent");
+//        }
 
-        /* Exit event */
-        if(states[i]->event_exit.classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent event(states[i]->event_exit);
-          event.save(fh, game_only, "exitevent");
-        }
+//        /* Exit event */ // TODO: REMOVE
+//        if(states[i]->event_exit.classification != EventClassifier::NOEVENT)
+//        {
+//          EditorEvent event(states[i]->event_exit);
+//          event.save(fh, game_only, "exitevent");
+//        }
 
-        /* Use event */
-        if(states[i]->event_use.classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent event(states[i]->event_use);
-          event.save(fh, game_only, "useevent");
-        }
+//        /* Use event */ // TODO: REMOVE
+//        if(states[i]->event_use.classification != EventClassifier::NOEVENT)
+//        {
+//          EditorEvent event(states[i]->event_use);
+//          event.save(fh, game_only, "useevent");
+//        }
 
-        /* Walkover event */
-        if(states[i]->event_walkover.classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent event(states[i]->event_walkover);
-          event.save(fh, game_only, "walkoverevent");
-        }
+//        /* Walkover event */ // TODO: REMOVE
+//        if(states[i]->event_walkover.classification != EventClassifier::NOEVENT)
+//        {
+//          EditorEvent event(states[i]->event_walkover);
+//          event.save(fh, game_only, "walkoverevent");
+//        }
+
+        /* Set saving */
+        states[i]->set_enter.save(fh, game_only, "enterset");
+        states[i]->set_exit.save(fh, game_only, "exitset");
+        states[i]->set_use.save(fh, game_only, "useset");
+        states[i]->set_walkover.save(fh, game_only, "walkoverset");
       }
 
       /* End Header */
@@ -187,11 +193,33 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
       fh->writeXmlData("inactive", getInactiveTime());
     }
   }
-  /* Next item data: Is not base - not used currently */
-  //else
-  //{
-  //
-  //}
+  /* Next item data: Is not base */
+  else
+  {
+    /* Write the states */
+    fh->writeXmlElement("states"); // TODO: Check if any valid??
+    for(int i = 0; i < states.size(); i++)
+    {
+      /* Event and interaction only relevant for state type */
+      if(states[i]->type == EditorEnumDb::IO_STATE &&
+         (!states[i]->set_enter.isEmpty() || !states[i]->set_exit.isEmpty() ||
+          !states[i]->set_use.isEmpty() || !states[i]->set_walkover.isEmpty()))
+      {
+        /* Start Header */
+        fh->writeXmlElement("state", "id", i);
+
+        /* Set saving */
+        states[i]->set_enter.save(fh, game_only, "enterset");
+        states[i]->set_exit.save(fh, game_only, "exitset");
+        states[i]->set_use.save(fh, game_only, "useset");
+        states[i]->set_walkover.save(fh, game_only, "walkoverset");
+
+        /* End Header */
+        fh->writeXmlElementEnd(); /* </state> */
+      }
+    }
+    fh->writeXmlElementEnd();
+  }
 }
 
 /*============================================================================
@@ -500,42 +528,74 @@ void EditorMapIO::load(XmlData data, int index)
         /* ---- ENTER EVENT ---- */
         else if(element3 == "enterevent")
         {
-          EditorEvent event(state->event_enter);
-          event.load(data, index + 3);
-          state->event_enter = EventSet::deleteEvent(state->event_enter);
-          if(event.getEvent() != NULL)
-            state->event_enter = *event.getEvent();
-          event.setEventBlank(false);
+          state->set_enter.load(data, index + 2);
+          state->base_enter = false;
+//          EditorEvent event(state->event_enter);
+//          event.load(data, index + 3);
+//          state->event_enter = EventSet::deleteEvent(state->event_enter);
+//          if(event.getEvent() != NULL)
+//            state->event_enter = *event.getEvent();
+//          event.setEventBlank(false);
+        }
+        /* ---- ENTER SET ---- */
+        else if(element3 == "enterset")
+        {
+          state->set_enter.load(data, index + 3);
+          state->base_enter = false;
         }
         /* ---- EXIT EVENT ---- */
         else if(element3 == "exitevent")
         {
-          EditorEvent event(state->event_exit);
-          event.load(data, index + 3);
-          state->event_exit = EventSet::deleteEvent(state->event_exit);
-          if(event.getEvent() != NULL)
-            state->event_exit = *event.getEvent();
-          event.setEventBlank(false);
+          state->set_exit.load(data, index + 2);
+          state->base_exit = false;
+//          EditorEvent event(state->event_exit);
+//          event.load(data, index + 3);
+//          state->event_exit = EventSet::deleteEvent(state->event_exit);
+//          if(event.getEvent() != NULL)
+//            state->event_exit = *event.getEvent();
+//          event.setEventBlank(false);
+        }
+        /* ---- EXIT SET ---- */
+        else if(element3 == "exitset")
+        {
+          state->set_exit.load(data, index + 3);
+          state->base_exit = false;
         }
         /* ---- USE EVENT ---- */
         else if(element3 == "useevent")
         {
-          EditorEvent event(state->event_use);
-          event.load(data, index + 3);
-          state->event_use = EventSet::deleteEvent(state->event_use);
-          if(event.getEvent() != NULL)
-            state->event_use = *event.getEvent();
-          event.setEventBlank(false);
+          state->set_use.load(data, index + 2);
+          state->base_use = false;
+//          EditorEvent event(state->event_use);
+//          event.load(data, index + 3);
+//          state->event_use = EventSet::deleteEvent(state->event_use);
+//          if(event.getEvent() != NULL)
+//            state->event_use = *event.getEvent();
+//          event.setEventBlank(false);
+        }
+        /* ---- USE SET ---- */
+        else if(element3 == "useset")
+        {
+          state->set_use.load(data, index + 3);
+          state->base_use = false;
         }
         /* ---- WALKOVER EVENT ---- */
         else if(element3 == "walkoverevent")
         {
-          EditorEvent event(state->event_walkover);
-          event.load(data, index + 3);
-          state->event_walkover = EventSet::deleteEvent(state->event_walkover);
-          if(event.getEvent() != NULL)
-            state->event_walkover = *event.getEvent();
-          event.setEventBlank(false);
+          state->set_walkover.load(data, index + 2);
+          state->base_walkover = false;
+//          EditorEvent event(state->event_walkover);
+//          event.load(data, index + 3);
+//          state->event_walkover = EventSet::deleteEvent(state->event_walkover);
+//          if(event.getEvent() != NULL)
+//            state->event_walkover = *event.getEvent();
+//          event.setEventBlank(false);
+        }
+        /* ---- WALKOVER SET ---- */
+        else if(element3 == "walkoverset")
+        {
+          state->set_walkover.load(data, index + 3);
+          state->base_walkover = false;
         }
       }
     }
@@ -587,7 +647,7 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
  * Inputs: int index - the node index in the stack
  *         Event event - the new enter event to set for the node
  * Output: bool - true if the event was set
- */
+ */ // TODO: REMOVE
 bool EditorMapIO::setEventEnter(int index, Event event)
 {
   EditorState* state = getState(index);
@@ -606,7 +666,7 @@ bool EditorMapIO::setEventEnter(int index, Event event)
  * Inputs: int index - the node index in the stack
  *         Event event - the new exit event to set for the node
  * Output: bool - true if the event was set
- */
+ */ // TODO: REMOVE
 bool EditorMapIO::setEventExit(int index, Event event)
 {
   EditorState* state = getState(index);
@@ -625,7 +685,7 @@ bool EditorMapIO::setEventExit(int index, Event event)
  * Inputs: int index - the node index in the stack
  *         Event event - the new use event to set for the node
  * Output: bool - true if the event was set
- */
+ */ // TODO: REMOVE
 bool EditorMapIO::setEventUse(int index, Event event)
 {
   EditorState* state = getState(index);
@@ -644,7 +704,7 @@ bool EditorMapIO::setEventUse(int index, Event event)
  * Inputs: int index - the node index in the stack
  *         Event event - the new walkover event to set for the node
  * Output: bool - true if the event was set
- */
+ */ // TODO: REMOVE
 bool EditorMapIO::setEventWalkover(int index, Event event)
 {
   EditorState* state = getState(index);
@@ -701,11 +761,23 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
       ref->type = state->type;
       ref->interact = state->interact;
 
+      /* Base event reference */
+      ref->base_enter = state->base_enter;
+      ref->base_exit = state->base_exit;
+      ref->base_use = state->base_use;
+      ref->base_walkover = state->base_walkover;
+
       /* Event state data */
-      ref->event_enter = EventSet::copyEvent(state->event_enter);
-      ref->event_exit = EventSet::copyEvent(state->event_exit);
-      ref->event_use = EventSet::copyEvent(state->event_use);
-      ref->event_walkover = EventSet::copyEvent(state->event_walkover);
+      ref->event_enter = EventSet::copyEvent(state->event_enter); // TODO: REMOVE
+      ref->event_exit = EventSet::copyEvent(state->event_exit); // TODO: REMOVE
+      ref->event_use = EventSet::copyEvent(state->event_use); // TODO: REMOVE
+      ref->event_walkover = EventSet::copyEvent(state->event_walkover); // TODO: REMOVE
+
+      /* Event set data */
+      ref->set_enter = state->set_enter;
+      ref->set_exit = state->set_exit;
+      ref->set_use = state->set_use;
+      ref->set_walkover = state->set_walkover;
     }
     /* Otherwise, this new pointer replaces the existing and the existing is
      * deleted. */
@@ -819,10 +891,14 @@ EditorState* EditorMapIO::createBlankState()
   state->matrix = new EditorMatrix();
   state->type = EditorEnumDb::IO_STATE;
   state->interact = MapState::NOINTERACTION;
-  state->event_enter = EventSet::createBlankEvent();
-  state->event_exit = EventSet::createBlankEvent();
-  state->event_use = EventSet::createBlankEvent();
-  state->event_walkover = EventSet::createBlankEvent();
+  state->base_enter = true;
+  state->base_exit = true;
+  state->base_use = true;
+  state->base_walkover = true;
+  state->event_enter = EventSet::createBlankEvent(); // TODO: REMOVE
+  state->event_exit = EventSet::createBlankEvent(); // TODO: REMOVE
+  state->event_use = EventSet::createBlankEvent(); // TODO: REMOVE
+  state->event_walkover = EventSet::createBlankEvent(); // TODO: REMOVE
 
   return state;
 }
@@ -841,10 +917,10 @@ void EditorMapIO::deleteState(EditorState* state)
   {
     /* Delete memory in structure */
     delete state->matrix;
-    EventSet::deleteEvent(state->event_enter);
-    EventSet::deleteEvent(state->event_exit);
-    EventSet::deleteEvent(state->event_use);
-    EventSet::deleteEvent(state->event_walkover);
+    EventSet::deleteEvent(state->event_enter); // TODO: REMOVE
+    EventSet::deleteEvent(state->event_exit); // TODO: REMOVE
+    EventSet::deleteEvent(state->event_use); // TODO: REMOVE
+    EventSet::deleteEvent(state->event_walkover); // TODO: REMOVE
 
     /* Delete state structure */
     delete state;

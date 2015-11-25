@@ -36,7 +36,6 @@ private:
 
   /* The event */
   EditorEventSet set;
-  //Event event; // TODO: Remove
   bool event_base;
 
   /* The view matrix */
@@ -86,9 +85,6 @@ public:
 
   /* Returns the event set of the thing */
   EditorEventSet* getEventSet();
-
-  /* Returns the event object of the thing */
-  //Event getEvent() const; // TODO: REMOVE
 
   /* Returns the game object reference ID. -1 if unset */
   int getGameID() const;
@@ -141,9 +137,6 @@ public:
 
   /* Sets the dialog image, with the path */
   void setDialogImage(QString path);
-
-  /* Sets the interaction event */
-  //void setEvent(Event event); // TODO: Remove
 
   /* Sets the interaction event set */
   void setEventSet(EditorEventSet set);
