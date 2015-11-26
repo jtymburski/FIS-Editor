@@ -130,7 +130,7 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     /* Event save, if relevant (isBaseEvent() is true) */
     if(!event_base)
     {
-      set.save(fh, game_only);
+      set.save(fh, game_only, "eventset", false, false);
     }
   }
   /* Otherwise, is base - write core data */

@@ -709,22 +709,23 @@ void IODialog::changedComboState(int index)
     bold.setBold(true);
     QFont not_bold = bold;
     not_bold.setBold(false);
-    if(state->event_enter.classification != EventClassifier::NOEVENT)
-      btn_enter->setFont(bold);
-    else
-      btn_enter->setFont(not_bold);
-    if(state->event_exit.classification != EventClassifier::NOEVENT)
-      btn_exit->setFont(bold);
-    else
-      btn_exit->setFont(not_bold);
-    if(state->event_use.classification != EventClassifier::NOEVENT)
-      btn_use->setFont(bold);
-    else
-      btn_use->setFont(not_bold);
-    if(state->event_walkover.classification != EventClassifier::NOEVENT)
-      btn_walkover->setFont(bold);
-    else
-      btn_walkover->setFont(not_bold);
+    // TODO: Fix
+    //if(state->event_enter.classification != EventClassifier::NOEVENT)
+    //  btn_enter->setFont(bold);
+    //else
+    //  btn_enter->setFont(not_bold);
+    //if(state->event_exit.classification != EventClassifier::NOEVENT)
+    //  btn_exit->setFont(bold);
+    //else
+    //  btn_exit->setFont(not_bold);
+    //if(state->event_use.classification != EventClassifier::NOEVENT)
+    //  btn_use->setFont(bold);
+    //else
+    //  btn_use->setFont(not_bold);
+    //if(state->event_walkover.classification != EventClassifier::NOEVENT)
+    //  btn_walkover->setFont(bold);
+    //else
+    //  btn_walkover->setFont(not_bold);
   }
   else if(state->type == EditorEnumDb::IO_TRANSITION)
   {

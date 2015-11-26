@@ -309,54 +309,70 @@ void EditorEventSet::load(XmlData data, int index)
  *         bool game_only - true if the data should include game only relevant
  *         QString preface - the wrapper text element. default to "eventset"
  *         bool no_preface - no XML wrapper included if true. Default false
+ *         bool
  * Output: none
  */
 void EditorEventSet::save(FileHandler* fh, bool game_only,
-                          QString preface, bool no_preface)
+                          QString preface, bool no_preface, bool skip_empty)
 {
-  if(fh != nullptr && !isEmpty())
+  if(fh != nullptr)
   {
-    /* Wrapper */
-    if(!no_preface)
-      fh->writeXmlElement(preface.toStdString());
-
-    /* Locked status */
-    lock_data.save(fh, game_only);
-
-    /* Locked event */
-    event_locked.save(fh, game_only, "lockevent");
-
-    /* Unlocked event(s) */
-    for(int i = 0; i < events_unlocked.size(); i++)
+    /* If the event set has valid data */
+    if(!isEmpty())
     {
-      if(events_unlocked[i]->getEventType() != EventClassifier::NOEVENT)
+      /* Wrapper */
+      if(!no_preface)
+        fh->writeXmlElement(preface.toStdString());
+
+      /* Locked status */
+      lock_data.save(fh, game_only);
+
+      /* Locked event */
+      event_locked.save(fh, game_only, "lockevent");
+
+      /* Unlocked event(s) */
+      for(int i = 0; i < events_unlocked.size(); i++)
       {
-        fh->writeXmlElement("unlockevent", "id", i);
-        events_unlocked[i]->save(fh, game_only, "", true);
-        fh->writeXmlElementEnd();
+        if(events_unlocked[i]->getEventType() != EventClassifier::NOEVENT)
+        {
+          fh->writeXmlElement("unlockevent", "id", i);
+          events_unlocked[i]->save(fh, game_only, "", true);
+          fh->writeXmlElementEnd();
+        }
       }
-    }
 
-    /* Unlocked parse state */
-    EventSet default_set;
-    if(default_set.getUnlockedState() != unlocked_state)
+      /* Unlocked parse state */
+      EventSet default_set;
+      if(default_set.getUnlockedState() != unlocked_state)
+      {
+        std::string state = "";
+
+        if(unlocked_state == UnlockedState::NONE)
+          state = "none";
+        else if(unlocked_state == UnlockedState::ORDERED)
+          state = "ordered";
+        else if(unlocked_state == UnlockedState::RANDOM)
+          state = "random";
+
+        if(!state.empty())
+          fh->writeXmlData("unlockparse", state);
+      }
+
+      /* End Wrapper */
+      if(!no_preface)
+        fh->writeXmlElementEnd();
+    }
+    /* If instructed to not skip empty, print none option - used for */
+    else if(!skip_empty)
     {
-      std::string state = "";
+      int zero = 0;
 
-      if(unlocked_state == UnlockedState::NONE)
-        state = "none";
-      else if(unlocked_state == UnlockedState::ORDERED)
-        state = "ordered";
-      else if(unlocked_state == UnlockedState::RANDOM)
-        state = "random";
-
-      if(!state.empty())
-        fh->writeXmlData("unlockparse", state);
+      if(!no_preface)
+        fh->writeXmlElement(preface.toStdString());
+      fh->writeXmlData("none", zero);
+      if(!no_preface)
+        fh->writeXmlElementEnd();
     }
-
-    /* End Wrapper */
-    if(!no_preface)
-      fh->writeXmlElementEnd();
   }
 }
 

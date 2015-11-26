@@ -22,10 +22,10 @@ struct EditorState
   MapState::InteractionState interact;
   
   // TODO: REMOVE
-  Event event_enter;
-  Event event_exit;
-  Event event_use;
-  Event event_walkover;
+  //Event event_enter;
+  //Event event_exit;
+  //Event event_use;
+  //Event event_walkover;
 
   /* Base utilize */
   bool base_enter;
@@ -99,16 +99,16 @@ public:
   EditorMapIO* getBaseIO() const;
 
   /* Returns event sets for the different state indexes */
-  //EditorEventSet* getEventEnter(int index); // TODO: Implement
-  //EditorEventSet* getEventExit(int index); // TODO: Implement
-  //EditorEventSet* getEventUse(int index); // TODO: Implement
-  //EditorEventSet* getEventWalkover(int index); // TODO: Implement
+  EditorEventSet* getEventEnter(int index);
+  EditorEventSet* getEventExit(int index);
+  EditorEventSet* getEventUse(int index);
+  EditorEventSet* getEventWalkover(int index);
 
   /* Returns the inactive time before returning down the state path (ms) */
   int getInactiveTime() const;
 
   /* Returns the state or states stored within the class */
-  EditorState* getState(int index);
+  EditorState* getState(int index, bool force_instance = false);
   QString getStateName(int index);
   QVector<EditorState*> getStates() const;
 
@@ -129,10 +129,14 @@ public:
   void setBase(EditorMapIO* base_io);
 
   /* Sets the events */
-  bool setEventEnter(int index, Event event); // TODO: Revise
-  bool setEventExit(int index, Event event); // TODO: Revise
-  bool setEventUse(int index, Event event); // TODO: Revise
-  bool setEventWalkover(int index, Event event); // TODO: Revise
+  bool setEventEnter(int index, EditorEventSet set);
+  bool setEventExit(int index, EditorEventSet set);
+  bool setEventUse(int index, EditorEventSet set);
+  bool setEventWalkover(int index, EditorEventSet set);
+  //bool setEventEnter(int index, Event event); // TODO: Remove
+  //bool setEventExit(int index, Event event); // TODO: Remove
+  //bool setEventUse(int index, Event event); // TODO: Remove
+  //bool setEventWalkover(int index, Event event); // TODO: Remove
 
   /* Sets the inactive time before the state returns down the state path (ms) */
   void setInactiveTime(int time);
@@ -142,6 +146,12 @@ public:
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
+
+  /* Sets the class to use the base event, if relevant */
+  bool setUseBaseEnter(int index, bool use_base);
+  bool setUseBaseExit(int index, bool use_base);
+  bool setUseBaseUse(int index, bool use_base);
+  bool setUseBaseWalkover(int index, bool use_base);
 
   /* Unset a state or unset all states */
   bool unsetState(int index);
