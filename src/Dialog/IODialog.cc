@@ -315,6 +315,59 @@ void IODialog::updateData()
   combo_sound->blockSignals(false);
 }
 
+/* Update state information */
+// TODO: Comment
+void IODialog::updateState()
+{
+  EditorState* state = io_working->getState(state_index);
+
+  /* Set the matrix */
+  matrix_view->setMatrix(state->matrix);
+
+  /* Depending on state mode, enable / disable some control */
+  if(state->type == EditorEnumDb::IO_STATE)
+  {
+    combo_interaction->setEnabled(true);
+    group_events->setEnabled(true);
+
+    /* Interaction combo box */
+    combo_interaction->setCurrentIndex((int)state->interact);
+
+    /* Events */
+    QFont bold = btn_enter->font();
+    bold.setBold(true);
+    QFont not_bold = bold;
+    not_bold.setBold(false);
+    if(!state->set_enter.isEmpty())
+      btn_enter->setFont(bold);
+    else
+      btn_enter->setFont(not_bold);
+    if(!state->set_exit.isEmpty())
+      btn_exit->setFont(bold);
+    else
+      btn_exit->setFont(not_bold);
+    if(!state->set_use.isEmpty())
+      btn_use->setFont(bold);
+    else
+      btn_use->setFont(not_bold);
+    if(!state->set_walkover.isEmpty())
+      btn_walkover->setFont(bold);
+    else
+      btn_walkover->setFont(not_bold);
+  }
+  else if(state->type == EditorEnumDb::IO_TRANSITION)
+  {
+    combo_interaction->setDisabled(true);
+    group_events->setDisabled(true);
+  }
+
+  /* If base index is 0, it cannot be deleted */
+  if(state_index == 0)
+    btn_minus->setDisabled(true);
+  else
+    btn_minus->setEnabled(true);
+}
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -394,21 +447,16 @@ void IODialog::buttonCancel()
  */
 void IODialog::buttonEventEnter()
 {
-  qDebug() << "TODO: EVENT ENTER";
+  /* Close the pop-up if open */
+  editEventSet(nullptr);
 
-//  /* Close the pop-up if open */
-//  if(editing_event != NOEVENT)
-//    buttonEventCancel();
-
-//  /* Set the event and open the new pop-up */
-//  EditorState* state = io_working->getState(combo_state->currentIndex());
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    event_ctrl->setEvent(EventSet::copyEvent(state->event_enter));
-//    event_view->updateEvent();
-//    pop_event->show();
-//    editing_event = ENTER;
-//  }
+  /* Set the event and open the new pop-up */
+  EditorState* state = io_working->getState(combo_state->currentIndex());
+  if(state != nullptr && state->type == EditorEnumDb::IO_STATE)
+  {
+    editEventSet(&state->set_enter, "Enter Set Edit");
+    editing_event = ENTER;
+  }
 }
 
 /*
@@ -421,21 +469,16 @@ void IODialog::buttonEventEnter()
  */
 void IODialog::buttonEventExit()
 {
-  qDebug() << "TODO: EVENT EXIT";
+  /* Close the pop-up if open */
+  editEventSet(nullptr);
 
-//  /* Close the pop-up if open */
-//  if(editing_event != NOEVENT)
-//    buttonEventCancel();
-
-//  /* Set the event and open the new pop-up */
-//  EditorState* state = io_working->getState(combo_state->currentIndex());
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    event_ctrl->setEvent(EventSet::copyEvent(state->event_exit));
-//    event_view->updateEvent();
-//    pop_event->show();
-//    editing_event = EXIT;
-//  }
+  /* Set the event and open the new pop-up */
+  EditorState* state = io_working->getState(combo_state->currentIndex());
+  if(state != nullptr && state->type == EditorEnumDb::IO_STATE)
+  {
+    editEventSet(&state->set_exit, "Exit Set Edit");
+    editing_event = EXIT;
+  }
 }
 
 /*
@@ -448,37 +491,14 @@ void IODialog::buttonEventExit()
  */
 void IODialog::buttonEventOk()
 {
-  qDebug() << "TODO: EVENT OK";
+  if(editing_event != NOEVENT)
+  {
+    /* Update IO Dialog */
+    updateState();
 
-//  if(editing_event != NOEVENT)
-//  {
-//    /* If conversation dialog is visible, hide it first */
-//    if(convo_dialog != NULL && convo_dialog->isVisible())
-//      convo_dialog->buttonCancel();
-
-//    /* Hide pop-up */
-//    pop_event->hide();
-
-//    /* Set the event */
-//    int index = combo_state->currentIndex();
-//    bool success = false;
-//    if(editing_event == ENTER)
-//      success = io_working->setEventEnter(index, *event_ctrl->getEvent());
-//    else if(editing_event == EXIT)
-//      success = io_working->setEventExit(index, *event_ctrl->getEvent());
-//    else if(editing_event == USE)
-//      success = io_working->setEventUse(index, *event_ctrl->getEvent());
-//    else if(editing_event == WALKOVER)
-//      success = io_working->setEventWalkover(index, *event_ctrl->getEvent());
-
-//    /* Update IO Dialog */
-//    changedComboState(index);
-
-//    /* Clear out the event control and view class */
-//    event_ctrl->setEventBlank(!success);
-//    event_view->update();
-//    editing_event = NOEVENT;
-//  }
+    /* Clear out the event control and view class */
+    editing_event = NOEVENT;
+  }
 }
 
 /*
@@ -491,21 +511,16 @@ void IODialog::buttonEventOk()
  */
 void IODialog::buttonEventUse()
 {
-  qDebug() << "TODO: EVENT USE";
+  /* Close the pop-up if open */
+  editEventSet(nullptr);
 
-//  /* Close the pop-up if open */
-//  if(editing_event != NOEVENT)
-//    buttonEventCancel();
-
-//  /* Set the event and open the new pop-up */
-//  EditorState* state = io_working->getState(combo_state->currentIndex());
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    event_ctrl->setEvent(EventSet::copyEvent(state->event_use));
-//    event_view->updateEvent();
-//    pop_event->show();
-//    editing_event = USE;
-//  }
+  /* Set the event and open the new pop-up */
+  EditorState* state = io_working->getState(combo_state->currentIndex());
+  if(state != nullptr && state->type == EditorEnumDb::IO_STATE)
+  {
+    editEventSet(&state->set_use, "Use Set Edit");
+    editing_event = USE;
+  }
 }
 
 /*
@@ -518,21 +533,16 @@ void IODialog::buttonEventUse()
  */
 void IODialog::buttonEventWalkover()
 {
-  qDebug() << "TODO: EVENT WALKOVER";
+  /* Close the pop-up if open */
+  editEventSet(nullptr);
 
-//  /* Close the pop-up if open */
-//  if(editing_event != NOEVENT)
-//    buttonEventCancel();
-
-//  /* Set the event and open the new pop-up */
-//  EditorState* state = io_working->getState(combo_state->currentIndex());
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    event_ctrl->setEvent(EventSet::copyEvent(state->event_walkover));
-//    event_view->updateEvent();
-//    pop_event->show();
-//    editing_event = WALKOVER;
-//  }
+  /* Set the event and open the new pop-up */
+  EditorState* state = io_working->getState(combo_state->currentIndex());
+  if(state != nullptr && state->type == EditorEnumDb::IO_STATE)
+  {
+    editEventSet(&state->set_walkover, "Walkover Set Edit");
+    editing_event = WALKOVER;
+  }
 }
 
 /*
@@ -544,13 +554,16 @@ void IODialog::buttonEventWalkover()
  */
 void IODialog::buttonFrameEdit()
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   /* Delete the dialog, if it exists */
-  if(frame_dialog != NULL)
+  if(frame_dialog != nullptr)
   {
     disconnect(frame_dialog, SIGNAL(ok()), this, SLOT(updateFrame()));
     delete frame_dialog;
   }
-  frame_dialog = NULL;
+  frame_dialog = nullptr;
 
   /* Create the new frame */
   frame_dialog = new FrameDialog(this, io_working->getDialogImage());
@@ -587,6 +600,9 @@ void IODialog::buttonOk()
  */
 void IODialog::buttonStateAdd()
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   QMessageBox msg_box;
   msg_box.setWindowTitle("Adding...");
   msg_box.setText("Select Node Type:");
@@ -618,6 +634,9 @@ void IODialog::buttonStateAdd()
  */
 void IODialog::buttonStateOverview()
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   // TODO: Implementation
   QMessageBox::information(this, "Notification",
                            "Coming soon to a production near you!");
@@ -634,6 +653,9 @@ void IODialog::buttonStateOverview()
 void IODialog::buttonStateRemove()
 {
   int index = combo_state->currentIndex();
+
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
 
   /* Create warning about deleting */
   QMessageBox msg_box;
@@ -670,6 +692,9 @@ void IODialog::buttonStateRemove()
  */
 void IODialog::changedComboInteract(int index)
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   EditorState* state = io_working->getState(combo_state->currentIndex());
   if(state != NULL)
     state->interact = (MapState::InteractionState)index;
@@ -686,61 +711,65 @@ void IODialog::changedComboInteract(int index)
  */
 void IODialog::changedComboState(int index)
 {
-  EditorState* state = io_working->getState(index);
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
 
   /* Consolidate */
   if(index != state_index)
     io_working->consolidate(state_index);
-
-  /* Set the matrix */
-  matrix_view->setMatrix(state->matrix);
-
-  /* Depending on state mode, enable / disable some control */
-  if(state->type == EditorEnumDb::IO_STATE)
-  {
-    combo_interaction->setEnabled(true);
-    group_events->setEnabled(true);
-
-    /* Interaction combo box */
-    combo_interaction->setCurrentIndex((int)state->interact);
-
-    /* Events */
-    QFont bold = btn_enter->font();
-    bold.setBold(true);
-    QFont not_bold = bold;
-    not_bold.setBold(false);
-    // TODO: Fix
-    //if(state->event_enter.classification != EventClassifier::NOEVENT)
-    //  btn_enter->setFont(bold);
-    //else
-    //  btn_enter->setFont(not_bold);
-    //if(state->event_exit.classification != EventClassifier::NOEVENT)
-    //  btn_exit->setFont(bold);
-    //else
-    //  btn_exit->setFont(not_bold);
-    //if(state->event_use.classification != EventClassifier::NOEVENT)
-    //  btn_use->setFont(bold);
-    //else
-    //  btn_use->setFont(not_bold);
-    //if(state->event_walkover.classification != EventClassifier::NOEVENT)
-    //  btn_walkover->setFont(bold);
-    //else
-    //  btn_walkover->setFont(not_bold);
-  }
-  else if(state->type == EditorEnumDb::IO_TRANSITION)
-  {
-    combo_interaction->setDisabled(true);
-    group_events->setDisabled(true);
-  }
-
-  /* If base index is 0, it cannot be deleted */
-  if(index == 0)
-    btn_minus->setDisabled(true);
-  else
-    btn_minus->setEnabled(true);
-
-  /* Reset state index */
   state_index = index;
+
+  /* Update view */
+  updateState();
+
+//  /* Set the matrix */
+//  matrix_view->setMatrix(state->matrix);
+
+//  /* Depending on state mode, enable / disable some control */
+//  if(state->type == EditorEnumDb::IO_STATE)
+//  {
+//    combo_interaction->setEnabled(true);
+//    group_events->setEnabled(true);
+
+//    /* Interaction combo box */
+//    combo_interaction->setCurrentIndex((int)state->interact);
+
+//    /* Events */
+//    QFont bold = btn_enter->font();
+//    bold.setBold(true);
+//    QFont not_bold = bold;
+//    not_bold.setBold(false);
+//    if(!state->set_enter.isEmpty())
+//      btn_enter->setFont(bold);
+//    else
+//      btn_enter->setFont(not_bold);
+//    if(!state->set_exit.isEmpty())
+//      btn_exit->setFont(bold);
+//    else
+//      btn_exit->setFont(not_bold);
+//    if(!state->set_use.isEmpty())
+//      btn_use->setFont(bold);
+//    else
+//      btn_use->setFont(not_bold);
+//    if(!state->set_walkover.isEmpty())
+//      btn_walkover->setFont(bold);
+//    else
+//      btn_walkover->setFont(not_bold);
+//  }
+//  else if(state->type == EditorEnumDb::IO_TRANSITION)
+//  {
+//    combo_interaction->setDisabled(true);
+//    group_events->setDisabled(true);
+//  }
+
+//  /* If base index is 0, it cannot be deleted */
+//  if(index == 0)
+//    btn_minus->setDisabled(true);
+//  else
+//    btn_minus->setEnabled(true);
+
+//  /* Reset state index */
+//  state_index = index;
 }
 
 /*
@@ -752,6 +781,9 @@ void IODialog::changedComboState(int index)
  */
 void IODialog::changedDescription()
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   QString simple = text_description->toPlainText().simplified();
   io_working->setDescription(simple);
 }
@@ -765,6 +797,9 @@ void IODialog::changedDescription()
  */
 void IODialog::changedInactive(int i)
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   io_working->setInactiveTime(i);
 }
 
@@ -777,6 +812,9 @@ void IODialog::changedInactive(int i)
  */
 void IODialog::changedName(QString name)
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   io_working->setName(name);
 }
 
@@ -790,6 +828,9 @@ void IODialog::changedName(QString name)
 void IODialog::changedSound(const QString &text)
 {
   QStringList str_list = text.split(':');
+
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
 
   /* If the list is two long, it is proper format - 001: Sound Example */
   if(str_list.size() >= 2)
@@ -812,6 +853,9 @@ void IODialog::changedSound(const QString &text)
  */
 void IODialog::checkInactive(int state)
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   if(state == Qt::Checked)
   {
     spin_inactive->setDisabled(true);
@@ -864,9 +908,10 @@ void IODialog::checkInactive(int state)
  *              from EventSetView. Required to lock out the pop-up.
  *
  * Inputs: EditorEventSet* set - the editing set
+ *         QString window_title - the event dialog window title
  * Output: none
  */
-void IODialog::editEventSet(EditorEventSet* set)
+void IODialog::editEventSet(EditorEventSet* set, QString window_title)
 {
   if(event_dialog != nullptr)
   {
@@ -876,12 +921,13 @@ void IODialog::editEventSet(EditorEventSet* set)
                this, SLOT(buttonEventOk()));
     delete event_dialog;
   }
-  event_dialog = NULL;
+  event_dialog = nullptr;
+  editing_event = NOEVENT;
 
   /* Create the new conversation dialog */
   if(set != nullptr)
   {
-    event_dialog = new EventDialog(set, this);
+    event_dialog = new EventDialog(set, this, window_title);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);
     event_dialog->setListSounds(list_sounds);
@@ -959,6 +1005,9 @@ void IODialog::selectTile()
  */
 void IODialog::visibilityChanged(int index)
 {
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
   if(index == 1)
     io_working->setVisibility(true);
   else if(index == 0)

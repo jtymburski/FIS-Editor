@@ -17,8 +17,10 @@
  *
  * Inputs: EditorEventSet& set - the set to edit within the dialog
  *         QWidget* parent - the parent widget
+ *         QString window_title - the title to make the window. Defaulted
  */
-EventDialog::EventDialog(EditorEventSet* set, QWidget* parent)
+EventDialog::EventDialog(EditorEventSet* set, QWidget* parent,
+                         QString window_title)
            : QDialog(parent)
 {
   convo_dialog = nullptr;
@@ -30,7 +32,10 @@ EventDialog::EventDialog(EditorEventSet* set, QWidget* parent)
   set_working = new EditorEventSet();
 
   /* Layout setup */
-  createLayout();
+  if(window_title.isEmpty())
+    createLayout();
+  else
+    createLayout(window_title);
   setEventSet(set);
 }
 
@@ -51,14 +56,14 @@ EventDialog::~EventDialog()
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *
- * Inputs: none
+ * Inputs: QString window_title -
  * Output: none
  */
-void EventDialog::createLayout()
+void EventDialog::createLayout(QString window_title)
 {
   /* General dialog control */
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  setWindowTitle("Event Set Edit");
+  setWindowTitle(window_title);
 
   /* Layout setup */
   QGridLayout* layout = new QGridLayout(this);

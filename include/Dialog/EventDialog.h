@@ -22,7 +22,8 @@ class EventDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  EventDialog(EditorEventSet* set = nullptr, QWidget* parent = nullptr);
+  EventDialog(EditorEventSet* set = nullptr, QWidget* parent = nullptr,
+              QString window_title = "");
 
   /* Destructor function */
   ~EventDialog();
@@ -67,7 +68,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the layout and widgets for this controller */
-  void createLayout();
+  void createLayout(QString window_title = "Event Set Edit");
 
   /* Set layout data */
   void setLayoutData();

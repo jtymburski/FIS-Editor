@@ -14,6 +14,7 @@
 #include "Database/EditorMapIO.h"
 //#include "Dialog/ConvoDialog.h"
 #include "Dialog/EventDialog.h"
+#include "View/EventSetView.h"
 //#include "View/EventView.h"
 #include "View/MatrixView.h"
 
@@ -117,6 +118,9 @@ private:
   /* Updates the objects with the io data */
   void updateData();
 
+  /* Update state information */
+  void updateState();
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -169,7 +173,7 @@ public slots:
   //void editConversation(Conversation* convo, bool is_option);
 
   /* Edit event set trigger */
-  void editEventSet(EditorEventSet* set);
+  void editEventSet(EditorEventSet* set, QString window_title = "");
 
   /* Select tile trigger */
   void selectTile();
