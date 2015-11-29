@@ -53,7 +53,7 @@ public:
   Locked* getLock();
 
   /* Returns the lock type */
-  LockedState getLockType();
+  LockedState getLockType() const;
 
   /* Returns a text list summary of the lock */
   QString getTextSummary(QString prefix = "Lock: ");

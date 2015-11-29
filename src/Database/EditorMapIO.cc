@@ -5,9 +5,8 @@
  * Description: The class for managing the interfacing with MapInteractiveObject
  *              and filling it with data. The management pop-up is IODialog.
  ******************************************************************************/
-#include "Database/EditorEvent.h"
 #include "Database/EditorMapIO.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 //const uint8_t EditorMapItem::kTOTAL_SURFACES   = 1;
@@ -142,34 +141,6 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
           action = "walkon";
         fh->writeXmlData("interaction", action.toStdString());
 
-//        /* Enter event */ // TODO: REMOVE
-//        if(states[i]->event_enter.classification != EventClassifier::NOEVENT)
-//        {
-//          EditorEvent event(states[i]->event_enter);
-//          event.save(fh, game_only, "enterevent");
-//        }
-
-//        /* Exit event */ // TODO: REMOVE
-//        if(states[i]->event_exit.classification != EventClassifier::NOEVENT)
-//        {
-//          EditorEvent event(states[i]->event_exit);
-//          event.save(fh, game_only, "exitevent");
-//        }
-
-//        /* Use event */ // TODO: REMOVE
-//        if(states[i]->event_use.classification != EventClassifier::NOEVENT)
-//        {
-//          EditorEvent event(states[i]->event_use);
-//          event.save(fh, game_only, "useevent");
-//        }
-
-//        /* Walkover event */ // TODO: REMOVE
-//        if(states[i]->event_walkover.classification != EventClassifier::NOEVENT)
-//        {
-//          EditorEvent event(states[i]->event_walkover);
-//          event.save(fh, game_only, "walkoverevent");
-//        }
-
         /* Set saving */
         states[i]->set_enter.save(fh, game_only, "enterset");
         states[i]->set_exit.save(fh, game_only, "exitset");
@@ -197,7 +168,7 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   else
   {
     /* Write the states */
-    fh->writeXmlElement("states"); // TODO: Check if any valid??
+    bool generated = false;
     for(int i = 0; i < states.size(); i++)
     {
       EditorState* state_base = getState(i);
@@ -209,6 +180,13 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
            (!state_inst->base_enter || !state_inst->base_exit ||
             !state_inst->base_use || !state_inst->base_walkover))
         {
+          /* Wrapping header, if not generated already */
+          if(!generated)
+          {
+            fh->writeXmlElement("states");
+            generated = true;
+          }
+
           /* Start Header */
           fh->writeXmlElement("state", "id", i);
 
@@ -228,7 +206,8 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
         }
       }
     }
-    fh->writeXmlElementEnd();
+    if(generated)
+      fh->writeXmlElementEnd();
   }
 }
 
@@ -305,8 +284,14 @@ EditorMapIO* EditorMapIO:: getBaseIO() const
   return NULL;
 }
 
-/* Returns event sets for the different state indexes */
-// TODO: Comment
+/*
+ * Description: Returns a reference on the event enter set of the state index
+ *              If the index is out of range or the index is not a STATE,
+ *              returns nullptr.
+ *
+ * Inputs: int index - the index to access within the state set
+ * Output: EditorEventSet* - the enter event set reference
+ */
 EditorEventSet* EditorMapIO::getEventEnter(int index)
 {
   EditorEventSet* found = nullptr;
@@ -328,8 +313,14 @@ EditorEventSet* EditorMapIO::getEventEnter(int index)
   return found;
 }
 
-/* Returns event sets for the different state indexes */
-// TODO: Comment
+/*
+ * Description: Returns a reference on the event exit set of the state index
+ *              If the index is out of range or the index is not a STATE,
+ *              returns nullptr.
+ *
+ * Inputs: int index - the index to access within the state set
+ * Output: EditorEventSet* - the exit event set reference
+ */
 EditorEventSet* EditorMapIO::getEventExit(int index)
 {
   EditorEventSet* found = nullptr;
@@ -351,8 +342,14 @@ EditorEventSet* EditorMapIO::getEventExit(int index)
   return found;
 }
 
-/* Returns event sets for the different state indexes */
-// TODO: Comment
+/*
+ * Description: Returns a reference on the event use set of the state index
+ *              If the index is out of range or the index is not a STATE,
+ *              returns nullptr.
+ *
+ * Inputs: int index - the index to access within the state set
+ * Output: EditorEventSet* - the use event set reference
+ */
 EditorEventSet* EditorMapIO::getEventUse(int index)
 {
   EditorEventSet* found = nullptr;
@@ -374,8 +371,14 @@ EditorEventSet* EditorMapIO::getEventUse(int index)
   return found;
 }
 
-/* Returns event sets for the different state indexes */
-// TODO: Comment
+/*
+ * Description: Returns a reference on the event walkover set of the state index
+ *              If the index is out of range or the index is not a STATE,
+ *              returns nullptr.
+ *
+ * Inputs: int index - the index to access within the state set
+ * Output: EditorEventSet* - the walkover event set reference
+ */
 EditorEventSet* EditorMapIO::getEventWalkover(int index)
 {
   EditorEventSet* found = nullptr;
@@ -639,12 +642,6 @@ void EditorMapIO::load(XmlData data, int index)
         {
           state->set_enter.load(data, index + 2);
           state->base_enter = false;
-//          EditorEvent event(state->event_enter);
-//          event.load(data, index + 3);
-//          state->event_enter = EventSet::deleteEvent(state->event_enter);
-//          if(event.getEvent() != NULL)
-//            state->event_enter = *event.getEvent();
-//          event.setEventBlank(false);
         }
         /* ---- ENTER SET ---- */
         else if(element3 == "enterset")
@@ -657,12 +654,6 @@ void EditorMapIO::load(XmlData data, int index)
         {
           state->set_exit.load(data, index + 2);
           state->base_exit = false;
-//          EditorEvent event(state->event_exit);
-//          event.load(data, index + 3);
-//          state->event_exit = EventSet::deleteEvent(state->event_exit);
-//          if(event.getEvent() != NULL)
-//            state->event_exit = *event.getEvent();
-//          event.setEventBlank(false);
         }
         /* ---- EXIT SET ---- */
         else if(element3 == "exitset")
@@ -675,12 +666,6 @@ void EditorMapIO::load(XmlData data, int index)
         {
           state->set_use.load(data, index + 2);
           state->base_use = false;
-//          EditorEvent event(state->event_use);
-//          event.load(data, index + 3);
-//          state->event_use = EventSet::deleteEvent(state->event_use);
-//          if(event.getEvent() != NULL)
-//            state->event_use = *event.getEvent();
-//          event.setEventBlank(false);
         }
         /* ---- USE SET ---- */
         else if(element3 == "useset")
@@ -693,12 +678,6 @@ void EditorMapIO::load(XmlData data, int index)
         {
           state->set_walkover.load(data, index + 2);
           state->base_walkover = false;
-//          EditorEvent event(state->event_walkover);
-//          event.load(data, index + 3);
-//          state->event_walkover = EventSet::deleteEvent(state->event_walkover);
-//          if(event.getEvent() != NULL)
-//            state->event_walkover = *event.getEvent();
-//          event.setEventBlank(false);
         }
         /* ---- WALKOVER SET ---- */
         else if(element3 == "walkoverset")
@@ -759,25 +738,12 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
 }
 
 /*
- * Description: Sets the enter event for the given node index.
+ * Description: Sets the enter event set for the given node index.
  *
  * Inputs: int index - the node index in the stack
- *         Event event - the new enter event to set for the node
- * Output: bool - true if the event was set
- */ // TODO: REMOVE
-//bool EditorMapIO::setEventEnter(int index, Event event)
-//{
-//  EditorState* state = getState(index);
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    state->event_enter = EventSet::deleteEvent(state->event_enter);
-//    state->event_enter = event;
-//    return true;
-//  }
-//  return false;
-//}
-
-// TODO: Comment
+ *         EditorEventSet set - the enter event set to set for the node
+ * Output: bool - true if the event set was set
+ */
 bool EditorMapIO::setEventEnter(int index, EditorEventSet set)
 {
   EditorState* state_inst = getState(index, true);
@@ -791,25 +757,12 @@ bool EditorMapIO::setEventEnter(int index, EditorEventSet set)
 }
 
 /*
- * Description: Sets the exit event for the given node index.
+ * Description: Sets the exit event set for the given node index.
  *
  * Inputs: int index - the node index in the stack
- *         Event event - the new exit event to set for the node
- * Output: bool - true if the event was set
- */ // TODO: REMOVE
-//bool EditorMapIO::setEventExit(int index, Event event)
-//{
-//  EditorState* state = getState(index);
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    state->event_exit = EventSet::deleteEvent(state->event_exit);
-//    state->event_exit = event;
-//    return true;
-//  }
-//  return false;
-//}
-
-// TODO: Comment
+ *         EditorEventSet set - the exit event set to set for the node
+ * Output: bool - true if the event set was set
+ */
 bool EditorMapIO::setEventExit(int index, EditorEventSet set)
 {
   EditorState* state_inst = getState(index, true);
@@ -823,25 +776,12 @@ bool EditorMapIO::setEventExit(int index, EditorEventSet set)
 }
 
 /*
- * Description: Sets the use event for the given node index.
+ * Description: Sets the use event set for the given node index.
  *
  * Inputs: int index - the node index in the stack
- *         Event event - the new use event to set for the node
- * Output: bool - true if the event was set
- */ // TODO: REMOVE
-//bool EditorMapIO::setEventUse(int index, Event event)
-//{
-//  EditorState* state = getState(index);
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    state->event_use = EventSet::deleteEvent(state->event_use);
-//    state->event_use = event;
-//    return true;
-//  }
-//  return false;
-//}
-
-// TODO: Comment
+ *         EditorEventSet set - the use event set to set for the node
+ * Output: bool - true if the event set was set
+ */
 bool EditorMapIO::setEventUse(int index, EditorEventSet set)
 {
   EditorState* state_inst = getState(index, true);
@@ -855,25 +795,12 @@ bool EditorMapIO::setEventUse(int index, EditorEventSet set)
 }
 
 /*
- * Description: Sets the walkover event for the given node index.
+ * Description: Sets the walkover event set for the given node index.
  *
  * Inputs: int index - the node index in the stack
- *         Event event - the new walkover event to set for the node
- * Output: bool - true if the event was set
- */ // TODO: REMOVE
-//bool EditorMapIO::setEventWalkover(int index, Event event)
-//{
-//  EditorState* state = getState(index);
-//  if(state != NULL && state->type == EditorEnumDb::IO_STATE)
-//  {
-//    state->event_walkover = EventSet::deleteEvent(state->event_walkover);
-//    state->event_walkover = event;
-//    return true;
-//  }
-//  return false;
-//}
-
-// TODO: Comment
+ *         EditorEventSet set - the walkover event set to set for the node
+ * Output: bool - true if the event set was set
+ */
 bool EditorMapIO::setEventWalkover(int index, EditorEventSet set)
 {
   EditorState* state_inst = getState(index, true);
@@ -936,12 +863,6 @@ bool EditorMapIO::setState(int index, EditorState* state, bool data_only)
       ref->base_use = state->base_use;
       ref->base_walkover = state->base_walkover;
 
-      /* Event state data */
-      //ref->event_enter = EventSet::copyEvent(state->event_enter); // TODO: REMOVE
-      //ref->event_exit = EventSet::copyEvent(state->event_exit); // TODO: REMOVE
-      //ref->event_use = EventSet::copyEvent(state->event_use); // TODO: REMOVE
-      //ref->event_walkover = EventSet::copyEvent(state->event_walkover); // TODO: REMOVE
-
       /* Event set data */
       ref->set_enter = state->set_enter;
       ref->set_exit = state->set_exit;
@@ -984,8 +905,16 @@ void EditorMapIO::setTileIcons(TileIcons* icons)
   EditorMapThing::setTileIcons(icons);
 }
 
-/* Sets the class to use the base event, if relevant */
-// TODO: Comment
+/*
+ * Description: Instructs the class to use the base enter event set, if there
+ *              is a base reference class being used. If set true, the event is
+ *              returned from the base class. Otherwise, this class holds the
+ *              relevant event.
+ *
+ * Inputs: int index - index where to edit the use base setting
+ *         bool use_base - true to use the event from the base class
+ * Output: bool - true if the use base enter event was set
+ */
 bool EditorMapIO::setUseBaseEnter(int index, bool use_base)
 {
   EditorState* state_inst = getState(index, true);
@@ -997,8 +926,16 @@ bool EditorMapIO::setUseBaseEnter(int index, bool use_base)
   return false;
 }
 
-/* Sets the class to use the base event, if relevant */
-// TODO: Comment
+/*
+ * Description: Instructs the class to use the base exit event set, if there
+ *              is a base reference class being used. If set true, the event is
+ *              returned from the base class. Otherwise, this class holds the
+ *              relevant event.
+ *
+ * Inputs: int index - index where to edit the use base setting
+ *         bool use_base - true to use the event from the base class
+ * Output: bool - true if the use base exit event was set
+ */
 bool EditorMapIO::setUseBaseExit(int index, bool use_base)
 {
   EditorState* state_inst = getState(index, true);
@@ -1010,8 +947,16 @@ bool EditorMapIO::setUseBaseExit(int index, bool use_base)
   return false;
 }
 
-/* Sets the class to use the base event, if relevant */
-// TODO: Comment
+/*
+ * Description: Instructs the class to use the base use event set, if there
+ *              is a base reference class being used. If set true, the event is
+ *              returned from the base class. Otherwise, this class holds the
+ *              relevant event.
+ *
+ * Inputs: int index - index where to edit the use base setting
+ *         bool use_base - true to use the event from the base class
+ * Output: bool - true if the use base use event was set
+ */
 bool EditorMapIO::setUseBaseUse(int index, bool use_base)
 {
   EditorState* state_inst = getState(index, true);
@@ -1023,8 +968,16 @@ bool EditorMapIO::setUseBaseUse(int index, bool use_base)
   return false;
 }
 
-/* Sets the class to use the base event, if relevant */
-// TODO: Comment
+/*
+ * Description: Instructs the class to use the base walkover event set, if there
+ *              is a base reference class being used. If set true, the event is
+ *              returned from the base class. Otherwise, this class holds the
+ *              relevant event.
+ *
+ * Inputs: int index - index where to edit the use base setting
+ *         bool use_base - true to use the event from the base class
+ * Output: bool - true if the use base walkover event was set
+ */
 bool EditorMapIO::setUseBaseWalkover(int index, bool use_base)
 {
   EditorState* state_inst = getState(index, true);
@@ -1116,10 +1069,6 @@ EditorState* EditorMapIO::createBlankState()
   state->base_exit = true;
   state->base_use = true;
   state->base_walkover = true;
-  //state->event_enter = EventSet::createBlankEvent(); // TODO: REMOVE
-  //state->event_exit = EventSet::createBlankEvent(); // TODO: REMOVE
-  //state->event_use = EventSet::createBlankEvent(); // TODO: REMOVE
-  //state->event_walkover = EventSet::createBlankEvent(); // TODO: REMOVE
   state->set_enter.clear();
   state->set_exit.clear();
   state->set_use.clear();
@@ -1142,10 +1091,6 @@ void EditorMapIO::deleteState(EditorState* state)
   {
     /* Delete memory in structure */
     delete state->matrix;
-    //EventSet::deleteEvent(state->event_enter); // TODO: REMOVE
-    //EventSet::deleteEvent(state->event_exit); // TODO: REMOVE
-    //EventSet::deleteEvent(state->event_use); // TODO: REMOVE
-    //EventSet::deleteEvent(state->event_walkover); // TODO: REMOVE
 
     /* Delete state structure */
     delete state;

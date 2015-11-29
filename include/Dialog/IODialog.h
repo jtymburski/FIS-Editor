@@ -12,10 +12,8 @@
 #include <QGridLayout>
 
 #include "Database/EditorMapIO.h"
-//#include "Dialog/ConvoDialog.h"
 #include "Dialog/EventDialog.h"
-#include "View/EventSetView.h"
-//#include "View/EventView.h"
+//#include "View/EventSetView.h"
 #include "View/MatrixView.h"
 
 class IODialog : public QDialog
@@ -50,18 +48,11 @@ private:
   QComboBox* combo_sound;
   QComboBox* combo_state;
 
-  /* The conversation dialog */
-  //ConvoDialog* convo_dialog;
-
   /* Editing event */
   EditEvent editing_event;
 
   /* The event set dialog */
   EventDialog* event_dialog;
-
-  /* Event view and control */
-  //EditorEvent* event_ctrl;
-  //EventView* event_view;
 
   /* The frame control dialog */
   FrameDialog* frame_dialog;
@@ -89,12 +80,6 @@ private:
   /* Matrix view and control */
   MatrixView* matrix_view;
 
-  /* Event pop-up */
-  //QDialog* pop_event;
-
-  /* Sound information, for dropdown */
-  //QList<QString> sound_list;
-
   /* Spin Boxes */
   QSpinBox* spin_inactive;
 
@@ -105,7 +90,6 @@ private:
   QTextEdit* text_description;
 
   /* Waiting for sub-map data */
-  //bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -144,7 +128,6 @@ signals:
 public slots:
   /* Button control triggers */
   void buttonCancel();
-  //void buttonEventCancel();
   void buttonEventEnter();
   void buttonEventExit();
   void buttonEventOk();
@@ -169,15 +152,11 @@ public slots:
   /* Check inactive time changed */
   void checkInactive(int state);
 
-  /* Edit conversation trigger */
-  //void editConversation(Conversation* convo, bool is_option);
-
   /* Edit event set trigger */
   void editEventSet(EditorEventSet* set, QString window_title = "");
 
   /* Select tile trigger */
   void selectTile();
-  //void selectTileConvo();
 
   /* Update the frame for the IO */
   void updateFrame();
@@ -191,9 +170,6 @@ public slots:
 public:
   /* Returns the event dialog widget */
   EventDialog* getEventDialog();
-
-  /* Returns the event view widget */
-  //EventView* getEventView();
 
   /* Returns the list of objects, used for dialog and event creation */
   QVector<QString> getListItems();

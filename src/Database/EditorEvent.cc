@@ -382,7 +382,7 @@ Event* EditorEvent::getEvent()
  * Inputs: none
  * Output: EventClassifier - event classification enum class
  */
-EventClassifier EditorEvent::getEventType()
+EventClassifier EditorEvent::getEventType() const
 {
   return event.classification;
 }

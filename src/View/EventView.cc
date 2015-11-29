@@ -540,9 +540,14 @@ void EventView::setLayoutData()
       }
 
       if(index >= 0)
+      {
         combo_sound->setCurrentIndex(index);
+      }
       else
+      {
         combo_sound->setCurrentIndex(0);
+        event->setSoundID(-1);
+      }
     }
 
     /* Enable the widget */

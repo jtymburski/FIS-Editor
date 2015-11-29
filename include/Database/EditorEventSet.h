@@ -83,7 +83,7 @@ public:
   UnlockedState getUnlockedState();
 
   /* Returns if the class is empty (default state after a clear() call) */
-  bool isEmpty();
+  bool isEmpty() const;
 
   /* Loads the event data */
   void load(XmlData data, int index);

@@ -5,9 +5,8 @@
  * Description: The class for managing the interfacing with MapThing and filling
  *              it with data. The management pop-up is ThingDialog.
  ******************************************************************************/
-#include "Database/EditorEvent.h" /* Only needed for public static function */
 #include "Database/EditorMapThing.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS

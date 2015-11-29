@@ -76,7 +76,7 @@ public:
   Event* getEvent();
 
   /* Returns the event type */
-  EventClassifier getEventType();
+  EventClassifier getEventType() const;
 
   /* Returns data relating to the give item event. If none, data is invalid */
   int getGiveItemCount();

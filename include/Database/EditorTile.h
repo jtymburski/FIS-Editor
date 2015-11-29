@@ -72,10 +72,6 @@ public:
   int type() const { return Type_TileRender; }
 
 private:
-  /* Events for the tile */
-  Event event_enter;
-  Event event_exit;
-
   /* Is the item hovered */
   HoverInfo* hover_info;
   bool hovered;
@@ -93,6 +89,10 @@ private:
   QList<TileRenderInfo> npcs;
   QList<TileRenderInfo> persons;
   QList<TileRenderInfo> things;
+
+  /* The event sets for the tile */
+  EditorEventSet set_enter;
+  EditorEventSet set_exit;
 
   /* The Tile that will be placed into Univursa.exe */
   Tile tile;
@@ -142,9 +142,9 @@ public:
   /* Returns the active layers in a string */
   QString getActiveLayers();
 
-  /* Gets the events */
-  Event getEventEnter() const;
-  Event getEventExit() const;
+  /* Gets the event sets */
+  EditorEventSet* getEventEnter();
+  EditorEventSet* getEventExit();
 
   /* Gets the tile for editing */
   Tile* getGameTile();
@@ -229,8 +229,8 @@ public:
              bool load = false);
 
   /* Sets the tile events */
-  void setEventEnter(Event event, bool just_update = false);
-  void setEventExit(Event event, bool just_update = false);
+  void setEventEnter(EditorEventSet set);
+  void setEventExit(EditorEventSet set);
 
   /* Sets the hover state */
   void setHover(bool hover, bool hover_invalid = false);

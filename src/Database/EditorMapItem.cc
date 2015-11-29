@@ -5,9 +5,8 @@
  * Description: The class for managing the interfacing with MapItem and 
  *              filling it with data. The management pop-up is PersonDialog.
  ******************************************************************************/
-#include "Database/EditorEvent.h"
 #include "Database/EditorMapItem.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 //const uint8_t EditorMapItem::kTOTAL_SURFACES   = 1;

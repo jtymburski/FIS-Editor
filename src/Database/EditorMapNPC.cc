@@ -6,9 +6,8 @@
  *              filling it with data. The base management pop-up is 
  *              PersonDialog and the instance management pop-up is ?
  ******************************************************************************/
-#include "Database/EditorEvent.h"
 #include "Database/EditorMapNPC.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 //const uint8_t EditorMapPerson::kTOTAL_DIRECTIONS = 4;

@@ -275,7 +275,7 @@ UnlockedState EditorEventSet::getUnlockedState()
  * Inputs: none
  * Output: bool - true if the event configuration is empty
  */
-bool EditorEventSet::isEmpty()
+bool EditorEventSet::isEmpty() const
 {
   /* Check unlocked */
   bool unlocked_valid = false;

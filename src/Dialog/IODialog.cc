@@ -21,7 +21,6 @@
  */
 IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
 {
-  //convo_dialog = NULL;
   editing_event = NOEVENT;
   event_dialog = nullptr;
   frame_dialog = NULL;
@@ -35,7 +34,6 @@ IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
   {
     *io_working = *io_original;
   }
-  //event_ctrl = new EditorEvent(EventSet::createBlankEvent());
 
   /* Layout setup */
   createLayout(edit_io->getBaseIO() != NULL);
@@ -48,18 +46,12 @@ IODialog::IODialog(EditorMapIO* edit_io, QWidget* parent) : QDialog(parent)
  */
 IODialog::~IODialog()
 {
-  io_original = NULL;
-
-  /* Delete event controller */
-  //buttonEventCancel();
-  //event_view->setEvent(NULL);
-  //delete event_ctrl;
-  //event_ctrl = NULL;
+  io_original = nullptr;
 
   /* Delete working IO */
-  if(io_working != NULL)
+  if(io_working != nullptr)
     delete io_working;
-  io_working = NULL;
+  io_working = nullptr;
 }
 
 /*============================================================================
@@ -200,7 +192,6 @@ void IODialog::createLayout(bool instance)
 
   /* Matrix View */
   matrix_view = new MatrixView(NULL, this);
-  //matrix_view = new MatrixView(io_working->getMatrix(), this);
   if(instance)
     matrix_view->setDisabled(true);
   layout->addWidget(matrix_view, 2, 4, 5, 4);
@@ -222,25 +213,6 @@ void IODialog::createLayout(bool instance)
   layout_events->addWidget(btn_walkover);
   group_events->setLayout(layout_events);
   layout->addWidget(group_events, 7, 4, 1, 4);
-
-  /* Event View */
-//  pop_event = new QDialog(this);
-//  pop_event->setWindowTitle("Event Edit");
-//  QGridLayout* e_layout = new QGridLayout(pop_event);
-//  event_view = new EventView(event_ctrl, pop_event);
-//  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-//          this, SLOT(editConversation(Conversation*,bool)));
-//  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTile()));
-//  e_layout->addWidget(event_view, 0, 0, 1, 4);
-//  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
-//  btn_event_ok->setDefault(true);
-//  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(buttonEventOk()));
-//  e_layout->addWidget(btn_event_ok, 1, 2);
-//  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
-//  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(buttonEventCancel()));
-//  e_layout->addWidget(btn_event_cancel, 1, 3);
-//  pop_event->setLayout(e_layout);
-//  pop_event->hide();
 
   /* The button control */
   layout->setRowMinimumHeight(8, 25);
@@ -315,8 +287,13 @@ void IODialog::updateData()
   combo_sound->blockSignals(false);
 }
 
-/* Update state information */
-// TODO: Comment
+/*
+ * Description: Updates the selected state visible information on the dialog to
+ *              the current selected drop down index
+ *
+ * Inputs: none
+ * Output: none
+ */
 void IODialog::updateState()
 {
   EditorState* state = io_working->getState(state_index);
@@ -381,15 +358,6 @@ void IODialog::updateState()
  */
 void IODialog::closeEvent(QCloseEvent* event)
 {
-  /* Close pop-ups */
-  //buttonEventCancel();
-
-  /* Clean up events */
-  //event_ctrl->setEventBlank();
-  //if(io_working != NULL)
-  //  delete io_working;
-  //io_working = NULL;
-
   /* Close and remove all references */
   editEventSet(nullptr);
   io_original = nullptr;
@@ -413,29 +381,6 @@ void IODialog::buttonCancel()
 {
   close();
 }
-
-/*
- * Description: Button slot on the cancel button of the event pop-up. Just
- *              closes the event dialog and doesn't save the changes.
- *
- * Inputs: none
- * Output: none
- */
-//void IODialog::buttonEventCancel()
-//{
-//  if(editing_event != NOEVENT)
-//  {
-//    /* If conversation dialog is visible, hide it first */
-//    if(convo_dialog != NULL && convo_dialog->isVisible())
-//      convo_dialog->buttonCancel();
-
-//    /* Then the event pop-up */
-//    pop_event->hide();
-//    event_ctrl->setEventBlank();
-//    event_view->update();
-//    editing_event = NOEVENT;
-//  }
-//}
 
 /*
  * Description: Button slot on the enter event button in the dialog. Triggers
@@ -586,7 +531,6 @@ void IODialog::buttonOk()
   io_working->consolidate(state_index);
 
   emit ok();
-  //event_ctrl->setEventBlank(false);
   close();
 }
 
@@ -721,55 +665,6 @@ void IODialog::changedComboState(int index)
 
   /* Update view */
   updateState();
-
-//  /* Set the matrix */
-//  matrix_view->setMatrix(state->matrix);
-
-//  /* Depending on state mode, enable / disable some control */
-//  if(state->type == EditorEnumDb::IO_STATE)
-//  {
-//    combo_interaction->setEnabled(true);
-//    group_events->setEnabled(true);
-
-//    /* Interaction combo box */
-//    combo_interaction->setCurrentIndex((int)state->interact);
-
-//    /* Events */
-//    QFont bold = btn_enter->font();
-//    bold.setBold(true);
-//    QFont not_bold = bold;
-//    not_bold.setBold(false);
-//    if(!state->set_enter.isEmpty())
-//      btn_enter->setFont(bold);
-//    else
-//      btn_enter->setFont(not_bold);
-//    if(!state->set_exit.isEmpty())
-//      btn_exit->setFont(bold);
-//    else
-//      btn_exit->setFont(not_bold);
-//    if(!state->set_use.isEmpty())
-//      btn_use->setFont(bold);
-//    else
-//      btn_use->setFont(not_bold);
-//    if(!state->set_walkover.isEmpty())
-//      btn_walkover->setFont(bold);
-//    else
-//      btn_walkover->setFont(not_bold);
-//  }
-//  else if(state->type == EditorEnumDb::IO_TRANSITION)
-//  {
-//    combo_interaction->setDisabled(true);
-//    group_events->setDisabled(true);
-//  }
-
-//  /* If base index is 0, it cannot be deleted */
-//  if(index == 0)
-//    btn_minus->setDisabled(true);
-//  else
-//    btn_minus->setEnabled(true);
-
-//  /* Reset state index */
-//  state_index = index;
 }
 
 /*
@@ -869,41 +764,6 @@ void IODialog::checkInactive(int state)
 }
 
 /*
- * Description: Edits the current conversation instance trigger. Triggered
- *              from EventView. Required to lock out the pop-up.
- *
- * Inputs: Conversation* convo - the conversation segment to edit
- *         bool is_option - true if the segment is an option
- * Output: none
- */
-//void IODialog::editConversation(Conversation* convo, bool is_option)
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//               this, SLOT(selectTileConvo()));
-//    disconnect(convo_dialog, SIGNAL(success()),
-//               event_view, SLOT(updateConversation()));
-//    delete convo_dialog;
-//  }
-//  convo_dialog = NULL;
-
-//  /* Create the new conversation dialog */
-//  convo_dialog = new ConvoDialog(convo, is_option, this);
-//  convo_dialog->setListThings(getEventView()->getListThings());
-//  convo_dialog->getEventView()->setListItems(getEventView()->getListItems());
-//  convo_dialog->getEventView()->setListMaps(getEventView()->getListMaps());
-//  convo_dialog->getEventView()->setListSounds(getListSounds());
-//  convo_dialog->getEventView()->setListSubmaps(
-//                                      getEventView()->getListSubmaps());
-//  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-//          this, SLOT(selectTileConvo()));
-//  connect(convo_dialog, SIGNAL(success()),
-//          event_view, SLOT(updateConversation()));
-//  convo_dialog->show();
-//}
-
-/*
  * Description: Edits the current event set instance trigger. Triggered
  *              from EventSetView. Required to lock out the pop-up.
  *
@@ -971,30 +831,10 @@ void IODialog::updateFrame()
  */
 void IODialog::selectTile()
 {
-  //waiting_convo = false;
   waiting_for_submap = true;
   hide();
-  //pop_event->hide();
   emit selectTile(EditorEnumDb::IO_VIEW);
 }
-
-/*
- * Description: Triggers the select tile dialog for the conversation in the
- *              event view in the pop-up. This hides the pop-up and waits for a
- *              tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-//void IODialog::selectTileConvo()
-//{
-//  if(convo_dialog != NULL)
-//  {
-//    selectTile();
-//    waiting_convo = true;
-//    convo_dialog->hide();
-//  }
-//}
 
 /*
  * Description: The drop down for visibility of the IO changed slot. This
@@ -1028,17 +868,6 @@ EventDialog* IODialog::getEventDialog()
 {
   return event_dialog;
 }
-
-/*
- * Description: Returns the event view within the IO dialog.
- *
- * Inputs: none
- * Output: EventView* - the event view widget for the current IO
- */
-//EventView* IODialog::getEventView()
-//{
-//  return event_view;
-//}
 
 /*
  * Description: Returns the list of items, used for event creation.
@@ -1187,7 +1016,6 @@ void IODialog::updateOriginal()
   if(io_original != NULL)
   {
     *io_original = *io_working;
-    //io_original->setEvent(*event_ctrl->getEvent());
   }
 }
 
@@ -1210,15 +1038,5 @@ void IODialog::updateSelectedTile(int id, int x, int y)
     show();
     if(event_dialog != nullptr)
       event_dialog->updateSelectedTile(id, x, y);
-//    pop_event->show();
-//    if(waiting_convo)
-//    {
-//      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-//      convo_dialog->show();
-//    }
-//    else
-//    {
-//      event_view->updateSelectedTile(id, x, y);
-//    }
   }
 }

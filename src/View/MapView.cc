@@ -22,17 +22,16 @@ const float MapView::kZOOM_STATES[] = {0.0625, 0.125, 0.25, 0.5, 0.75, 1,
  *
  * Input: Parent Widget
  */
-MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
+MapView::MapView(QWidget* parent)
        : QMainWindow(parent)
 {
-  convo_dialog = NULL;
   cursor_mode = EditorEnumDb::BASIC;
   data_db = false;
-  event_convo = false;
+  event_dialog = nullptr;
   event_enter = false;
   event_exit = false;
   event_external = false;
-  event_tile = NULL;
+  event_tile = nullptr;
 
   /* Calls all setup functions */
   setupLeftBar();
@@ -41,28 +40,8 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
   setWindowFlags(windowFlags() & ~Qt::Window);
 
   /* Starts disabled */
-  editing_map = NULL;
+  editing_map = nullptr;
   setDisabled(true);
-
-  /* Event View */
-  pop_event = new QDialog(this);
-  pop_event->setWindowTitle("Event Edit");
-  QGridLayout* e_layout = new QGridLayout(pop_event);
-  event_ctrl = new EditorEvent(EventSet::createBlankEvent());
-  event_view = new EventView(event_ctrl, pop_event);
-  connect(event_view, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
-  connect(event_view, SIGNAL(selectTile()), this, SLOT(selectTileEvent()));
-  e_layout->addWidget(event_view, 0, 0, 1, 4);
-  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
-  btn_event_ok->setDefault(true);
-  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(buttonEventOk()));
-  e_layout->addWidget(btn_event_ok, 1, 2);
-  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
-  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(buttonEventCancel()));
-  e_layout->addWidget(btn_event_cancel, 1, 3);
-  pop_event->setLayout(e_layout);
-  pop_event->hide();
 }
 
 /*
@@ -70,11 +49,7 @@ MapView::MapView(QWidget* parent)//, int xsize, int ysize) :
  */
 MapView::~MapView()
 {
-  /* Delete event controller */
-  buttonEventCancel();
-  event_view->setEvent(NULL);
-  delete event_ctrl;
-  event_ctrl = NULL;
+  editEventSet(nullptr);
 }
 
 /*============================================================================
@@ -85,7 +60,7 @@ MapView::~MapView()
 // TODO: Comment
 void MapView::fillEventWithData()
 {
-  if(editing_map != NULL)
+  if(editing_map != nullptr)
   {
     /* Get data */
     QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
@@ -95,8 +70,8 @@ void MapView::fillEventWithData()
     thing_list << editing_map->getIOList(0, true, true);
 
     /* Load data in */
-    event_view->setListSubmaps(editing_map->getMapList());
-    event_view->setListThings(thing_list);
+    event_dialog->setListSubmaps(editing_map->getMapList());
+    event_dialog->setListThings(thing_list);
 
     data_db = false;
     emit updateEventObjects();
@@ -224,17 +199,8 @@ void MapView::buttonEventCancel()
 {
   if(event_enter || event_exit)
   {
-    /* If conversation dialog is visible, hide it first */
-    if(convo_dialog != NULL && convo_dialog->isVisible())
-      convo_dialog->buttonCancel();
-
-    /* Then the event pop-up */
-    pop_event->hide();
-    event_ctrl->setEventBlank();
-    event_view->update();
-    event_enter = false;
-    event_exit = false;
-    event_tile = NULL;
+    /* Clear out the event control and view class */
+    editEventSet(nullptr);
   }
 }
 
@@ -244,57 +210,47 @@ void MapView::buttonEventOk()
 {
   if(event_enter || event_exit)
   {
-    /* If conversation dialog is visible, hide it first */
-    if(convo_dialog != NULL && convo_dialog->isVisible())
-      convo_dialog->buttonCancel();
-
-    /* Hide pop-up */
-    pop_event->hide();
-
-    /* Set the event */
-    if(event_tile != NULL)
-    {
-      if(event_enter)
-        event_tile->setEventEnter(*event_ctrl->getEvent());
-      else if(event_exit)
-        event_tile->setEventExit(*event_ctrl->getEvent());
-    }
+    /* Update tile if ok hit */
+    if(event_tile != nullptr)
+      event_tile->update();
 
     /* Clear out the event control and view class */
-    event_ctrl->setEventBlank(false);
-    event_enter = false;
-    event_exit = false;
-    event_tile = NULL;
-    event_view->update();
+    editEventSet(nullptr);
   }
 }
 
-/* Edit conversation trigger */
+/* Edit event set trigger */
 // TODO: Comment
-void MapView::editConversation(Conversation* convo, bool is_option)
+void MapView::editEventSet(EditorEventSet* set, QString window_title)
 {
-  if(convo_dialog != NULL)
+  if(event_dialog != nullptr)
   {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               event_view, SLOT(updateConversation()));
-    delete convo_dialog;
+    disconnect(event_dialog, SIGNAL(cancel()),
+               this, SLOT(buttonEventCancel()));
+    disconnect(event_dialog, SIGNAL(ok()),
+               this, SLOT(buttonEventOk()));
+    disconnect(event_dialog, SIGNAL(selectTile()),
+               this, SLOT(selectTileEvent()));
+    delete event_dialog;
   }
-  convo_dialog = NULL;
+  event_dialog = nullptr;
+  event_enter = false;
+  event_exit = false;
+  event_tile = nullptr;
 
   /* Create the new conversation dialog */
-  convo_dialog = new ConvoDialog(convo, is_option, this);
-  convo_dialog->setListThings(event_view->getListThings(), false);
-  convo_dialog->getEventView()->setListItems(event_view->getListItems());
-  convo_dialog->getEventView()->setListMaps(event_view->getListMaps());
-  convo_dialog->getEventView()->setListSounds(event_view->getListSounds());
-  convo_dialog->getEventView()->setListSubmaps(event_view->getListSubmaps());
-  connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-          this, SLOT(selectTileConvo()));
-  connect(convo_dialog, SIGNAL(success()),
-          event_view, SLOT(updateConversation()));
-  convo_dialog->show();
+  if(set != nullptr)
+  {
+    event_dialog = new EventDialog(set, this, window_title);
+    fillEventWithData();
+    connect(event_dialog, SIGNAL(cancel()),
+            this, SLOT(buttonEventCancel()));
+    connect(event_dialog, SIGNAL(ok()),
+            this, SLOT(buttonEventOk()));
+    connect(event_dialog, SIGNAL(selectTile()),
+            this, SLOT(selectTileEvent()));
+    event_dialog->show();
+  }
 }
 
 /* Ensures the following item is visible in scene */
@@ -331,18 +287,6 @@ void MapView::pathEditTrigger(EditorNPCPath* path)
 
 /* Select a tile trigger */
 // TODO: Comment
-void MapView::selectTileConvo()
-{
-  if(convo_dialog != NULL)
-  {
-    selectTileEvent();
-    event_convo = true;
-    convo_dialog->hide();
-  }
-}
-
-/* Select a tile trigger */
-// TODO: Comment
 void MapView::selectTileDb()
 {
   event_external = true;
@@ -354,8 +298,6 @@ void MapView::selectTileDb()
 void MapView::selectTileEvent()
 {
   event_external = false;
-  event_convo = false;
-  pop_event->hide();
   map_render->selectTile();
 }
 
@@ -369,16 +311,8 @@ void MapView::sendSelectedTile(int id, int x, int y)
   }
   else
   {
-    pop_event->show();
-    if(event_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      event_view->updateSelectedTile(id, x, y);
-    }
+    if(event_dialog != nullptr)
+      event_dialog->updateSelectedTile(id, x, y);
   }
 }
 
@@ -425,20 +359,15 @@ void MapView::setCurrentTile(int x, int y)
 void MapView::tileEventEnter()
 {
   /* Close the pop-up if open */
-  if(event_enter || event_exit)
-    buttonEventCancel();
+  editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
-  event_tile = editing_map->getHoverInfo()->hover_tile;
-  if(event_tile != NULL)
+  EditorTile* curr_tile = editing_map->getHoverInfo()->hover_tile;
+  if(curr_tile != nullptr)
   {
-    event_ctrl->setEvent(EventSet::copyEvent(event_tile->getEventEnter()));
-    event_view->updateEvent();
-    pop_event->setWindowTitle("Enter Event Edit");
-    pop_event->show();
+    editEventSet(curr_tile->getEventEnter(), "Tile Enter Event Edit");
     event_enter = true;
-
-    fillEventWithData();
+    event_tile = curr_tile;
   }
 }
 
@@ -447,20 +376,15 @@ void MapView::tileEventEnter()
 void MapView::tileEventExit()
 {
   /* Close the pop-up if open */
-  if(event_enter || event_exit)
-    buttonEventCancel();
+  editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
-  event_tile = editing_map->getHoverInfo()->hover_tile;
-  if(event_tile != NULL)
+  EditorTile* curr_tile = editing_map->getHoverInfo()->hover_tile;
+  if(curr_tile != nullptr)
   {
-    event_ctrl->setEvent(EventSet::copyEvent(event_tile->getEventExit()));
-    event_view->updateEvent();
-    pop_event->setWindowTitle("Exit Event Edit");
-    pop_event->show();
+    editEventSet(curr_tile->getEventExit(), "Tile Exit Event Edit");
     event_exit = true;
-
-    fillEventWithData();
+    event_tile = curr_tile;
   }
 }
 
@@ -486,8 +410,8 @@ void MapView::updatedItems(QVector<QString> items)
 {
   if(data_db)
     map_database->updatedItems(items);
-  else
-    event_view->setListItems(items);
+  else if(event_dialog != nullptr)
+    event_dialog->setListItems(items);
 }
 
 /* Updated data to pass into map database */
@@ -496,8 +420,8 @@ void MapView::updatedMaps(QVector<QString> maps)
 {
   if(data_db)
     map_database->updatedMaps(maps);
-  else
-    event_view->setListMaps(maps);
+  else if(event_dialog != nullptr)
+    event_dialog->setListMaps(maps);
 }
 
 /* Updated data to pass into map database */
@@ -521,8 +445,8 @@ void MapView::updatedSounds(QList<QString> sound_list)
 {
   if(data_db)
     map_database->updatedSounds(sound_list);
-  else
-    event_view->setListSounds(sound_list);
+  else if(event_dialog != nullptr)
+    event_dialog->setListSounds(sound_list);
 }
 
 /*============================================================================
@@ -568,6 +492,7 @@ void MapView::setCursorMode(EditorEnumDb::CursorMode mode)
 void MapView::setMapEditor(EditorMap* editor)
 {
   /* Remove connections to the old map */
+  editEventSet(nullptr);
   map_render->setMapEditor(NULL);
   map_control->setMapEditor(NULL);
   map_database->setMapEditor(NULL);

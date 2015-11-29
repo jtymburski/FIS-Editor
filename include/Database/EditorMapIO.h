@@ -20,12 +20,6 @@ struct EditorState
   EditorMatrix* matrix;
   EditorEnumDb::MapIOType type;
   MapState::InteractionState interact;
-  
-  // TODO: REMOVE
-  //Event event_enter;
-  //Event event_exit;
-  //Event event_use;
-  //Event event_walkover;
 
   /* Base utilize */
   bool base_enter;
@@ -133,10 +127,6 @@ public:
   bool setEventExit(int index, EditorEventSet set);
   bool setEventUse(int index, EditorEventSet set);
   bool setEventWalkover(int index, EditorEventSet set);
-  //bool setEventEnter(int index, Event event); // TODO: Remove
-  //bool setEventExit(int index, Event event); // TODO: Remove
-  //bool setEventUse(int index, Event event); // TODO: Remove
-  //bool setEventWalkover(int index, Event event); // TODO: Remove
 
   /* Sets the inactive time before the state returns down the state path (ms) */
   void setInactiveTime(int time);

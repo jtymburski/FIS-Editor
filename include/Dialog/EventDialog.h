@@ -94,6 +94,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Cancel pressed */
+  void cancel();
+
   /* Ok pressed */
   void ok();
 

@@ -376,6 +376,7 @@ void EventDialog::btnAddUnlock()
 void EventDialog::btnCancel()
 {
   close();
+  emit cancel();
 }
 
 /*
@@ -451,8 +452,8 @@ void EventDialog::btnOk()
 {
   editConversation(nullptr, false);
   updateSet();
-  emit ok();
   close();
+  emit ok();
 }
 
 /*

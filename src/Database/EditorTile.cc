@@ -36,10 +36,6 @@ EditorTile::EditorTile(int x, int y, TileIcons* icons)
   x_pos = x;
   y_pos = y;
 
-  /* Event control */
-  event_enter = EventSet::createBlankEvent();
-  event_exit = EventSet::createBlankEvent();
-
   /* Layer control */
   TileRenderInfo temp;
   temp.sprite = NULL;
@@ -129,8 +125,8 @@ void EditorTile::copySelf(const EditorTile &source)
   y_pos = source.y_pos;
 
   /* Copy events */
-  setEventEnter(EventSet::copyEvent(source.getEventEnter()));
-  setEventExit(EventSet::copyEvent(source.getEventExit()));
+  setEventEnter(source.set_enter);
+  setEventExit(source.set_exit);
 
   /* Copy base */
   layer_base.sprite = source.layer_base.sprite;
@@ -406,25 +402,25 @@ QString EditorTile::getActiveLayers()
 }
 
 /*
- * Description: Returns the tile enter event.
+ * Description: Returns the tile enter event set.
  *
  * Inputs: none
- * Output: Event - the enter triggered event on the tile
+ * Output: Event - the enter triggered event set on the tile
  */
-Event EditorTile::getEventEnter() const
+EditorEventSet* EditorTile::getEventEnter()
 {
-  return event_enter;
+  return &set_enter;
 }
 
 /*
- * Description: Returns the tile exit event.
+ * Description: Returns the tile exit event set.
  *
  * Inputs: none
- * Output: Event - the exit triggered event on the tile
+ * Output: Event - the exit triggered event set on the tile
  */
-Event EditorTile::getEventExit() const
+EditorEventSet* EditorTile::getEventExit()
 {
-  return event_exit;
+  return &set_exit;
 }
 
 /*
@@ -1041,27 +1037,27 @@ int EditorTile::getY()
 }
 
 /*
- * Description: Returns true if the enter event is a valid event and not
- *              EventClassifier::NOEVENT.
+ * Description: Returns true if the enter event set is a valid event and is not
+ *              empty.
  *
  * Inputs: none
- * Output: bool - true if the tile enter event is a valid event
+ * Output: bool - true if the tile enter event set is a valid event
  */
 bool EditorTile::isEventEnterSet() const
 {
-  return (event_enter.classification != EventClassifier::NOEVENT);
+  return !set_enter.isEmpty();
 }
 
 /*
- * Description: Returns true if the exit event is a valid event and not
- *              EventClassifier::NOEVENT.
+ * Description: Returns true if the exit event set is a valid event and is not
+ *              empty.
  *
  * Inputs: none
- * Output: bool - true if the tile exit event is a valid event
+ * Output: bool - true if the tile exit event set is a valid event
  */
 bool EditorTile::isEventExitSet() const
 {
-  return (event_exit.classification != EventClassifier::NOEVENT);
+  return !set_exit.isEmpty();
 }
 
 /*
@@ -1448,36 +1444,26 @@ bool EditorTile::place(EditorEnumDb::Layer layer, EditorSprite* sprite,
 }
 
 /*
- * Description: Sets the enter event on the tile. Note: once called, this class
- *              will take control of releasing the memory of the event when
- *              destructed.
+ * Description: Sets the enter event set on the tile.
  *
- * Inputs: Event event - the event to connect to the enter trigger
- *         bool just_update - true if the event should be updated; not deleted
+ * Inputs: EditorEventSet set - the event set to connect to the enter trigger
  * Output: none
  */
-void EditorTile::setEventEnter(Event event, bool just_update)
+void EditorTile::setEventEnter(EditorEventSet set)
 {
-  if(!just_update)
-    unsetEventEnter();
-  event_enter = event;
+  set_enter = set;
   update();
 }
 
 /*
- * Description: Sets the exit event on the tile. Note: once called, this class
- *              will take control of releasing the memory of the event when
- *              destructed.
+ * Description: Sets the exit event set on the tile.
  *
- * Inputs: Event event - the event to connect to the exit trigger
- *         bool just_update - true if the event should be updated; not deleted
+ * Inputs: EditorEventSet set - the event set to connect to the exit trigger
  * Output: none
  */
-void EditorTile::setEventExit(Event event, bool just_update)
+void EditorTile::setEventExit(EditorEventSet set)
 {
-  if(!just_update)
-    unsetEventExit();
-  event_exit = event;
+  set_exit = set;
   update();
 }
 
@@ -2107,7 +2093,7 @@ void EditorTile::unplace(EditorSprite* sprite)
  */
 void EditorTile::unsetEventEnter()
 {
-  event_enter = EventSet::deleteEvent(event_enter);
+  set_enter.clear();
 }
 
 /*
@@ -2119,7 +2105,7 @@ void EditorTile::unsetEventEnter()
  */
 void EditorTile::unsetEventExit()
 {
-  event_exit = EventSet::deleteEvent(event_exit);
+  set_exit.clear();
 }
 
 /*

@@ -734,19 +734,37 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     {
       if(category == "enter")
       {
-        EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
-        edit_event.load(data, index + 3);
-        if(edit_event.getEvent() != NULL)
-          map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), false);
-        edit_event.setEventBlank(false);
+        EditorEventSet* set = map->tiles[x][y]->getEventEnter();
+        set->load(data, index + 2);
+
+        // TODO: Remove
+        //EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
+        //edit_event.load(data, index + 3);
+        //if(edit_event.getEvent() != NULL)
+        //  map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), false);
+        //edit_event.setEventBlank(false);
+      }
+      else if(category == "enterset")
+      {
+        EditorEventSet* set = map->tiles[x][y]->getEventEnter();
+        set->load(data, index + 3);
       }
       else if(category == "exit")
       {
-        EditorEvent edit_event(map->tiles[x][y]->getEventExit());
-        edit_event.load(data, index + 3);
-        if(edit_event.getEvent() != NULL)
-          map->tiles[x][y]->setEventExit(*edit_event.getEvent(), false);
-        edit_event.setEventBlank(false);
+        EditorEventSet* set = map->tiles[x][y]->getEventExit();
+        set->load(data, index + 2);
+
+        // TODO: Remove
+        //EditorEvent edit_event(map->tiles[x][y]->getEventExit());
+        //edit_event.load(data, index + 3);
+        //if(edit_event.getEvent() != NULL)
+        //  map->tiles[x][y]->setEventExit(*edit_event.getEvent(), false);
+        //edit_event.setEventBlank(false);
+      }
+      else if(category == "exitset")
+      {
+        EditorEventSet* set = map->tiles[x][y]->getEventExit();
+        set->load(data, index + 3);
       }
     }
   }
@@ -1148,12 +1166,18 @@ void EditorMap::recursiveFill(int x, int y, EditorEnumDb::Layer layer,
  */
 bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 {
+  /* Unselect hover tile */
+  setHoverTile(nullptr);
+
   /* Remove all things for processing */
   tilesThingRemove(true);
   tilesIORemove(true);
   tilesItemRemove(true);
   tilesPersonRemove(true);
   tilesNPCRemove(true);
+
+  /* Reference tile */
+  EditorTile* ref_tile = map->tiles.front().front();
 
   /* If smaller, delete tiles on width */
   if(map->tiles.size() > width)
@@ -1176,6 +1200,9 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
       {
         row.push_back(new EditorTile(i, j, getTileIcons()));
         row.last()->setHoverInfo(getHoverInfo());
+        row.last()->setVisibilityEvents(ref_tile->getVisibilityEvents());
+        row.last()->setVisibilityGrid(ref_tile->getVisibilityGrid());
+        row.last()->setVisibilityPass(ref_tile->getVisibilityPass());
       }
 
       map->tiles.push_back(row);
@@ -1203,6 +1230,10 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
       {
         map->tiles[i].push_back(new EditorTile(i, j, getTileIcons()));
         map->tiles[i].last()->setHoverInfo(getHoverInfo());
+        map->tiles[i].last()->setVisibilityEvents(
+                                              ref_tile->getVisibilityEvents());
+        map->tiles[i].last()->setVisibilityGrid(ref_tile->getVisibilityGrid());
+        map->tiles[i].last()->setVisibilityPass(ref_tile->getVisibilityPass());
       }
     }
   }
@@ -1367,7 +1398,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   fh->writeXmlElementEnd();
 
   /* Add enter events */
-  fh->writeXmlElement("tileevent", "type", "enter");
+  fh->writeXmlElement("tileevent", "type", "enterset");
   for(int i = 0; i < event_stack.front().size(); i++)
   {
     bool x_element = false;
@@ -1384,10 +1415,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
           x_element = true;
         }
         fh->writeXmlElement("y", "index", event_stack.front()[i][j]);
-
-        EditorEvent edit_event(t->getEventEnter());
-        edit_event.save(fh, game_only, "", true);
-
+        t->getEventEnter()->save(fh, game_only, "", true);
         fh->writeXmlElementEnd();
       }
     }
@@ -1399,7 +1427,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   fh->writeXmlElementEnd();
 
   /* Add exit events */
-  fh->writeXmlElement("tileevent", "type", "exit");
+  fh->writeXmlElement("tileevent", "type", "exitset");
   for(int i = 0; i < event_stack.back().size(); i++)
   {
     bool x_element = false;
@@ -1416,10 +1444,7 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
           x_element = true;
         }
         fh->writeXmlElement("y", "index", event_stack.back()[i][j]);
-
-        EditorEvent edit_event(t->getEventExit());
-        edit_event.save(fh, game_only, "", true);
-
+        t->getEventExit()->save(fh, game_only, "", true);
         fh->writeXmlElementEnd();
       }
     }

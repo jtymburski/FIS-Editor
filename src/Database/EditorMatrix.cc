@@ -6,7 +6,7 @@
  *              scene of EditorTileSprites that are used for thing creation.
  ******************************************************************************/
 #include "Database/EditorMatrix.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS

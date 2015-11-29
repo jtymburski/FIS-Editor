@@ -29,6 +29,7 @@
 #include <QSizePolicy>
 
 #include "Database/EditorMap.h"
+#include "Dialog/EventDialog.h"
 #include "EditorEnumDb.h"
 #include "View/MapRender.h"
 #include "View/RawImageView.h"
@@ -43,15 +44,12 @@ class MapView : public QMainWindow
 
 public:
   /* Constructor function */
-  MapView(QWidget* parent = NULL);//, int xsize = 100, int ysize = 100);
+  MapView(QWidget* parent = nullptr);
 
   /* Destructor function */
   ~MapView();
 
 private:
-  /* The conversation dialog */
-  ConvoDialog* convo_dialog;
-
   /* Cursor Mode */
   EditorEnumDb::CursorMode cursor_mode;
 
@@ -61,14 +59,14 @@ private:
   /* The editing map */
   EditorMap* editing_map;
 
-  /* Event view and control */
-  EditorEvent* event_ctrl;
-  bool event_convo;
+  /* The event set dialog */
+  EventDialog* event_dialog;
+
+  /* Event control */
   bool event_enter;
   bool event_exit;
   bool event_external;
   EditorTile* event_tile;
-  EventView* event_view;
 
   /* Map Control pointer - right portion */
   MapControl* map_control;
@@ -82,9 +80,6 @@ private:
   /* Map editor - center portion */
   MapRender* map_render;
   QGraphicsView* map_render_view;
-
-  /* Event edit pop-up */
-  QDialog* pop_event; // TODO
 
   /* The current zoom state */
   int zoom_state;
@@ -105,7 +100,7 @@ private:
   void setupLeftBar();
 
   /* Sets up the Map View - center portion */
-  void setupMapView();//int x = 0, int y = 0);
+  void setupMapView();
 
   /* Sets up the control bar */
   void setupRightBar();
@@ -141,8 +136,8 @@ public slots:
   void buttonEventCancel();
   void buttonEventOk();
 
-  /* Edit conversation trigger */
-  void editConversation(Conversation* convo, bool is_option);
+  /* Edit event set trigger */
+  void editEventSet(EditorEventSet* set, QString window_title = "");
 
   /* Ensures the following item is visible in scene */
   void ensureVisible(QGraphicsItem* item);
@@ -151,7 +146,7 @@ public slots:
   void pathEditTrigger(EditorNPCPath* path);
 
   /* Select a tile trigger */
-  void selectTileConvo();
+  //void selectTileConvo(); // TODO: Remove?
   void selectTileDb();
   void selectTileEvent();
 

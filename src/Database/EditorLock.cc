@@ -135,7 +135,7 @@ Locked* EditorLock::getLock()
  * Inputs: none
  * Output: LockedState - lock classification enum
  */
-LockedState EditorLock::getLockType()
+LockedState EditorLock::getLockType() const
 {
   return lock.state;
 }

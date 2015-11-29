@@ -117,6 +117,16 @@ void EventSetView::setLayoutData()
 
     /* Edit button enable */
     btn_edit->setEnabled(true);
+
+    /* Check if real data exists and bold button if so */
+    QFont bold = btn_edit->font();
+    bold.setBold(true);
+    QFont not_bold = bold;
+    not_bold.setBold(false);
+    if(!event_set->isEmpty())
+      btn_edit->setFont(bold);
+    else
+      btn_edit->setFont(not_bold);
   }
   /* Event set is invalid */
   else
