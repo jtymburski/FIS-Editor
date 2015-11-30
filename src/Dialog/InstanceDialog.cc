@@ -449,13 +449,15 @@ void InstanceDialog::buttonBaseEdit()
     int status = msg_box.exec();
     if(status == QMessageBox::Yes)
     {
+      EditorMapThing* base_thing = thing_original->getBaseThing();
       buttonOk();
-      emit editBase(thing_original->getBaseThing());
+      emit editBase(base_thing);
     }
     else if(status == QMessageBox::No)
     {
+      EditorMapThing* base_thing = thing_original->getBaseThing();
       buttonCancel();
-      emit editBase(thing_original->getBaseThing());
+      emit editBase(base_thing);
     }
   }
 }

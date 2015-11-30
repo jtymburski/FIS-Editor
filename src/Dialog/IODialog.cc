@@ -6,7 +6,7 @@
  *              related to it. Allows manipulation of the data.
  ******************************************************************************/
 #include "Dialog/IODialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -48,9 +48,14 @@ IODialog::~IODialog()
 {
   io_original = nullptr;
 
+  /* Delete the pop-up association */
+  buttonLockCancel();
+  editEventSet(nullptr);
+  delete lock_ctrl;
+  lock_ctrl = nullptr;
+
   /* Delete working IO */
-  if(io_working != nullptr)
-    delete io_working;
+  delete io_working;
   io_working = nullptr;
 }
 
@@ -71,7 +76,7 @@ void IODialog::createLayout(bool instance)
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setColumnStretch(2, 1);
   layout->setColumnStretch(5, 1);
-  layout->setRowStretch(6, 1);
+  layout->setRowStretch(7, 1);
 
   /* The ID widget */
   QLabel* lbl_id = new QLabel("ID:", this);
@@ -125,13 +130,23 @@ void IODialog::createLayout(bool instance)
           this, SLOT(changedDescription()));
   layout->addWidget(text_description, 4, 1, 1, 3);
 
+  /* The lock widget */
+  QLabel* lbl_lock = new QLabel("Lock:", this);
+  layout->addWidget(lbl_lock, 5, 0);
+  lbl_lock_data = new QLabel("ITEM #", this);
+  lbl_lock_data->setStyleSheet("border: 1px solid #a8a8a8");
+  layout->addWidget(lbl_lock_data, 5, 1, 1, 2);
+  QPushButton* btn_lock = new QPushButton("Edit", this);
+  connect(btn_lock, SIGNAL(clicked()), this, SLOT(buttonLockEdit()));
+  layout->addWidget(btn_lock, 5, 3);
+
   /* The sound widget */
   QLabel* lbl_sound = new QLabel("Sound:", this);
-  layout->addWidget(lbl_sound, 5, 0);
+  layout->addWidget(lbl_sound, 6, 0);
   combo_sound = new QComboBox(this);
   connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(changedSound(QString)));
-  layout->addWidget(combo_sound, 5, 1, 1, 3);
+  layout->addWidget(combo_sound, 6, 1, 1, 3);
 
   /* State selection */
   QLabel* lbl_state = new QLabel("State", this);
@@ -175,12 +190,12 @@ void IODialog::createLayout(bool instance)
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 6, 0, 2, 1);
+  layout->addWidget(lbl_frame, 7, 0, 2, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 6, 1, 2, 3);
+  layout->addWidget(lbl_frame_img, 7, 1, 2, 3);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -188,13 +203,13 @@ void IODialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 6, 3, 2, 1, Qt::AlignTop);
+  layout->addWidget(btn_frame_click, 7, 3, 2, 1, Qt::AlignTop | Qt::AlignRight);
 
   /* Matrix View */
   matrix_view = new MatrixView(NULL, this);
   if(instance)
     matrix_view->setDisabled(true);
-  layout->addWidget(matrix_view, 2, 4, 5, 4);
+  layout->addWidget(matrix_view, 2, 4, 6, 4);
 
   /* Event Control */
   group_events = new QGroupBox("Events", this);
@@ -212,20 +227,73 @@ void IODialog::createLayout(bool instance)
   layout_events->addWidget(btn_use);
   layout_events->addWidget(btn_walkover);
   group_events->setLayout(layout_events);
-  layout->addWidget(group_events, 7, 4, 1, 4);
+  layout->addWidget(group_events, 8, 4, 1, 4);
 
   /* The button control */
-  layout->setRowMinimumHeight(8, 25);
+  layout->setRowMinimumHeight(9, 25);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 9, 6);
+  layout->addWidget(btn_ok, 10, 6);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 9, 7);
+  layout->addWidget(btn_cancel, 10, 7);
 
-  /* Dialog control */
+  /* Title for dialog */
   setWindowTitle("Interactive Object Edit");
+
+  /* Pop-up construction for locks */
+  pop_lock = new QDialog(this);
+  pop_lock->setWindowTitle("Lock Edit");
+  QGridLayout* l_layout = new QGridLayout(pop_lock);
+  lock_ctrl = new EditorLock();
+  lock_view = new LockView(nullptr, pop_lock);
+  l_layout->addWidget(lock_view, 0, 0, 1, 4);
+  QPushButton* btn_lock_ok = new QPushButton("Ok", pop_lock);
+  connect(btn_lock_ok, SIGNAL(clicked()), this, SLOT(buttonLockOk()));
+  l_layout->addWidget(btn_lock_ok, 1, 2);
+  QPushButton* btn_lock_cancel = new QPushButton("Cancel", pop_lock);
+  connect(btn_lock_cancel, SIGNAL(clicked()), this, SLOT(buttonLockCancel()));
+  l_layout->addWidget(btn_lock_cancel);
+  pop_lock->hide();
+}
+
+/*
+ * Description: Edits the current event set instance trigger. Triggered
+ *              from EventSetView. Required to lock out the pop-up.
+ *
+ * Inputs: EditorEventSet* set - the editing set
+ *         QString window_title - the event dialog window title
+ * Output: none
+ */
+void IODialog::editEventSet(EditorEventSet* set, QString window_title)
+{
+  if(event_dialog != nullptr)
+  {
+    disconnect(event_dialog, SIGNAL(selectTile()),
+               this, SLOT(selectTile()));
+    disconnect(event_dialog, SIGNAL(ok()),
+               this, SLOT(buttonEventOk()));
+    delete event_dialog;
+  }
+  event_dialog = nullptr;
+  editing_event = NOEVENT;
+
+  /* Create the new conversation dialog */
+  if(set != nullptr)
+  {
+    event_dialog = new EventDialog(set, this, window_title);
+    event_dialog->setListItems(list_items);
+    event_dialog->setListMaps(list_maps);
+    event_dialog->setListSounds(list_sounds);
+    event_dialog->setListSubmaps(list_submaps);
+    event_dialog->setListThings(list_things);
+    connect(event_dialog, SIGNAL(selectTile()),
+            this, SLOT(selectTile()));
+    connect(event_dialog, SIGNAL(ok()),
+            this, SLOT(buttonEventOk()));
+    event_dialog->show();
+  }
 }
 
 /*
@@ -277,6 +345,9 @@ void IODialog::updateData()
       if(str_split.front().toInt() == io_working->getSoundID())
         index = i;
   }
+
+  /* Lock data */
+  lbl_lock_data->setText(io_working->getLock()->getTextSummary(""));
 
   /* Sound data - load into combo */
   combo_sound->blockSignals(true);
@@ -359,6 +430,7 @@ void IODialog::updateState()
 void IODialog::closeEvent(QCloseEvent* event)
 {
   /* Close and remove all references */
+  buttonLockCancel();
   editEventSet(nullptr);
   io_original = nullptr;
 
@@ -393,6 +465,7 @@ void IODialog::buttonCancel()
 void IODialog::buttonEventEnter()
 {
   /* Close the pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
@@ -415,6 +488,7 @@ void IODialog::buttonEventEnter()
 void IODialog::buttonEventExit()
 {
   /* Close the pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
@@ -428,7 +502,7 @@ void IODialog::buttonEventExit()
 
 /*
  * Description: Button slot on the ok button of the event pop-up. Closes and
- *              savesz the event dialog to the IO working pointer in the IO
+ *              saves the event dialog to the IO working pointer in the IO
  *              dialog.
  *
  * Inputs: none
@@ -457,6 +531,7 @@ void IODialog::buttonEventOk()
 void IODialog::buttonEventUse()
 {
   /* Close the pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
@@ -479,6 +554,7 @@ void IODialog::buttonEventUse()
 void IODialog::buttonEventWalkover()
 {
   /* Close the pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Set the event and open the new pop-up */
@@ -500,6 +576,7 @@ void IODialog::buttonEventWalkover()
 void IODialog::buttonFrameEdit()
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Delete the dialog, if it exists */
@@ -517,6 +594,54 @@ void IODialog::buttonFrameEdit()
 }
 
 /*
+ * Description: Button slot on lock cancel button within lock edit pop-up
+ *              created within the class. When selected, the pop-up is cleaned
+ *              and the pop-up is hidden.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void IODialog::buttonLockCancel()
+{
+  pop_lock->hide();
+  lock_view->setLock(nullptr);
+}
+
+/*
+ * Description: Button slot on the lock edit button triggered from the IO
+ *              dialog. This displays the lock edit widget to modify the lock
+ *              data.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void IODialog::buttonLockEdit()
+{
+  /* Close the event pop-up if open */
+  editEventSet(nullptr);
+
+  *lock_ctrl = *io_working->getLock();
+  lock_view->setLock(lock_ctrl);
+  pop_lock->show();
+}
+
+/*
+ * Description: Button slot on lock ok button within lock edit pop-up
+ *              created within the class. When selected, the lock data is saved
+ *              within the working IO, the pop-up is cleaned and the pop-up is
+ *              hidden.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void IODialog::buttonLockOk()
+{
+  *io_working->getLock() = *lock_ctrl;
+  lbl_lock_data->setText(io_working->getLock()->getTextSummary(""));
+  buttonLockCancel();
+}
+
+/*
  * Description: Button slot on the ok button. Emits ok prior to closing the
  *              dialog. The ok gets handled by the widget parent, which
  *              updates the visible IOs on map prior to accepting changes.
@@ -527,6 +652,7 @@ void IODialog::buttonFrameEdit()
 void IODialog::buttonOk()
 {
   /* Consolidate before closing */
+  buttonLockCancel();
   editEventSet(nullptr);
   io_working->consolidate(state_index);
 
@@ -545,6 +671,7 @@ void IODialog::buttonOk()
 void IODialog::buttonStateAdd()
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   QMessageBox msg_box;
@@ -579,6 +706,7 @@ void IODialog::buttonStateAdd()
 void IODialog::buttonStateOverview()
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   // TODO: Implementation
@@ -599,6 +727,7 @@ void IODialog::buttonStateRemove()
   int index = combo_state->currentIndex();
 
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Create warning about deleting */
@@ -637,6 +766,7 @@ void IODialog::buttonStateRemove()
 void IODialog::changedComboInteract(int index)
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   EditorState* state = io_working->getState(combo_state->currentIndex());
@@ -656,6 +786,7 @@ void IODialog::changedComboInteract(int index)
 void IODialog::changedComboState(int index)
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* Consolidate */
@@ -677,6 +808,7 @@ void IODialog::changedComboState(int index)
 void IODialog::changedDescription()
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   QString simple = text_description->toPlainText().simplified();
@@ -693,6 +825,7 @@ void IODialog::changedDescription()
 void IODialog::changedInactive(int i)
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   io_working->setInactiveTime(i);
@@ -708,6 +841,7 @@ void IODialog::changedInactive(int i)
 void IODialog::changedName(QString name)
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   io_working->setName(name);
@@ -725,6 +859,7 @@ void IODialog::changedSound(const QString &text)
   QStringList str_list = text.split(':');
 
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   /* If the list is two long, it is proper format - 001: Sound Example */
@@ -749,6 +884,7 @@ void IODialog::changedSound(const QString &text)
 void IODialog::checkInactive(int state)
 {
   /* Close the event pop-up if open */
+  buttonLockCancel();
   editEventSet(nullptr);
 
   if(state == Qt::Checked)
@@ -763,43 +899,7 @@ void IODialog::checkInactive(int state)
   }
 }
 
-/*
- * Description: Edits the current event set instance trigger. Triggered
- *              from EventSetView. Required to lock out the pop-up.
- *
- * Inputs: EditorEventSet* set - the editing set
- *         QString window_title - the event dialog window title
- * Output: none
- */
-void IODialog::editEventSet(EditorEventSet* set, QString window_title)
-{
-  if(event_dialog != nullptr)
-  {
-    disconnect(event_dialog, SIGNAL(selectTile()),
-               this, SLOT(selectTile()));
-    disconnect(event_dialog, SIGNAL(ok()),
-               this, SLOT(buttonEventOk()));
-    delete event_dialog;
-  }
-  event_dialog = nullptr;
-  editing_event = NOEVENT;
 
-  /* Create the new conversation dialog */
-  if(set != nullptr)
-  {
-    event_dialog = new EventDialog(set, this, window_title);
-    event_dialog->setListItems(list_items);
-    event_dialog->setListMaps(list_maps);
-    event_dialog->setListSounds(list_sounds);
-    event_dialog->setListSubmaps(list_submaps);
-    event_dialog->setListThings(list_things);
-    connect(event_dialog, SIGNAL(selectTile()),
-            this, SLOT(selectTile()));
-    connect(event_dialog, SIGNAL(ok()),
-            this, SLOT(buttonEventOk()));
-    event_dialog->show();
-  }
-}
 
 /*
  * Description: Updates the frame dialog image in the pop-up. Scales the image
@@ -846,8 +946,9 @@ void IODialog::selectTile()
 void IODialog::visibilityChanged(int index)
 {
   /* Close the event pop-up if open */
-  editEventSet(nullptr);
 
+  editEventSet(nullptr);
+  buttonLockCancel();
   if(index == 1)
     io_working->setVisibility(true);
   else if(index == 0)
@@ -938,6 +1039,8 @@ void IODialog::setListItems(QVector<QString> items)
   /* Event dialog data */
   if(event_dialog != nullptr)
     event_dialog->setListItems(items);
+  if(lock_view != nullptr)
+    lock_view->setListItems(items);
 }
 
 /*

@@ -634,15 +634,6 @@ void EventView::categoryChanged(int index)
 //  if(ret == QMessageBox::Yes)
 //  {
 
-  /* Restrict sound widget - TODO REMOVE */
-  //if(index == (int)EventClassifier::JUSTSOUND)
-  //{
-  //  index = (int)EventClassifier::NOEVENT;
-  //  combo_category->blockSignals(true);
-  //  combo_category->setCurrentIndex(index);
-  //  combo_category->blockSignals(false);
-  //}
-
   /* Update the stack */
   view_stack->setCurrentIndex(index);
 
@@ -674,11 +665,11 @@ void EventView::categoryChanged(int index)
       else if(index == (int)EventClassifier::TELEPORTTHING)
         event->setEventTeleport();
       else if(index == (int)EventClassifier::UNLOCKIO)
-        qDebug() << "TODO: Unlock IO Event - Setup";
+        event->setEventUnlockIO();
       else if(index == (int)EventClassifier::UNLOCKTHING)
-        qDebug() << "TODO: Unlock Thing Event - Setup";
+        event->setEventUnlockThing();
       else if(index == (int)EventClassifier::UNLOCKTILE)
-        qDebug() << "TODO: Unlock Tile Event - Setup";
+        event->setEventUnlockTile();
     }
 
     /* Update the layout */

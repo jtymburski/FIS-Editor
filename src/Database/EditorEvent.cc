@@ -590,6 +590,263 @@ QString EditorEvent::getTextSummary(QString prefix)
 }
 
 /*
+ * Description: Returns the selected events in the IO for the unlock IO event.
+ *              UnlockIOEvent::NONE returned if invalid.
+ *
+ * Inputs: none
+ * Output: UnlockIOEvent - the event(s) unlocked if triggered
+ */
+UnlockIOEvent EditorEvent::getUnlockIOEventMode()
+{
+  int io_id, state_num, view_time;
+  UnlockIOMode mode;
+  UnlockIOEvent mode_events;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                 mode_view, view_time))
+  {
+    return mode_events;
+  }
+  return UnlockIOEvent::NONE;
+}
+
+/*
+ * Description: Returns the target ID for the unlock IO event. Returns -1 if
+ *              the event is not the unlock IO event
+ *
+ * Inputs: none
+ * Output: int - the reference ID
+ */
+int EditorEvent::getUnlockIOID()
+{
+  int io_id, state_num, view_time;
+  UnlockIOMode mode;
+  UnlockIOEvent mode_events;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                 mode_view, view_time))
+  {
+    return io_id;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the mode(s) that are targetted within the IO for locked
+ *              states when the unlock triggers. Returns UnlockIOMode::NONE if
+ *              the event is not the unlock IO event
+ *
+ * Inputs: none
+ * Output: UnlockIOMode - the mode(s) with the lock structs to target
+ */
+UnlockIOMode EditorEvent::getUnlockIOMode()
+{
+  int io_id, state_num, view_time;
+  UnlockIOMode mode;
+  UnlockIOEvent mode_events;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                 mode_view, view_time))
+  {
+    return mode;
+  }
+  return UnlockIOMode::NONE;
+}
+
+/*
+ * Description: Returns the target state that are targetted within the IO if
+ *              the event view mode is valid. Less than 0 targets all states
+ *              in the IO.
+ *
+ * Inputs: none
+ * Output: int - the state reference number
+ */
+int EditorEvent::getUnlockIOState()
+{
+  int io_id, state_num, view_time;
+  UnlockIOMode mode;
+  UnlockIOEvent mode_events;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                 mode_view, view_time))
+  {
+    return state_num;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the reference thing ID that is targeted when the unlock
+ *              event is triggered. If invalid, returns -1.
+ *
+ * Inputs: none
+ * Output: int - the thing ID reference
+ */
+int EditorEvent::getUnlockThingID()
+{
+  int thing_id, view_time;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time))
+    return thing_id;
+  return -1;
+}
+
+/*
+ * Description: Returns the tile mode of events to attempt unlock on the given
+ *              tile unlock event. Returns NONE if invalid
+ *
+ * Inputs: none
+ * Output: UnlockTileMode - which events to attempt unlock in tile
+ */
+UnlockTileMode EditorEvent::getUnlockTileMode()
+{
+  int section_id, tile_x, tile_y, view_time;
+  UnlockTileMode mode;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                   mode_view, view_time))
+  {
+    return mode;
+  }
+  return UnlockTileMode::NONE;
+}
+
+/*
+ * Description: Returns the tile section ID of where to locate the tile to
+ *              unlock. If less than 0, it's the current map index where
+ *              triggered.
+ *
+ * Inputs: none
+ * Output: int - the section ID of the tile
+ */
+int EditorEvent::getUnlockTileSection()
+{
+  int section_id, tile_x, tile_y, view_time;
+  UnlockTileMode mode;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                   mode_view, view_time))
+  {
+    return section_id;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the tile X index of where to locate the tile to unlock.
+ *              If less than 0, the event is not an unlock tile
+ *
+ * Inputs: none
+ * Output: int - the X reference of the tile
+ */
+int EditorEvent::getUnlockTileX()
+{
+  int section_id, tile_x, tile_y, view_time;
+  UnlockTileMode mode;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                   mode_view, view_time))
+  {
+    return tile_x;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the tile Y index of where to locate the tile to unlock.
+ *              If less than 0, the event is not an unlock tile
+ *
+ * Inputs: none
+ * Output: int - the Y reference of the tile
+ */
+int EditorEvent::getUnlockTileY()
+{
+  int section_id, tile_x, tile_y, view_time;
+  UnlockTileMode mode;
+  UnlockView mode_view;
+  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                   mode_view, view_time))
+  {
+    return tile_y;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the view mode and how it views the point where the
+ *              unlock occurs. Returns NONE if the event is not an unlock event
+ *
+ * Inputs: none
+ * Output: UnlockView - the unlock view reference for how the event is handled
+ */
+UnlockView EditorEvent::getUnlockViewMode()
+{
+  /* View data */
+  int view_time;
+  UnlockView mode_view = UnlockView::NONE;
+
+  /* Determine classification */
+  if(event.classification == EventClassifier::UNLOCKIO)
+  {
+    int io_id, state_num;
+    UnlockIOMode mode;
+    UnlockIOEvent mode_events;
+    EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                mode_view, view_time);
+  }
+  else if(event.classification == EventClassifier::UNLOCKTHING)
+  {
+    int thing_id;
+    EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
+  }
+  else if(event.classification == EventClassifier::UNLOCKTILE)
+  {
+    int section_id, tile_x, tile_y;
+    UnlockTileMode mode;
+    EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                  mode_view, view_time);
+  }
+  return mode_view;
+}
+
+/*
+ * Description: Returns the view time and how long it views the point where the
+ *              unlock occurs. Returns 0 if the event is not an unlock event
+ *
+ * Inputs: none
+ * Output: int - the unlock view time for how the event is handled
+ */
+int EditorEvent::getUnlockViewTime()
+{
+  /* View data */
+  int view_time = 0;
+  UnlockView mode_view = UnlockView::NONE;
+
+  /* Determine classification */
+  if(event.classification == EventClassifier::UNLOCKIO)
+  {
+    int io_id, state_num;
+    UnlockIOMode mode;
+    UnlockIOEvent mode_events;
+    EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                mode_view, view_time);
+  }
+  else if(event.classification == EventClassifier::UNLOCKTHING)
+  {
+    int thing_id;
+    EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
+  }
+  else if(event.classification == EventClassifier::UNLOCKTILE)
+  {
+    int section_id, tile_x, tile_y;
+    UnlockTileMode mode;
+    EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                  mode_view, view_time);
+  }
+  return view_time;
+}
+
+/*
  * Description: Inserts a passed in conversation node after the index node
  *              passed in. If the index is on a bad path on the tree, it fails.
  *              If option_node is set, a node with children can be passed in
@@ -892,6 +1149,159 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
 
       fh->writeXmlElementEnd();
     }
+    /* -- UNLOCK IO EVENT -- */
+    else if(event.classification == EventClassifier::UNLOCKIO)
+    {
+      fh->writeXmlElement("unlockio");
+
+      /* Access data */
+      int io_id, state_num, view_time;
+      UnlockIOMode mode;
+      UnlockIOEvent mode_events;
+      UnlockView mode_view;
+      EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
+                                  mode_view, view_time);
+
+      /* ID */
+      fh->writeXmlData("id", io_id);
+
+      /* Mode */
+      bool lock, events;
+      EventSet::dataEnumIOMode(mode, lock, events);
+      if(lock)
+        fh->writeXmlData("modelock", lock);
+      if(events)
+        fh->writeXmlData("modeevents", events);
+
+      /* Only if events enabled, proceed to remaining data */
+      if(events)
+      {
+        /* State */
+        if(state_num >= 0)
+          fh->writeXmlData("state", state_num);
+
+        /* Which events - check if all */
+        bool enter,exit,use,walkover;
+        EventSet::dataEnumIOEvent(mode_events, enter, exit, use, walkover);
+        if(enter && exit && use && walkover)
+        {
+          fh->writeXmlData("eventall", enter);
+        }
+        /* Parse individually */
+        else
+        {
+          if(enter)
+            fh->writeXmlData("evententer", enter);
+          if(exit)
+            fh->writeXmlData("eventexit", exit);
+          if(use)
+            fh->writeXmlData("eventuse", use);
+          if(walkover)
+            fh->writeXmlData("eventwalkover", walkover);
+        }
+      }
+
+      /* View */
+      bool view, scroll;
+      EventSet::dataEnumView(mode_view, view, scroll);
+      if(view)
+      {
+        fh->writeXmlData("view", view);
+        if(scroll)
+          fh->writeXmlData("viewscroll", scroll);
+        if(view_time != EventSet::kVIEW_TIME)
+          fh->writeXmlData("viewtime", view_time);
+      }
+
+      /* Sound */
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+
+      fh->writeXmlElementEnd();
+    }
+    /* -- UNLOCK THING EVENT -- */
+    else if(event.classification == EventClassifier::UNLOCKTHING)
+    {
+      fh->writeXmlElement("unlockthing");
+
+      /* Access data */
+      int thing_id, view_time;
+      UnlockView mode_view;
+      EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
+
+      /* ID */
+      fh->writeXmlData("id", thing_id);
+
+      /* View */
+      bool view, scroll;
+      EventSet::dataEnumView(mode_view, view, scroll);
+      if(view)
+      {
+        fh->writeXmlData("view", view);
+        if(scroll)
+          fh->writeXmlData("viewscroll", scroll);
+        if(view_time != EventSet::kVIEW_TIME)
+          fh->writeXmlData("viewtime", view_time);
+      }
+
+      /* Sound */
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+
+      fh->writeXmlElementEnd();
+    }
+    /* -- UNLOCK TILE EVENT -- */
+    else if(event.classification == EventClassifier::UNLOCKTILE)
+    {
+      fh->writeXmlElement("unlocktile");
+
+      /* Access data */
+      int section_id, tile_x, tile_y, view_time;
+      UnlockTileMode mode;
+      UnlockView mode_view;
+      EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
+                                    mode_view, view_time);
+
+      /* X, Y, Section ID */
+      fh->writeXmlData("x", tile_x);
+      fh->writeXmlData("y", tile_y);
+      if(section_id >= 0)
+        fh->writeXmlData("sectionid", section_id);
+
+      /* Mode */
+      bool enter, exit;
+      EventSet::dataEnumTileEvent(mode, enter, exit);
+      if(enter && exit)
+      {
+        fh->writeXmlData("eventall", enter);
+      }
+      /* Parse individually */
+      else
+      {
+        if(enter)
+          fh->writeXmlData("evententer", enter);
+        if(exit)
+          fh->writeXmlData("eventexit", exit);
+      }
+
+      /* View */
+      bool view, scroll;
+      EventSet::dataEnumView(mode_view, view, scroll);
+      if(view)
+      {
+        fh->writeXmlData("view", view);
+        if(scroll)
+          fh->writeXmlData("viewscroll", scroll);
+        if(view_time != EventSet::kVIEW_TIME)
+          fh->writeXmlData("viewtime", view_time);
+      }
+
+      /* Sound */
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+
+      fh->writeXmlElementEnd();
+    }
 
     if(!no_preface)
       fh->writeXmlElementEnd();
@@ -940,9 +1350,6 @@ void EditorEvent::setEvent(Event event)
   this->event = EventSet::copyEvent(event);
   if(event.classification == EventClassifier::STARTCONVO)
     conversation = this->event.convo;
-  //this->event = event;
-  //if(event.classification == EventClassifier::STARTCONVO)
-  //  conversation = event.convo;
 }
 
 /*
@@ -1107,6 +1514,90 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
   {
     setEventBlank();
     event = EventSet::createEventTeleport(thing_id, x, y, section_id, sound_id);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the event in the class to the unlock IO event, using the
+ *              IO ID, mode, state reference, event mode, view mode, and view
+ *              time.
+ *
+ * Inputs: int io_id - the IO reference ID
+ *         UnlockIOMode mode - the lock mode to address in the IO
+ *         int state_num - if state mode, the state connected num. -1 if all
+ *         UnlockIOEvents events - the events to address within the state
+ *         UnlockView view_mode - how th unlock point is viewed
+ *         int view_time - how long to view the point
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
+                   UnlockIOEvent events, UnlockView view_mode, int view_time,
+                   int sound_id)
+{
+  if(io_id >= 0 && view_time >= 0)
+  {
+    if(state_num < 0)
+      state_num = EventSet::kUNSET_ID;
+    setEventBlank();
+    event = EventSet::createEventUnlockIO(io_id, mode, state_num, events,
+                                          view_mode, view_time, sound_id);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the event in the class to the unlock thing event, using the
+ *              thing ID, view mode, and view time.
+ *
+ * Inputs: int thing_id - the thing reference ID
+ *         UnlockView view_mode - how th unlock point is viewed
+ *         int view_time - how long to view the point
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventUnlockThing(int thing_id, UnlockView view_mode,
+                                      int view_time, int sound_id)
+{
+  if(thing_id >= 0 && view_time >= 0)
+  {
+    setEventBlank();
+    event = EventSet::createEventUnlockThing(thing_id, view_mode, view_time,
+                                             sound_id);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the event in the class to the unlock tile event, using the
+ *              tile section ID, tile X, tile Y, tile mode, view mode, and view
+ *              time.
+ *
+ * Inputs: int section_id - the section tile reference
+ *         uint16_t tile_x - the tile x reference
+ *         uint16_t tile_y - the tile y reference
+ *         UnlockTileMode - the event modes to unlock in tile
+ *         UnlockView view_mode - how th unlock point is viewed
+ *         int view_time - how long to view the point
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x,
+                                     uint16_t tile_y, UnlockTileMode mode,
+                                     UnlockView view_mode, int view_time,
+                                     int sound_id)
+{
+  if(view_time >= 0)
+  {
+    if(section_id < 0)
+      section_id = EventSet::kUNSET_ID;
+    setEventBlank();
+    event = EventSet::createEventUnlockTile(section_id, tile_x, tile_y, mode,
+                                            view_mode, view_time, sound_id);
     return true;
   }
   return false;

@@ -104,6 +104,25 @@ public:
   /* Returns a text list summary of the event */
   QString getTextSummary(QString prefix = "Event: ");
 
+  /* Unlock IO data */
+  UnlockIOEvent getUnlockIOEventMode();
+  int getUnlockIOID();
+  UnlockIOMode getUnlockIOMode();
+  int getUnlockIOState();
+
+  /* Unlock Thing data */
+  int getUnlockThingID();
+
+  /* Unlock Tile data */
+  UnlockTileMode getUnlockTileMode();
+  int getUnlockTileSection();
+  int getUnlockTileX();
+  int getUnlockTileY();
+
+  /* General unlock data - shared */
+  UnlockView getUnlockViewMode();
+  int getUnlockViewTime();
+
   /* Insert conversations at index control points. Fails if invalid point */
   QString insertConversationAfter(QString index, Conversation convo,
                                   bool option_node = false);
@@ -154,6 +173,28 @@ public:
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
                         int y = 0, int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to the unlock IO */
+  bool setEventUnlockIO(int io_id = 0, // TODO: Implement (and 2 below)
+                     UnlockIOMode mode = UnlockIOMode::NONE, int state_num = -1,
+                     UnlockIOEvent events = UnlockIOEvent::NONE,
+                     UnlockView view_mode = UnlockView::NONE,
+                     int view_time = EventSet::kVIEW_TIME,
+                        int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to the unlock thing */
+  bool setEventUnlockThing(int thing_id = 0,
+                     UnlockView view_mode = UnlockView::NONE,
+                     int view_time = EventSet::kVIEW_TIME,
+                     int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to the unlock tile */
+  bool setEventUnlockTile(int section_id = EventSet::kUNSET_ID,
+                     uint16_t tile_x = 0, uint16_t tile_y = 0,
+                     UnlockTileMode mode = UnlockTileMode::NONE,
+                     UnlockView view_mode = UnlockView::NONE,
+                     int view_time = EventSet::kVIEW_TIME,
+                     int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the sound ID, for the event */
   bool setSoundID(int id);

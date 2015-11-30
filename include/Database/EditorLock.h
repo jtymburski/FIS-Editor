@@ -66,7 +66,7 @@ public:
 
   /* Saves the lock data */
   void save(FileHandler* fh, bool game_only = false, QString preface = "lock",
-            bool no_preface = false);
+            bool no_preface = false, bool skip_empty = true);
 
   /* Sets the locked struct */
   void setLock(Locked lock);

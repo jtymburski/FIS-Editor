@@ -194,58 +194,74 @@ void EditorLock::load(XmlData data, int index)
  *         bool game_only - true if the data should include game only relevant
  *         QString preface - the wrapper text element. default to "lock"
  *         bool no_preface - no XML wrapper included if true. Default false
+ *         bool skip_empty - true to skip the empty state and save nothing
  * Output: none
  */
 void EditorLock::save(FileHandler* fh, bool game_only, QString preface,
-                      bool no_preface)
+                      bool no_preface, bool skip_empty)
 {
   (void)game_only;
 
   if(fh != nullptr && lock.state != LockedState::NONE)
   {
-    if(!no_preface)
-      fh->writeXmlElement(preface.toStdString());
-
-    /* -- HAVE ITEM LOCK -- */
-    if(lock.state == LockedState::ITEM)
+    /* If the lock has valid data */
+    if(lock.state != LockedState::NONE)
     {
-      Locked lock_struct = EventSet::createLockHaveItem();
-      EditorLock default_lock(lock_struct);
+      if(!no_preface)
+        fh->writeXmlElement(preface.toStdString());
 
-      fh->writeXmlElement("item");
-
-      /* Data */
-      fh->writeXmlData("id", getHaveItemID());
-      if(getHaveItemCount() != default_lock.getHaveItemCount())
-        fh->writeXmlData("count", getHaveItemCount());
-      if(getHaveItemConsume() != default_lock.getHaveItemConsume())
-        fh->writeXmlData("consume", getHaveItemConsume());
-      if(isPermanent() != default_lock.isPermanent())
-        fh->writeXmlData("permanent", isPermanent());
-
-      fh->writeXmlElementEnd();
-    }
-    else if(lock.state == LockedState::TRIGGER)
-    {
-      Locked lock_struct = EventSet::createLockTriggered();
-      EditorLock default_lock(lock_struct);
-
-      /* Depending on if any data is needed for trigger, depends how it saves */
-      if(isPermanent() != default_lock.isPermanent())
+      /* -- HAVE ITEM LOCK -- */
+      if(lock.state == LockedState::ITEM)
       {
-        fh->writeXmlElement("trigger");
-        fh->writeXmlData("permanent", isPermanent());
+        Locked lock_struct = EventSet::createLockHaveItem();
+        EditorLock default_lock(lock_struct);
+
+        fh->writeXmlElement("item");
+
+        /* Data */
+        fh->writeXmlData("id", getHaveItemID());
+        if(getHaveItemCount() != default_lock.getHaveItemCount())
+          fh->writeXmlData("count", getHaveItemCount());
+        if(getHaveItemConsume() != default_lock.getHaveItemConsume())
+          fh->writeXmlData("consume", getHaveItemConsume());
+        if(isPermanent() != default_lock.isPermanent())
+          fh->writeXmlData("permanent", isPermanent());
+
         fh->writeXmlElementEnd();
       }
-      else
+      else if(lock.state == LockedState::TRIGGER)
       {
-        int none = 0;
-        fh->writeXmlData("trigger", none);
-      }
-    }
+        Locked lock_struct = EventSet::createLockTriggered();
+        EditorLock default_lock(lock_struct);
 
-    if(!no_preface)
-      fh->writeXmlElementEnd();
+        /* Parse how the save is handled depending on data */
+        if(isPermanent() != default_lock.isPermanent())
+        {
+          fh->writeXmlElement("trigger");
+          fh->writeXmlData("permanent", isPermanent());
+          fh->writeXmlElementEnd();
+        }
+        else
+        {
+          int none = 0;
+          fh->writeXmlData("trigger", none);
+        }
+      }
+
+      if(!no_preface)
+        fh->writeXmlElementEnd();
+    }
+    /* If instructed to not skip empty, print none option - used for instance */
+    else if(!skip_empty)
+    {
+      int zero = 0;
+
+      if(!no_preface)
+        fh->writeXmlElement(preface.toStdString());
+      fh->writeXmlData("none", zero);
+      if(!no_preface)
+        fh->writeXmlElementEnd();
+    }
   }
 }
 

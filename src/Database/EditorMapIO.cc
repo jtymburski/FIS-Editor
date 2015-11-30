@@ -33,6 +33,10 @@ EditorMapIO::EditorMapIO(int id, QString name, QString description)
 
   /* Set the initial frames in the thing */
   setMatrix(state->matrix);
+
+  /* Set the lock */
+  lock.setLockBlank();
+  lock_base = true;
 }
 
 /*
@@ -94,6 +98,10 @@ void EditorMapIO::copySelf(const EditorMapIO &source)
 
   /* Copy Inactive time */
   setInactiveTime(source.getInactiveTime());
+
+  /* Copy the lock */
+  setLock(source.lock);
+  lock_base = source.lock_base;
 }
 
 /*
@@ -163,6 +171,9 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     {
       fh->writeXmlData("inactive", getInactiveTime());
     }
+
+    /* Lock */
+    lock.save(fh, game_only);
   }
   /* Next item data: Is not base (an instance) */
   else
@@ -208,6 +219,10 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     }
     if(generated)
       fh->writeXmlElementEnd();
+
+    /* Lock instance */
+    if(!lock_base)
+      lock.save(fh, game_only, "lock", false, false);
   }
 }
 
@@ -417,6 +432,20 @@ int EditorMapIO::getInactiveTime() const
 }
 
 /*
+ * Description: Returns the lock data reference of the IO
+ *
+ * Inputs: none
+ * Output: EditorLock* - the lock reference. Never null
+ */
+EditorLock* EditorMapIO::getLock()
+{
+  EditorMapIO* base_io = getBaseIO();
+  if(base_io != nullptr && lock_base)
+    return base_io->getLock();
+  return &lock;
+}
+
+/*
  * Description: Returns the IO state at the given index in the stack. Returns
  *              NULL if the index is out of range.
  *
@@ -573,6 +602,18 @@ bool EditorMapIO::isAllNull(int x, int y) const
 }
 
 /*
+ * Description: Returns if the lock returned by getLock() is the event from
+ *              the base class. Only valid if getBaseThing() is not null.
+ *
+ * Inputs: none
+ * Output: bool - true if the lock is the base lock
+ */
+bool EditorMapIO::isBaseLock() const
+{
+  return (getBaseIO() != nullptr) && (lock_base);
+}
+
+/*
  * Description: Loads the IO data from the XML struct and offset index.
  *
  * Inputs: XmlData data - the XML data tree struct
@@ -587,6 +628,11 @@ void EditorMapIO::load(XmlData data, int index)
   if(element == "inactive")
   {
     setInactiveTime(data.getDataInteger());
+  }
+  else if(element == "lock")
+  {
+    lock.load(data, index + 1);
+    lock_base = false;
   }
   else if(element == "rendermatrix")
   {
@@ -727,6 +773,7 @@ void EditorMapIO::setBase(EditorMapIO* base_io)
   if(base_io != NULL)
   {
     thing = base_io;
+    lock_base = true;
 
     /* Update the states to be of similar length to base */
     unsetStates();
@@ -825,6 +872,17 @@ bool EditorMapIO::setEventWalkover(int index, EditorEventSet set)
 void EditorMapIO::setInactiveTime(int time)
 {
   io.setInactiveTime(time);
+}
+
+/*
+ * Description: Sets the restriction lock for the IO which restricts interaction
+ *
+ * Inputs: EditorLock lock - the new lock to use within the IO
+ * Output: none
+ */
+void EditorMapIO::setLock(EditorLock lock)
+{
+  this->lock = lock;
 }
 
 /*
@@ -945,6 +1003,20 @@ bool EditorMapIO::setUseBaseExit(int index, bool use_base)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Instructs the class to use the base lock, if there is a base
+ *              reference class being used. If set true, the lock is returned
+ *              from the base class. Otherwise, this class holds the relevant
+ *              lock.
+ *
+ * Inputs: bool use_base - true to use the lock from the base class
+ * Output: none
+ */
+void EditorMapIO::setUseBaseLock(bool use_base)
+{
+  lock_base = use_base;
 }
 
 /*

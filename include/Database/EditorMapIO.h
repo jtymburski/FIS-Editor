@@ -57,6 +57,10 @@ private:
   /* Set of states */
   QVector<EditorState*> states;
 
+  /* The io lock */
+  EditorLock lock;
+  bool lock_base;
+
   /* -------------------------- Constants ------------------------- */
   //const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
 
@@ -101,6 +105,9 @@ public:
   /* Returns the inactive time before returning down the state path (ms) */
   int getInactiveTime() const;
 
+  /* Returns the lock data of the IO */
+  EditorLock* getLock();
+
   /* Returns the state or states stored within the class */
   EditorState* getState(int index, bool force_instance = false);
   QString getStateName(int index);
@@ -112,6 +119,9 @@ public:
 
   /* Returns if the tile sprites in all matrixes at that x, y are null */
   virtual bool isAllNull(int x, int y) const;
+
+  /* Returns if the IO is using the base lock */
+  bool isBaseLock() const;
 
   /* Loads the io data */
   virtual void load(XmlData data, int index);
@@ -130,16 +140,20 @@ public:
 
   /* Sets the inactive time before the state returns down the state path (ms) */
   void setInactiveTime(int time);
-  
+
+  /* Sets the lock of the IO */
+  void setLock(EditorLock lock);
+
   /* Sets the state at the index (will replace existing) */
   bool setState(int index, EditorState* state, bool data_only = false);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
 
-  /* Sets the class to use the base event, if relevant */
+  /* Sets the class to use the base event/lock, if relevant */
   bool setUseBaseEnter(int index, bool use_base);
   bool setUseBaseExit(int index, bool use_base);
+  void setUseBaseLock(bool use_base);
   bool setUseBaseUse(int index, bool use_base);
   bool setUseBaseWalkover(int index, bool use_base);
 

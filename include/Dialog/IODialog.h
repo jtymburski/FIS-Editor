@@ -64,8 +64,9 @@ private:
   EditorMapIO* io_original;
   EditorMapIO* io_working;
   
-  /* The frame image */
+  /* The labels for displaying data */
   QLabel* lbl_frame_img;
+  QLabel* lbl_lock_data;
 
   /* The line edit for io data */
   QLineEdit* line_name;
@@ -77,8 +78,15 @@ private:
   QVector<QString> list_submaps;
   QVector<QString> list_things;
 
+  /* Lock view and control */
+  EditorLock* lock_ctrl;
+  LockView* lock_view;
+
   /* Matrix view and control */
   MatrixView* matrix_view;
+
+  /* Pop-ups within the dialog */
+  QDialog* pop_lock;
 
   /* Spin Boxes */
   QSpinBox* spin_inactive;
@@ -98,6 +106,9 @@ private:
 private:
   /* Creates the layout - only called on initial construction */
   void createLayout(bool instance = false);
+
+  /* Edit event set trigger */
+  void editEventSet(EditorEventSet* set, QString window_title = "");
 
   /* Updates the objects with the io data */
   void updateData();
@@ -134,6 +145,9 @@ public slots:
   void buttonEventUse();
   void buttonEventWalkover();
   void buttonFrameEdit();
+  void buttonLockCancel();
+  void buttonLockEdit();
+  void buttonLockOk();
   void buttonOk();
   void buttonStateAdd();
   void buttonStateOverview();
@@ -151,9 +165,6 @@ public slots:
 
   /* Check inactive time changed */
   void checkInactive(int state);
-
-  /* Edit event set trigger */
-  void editEventSet(EditorEventSet* set, QString window_title = "");
 
   /* Select tile trigger */
   void selectTile();
