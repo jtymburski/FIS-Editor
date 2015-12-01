@@ -8,10 +8,13 @@
 #ifndef EVENTVIEW_H
 #define EVENTVIEW_H
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QHeaderView>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
@@ -86,6 +89,34 @@ private:
   /* Teleport event - view text boxes for map location and thing */
   QLineEdit* tele_map;
   QComboBox* tele_thing;
+
+  /* Unlock thing control widgets */
+  QComboBox* unth_name;
+  QCheckBox* unth_view_enable;
+  QCheckBox* unth_view_scroll;
+  QSpinBox* unth_view_time;
+
+  /* Unlock tile control widgets */
+  QGroupBox* unti_event;
+  QCheckBox* unti_event_enter;
+  QCheckBox* unti_event_exit;
+  QLineEdit* unti_location;
+  QCheckBox* unti_view_enable;
+  QCheckBox* unti_view_scroll;
+  QSpinBox* unti_view_time;
+
+  /* Unlock IO control widgets */
+  QGroupBox* unio_event;
+  QCheckBox* unio_event_enter;
+  QCheckBox* unio_event_exit;
+  QCheckBox* unio_event_use;
+  QCheckBox* unio_event_walk;
+  QCheckBox* unio_mode_lock;
+  QCheckBox* unio_mode_states;
+  QComboBox* unio_state;
+  QCheckBox* unio_view_enable;
+  QCheckBox* unio_view_scroll;
+  QSpinBox* unio_view_time;
 
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;

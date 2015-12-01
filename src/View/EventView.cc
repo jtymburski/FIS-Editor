@@ -103,11 +103,13 @@ void EventView::createLayout(bool conversation_enabled)
   connect(item_count, SIGNAL(valueChanged(int)),
           this, SLOT(giveCountChanged(int)));
   QGridLayout* layout_give = new QGridLayout(widget_give);
-  layout_give->addWidget(lbl_give_item, 0, 0);
-  layout_give->addWidget(item_name, 0, 1, 1, 2);
-  layout_give->addWidget(lbl_give_count, 1, 0);
-  layout_give->addWidget(item_count, 1, 1);
+  layout_give->setRowStretch(0, 1);
+  layout_give->addWidget(lbl_give_item, 1, 0);
+  layout_give->addWidget(item_name, 1, 1, 1, 2);
+  layout_give->addWidget(lbl_give_count, 2, 0);
+  layout_give->addWidget(item_count, 2, 1);
   layout_give->setColumnStretch(2, 1);
+  layout_give->setRowStretch(3, 1);
 
   /* Widget for notification control */
   QWidget* widget_notification = new QWidget(this);
@@ -116,7 +118,7 @@ void EventView::createLayout(bool conversation_enabled)
   connect(notification_edit, SIGNAL(textChanged()),
           this, SLOT(notificationTextChanged()));
   QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
-  layout_notification->addWidget(notification_edit, 0, Qt::AlignCenter);
+  layout_notification->addWidget(notification_edit);
 
   /* Widget for battle execution control */
   QWidget* widget_battle = new QWidget(this);
@@ -156,11 +158,13 @@ void EventView::createLayout(bool conversation_enabled)
   btn_tele_map->setMaximumSize(30, 30);
   connect(btn_tele_map, SIGNAL(clicked()), this, SLOT(teleportMapPressed()));
   QGridLayout* layout_tele = new QGridLayout(widget_teleport);
-  layout_tele->addWidget(lbl_tele_map, 0, 0);
-  layout_tele->addWidget(tele_map, 0, 1);
-  layout_tele->addWidget(btn_tele_map, 0, 2);
-  layout_tele->addWidget(lbl_tele_thing, 1, 0);
-  layout_tele->addWidget(tele_thing, 1, 1);
+  layout_tele->setRowStretch(0, 1);
+  layout_tele->addWidget(lbl_tele_map, 1, 0);
+  layout_tele->addWidget(tele_map, 1, 1);
+  layout_tele->addWidget(btn_tele_map, 1, 2);
+  layout_tele->addWidget(lbl_tele_thing, 2, 0);
+  layout_tele->addWidget(tele_thing, 2, 1);
+  layout_tele->setRowStretch(3, 1);
 
   /* Widget for sound control */
   QWidget* widget_sound = new QWidget(this);
@@ -182,29 +186,137 @@ void EventView::createLayout(bool conversation_enabled)
   connect(take_count, SIGNAL(valueChanged(int)),
           this, SLOT(takeCountChanged(int)));
   QGridLayout* layout_take = new QGridLayout(widget_take);
-  layout_take->addWidget(lbl_take_item, 0, 0);
-  layout_take->addWidget(take_name, 0, 1, 1, 2);
-  layout_take->addWidget(lbl_take_count, 1, 0);
-  layout_take->addWidget(take_count, 1, 1);
+  layout_take->setRowStretch(0, 1);
+  layout_take->addWidget(lbl_take_item, 1, 0);
+  layout_take->addWidget(take_name, 1, 1, 1, 2);
+  layout_take->addWidget(lbl_take_count, 2, 0);
+  layout_take->addWidget(take_count, 2, 1);
   layout_take->setColumnStretch(2, 1);
+  layout_take->setRowStretch(3, 1);
 
   /* Widget for unlock thing control */
   QWidget* widget_unlock_thing = new QWidget(this);
-  QLabel* lbl_unlock_thing = new QLabel("TODO", this);
-  QVBoxLayout* layout_unlock_thing = new QVBoxLayout(widget_unlock_thing);
-  layout_unlock_thing->addWidget(lbl_unlock_thing, 0, Qt::AlignCenter);
+  widget_unlock_thing->setDisabled(true); // TODO: Remove when implemented
+  QLabel* lbl_unth = new QLabel("Thing:", this);
+  unth_name = new QComboBox(this);
+  /* -- */
+  QGroupBox* unth_view = new QGroupBox("View", this);
+  unth_view_enable = new QCheckBox("GoTo Unlock", unth_view);
+  unth_view_scroll = new QCheckBox("Scroll", unth_view);
+  QLabel* lbl_unth_view = new QLabel("Time at Unlock", this);
+  unth_view_time = new QSpinBox(this);
+  QGridLayout* layout_unth_view = new QGridLayout(unth_view);
+  QMargins m = layout_unth_view->contentsMargins();
+  layout_unth_view->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unth_view->addWidget(unth_view_enable, 0, 0);
+  layout_unth_view->addWidget(unth_view_scroll, 0, 1);
+  layout_unth_view->addWidget(lbl_unth_view, 1, 0);
+  layout_unth_view->addWidget(unth_view_time, 1, 1);
+  /* -- */
+  QGridLayout* layout_unth = new QGridLayout(widget_unlock_thing);
+  layout_unth->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unth->setRowStretch(0, 1);
+  layout_unth->addWidget(lbl_unth, 1, 0);
+  layout_unth->addWidget(unth_name, 1, 1, 1, 3);
+  layout_unth->addWidget(unth_view, 2, 0, 1, 4);
+  layout_unth->setRowStretch(3, 1);
 
   /* Widget for unlock tile control */
   QWidget* widget_unlock_tile = new QWidget(this);
-  QLabel* lbl_unlock_tile = new QLabel("TODO", this);
-  QVBoxLayout* layout_unlock_tile = new QVBoxLayout(widget_unlock_tile);
-  layout_unlock_tile->addWidget(lbl_unlock_tile, 0, Qt::AlignCenter);
+  widget_unlock_tile->setDisabled(true); // TODO: Remove when implemented
+  QLabel* lbl_unti = new QLabel("Tile:", this);
+  unti_location = new QLineEdit("", this);
+  unti_location->setDisabled(true);
+  QPalette pal2 = unti_location->palette();
+  pal2.setColor(QPalette::Disabled, QPalette::Text,
+                pal2.color(QPalette::Active, QPalette::Text));
+  unti_location->setPalette(pal2);
+  QPushButton* btn_unti_map = new QPushButton(this);
+  btn_unti_map->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_unti_map->setIconSize(QSize(24,24));
+  btn_unti_map->setMaximumSize(30, 30);
+  /* -- */
+  unti_event = new QGroupBox("Events", this);
+  unti_event_enter = new QCheckBox("Enter", unti_event);
+  unti_event_exit = new QCheckBox("Exit", unti_event);
+  QGridLayout* layout_unti_event = new QGridLayout(unti_event);
+  layout_unti_event->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unti_event->addWidget(unti_event_enter, 0, 0);
+  layout_unti_event->addWidget(unti_event_exit, 0, 1);
+  /* -- */
+  QGroupBox* unti_view = new QGroupBox("View", this);
+  unti_view_enable = new QCheckBox("GoTo Unlock", unti_view);
+  unti_view_scroll = new QCheckBox("Scroll", unti_view);
+  QLabel* lbl_unti_view = new QLabel("Time at Unlock", this);
+  unti_view_time = new QSpinBox(this);
+  QGridLayout* layout_unti_view = new QGridLayout(unti_view);
+  layout_unti_view->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unti_view->addWidget(unti_view_enable, 0, 0);
+  layout_unti_view->addWidget(unti_view_scroll, 0, 1);
+  layout_unti_view->addWidget(lbl_unti_view, 1, 0);
+  layout_unti_view->addWidget(unti_view_time, 1, 1);
+  /* -- */
+  QGridLayout* layout_unti = new QGridLayout(widget_unlock_tile);
+  layout_unti->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unti->setRowStretch(0, 1);
+  layout_unti->addWidget(lbl_unti, 1, 0);
+  layout_unti->addWidget(unti_location, 1, 1, 1, 2);
+  layout_unti->addWidget(btn_unti_map, 1, 3);
+  layout_unti->addWidget(unti_event, 2, 0, 1, 4);
+  layout_unti->addWidget(unti_view, 3, 0, 1, 4);
+  layout_unti->setRowStretch(4, 1);
+  layout_unti->setColumnStretch(1, 1);
 
   /* Widget for unlock io control */
   QWidget* widget_unlock_io = new QWidget(this);
-  QLabel* lbl_unlock_io = new QLabel("TODO", this);
-  QVBoxLayout* layout_unlock_io = new QVBoxLayout(widget_unlock_io);
-  layout_unlock_io->addWidget(lbl_unlock_io, 0, Qt::AlignCenter);
+  widget_unlock_io->setDisabled(true); // TODO: Remove when implemented
+  QLabel* lbl_unio = new QLabel("IO:", this);
+  QComboBox* unio_name = new QComboBox(this);
+  /* -- */
+  QGroupBox* unio_mode = new QGroupBox("Mode", this);
+  unio_mode_lock = new QCheckBox("Main Lock", unio_mode);
+  unio_mode_states = new QCheckBox("States", unio_mode);
+  QHBoxLayout* layout_unio_mode = new QHBoxLayout(unio_mode);
+  layout_unio_mode->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unio_mode->addWidget(unio_mode_lock);
+  layout_unio_mode->addWidget(unio_mode_states);
+  /* -- */
+  QLabel* lbl_unio_state = new QLabel("State:", this);
+  unio_state = new QComboBox(this);
+  /* -- */
+  unio_event = new QGroupBox("Events", this);
+  unio_event_enter = new QCheckBox("Enter", unio_event);
+  unio_event_exit = new QCheckBox("Exit", unio_event);
+  unio_event_use = new QCheckBox("Use", unio_event);
+  unio_event_walk = new QCheckBox("Walkover", unio_event);
+  QGridLayout* layout_unio_event = new QGridLayout(unio_event);
+  layout_unio_event->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unio_event->addWidget(unio_event_enter, 0, 0);
+  layout_unio_event->addWidget(unio_event_exit, 0, 1);
+  layout_unio_event->addWidget(unio_event_use, 1, 0);
+  layout_unio_event->addWidget(unio_event_walk, 1, 1);
+  /* -- */
+  QGroupBox* unio_view = new QGroupBox("View", this);
+  unio_view_enable = new QCheckBox("GoTo Unlock", unio_view);
+  unio_view_scroll = new QCheckBox("Scroll", unio_view);
+  QLabel* lbl_unio_view = new QLabel("Time at Unlock", this);
+  unio_view_time = new QSpinBox(this);
+  QGridLayout* layout_unio_view = new QGridLayout(unio_view);
+  layout_unio_view->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unio_view->addWidget(unio_view_enable, 0, 0);
+  layout_unio_view->addWidget(unio_view_scroll, 0, 1);
+  layout_unio_view->addWidget(lbl_unio_view, 1, 0);
+  layout_unio_view->addWidget(unio_view_time, 1, 1);
+  /* -- */
+  QGridLayout* layout_unio = new QGridLayout(widget_unlock_io);
+  layout_unio->setContentsMargins(m.left(), 0, m.right(), 0);
+  layout_unio->addWidget(lbl_unio, 0, 0);
+  layout_unio->addWidget(unio_name, 0, 1, 1, 3);
+  layout_unio->addWidget(unio_mode, 1, 0, 1, 4);
+  layout_unio->addWidget(lbl_unio_state, 2, 0);
+  layout_unio->addWidget(unio_state, 2, 1, 1, 3);
+  layout_unio->addWidget(unio_event, 3, 0, 1, 4);
+  layout_unio->addWidget(unio_view, 4, 0, 1, 4);
 
   /* Widget for conversation control */
   QWidget* widget_convo;
@@ -213,7 +325,7 @@ void EventView::createLayout(bool conversation_enabled)
     widget_convo = new QWidget(this);
     convo_tree = new QTreeWidget(this);
     convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-    convo_tree->setMinimumWidth(320);
+    //convo_tree->setMinimumWidth(320);
     convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     convo_tree->header()->hide();
     connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
@@ -225,7 +337,7 @@ void EventView::createLayout(bool conversation_enabled)
     connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
             this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
     QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
-    layout_convo->addWidget(convo_tree, 0, Qt::AlignCenter);
+    layout_convo->addWidget(convo_tree);
 
     /* Right click menu control */
     rightclick_menu = new QMenu("Convo Edit", this);

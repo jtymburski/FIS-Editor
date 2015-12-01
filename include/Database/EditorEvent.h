@@ -175,12 +175,12 @@ public:
                         int y = 0, int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to the unlock IO */
-  bool setEventUnlockIO(int io_id = 0, // TODO: Implement (and 2 below)
+  bool setEventUnlockIO(int io_id = 0,
                      UnlockIOMode mode = UnlockIOMode::NONE, int state_num = -1,
                      UnlockIOEvent events = UnlockIOEvent::NONE,
                      UnlockView view_mode = UnlockView::NONE,
                      int view_time = EventSet::kVIEW_TIME,
-                        int sound_id = EventSet::kUNSET_ID);
+                     int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to the unlock thing */
   bool setEventUnlockThing(int thing_id = 0,

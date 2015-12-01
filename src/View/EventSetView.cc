@@ -79,8 +79,8 @@ void EventSetView::createLayout()
   QPalette palette;
   palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
   setPalette(palette);
-  setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H - 50);
-  setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H - 50);
+  setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_SET_VIEW_H);
+  setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_SET_VIEW_H);
 }
 
 /*
