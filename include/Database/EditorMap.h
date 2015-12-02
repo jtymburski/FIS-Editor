@@ -60,6 +60,13 @@ public:
   /* Destructor function */
   virtual ~EditorMap();
 
+  /*------------------- Constants -----------------------*/
+  //const static int kBASE_ID_IOS; /* The instant base ID for MapIOs */
+  //const static int kBASE_ID_ITEMS; /* The instant base ID for items */
+  //const static int kBASE_ID_PERSON; /* The instant base ID for persons */
+  //const static int kBASE_ID_NPC; /* The instant base ID for npcs */
+  //const static int kBASE_ID_THING; /* The base thing ID */
+
 private:
   /* Active references in the map - used when displaying a map */
   HoverInfo active_info;
@@ -91,11 +98,6 @@ private:
   bool visible_path;
 
   /*------------------- Constants -----------------------*/
-  const static int kBASE_ID_IOS; /* The instant base ID for MapIOs */
-  const static int kBASE_ID_ITEMS; /* The instant base ID for items */
-  const static int kBASE_ID_PERSON; /* The instant base ID for persons */
-  const static int kBASE_ID_NPC; /* The instant base ID for npcs */
-  const static int kBASE_ID_THING; /* The base thing ID */
   const static int kUNSET_ID; /* The unset ID */
 
 /*============================================================================

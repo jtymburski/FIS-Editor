@@ -8,11 +8,11 @@
 #include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
-const int EditorMap::kBASE_ID_IOS = 30000;
-const int EditorMap::kBASE_ID_ITEMS = 40000;
-const int EditorMap::kBASE_ID_PERSON = 0;
-const int EditorMap::kBASE_ID_NPC = 10000;
-const int EditorMap::kBASE_ID_THING = 20000;
+//const int EditorMap::kBASE_ID_IOS = 30000;
+//const int EditorMap::kBASE_ID_ITEMS = 40000;
+//const int EditorMap::kBASE_ID_PERSON = 0;
+//const int EditorMap::kBASE_ID_NPC = 10000;
+//const int EditorMap::kBASE_ID_THING = 20000;
 const int EditorMap::kUNSET_ID = -1;
 
 /*============================================================================
@@ -2857,7 +2857,7 @@ int EditorMap::getNextIOID(bool from_sub)
     qSort(id_list);
 
     /* Find the next available ID */
-    id = kBASE_ID_IOS;
+    id = EditorEnumDb::kBASE_ID_IOS;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
       if(id_list[i] != (id + i))
@@ -2916,7 +2916,7 @@ int EditorMap::getNextItemID(bool from_sub)
     qSort(id_list);
 
     /* Find the next available ID */
-    id = kBASE_ID_ITEMS;
+    id = EditorEnumDb::kBASE_ID_ITEMS;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
       if(id_list[i] != (id + i))
@@ -2972,7 +2972,7 @@ int EditorMap::getNextMapID()
 int EditorMap::getNextNPCID(bool from_sub)
 {
   bool found = false;
-  int id = kBASE_ID_NPC;
+  int id = EditorEnumDb::kBASE_ID_NPC;
 
   /* If not from sub map, check base for base ID */
   if(!from_sub)
@@ -3061,7 +3061,7 @@ int EditorMap::getNextPersonID(bool from_sub)
     qSort(id_list);
 
     /* Find the next available ID */
-    id = kBASE_ID_PERSON;
+    id = EditorEnumDb::kBASE_ID_PERSON;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
       if(id_list[i] != (id + i))
@@ -3148,7 +3148,7 @@ int EditorMap::getNextThingID(bool from_sub)
     qSort(id_list);
 
     /* Find the next available ID */
-    id = kBASE_ID_THING;
+    id = EditorEnumDb::kBASE_ID_THING;
     for(int i = 0; !found && (i < id_list.size()); i++)
     {
       if(id_list[i] != (id + i))

@@ -15,6 +15,11 @@ class EditorEnumDb
 public:
   /* ---- Constants ---- */
 
+  const static int kBASE_ID_IOS = 30000; /* The instant base ID for MapIOs */
+  const static int kBASE_ID_ITEMS = 40000; /* The instant base ID for items */
+  const static int kBASE_ID_PERSON = 0; /* The instant base ID for persons */
+  const static int kBASE_ID_NPC = 10000; /* The instant base ID for npcs */
+  const static int kBASE_ID_THING = 20000; /* The base thing ID */
   const static int kEVENT_SET_VIEW_H = 186; /* Height of event set view */
   const static int kEVENT_VIEW_H = 360;//236; /* Height of event view widget */
   const static int kEVENT_VIEW_W = 352; /* Width of event view widget */

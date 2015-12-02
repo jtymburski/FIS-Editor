@@ -66,11 +66,13 @@ private:
   QComboBox* item_name;
 
   /* The list of objects used in possible events */
+  QVector<QString> list_ios;
   QVector<QString> list_items;
   QVector<QString> list_maps;
   QList<QString> list_sounds;
   QVector<QString> list_submaps;
   QVector<QString> list_things;
+  QVector<QString> list_things_no_io;
 
   /* Switch maps event - map name view box */
   QComboBox* map_name;
@@ -97,7 +99,6 @@ private:
   QSpinBox* unth_view_time;
 
   /* Unlock tile control widgets */
-  QGroupBox* unti_event;
   QCheckBox* unti_event_enter;
   QCheckBox* unti_event_exit;
   QLineEdit* unti_location;
@@ -113,6 +114,7 @@ private:
   QCheckBox* unio_event_walk;
   QCheckBox* unio_mode_lock;
   QCheckBox* unio_mode_states;
+  QComboBox* unio_name;
   QComboBox* unio_state;
   QCheckBox* unio_view_enable;
   QCheckBox* unio_view_scroll;
@@ -197,6 +199,33 @@ public slots:
   /* The teleport event button presses */
   void teleportMapPressed();
   void teleportThingChanged(int index);
+
+  /* The unlock IO triggers */
+  void unlockIOChanged(const QString & text);
+  void unlockIOModeLock(int state);
+  void unlockIOModeStates(int state);
+  void unlockIOStateChanged(int index);
+  void unlockIOStateEnter(int state);
+  void unlockIOStateExit(int state);
+  void unlockIOStateUse(int state);
+  void unlockIOStateWalk(int state);
+  void unlockIOView(int state);
+  void unlockIOViewScroll(int state);
+  void unlockIOViewTime(int time);
+
+  /* The unlock thing triggers */
+  void unlockThingChanged(const QString & text);
+  void unlockThingView(int state);
+  void unlockThingViewScroll(int state);
+  void unlockThingViewTime(int time);
+
+  /* The unlock tile triggers */
+  void unlockTileEnter(int state);
+  void unlockTileExit(int state);
+  void unlockTilePressed();
+  void unlockTileView(int state);
+  void unlockTileViewScroll(int state);
+  void unlockTileViewTime(int time);
 
   /* Update the layout trigger */
   void updateConversation();

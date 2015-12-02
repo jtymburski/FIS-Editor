@@ -196,15 +196,26 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock thing control */
   QWidget* widget_unlock_thing = new QWidget(this);
-  widget_unlock_thing->setDisabled(true); // TODO: Remove when implemented
+  //widget_unlock_thing->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unth = new QLabel("Thing:", this);
   unth_name = new QComboBox(this);
+  connect(unth_name, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(unlockThingChanged(QString)));
   /* -- */
   QGroupBox* unth_view = new QGroupBox("View", this);
   unth_view_enable = new QCheckBox("GoTo Unlock", unth_view);
+  connect(unth_view_enable, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockThingView(int)));
   unth_view_scroll = new QCheckBox("Scroll", unth_view);
+  unth_view_scroll->setDisabled(true);
+  connect(unth_view_scroll, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockThingViewScroll(int)));
   QLabel* lbl_unth_view = new QLabel("Time at Unlock", this);
   unth_view_time = new QSpinBox(this);
+  unth_view_time->setMaximum(1000000);
+  unth_view_time->setDisabled(true);
+  connect(unth_view_time, SIGNAL(valueChanged(int)),
+          this, SLOT(unlockThingViewTime(int)));
   QGridLayout* layout_unth_view = new QGridLayout(unth_view);
   QMargins m = layout_unth_view->contentsMargins();
   layout_unth_view->setContentsMargins(m.left(), 0, m.right(), 0);
@@ -223,7 +234,7 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock tile control */
   QWidget* widget_unlock_tile = new QWidget(this);
-  widget_unlock_tile->setDisabled(true); // TODO: Remove when implemented
+  //widget_unlock_tile->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unti = new QLabel("Tile:", this);
   unti_location = new QLineEdit("", this);
   unti_location->setDisabled(true);
@@ -232,13 +243,18 @@ void EventView::createLayout(bool conversation_enabled)
                 pal2.color(QPalette::Active, QPalette::Text));
   unti_location->setPalette(pal2);
   QPushButton* btn_unti_map = new QPushButton(this);
+  connect(btn_unti_map, SIGNAL(clicked()), this, SLOT(unlockTilePressed()));
   btn_unti_map->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_unti_map->setIconSize(QSize(24,24));
   btn_unti_map->setMaximumSize(30, 30);
   /* -- */
-  unti_event = new QGroupBox("Events", this);
+  QGroupBox* unti_event = new QGroupBox("Events", this);
   unti_event_enter = new QCheckBox("Enter", unti_event);
+  connect(unti_event_enter, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockTileEnter(int)));
   unti_event_exit = new QCheckBox("Exit", unti_event);
+  connect(unti_event_exit, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockTileExit(int)));
   QGridLayout* layout_unti_event = new QGridLayout(unti_event);
   layout_unti_event->setContentsMargins(m.left(), 0, m.right(), 0);
   layout_unti_event->addWidget(unti_event_enter, 0, 0);
@@ -246,9 +262,18 @@ void EventView::createLayout(bool conversation_enabled)
   /* -- */
   QGroupBox* unti_view = new QGroupBox("View", this);
   unti_view_enable = new QCheckBox("GoTo Unlock", unti_view);
+  connect(unti_view_enable, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockTileView(int)));
   unti_view_scroll = new QCheckBox("Scroll", unti_view);
+  unti_view_scroll->setDisabled(true);
+  connect(unth_view_scroll, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockTileViewScroll(int)));
   QLabel* lbl_unti_view = new QLabel("Time at Unlock", this);
   unti_view_time = new QSpinBox(this);
+  unti_view_time->setMaximum(1000000);
+  unti_view_time->setDisabled(true);
+  connect(unti_view_time, SIGNAL(valueChanged(int)),
+          this, SLOT(unlockTileViewTime(int)));
   QGridLayout* layout_unti_view = new QGridLayout(unti_view);
   layout_unti_view->setContentsMargins(m.left(), 0, m.right(), 0);
   layout_unti_view->addWidget(unti_view_enable, 0, 0);
@@ -271,11 +296,17 @@ void EventView::createLayout(bool conversation_enabled)
   QWidget* widget_unlock_io = new QWidget(this);
   widget_unlock_io->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unio = new QLabel("IO:", this);
-  QComboBox* unio_name = new QComboBox(this);
+  unio_name = new QComboBox(this);
+  connect(unio_name, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(unlockIOChanged(QString)));
   /* -- */
   QGroupBox* unio_mode = new QGroupBox("Mode", this);
   unio_mode_lock = new QCheckBox("Main Lock", unio_mode);
+  connect(unio_mode_lock, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOModeLock(int)));
   unio_mode_states = new QCheckBox("States", unio_mode);
+  connect(unio_mode_states, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOModeStates(int)));
   QHBoxLayout* layout_unio_mode = new QHBoxLayout(unio_mode);
   layout_unio_mode->setContentsMargins(m.left(), 0, m.right(), 0);
   layout_unio_mode->addWidget(unio_mode_lock);
@@ -283,12 +314,24 @@ void EventView::createLayout(bool conversation_enabled)
   /* -- */
   QLabel* lbl_unio_state = new QLabel("State:", this);
   unio_state = new QComboBox(this);
+  unio_state->setDisabled(true);
+  connect(unio_state, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(unlockIOStateChanged(int)));
   /* -- */
   unio_event = new QGroupBox("Events", this);
+  unio_event->setDisabled(true);
   unio_event_enter = new QCheckBox("Enter", unio_event);
+  connect(unio_event_enter, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOStateEnter(int)));
   unio_event_exit = new QCheckBox("Exit", unio_event);
+  connect(unio_event_exit, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOStateExit(int)));
   unio_event_use = new QCheckBox("Use", unio_event);
+  connect(unio_event_use, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOStateUse(int)));
   unio_event_walk = new QCheckBox("Walkover", unio_event);
+  connect(unio_event_walk, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOStateWalk(int)));
   QGridLayout* layout_unio_event = new QGridLayout(unio_event);
   layout_unio_event->setContentsMargins(m.left(), 0, m.right(), 0);
   layout_unio_event->addWidget(unio_event_enter, 0, 0);
@@ -298,9 +341,18 @@ void EventView::createLayout(bool conversation_enabled)
   /* -- */
   QGroupBox* unio_view = new QGroupBox("View", this);
   unio_view_enable = new QCheckBox("GoTo Unlock", unio_view);
+  connect(unio_view_enable, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOView(int)));
   unio_view_scroll = new QCheckBox("Scroll", unio_view);
+  unio_view_scroll->setDisabled(true);
+  connect(unio_view_scroll, SIGNAL(stateChanged(int)),
+          this, SLOT(unlockIOViewScroll(int)));
   QLabel* lbl_unio_view = new QLabel("Time at Unlock", this);
   unio_view_time = new QSpinBox(this);
+  unio_view_time->setMaximum(1000000);
+  unio_view_time->setDisabled(true);
+  connect(unio_view_time, SIGNAL(valueChanged(int)),
+          this, SLOT(unlockIOViewTime(int)));
   QGridLayout* layout_unio_view = new QGridLayout(unio_view);
   layout_unio_view->setContentsMargins(m.left(), 0, m.right(), 0);
   layout_unio_view->addWidget(unio_view_enable, 0, 0);
@@ -530,7 +582,11 @@ void EventView::setLayoutData()
 
       /* If index < 0 (not found), set to first */
       if(index < 0)
+      {
         item_name->setCurrentIndex(0);
+        if(list_items.size() > 0)
+          giveItemChanged(0);
+      }
     }
     else if(event->getEventType() == EventClassifier::NOTIFICATION)
     {
@@ -555,7 +611,11 @@ void EventView::setLayoutData()
 
       /* If index < 0 (not found), set to first */
       if(index < 0)
+      {
         map_name->setCurrentIndex(0);
+        if(list_maps.size() > 0)
+          changeMapChanged(0);
+      }
     }
     else if(event->getEventType() == EventClassifier::STARTCONVO)
     {
@@ -595,7 +655,11 @@ void EventView::setLayoutData()
 
       /* If index < 0 (not found), set to first */
       if(index < 0)
+      {
         take_name->setCurrentIndex(0);
+        if(list_items.size() > 0)
+          takeItemChanged(0);
+      }
     }
     else if(event->getEventType() == EventClassifier::TELEPORTTHING)
     {
@@ -632,7 +696,76 @@ void EventView::setLayoutData()
 
       /* If index < 0 (not found), set to first */
       if(index < 0)
+      {
         tele_thing->setCurrentIndex(0);
+        if(list_things.size() > 0)
+          teleportThingChanged(0);
+      }
+    }
+    else if(event->getEventType() == EventClassifier::UNLOCKTHING)
+    {
+      /* Attempt to find thing in combo box */
+      int index = -1;
+      for(int i = 0; (index < 0) && (i < list_things_no_io.size()); i++)
+      {
+        QStringList set = list_things_no_io[i].split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getUnlockThingID())
+            index = i;
+      }
+      if(index >= 0)
+      {
+        unth_name->setCurrentIndex(index);
+      }
+      else
+      {
+        unth_name->setCurrentIndex(0);
+        if(list_things_no_io.size() > 0)
+          unlockThingChanged(list_things_no_io.front());
+      }
+
+      /* View data */
+      bool view, scroll;
+      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
+      unth_view_enable->setChecked(view);
+      unth_view_scroll->setChecked(scroll);
+      unth_view_time->setValue(event->getUnlockViewTime());
+    }
+    else if(event->getEventType() == EventClassifier::UNLOCKTILE)
+    {
+      /* Attempt to find the map name */
+      QString name = "";
+      for(int i = 0; i < list_submaps.size(); i++)
+      {
+        QStringList set = list_submaps[i].split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getUnlockTileSection())
+            name = set.last();
+      }
+
+      /* Load the name and information */
+      unti_location->setText(QString::number(event->getUnlockTileSection()) +
+                             ": " + name + "  | X: " +
+                             QString::number(event->getUnlockTileX()) +
+                             " | Y: " +
+                             QString::number(event->getUnlockTileY()));
+
+      /* Event data */
+      bool enter, exit;
+      EventSet::dataEnumTileEvent(event->getUnlockTileMode(), enter, exit);
+      unti_event_enter->setChecked(enter);
+      unti_event_exit->setChecked(exit);
+
+      /* View data */
+      bool view, scroll;
+      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
+      unti_view_enable->setChecked(view);
+      unti_view_scroll->setChecked(scroll);
+      unti_view_time->setValue(event->getUnlockViewTime());
+    }
+    else if(event->getEventType() == EventClassifier::UNLOCKIO)
+    {
+      // TODO
     }
 
     /* Data for sounds */
@@ -658,7 +791,8 @@ void EventView::setLayoutData()
       else
       {
         combo_sound->setCurrentIndex(0);
-        event->setSoundID(-1);
+        if(list_sounds.size() > 0)
+          event->setSoundID(-1);
       }
     }
 
@@ -1204,6 +1338,218 @@ void EventView::teleportThingChanged(int index)
   }
 }
 
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOChanged(const QString & text)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOModeLock(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOModeStates(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOStateChanged(int index)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOStateEnter(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOStateExit(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOStateUse(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOStateWalk(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOView(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOViewScroll(int state)
+{
+  // TODO
+}
+
+/* The unlock IO triggers */
+// TODO: Comment
+void EventView::unlockIOViewTime(int time)
+{
+  // TODO
+}
+
+/* The unlock thing triggers */
+// TODO: Comment
+void EventView::unlockThingChanged(const QString & text)
+{
+  QStringList list = text.split(":");
+  if(list.size() == 2)
+    event->setEventUnlockThing(list.front().toInt(), event->getUnlockViewMode(),
+                               event->getUnlockViewTime(), event->getSoundID());
+}
+
+/* The unlock thing triggers */
+// TODO: Comment
+void EventView::unlockThingView(int state)
+{
+  /* Save the data to the event */
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  view = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockThing(event->getUnlockThingID(), view_mode,
+                             event->getUnlockViewTime(), event->getSoundID());
+
+  /* Proceed to enable/disable widget */
+  unth_view_scroll->setEnabled(view);
+  unth_view_time->setEnabled(view);
+}
+
+/* The unlock thing triggers */
+// TODO: Comment
+void EventView::unlockThingViewScroll(int state)
+{
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  scroll = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockThing(event->getUnlockThingID(), view_mode,
+                             event->getUnlockViewTime(), event->getSoundID());
+}
+
+/* The unlock thing triggers */
+// TODO: Comment
+void EventView::unlockThingViewTime(int time)
+{
+  if(time >= 0)
+    event->setEventUnlockThing(event->getUnlockThingID(),
+                               event->getUnlockViewMode(),
+                               time, event->getSoundID());
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTileEnter(int state)
+{
+  bool enter, exit;
+  UnlockTileMode mode = event->getUnlockTileMode();
+  EventSet::dataEnumTileEvent(mode, enter, exit);
+  enter = (state == Qt::Checked);
+  mode = EventSet::createEnumTileEvent(enter, exit);
+  event->setEventUnlockTile(event->getUnlockTileSection(),
+                            event->getUnlockTileX(), event->getUnlockTileY(),
+                            mode, event->getUnlockViewMode(),
+                            event->getUnlockViewTime(), event->getSoundID());
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTileExit(int state)
+{
+  bool enter, exit;
+  UnlockTileMode mode = event->getUnlockTileMode();
+  EventSet::dataEnumTileEvent(mode, enter, exit);
+  exit = (state == Qt::Checked);
+  mode = EventSet::createEnumTileEvent(enter, exit);
+  event->setEventUnlockTile(event->getUnlockTileSection(),
+                            event->getUnlockTileX(), event->getUnlockTileY(),
+                            mode, event->getUnlockViewMode(),
+                            event->getUnlockViewTime(), event->getSoundID());
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTilePressed()
+{
+  emit selectTile();
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTileView(int state)
+{
+  /* Save the data to the event */
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  view = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockTile(event->getUnlockTileSection(),
+                            event->getUnlockTileX(), event->getUnlockTileY(),
+                            event->getUnlockTileMode(), view_mode,
+                            event->getUnlockViewTime(), event->getSoundID());
+
+  /* Proceed to enable/disable widget */
+  unti_view_scroll->setEnabled(view);
+  unti_view_time->setEnabled(view);
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTileViewScroll(int state)
+{
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  scroll = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockTile(event->getUnlockTileSection(),
+                            event->getUnlockTileX(), event->getUnlockTileY(),
+                            event->getUnlockTileMode(), view_mode,
+                            event->getUnlockViewTime(), event->getSoundID());
+}
+
+/* The unlock tile triggers */
+// TODO: Comment
+void EventView::unlockTileViewTime(int time)
+{
+  if(time >= 0)
+    event->setEventUnlockTile(event->getUnlockTileSection(),
+                              event->getUnlockTileX(), event->getUnlockTileY(),
+                              event->getUnlockTileMode(),
+                              event->getUnlockViewMode(),
+                              time, event->getSoundID());
+}
+
 /*
  * Description: Updates the conversation after an edit. Attempts to maintain
  *              the same index after execution.
@@ -1396,13 +1742,47 @@ void EventView::setListSubmaps(QVector<QString> sub_maps)
  */
 void EventView::setListThings(QVector<QString> things)
 {
+  /* Data parsing - main thing list */
   list_things = things;
+
+  /* Data parsing - thing with no IO/IO split */
+  list_ios.clear();
+  list_things_no_io.clear();
+  for(int i = 0; i < things.size(); i++)
+  {
+    QStringList set = things[i].split(":");
+
+    if(set.size() == 2 && set.front().toInt() >= EditorEnumDb::kBASE_ID_IOS)
+      list_ios.push_back(things[i]);
+    else
+      list_things_no_io.push_back(things[i]);
+  }
+
+  /* Block singals */
   tele_thing->blockSignals(true);
+  unth_name->blockSignals(true);
+  unio_name->blockSignals(true);
+
+  /* Load in to teleport thing combo box */
   tele_thing->clear();
   for(int i = 0; i < list_things.size(); i++)
     tele_thing->addItem(list_things[i]);
+
+  /* Load in to unlock thing combo box */
+  unth_name->clear();
+  for(int i = 0; i < list_things_no_io.size(); i++)
+    unth_name->addItem(list_things_no_io[i]);
+
+  /* Load in to unlock IO combo box */
+  unio_name->clear();
+  for(int i = 0; i < list_ios.size(); i++)
+    unio_name->addItem(list_ios[i]);
+
+  /* Update data and unblock signals */
   setLayoutData();
   tele_thing->blockSignals(false);
+  unth_name->blockSignals(false);
+  unio_name->blockSignals(false);
 }
 
 /*
@@ -1429,10 +1809,15 @@ void EventView::updateEvent()
  */
 void EventView::updateSelectedTile(int id, int x, int y)
 {
-  if(event != NULL)
+  if(event != nullptr)
   {
-    event->setEventTeleport(event->getTeleportThingID(), id, x, y,
-                            event->getSoundID());
+    if(event->getEventType() == EventClassifier::TELEPORTTHING)
+      event->setEventTeleport(event->getTeleportThingID(), id, x, y,
+                              event->getSoundID());
+    else if(event->getEventType() == EventClassifier::UNLOCKTILE)
+      event->setEventUnlockTile(id, x, y, event->getUnlockTileMode(),
+                                event->getUnlockViewMode(),
+                                event->getUnlockViewTime(), event->getSoundID());
     setLayoutData();
   }
 }
