@@ -765,6 +765,17 @@ void EventView::setLayoutData()
     }
     else if(event->getEventType() == EventClassifier::UNLOCKIO)
     {
+      /* Update state to combo */
+//      int index = unio_name->currentIndex();
+//      unio_state->clear();
+//      if(index >= 0 && index < list_ios.size())
+//      {
+//        QStringList split_set = list_ios[index].second.split(',');
+//        unio_state->addItem("-1: All States");
+//        for(int i = 0; i < split_set.size(); i++)
+//          unio_state->addItem(split_set[i] + ": State");
+//      }
+
       // TODO
     }
 
@@ -1342,7 +1353,32 @@ void EventView::teleportThingChanged(int index)
 // TODO: Comment
 void EventView::unlockIOChanged(const QString & text)
 {
-  // TODO
+  // TODO: REF
+  //event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+  //                        event->getUnlockIOState(),
+  //                        event->getUnlockIOEventMode(),
+  //                        event->getUnlockViewMode(),
+  //                        event->getUnlockViewTime(), event->getSoundID());
+
+  QStringList list = text.split(":");
+  if(list.size() == 2)
+  {
+    event->setEventUnlockIO(list.front().toInt(), event->getUnlockIOMode(),
+                            -1, event->getUnlockIOEventMode(),
+                            event->getUnlockViewMode(),
+                            event->getUnlockViewTime(), event->getSoundID());
+
+    /* Update state to combo */
+    int index = unio_name->currentIndex();
+    unio_state->clear();
+    if(index >= 0 && index < list_ios.size())
+    {
+      QStringList split_set = list_ios[index].second.split(',');
+      unio_state->addItem("-1: All States");
+      for(int i = 0; i < split_set.size(); i++)
+        unio_state->addItem(split_set[i] + ": State");
+    }
+  }
 }
 
 /* The unlock IO triggers */
@@ -1583,6 +1619,13 @@ EditorEvent* EventView::getEvent()
   return event;
 }
 
+/* Returns the list of objects, used for event creation */
+// TODO: Comment
+QVector<QPair<QString,QString>> EventView::getListIOs()
+{
+  return list_ios;
+}
+
 /*
  * Description: Returns the list of items, used for event creation.
  *
@@ -1655,6 +1698,26 @@ void EventView::setEvent(EditorEvent* event)
 
   /* After-math processing */
   setLayoutData();
+}
+
+/* Sets the list of objects, used for event creation */
+// TODO: Comment
+void EventView::setListIOs(QVector<QPair<QString,QString>> ios)
+{
+  /* Data parsing - main IO list */
+  list_ios = ios;
+
+  /* Block singals */
+  unio_name->blockSignals(true);
+
+  /* Load in to unlock IO combo box */
+  unio_name->clear();
+  for(int i = 0; i < list_ios.size(); i++)
+    unio_name->addItem(list_ios[i].first);
+
+  /* Update data and unblock signals */
+  setLayoutData();
+  unio_name->blockSignals(false);
 }
 
 /*
@@ -1746,22 +1809,23 @@ void EventView::setListThings(QVector<QString> things)
   list_things = things;
 
   /* Data parsing - thing with no IO/IO split */
-  list_ios.clear();
+  //list_ios.clear();
   list_things_no_io.clear();
   for(int i = 0; i < things.size(); i++)
   {
     QStringList set = things[i].split(":");
 
-    if(set.size() == 2 && set.front().toInt() >= EditorEnumDb::kBASE_ID_IOS)
-      list_ios.push_back(things[i]);
-    else
+    //if(set.size() == 2 && set.front().toInt() >= EditorEnumDb::kBASE_ID_IOS)
+    //  list_ios.push_back(things[i]);
+    //else
+    if(set.size() != 2 || set.front().toInt() < EditorEnumDb::kBASE_ID_IOS)
       list_things_no_io.push_back(things[i]);
   }
 
   /* Block singals */
   tele_thing->blockSignals(true);
   unth_name->blockSignals(true);
-  unio_name->blockSignals(true);
+  //unio_name->blockSignals(true);
 
   /* Load in to teleport thing combo box */
   tele_thing->clear();
@@ -1774,15 +1838,15 @@ void EventView::setListThings(QVector<QString> things)
     unth_name->addItem(list_things_no_io[i]);
 
   /* Load in to unlock IO combo box */
-  unio_name->clear();
-  for(int i = 0; i < list_ios.size(); i++)
-    unio_name->addItem(list_ios[i]);
+  //unio_name->clear();
+  //for(int i = 0; i < list_ios.size(); i++)
+  //  unio_name->addItem(list_ios[i]);
 
   /* Update data and unblock signals */
   setLayoutData();
   tele_thing->blockSignals(false);
   unth_name->blockSignals(false);
-  unio_name->blockSignals(false);
+  //unio_name->blockSignals(false);
 }
 
 /*

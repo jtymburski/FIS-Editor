@@ -695,6 +695,16 @@ void MapPersonView::setEditorMap(EditorMap* map)
   updateList();
 }
 
+/* Updates list in person dialog, needed for event control */
+// TODO: Comment
+void MapPersonView::updateListIOs(QVector<QPair<QString,QString>> ios)
+{
+  if(person_dialog != nullptr)
+    person_dialog->setListIOs(ios);
+  if(instance_dialog != nullptr)
+    instance_dialog->setListIOs(ios);
+}
+
 /*
  * Description: Sets the list of items, used for event creation
  *

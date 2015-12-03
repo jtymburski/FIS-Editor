@@ -692,6 +692,16 @@ void MapIOView::setEditorMap(EditorMap* map)
   updateList();
 }
 
+/* Updates list in IO dialog, needed for event control */
+// TODO: Comment
+void MapIOView::updateListIOs(QVector<QPair<QString,QString>> ios)
+{
+  if(io_dialog != nullptr)
+    io_dialog->setListIOs(ios);
+  //if(instance_dialog != NULL)
+  //  instance_dialog->getEventView()->setListItems(list);
+}
+
 /*
  * Description: Sets the list of items, used for event creation
  *

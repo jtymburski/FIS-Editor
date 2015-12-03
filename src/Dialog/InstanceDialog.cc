@@ -787,6 +787,13 @@ EventDialog* InstanceDialog::getEventDialog()
   return event_dialog;
 }
 
+/* Returns the list of objects, used for dialog and event creation */
+// TODO: Comment
+QVector<QPair<QString,QString>> InstanceDialog::getListIOs()
+{
+  return list_ios;
+}
+
 /*
  * Description: Returns the list of items, used for event creation.
  *
@@ -851,6 +858,17 @@ QVector<QString> InstanceDialog::getListSubmaps()
 QVector<QString> InstanceDialog::getListThings()
 {
   return list_things;
+}
+
+/* Sets the list of parties, used for dialog and event creation */
+// TODO: Comment
+void InstanceDialog::setListIOs(QVector<QPair<QString,QString>> ios)
+{
+  list_ios = ios;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListIOs(ios);
 }
 
 /*

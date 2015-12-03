@@ -2485,6 +2485,46 @@ QVector<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
   return stack;
 }
 
+/* Returns stored IO information */
+// TODO: Comment
+QVector<QPair<QString,QString>> EditorMap::getIOListSet(int sub_map,
+                                                        bool all_submaps,
+                                                        bool shortened)
+{
+  QVector<QPair<QString,QString>> set;
+  //set.push_back(QPair<QString,QString>("-- INTERACTIVE OBJECTS --", ""));
+
+  /* If sub map ref is less than 0, get from base set */
+  if(sub_map < 0)
+  {
+    /* Go through all ios and add them to the list */
+    for(int i = 0; i < base_ios.size(); i++)
+      set.push_back(QPair<QString,QString>(base_ios[i]->getNameList(),
+                                           base_ios[i]->getStateList()));
+  }
+  /* Otherwise, get from sub map */
+  else if(sub_map < sub_maps.size())
+  {
+    /* Determine the range */
+    int start = sub_map;
+    int end = sub_map;
+    if(all_submaps)
+    {
+      start = 0;
+      end = sub_maps.size() - 1;
+    }
+
+    /* Go through the maps and add them to the list */
+    for(int i = start; i <= end; i++)
+      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+        set.push_back(QPair<QString,QString>(
+                        sub_maps[i]->ios[j]->getNameList(shortened),
+                        sub_maps[i]->ios[j]->getStateList()));
+  }
+
+  return set;
+}
+
 /*
  * Description: Returns the list of all IOs in the editor map
  *

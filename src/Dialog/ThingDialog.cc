@@ -344,6 +344,7 @@ void ThingDialog::editEventSet(EditorEventSet* set)
   if(set != nullptr)
   {
     event_dialog = new EventDialog(set, this);
+    event_dialog->setListIOs(list_ios);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);
     event_dialog->setListSounds(list_sounds);
@@ -422,6 +423,13 @@ EventDialog* ThingDialog::getEventDialog()
   return event_dialog;
 }
 
+/* Returns the list of objects, used for dialog and event creation */
+// TODO: Comment
+QVector<QPair<QString,QString>> ThingDialog::getListIOs()
+{
+  return list_ios;
+}
+
 /*
  * Description: Returns the list of items, used for event creation.
  *
@@ -475,6 +483,17 @@ QVector<QString> ThingDialog::getListSubmaps()
 QVector<QString> ThingDialog::getListThings()
 {
   return list_things;
+}
+
+/* Sets the list of objects, used for dialog and event creation */
+// TODO: Comment
+void ThingDialog::setListIOs(QVector<QPair<QString,QString>> ios)
+{
+  list_ios = ios;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListIOs(ios);
 }
 
 /*

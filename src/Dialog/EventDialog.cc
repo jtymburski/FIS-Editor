@@ -638,6 +638,13 @@ void EventDialog::updateLock()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns the list of objects, used for event creation */
+// TODO: Comment
+QVector<QPair<QString,QString>> EventDialog::getListIOs()
+{
+  return view_event->getListIOs();
+}
+
 /*
  * Description: Returns the list of items, used for event creation.
  *
@@ -738,6 +745,13 @@ EventView* EventDialog::getViewEvent()
 LockView* EventDialog::getViewLock()
 {
   return view_lock;
+}
+
+/* Sets the list of objects, used for event creation */
+// TODO: Comment
+void EventDialog::setListIOs(QVector<QPair<QString,QString>> ios)
+{
+  view_event->setListIOs(ios);
 }
 
 /*

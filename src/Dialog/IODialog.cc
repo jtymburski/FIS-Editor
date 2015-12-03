@@ -283,6 +283,7 @@ void IODialog::editEventSet(EditorEventSet* set, QString window_title)
   if(set != nullptr)
   {
     event_dialog = new EventDialog(set, this, window_title);
+    event_dialog->setListIOs(list_ios);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);
     event_dialog->setListSounds(list_sounds);
@@ -970,6 +971,13 @@ EventDialog* IODialog::getEventDialog()
   return event_dialog;
 }
 
+/* Returns the list of objects, used for dialog and event creation */
+// TODO: Comment
+QVector<QPair<QString,QString>> IODialog::getListIOs()
+{
+  return list_ios;
+}
+
 /*
  * Description: Returns the list of items, used for event creation.
  *
@@ -1024,6 +1032,16 @@ QVector<QString> IODialog::getListSubmaps()
 QVector<QString> IODialog::getListThings()
 {
   return list_things;
+}
+
+/* Sets the list of objects, used for dialog and event creation */
+void IODialog::setListIOs(QVector<QPair<QString,QString>> ios)
+{
+  list_ios = ios;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListIOs(ios);
 }
 
 /*

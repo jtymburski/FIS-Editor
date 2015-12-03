@@ -69,7 +69,12 @@ void MapView::fillEventWithData()
     thing_list << editing_map->getThingList(0, true, true);
     thing_list << editing_map->getIOList(0, true, true);
 
+    /* Compile io list */
+    QVector<QPair<QString,QString>> io_set =
+                                       editing_map->getIOListSet(0, true, true);
+
     /* Load data in */
+    event_dialog->setListIOs(io_set);
     event_dialog->setListSubmaps(editing_map->getMapList());
     event_dialog->setListThings(thing_list);
 

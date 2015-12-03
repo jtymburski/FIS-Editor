@@ -66,7 +66,8 @@ private:
   QComboBox* item_name;
 
   /* The list of objects used in possible events */
-  QVector<QString> list_ios;
+  //QVector<QString> list_ios;
+  QVector<QPair<QString,QString>> list_ios;
   QVector<QString> list_items;
   QVector<QString> list_maps;
   QList<QString> list_sounds;
@@ -238,6 +239,7 @@ public:
   EditorEvent* getEvent();
 
   /* Returns the list of objects, used for event creation */
+  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
   QList<QString> getListSounds();
@@ -248,6 +250,7 @@ public:
   void setEvent(EditorEvent* event);
 
   /* Sets the list of objects, used for event creation */
+  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
   void setListSounds(QList<QString> sounds);

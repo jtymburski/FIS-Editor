@@ -239,6 +239,9 @@ public:
   int getIOIndex(int id, int sub_map = -1);
   QVector<QString> getIOList(int sub_map = -1, bool all_submaps = false,
                              bool shortened = false);
+  QVector<QPair<QString,QString>> getIOListSet(int sub_map = -1,
+                                               bool all_submaps = false,
+                                               bool shortened = false);
   QVector<EditorMapIO*> getIOs(int sub_map = -1);
 
   /* Return stored item information */

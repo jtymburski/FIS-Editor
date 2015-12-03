@@ -692,6 +692,16 @@ void MapThingView::setEditorMap(EditorMap* map)
   updateList();
 }
 
+/* Updates list in thing dialog, needed for event control */
+// TODO: Comment
+void MapThingView::updateListIOs(QVector<QPair<QString,QString>> ios)
+{
+  if(thing_dialog != nullptr)
+    thing_dialog->setListIOs(ios);
+  if(instance_dialog != nullptr)
+    instance_dialog->setListIOs(ios);
+}
+
 /*
  * Description: Sets the list of items, used for event creation
  *

@@ -141,6 +141,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the list of objects, used for event creation */
+  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
   QList<QString> getListSounds();
@@ -156,6 +157,7 @@ public:
   LockView* getViewLock();
 
   /* Sets the list of objects, used for event creation */
+  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
   void setListSounds(QList<QString> sounds);

@@ -110,6 +110,7 @@ public:
 
   /* Returns the state or states stored within the class */
   EditorState* getState(int index, bool force_instance = false);
+  QString getStateList(bool inc_states = true, bool inc_transition = false);
   QString getStateName(int index);
   QVector<EditorState*> getStates() const;
 

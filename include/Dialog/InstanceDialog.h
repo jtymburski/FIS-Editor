@@ -71,6 +71,7 @@ private:
   QListWidget* list_nodes;
 
   /* The list of objects used in possible events/dialog */
+  QVector<QPair<QString,QString>> list_ios;
   QVector<QString> list_items;
   QVector<QString> list_maps;
   QVector<QString> list_parties;
@@ -181,6 +182,7 @@ public:
   EventDialog* getEventDialog();
 
   /* Returns the list of objects, used for dialog and event creation */
+  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
   QVector<QString> getListParties();
@@ -189,6 +191,7 @@ public:
   QVector<QString> getListThings();
 
   /* Sets the list of parties, used for dialog and event creation */
+  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
   void setListParties(QVector<QString> parties);

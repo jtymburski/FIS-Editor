@@ -460,8 +460,12 @@ EditorState* EditorMapIO::getState(int index, bool force_instance)
 
   /* Always ensure there is sufficient states in instance if base is set */
   if(base != nullptr)
+  {
     while(states.size() < base->states.size())
       appendState(EditorEnumDb::IO_STATE);
+    while(states.size() > base->states.size())
+      unsetState(states.size() - 1);
+  }
 
   /* Check if it's a base and the frames from it should be used instead */
   if(base != nullptr && !force_instance)
@@ -476,6 +480,32 @@ EditorState* EditorMapIO::getState(int index, bool force_instance)
   }
 
   return nullptr;
+}
+
+/* Returns the state or states stored within the class */
+// TODO: Comment
+QString EditorMapIO::getStateList(bool inc_states, bool inc_transition)
+{
+  QString list = "";
+
+  /* Parse all states */
+  for(int i = 0; i < states.size(); i++)
+  {
+    if(states[i]->type == EditorEnumDb::IO_STATE && inc_states)
+    {
+      list += QString::number(i) + ",";
+    }
+    else if(states[i]->type == EditorEnumDb::IO_TRANSITION && inc_transition)
+    {
+
+    }
+  }
+
+  /* Clean-up */
+  if(list.length() > 0)
+    list.chop(1);
+
+  return list;
 }
 
 /*
