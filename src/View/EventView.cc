@@ -294,7 +294,7 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock io control */
   QWidget* widget_unlock_io = new QWidget(this);
-  widget_unlock_io->setDisabled(true); // TODO: Remove when implemented
+  //widget_unlock_io->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unio = new QLabel("IO:", this);
   unio_name = new QComboBox(this);
   connect(unio_name, SIGNAL(currentIndexChanged(QString)),
@@ -765,18 +765,58 @@ void EventView::setLayoutData()
     }
     else if(event->getEventType() == EventClassifier::UNLOCKIO)
     {
-      /* Update state to combo */
-//      int index = unio_name->currentIndex();
-//      unio_state->clear();
-//      if(index >= 0 && index < list_ios.size())
-//      {
-//        QStringList split_set = list_ios[index].second.split(',');
-//        unio_state->addItem("-1: All States");
-//        for(int i = 0; i < split_set.size(); i++)
-//          unio_state->addItem(split_set[i] + ": State");
-//      }
+      /* Initial reference data */
+      int ref_state = event->getUnlockIOState();
 
-      // TODO
+      /* Attempt to find thing in combo box */
+      int index = -1;
+      for(int i = 0; (index < 0) && (i < list_ios.size()); i++)
+      {
+        QStringList set = list_ios[i].first.split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getUnlockIOID())
+            index = i;
+      }
+      if(index >= 0)
+        unio_name->setCurrentIndex(index);
+      else
+        unth_name->setCurrentIndex(0);
+      unlockIOChanged(unio_name->currentText());
+
+      /* Main mode check boxes */
+      bool lock, events;
+      EventSet::dataEnumIOMode(event->getUnlockIOMode(), lock, events);
+      unio_mode_lock->setChecked(lock);
+      unio_mode_states->setChecked(events);
+
+      /* State info */
+      if(events)
+      {
+        /* Selected state */
+        for(int i = 0; i < unio_state->count(); i++)
+        {
+          QStringList set = unio_state->itemText(i).split(":");
+          if(set.size() == 2)
+            if(set.front().toInt() == ref_state)
+              unio_state->setCurrentIndex(i);
+        }
+
+        /* Event check boxes */
+        bool enter, exit, use, walkover;
+        EventSet::dataEnumIOEvent(event->getUnlockIOEventMode(),
+                                  enter, exit, use, walkover);
+        unio_event_enter->setChecked(enter);
+        unio_event_exit->setChecked(exit);
+        unio_event_use->setChecked(use);
+        unio_event_walk->setChecked(walkover);
+      }
+
+      /* View info */
+      bool view, scroll;
+      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
+      unio_view_enable->setChecked(view);
+      unio_view_scroll->setChecked(scroll);
+      unio_view_time->setValue(event->getUnlockViewTime());
     }
 
     /* Data for sounds */
@@ -1353,13 +1393,6 @@ void EventView::teleportThingChanged(int index)
 // TODO: Comment
 void EventView::unlockIOChanged(const QString & text)
 {
-  // TODO: REF
-  //event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
-  //                        event->getUnlockIOState(),
-  //                        event->getUnlockIOEventMode(),
-  //                        event->getUnlockViewMode(),
-  //                        event->getUnlockViewTime(), event->getSoundID());
-
   QStringList list = text.split(":");
   if(list.size() == 2)
   {
@@ -1385,70 +1418,163 @@ void EventView::unlockIOChanged(const QString & text)
 // TODO: Comment
 void EventView::unlockIOModeLock(int state)
 {
-  // TODO
+  bool lock, events;
+  UnlockIOMode mode = event->getUnlockIOMode();
+  EventSet::dataEnumIOMode(mode, lock, events);
+  lock = (state == Qt::Checked);
+  mode = EventSet::createEnumIOMode(lock, events);
+  event->setEventUnlockIO(event->getUnlockIOID(), mode,
+                          event->getUnlockIOState(),
+                          event->getUnlockIOEventMode(),
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOModeStates(int state)
 {
-  // TODO
+  bool lock, events;
+  UnlockIOMode mode = event->getUnlockIOMode();
+  EventSet::dataEnumIOMode(mode, lock, events);
+  events = (state == Qt::Checked);
+  mode = EventSet::createEnumIOMode(lock, events);
+  event->setEventUnlockIO(event->getUnlockIOID(), mode,
+                          event->getUnlockIOState(),
+                          event->getUnlockIOEventMode(),
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
+
+  /* Enable or disable state dropdown depending on current state */
+  unio_state->setEnabled(events);
+  unio_event->setEnabled(events);
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOStateChanged(int index)
 {
-  // TODO
+  int main_index = unio_name->currentIndex();
+  if(main_index >= 0 && main_index < list_ios.size())
+  {
+    int new_state = -1;
+    QStringList split_set = list_ios[main_index].second.split(',');
+    if(index > 0)
+      new_state = split_set[index - 1].toInt();
+
+    /* Set data */
+    event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                            new_state, event->getUnlockIOEventMode(),
+                            event->getUnlockViewMode(),
+                            event->getUnlockViewTime(), event->getSoundID());
+  }
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOStateEnter(int state)
 {
-  // TODO
+  bool enter, exit, use, walkover;
+  UnlockIOEvent event_mode = event->getUnlockIOEventMode();
+  EventSet::dataEnumIOEvent(event_mode, enter, exit, use, walkover);
+  enter = (state == Qt::Checked);
+  event_mode = EventSet::createEnumIOEvent(enter, exit, use, walkover);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(), event_mode,
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOStateExit(int state)
 {
-  // TODO
+  bool enter, exit, use, walkover;
+  UnlockIOEvent event_mode = event->getUnlockIOEventMode();
+  EventSet::dataEnumIOEvent(event_mode, enter, exit, use, walkover);
+  exit = (state == Qt::Checked);
+  event_mode = EventSet::createEnumIOEvent(enter, exit, use, walkover);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(), event_mode,
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOStateUse(int state)
 {
-  // TODO
+  bool enter, exit, use, walkover;
+  UnlockIOEvent event_mode = event->getUnlockIOEventMode();
+  EventSet::dataEnumIOEvent(event_mode, enter, exit, use, walkover);
+  use = (state == Qt::Checked);
+  event_mode = EventSet::createEnumIOEvent(enter, exit, use, walkover);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(), event_mode,
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOStateWalk(int state)
 {
-  // TODO
+  bool enter, exit, use, walkover;
+  UnlockIOEvent event_mode = event->getUnlockIOEventMode();
+  EventSet::dataEnumIOEvent(event_mode, enter, exit, use, walkover);
+  walkover = (state == Qt::Checked);
+  event_mode = EventSet::createEnumIOEvent(enter, exit, use, walkover);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(), event_mode,
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOView(int state)
 {
-  // TODO
+  /* Save the data to the event */
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  view = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(),
+                          event->getUnlockIOEventMode(), view_mode,
+                          event->getUnlockViewTime(), event->getSoundID());
+
+  /* Proceed to enable/disable widget */
+  unio_view_scroll->setEnabled(view);
+  unio_view_time->setEnabled(view);
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOViewScroll(int state)
 {
-  // TODO
+  bool scroll, view;
+  UnlockView view_mode = event->getUnlockViewMode();
+  EventSet::dataEnumView(view_mode, view, scroll);
+  scroll = (state == Qt::Checked);
+  view_mode = EventSet::createEnumView(view, scroll);
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          event->getUnlockIOState(),
+                          event->getUnlockIOEventMode(), view_mode,
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /* The unlock IO triggers */
 // TODO: Comment
 void EventView::unlockIOViewTime(int time)
 {
-  // TODO
+  if(time >= 0)
+    event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                            event->getUnlockIOState(),
+                            event->getUnlockIOEventMode(),
+                            event->getUnlockViewMode(),
+                            time, event->getSoundID());
 }
 
 /* The unlock thing triggers */
