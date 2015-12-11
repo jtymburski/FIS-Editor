@@ -35,7 +35,6 @@ private:
   /* Event sets */
   EditorEvent event_locked;
   QVector<EditorEvent*> events_unlocked;
-  //QVector<EditorEvent> events_unlocked;
 
   /* Locked status struct */
   EditorLock lock_data;

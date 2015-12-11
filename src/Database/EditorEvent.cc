@@ -240,8 +240,13 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
     /* Conversation Data */
     fh->writeXmlData("text", convo->text);
     fh->writeXmlData("id", convo->thing_id);
-    if(first_call && getSoundID() >= 0)
-      fh->writeXmlData("sound_id", getSoundID());
+    if(first_call)
+    {
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+    }
     if(convo->action_event.classification != EventClassifier::NOEVENT)
     {
       EditorEvent convo_event(convo->action_event);
@@ -586,7 +591,11 @@ QString EditorEvent::getTextSummary(QString prefix)
   else
     content = "None";
 
-  return (prefix + content);
+  QString suffix = "";
+  if(isOneShot())
+    suffix += " (once)";
+
+  return (prefix + content + suffix);
 }
 
 /*
@@ -1021,6 +1030,17 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
 }
 
 /*
+ * Description: Returns if the event will only trigger once when initiated.
+ *
+ * Inputs: none
+ * Output: bool - true if the event is one shot triggered
+ */
+bool EditorEvent::isOneShot()
+{
+  return event.one_shot;
+}
+
+/*
  * Description: Loads the event data from the XML struct and offset index. Uses
  *              existing functions in game EventHandler class.
  *
@@ -1060,6 +1080,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       /* Data */
       fh->writeXmlData("id", getGiveItemID());
       fh->writeXmlData("count", getGiveItemCount());
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1069,17 +1091,38 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     else if(event.classification == EventClassifier::JUSTSOUND)
     {
       if(getSoundID() >= 0)
-        fh->writeXmlData("justsound", getSoundID());
+      {
+        /* Two properties: more complex save */
+        if(isOneShot())
+        {
+          fh->writeXmlElement("justsound");
+
+          /* Data */
+          fh->writeXmlData("sound_id", getSoundID());
+          fh->writeXmlData("one_shot", isOneShot());
+
+          fh->writeXmlElementEnd();
+        }
+        /* Just the sound ID: simpler save */
+        else
+        {
+          fh->writeXmlData("justsound", getSoundID());
+        }
+      }
     }
     /* -- NOTIFICATION EVENT -- */
     else if(event.classification == EventClassifier::NOTIFICATION)
     {
-      if(getSoundID() >= 0)
+      if(getSoundID() >= 0 || isOneShot())
       {
         fh->writeXmlElement("notification");
 
+        /* Data */
         fh->writeXmlData("text", getNotification().toStdString());
-        fh->writeXmlData("sound_id", getSoundID());
+        if(isOneShot())
+          fh->writeXmlData("one_shot", isOneShot());
+        if(getSoundID() >= 0)
+          fh->writeXmlData("sound_id", getSoundID());
 
         fh->writeXmlElementEnd();
       }
@@ -1091,15 +1134,22 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     /* -- EXECUTE BATTLE EVENT -- */
     else if(event.classification == EventClassifier::RUNBATTLE)
     {
-      if(getSoundID() >= 0)
+      if(getSoundID() >= 0 || isOneShot())
       {
         fh->writeXmlElement("startbattle");
-        fh->writeXmlData("sound_id", getSoundID());
+
+        /* Data */
+        if(isOneShot())
+          fh->writeXmlData("one_shot", isOneShot());
+        if(getSoundID() >= 0)
+          fh->writeXmlData("sound_id", getSoundID());
+
         fh->writeXmlElementEnd();
       }
       else
       {
-        fh->writeXmlData("startbattle", "blank");
+        int zero = 0;
+        fh->writeXmlData("startbattle", zero);
       }
     }
     /* -- EXECUTE MAP EVENT -- */
@@ -1109,6 +1159,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
 
       /* Data */
       fh->writeXmlData("id", getStartMapID());
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1127,6 +1179,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       /* Data */
       fh->writeXmlData("id", getTakeItemID());
       fh->writeXmlData("count", getTakeItemCount());
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1144,6 +1198,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("section", getTeleportSection());
       if(getTeleportThingID() != 0)
         fh->writeXmlData("id", getTeleportThingID());
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1213,7 +1269,9 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           fh->writeXmlData("viewtime", view_time);
       }
 
-      /* Sound */
+      /* Sound and one shot */
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1244,7 +1302,9 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           fh->writeXmlData("viewtime", view_time);
       }
 
-      /* Sound */
+      /* Sound and one shot */
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1296,7 +1356,9 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           fh->writeXmlData("viewtime", view_time);
       }
 
-      /* Sound */
+      /* Sound and one shot */
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
 
@@ -1377,9 +1439,13 @@ void EditorEvent::setEventBlank(bool delete_event)
  */
 bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
 {
+  /* Existing */
+  bool one_shot = event.one_shot;
+
   /* Create the new conversation */
   setEventBlank();
   event = EventSet::createEventConversation(convo, sound_id);
+  event.one_shot = one_shot;
   event.convo->text = "First Entry.";
   conversation = event.convo;
   return true;
@@ -1399,8 +1465,13 @@ bool EditorEvent::setEventGiveItem(int id, int count, int sound_id)
 {
   if(id >= 0 && count > 0)
   {
+    /* Existing */
+    bool one_shot = event.one_shot;
+
+    /* New data */
     setEventBlank();
     event = EventSet::createEventGiveItem(id, count, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1418,9 +1489,11 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
 {
   if(!notification.isEmpty())
   {
+    bool one_shot = event.one_shot;
     setEventBlank();
     event = EventSet::createEventNotification(notification.toStdString(),
                                               sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1435,8 +1508,10 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
  */
 bool EditorEvent::setEventSound(int sound_id)
 {
+  bool one_shot = event.one_shot;
   setEventBlank();
   event = EventSet::createEventSound(sound_id);
+  event.one_shot = one_shot;
   return true;
 }
 
@@ -1450,8 +1525,10 @@ bool EditorEvent::setEventSound(int sound_id)
  */
 bool EditorEvent::setEventStartBattle(int sound_id)
 {
+  bool one_shot = event.one_shot;
   setEventBlank();
   event = EventSet::createEventStartBattle(sound_id);
+  event.one_shot = one_shot;
   return true;
 }
 
@@ -1468,8 +1545,10 @@ bool EditorEvent::setEventStartMap(int id, int sound_id)
 {
   if(id >= 0)
   {
+    bool one_shot = event.one_shot;
     setEventBlank();
     event = EventSet::createEventStartMap(id, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1489,8 +1568,10 @@ bool EditorEvent::setEventTakeItem(int id, int count, int sound_id)
 {
   if(id >= 0 && count > 0)
   {
+    bool one_shot = event.one_shot;
     setEventBlank();
     event = EventSet::createEventTakeItem(id, count, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1512,8 +1593,10 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
 {
   if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
   {
+    bool one_shot = event.one_shot;
     setEventBlank();
     event = EventSet::createEventTeleport(thing_id, x, y, section_id, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1539,11 +1622,13 @@ bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
 {
   if(io_id >= 0 && view_time >= 0)
   {
+    bool one_shot = event.one_shot;
     if(state_num < 0)
       state_num = EventSet::kUNSET_ID;
     setEventBlank();
     event = EventSet::createEventUnlockIO(io_id, mode, state_num, events,
                                           view_mode, view_time, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1564,9 +1649,11 @@ bool EditorEvent::setEventUnlockThing(int thing_id, UnlockView view_mode,
 {
   if(thing_id >= 0 && view_time >= 0)
   {
+    bool one_shot = event.one_shot;
     setEventBlank();
     event = EventSet::createEventUnlockThing(thing_id, view_mode, view_time,
                                              sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
@@ -1593,14 +1680,27 @@ bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x,
 {
   if(view_time >= 0)
   {
+    bool one_shot = event.one_shot;
     if(section_id < 0)
       section_id = EventSet::kUNSET_ID;
     setEventBlank();
     event = EventSet::createEventUnlockTile(section_id, tile_x, tile_y, mode,
                                             view_mode, view_time, sound_id);
+    event.one_shot = one_shot;
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets if the event will only trigger once.
+ *
+ * Inputs: bool one_shot - true if the event will only trigger once
+ * Output: none
+ */
+void EditorEvent::setOneShot(bool one_shot)
+{
+  event.one_shot = one_shot;
 }
 
 /*

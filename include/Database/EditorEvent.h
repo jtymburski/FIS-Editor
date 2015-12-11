@@ -129,6 +129,9 @@ public:
   QString insertConversationBefore(QString index, Conversation convo,
                                    bool option_node = false);
 
+  /* Returns if the event is a one shot trigger */
+  bool isOneShot();
+
   /* Loads the event data */
   void load(XmlData data, int index);
 
@@ -195,6 +198,9 @@ public:
                      UnlockView view_mode = UnlockView::NONE,
                      int view_time = EventSet::kVIEW_TIME,
                      int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets if the event is a one shot */
+  void setOneShot(bool one_shot);
 
   /* Sets the sound ID, for the event */
   bool setSoundID(int id);

@@ -6,7 +6,7 @@
  *              EditorEvent class.
  ******************************************************************************/
 #include "View/EventView.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -266,7 +266,7 @@ void EventView::createLayout(bool conversation_enabled)
           this, SLOT(unlockTileView(int)));
   unti_view_scroll = new QCheckBox("Scroll", unti_view);
   unti_view_scroll->setDisabled(true);
-  connect(unth_view_scroll, SIGNAL(stateChanged(int)),
+  connect(unti_view_scroll, SIGNAL(stateChanged(int)),
           this, SLOT(unlockTileViewScroll(int)));
   QLabel* lbl_unti_view = new QLabel("Time at Unlock", this);
   unti_view_time = new QSpinBox(this);
@@ -431,6 +431,13 @@ void EventView::createLayout(bool conversation_enabled)
     view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
+  /* One Shot widget */
+  check_oneshot = new QCheckBox("Only Trigger Once", this);
+  check_oneshot->setDisabled(true);
+  connect(check_oneshot, SIGNAL(stateChanged(int)),
+          this, SLOT(changedOneShot(int)));
+  layout->addWidget(check_oneshot, 0, Qt::AlignHCenter);
+
   /* Sound widget */
   QHBoxLayout* sound_layout = new QHBoxLayout();
   sound_layout->setContentsMargins(8, 0, 8, 0);
@@ -545,7 +552,7 @@ QString EventView::getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent)
  */
 void EventView::setLayoutData()
 {
-  if(event != NULL)
+  if(event != nullptr)
   {
     /* Set the selected category */
     if((int)event->getEventType() != combo_category->currentIndex())
@@ -819,6 +826,12 @@ void EventView::setLayoutData()
       unio_view_time->setValue(event->getUnlockViewTime());
     }
 
+    /* Data for one shot */
+    if(event->getEventType() != EventClassifier::NOEVENT)
+    {
+      check_oneshot->setChecked(event->isOneShot());
+    }
+
     /* Data for sounds */
     if(event->getEventType() != EventClassifier::NOEVENT &&
        list_sounds.size() > 0)
@@ -935,10 +948,11 @@ void EventView::categoryChanged(int index)
   view_stack->setCurrentIndex(index);
 
   /* If anything except no classification, enables sound widget */
+  check_oneshot->setEnabled(index != (int)EventClassifier::NOEVENT);
   combo_sound->setEnabled(index != (int)EventClassifier::NOEVENT);
 
   /* Update the event */
-  if(event != NULL)
+  if(event != nullptr)
   {
     if((int)event->getEventType() != index)
     {
@@ -998,6 +1012,18 @@ void EventView::changeMapChanged(int index)
       event->setEventStartMap(list.front().toInt(), event->getSoundID());
     }
   }
+}
+
+/*
+ * Description: Triggers when the one shot trigger check box changes state
+ *              by user interaction.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::changedOneShot(int state)
+{
+  event->setOneShot(state == Qt::Checked);
 }
 
 /*
@@ -1816,8 +1842,8 @@ QVector<QString> EventView::getListThings()
 void EventView::setEvent(EditorEvent* event)
 {
   /* If existing event isn't NULL, finish connection */
-  if(this->event != NULL)
-    this->event = NULL;
+  if(this->event != nullptr)
+    this->event = nullptr;
 
   /* Set the event */
   this->event = event;

@@ -46,6 +46,9 @@ private:
   QAction* action_delete;
   QAction* action_option;
 
+  /* The one shot selection in the view */
+  QCheckBox* check_oneshot;
+
   /* The category of the event view */
   QComboBox* combo_category;
 
@@ -166,6 +169,9 @@ public slots:
 
   /* The change map button press */
   void changeMapChanged(int index);
+
+  /* One shot choice changed */
+  void changedOneShot(int state);
 
   /* Sound reference updated */
   void changedSound(const QString & text);

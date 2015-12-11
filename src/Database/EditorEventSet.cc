@@ -222,8 +222,12 @@ EditorLock* EditorEventSet::getLockedState()
   return &lock_data;
 }
 
-/* Returns a text list summary of the event set */
-// TODO: Comment
+/*
+ * Description: Returns a text list summary of the event set for view.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - the set of strings describing the event set
+ */
 QVector<QString> EditorEventSet::getTextSummary()
 {
   QVector<QString> stack;
