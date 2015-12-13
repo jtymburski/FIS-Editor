@@ -1368,8 +1368,8 @@ void EditorAction::updateLayouts()
 
   if(action_flags_inflict->isChecked() || action_flags_relieve->isChecked())
   {
-    value_label->setDisabled(true);
-    value_edit->setDisabled(true);
+    value_label->setDisabled(false);
+    value_edit->setDisabled(false);
     variance_label->setDisabled(true);
     variance_edit->setDisabled(true);
     action_flags_base_pc->setDisabled(true);
