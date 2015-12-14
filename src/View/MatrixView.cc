@@ -115,7 +115,8 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
     button_pen_plus->setIcon(QIcon(":/images/icons/32_depth_up.png"));
     button_pen_plus->setIconSize(QSize(icon_size,icon_size));
     button_pen_plus->setMaximumSize(button_size, button_size);
-    connect(button_pen_plus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    connect(button_pen_plus, SIGNAL(toggled(bool)),
+            this, SLOT(buttonPen(bool)));
     layout->addWidget(button_pen_plus, 3, 0);
     button_pen_minus = new QPushButton(this);
     button_pen_minus->setCheckable(true);
@@ -123,7 +124,8 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
     button_pen_minus->setIcon(QIcon(":/images/icons/32_depth_down.png"));
     button_pen_minus->setIconSize(QSize(icon_size,icon_size));
     button_pen_minus->setMaximumSize(button_size, button_size);
-    connect(button_pen_minus, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    connect(button_pen_minus, SIGNAL(toggled(bool)),
+            this, SLOT(buttonPen(bool)));
     layout->addWidget(button_pen_minus, 4, 0);
     button_pen_pass = new QPushButton(this);
     button_pen_pass->setCheckable(true);
@@ -131,7 +133,8 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
     button_pen_pass->setIcon(QIcon(":/images/icons/32_passA.png"));
     button_pen_pass->setIconSize(QSize(icon_size,icon_size));
     button_pen_pass->setMaximumSize(button_size, button_size);
-    connect(button_pen_pass, SIGNAL(toggled(bool)), this, SLOT(buttonPen(bool)));
+    connect(button_pen_pass, SIGNAL(toggled(bool)),
+            this, SLOT(buttonPen(bool)));
     layout->addWidget(button_pen_pass, 5, 0);
   }
 
@@ -196,13 +199,15 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
     layout->addWidget(button_play, 11, 0);
     button_frame_prev = new QPushButton("<", this);
     button_frame_prev->setMaximumSize(button_size, button_size);
-    connect(button_frame_prev, SIGNAL(clicked()), this, SLOT(buttonFramePrev()));
+    connect(button_frame_prev, SIGNAL(clicked()),
+            this, SLOT(buttonFramePrev()));
     layout->addWidget(button_frame_prev, 11, 1);//, Qt::AlignRight);
     lbl_frame_num = new QLabel("0", this);
     layout->addWidget(lbl_frame_num, 11, 2, Qt::AlignCenter);
     button_frame_next = new QPushButton(">", this);
     button_frame_next->setMaximumSize(button_size, button_size);
-    connect(button_frame_next, SIGNAL(clicked()), this, SLOT(buttonFrameNext()));
+    connect(button_frame_next, SIGNAL(clicked()),
+            this, SLOT(buttonFrameNext()));
     layout->addWidget(button_frame_next, 11, 3);//, Qt::AlignLeft);
   }
 
@@ -781,7 +786,7 @@ void MatrixView::initMatrixPlace()
     /* If growth limited, just take single image */
     if(no_grow)
     {
-      matrix->matrixPlace(path, false, false);
+      matrix->matrixPlace(QDir::toNativeSeparators(path), false, false);
     }
     /* Otherwise, send to matrix dialog */
     else
