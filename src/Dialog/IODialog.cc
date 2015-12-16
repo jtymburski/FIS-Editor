@@ -971,8 +971,12 @@ EventDialog* IODialog::getEventDialog()
   return event_dialog;
 }
 
-/* Returns the list of objects, used for dialog and event creation */
-// TODO: Comment
+/*
+ * Description: Returns the list of IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
+ */
 QVector<QPair<QString,QString>> IODialog::getListIOs()
 {
   return list_ios;
@@ -1034,7 +1038,12 @@ QVector<QString> IODialog::getListThings()
   return list_things;
 }
 
-/* Sets the list of objects, used for dialog and event creation */
+/*
+ * Description: Sets the list of IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
+ * Output: none
+ */
 void IODialog::setListIOs(QVector<QPair<QString,QString>> ios)
 {
   list_ios = ios;

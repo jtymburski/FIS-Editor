@@ -696,8 +696,12 @@ void MapNPCView::setEditorMap(EditorMap* map)
   updateList();
 }
 
-/* Updates list in person dialog, needed for event control */
-// TODO: Comment
+/*
+ * Description: Sets the list of IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs with states pair
+ * Output: none
+ */
 void MapNPCView::updateListIOs(QVector<QPair<QString,QString>> ios)
 {
   if(npc_dialog != nullptr)

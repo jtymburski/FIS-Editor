@@ -600,7 +600,13 @@ void InstanceDialog::buttonEditNodes()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on lock dialog cancel button. Hides the dialog and
+ *              cancels all changes.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonLockCancel()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -610,7 +616,13 @@ void InstanceDialog::buttonLockCancel()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on lock edit within IO version of instance. Shows
+ *              the lock dialog with the lock information from the present IO
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonLockEdit()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -628,7 +640,13 @@ void InstanceDialog::buttonLockEdit()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on lock dialog ok button. Hides the dialog but
+ *              saves changes made to the lock to the current working IO.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonLockOk()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -659,7 +677,14 @@ void InstanceDialog::buttonOk()
   close();
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the enter event edit/view button for the given
+ *              IO state. If the state is an instance, this trigger will do
+ *              nothing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonStateEnter()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -681,7 +706,14 @@ void InstanceDialog::buttonStateEnter()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the exit event edit/view button for the given
+ *              IO state. If the state is an instance, this trigger will do
+ *              nothing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonStateExit()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -703,7 +735,14 @@ void InstanceDialog::buttonStateExit()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the use event edit/view button for the given
+ *              IO state. If the state is an instance, this trigger will do
+ *              nothing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonStateUse()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -725,7 +764,14 @@ void InstanceDialog::buttonStateUse()
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Button slot on the walkover event edit/view button for the given
+ *              IO state. If the state is an instance, this trigger will do
+ *              nothing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::buttonStateWalk()
 {
   if(thing_type == EditorEnumDb::IO)
@@ -829,7 +875,14 @@ void InstanceDialog::checkInteractionChange(int state)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the check box for the IO use base for lock
+ *              changes state. Updates if the lock uses the base IO or the
+ *              instant IO.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void InstanceDialog::checkLockBase(int state)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -857,7 +910,14 @@ void InstanceDialog::checkLockBase(int state)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the check box for the IO use base for state
+ *              enter event. Updates if the lock uses the base IO or the
+ *              instant IO to access the event.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void InstanceDialog::checkStateEnter(int state)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -869,7 +929,14 @@ void InstanceDialog::checkStateEnter(int state)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the check box for the IO use base for state
+ *              exit event. Updates if the lock uses the base IO or the
+ *              instant IO to access the event.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void InstanceDialog::checkStateExit(int state)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -881,7 +948,14 @@ void InstanceDialog::checkStateExit(int state)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the check box for the IO use base for state
+ *              use event. Updates if the lock uses the base IO or the
+ *              instant IO to access the event.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void InstanceDialog::checkStateUse(int state)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -893,7 +967,14 @@ void InstanceDialog::checkStateUse(int state)
   }
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the check box for the IO use base for state
+ *              walkover event. Updates if the lock uses the base IO or the
+ *              instant IO to access the event.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void InstanceDialog::checkStateWalk(int state)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -959,7 +1040,13 @@ void InstanceDialog::comboPartyChange(int index)
     thing_working->setGameID(-1);
 }
 
-// TODO: Comment
+/*
+ * Description: Slot triggered when the combo box for the selected state of
+ *              the IO is changed. This changes what events are viewed/editable.
+ *
+ * Inputs: int index - the new index in the combo box
+ * Output: none
+ */
 void InstanceDialog::comboStateChange(int index)
 {
   if(thing_type == EditorEnumDb::IO)
@@ -1186,8 +1273,15 @@ void InstanceDialog::editNode(QListWidgetItem*)
   }
 }
 
-/* Edit event set clicked ok finish - update event */
-// TODO: Comment
+/*
+ * Description: Button slot triggers when the edit event set ok is selected
+ *              and the event is to be updated. If IO, it just updates the
+ *              enter/exit/use/walkover event view. For other cases, updates
+ *              the event set view
+ *
+ * Inputs: none
+ * Output: none
+ */
 void InstanceDialog::eventUpdated()
 {
   /* IO event */
@@ -1258,8 +1352,12 @@ EventDialog* InstanceDialog::getEventDialog()
   return event_dialog;
 }
 
-/* Returns the list of objects, used for dialog and event creation */
-// TODO: Comment
+/*
+ * Description: Returns the list of IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
+ */
 QVector<QPair<QString,QString>> InstanceDialog::getListIOs()
 {
   return list_ios;
@@ -1331,8 +1429,12 @@ QVector<QString> InstanceDialog::getListThings()
   return list_things;
 }
 
-/* Sets the list of parties, used for dialog and event creation */
-// TODO: Comment
+/*
+ * Description: Sets the list of IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
+ * Output: none
+ */
 void InstanceDialog::setListIOs(QVector<QPair<QString,QString>> ios)
 {
   list_ios = ios;

@@ -482,8 +482,16 @@ EditorState* EditorMapIO::getState(int index, bool force_instance)
   return nullptr;
 }
 
-/* Returns the state or states stored within the class */
-// TODO: Comment
+/*
+ * Description: Returns the state(s) and/or instance(s) comma delimited list
+ *              for use. If inc_transition is true, transition numbers include
+ *              'i' at end. States include nothing except the number.
+ *              E.g. 0,1i,2,3i,4
+ *
+ * Inputs: bool inc_states - include states in list. default true
+ *         bool inc_transitino - include transition in list. default false
+ * Output: QString - comma delimited result. See description above
+ */
 QString EditorMapIO::getStateList(bool inc_states, bool inc_transition)
 {
   QString list = "";
@@ -497,7 +505,7 @@ QString EditorMapIO::getStateList(bool inc_states, bool inc_transition)
     }
     else if(states[i]->type == EditorEnumDb::IO_TRANSITION && inc_transition)
     {
-
+      list += QString::number(i) + "i,";
     }
   }
 

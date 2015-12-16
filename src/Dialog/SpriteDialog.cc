@@ -6,7 +6,7 @@
  *              related to it. Allows manipulation of the data.
  ******************************************************************************/
 #include "Dialog/SpriteDialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS

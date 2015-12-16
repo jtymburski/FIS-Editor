@@ -198,7 +198,6 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock thing control */
   QWidget* widget_unlock_thing = new QWidget(this);
-  //widget_unlock_thing->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unth = new QLabel("Thing:", this);
   unth_name = new QComboBox(this);
   connect(unth_name, SIGNAL(currentIndexChanged(QString)),
@@ -236,7 +235,6 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock tile control */
   QWidget* widget_unlock_tile = new QWidget(this);
-  //widget_unlock_tile->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unti = new QLabel("Tile:", this);
   unti_location = new QLineEdit("", this);
   unti_location->setDisabled(true);
@@ -296,7 +294,6 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for unlock io control */
   QWidget* widget_unlock_io = new QWidget(this);
-  //widget_unlock_io->setDisabled(true); // TODO: Remove when implemented
   QLabel* lbl_unio = new QLabel("IO:", this);
   unio_name = new QComboBox(this);
   connect(unio_name, SIGNAL(currentIndexChanged(QString)),
@@ -1420,8 +1417,13 @@ void EventView::teleportThingChanged(int index)
   }
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO dropdown selection change. Updates
+ *              the targetted IO.
+ *
+ * Inputs: QString text - the selected text in the dialog to parse
+ * Output: none
+ */
 void EventView::unlockIOChanged(const QString & text)
 {
   QStringList list = text.split(":");
@@ -1445,8 +1447,13 @@ void EventView::unlockIOChanged(const QString & text)
   }
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO lock mode check box change. Updates
+ *              if the main lock is targetted within the IO for the unlock.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOModeLock(int state)
 {
   bool lock, events;
@@ -1461,8 +1468,13 @@ void EventView::unlockIOModeLock(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO state check box change. Updates if
+ *              the states are targetted within the IO for the unlock.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOModeStates(int state)
 {
   bool lock, events;
@@ -1481,8 +1493,14 @@ void EventView::unlockIOModeStates(int state)
   unio_event->setEnabled(events);
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the selected target state drop down
+ *              selection is changed. Updates the target state (all or specific
+ *              one).
+ *
+ * Inputs: int index - the index within the state dropdown
+ * Output: none
+ */
 void EventView::unlockIOStateChanged(int index)
 {
   int main_index = unio_name->currentIndex();
@@ -1501,8 +1519,13 @@ void EventView::unlockIOStateChanged(int index)
   }
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO state enter event check box change.
+ *              Updates if the enter event of the targetted state is unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOStateEnter(int state)
 {
   bool enter, exit, use, walkover;
@@ -1516,8 +1539,13 @@ void EventView::unlockIOStateEnter(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO state exit event check box change.
+ *              Updates if the exit event of the targetted state is unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOStateExit(int state)
 {
   bool enter, exit, use, walkover;
@@ -1531,8 +1559,13 @@ void EventView::unlockIOStateExit(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO state use event check box change.
+ *              Updates if the use event of the targetted state is unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOStateUse(int state)
 {
   bool enter, exit, use, walkover;
@@ -1546,8 +1579,14 @@ void EventView::unlockIOStateUse(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock IO state walkover event check box
+ *              change. Updates if the walkover event of the targetted state
+ *              is unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOStateWalk(int state)
 {
   bool enter, exit, use, walkover;
@@ -1561,8 +1600,13 @@ void EventView::unlockIOStateWalk(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock IO view check box is changed.
+ *              Updates if the unlocked IO is to be viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOView(int state)
 {
   /* Save the data to the event */
@@ -1581,8 +1625,14 @@ void EventView::unlockIOView(int state)
   unio_view_time->setEnabled(view);
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock IO view check box is changed.
+ *              Updates if the unlocked IO is to be scrolled to as opposed to
+ *              fade out/in viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockIOViewScroll(int state)
 {
   bool scroll, view;
@@ -1596,8 +1646,14 @@ void EventView::unlockIOViewScroll(int state)
                           event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock IO triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock IO view time (ms) is changed.
+ *              Updates how long the respective IO is viewed when unlocked by
+ *              the player.
+ *
+ * Inputs: int time - the time to view the unlocked object in milliseconds
+ * Output: none
+ */
 void EventView::unlockIOViewTime(int time)
 {
   if(time >= 0)
@@ -1608,8 +1664,13 @@ void EventView::unlockIOViewTime(int time)
                             time, event->getSoundID());
 }
 
-/* The unlock thing triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock thing dropdown selection change.
+ *              Updates the targetted thing.
+ *
+ * Inputs: QString text - the selected text in the dialog to parse
+ * Output: none
+ */
 void EventView::unlockThingChanged(const QString & text)
 {
   QStringList list = text.split(":");
@@ -1618,8 +1679,13 @@ void EventView::unlockThingChanged(const QString & text)
                                event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock thing triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock thing view check box is changed.
+ *              Updates if the unlocked thing is to be viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockThingView(int state)
 {
   /* Save the data to the event */
@@ -1636,8 +1702,14 @@ void EventView::unlockThingView(int state)
   unth_view_time->setEnabled(view);
 }
 
-/* The unlock thing triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock thing view check box is changed.
+ *              Updates if the unlocked thing is to be scrolled to as opposed to
+ *              fade out/in viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockThingViewScroll(int state)
 {
   bool scroll, view;
@@ -1649,8 +1721,14 @@ void EventView::unlockThingViewScroll(int state)
                              event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock thing triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock thing view time (ms) is changed.
+ *              Updates how long the respective thing is viewed when unlocked by
+ *              the player.
+ *
+ * Inputs: int time - the time to view the unlocked object in milliseconds
+ * Output: none
+ */
 void EventView::unlockThingViewTime(int time)
 {
   if(time >= 0)
@@ -1659,8 +1737,13 @@ void EventView::unlockThingViewTime(int time)
                                time, event->getSoundID());
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock tile enter event check box change.
+ *              Updates if the enter event of the tile is to be unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockTileEnter(int state)
 {
   bool enter, exit;
@@ -1674,8 +1757,13 @@ void EventView::unlockTileEnter(int state)
                             event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered on unlock tile exit event check box change.
+ *              Updates if the exit event of the tile is to be unlocked.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockTileExit(int state)
 {
   bool enter, exit;
@@ -1689,15 +1777,26 @@ void EventView::unlockTileExit(int state)
                             event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot which triggers when the select tile in unlock tile event is
+ *              pressed. Triggers selectTile() which is picked up by the parent
+ *              and triggers a hide and then select tile before re-showing.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EventView::unlockTilePressed()
 {
   emit selectTile();
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock tile view check box is changed.
+ *              Updates if the unlocked tile is to be viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockTileView(int state)
 {
   /* Save the data to the event */
@@ -1716,8 +1815,14 @@ void EventView::unlockTileView(int state)
   unti_view_time->setEnabled(view);
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock tile view check box is changed.
+ *              Updates if the unlocked tile is to be scrolled to as opposed to
+ *              fade out/in viewed by the player.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
 void EventView::unlockTileViewScroll(int state)
 {
   bool scroll, view;
@@ -1731,8 +1836,14 @@ void EventView::unlockTileViewScroll(int state)
                             event->getUnlockViewTime(), event->getSoundID());
 }
 
-/* The unlock tile triggers */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the unlock tile view time (ms) is changed.
+ *              Updates how long the respective tile is viewed when unlocked by
+ *              the player.
+ *
+ * Inputs: int time - the time to view the unlocked object in milliseconds
+ * Output: none
+ */
 void EventView::unlockTileViewTime(int time)
 {
   if(time >= 0)
@@ -1776,8 +1887,12 @@ EditorEvent* EventView::getEvent()
   return event;
 }
 
-/* Returns the list of objects, used for event creation */
-// TODO: Comment
+/*
+ * Description: Returns the list of IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString> - list of all IOs (for unlock event)
+ */
 QVector<QPair<QString,QString>> EventView::getListIOs()
 {
   return list_ios;
@@ -1857,8 +1972,12 @@ void EventView::setEvent(EditorEvent* event)
   setLayoutData();
 }
 
-/* Sets the list of objects, used for event creation */
-// TODO: Comment
+/*
+ * Description: Sets the list of IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
+ * Output: none
+ */
 void EventView::setListIOs(QVector<QPair<QString,QString>> ios)
 {
   /* Data parsing - main IO list */

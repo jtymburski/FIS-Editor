@@ -692,8 +692,12 @@ void MapThingView::setEditorMap(EditorMap* map)
   updateList();
 }
 
-/* Updates list in thing dialog, needed for event control */
-// TODO: Comment
+/*
+ * Description: Sets the list of IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs with states pair
+ * Output: none
+ */
 void MapThingView::updateListIOs(QVector<QPair<QString,QString>> ios)
 {
   if(thing_dialog != nullptr)
@@ -812,14 +816,19 @@ void MapThingView::updateSelectedTile(int id, int x, int y)
  */
 int MapThingView::getInstanceID(QString text)
 {
-  /* Split to find the number */
-  QStringList front = text.split('(');
-  if(front.size() == 2)
+  /* Primary split on colon */
+  QStringList main_split = text.split(':');
+  if(main_split.size() >= 2)
   {
-    QStringList back = front.back().split(')');
-    if(back.size() == 2)
+    /* Split to find the number */
+    QStringList front = main_split.front().split('(');
+    if(front.size() == 2)
     {
-      return back.front().toInt();
+      QStringList back = front.back().split(')');
+      if(back.size() == 2)
+      {
+        return back.front().toInt();
+      }
     }
   }
 
