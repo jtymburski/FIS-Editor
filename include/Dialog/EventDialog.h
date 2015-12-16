@@ -23,7 +23,7 @@ class EventDialog : public QDialog
 public:
   /* Constructor function */
   EventDialog(EditorEventSet* set = nullptr, QWidget* parent = nullptr,
-              QString window_title = "");
+              QString window_title = "", bool view_only = false);
 
   /* Destructor function */
   ~EventDialog();
@@ -58,6 +58,9 @@ private:
 
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;
+
+  /* View only flag */
+  bool view_only;
 
   /* Waiting for sub-map data */
   bool waiting_convo;

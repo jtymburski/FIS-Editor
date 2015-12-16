@@ -26,7 +26,8 @@ class LockView : public QFrame
   Q_OBJECT
 public:
   /* Constructor function */
-  LockView(EditorLock* lock = nullptr, QWidget* parent = nullptr);
+  LockView(EditorLock* lock = nullptr, QWidget* parent = nullptr,
+           bool view_only = false);
 
   /* Destructor function */
   ~LockView();
@@ -49,6 +50,9 @@ private:
 
   /* Trigger lock control widgets */
   QCheckBox* trigger_permanent;
+
+  /* View only flag */
+  bool view_only;
 
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;

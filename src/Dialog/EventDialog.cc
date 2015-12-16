@@ -18,12 +18,14 @@
  * Inputs: EditorEventSet& set - the set to edit within the dialog
  *         QWidget* parent - the parent widget
  *         QString window_title - the title to make the window. Defaulted
+ *         bool view_only - true if only for viewing and not editing. Defaulted
  */
 EventDialog::EventDialog(EditorEventSet* set, QWidget* parent,
-                         QString window_title)
+                         QString window_title, bool view_only)
            : QDialog(parent)
 {
   convo_dialog = nullptr;
+  this->view_only = view_only;
   waiting_convo = false;
   waiting_for_submap = false;
 
@@ -127,21 +129,23 @@ void EventDialog::createLayout(QString window_title)
   connect(btn_rem, SIGNAL(clicked()), this, SLOT(btnRemoveUnlock()));
   layout->addWidget(btn_rem, 6, 2);
   btn_up = new QPushButton("Up", this);
+  btn_up->setDisabled(true);
   connect(btn_up, SIGNAL(clicked()), this, SLOT(btnUpUnlock()));
   layout->addWidget(btn_up, 6, 3);
   btn_down = new QPushButton("Down", this);
+  btn_down->setDisabled(true);
   connect(btn_down, SIGNAL(clicked()), this, SLOT(btnDownUnlock()));
   layout->addWidget(btn_down, 6, 4);
 
   /* Event and Lock View */
   view_stack = new QStackedWidget(this);
-  view_event = new EventView(nullptr, this);
+  view_event = new EventView(nullptr, this, true, view_only);
   connect(view_event, SIGNAL(editConversation(Conversation*,bool)),
           this, SLOT(editConversation(Conversation*,bool)));
   connect(view_event, SIGNAL(selectTile()), this, SLOT(selectTileMain()));
   connect(view_event, SIGNAL(updated()), this, SLOT(updateEvent()));
   view_stack->addWidget(view_event);
-  view_lock = new LockView(nullptr, this);
+  view_lock = new LockView(nullptr, this, view_only);
   connect(view_lock, SIGNAL(updated()), this, SLOT(updateLock()));
   view_stack->addWidget(view_lock);
   layout->addWidget(view_stack, 2, 6, 5, 5);
@@ -160,6 +164,16 @@ void EventDialog::createLayout(QString window_title)
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(btnCancel()));
   layout->addWidget(btn_cancel, 10, 10);
+
+  /* View only control */
+  if(view_only)
+  {
+    btn_lock->setText("View");
+    btn_lock_event->setText("View");
+    box_unlock->setDisabled(true);
+    btn_add->setDisabled(true);
+    btn_edit->setText("View");
+  }
 
   /* Finally resize and lock size at minimum */
   updateGeometry();
@@ -520,6 +534,7 @@ void EventDialog::editConversation(Conversation* convo, bool is_option)
   {
     convo_dialog = new ConvoDialog(convo, is_option, this);
     convo_dialog->setListThings(getListThings());
+    convo_dialog->getEventView()->setListIOs(getListIOs());
     convo_dialog->getEventView()->setListItems(getListItems());
     convo_dialog->getEventView()->setListMaps(getListMaps());
     convo_dialog->getEventView()->setListSounds(getListSounds());
@@ -543,13 +558,13 @@ void EventDialog::listUnlockChange(int current_row)
 {
   /* Edit and remove buttons */
   btn_edit->setEnabled(current_row >= 0);
-  btn_rem->setEnabled(current_row >= 0);
+  btn_rem->setEnabled(!view_only && current_row >= 0);
 
   /* Up button */
-  btn_up->setEnabled(current_row > 0);
+  btn_up->setEnabled(!view_only && current_row > 0);
 
   /* Down button */
-  btn_down->setEnabled(current_row >= 0 &&
+  btn_down->setEnabled(!view_only && current_row >= 0 &&
                        current_row < (list_unlock_events->count() - 1));
 }
 

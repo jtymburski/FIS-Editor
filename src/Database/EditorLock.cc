@@ -202,7 +202,7 @@ void EditorLock::save(FileHandler* fh, bool game_only, QString preface,
 {
   (void)game_only;
 
-  if(fh != nullptr && lock.state != LockedState::NONE)
+  if(fh != nullptr)
   {
     /* If the lock has valid data */
     if(lock.state != LockedState::NONE)

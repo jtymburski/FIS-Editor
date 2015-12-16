@@ -6,7 +6,7 @@
  *              map interactive objects.
  ******************************************************************************/
 #include "View/MapIOView.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -698,8 +698,8 @@ void MapIOView::updateListIOs(QVector<QPair<QString,QString>> ios)
 {
   if(io_dialog != nullptr)
     io_dialog->setListIOs(ios);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListItems(list);
+  if(instance_dialog != NULL)
+    instance_dialog->setListIOs(ios);
 }
 
 /*
@@ -712,8 +712,8 @@ void MapIOView::updateListItems(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListItems(list);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListItems(list);
+  if(instance_dialog != NULL)
+    instance_dialog->setListItems(list);
 }
 
 /*
@@ -726,8 +726,8 @@ void MapIOView::updateListMaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListMaps(list);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListMaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->setListMaps(list);
 }
 
 /*
@@ -752,6 +752,8 @@ void MapIOView::updateListSounds(QList<QString> list)
 {
   if(io_dialog != nullptr)
     io_dialog->setListSounds(list);
+  if(instance_dialog != nullptr)
+    instance_dialog->setListSounds(list);
 }
 
 /*
@@ -764,8 +766,8 @@ void MapIOView::updateListSubmaps(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListSubmaps(list);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListSubmaps(list);
+  if(instance_dialog != NULL)
+    instance_dialog->setListSubmaps(list);
 }
 
 /*
@@ -778,8 +780,8 @@ void MapIOView::updateListThings(QVector<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListThings(list);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->getEventView()->setListThings(list);
+  if(instance_dialog != NULL)
+    instance_dialog->setListThings(list);
 }
 
 /*
@@ -794,6 +796,6 @@ void MapIOView::updateSelectedTile(int id, int x, int y)
 {
   if(io_dialog != NULL)
     io_dialog->updateSelectedTile(id, x, y);
-  //if(instance_dialog != NULL)
-  //  instance_dialog->updateSelectedTile(id, x, y);
+  if(instance_dialog != NULL)
+    instance_dialog->updateSelectedTile(id, x, y);
 }

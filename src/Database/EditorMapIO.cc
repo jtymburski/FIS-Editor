@@ -203,14 +203,14 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
 
           /* Set saving */
           if(!state_inst->base_enter)
-            state_inst->set_enter.save(fh, game_only, "enterset", false, true);
+            state_inst->set_enter.save(fh, game_only, "enterset", false, false);
           if(!state_inst->base_exit)
-            state_inst->set_exit.save(fh, game_only, "exitset", false, true);
+            state_inst->set_exit.save(fh, game_only, "exitset", false, false);
           if(!state_inst->base_use)
-            state_inst->set_use.save(fh, game_only, "useset", false, true);
+            state_inst->set_use.save(fh, game_only, "useset", false, false);
           if(!state_inst->base_walkover)
             state_inst->set_walkover.save(fh, game_only, "walkoverset",
-                                          false, true);
+                                          false, false);
 
           /* End Header */
           fh->writeXmlElementEnd(); /* </state> */

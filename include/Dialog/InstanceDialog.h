@@ -40,13 +40,24 @@ private:
   QCheckBox* box_base_event;
   QCheckBox* box_base_speed;
   QCheckBox* box_interaction;
+  QCheckBox* box_lock_base;
+  QCheckBox* box_states_enter;
+  QCheckBox* box_states_exit;
+  QCheckBox* box_states_use;
+  QCheckBox* box_states_walk;
 
-  /* Button for triggering node edit */
+  /* Button widgets */
   QPushButton* btn_edit_nodes;
+  QPushButton* btn_lock;
+  QPushButton* btn_states_enter;
+  QPushButton* btn_states_exit;
+  QPushButton* btn_states_use;
+  QPushButton* btn_states_walk;
 
   /* Combo box control for algorithms and tracking */
   QComboBox* combo_algorithm;
   QComboBox* combo_party;
+  QComboBox* combo_states;
   QComboBox* combo_tracking;
 
   /* The conversation dialog */
@@ -61,7 +72,8 @@ private:
   /* The event set dialog */
   EventDialog* event_dialog;
 
-  /* Speed result label */
+  /* Label widgets */
+  QLabel* lbl_lock_data;
   QLabel* lbl_speed_result;
 
   /* The line edit for thing data */
@@ -78,6 +90,13 @@ private:
   QList<QString> list_sounds;
   QVector<QString> list_submaps;
   QVector<QString> list_things;
+
+  /* Lock view and control */
+  EditorLock* lock_ctrl;
+  LockView* lock_view;
+
+  /* Pop-ups within the dialog */
+  QDialog* pop_lock;
 
   /* The speed control value */
   QSpinBox* spin_speed;
@@ -145,7 +164,14 @@ public slots:
   void buttonBaseEdit();
   void buttonCancel();
   void buttonEditNodes();
+  void buttonLockCancel();
+  void buttonLockEdit();
+  void buttonLockOk();
   void buttonOk();
+  void buttonStateEnter();
+  void buttonStateExit();
+  void buttonStateUse();
+  void buttonStateWalk();
 
   /* Changed text in line edits */
   void changedDescription();
@@ -155,21 +181,30 @@ public slots:
   void checkBaseChange(int state);
   void checkBaseSpeed(int state);
   void checkInteractionChange(int state);
+  void checkLockBase(int state);
+  void checkStateEnter(int state);
+  void checkStateExit(int state);
+  void checkStateUse(int state);
+  void checkStateWalk(int state);
 
   /* Combo box triggers */
   void comboAlgorithmChange(int index);
   void comboPartyChange(int index);
+  void comboStateChange(int index);
   void comboTrackingChange(int index);
 
   /* Edit event set trigger */
-  void editEventSet(EditorEventSet* set);
+  void editEventSet(EditorEventSet* set, QString window_title = "",
+                    bool view_only = false);
 
   /* Edit Single Node trigger */
   void editNode(QListWidgetItem*);
 
+  /* Edit event set clicked ok finish - update event */
+  void eventUpdated();
+
   /* Select tile trigger */
   void selectTile();
-  //void selectTileConvo();
 
   /* Speed changed */
   void speedChanged(int value);

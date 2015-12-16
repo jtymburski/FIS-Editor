@@ -18,12 +18,14 @@
  *
  * Inputs: EditorLock* lock - the lock controller for the Lock from EventSet
  *         QWidget* parent - the parent widget
+ *         bool view_only - true if the event is only for viewing and no edit
  */
-LockView::LockView(EditorLock* lock, QWidget* parent)
+LockView::LockView(EditorLock* lock, QWidget* parent, bool view_only)
         : QFrame(parent)
 {
   /* Initialize variables */
   this->lock = nullptr;
+  this->view_only = view_only;
 
   /* Create the layout */
   createLayout();
@@ -182,6 +184,9 @@ void LockView::setLayoutData()
     combo_category->setCurrentIndex(0);
     combo_category->setDisabled(true);
   }
+
+  /* View handling */
+  setDisabled(view_only);
 }
 
 /*============================================================================

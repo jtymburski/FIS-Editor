@@ -313,7 +313,7 @@ void EditorEventSet::load(XmlData data, int index)
  *         bool game_only - true if the data should include game only relevant
  *         QString preface - the wrapper text element. default to "eventset"
  *         bool no_preface - no XML wrapper included if true. Default false
- *         bool skip_empty - true to skip the empty state and save nothing
+ *         bool skip_empty - false to save even if empty (default true)
  * Output: none
  */
 void EditorEventSet::save(FileHandler* fh, bool game_only,

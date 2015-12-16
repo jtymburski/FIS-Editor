@@ -19,15 +19,17 @@
  * Inputs: EditorEvent* event - the event controller for the Event from handler
  *         QWidget* parent - the parent widget
  *         bool conversation_enabled - is the conversation option available??
+ *         bool view_only - true if the event is only for viewing and no edit
  */
 EventView::EventView(EditorEvent* event, QWidget* parent,
-                     bool conversation_enabled)
+                     bool conversation_enabled, bool view_only)
          : QFrame(parent)
 {
   /* Initialize variables */
   //database = NULL;
   this->event = NULL;
   rightclick_index = "";
+  this->view_only = view_only;
 
   /* Create the layout */
   createLayout(conversation_enabled);
@@ -868,6 +870,9 @@ void EventView::setLayoutData()
     combo_category->setCurrentIndex(0);
     combo_category->setDisabled(true);
   }
+
+  /* View handling */
+  setDisabled(view_only);
 }
 
 /*

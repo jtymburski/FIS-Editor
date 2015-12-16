@@ -192,7 +192,7 @@ void InstanceDialog::createLayout()
     layout->addWidget(box_base_speed, 5, 3);
   }
 
-  /* Events only relevant if not IO */
+  /* Events that are relevant if not IO */
   if(thing_type != EditorEnumDb::IO)
   {
     /* Use base event widget */
@@ -208,6 +208,77 @@ void InstanceDialog::createLayout()
     connect(event_view, SIGNAL(editSet(EditorEventSet*)),
             this, SLOT(editEventSet(EditorEventSet*)));
     layout->addWidget(event_view, 7, 0, 1, 4, Qt::AlignBottom);
+  }
+  /* Events that are relevant if IO - different layout */
+  else
+  {
+    /* Lock data */
+    layout->setRowMinimumHeight(6, 9);
+    QLabel* lbl_lock = new QLabel("Lock", this);
+    layout->addWidget(lbl_lock, 7, 0);
+    box_lock_base = new QCheckBox("Use Base", this);
+    connect(box_lock_base, SIGNAL(stateChanged(int)),
+            this, SLOT(checkLockBase(int)));
+    layout->addWidget(box_lock_base, 7, 1);
+    lbl_lock_data = new QLabel("UNCONNECTED", this);
+    lbl_lock_data->setStyleSheet("border: 1px solid #a8a8a8");
+    layout->addWidget(lbl_lock_data, 8, 1, 1, 2);
+    btn_lock = new QPushButton("View", this);
+    connect(btn_lock, SIGNAL(clicked()), this, SLOT(buttonLockEdit()));
+    layout->addWidget(btn_lock, 8, 3);
+    layout->setRowMinimumHeight(9, 9);
+
+    /* Overall state data */
+    QLabel* lbl_states = new QLabel("States", this);
+    layout->addWidget(lbl_states, 10, 0);
+    combo_states = new QComboBox(this);
+    connect(combo_states, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(comboStateChange(int)));
+    layout->addWidget(combo_states, 10, 1, 1, 3);
+
+    /* State enter */
+    QLabel* lbl_states_enter = new QLabel("Enter", this);
+    layout->addWidget(lbl_states_enter, 11, 1, Qt::AlignRight);
+    btn_states_enter = new QPushButton("View", this);
+    connect(btn_states_enter, SIGNAL(clicked()), this, SLOT(buttonStateEnter()));
+    layout->addWidget(btn_states_enter, 11, 2);
+    box_states_enter = new QCheckBox("Use Base", this);
+    connect(box_states_enter, SIGNAL(stateChanged(int)),
+            this, SLOT(checkStateEnter(int)));
+    layout->addWidget(box_states_enter, 11, 3);
+
+    /* State exit */
+    QLabel* lbl_states_exit = new QLabel("Exit", this);
+    layout->addWidget(lbl_states_exit, 12, 1, Qt::AlignRight);
+    btn_states_exit = new QPushButton("View", this);
+    connect(btn_states_exit, SIGNAL(clicked()), this, SLOT(buttonStateExit()));
+    layout->addWidget(btn_states_exit, 12, 2);
+    box_states_exit = new QCheckBox("Use Base", this);
+    connect(box_states_exit, SIGNAL(stateChanged(int)),
+            this, SLOT(checkStateExit(int)));
+    layout->addWidget(box_states_exit, 12, 3);
+
+    /* State use */
+    QLabel* lbl_states_use = new QLabel("Use", this);
+    layout->addWidget(lbl_states_use, 13, 1, Qt::AlignRight);
+    btn_states_use = new QPushButton("View", this);
+    connect(btn_states_use, SIGNAL(clicked()), this, SLOT(buttonStateUse()));
+    layout->addWidget(btn_states_use, 13, 2);
+    box_states_use = new QCheckBox("Use Base", this);
+    connect(box_states_use, SIGNAL(stateChanged(int)),
+            this, SLOT(checkStateUse(int)));
+    layout->addWidget(box_states_use, 13, 3);
+
+    /* State walkover */
+    QLabel* lbl_states_walk = new QLabel("Walkover", this);
+    layout->addWidget(lbl_states_walk, 14, 1, Qt::AlignRight);
+    btn_states_walk = new QPushButton("View", this);
+    connect(btn_states_walk, SIGNAL(clicked()), this, SLOT(buttonStateWalk()));
+    layout->addWidget(btn_states_walk, 14, 2);
+    box_states_walk = new QCheckBox("Use Base", this);
+    connect(box_states_walk, SIGNAL(stateChanged(int)),
+            this, SLOT(checkStateWalk(int)));
+    layout->addWidget(box_states_walk, 14, 3);
   }
 
   /* Movement section only relevant if npc */
@@ -270,20 +341,20 @@ void InstanceDialog::createLayout()
   }
 
   /* The button control */
-  layout->setRowMinimumHeight(6, 15);
+  layout->setRowMinimumHeight(15, 15);
   QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
   btn_base_edit->setMaximumWidth(75);
   connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
-  layout->addWidget(btn_base_edit, 9, 0);
+  layout->addWidget(btn_base_edit, 16, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 9, 2 + btn_offset);
+  layout->addWidget(btn_ok, 16, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   btn_cancel->setMaximumWidth(75);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 9, 3 + btn_offset);
+  layout->addWidget(btn_cancel, 16, 3 + btn_offset);
 
   /* Dialog control */
   if(thing_type == EditorEnumDb::THING)
@@ -294,6 +365,21 @@ void InstanceDialog::createLayout()
     setWindowTitle("NPC Instance Edit");
   else if(thing_type == EditorEnumDb::IO)
     setWindowTitle("IO Instance Edit");
+
+  /* Pop-up construction for locks */
+  pop_lock = new QDialog(this);
+  pop_lock->setWindowTitle("Lock Edit");
+  QGridLayout* l_layout = new QGridLayout(pop_lock);
+  lock_ctrl = new EditorLock();
+  lock_view = new LockView(nullptr, pop_lock);
+  l_layout->addWidget(lock_view, 0, 0, 1, 4);
+  QPushButton* btn_lock_ok = new QPushButton("Ok", pop_lock);
+  connect(btn_lock_ok, SIGNAL(clicked()), this, SLOT(buttonLockOk()));
+  l_layout->addWidget(btn_lock_ok, 1, 2);
+  QPushButton* btn_lock_cancel = new QPushButton("Cancel", pop_lock);
+  connect(btn_lock_cancel, SIGNAL(clicked()), this, SLOT(buttonLockCancel()));
+  l_layout->addWidget(btn_lock_cancel);
+  pop_lock->hide();
 }
 
 /*
@@ -353,6 +439,28 @@ void InstanceDialog::updateData()
     event_view->setEventSet(thing_working->getEventSet());
     event_view->setEnabled(!thing_working->isBaseEvent());
     box_base_event->blockSignals(false);
+  }
+  else
+  {
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+
+    /* Lock data */
+    box_lock_base->setChecked(io->isBaseLock());
+    lbl_lock_data->setText(io->getLock()->getTextSummary(""));
+    if(io->isBaseLock())
+      checkLockBase(Qt::Checked);
+    else
+      checkLockBase(Qt::Unchecked);
+
+    /* State data */
+    combo_states->blockSignals(true);
+    combo_states->clear();
+    for(int i = 0; i < io->getStates().size(); i++)
+      combo_states->addItem(io->getStateName(i));
+    combo_states->blockSignals(false);
+
+    /* Individual state event update */
+    comboStateChange(combo_states->currentIndex());
   }
 
   /* If NPC, update movement data */
@@ -492,6 +600,49 @@ void InstanceDialog::buttonEditNodes()
   }
 }
 
+// TODO: Comment
+void InstanceDialog::buttonLockCancel()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    pop_lock->hide();
+    lock_view->setLock(nullptr);
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::buttonLockEdit()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+
+    /* Close event set dialog (and correspondingly the lock dialog as well) */
+    editEventSet(nullptr);
+
+    /* Set the new information for the lock and open */
+    *lock_ctrl = *io->getLock();
+    lock_view->setLock(lock_ctrl);
+    lock_view->setDisabled(io->isBaseLock());
+    pop_lock->show();
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::buttonLockOk()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    if(!io->isBaseLock())
+    {
+      io->setLock(*lock_ctrl);
+      checkLockBase(Qt::Unchecked);
+    }
+    buttonLockCancel();
+  }
+}
+
 /*
  * Description: Button slot on the ok button. Emits ok prior to closing the
  *              dialog. The ok gets handled by the widget parent, which
@@ -506,6 +657,95 @@ void InstanceDialog::buttonOk()
   updateOriginal();
   emit ok(thing_original->getNameList());
   close();
+}
+
+// TODO: Comment
+void InstanceDialog::buttonStateEnter()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Acquire the state */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    EditorState* state_base = io->getState(combo_states->currentIndex());
+    EditorState* state_inst = io->getState(combo_states->currentIndex(), true);
+
+    /* If state is valid, proceed to open pop-up */
+    if(state_base != nullptr && state_inst != nullptr &&
+       state_base->type == EditorEnumDb::IO_STATE)
+    {
+      if(state_inst->base_enter)
+        editEventSet(&state_base->set_enter, "Enter Event (Base) View", true);
+      else
+        editEventSet(&state_inst->set_enter, "Enter Event Edit");
+    }
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::buttonStateExit()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Acquire the state */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    EditorState* state_base = io->getState(combo_states->currentIndex());
+    EditorState* state_inst = io->getState(combo_states->currentIndex(), true);
+
+    /* If state is valid, proceed to open pop-up */
+    if(state_base != nullptr && state_inst != nullptr &&
+       state_base->type == EditorEnumDb::IO_STATE)
+    {
+      if(state_inst->base_exit)
+        editEventSet(&state_base->set_exit, "Exit Event (Base) View", true);
+      else
+        editEventSet(&state_inst->set_exit, "Exit Event Edit");
+    }
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::buttonStateUse()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Acquire the state */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    EditorState* state_base = io->getState(combo_states->currentIndex());
+    EditorState* state_inst = io->getState(combo_states->currentIndex(), true);
+
+    /* If state is valid, proceed to open pop-up */
+    if(state_base != nullptr && state_inst != nullptr &&
+       state_base->type == EditorEnumDb::IO_STATE)
+    {
+      if(state_inst->base_use)
+        editEventSet(&state_base->set_use, "Use Event (Base) View", true);
+      else
+        editEventSet(&state_inst->set_use, "Use Event Edit");
+    }
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::buttonStateWalk()
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Acquire the state */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    EditorState* state_base = io->getState(combo_states->currentIndex());
+    EditorState* state_inst = io->getState(combo_states->currentIndex(), true);
+
+    /* If state is valid, proceed to open pop-up */
+    if(state_base != nullptr && state_inst != nullptr &&
+       state_base->type == EditorEnumDb::IO_STATE)
+    {
+      if(state_inst->base_walkover)
+        editEventSet(&state_base->set_walkover,
+                     "Walkover Event (Base) View", true);
+      else
+        editEventSet(&state_inst->set_walkover, "Walkover Event Edit");
+    }
+  }
 }
 
 /*
@@ -589,6 +829,82 @@ void InstanceDialog::checkInteractionChange(int state)
   }
 }
 
+// TODO: Comment
+void InstanceDialog::checkLockBase(int state)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Change the use base status */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    io->setUseBaseLock(state == Qt::Checked);
+
+    /* Font */
+    QFont bold = btn_lock->font();
+    bold.setBold(true);
+    QFont not_bold = bold;
+    not_bold.setBold(false);
+
+    /* Update the lock data and view */
+    lbl_lock_data->setText(io->getLock()->getTextSummary(""));
+    if(state == Qt::Checked)
+      btn_lock->setText("View");
+    else
+      btn_lock->setText("Edit");
+    if(io->getLock()->getLockType() == LockedState::NONE)
+      btn_lock->setFont(not_bold);
+    else
+      btn_lock->setFont(bold);
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::checkStateEnter(int state)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Change the use base status */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    io->setUseBaseEnter(combo_states->currentIndex(), state == Qt::Checked);
+    comboStateChange(combo_states->currentIndex());
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::checkStateExit(int state)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Change the use base status */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    io->setUseBaseExit(combo_states->currentIndex(), state == Qt::Checked);
+    comboStateChange(combo_states->currentIndex());
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::checkStateUse(int state)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Change the use base status */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    io->setUseBaseUse(combo_states->currentIndex(), state == Qt::Checked);
+    comboStateChange(combo_states->currentIndex());
+  }
+}
+
+// TODO: Comment
+void InstanceDialog::checkStateWalk(int state)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    /* Change the use base status */
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+    io->setUseBaseWalkover(combo_states->currentIndex(), state == Qt::Checked);
+    comboStateChange(combo_states->currentIndex());
+  }
+}
+
 /*
  * Description: Slot triggered when the combo box for the algorithm type of
  *              the movement of the npc is changed. This changes the modes of
@@ -643,6 +959,135 @@ void InstanceDialog::comboPartyChange(int index)
     thing_working->setGameID(-1);
 }
 
+// TODO: Comment
+void InstanceDialog::comboStateChange(int index)
+{
+  if(thing_type == EditorEnumDb::IO)
+  {
+    EditorMapIO* io = (EditorMapIO*)thing_working;
+
+    /* Close event set dialog, if open */
+    editEventSet(nullptr);
+
+    /* Fonts */
+    QFont bold = btn_states_enter->font();
+    bold.setBold(true);
+    QFont not_bold = bold;
+    not_bold.setBold(false);
+
+    /* Proceed to access state to update - only if IO_STATE */
+    EditorState* state = io->getState(index, true);
+    EditorState* state_base = io->getState(index);
+    if(state != nullptr && state_base != nullptr &&
+       state_base->type == EditorEnumDb::IO_STATE)
+    {
+      /* Enter */
+      box_states_enter->setEnabled(true);
+      box_states_enter->setChecked(state->base_enter);
+      btn_states_enter->setEnabled(true);
+      if(state->base_enter)
+      {
+        btn_states_enter->setText("View");
+        if(state_base->set_enter.isEmpty())
+          btn_states_enter->setFont(not_bold);
+        else
+          btn_states_enter->setFont(bold);
+      }
+      else
+      {
+        btn_states_enter->setText("Edit");
+        if(state->set_enter.isEmpty())
+          btn_states_enter->setFont(not_bold);
+        else
+          btn_states_enter->setFont(bold);
+      }
+
+      /* Exit */
+      box_states_exit->setEnabled(true);
+      box_states_exit->setChecked(state->base_exit);
+      btn_states_exit->setEnabled(true);
+      if(state->base_exit)
+      {
+        btn_states_exit->setText("View");
+        if(state_base->set_exit.isEmpty())
+          btn_states_exit->setFont(not_bold);
+        else
+          btn_states_exit->setFont(bold);
+      }
+      else
+      {
+        btn_states_exit->setText("Edit");
+        if(state->set_exit.isEmpty())
+          btn_states_exit->setFont(not_bold);
+        else
+          btn_states_exit->setFont(bold);
+      }
+
+      /* Use */
+      box_states_use->setEnabled(true);
+      box_states_use->setChecked(state->base_use);
+      btn_states_use->setEnabled(true);
+      if(state->base_use)
+      {
+        btn_states_use->setText("View");
+        if(state_base->set_use.isEmpty())
+          btn_states_use->setFont(not_bold);
+        else
+          btn_states_use->setFont(bold);
+      }
+      else
+      {
+        btn_states_use->setText("Edit");
+        if(state->set_use.isEmpty())
+          btn_states_use->setFont(not_bold);
+        else
+          btn_states_use->setFont(bold);
+      }
+
+      /* Walkover */
+      box_states_walk->setEnabled(true);
+      box_states_walk->setChecked(state->base_walkover);
+      btn_states_walk->setEnabled(true);
+      if(state->base_walkover)
+      {
+        btn_states_walk->setText("View");
+        if(state_base->set_walkover.isEmpty())
+          btn_states_walk->setFont(not_bold);
+        else
+          btn_states_walk->setFont(bold);
+      }
+      else
+      {
+        btn_states_walk->setText("Edit");
+        if(state->set_walkover.isEmpty())
+          btn_states_walk->setFont(not_bold);
+        else
+          btn_states_walk->setFont(bold);
+      }
+    }
+    /* Not a valid state (transition or otherwise */
+    else
+    {
+      box_states_enter->setDisabled(true);
+      box_states_exit->setDisabled(true);
+      box_states_use->setDisabled(true);
+      box_states_walk->setDisabled(true);
+
+      btn_states_enter->setDisabled(true);
+      btn_states_enter->setFont(not_bold);
+
+      btn_states_exit->setDisabled(true);
+      btn_states_exit->setFont(not_bold);
+
+      btn_states_use->setDisabled(true);
+      btn_states_use->setFont(not_bold);
+
+      btn_states_walk->setDisabled(true);
+      btn_states_walk->setFont(not_bold);
+    }
+  }
+}
+
 /*
  * Description: Slot triggered when the combo box for the tracking type of the
  *              movement of the npc is changed. This changes how the npc reacts
@@ -672,16 +1117,23 @@ void InstanceDialog::comboTrackingChange(int index)
  *              from EventSetView. Required to lock out the pop-up.
  *
  * Inputs: EditorEventSet* set - the editing set
+ *         QString window_title - title for edit event pop-up window
+ *         bool view_only - true if the pop-up is for viewing data only
  * Output: none
  */
-void InstanceDialog::editEventSet(EditorEventSet* set)
+void InstanceDialog::editEventSet(EditorEventSet* set,
+                                  QString window_title, bool view_only)
 {
+  /* Close lock dialog */
+  buttonLockCancel();
+
+  /* Close event dialog, if open */
   if(event_dialog != nullptr)
   {
     disconnect(event_dialog, SIGNAL(selectTile()),
                this, SLOT(selectTile()));
     disconnect(event_dialog, SIGNAL(ok()),
-               event_view, SLOT(eventUpdated()));
+               this, SLOT(eventUpdated()));
     delete event_dialog;
   }
   event_dialog = NULL;
@@ -689,7 +1141,8 @@ void InstanceDialog::editEventSet(EditorEventSet* set)
   /* Create the new conversation dialog */
   if(set != nullptr)
   {
-    event_dialog = new EventDialog(set, this);
+    event_dialog = new EventDialog(set, this, window_title, view_only);
+    event_dialog->setListIOs(list_ios);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);
     event_dialog->setListSounds(list_sounds);
@@ -698,7 +1151,7 @@ void InstanceDialog::editEventSet(EditorEventSet* set)
     connect(event_dialog, SIGNAL(selectTile()),
             this, SLOT(selectTile()));
     connect(event_dialog, SIGNAL(ok()),
-            event_view, SLOT(eventUpdated()));
+            this, SLOT(eventUpdated()));
     event_dialog->show();
   }
 }
@@ -733,6 +1186,22 @@ void InstanceDialog::editNode(QListWidgetItem*)
   }
 }
 
+/* Edit event set clicked ok finish - update event */
+// TODO: Comment
+void InstanceDialog::eventUpdated()
+{
+  /* IO event */
+  if(thing_type == EditorEnumDb::IO)
+  {
+    comboStateChange(combo_states->currentIndex());
+  }
+  /* All other things */
+  else
+  {
+    event_view->eventUpdated();
+  }
+}
+
 /*
  * Description: Triggers the select tile dialog for the pop-up. This hides the
  *              pop-up and waits for a tile to be selected on the map render.
@@ -748,6 +1217,8 @@ void InstanceDialog::selectTile()
   /* Emit the proper signal */
   if(thing_type == EditorEnumDb::THING)
     emit selectTile(EditorEnumDb::THING_VIEW);
+  else if(thing_type == EditorEnumDb::IO)
+    emit selectTile(EditorEnumDb::IO_VIEW);
   else if(thing_type == EditorEnumDb::PERSON)
     emit selectTile(EditorEnumDb::PERSON_VIEW);
   else if(thing_type == EditorEnumDb::NPC)
@@ -884,6 +1355,8 @@ void InstanceDialog::setListItems(QVector<QString> items)
   /* Event dialog data */
   if(event_dialog != nullptr)
     event_dialog->setListItems(items);
+  if(lock_view != nullptr)
+    lock_view->setListItems(items);
 }
 
 /*

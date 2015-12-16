@@ -36,7 +36,7 @@ class EventView : public QFrame
 public:
   /* Constructor function */
   EventView(EditorEvent* event = NULL, QWidget* parent = NULL,
-            bool conversation_enabled = true);
+            bool conversation_enabled = true, bool view_only = false);
 
   /* Destructor function */
   ~EventView();
@@ -123,6 +123,9 @@ private:
   QCheckBox* unio_view_enable;
   QCheckBox* unio_view_scroll;
   QSpinBox* unio_view_time;
+
+  /* View only flag */
+  bool view_only;
 
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;
