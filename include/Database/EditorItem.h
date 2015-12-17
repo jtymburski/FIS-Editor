@@ -218,7 +218,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the item */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Update skills */
   void updateSkills(QVector<EditorSkill*> skills);

@@ -296,19 +296,35 @@ void GameDatabase::changeAction(int index, bool forced, bool save)
   /* If current action is valid, either save or load */
   if(current_action != NULL)
   {
-    /* Create warning about changing action */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Action. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_action->getEditedAction();
       else
         current_action->resetInfo();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Action. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Action?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_action->getEditedAction();
+        else
+          current_action->resetInfo();
+      }
     }
   }
   else
@@ -338,19 +354,35 @@ void GameDatabase::changeClass(int index, bool forced, bool save)
   /* If current battle class is valid, either save or load */
   if(current_battleclass != NULL)
   {
-    /* Create warning about changing battle class */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another BattleClass. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_battleclass->saveWorking();
       else
         current_battleclass->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another BattleClass. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing BattleClass?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_battleclass->saveWorking();
+        else
+          current_battleclass->resetWorking();
+      }
     }
   }
   else
@@ -380,19 +412,35 @@ void GameDatabase::changeItem(int index, bool forced, bool save)
   /* If current item is valid, either save or load */
   if(current_item != NULL)
   {
-    /* Create warning about changing item */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Item. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_item->saveWorking();
       else
         current_item->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Item. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Item?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_item->saveWorking();
+        else
+          current_item->resetWorking();
+      }
     }
   }
   else
@@ -422,19 +470,35 @@ void GameDatabase::changeParty(int index, bool forced, bool save)
   /* If current party is valid, either save or load */
   if(current_party != NULL)
   {
-    /* Create warning about changing party */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Party. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_party->saveWorking();
       else
         current_party->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Party. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Party?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_party->saveWorking();
+        else
+          current_party->resetWorking();
+      }
     }
   }
   else
@@ -464,19 +528,35 @@ void GameDatabase::changePerson(int index, bool forced, bool save)
   /* If current person is valid, either save or load */
   if(current_person != NULL)
   {
-    /* Create warning about changing person */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Person. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_person->saveWorking();
       else
         current_person->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Person. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Person?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_person->saveWorking();
+        else
+          current_person->resetWorking();
+      }
     }
   }
   else
@@ -506,19 +586,35 @@ void GameDatabase::changeRace(int index, bool forced, bool save)
   /* If current race is valid, either save or load */
   if(current_race != NULL)
   {
-    /* Create warning about changing race */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Race. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_race->saveWorking();
       else
         current_race->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Race. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Race?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_race->saveWorking();
+        else
+          current_race->resetWorking();
+      }
     }
   }
   else
@@ -548,19 +644,35 @@ void GameDatabase::changeSkill(int index, bool forced, bool save)
   /* If current skill is valid, either save or load */
   if(current_skill != NULL)
   {
-    /* Create warning about changing action */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Skill. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_skill->getEditedSkill();
       else
         current_skill->resetWorkingSkill();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Skill. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Skill?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_skill->getEditedSkill();
+        else
+          current_skill->resetWorkingSkill();
+      }
     }
   }
   else
@@ -590,19 +702,35 @@ void GameDatabase::changeSkillSet(int index, bool forced, bool save)
   /* If current skill set is valid, either save or load */
   if(current_skillset != NULL)
   {
-    /* Create warning about changing action */
-    QMessageBox msg_box;
-    msg_box.setText(QString("Changing to another Skill Set. All unsaved ") +
-                    QString("changes to the existing will be lost."));
-    msg_box.setInformativeText("Are you sure?");
-    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if(forced || msg_box.exec() == QMessageBox::Yes)
+    /* Forced - Do not show dialog */
+    if(forced)
     {
       proceed = true;
       if(save)
         current_skillset->saveWorking();
       else
         current_skillset->resetWorking();
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another Skill Set. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing Skill Set?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          current_skillset->saveWorking();
+        else
+          current_skillset->resetWorking();
+      }
     }
   }
   else
@@ -910,6 +1038,7 @@ void GameDatabase::loadFinish()
   {
     data_skill[i]->updateActions(data_action);
     data_skill[i]->setBaseSkill(data_skill[i]->getBaseSkill());
+    data_skill[i]->checkFlags();
   }
 
   /* Skill Sets finish */
@@ -1145,6 +1274,7 @@ void GameDatabase::createNewResource()
       else
         data_skill.push_back(new EditorSkill(0, name));
       data_skill.last()->updateActions(data_action);
+      data_skill.last()->checkFlags();
       updateItems();
       updateSkillSets();
       break;

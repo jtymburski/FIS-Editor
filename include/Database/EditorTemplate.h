@@ -27,7 +27,7 @@ public:
   virtual void setID(int id) = 0;
 
   /* Sets the name of the editor object */
-  virtual void setName(QString name) = 0;
+  virtual void setName(QString name, bool update) = 0;
 };
 
 #endif // EDITORTEMPLATE_H

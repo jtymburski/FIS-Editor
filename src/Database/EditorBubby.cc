@@ -72,8 +72,10 @@ void EditorBubby::setID(int id)
 }
 
 /* Sets the name of the bubby */
-void EditorBubby::setName(QString name)
+void EditorBubby::setName(QString name, bool update)
 {
+  (void)update;
+
   bubby.setName(name.toStdString());
 }
 

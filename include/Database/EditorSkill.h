@@ -87,9 +87,9 @@ private:
   QListWidget* skill_actions;
 
   QGroupBox* skill_flags;
-  QRadioButton* skill_offensive;
-  QRadioButton* skill_defensive;
-  QRadioButton* skill_neutral;
+  QCheckBox* skill_offensive;
+  QCheckBox* skill_defensive;
+  QCheckBox* skill_neutral;
 
   QPushButton* add_action_to_skill;
   QPushButton* remove_action_from_skill;
@@ -153,6 +153,9 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Check flags trigger */
+  bool checkFlags();
+
   /* Returns the ID of the skill */
   virtual int getID() const;
 
@@ -172,7 +175,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the skill */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Update actions */
   void updateActions(QVector<EditorAction*> actions);

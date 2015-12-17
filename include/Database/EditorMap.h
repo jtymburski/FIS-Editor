@@ -365,7 +365,7 @@ public:
   int setMap(int id, QString name, int width, int height);
 
   /* Sets the name of the map set */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Sets a npc in the map */
   int setNPC(EditorMapNPC* npc, int sub_map = -1);

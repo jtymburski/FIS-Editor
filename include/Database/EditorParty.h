@@ -163,7 +163,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the party */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Update Calls for data */
   void updateItems(QVector<EditorItem*> items,

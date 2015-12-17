@@ -609,7 +609,7 @@ void EditorParty::changedClassify(QString index)
  */
 void EditorParty::changedName(QString name)
 {
-  setName(name);
+  setName(name, false);
 }
 
 /*
@@ -984,12 +984,14 @@ void EditorParty::setID(int id)
  * Description: Sets the name of the party.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorParty::setName(QString name)
+void EditorParty::setName(QString name, bool update)
 {
   name_curr = name;
-  edit_name->setText(name);
+  if(update)
+    edit_name->setText(name);
   emit nameChange(name);
 }
 

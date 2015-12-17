@@ -73,8 +73,10 @@ void EditorEquipment::setID(int id)
 }
 
 /* Sets the name of the equipment */
-void EditorEquipment::setName(QString name)
+void EditorEquipment::setName(QString name, bool update)
 {
+  (void)update;
+
   equipment.setName(name.toStdString());
 }
 

@@ -502,7 +502,7 @@ void EditorCategory::changedImmunities(int)
  */
 void EditorCategory::changedName(QString name)
 {
-  setName(name);
+  setName(name, false);
 }
 
 /*
@@ -847,12 +847,14 @@ void EditorCategory::setID(int id)
  * Description: Sets the name of the category.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorCategory::setName(QString name)
+void EditorCategory::setName(QString name, bool update)
 {
   cat_curr.setName(name.toStdString());
-  edit_name->setText(QString::fromStdString(cat_curr.getName()));
+  if(update)
+    edit_name->setText(QString::fromStdString(cat_curr.getName()));
   emit nameChange(name);
 }
 

@@ -346,7 +346,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

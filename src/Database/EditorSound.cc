@@ -327,10 +327,13 @@ void EditorSound::setID(int id)
  * Description: Sets the name of the sound.
  *
  * Inputs: QString name - the new name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorSound::setName(QString name)
+void EditorSound::setName(QString name, bool update)
 {
+  (void)update;
+
   if(!name_locked)
     this->name = name;
 }

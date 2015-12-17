@@ -4791,10 +4791,13 @@ int EditorMap::setMap(int id, QString name, int width, int height)
  * Description: Sets the name of the editor map.
  *
  * Inputs: QString name - map name
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorMap::setName(QString name)
+void EditorMap::setName(QString name, bool update)
 {
+  (void)update;
+
   this->name = name;
 }
 

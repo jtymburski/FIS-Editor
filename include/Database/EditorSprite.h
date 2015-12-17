@@ -140,7 +140,7 @@ public slots:
   void setHorizontalFlips(bool flip = true);
 
   /* Sets the user submitted name */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Sets the sprites opacity */
   void setOpacity(int opacity);

@@ -491,12 +491,14 @@ void EditorSkillset::setID(int id)
  * Description: Sets the name of the skillset.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorSkillset::setName(QString name)
+void EditorSkillset::setName(QString name, bool update)
 {
   this->name = name;
-  loadWorkingInfo();
+  if(update)
+    loadWorkingInfo();
   emit nameChange(name);
 }
 

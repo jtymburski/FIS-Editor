@@ -74,11 +74,11 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   /* Skill Flags */
   QGroupBox* skill_flags = new QGroupBox("Skill Flags",this);
   QVBoxLayout* skill_flags_layout = new QVBoxLayout();
-  skill_offensive = new QRadioButton("Offensive",this);
+  skill_offensive = new QCheckBox("Offensive",this);
   skill_flags_layout->addWidget(skill_offensive);
-  skill_defensive = new QRadioButton("Defensive",this);
+  skill_defensive = new QCheckBox("Defensive",this);
   skill_flags_layout->addWidget(skill_defensive);
-  skill_neutral = new QRadioButton("Neutral",this);
+  skill_neutral = new QCheckBox("Neutral",this);
   skill_flags_layout->addWidget(skill_neutral);
   skill_flags_layout->addStretch(1);
   skill_flags->setLayout(skill_flags_layout);
@@ -367,9 +367,15 @@ Skill EditorSkill::getEditedSkill()
   working.setCooldown(cooldown_edit->text().toInt());
   working.setValue(value_edit->text().toInt());
 
-  working.setFlag(SkillFlags::OFFENSIVE,skill_offensive->isChecked());
-  working.setFlag(SkillFlags::DEFENSIVE,skill_defensive->isChecked());
-  working.setFlag(SkillFlags::NEUTRAL,skill_neutral->isChecked());
+  /* Flags */
+  //if(!skill_offensive->isChecked() && !skill_defensive->isChecked() &&
+  //   !skill_neutral->isChecked())
+  //{
+  //  skill_offensive->setChecked(true);
+  //}
+  working.setFlag(SkillFlags::OFFENSIVE, skill_offensive->isChecked());
+  working.setFlag(SkillFlags::DEFENSIVE, skill_defensive->isChecked());
+  working.setFlag(SkillFlags::NEUTRAL, skill_neutral->isChecked());
 
   if(primary_flag->currentIndex() == 0)
     working.setPrimary(Element::PHYSICAL);
@@ -463,15 +469,15 @@ void EditorSkill::loadWorkingInfo()
   cooldown_edit->setText(QString::number(working.getCooldown()));
   value_edit->setText(QString::number(working.getValue()));
 
-  if(working.getFlag(SkillFlags::DEFENSIVE))
-    skill_defensive->setChecked(true);
-  else if(working.getFlag(SkillFlags::NEUTRAL))
-    skill_neutral->setChecked(true);
-  else
-  {
-    skill_offensive->setChecked(true);
-    working.setFlag(SkillFlags::OFFENSIVE, true);
-  }
+  //if(working.getFlag(SkillFlags::DEFENSIVE))
+  skill_defensive->setChecked(working.getFlag(SkillFlags::DEFENSIVE));
+  //else if(working.getFlag(SkillFlags::NEUTRAL))
+  skill_neutral->setChecked(working.getFlag(SkillFlags::NEUTRAL));
+  //else
+  //{
+  skill_offensive->setChecked(working.getFlag(SkillFlags::OFFENSIVE));
+  //working.setFlag(SkillFlags::OFFENSIVE, true);
+  //}
 
   if(working.getPrimary() == Element::PHYSICAL)
     primary_flag->setCurrentIndex(0);
@@ -583,6 +589,12 @@ void EditorSkill::resetWorkingSkill()
   buttonThumbEdit(true);
 
   /* Fix data */
+  //if(!base.getFlag(SkillFlags::OFFENSIVE) &&
+  //   !base.getFlag(SkillFlags::DEFENSIVE) &&
+  //   !base.getFlag(SkillFlags::NEUTRAL))
+  //{
+  //  base.setFlag(SkillFlags::OFFENSIVE, true);
+  //}
   working = base;
   sprite_anim = sprite_anim_base;
   sprite_thumb = sprite_thumb_base;
@@ -600,7 +612,7 @@ void EditorSkill::resetWorkingSkill()
  */
 void EditorSkill::setBaseSkill(Skill s)
 {
-  s.setFlag(SkillFlags::OFFENSIVE, true);
+  //s.setFlag(SkillFlags::OFFENSIVE, true);
   base = s;
   setWorkingSkill(base);
 }
@@ -686,6 +698,25 @@ void EditorSkill::updateThumb()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Checks the flags. If all 3 are unset, it sets one.
+ *
+ * Inputs: none
+ * Output: bool - true if the flags changed states
+ */
+bool EditorSkill::checkFlags()
+{
+  if(!base.getFlag(SkillFlags::OFFENSIVE) &&
+     !base.getFlag(SkillFlags::DEFENSIVE) &&
+     !base.getFlag(SkillFlags::NEUTRAL))
+  {
+    base.setFlag(SkillFlags::OFFENSIVE, true);
+    setWorkingSkill(Skill());
+    return true;
+  }
+  return false;
+}
 
 /*
  * Description: Returns the ID of the skill
@@ -854,12 +885,14 @@ void EditorSkill::setID(int id)
  * Description: Sets the name of the skill.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorSkill::setName(QString name)
+void EditorSkill::setName(QString name, bool update)
 {
   this->name = name;
-  name_edit->setText(name);
+  if(update)
+    name_edit->setText(name);
 }
 
 /*

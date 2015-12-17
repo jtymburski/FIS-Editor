@@ -638,10 +638,13 @@ void EditorMapThing::setID(int id)
  * Description: Sets the name of the thing.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorMapThing::setName(QString name)
+void EditorMapThing::setName(QString name, bool update)
 {
+  (void)update;
+
   thing.setName(name.toStdString());
 }
 

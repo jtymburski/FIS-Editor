@@ -125,7 +125,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the skillset */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Update skills */
   void updateSkills(QVector<EditorSkill*> skills);

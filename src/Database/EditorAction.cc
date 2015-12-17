@@ -5,7 +5,7 @@
  * Description: Editor Action to interface with game action.
  ******************************************************************************/
 #include "Database/EditorAction.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -1366,9 +1366,18 @@ void EditorAction::updateLayouts()
     target_flags_box->setDisabled(true);
   }
 
-  if(action_flags_inflict->isChecked() || action_flags_relieve->isChecked())
+  if(action_flags_relieve->isChecked())
   {
-    value_label->setDisabled(false);
+    value_label->setDisabled(true);
+    value_edit->setDisabled(true);
+    variance_label->setDisabled(true);
+    variance_edit->setDisabled(true);
+    action_flags_base_pc->setDisabled(true);
+    action_flags_vari_pc->setDisabled(true);
+  }
+  else if(action_flags_inflict->isChecked())
+  {
+    value_label->setDisabled(true);
     value_edit->setDisabled(false);
     variance_label->setDisabled(true);
     variance_edit->setDisabled(true);
@@ -1503,12 +1512,14 @@ void EditorAction::setID(int id)
  * Description: Sets the name of the object.
  *
  * Inputs: QString name - the name text
+ *         bool updatee - should the widget be updated? default true
  * Output: none
  */
-void EditorAction::setName(QString name)
+void EditorAction::setName(QString name, bool update)
 {
   this->name = name;
-  name_edit->setText(name);
+  if(update)
+    name_edit->setText(name);
   setWorkingAction(base);
 }
 

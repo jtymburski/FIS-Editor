@@ -786,7 +786,7 @@ void EditorPerson::changedFlags(int)
  */
 void EditorPerson::changedName(QString name)
 {
-  setName(name);
+  setName(name, false);
 }
 
 /*
@@ -1282,12 +1282,14 @@ void EditorPerson::setID(int id)
  * Description: Sets the name of the person.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorPerson::setName(QString name)
+void EditorPerson::setName(QString name, bool update)
 {
   person_curr.setName(name.toStdString());
-  edit_name->setText(name);
+  if(update)
+    edit_name->setText(name);
   emit nameChange(name);
 }
 

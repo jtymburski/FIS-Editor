@@ -148,7 +148,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the user submitted name */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Sets the connected sound ID */
   void setSoundID(int id);

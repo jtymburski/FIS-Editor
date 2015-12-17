@@ -96,7 +96,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the sound */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Sets the name lock, if relevant */
   void setNameLock(bool name_locked);

@@ -888,7 +888,7 @@ void EditorItem::changedMessage(QString message)
  */
 void EditorItem::changedName(QString name)
 {
-  setName(name);
+  setName(name, false);
 }
 
 /*
@@ -1359,12 +1359,14 @@ void EditorItem::setID(int id)
  * Description: Sets the name of the item.
  *
  * Inputs: QString name - the name text
+ *         bool update - should the widget be updated? default true
  * Output: none
  */
-void EditorItem::setName(QString name)
+void EditorItem::setName(QString name, bool update)
 {
   item_curr.setName(name.toStdString());
-  edit_name->setText(name);
+  if(update)
+    edit_name->setText(name);
   emit nameChange(name);
 }
 

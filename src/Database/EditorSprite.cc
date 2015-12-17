@@ -525,10 +525,13 @@ void EditorSprite::setHorizontalFlips(bool flip)
 /*
  * Description: Sets the Editor Sprites name
  *
- * Input: Name
+ * Input: QString - name of sprite
+ *        bool - should the widget be updated? default true. Not used here
  */
-void EditorSprite::setName(QString n)
+void EditorSprite::setName(QString n, bool update)
 {
+  (void)update;
+
   name = n;
 }
 

@@ -204,7 +204,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the person */
-  virtual void setName(QString name);
+  virtual void setName(QString name, bool update = true);
 
   /* Update Calls for data */
   void updateClasses(QVector<EditorCategory*> classes,
