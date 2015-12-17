@@ -5,7 +5,7 @@
  * Description: The category that defines persons and what they are capable of.
  ******************************************************************************/
 #include "Database/EditorCategory.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 const int EditorCategory::kMAX_PRESETS = 6;
@@ -23,9 +23,15 @@ EditorCategory::EditorCategory(QWidget *parent) : QWidget(parent)
 {
   /* Properties of base data */
   cat_base.triggerEditMode(true);
+  cat_base.getBaseSet().setStat(0, 1);
+  cat_base.getTopSet().setStat(0, 1);
   cat_curr.triggerEditMode(true);
+  cat_curr.getBaseSet().setStat(0, 1);
+  cat_curr.getTopSet().setStat(0, 1);
   chk_no_signals = false;
   id = 0;
+  set_id = -1;
+  set_id_base = -1;
 
   /* Layouts and info loading */
   createLayout();
@@ -80,6 +86,9 @@ void EditorCategory::copySelf(const EditorCategory &source)
 {
   cat_base = source.cat_base;
   id = source.id;
+  set_id_base = source.set_id_base;
+  set_total = source.set_total;
+
   resetWorking();
 }
 
@@ -94,8 +103,8 @@ void EditorCategory::createLayout()
   /* Layout */
   QGridLayout* layout = new QGridLayout(this);
   layout->setColumnStretch(7, 1);
-  layout->setRowMinimumHeight(7, 15);
-  layout->setRowStretch(6, 1);
+  layout->setRowMinimumHeight(8, 15);
+  layout->setRowStretch(7, 1);
 
   /* ID */
   QLabel* lbl_id = new QLabel("ID", this);
@@ -148,6 +157,15 @@ void EditorCategory::createLayout()
   connect(combo_qd, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(changedRegenQD(QString)));
   layout->addWidget(combo_qd, 5, 1, 1, 2);
+
+  /* Skill Sets */
+  QLabel* lbl_skill_set = new QLabel("Skill Set", this);
+  layout->addWidget(lbl_skill_set, 6, 0);
+  combo_skill_set = new QComboBox(this);
+  combo_skill_set->addItem("None");
+  connect(combo_skill_set, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changedSet(int)));
+  layout->addWidget(combo_skill_set, 6, 1, 1, 2);
 
   /* Flag Group */
   QGroupBox* box_flags = new QGroupBox("Flags", this);
@@ -214,7 +232,7 @@ void EditorCategory::createLayout()
   connect(chk_e_long_arms, SIGNAL(stateChanged(int)),
           this, SLOT(changedFlags(int)));
   box_layout->addWidget(chk_e_long_arms);
-  layout->addWidget(box_flags, 0, 3, 6, 1);
+  layout->addWidget(box_flags, 0, 3, 7, 1);
 
   /* Immunities Group */
   QGroupBox* box_immunities = new QGroupBox("Immunities", this);
@@ -229,7 +247,7 @@ void EditorCategory::createLayout()
             this, SLOT(changedImmunities(int)));
     layout_immunities->addWidget(chk_immunities.back());
   }
-  layout->addWidget(box_immunities, 0, 4, 7, 1);
+  layout->addWidget(box_immunities, 0, 4, 8, 1);
 
   /* Preset List for Stats */
   QStringList stat_presets;
@@ -245,19 +263,22 @@ void EditorCategory::createLayout()
   connect(combo_stats_base, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statBasePreset(int)));
   layout_stats_base->addWidget(combo_stats_base, 0, 0, 1, 2);
-  for(int i = 0; i < (int)Attribute::NONE; i++)
+  for(int i = 0; i <= (int)Attribute::MANN; i++)
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
     layout_stats_base->addWidget(lbl, i + 1, 0);
     spin_atts_base.push_back(new QSpinBox(this));
-    spin_atts_base.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
+    if(i == 0)
+      spin_atts_base.last()->setMinimum(1);
+    else
+      spin_atts_base.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
     spin_atts_base.last()->setMaximum(AttributeSet::kMAX_VALUE);
     connect(spin_atts_base.last(), SIGNAL(valueChanged(QString)),
             this, SLOT(changedStatsBase(QString)));
     layout_stats_base->addWidget(spin_atts_base.last(), i + 1, 1);
   }
-  layout->addWidget(box_stats_base, 0, 5, 7, 1);
+  layout->addWidget(box_stats_base, 0, 5, 8, 1);
 
   /* Max Stats Group */
   QGroupBox* box_stats_max = new QGroupBox("Max Stats", this);
@@ -268,27 +289,30 @@ void EditorCategory::createLayout()
   connect(combo_stats_max, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statMaxPreset(int)));
   layout_stats_max->addWidget(combo_stats_max, 0, 0, 1, 2);
-  for(int i = 0; i < (int)Attribute::NONE; i++)
+  for(int i = 0; i <= (int)Attribute::MANN; i++)
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
     layout_stats_max->addWidget(lbl, i + 1, 0);
     spin_atts_max.push_back(new QSpinBox(this));
-    spin_atts_max.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
+    if(i == 0)
+      spin_atts_max.last()->setMinimum(1);
+    else
+      spin_atts_max.last()->setMinimum(AttributeSet::kMIN_P_VALUE);
     spin_atts_max.last()->setMaximum(AttributeSet::kMAX_VALUE);
     connect(spin_atts_max.last(), SIGNAL(valueChanged(QString)),
             this, SLOT(changedStatsMax(QString)));
     layout_stats_max->addWidget(spin_atts_max.back(), i + 1, 1);
   }
-  layout->addWidget(box_stats_max, 0, 6, 7, 1);
+  layout->addWidget(box_stats_max, 0, 6, 8, 1);
 
   /* Push Buttons - for reset and save */
   QPushButton* btn_reset = new QPushButton("Reset", this);
   connect(btn_reset, SIGNAL(clicked()), this, SLOT(btnReset()));
-  layout->addWidget(btn_reset, 8, 5);
+  layout->addWidget(btn_reset, 9, 5);
   QPushButton* btn_save = new QPushButton("Save", this);
   connect(btn_save, SIGNAL(clicked()), this, SLOT(btnSave()));
-  layout->addWidget(btn_save, 8, 6);
+  layout->addWidget(btn_save, 9, 6);
 }
 
 /*
@@ -315,6 +339,23 @@ void EditorCategory::loadWorkingInfo()
   /* Vita and QD Regen */
   combo_vita->setCurrentIndex((int)cat_curr.getVitaRegenRate());
   combo_qd->setCurrentIndex((int)cat_curr.getQDRegenRate());
+
+  /* Skill Set */
+  combo_skill_set->blockSignals(true);
+  combo_skill_set->clear();
+  combo_skill_set->addItem("None");
+  int set_index = -1;
+  for(int i = 0; i < set_total.size(); i++)
+  {
+    combo_skill_set->addItem(set_total[i]->getNameList());
+    if(set_total[i]->getID() == set_id)
+      set_index = i + 1;
+  }
+  if(set_index > 0)
+    combo_skill_set->setCurrentIndex(set_index);
+  else
+    set_id = -1;
+  combo_skill_set->blockSignals(false);
 
   /* Flags */
   chk_no_signals = true;
@@ -343,7 +384,7 @@ void EditorCategory::loadWorkingInfo()
   }
 
   /* Base Stats */
-  for(int i = 0; i < (int)Attribute::NONE; i++)
+  for(int i = 0; i <= (int)Attribute::MANN; i++)
   {
     spin_atts_base[i]->blockSignals(true);
     spin_atts_base[i]->setValue(cat_curr.getBaseSet().getStat(i));
@@ -351,7 +392,7 @@ void EditorCategory::loadWorkingInfo()
   }
 
   /* Max Stats */
-  for(int i = 0; i < (int)Attribute::NONE; i++)
+  for(int i = 0; i <= (int)Attribute::MANN; i++)
   {
     spin_atts_max[i]->blockSignals(true);
     spin_atts_max[i]->setValue(cat_curr.getTopSet().getStat(i));
@@ -490,6 +531,22 @@ void EditorCategory::changedRegenVita(QString vita)
 }
 
 /*
+ * Description: Slot triggered when the skill set drop down changes
+ *              the active index. Updates the working data with the new
+ *              skill set ID.
+ *
+ * Inputs: int index - the new index within the skill set list
+ * Output: none
+ */
+void EditorCategory::changedSet(int index)
+{
+  if(index > 0)
+    set_id = set_total[index - 1]->getID();
+  else
+    set_id = -1;
+}
+
+/*
  * Description: Slot triggered when any one spin box of the base stat group set
  *              is modified. Updates the working data with the base attribute
  *              set.
@@ -531,7 +588,7 @@ void EditorCategory::statBasePreset(int index)
 {
   if(index >= 0 && index < kMAX_PRESETS)
   {
-    cat_curr.getBaseSet().buildAsPreset(index);
+    cat_curr.getBaseSet().buildAsPreset(index + 1);
     loadWorkingInfo();
   }
 }
@@ -600,7 +657,15 @@ QString EditorCategory::getNameList()
 void EditorCategory::load(XmlData data, int index)
 {
   /* Parse elements */
-  cat_base.loadData(data, index, NULL);
+  if(data.getElement(index) == "skillset")
+  {
+    set_id_base = data.getDataInteger();
+  }
+  else
+  {
+    cat_base.loadData(data, index, NULL);
+    cat_base.triggerEditMode(true);
+  }
 }
 
 /*
@@ -614,6 +679,7 @@ void EditorCategory::load(XmlData data, int index)
 void EditorCategory::resetWorking()
 {
   cat_curr = cat_base;
+  set_id = set_id_base;
   setName(QString::fromStdString(cat_curr.getName()));
   combo_stats_base->setCurrentIndex(kMAX_PRESETS);
   combo_stats_max->setCurrentIndex(kMAX_PRESETS);
@@ -660,6 +726,10 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
     if(cat_base.getQDRegenRate() != blank.getQDRegenRate())
       fh->writeXmlData("qd_regen",
                        Helpers::regenRateToStr(cat_base.getQDRegenRate()));
+
+    /* Skill Set */
+    if(set_id_base >= 0)
+      fh->writeXmlData("skillset", set_id_base);
 
     /* Flags */
     fh->writeXmlElement("flags");
@@ -744,7 +814,7 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
 
     /* End Wrapper */
     fh->writeXmlElementEnd();
-    cat_base.triggerEditMode();
+    cat_base.triggerEditMode(true);
   }
 }
 
@@ -758,6 +828,7 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
 void EditorCategory::saveWorking()
 {
   cat_base = cat_curr;
+  set_id_base = set_id;
 }
 
 /*
@@ -783,6 +854,24 @@ void EditorCategory::setName(QString name)
   cat_curr.setName(name.toStdString());
   edit_name->setText(QString::fromStdString(cat_curr.getName()));
   emit nameChange(name);
+}
+
+/*
+ * Description: Updates the list of available skill sets within the category.
+ *              If this list removes sets previously used, they are removed
+ *              from the working set (only). If new ones are added, they are
+ *              placed in the available skill set drop down.
+ *
+ * Inputs: QVector<EditorSkillset*> sets - all available skill sets created
+ *         bool update_working - true to update working widget. default true
+ * Output: none
+ */
+void EditorCategory::updateSkillSets(QVector<EditorSkillset*> sets,
+                                     bool update_working)
+{
+  set_total = sets;
+  if(update_working)
+    loadWorkingInfo();
 }
 
 /*============================================================================

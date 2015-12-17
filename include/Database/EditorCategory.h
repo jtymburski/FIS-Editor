@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Database/EditorSkillset.h"
 #include "Database/EditorTemplate.h"
 #include "EditorHelpers.h"
 #include "Game/Player/Category.h"
@@ -67,6 +68,7 @@ private:
 
   /* Combo Box Widgets */
   QComboBox* combo_qd;
+  QComboBox* combo_skill_set;
   QComboBox* combo_stats_base;
   QComboBox* combo_stats_max;
   QComboBox* combo_vita;
@@ -78,6 +80,11 @@ private:
 
   /* Editor ID */
   int id;
+
+  /* Skill Set information */
+  int set_id;
+  int set_id_base;
+  QVector<EditorSkillset*> set_total;
 
   /* Spin Box Stack Widgets */
   QVector<QSpinBox*> spin_atts_base;
@@ -125,6 +132,7 @@ public slots:
   void changedName(QString name);
   void changedRegenQD(QString qd);
   void changedRegenVita(QString vita);
+  void changedSet(int index);
   void changedStatsBase(QString);
   void changedStatsMax(QString);
 
@@ -163,6 +171,10 @@ public:
 
   /* Sets the name of the category */
   virtual void setName(QString name);
+
+  /* Update Calls for data */
+  void updateSkillSets(QVector<EditorSkillset*> sets,
+                       bool update_working = true);
 
 /*============================================================================
  * OPERATOR FUNCTIONS

@@ -31,10 +31,6 @@
 #include "EditorEnumDb.h"
 #include "FileHandler.h"
 
-// TODO: REMOVE - TESTING
-#include "Dialog/EventDialog.h"
-#include "View/LockView.h"
-
 class GameDatabase : public QWidget
 {
   Q_OBJECT
@@ -146,6 +142,7 @@ private:
   void loadFinish();
 
   /* Update calls for objects (to fill in information required from others) */
+  void updateClasses();
   void updateItems();
   void updateParties();
   void updatePersons();

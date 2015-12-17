@@ -5,7 +5,7 @@
  * Description: Editor Skill which contains the connections to edit a skill.
  ******************************************************************************/
 #include "Database/EditorSkill.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -40,8 +40,8 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   /* Description */
   QLabel* description_label = new QLabel("Description",this);
   layout->addWidget(description_label, 1, 0);
-  description = new QTextEdit(this);
-  layout->addWidget(description, 1, 1, 1, 2);
+  descrip_edit = new QTextEdit("", this);
+  layout->addWidget(descrip_edit, 1, 1, 1, 2);
 
   /* String sets for categories and scopes */
   QStringList types;
@@ -52,7 +52,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
            "All Enemies" << "One Ally" << "One Ally (Not User)" <<
            "Two Allies" << "All Allies" << "One Fallen Ally" <<
            "All Fallen Allies" << "One Party" << "All Targets" << "Not User" <<
-           "All Targets (Not User)" << "No Scope";
+           "All Targets (Not User)";// << "No Scope";
 
   /* Primary, Secondary, and Scope selectors */
   QLabel *primary_label = new QLabel("Primary Element",this);
@@ -74,11 +74,11 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   /* Skill Flags */
   QGroupBox* skill_flags = new QGroupBox("Skill Flags",this);
   QVBoxLayout* skill_flags_layout = new QVBoxLayout();
-  skill_offensive = new QCheckBox("Offensive",this);
+  skill_offensive = new QRadioButton("Offensive",this);
   skill_flags_layout->addWidget(skill_offensive);
-  skill_defensive = new QCheckBox("Defensive",this);
+  skill_defensive = new QRadioButton("Defensive",this);
   skill_flags_layout->addWidget(skill_defensive);
-  skill_neutral = new QCheckBox("Neutral",this);
+  skill_neutral = new QRadioButton("Neutral",this);
   skill_flags_layout->addWidget(skill_neutral);
   skill_flags_layout->addStretch(1);
   skill_flags->setLayout(skill_flags_layout);
@@ -87,7 +87,7 @@ EditorSkill::EditorSkill(QWidget *parent) : QWidget(parent)
   /* Hit Message */
   QLabel* message_label = new QLabel("Hit Message",this);
   layout->addWidget(message_label, 4, 0);
-  message_edit = new QTextEdit(this);
+  message_edit = new QTextEdit("", this);
   layout->addWidget(message_edit, 4, 1, 1, 2);
 
   /* QD Cost */
@@ -361,7 +361,7 @@ Skill EditorSkill::getEditedSkill()
 
   //working.setName(name_edit->text().toStdString());
   working.setMessage(message_edit->toPlainText().toStdString());
-  working.setDescription(description->toPlainText().toStdString());
+  working.setDescription(descrip_edit->toPlainText().toStdString());
   working.setCost(cost_edit->text().toInt());
   working.setChance(chance_edit->text().toFloat());
   working.setCooldown(cooldown_edit->text().toInt());
@@ -435,8 +435,8 @@ Skill EditorSkill::getEditedSkill()
     working.setScope(ActionScope::NOT_USER);
   else if(scope_flag->currentIndex() == 14)
     working.setScope(ActionScope::ALL_NOT_USER);
-  else if(scope_flag->currentIndex() == 15)
-    working.setScope(ActionScope::NO_SCOPE);
+  //else if(scope_flag->currentIndex() == 15)
+  //  working.setScope(ActionScope::NO_SCOPE);
 
   base = working;
   sprite_anim_base = sprite_anim;
@@ -456,16 +456,22 @@ Skill EditorSkill::getEditedSkill()
 void EditorSkill::loadWorkingInfo()
 {
   name_edit->setText(name);
-  message_edit->setText((QString::fromStdString(working.getMessage())));
-  description->setText(QString::fromStdString(working.getDescription()));
+  message_edit->setText(QString::fromStdString(working.getMessage()));
+  descrip_edit->setText(QString::fromStdString(working.getDescription()));
   cost_edit->setText(QString::number(working.getCost()));
   chance_edit->setText(QString::number(working.getChance()));
   cooldown_edit->setText(QString::number(working.getCooldown()));
   value_edit->setText(QString::number(working.getValue()));
 
-  skill_offensive->setChecked(working.getFlag(SkillFlags::OFFENSIVE));
-  skill_defensive->setChecked(working.getFlag(SkillFlags::DEFENSIVE));
-  skill_neutral->setChecked(working.getFlag(SkillFlags::NEUTRAL));
+  if(working.getFlag(SkillFlags::DEFENSIVE))
+    skill_defensive->setChecked(true);
+  else if(working.getFlag(SkillFlags::NEUTRAL))
+    skill_neutral->setChecked(true);
+  else
+  {
+    skill_offensive->setChecked(true);
+    working.setFlag(SkillFlags::OFFENSIVE, true);
+  }
 
   if(working.getPrimary() == Element::PHYSICAL)
     primary_flag->setCurrentIndex(0);
@@ -531,8 +537,13 @@ void EditorSkill::loadWorkingInfo()
     scope_flag->setCurrentIndex(13);
   else if(working.getScope() == ActionScope::ALL_NOT_USER)
     scope_flag->setCurrentIndex(14);
-  else if(working.getScope() == ActionScope::NO_SCOPE)
-    scope_flag->setCurrentIndex(15);
+  else
+  {
+    scope_flag->setCurrentIndex(2); /* Default to ONE_ENEMY if non set */
+    working.setScope(ActionScope::ONE_ENEMY);
+  }
+  //else if(working.getScope() == ActionScope::NO_SCOPE)
+  //  scope_flag->setCurrentIndex(15);
 
   /* Update sprite data */
   updateAnimation();
@@ -589,6 +600,7 @@ void EditorSkill::resetWorkingSkill()
  */
 void EditorSkill::setBaseSkill(Skill s)
 {
+  s.setFlag(SkillFlags::OFFENSIVE, true);
   base = s;
   setWorkingSkill(base);
 }
@@ -806,9 +818,9 @@ void EditorSkill::save(FileHandler* fh, bool game_only)
 
       if(base.getFlag(SkillFlags::OFFENSIVE))
         fh->writeXmlData("offensive", true);
-      if(base.getFlag(SkillFlags::DEFENSIVE))
+      else if(base.getFlag(SkillFlags::DEFENSIVE))
         fh->writeXmlData("defensive", true);
-      if(base.getFlag(SkillFlags::NEUTRAL))
+      else if(base.getFlag(SkillFlags::NEUTRAL))
         fh->writeXmlData("neutral", true);
 
       fh->writeXmlElementEnd();

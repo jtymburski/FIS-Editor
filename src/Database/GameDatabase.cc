@@ -921,11 +921,17 @@ void GameDatabase::loadFinish()
 
   /* Classes finish */
   for(int i = 0; i < data_battleclass.size(); i++)
+  {
+    data_battleclass[i]->updateSkillSets(data_skillset);
     data_battleclass[i]->resetWorking();
+  }
 
   /* Races finish */
   for(int i = 0; i < data_race.size(); i++)
+  {
+    data_race[i]->updateSkillSets(data_skillset);
     data_race[i]->resetWorking();
+  }
 
   /* Item finish */
   for(int i = 0; i < data_item.size(); i++)
@@ -953,6 +959,15 @@ void GameDatabase::loadFinish()
 
   /* Update music */
   emit updatedMusic(data_sounds->getListMusic());
+}
+
+/* Update calls for objects (to fill in information required from others) */
+void GameDatabase::updateClasses()
+{
+  for(int i = 0; i < data_battleclass.size(); i++)
+    data_battleclass[i]->updateSkillSets(data_skillset);
+  for(int i = 0; i < data_race.size(); i++)
+    data_race[i]->updateSkillSets(data_skillset);
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -1096,6 +1111,7 @@ void GameDatabase::createNewResource()
                        new EditorCategory(data_race.last()->getID() + 1, name));
       else
         data_race.push_back(new EditorCategory(0, name));
+      data_race.last()->updateSkillSets(data_skillset);
       updatePersons();
       break;
     /* -- BATTLE CLASS -- */
@@ -1106,6 +1122,7 @@ void GameDatabase::createNewResource()
                 new EditorCategory(data_battleclass.last()->getID() + 1, name));
       else
         data_battleclass.push_back(new EditorCategory(0, name));
+      data_battleclass.last()->updateSkillSets(data_skillset);
       updatePersons();
       break;
     /* -- SKILL SET -- */
@@ -1117,6 +1134,7 @@ void GameDatabase::createNewResource()
       else
         data_skillset.push_back(new EditorSkillset(0, name));
       data_skillset.last()->updateSkills(data_skill);
+      updateClasses();
       break;
     /* -- SKILL -- */
     case EditorEnumDb::SKILLVIEW:
@@ -1250,6 +1268,7 @@ void GameDatabase::deleteResource()
               changeSkillSet(-1, true);
             delete data_skillset[index];
             data_skillset.remove(index);
+            updateClasses();
             break;
           /* -- SKILL -- */
           case EditorEnumDb::SKILLVIEW:
@@ -1399,21 +1418,8 @@ void GameDatabase::duplicateResource()
 void GameDatabase::importResource()
 {
   // TODO: Future
-  //QMessageBox::information(this, "Notification",
-  //                         "Coming soon to a production near you!");
-
-  // TODO: REMOVE - TESTING
-  //QDialog* pop_test = new QDialog(this);
-  //pop_test->setWindowTitle("Lock Test");
-  //QVBoxLayout* pop_layout = new QVBoxLayout(pop_test);
-  //EditorLock* lock = new EditorLock();
-  //LockView* view = new LockView(lock, pop_test);
-  //pop_layout->addWidget(view);
-  //pop_test->show();
-
-  // TODO: REMOVE - TESTING 2
-  EventDialog* dialog = new EventDialog(nullptr, this);
-  dialog->show();
+  QMessageBox::information(this, "Notification",
+                           "Coming soon to a production near you!");
 }
 
 /* Right click list menu on bottom list */
@@ -1610,6 +1616,10 @@ void GameDatabase::updateBottomListName(QString str)
     updateItems();
     updateSkillSets();
   }
+  else if(view_top->currentRow() == EditorEnumDb::SKILLSETVIEW)
+  {
+    updateClasses();
+  }
   else if(view_top->currentRow() == EditorEnumDb::BATTLECLASSVIEW ||
           view_top->currentRow() == EditorEnumDb::RACEVIEW)
   {
@@ -1630,7 +1640,7 @@ void GameDatabase::updateBottomListName(QString str)
 // TODO: Comment
 void GameDatabase::updateEventObjects()
 {
-  /* List of Items */
+  /* List of items */
   QVector<QString> item_list;
   for(int i = 0; i < data_item.size(); i++)
     item_list.push_back(data_item[i]->getNameList());

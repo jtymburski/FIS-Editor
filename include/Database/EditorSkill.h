@@ -71,7 +71,7 @@ private:
   QLabel* lbl_anim_img;
   QLabel* lbl_thumb_img;
 
-  QTextEdit* description;
+  QTextEdit* descrip_edit;
   QLineEdit* cost_edit;
   QLineEdit* chance_edit;
   QLineEdit* cooldown_edit;
@@ -87,9 +87,9 @@ private:
   QListWidget* skill_actions;
 
   QGroupBox* skill_flags;
-  QCheckBox* skill_offensive;
-  QCheckBox* skill_defensive;
-  QCheckBox* skill_neutral;
+  QRadioButton* skill_offensive;
+  QRadioButton* skill_defensive;
+  QRadioButton* skill_neutral;
 
   QPushButton* add_action_to_skill;
   QPushButton* remove_action_from_skill;
