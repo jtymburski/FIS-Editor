@@ -605,7 +605,7 @@ void EditorCategory::statMaxPreset(int index)
 {
   if(index >= 0 && index < kMAX_PRESETS)
   {
-    cat_curr.getTopSet().buildAsPreset(index);
+    cat_curr.getTopSet().buildAsPreset(index + 1);
     loadWorkingInfo();
   }
 }
@@ -827,6 +827,8 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
  */
 void EditorCategory::saveWorking()
 {
+  if(cat_base.getName() != cat_curr.getName())
+    emit nameChange(QString::fromStdString(cat_curr.getName()));
   cat_base = cat_curr;
   set_id_base = set_id;
 }
@@ -855,7 +857,7 @@ void EditorCategory::setName(QString name, bool update)
   cat_curr.setName(name.toStdString());
   if(update)
     edit_name->setText(QString::fromStdString(cat_curr.getName()));
-  emit nameChange(name);
+  //emit nameChange(name);
 }
 
 /*

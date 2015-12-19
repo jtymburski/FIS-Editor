@@ -28,7 +28,7 @@ public:
   EditorSkillset(QWidget* parent = NULL);
 
   /* Constructor function with id and name */
-  EditorSkillset(int id, QString name, QWidget* parent = NULL);
+  EditorSkillset(int id, QString name_curr, QWidget* parent = NULL);
 
   /* Copy constructor */
   EditorSkillset(const EditorSkillset &source);
@@ -40,7 +40,8 @@ private:
   /* Editor ID */
   int id;
   /* Editor Name */
-  QString name;
+  QString name_base;
+  QString name_curr;
 
   /* Buttons */
   QPushButton* btn_add;
@@ -125,7 +126,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the skillset */
-  virtual void setName(QString name, bool update = true);
+  virtual void setName(QString name_curr, bool update = true);
 
   /* Update skills */
   void updateSkills(QVector<EditorSkill*> skills);

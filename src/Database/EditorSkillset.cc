@@ -18,6 +18,9 @@
  */
 EditorSkillset::EditorSkillset(QWidget *parent) : QWidget(parent)
 {
+  name_base = "New Skill Set";
+  name_curr = name_base;
+
   /* Setup layout */
   QGridLayout* main_layout = new QGridLayout(this);
   main_layout->setColumnStretch(0, 1);
@@ -77,6 +80,7 @@ EditorSkillset::EditorSkillset(int id, QString name, QWidget* parent)
 {
   setID(id);
   setName(name);
+  saveWorking();
 }
 
 /*
@@ -111,14 +115,14 @@ EditorSkillset::~EditorSkillset()
 void EditorSkillset::copySelf(const EditorSkillset &source)
 {
   id = source.id;
-  name = source.name;
+  name_base = source.name_base;
 
   /* List data */
   set_base = source.set_base;
   set_total = source.set_total;
   set_working = set_base;
 
-  loadWorkingInfo();
+  resetWorking();
 }
 
 /*
@@ -146,7 +150,7 @@ EditorSkill* EditorSkillset::getByID(int id)
 void EditorSkillset::loadWorkingInfo()
 {
   /* Name */
-  edit_name->setText(name);
+  edit_name->setText(getName());
 
   /* Get indexes and Clear existing sets */
   int index_avail = list_available->currentRow();
@@ -287,8 +291,8 @@ void EditorSkillset::addSkill()
  */
 void EditorSkillset::nameEdited(QString str)
 {
-  name = str;
-  emit nameChange(str);
+  name_curr = str;
+  //emit nameChange(str);
 }
 
 /*
@@ -336,6 +340,7 @@ void EditorSkillset::removeSkill()
 void EditorSkillset::resetWorking()
 {
   set_working = set_base;
+  name_curr = name_base;
   loadWorkingInfo();
 }
 
@@ -349,6 +354,9 @@ void EditorSkillset::resetWorking()
 void EditorSkillset::saveWorking()
 {
   set_base = set_working;
+  if(name_base != name_curr)
+    emit nameChange(name_curr);
+  name_base = name_curr;
 }
 
 /*
@@ -361,7 +369,7 @@ void EditorSkillset::saveWorking()
 void EditorSkillset::setNameAndID(QString str)
 {
   id = (str.split(" : ").at(0).toInt());
-  name = str.split(" : ").at(1);
+  name_curr = str.split(" : ").at(1);
   loadWorkingInfo();
 }
 
@@ -388,7 +396,7 @@ int EditorSkillset::getID() const
  */
 QString EditorSkillset::getName() const
 {
-  return name;
+  return name_curr;
 }
 
 /*
@@ -414,8 +422,8 @@ void EditorSkillset::load(XmlData data, int index)
   /* Parse elements */
   if(data.getElement(index) == "name")
   {
-    name = QString::fromStdString(data.getDataString());
-    emit nameChange(name);
+    name_base = QString::fromStdString(data.getDataString());
+    emit nameChange(name_curr);
   }
   else if(data.getElement(index) == "skill")
   {
@@ -446,7 +454,7 @@ void EditorSkillset::save(FileHandler* fh, bool game_only)
     /* Base data */
     fh->writeXmlElement("skillset", "id", getID());
     if(!game_only)
-      fh->writeXmlData("name", getName().toStdString());
+      fh->writeXmlData("name", name_base.toStdString());
 
     /* Skills in the set */
     for(int i = 0; i < set_base.size(); i++)
@@ -496,7 +504,7 @@ void EditorSkillset::setID(int id)
  */
 void EditorSkillset::setName(QString name, bool update)
 {
-  this->name = name;
+  this->name_curr = name;
   if(update)
     loadWorkingInfo();
   emit nameChange(name);

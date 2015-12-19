@@ -321,7 +321,11 @@ QString EditorMapThing::getNameList()
   if(base != NULL)
     base_id = base->getID();
 
-  return EditorHelpers::getListString(getID(), getName(), base_id, true);
+  QString name = getName();
+  if(getGameID() >= 0)
+    name += "*";
+
+  return EditorHelpers::getListString(getID(), name, base_id, true);
 }
 
 /*

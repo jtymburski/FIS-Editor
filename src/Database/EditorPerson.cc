@@ -1230,6 +1230,8 @@ void EditorPerson::saveWorking()
   btnActionSprite(true);
 
   /* Save the data */
+  if(person_base.getName() != person_curr.getName())
+    emit nameChange(QString::fromStdString(person_curr.getName()));
   person_base = person_curr;
   sprite_as_base = sprite_as;
   sprite_ds_base = sprite_ds;
@@ -1290,7 +1292,7 @@ void EditorPerson::setName(QString name, bool update)
   person_curr.setName(name.toStdString());
   if(update)
     edit_name->setText(name);
-  emit nameChange(name);
+  //emit nameChange(name);
 }
 
 /*

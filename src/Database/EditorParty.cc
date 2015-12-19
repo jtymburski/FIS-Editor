@@ -948,6 +948,8 @@ void EditorParty::saveWorking()
   party_base = party_curr;
   item_set_base = item_set;
   person_set_base = person_set;
+  if(name_base != name_curr)
+    emit nameChange(name_curr);
   name_base = name_curr;
 }
 
@@ -992,7 +994,7 @@ void EditorParty::setName(QString name, bool update)
   name_curr = name;
   if(update)
     edit_name->setText(name);
-  emit nameChange(name);
+  //emit nameChange(name);
 }
 
 /*

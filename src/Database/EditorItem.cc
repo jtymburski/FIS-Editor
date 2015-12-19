@@ -1301,11 +1301,12 @@ void EditorItem::saveWorking()
   buttonThumbEdit(true);
 
   /* Save the data */
+  if(item_base.getName() != item_curr.getName())
+    emit nameChange(QString::fromStdString(item_curr.getName()));
   item_base = item_curr;
   sprite_anim_base = sprite_anim;
   sprite_thumb_base = sprite_thumb;
   skill_id_base = skill_id;
-  setName(getName());
 }
 
 /*
@@ -1367,7 +1368,7 @@ void EditorItem::setName(QString name, bool update)
   item_curr.setName(name.toStdString());
   if(update)
     edit_name->setText(name);
-  emit nameChange(name);
+  //emit nameChange(name);
 }
 
 /*
