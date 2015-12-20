@@ -1552,7 +1552,8 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
     }
 
     /* Write the tracking state */
-    if(default_path.getTracking() != getTracking())
+    if(getState() != MapNPC::LOCKED &&
+       default_path.getTracking() != getTracking())
     {
       std::string element = "tracking";
       fh->writeXmlData(element, MapNPC::getTrackingString(getTracking()));

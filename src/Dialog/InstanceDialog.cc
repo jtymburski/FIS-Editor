@@ -480,6 +480,7 @@ void InstanceDialog::updateData()
       combo_algorithm->setCurrentIndex(3);
     else if(path->getState() == MapNPC::RANDOM)
       combo_algorithm->setCurrentIndex(4);
+    comboAlgorithmChange(combo_algorithm->currentIndex());
 
     /* Combo box tracking */
     if(path->getTracking() == MapNPC::NOTRACK)
@@ -1018,6 +1019,9 @@ void InstanceDialog::comboAlgorithmChange(int index)
       btn_edit_nodes->setEnabled(false);
     else
       btn_edit_nodes->setEnabled(true);
+
+    /* Disable tracking for locked */
+    combo_tracking->setDisabled(npc->getPath()->getState() == MapNPC::LOCKED);
 
     /* Update nodes */
     updateNodes();
