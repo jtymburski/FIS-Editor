@@ -16,6 +16,8 @@ const std::string InstanceDialog::kALGO_STATES[] = {"None", "Path Circular",
                                                     "Random In Range",
                                                     "Random"};
 const int InstanceDialog::kTRACK_COUNT = 3;
+const int InstanceDialog::kTRACK_MAX = 100;
+const int InstanceDialog::kTRACK_MIN = 1;
 const std::string InstanceDialog::kTRACK_STATES[] = {"None", "Away From Player",
                                                      "To The Player"};
 
@@ -133,8 +135,9 @@ InstanceDialog::~InstanceDialog()
 void InstanceDialog::createLayout()
 {
   /* Layout setup */
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   QGridLayout* layout = new QGridLayout(this);
-  layout->setSizeConstraint(QLayout::SetFixedSize);
+  //layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setColumnStretch(3, 1);
 
   /* The ID widget */
@@ -207,7 +210,8 @@ void InstanceDialog::createLayout()
     event_view = new EventSetView(nullptr, this);
     connect(event_view, SIGNAL(editSet(EditorEventSet*)),
             this, SLOT(editEventSet(EditorEventSet*)));
-    layout->addWidget(event_view, 7, 0, 1, 4, Qt::AlignBottom);
+    layout->addWidget(event_view, 7, 0, 8, 4,
+                      Qt::AlignHCenter | Qt::AlignBottom);
   }
   /* Events that are relevant if IO - different layout */
   else
@@ -319,9 +323,41 @@ void InstanceDialog::createLayout()
             this, SLOT(checkInteractionChange(int)));
     layout->addWidget(box_interaction, 3, 6, 1, 2);
 
+    /* Tracking setpoints */
+    QLabel* lbl_track_start = new QLabel("Track Start", this);
+    layout->addWidget(lbl_track_start, 4, 5);
+    spin_track_start = new QSpinBox(this);
+    spin_track_start->setSuffix(" tiles");
+    spin_track_start->setMinimum(kTRACK_MIN);
+    spin_track_start->setMaximum(kTRACK_MAX);
+    spin_track_start->setDisabled(true);
+    connect(spin_track_start, SIGNAL(valueChanged(int)),
+            this, SLOT(trackStartChanged(int)));
+    layout->addWidget(spin_track_start, 4, 6, 1, 2);
+    QLabel* lbl_track_release = new QLabel("Track Stop", this);
+    layout->addWidget(lbl_track_release, 5, 5);
+    spin_track_release = new QSpinBox(this);
+    spin_track_release->setSuffix(" tiles");
+    spin_track_release->setMinimum(kTRACK_MIN + 2);
+    spin_track_release->setMaximum(kTRACK_MAX + 2);
+    spin_track_release->setDisabled(true);
+    connect(spin_track_release, SIGNAL(valueChanged(int)),
+            this, SLOT(trackReleaseChanged(int)));
+    layout->addWidget(spin_track_release, 5, 6, 1, 2);
+    QLabel* lbl_track_maintain = new QLabel("Track Maintain", this);
+    layout->addWidget(lbl_track_maintain, 6, 5);
+    spin_track_maintain = new QSpinBox(this);
+    spin_track_maintain->setSuffix(" tiles");
+    spin_track_maintain->setMinimum(kTRACK_MIN + 1);
+    spin_track_maintain->setMaximum(kTRACK_MAX + 1);
+    spin_track_maintain->setDisabled(true);
+    connect(spin_track_maintain, SIGNAL(valueChanged(int)),
+            this, SLOT(trackMaintainChanged(int)));
+    layout->addWidget(spin_track_maintain, 6, 6, 1, 2);
+
     /* Node control */
     QLabel* lbl_nodes = new QLabel("Nodes", this);
-    layout->addWidget(lbl_nodes, 4, 5);
+    layout->addWidget(lbl_nodes, 7, 5);
     int icon_size = 24;
     int button_size = icon_size + 6;
     btn_edit_nodes = new QPushButton(this);
@@ -329,13 +365,13 @@ void InstanceDialog::createLayout()
     btn_edit_nodes->setIconSize(QSize(icon_size,icon_size));
     btn_edit_nodes->setMaximumSize(button_size, button_size);
     connect(btn_edit_nodes, SIGNAL(clicked()), this, SLOT(buttonEditNodes()));
-    layout->addWidget(btn_edit_nodes, 4, 8, Qt::AlignRight);
+    layout->addWidget(btn_edit_nodes, 7, 8, Qt::AlignRight);
 
     /* Node list */
     list_nodes = new QListWidget(this);
     connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(editNode(QListWidgetItem*)));
-    layout->addWidget(list_nodes, 5, 5, 3, 4);
+    layout->addWidget(list_nodes, 8, 5, 7, 4);
 
     btn_offset = 5;
   }
@@ -365,6 +401,10 @@ void InstanceDialog::createLayout()
     setWindowTitle("NPC Instance Edit");
   else if(thing_type == EditorEnumDb::IO)
     setWindowTitle("IO Instance Edit");
+
+  /* Finally resize and lock size at minimum */
+  updateGeometry();
+  setFixedSize(minimumSizeHint());
 
   /* Pop-up construction for locks */
   pop_lock = new QDialog(this);
@@ -489,6 +529,18 @@ void InstanceDialog::updateData()
       combo_tracking->setCurrentIndex(1);
     else if(path->getTracking() == MapNPC::TOPLAYER)
       combo_tracking->setCurrentIndex(2);
+    comboTrackingChange(combo_tracking->currentIndex());
+
+    /* Tracking setpoints */
+    spin_track_maintain->blockSignals(true);
+    spin_track_release->blockSignals(true);
+    spin_track_start->blockSignals(true);
+    spin_track_maintain->setValue(path->getTrackDistRun());
+    spin_track_release->setValue(path->getTrackDistMax());
+    spin_track_start->setValue(path->getTrackDistMin());
+    spin_track_maintain->blockSignals(false);
+    spin_track_release->blockSignals(false);
+    spin_track_start->blockSignals(false);
 
     /* Forced interaction */
     box_interaction->setChecked(path->isForcedInteraction());
@@ -1200,6 +1252,12 @@ void InstanceDialog::comboTrackingChange(int index)
       npc->getPath()->setTracking(MapNPC::AVOIDPLAYER);
     else if(index == 2)
       npc->getPath()->setTracking(MapNPC::TOPLAYER);
+
+    /* Enable/Disable of setpoint widgets */
+    MapNPC::TrackingState state = npc->getPath()->getTracking();
+    spin_track_maintain->setEnabled(state == MapNPC::AVOIDPLAYER);
+    spin_track_release->setEnabled(state != MapNPC::NOTRACK);
+    spin_track_start->setEnabled(state != MapNPC::NOTRACK);
   }
 }
 
@@ -1339,6 +1397,53 @@ void InstanceDialog::speedChanged(int value)
     lbl_speed_result->setText(QString::number(4096 / value) + " ms/tile");
   else
     lbl_speed_result->setText("0 ms/tile");
+}
+
+/* Tracking setpoint changed */
+// TODO: Comment
+void InstanceDialog::trackMaintainChanged(int value)
+{
+  if(thing_type == EditorEnumDb::NPC && value > 0)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+    npc->getPath()->setTrackDistRun(value);
+
+    /* Ensure associated values are within range */
+    if(value <= spin_track_start->value())
+      spin_track_start->setValue(value - 1);
+    else if(value >= spin_track_release->value())
+      spin_track_release->setValue(value + 1);
+  }
+}
+
+/* Tracking setpoint changed */
+// TODO: Comment
+void InstanceDialog::trackReleaseChanged(int value)
+{
+  if(thing_type == EditorEnumDb::NPC && value > 0)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+    npc->getPath()->setTrackDistMax(value);
+
+    /* Ensure associated values are within range */
+    if(value <= spin_track_maintain->value())
+      spin_track_maintain->setValue(value - 1);
+  }
+}
+
+/* Tracking setpoint changed */
+// TODO: Comment
+void InstanceDialog::trackStartChanged(int value)
+{
+  if(thing_type == EditorEnumDb::NPC && value > 0)
+  {
+    EditorMapNPC* npc = (EditorMapNPC*)thing_working;
+    npc->getPath()->setTrackDistMin(value);
+
+    /* Ensure associated values are within range */
+    if(value >= spin_track_maintain->value())
+      spin_track_maintain->setValue(value + 1);
+  }
 }
 
 /*============================================================================

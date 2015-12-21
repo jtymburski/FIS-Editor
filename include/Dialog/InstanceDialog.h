@@ -98,8 +98,11 @@ private:
   /* Pop-ups within the dialog */
   QDialog* pop_lock;
 
-  /* The speed control value */
+  /* Spin control widgets */
   QSpinBox* spin_speed;
+  QSpinBox* spin_track_maintain;
+  QSpinBox* spin_track_release;
+  QSpinBox* spin_track_start;
 
   /* The working and original thing */
   EditorEnumDb::Layer thing_type;
@@ -115,6 +118,8 @@ private:
   static const int kALGO_COUNT;
   static const std::string kALGO_STATES[];
   static const int kTRACK_COUNT;
+  static const int kTRACK_MAX;
+  static const int kTRACK_MIN;
   static const std::string kTRACK_STATES[];
 
 /*============================================================================
@@ -208,6 +213,11 @@ public slots:
 
   /* Speed changed */
   void speedChanged(int value);
+
+  /* Tracking setpoint changed */
+  void trackMaintainChanged(int value);
+  void trackReleaseChanged(int value);
+  void trackStartChanged(int value);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

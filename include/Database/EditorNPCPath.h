@@ -71,6 +71,11 @@ private:
   /* Sets the path state */
   MapNPC::NodeState state;
 
+  /* Tracking setpoints */
+  int track_dist_max;
+  int track_dist_min;
+  int track_dist_run;
+
   /* Tracking properties */
   MapNPC::TrackingState tracking;
 
@@ -182,6 +187,11 @@ public:
   /* Returns the state of the path */
   MapNPC::NodeState getState();
 
+  /* Returns tracking distance setpoints */
+  int getTrackDistMax();
+  int getTrackDistMin();
+  int getTrackDistRun();
+
   /* Returns the tracking state of the npc on the path */
   MapNPC::TrackingState getTracking();
 
@@ -202,14 +212,14 @@ public:
   bool isVisibleEdit();
 
   /* Loads the path data */
-  void load(XmlData data, int index); // TODO
+  void load(XmlData data, int index);
 
   /* Painting function for Path Wrapper - virtual */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem*,
              QWidget*);
 
   /* Saves the path data */
-  void save(FileHandler* fh, bool game_only = false); // TODO
+  void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the color of the path */
   bool setColor(int r, int g, int b, int a = kCOLOR_ALPHA);
@@ -233,6 +243,11 @@ public:
 
   /* Sets the path state */
   void setState(MapNPC::NodeState state);
+
+  /* Sets the tracking distance setpoints */
+  bool setTrackDistMax(int dist);
+  bool setTrackDistMin(int dist);
+  bool setTrackDistRun(int dist);
 
   /* Sets the tracking state of the npc on the path */
   void setTracking(MapNPC::TrackingState tracking);

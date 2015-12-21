@@ -58,6 +58,9 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   index_select = -2;
   interact = false;
   state = MapNPC::LOOPED;
+  track_dist_max = MapNPC::kTRACK_DIST_MAX;
+  track_dist_min = MapNPC::kTRACK_DIST_MIN;
+  track_dist_run = MapNPC::kTRACK_DIST_RUN;
   tracking = MapNPC::NOTRACK;
   visible_by_control = true;
   visible_by_edit = true;
@@ -132,6 +135,9 @@ void EditorNPCPath::copySelf(const EditorNPCPath &source)
   nodes = source.nodes;
   start_node = source.start_node;
   state = source.state;
+  track_dist_max = source.track_dist_max;
+  track_dist_min = source.track_dist_min;
+  track_dist_run = source.track_dist_run;
   tracking = source.tracking;
 
   update();
@@ -1251,6 +1257,27 @@ MapNPC::NodeState EditorNPCPath::getState()
   return state;
 }
 
+/* Returns tracking distance setpoints */
+// TODO: Comment
+int EditorNPCPath::getTrackDistMax()
+{
+  return track_dist_max;
+}
+
+/* Returns tracking distance setpoints */
+// TODO: Comment
+int EditorNPCPath::getTrackDistMin()
+{
+  return track_dist_min;
+}
+
+/* Returns tracking distance setpoints */
+// TODO: Comment
+int EditorNPCPath::getTrackDistRun()
+{
+  return track_dist_run;
+}
+
 /*
  * Description: Sets the tracking of the NPC node on the path, as per the enum
  *              defined in the MapNPC::TrackingState.
@@ -1446,6 +1473,21 @@ void EditorNPCPath::load(XmlData data, int index)
     else if(state == "locked")
       setState(MapNPC::LOCKED);
   }
+  /* -- TRACKING DIST MAX -- */
+  else if(element == "trackmax")
+  {
+    setTrackDistMax(data.getDataInteger());
+  }
+  /* -- TRACKING DIST MIN -- */
+  else if(element == "trackmin")
+  {
+    setTrackDistMin(data.getDataInteger());
+  }
+  /* -- TRACKING DIST RUN -- */
+  else if(element == "trackrun")
+  {
+    setTrackDistRun(data.getDataInteger());
+  }
   /* -- TRACKING STATE -- */
   else if(element == "tracking")
   {
@@ -1551,12 +1593,31 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
       fh->writeXmlData(element, MapNPC::getNodeString(getState()));
     }
 
-    /* Write the tracking state */
-    if(getState() != MapNPC::LOCKED &&
-       default_path.getTracking() != getTracking())
+    /* Write the tracking state and setpoints */
+    if(getState() != MapNPC::LOCKED)
     {
-      std::string element = "tracking";
-      fh->writeXmlData(element, MapNPC::getTrackingString(getTracking()));
+      /* Write the state */
+      if(default_path.getTracking() != getTracking())
+      {
+        std::string element = "tracking";
+        fh->writeXmlData(element, MapNPC::getTrackingString(getTracking()));
+      }
+
+      /* Write the setpoints */
+      if(getTracking() != MapNPC::NOTRACK)
+      {
+        /* Max */
+        if(default_path.getTrackDistMax() != getTrackDistMax())
+          fh->writeXmlData("trackmax", getTrackDistMax());
+
+        /* Min */
+        if(default_path.getTrackDistMin() != getTrackDistMin())
+          fh->writeXmlData("trackmin", getTrackDistMin());
+
+        /* Run */
+        if(default_path.getTrackDistRun() != getTrackDistRun())
+          fh->writeXmlData("trackrun", getTrackDistRun());
+      }
     }
 
     /* Write the forced interaction state */
@@ -1807,6 +1868,42 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
 
     unsetAllIndexes();
   }
+}
+
+/* Sets the tracking distance setpoints */
+// TODO: Comment
+bool EditorNPCPath::setTrackDistMax(int dist)
+{
+  if(dist > 0)
+  {
+    track_dist_max = dist;
+    return true;
+  }
+  return false;
+}
+
+/* Sets the tracking distance setpoints */
+// TODO: Comment
+bool EditorNPCPath::setTrackDistMin(int dist)
+{
+  if(dist > 0)
+  {
+    track_dist_min = dist;
+    return true;
+  }
+  return false;
+}
+
+/* Sets the tracking distance setpoints */
+// TODO: Comment
+bool EditorNPCPath::setTrackDistRun(int dist)
+{
+  if(dist > 0)
+  {
+    track_dist_run = dist;
+    return true;
+  }
+  return false;
 }
 
 /*
