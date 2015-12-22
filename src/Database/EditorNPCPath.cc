@@ -1607,16 +1607,18 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
       if(getTracking() != MapNPC::NOTRACK)
       {
         /* Max */
-        if(default_path.getTrackDistMax() != getTrackDistMax())
-          fh->writeXmlData("trackmax", getTrackDistMax());
+        if(getState() != MapNPC::RANDOM)
+          if(default_path.getTrackDistMax() != getTrackDistMax())
+            fh->writeXmlData("trackmax", getTrackDistMax());
 
         /* Min */
         if(default_path.getTrackDistMin() != getTrackDistMin())
           fh->writeXmlData("trackmin", getTrackDistMin());
 
         /* Run */
-        if(default_path.getTrackDistRun() != getTrackDistRun())
-          fh->writeXmlData("trackrun", getTrackDistRun());
+        if(getTracking() == MapNPC::AVOIDPLAYER)
+          if(default_path.getTrackDistRun() != getTrackDistRun())
+            fh->writeXmlData("trackrun", getTrackDistRun());
       }
     }
 

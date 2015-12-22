@@ -1072,7 +1072,8 @@ void InstanceDialog::comboAlgorithmChange(int index)
     else
       btn_edit_nodes->setEnabled(true);
 
-    /* Disable tracking for locked */
+    /* Disable tracking for locked and update child widgets */
+    comboTrackingChange(combo_tracking->currentIndex());
     combo_tracking->setDisabled(npc->getPath()->getState() == MapNPC::LOCKED);
 
     /* Update nodes */
@@ -1254,10 +1255,15 @@ void InstanceDialog::comboTrackingChange(int index)
       npc->getPath()->setTracking(MapNPC::TOPLAYER);
 
     /* Enable/Disable of setpoint widgets */
+    MapNPC::NodeState node_state = npc->getPath()->getState();
     MapNPC::TrackingState state = npc->getPath()->getTracking();
-    spin_track_maintain->setEnabled(state == MapNPC::AVOIDPLAYER);
-    spin_track_release->setEnabled(state != MapNPC::NOTRACK);
-    spin_track_start->setEnabled(state != MapNPC::NOTRACK);
+    spin_track_maintain->setEnabled(state == MapNPC::AVOIDPLAYER &&
+                                    node_state != MapNPC::LOCKED);
+    spin_track_release->setEnabled(state != MapNPC::NOTRACK &&
+                                   node_state != MapNPC::RANDOM &&
+                                   node_state != MapNPC::LOCKED);
+    spin_track_start->setEnabled(state != MapNPC::NOTRACK &&
+                                 node_state != MapNPC::LOCKED);
   }
 }
 
