@@ -5,7 +5,7 @@
  * Description: A tile representation in a single map
  ******************************************************************************/
 #include "Database/EditorTile.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
 const uint8_t EditorTile::kLOWER_COUNT_MAX = 5;
@@ -1158,6 +1158,7 @@ void EditorTile::paint(QPainter *painter,
       persons[i].thing->paint(0, painter, bound,
                               x_pos - persons[i].thing->getX(),
                               y_pos - persons[i].thing->getY());
+
     /* Paint the npc */
     else if(npcs[i].visible && npcs[i].thing != NULL)
       npcs[i].thing->paint(0, painter, bound,

@@ -614,6 +614,12 @@ void Application::playFinished(int)
   QString play_file = EditorHelpers::getProjectDir() +
                       "/../Editor/exports/xXx_TMP_xXx.utv";
 
+  /* Output the command line info */
+  qDebug() << " -- PLAY OUTPUT -- ";
+  qDebug() << run_process.readAll();
+  qDebug() << " -- END -- ";
+
+  /* Re-enable and remove the file */
   setEnabled(true);
   QFile::remove(play_file);
 }

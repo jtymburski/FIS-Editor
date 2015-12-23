@@ -36,7 +36,9 @@ private:
   QPushButton* btn_item_add;
   QPushButton* btn_item_rem;
   QPushButton* btn_person_add;
+  QPushButton* btn_person_down;
   QPushButton* btn_person_rem;
+  QPushButton* btn_person_up;
 
   /* Combo Box Widgets */
   QComboBox* combo_classify;
@@ -116,7 +118,9 @@ public slots:
   void btnItemAdd();
   void btnItemRemove();
   void btnPersonAdd();
+  void btnPersonDown();
   void btnPersonRemove();
+  void btnPersonUp();
   void btnReset();
   void btnSave();
 

@@ -176,9 +176,10 @@ void InstanceDialog::createLayout()
           this, SLOT(comboPartyChange(int)));
   layout->addWidget(combo_party, 4, 1, 1, 3);
 
-  /* Speed settings */
+  /* Person/NPC exclusive settings */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
   {
+    /* Speed */
     QLabel* lbl_speed = new QLabel("Speed", this);
     layout->addWidget(lbl_speed, 5, 0);
     spin_speed = new QSpinBox(this);
@@ -193,6 +194,18 @@ void InstanceDialog::createLayout()
     connect(box_base_speed, SIGNAL(stateChanged(int)),
             this, SLOT(checkBaseSpeed(int)));
     layout->addWidget(box_base_speed, 5, 3);
+
+    /* Default direction */
+    QLabel* lbl_dir = new QLabel("Direction", this);
+    layout->addWidget(lbl_dir, 6, 0);
+    combo_dir = new QComboBox(this);
+    combo_dir->addItem("North");
+    combo_dir->addItem("East");
+    combo_dir->addItem("South");
+    combo_dir->addItem("West");
+    connect(combo_dir, SIGNAL(currentIndexChanged(QString)),
+            this, SLOT(comboDirectionChange(QString)));
+    layout->addWidget(combo_dir, 6, 1, 1, 2);
   }
 
   /* Events that are relevant if not IO */
@@ -204,85 +217,85 @@ void InstanceDialog::createLayout()
             this, SLOT(checkBaseChange(int)));
     //if(thing_type == EditorEnumDb::IO)
     //  box_base_event->setDisabled(true);
-    layout->addWidget(box_base_event, 6, 1, 1, 2);
+    layout->addWidget(box_base_event, 7, 1, 1, 2, Qt::AlignBottom);
 
     /* Event View */
     event_view = new EventSetView(nullptr, this);
     connect(event_view, SIGNAL(editSet(EditorEventSet*)),
             this, SLOT(editEventSet(EditorEventSet*)));
-    layout->addWidget(event_view, 7, 0, 8, 4,
+    layout->addWidget(event_view, 8, 0, 8, 4,
                       Qt::AlignHCenter | Qt::AlignBottom);
   }
   /* Events that are relevant if IO - different layout */
   else
   {
     /* Lock data */
-    layout->setRowMinimumHeight(6, 9);
+    layout->setRowMinimumHeight(7, 9);
     QLabel* lbl_lock = new QLabel("Lock", this);
-    layout->addWidget(lbl_lock, 7, 0);
+    layout->addWidget(lbl_lock, 8, 0);
     box_lock_base = new QCheckBox("Use Base", this);
     connect(box_lock_base, SIGNAL(stateChanged(int)),
             this, SLOT(checkLockBase(int)));
-    layout->addWidget(box_lock_base, 7, 1);
+    layout->addWidget(box_lock_base, 8, 1);
     lbl_lock_data = new QLabel("UNCONNECTED", this);
     lbl_lock_data->setStyleSheet("border: 1px solid #a8a8a8");
-    layout->addWidget(lbl_lock_data, 8, 1, 1, 2);
+    layout->addWidget(lbl_lock_data, 9, 1, 1, 2);
     btn_lock = new QPushButton("View", this);
     connect(btn_lock, SIGNAL(clicked()), this, SLOT(buttonLockEdit()));
-    layout->addWidget(btn_lock, 8, 3);
-    layout->setRowMinimumHeight(9, 9);
+    layout->addWidget(btn_lock, 9, 3);
+    layout->setRowMinimumHeight(10, 9);
 
     /* Overall state data */
     QLabel* lbl_states = new QLabel("States", this);
-    layout->addWidget(lbl_states, 10, 0);
+    layout->addWidget(lbl_states, 11, 0);
     combo_states = new QComboBox(this);
     connect(combo_states, SIGNAL(currentIndexChanged(int)),
             this, SLOT(comboStateChange(int)));
-    layout->addWidget(combo_states, 10, 1, 1, 3);
+    layout->addWidget(combo_states, 11, 1, 1, 3);
 
     /* State enter */
     QLabel* lbl_states_enter = new QLabel("Enter", this);
-    layout->addWidget(lbl_states_enter, 11, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_enter, 12, 1, Qt::AlignRight);
     btn_states_enter = new QPushButton("View", this);
     connect(btn_states_enter, SIGNAL(clicked()), this, SLOT(buttonStateEnter()));
-    layout->addWidget(btn_states_enter, 11, 2);
+    layout->addWidget(btn_states_enter, 12, 2);
     box_states_enter = new QCheckBox("Use Base", this);
     connect(box_states_enter, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateEnter(int)));
-    layout->addWidget(box_states_enter, 11, 3);
+    layout->addWidget(box_states_enter, 12, 3);
 
     /* State exit */
     QLabel* lbl_states_exit = new QLabel("Exit", this);
-    layout->addWidget(lbl_states_exit, 12, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_exit, 13, 1, Qt::AlignRight);
     btn_states_exit = new QPushButton("View", this);
     connect(btn_states_exit, SIGNAL(clicked()), this, SLOT(buttonStateExit()));
-    layout->addWidget(btn_states_exit, 12, 2);
+    layout->addWidget(btn_states_exit, 13, 2);
     box_states_exit = new QCheckBox("Use Base", this);
     connect(box_states_exit, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateExit(int)));
-    layout->addWidget(box_states_exit, 12, 3);
+    layout->addWidget(box_states_exit, 13, 3);
 
     /* State use */
     QLabel* lbl_states_use = new QLabel("Use", this);
-    layout->addWidget(lbl_states_use, 13, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_use, 14, 1, Qt::AlignRight);
     btn_states_use = new QPushButton("View", this);
     connect(btn_states_use, SIGNAL(clicked()), this, SLOT(buttonStateUse()));
-    layout->addWidget(btn_states_use, 13, 2);
+    layout->addWidget(btn_states_use, 14, 2);
     box_states_use = new QCheckBox("Use Base", this);
     connect(box_states_use, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateUse(int)));
-    layout->addWidget(box_states_use, 13, 3);
+    layout->addWidget(box_states_use, 14, 3);
 
     /* State walkover */
     QLabel* lbl_states_walk = new QLabel("Walkover", this);
-    layout->addWidget(lbl_states_walk, 14, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_walk, 15, 1, Qt::AlignRight);
     btn_states_walk = new QPushButton("View", this);
     connect(btn_states_walk, SIGNAL(clicked()), this, SLOT(buttonStateWalk()));
-    layout->addWidget(btn_states_walk, 14, 2);
+    layout->addWidget(btn_states_walk, 15, 2);
     box_states_walk = new QCheckBox("Use Base", this);
     connect(box_states_walk, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateWalk(int)));
-    layout->addWidget(box_states_walk, 14, 3);
+    layout->addWidget(box_states_walk, 15, 3);
   }
 
   /* Movement section only relevant if npc */
@@ -371,26 +384,26 @@ void InstanceDialog::createLayout()
     list_nodes = new QListWidget(this);
     connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(editNode(QListWidgetItem*)));
-    layout->addWidget(list_nodes, 8, 5, 7, 4);
+    layout->addWidget(list_nodes, 8, 5, 8, 4);
 
     btn_offset = 5;
   }
 
   /* The button control */
-  layout->setRowMinimumHeight(15, 15);
+  layout->setRowMinimumHeight(16, 15);
   QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
   btn_base_edit->setMaximumWidth(75);
   connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
-  layout->addWidget(btn_base_edit, 16, 0);
+  layout->addWidget(btn_base_edit, 17, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 16, 2 + btn_offset);
+  layout->addWidget(btn_ok, 17, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   btn_cancel->setMaximumWidth(75);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 16, 3 + btn_offset);
+  layout->addWidget(btn_cancel, 17, 3 + btn_offset);
 
   /* Dialog control */
   if(thing_type == EditorEnumDb::THING)
@@ -463,12 +476,23 @@ void InstanceDialog::updateData()
       combo_party->setCurrentIndex(i + 1);
   }
 
-  /* Speed */
+  /* Person/NPC specific settings */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
   {
-    spin_speed->setValue(((EditorMapPerson*)thing_working)->getSpeed());
-    box_base_speed->setChecked(
-                              ((EditorMapPerson*)thing_working)->isBaseSpeed());
+    EditorMapPerson* ref = (EditorMapPerson*)thing_working;
+    /* Speed */
+    spin_speed->setValue(ref->getSpeed());
+    box_base_speed->setChecked(ref->isBaseSpeed());
+
+    /* Starting direction */
+    if(ref->getStartingDirection() == Direction::NORTH)
+      combo_dir->setCurrentIndex(0);
+    else if(ref->getStartingDirection() == Direction::EAST)
+      combo_dir->setCurrentIndex(1);
+    else if(ref->getStartingDirection() == Direction::SOUTH)
+      combo_dir->setCurrentIndex(2);
+    else if(ref->getStartingDirection() == Direction::WEST)
+      combo_dir->setCurrentIndex(3);
   }
 
   /* Event control */
@@ -510,6 +534,7 @@ void InstanceDialog::updateData()
     EditorNPCPath* path = npc->getPath();
 
     /* Combo box algorithm */
+    combo_algorithm->blockSignals(true);
     if(path->getState() == MapNPC::LOCKED)
       combo_algorithm->setCurrentIndex(0);
     else if(path->getState() == MapNPC::LOOPED)
@@ -520,16 +545,17 @@ void InstanceDialog::updateData()
       combo_algorithm->setCurrentIndex(3);
     else if(path->getState() == MapNPC::RANDOM)
       combo_algorithm->setCurrentIndex(4);
-    comboAlgorithmChange(combo_algorithm->currentIndex());
+    combo_algorithm->blockSignals(false);
 
     /* Combo box tracking */
+    combo_tracking->blockSignals(true);
     if(path->getTracking() == MapNPC::NOTRACK)
       combo_tracking->setCurrentIndex(0);
     else if(path->getTracking() == MapNPC::AVOIDPLAYER)
       combo_tracking->setCurrentIndex(1);
     else if(path->getTracking() == MapNPC::TOPLAYER)
       combo_tracking->setCurrentIndex(2);
-    comboTrackingChange(combo_tracking->currentIndex());
+    combo_tracking->blockSignals(false);
 
     /* Tracking setpoints */
     spin_track_maintain->blockSignals(true);
@@ -545,8 +571,10 @@ void InstanceDialog::updateData()
     /* Forced interaction */
     box_interaction->setChecked(path->isForcedInteraction());
 
-    /* Nodes */
+    /* Nodes and updates */
     updateNodes();
+    comboAlgorithmChange(combo_algorithm->currentIndex());
+    comboTrackingChange(combo_tracking->currentIndex());
   }
 }
 
@@ -1082,6 +1110,24 @@ void InstanceDialog::comboAlgorithmChange(int index)
 }
 
 /*
+ * Description: Slot triggered when the combo box for the initial facing
+ *              direction of the person/npc is changed. This changes it within
+ *              the class.
+ *
+ * Inputs: QString item - the new selected item in the combo box
+ * Output: none
+ */
+void InstanceDialog::comboDirectionChange(QString item)
+{
+  if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
+  {
+    EditorMapPerson* ref = (EditorMapPerson*)thing_working;
+    Direction dir = Helpers::directionFromString(item.toStdString());
+    ref->setStartingDirection(dir);
+  }
+}
+
+/*
  * Description: Slot triggered when the combo box for the selected party of
  *              the thing is changed. This changes the party index.
  *
@@ -1405,8 +1451,15 @@ void InstanceDialog::speedChanged(int value)
     lbl_speed_result->setText("0 ms/tile");
 }
 
-/* Tracking setpoint changed */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the spin box changes and sets the tracking
+ *              distance run in tile count when the
+ *              tracking NPC which is set to keep away from the player attempts
+ *              to maintain this distance at all times.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the keep away
+ */
 void InstanceDialog::trackMaintainChanged(int value)
 {
   if(thing_type == EditorEnumDb::NPC && value > 0)
@@ -1422,8 +1475,14 @@ void InstanceDialog::trackMaintainChanged(int value)
   }
 }
 
-/* Tracking setpoint changed */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the spin box changes and sets the tracking
+ *              distance max in tile count when the tracking NPC releases its
+ *              hold on the player.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the max
+ */
 void InstanceDialog::trackReleaseChanged(int value)
 {
   if(thing_type == EditorEnumDb::NPC && value > 0)
@@ -1437,8 +1496,14 @@ void InstanceDialog::trackReleaseChanged(int value)
   }
 }
 
-/* Tracking setpoint changed */
-// TODO: Comment
+/*
+ * Description: Slot triggered when the spin box changes and sets the tracking
+ *              distance min in tile count when the tracking NPC initiates its
+ *              hold on the player and follows or runs away.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the min
+ */
 void InstanceDialog::trackStartChanged(int value)
 {
   if(thing_type == EditorEnumDb::NPC && value > 0)
@@ -1669,13 +1734,41 @@ void InstanceDialog::updateOriginal()
   {
     /* Copy the data for the thing */
     if(thing_type == EditorEnumDb::THING)
+    {
       *thing_original = *thing_working;
+    }
     else if(thing_type == EditorEnumDb::PERSON)
-      *((EditorMapPerson*)thing_original) = *((EditorMapPerson*)thing_working);
+    {
+      EditorMapPerson* ref_orig = (EditorMapPerson*)thing_original;
+      EditorMapPerson* ref_work = (EditorMapPerson*)thing_working;
+      bool dir_changed = (ref_orig->getStartingDirection() !=
+                          ref_work->getStartingDirection());
+
+      /* Update references */
+      *ref_orig = *ref_work;
+
+      /* If dir changed, emit accordingly */
+      if(dir_changed)
+        emit personChanged(ref_orig);
+    }
     else if(thing_type == EditorEnumDb::NPC)
-      *((EditorMapNPC*)thing_original) = *((EditorMapNPC*)thing_working);
+    {
+      EditorMapNPC* ref_orig = (EditorMapNPC*)thing_original;
+      EditorMapNPC* ref_work = (EditorMapNPC*)thing_working;
+      bool dir_changed = (ref_orig->getStartingDirection() !=
+                          ref_work->getStartingDirection());
+
+      /* Update references */
+      *ref_orig = *ref_work;
+
+      /* If dir changed, emit accordingly */
+      if(dir_changed)
+        emit personChanged(ref_orig);
+    }
     else if(thing_type == EditorEnumDb::IO)
+    {
       *((EditorMapIO*)thing_original) = *((EditorMapIO*)thing_working);
+    }
   }
 }
 

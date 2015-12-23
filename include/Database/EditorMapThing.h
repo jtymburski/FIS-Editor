@@ -93,7 +93,7 @@ public:
   virtual int getID() const;
 
   /* Returns the matrix in the thing class */
-  EditorMatrix* getMatrix() const;
+  virtual EditorMatrix* getMatrix() const;
 
   /* Gets the user submitted name of the thing */
   virtual QString getName() const;

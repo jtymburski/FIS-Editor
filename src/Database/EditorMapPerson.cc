@@ -15,7 +15,7 @@ const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
- 
+
 /*
  * Description: Main constructor function. All parameters have blank defaults.
  *
@@ -98,9 +98,10 @@ void EditorMapPerson::initializeMatrixes()
   }
 
   /* Set the initial frames in the thing */
-  setMatrix(getState(MapPerson::SurfaceClassifier::GROUND, Direction::SOUTH));
+  setMatrix(getState(MapPerson::SurfaceClassifier::GROUND,
+                     getStartingDirection()), true);
 }
-  
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -123,6 +124,7 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
 
   /* Person data */
   setSpeed(source.getSpeed());
+  setStartingDirection(source.getStartingDirection());
   setUseBaseSpeed(source.isBaseSpeed());
 }
 
@@ -173,8 +175,17 @@ void EditorMapPerson::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   }
   else
   {
+    /* Speed */
     if(!isBaseSpeed())
       fh->writeXmlData("speed", getSpeed());
+
+    /* Starting direction */
+    if(default_person.getStartingDirection() != getStartingDirection())
+    {
+      std::string dir_str = Helpers::directionToString(getStartingDirection());
+      std::transform(dir_str.begin(),dir_str.end(),dir_str.begin(),::tolower);
+      fh->writeXmlData("startingdir", dir_str);
+    }
   }
 }
 
@@ -193,6 +204,18 @@ EditorMapPerson* EditorMapPerson::getBasePerson() const
   if(getBaseThing() != NULL)
     return (EditorMapPerson*)getBaseThing();
   return NULL;
+}
+
+/*
+ * Description: Returns the matrix from the base associated to the current
+ *              direction.
+ *
+ * Inputs: none
+ * Output: EditorMatrix* - the matrix with the given starting direction
+ */
+EditorMatrix* EditorMapPerson::getMatrix() const
+{
+  return getState(MapPerson::GROUND, getStartingDirection());
 }
 
 /*
@@ -224,6 +247,17 @@ uint16_t EditorMapPerson::getSpeed() const
 }
 
 /*
+ * Description: Returns the starting facing direction of the person
+ *
+ * Inputs: none
+ * Output: Direction - the facing direction enum
+ */
+Direction EditorMapPerson::getStartingDirection() const
+{
+  return person.getStartingDirection();
+}
+
+/*
  * Description: Returns the matrix that is connected with the surface
  *              definition and the direction. Returns NULL if unset or
  *              invalid.
@@ -233,7 +267,7 @@ uint16_t EditorMapPerson::getSpeed() const
  * Output: EditorMatrix* - matrix reference, that defines the sprite data
  */
 EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
-                                        Direction direction)
+                                        Direction direction) const
 {
   int surface_index = static_cast<int>(surface);
   int dir_index = MapPerson::dirToInt(direction);
@@ -375,6 +409,10 @@ void EditorMapPerson::load(XmlData data, int index)
     if(getBasePerson() != NULL)
       setUseBaseSpeed(false);
   }
+  else if(element == "startingdir")
+  {
+    person.addThingInformation(data, index, -1, nullptr, "");
+  }
   else
   {
     EditorMapThing::load(data, index);
@@ -430,6 +468,25 @@ void EditorMapPerson::setBase(EditorMapPerson* person)
 void EditorMapPerson::setSpeed(uint16_t speed)
 {
   person.setSpeed(speed);
+}
+
+/*
+ * Description: Sets the person starting facing direction. This is used on
+ *              initial creation and certain inactive cases.
+ *
+ * Inputs: Direction starting - the starting direction facing of the person
+ * Output: bool - returns if the direction was set
+ */
+bool EditorMapPerson::setStartingDirection(Direction starting)
+{
+  if(person.setStartingDirection(starting))
+  {
+    /* Set the initial frames in the thing */
+    //setMatrix(getState(MapPerson::SurfaceClassifier::GROUND,
+    //                   getStartingDirection()));
+    return true;
+  }
+  return false;
 }
 
 /*

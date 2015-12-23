@@ -658,7 +658,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
           data.getElement(index + 2) == "y")
   {
     /* Determine the layer */
-    EditorEnumDb::Layer layer;
+    EditorEnumDb::Layer layer = EditorEnumDb::NO_LAYER;
     if(element == "base")
       layer = EditorEnumDb::BASE;
     else if(element == "enhancer")
@@ -1601,6 +1601,25 @@ bool EditorMap::updateHoverThing(bool unset)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Updates the given tile range within the sub-map
+ *
+ * Inputs: int x - the x top left tile location
+ *         int y - the y top left tile location
+ *         int w - the width of tiles for the update
+ *         int h - the height of tiles for the update
+ * Output: none
+ */
+void EditorMap::updateTiles(SubMapInfo* map, int x, int y, int w, int h)
+{
+  if(map != nullptr)
+  {
+    for(int i = x; i < map->tiles.size() && i < (x + w); i++)
+      for(int j = y; j < map->tiles[i].size() && j < (y + h); j++)
+        map->tiles[i][j]->update();
+  }
 }
 
 /*============================================================================
@@ -3520,6 +3539,24 @@ QVector<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
   }
 
   return stack;
+}
+
+/*
+ * Description: Returns the sub map index of the person instance reference.
+ *
+ * Inputs: EditorMapPerson* ref - the reference of the person pointer
+ * Output: SubMapInfo* - the reference sub map
+ */
+SubMapInfo* EditorMap::getPersonSub(EditorMapPerson* ref)
+{
+  if(ref != nullptr && ref->getBasePerson() != nullptr)
+  {
+    for(int i = 0; i < sub_maps.size(); i++)
+      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+        if(sub_maps[i]->persons[j] == ref)
+          return sub_maps[i];
+  }
+  return nullptr;
 }
 
 /*
@@ -5808,6 +5845,21 @@ void EditorMap::updateAll()
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
         sub_maps[i]->tiles[j][k]->update();
+}
+
+/*
+ * Description: Updates the tiles related to the thing, assuming its an
+ *              instant and is placed on the map
+ *
+ * Inputs: EditorMapPerson* ref - the reference person to determine the tile set
+ * Output: none
+ */
+void EditorMap::updateTiles(EditorMapPerson* ref)
+{
+  SubMapInfo* sub_ref = getPersonSub(ref);
+  if(sub_ref != nullptr)
+    updateTiles(getPersonSub(ref), ref->getX(), ref->getY(),
+                ref->getMatrix()->getWidth(), ref->getMatrix()->getHeight());
 }
 
 /*

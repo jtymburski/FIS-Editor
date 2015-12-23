@@ -56,6 +56,7 @@ private:
 
   /* Combo box control for algorithms and tracking */
   QComboBox* combo_algorithm;
+  QComboBox* combo_dir;
   QComboBox* combo_party;
   QComboBox* combo_states;
   QComboBox* combo_tracking;
@@ -158,6 +159,9 @@ signals:
   /* Path edit start trigger */
   void pathEditStart(EditorNPCPath*);
 
+  /* Person direction changed on base */
+  void personChanged(EditorMapPerson* ref);
+
   /* Select tile trigger */
   void selectTile(EditorEnumDb::MapObjectMode view);
 
@@ -194,6 +198,7 @@ public slots:
 
   /* Combo box triggers */
   void comboAlgorithmChange(int index);
+  void comboDirectionChange(QString item);
   void comboPartyChange(int index);
   void comboStateChange(int index);
   void comboTrackingChange(int index);

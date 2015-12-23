@@ -66,12 +66,18 @@ public:
   /* Gets the base person of the person */
   EditorMapPerson* getBasePerson() const;
 
+  /* Returns the matrix associated to the current direction */
+  EditorMatrix* getMatrix() const;
+
   /* Returns the speed of the person */
   uint16_t getSpeed() const;
 
+  /* Returns the starting facing direction of the person */
+  Direction getStartingDirection() const;
+
   /* Returns the state at the defined surface and direction */
   EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
-                         Direction direction);
+                         Direction direction) const;
   QList<QList<EditorMatrix*>> getStates() const;
 
   /* Returns if the tile sprites in all matrixes at that x, y are null */
@@ -91,6 +97,9 @@ public:
 
   /* Sets the speed of the person */
   void setSpeed(uint16_t speed);
+
+  /* Sets the starting direction of the person */
+  bool setStartingDirection(Direction starting);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);

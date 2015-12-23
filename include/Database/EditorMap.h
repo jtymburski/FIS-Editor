@@ -163,6 +163,9 @@ protected:
   /* Updates the tiles that contain the hover information struct */
   bool updateHoverThing(bool unset = false);
 
+  /* Updates the given tile range within the sub-map */
+  void updateTiles(SubMapInfo* map, int x, int y, int w, int h);
+
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
@@ -294,6 +297,7 @@ public:
   int getPersonIndex(int id, int sub_map = -1);
   QVector<QString> getPersonList(int sub_map = -1, bool all_submaps = false,
                                  bool shortened = false);
+  SubMapInfo* getPersonSub(EditorMapPerson* ref);
   QVector<EditorMapPerson*> getPersons(int sub_map = -1);
 
   /* Returns the number of things that will be saved */
@@ -410,6 +414,9 @@ public:
 
   /* Update all tiles */
   void updateAll();
+
+  /* Updates tiles related to person reference */
+  void updateTiles(EditorMapPerson* ref);
 
   /* Unset io(s) */
   bool unsetIO(int id, bool from_sub = false);

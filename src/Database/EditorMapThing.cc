@@ -180,6 +180,7 @@ bool EditorMapThing::setMatrix(EditorMatrix* matrix, bool first_call)
       delete this->matrix;
 
     this->matrix = matrix;
+    //update();
     return true;
   }
   return false;

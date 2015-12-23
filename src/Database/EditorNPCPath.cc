@@ -1257,22 +1257,39 @@ MapNPC::NodeState EditorNPCPath::getState()
   return state;
 }
 
-/* Returns tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Returns the tracking distance max in tile count when the
+ *              tracking NPC releases its hold on the player.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the max
+ */
 int EditorNPCPath::getTrackDistMax()
 {
   return track_dist_max;
 }
 
-/* Returns tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Returns the tracking distance min in tile count when the
+ *              tracking NPC initiates its hold on the player and follows or
+ *              runs away.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the min
+ */
 int EditorNPCPath::getTrackDistMin()
 {
   return track_dist_min;
 }
 
-/* Returns tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Returns the tracking distance run in tile count when the
+ *              tracking NPC which is set to keep away from the player attempts
+ *              to maintain this distance at all times.
+ *
+ * Inputs: none
+ * Output: int - the distance in tiles for the keep away
+ */
 int EditorNPCPath::getTrackDistRun()
 {
   return track_dist_run;
@@ -1872,8 +1889,14 @@ void EditorNPCPath::setState(MapNPC::NodeState state)
   }
 }
 
-/* Sets the tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Sets the tracking distance max in tile count when the
+ *              tracking NPC releases its hold on the player.
+ *
+ *
+ * Inputs: int - the distance in tiles for the max
+ * Output: none
+ */
 bool EditorNPCPath::setTrackDistMax(int dist)
 {
   if(dist > 0)
@@ -1884,8 +1907,14 @@ bool EditorNPCPath::setTrackDistMax(int dist)
   return false;
 }
 
-/* Sets the tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Sets the tracking distance min in tile count when the
+ *              tracking NPC initiates its hold on the player and follows or
+ *              runs away.
+ *
+ * Inputs: int - the distance in tiles for the min
+ * Output: none
+ */
 bool EditorNPCPath::setTrackDistMin(int dist)
 {
   if(dist > 0)
@@ -1896,8 +1925,14 @@ bool EditorNPCPath::setTrackDistMin(int dist)
   return false;
 }
 
-/* Sets the tracking distance setpoints */
-// TODO: Comment
+/*
+ * Description: Sets the tracking distance run in tile count when the
+ *              tracking NPC which is set to keep away from the player attempts
+ *              to maintain this distance at all times.
+ *
+ * Inputs: int - the distance in tiles for the keep away
+ * Output: none
+ */
 bool EditorNPCPath::setTrackDistRun(int dist)
 {
   if(dist > 0)
@@ -1988,7 +2023,6 @@ QPainterPath EditorNPCPath::shape() const
     path.addRect(x, y, rect, rect);
   }
 
-  // TODO: FUTURE - FOR LINES??
   return path;
 }
 

@@ -98,7 +98,7 @@ void EditorParty::createLayout()
 {
   /* Layout */
   QGridLayout* layout = new QGridLayout(this);
-  layout->setColumnStretch(5, 1);
+  layout->setColumnStretch(7, 1);
   layout->setRowMinimumHeight(7, 15);
   layout->setRowStretch(5, 1);
 
@@ -161,15 +161,23 @@ void EditorParty::createLayout()
 
   /* Persons */
   QLabel* lbl_person = new QLabel("Persons in Party", this);
-  layout->addWidget(lbl_person, 0, 3, 1, 2, Qt::AlignHCenter);
-  btn_person_add = new QPushButton("Add Person", this);
+  layout->addWidget(lbl_person, 0, 3, 1, 4, Qt::AlignHCenter);
+  btn_person_add = new QPushButton("Add", this);
   btn_person_add->setDisabled(true);
   connect(btn_person_add, SIGNAL(clicked()), this, SLOT(btnPersonAdd()));
   layout->addWidget(btn_person_add, 1, 3);
-  btn_person_rem = new QPushButton("Remove Person", this);
+  btn_person_rem = new QPushButton("Remove", this);
   btn_person_rem->setDisabled(true);
   connect(btn_person_rem, SIGNAL(clicked()), this, SLOT(btnPersonRemove()));
   layout->addWidget(btn_person_rem, 1, 4);
+  btn_person_up = new QPushButton("Up", this);
+  btn_person_up->setDisabled(true);
+  connect(btn_person_up, SIGNAL(clicked()), this, SLOT(btnPersonUp()));
+  layout->addWidget(btn_person_up, 1, 5);
+  btn_person_down = new QPushButton("Down", this);
+  btn_person_down->setDisabled(true);
+  connect(btn_person_down, SIGNAL(clicked()), this, SLOT(btnPersonDown()));
+  layout->addWidget(btn_person_down, 1, 6);
   list_persons_all = new QListWidget(this);
   connect(list_persons_all, SIGNAL(currentRowChanged(int)),
           this, SLOT(listPersonAllChanged(int)));
@@ -181,17 +189,17 @@ void EditorParty::createLayout()
           this, SLOT(listPersonUsedChanged(int)));
   connect(list_persons_used, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
           this, SLOT(listPersonEdited(QListWidgetItem*)));
-  layout->addWidget(list_persons_used, 2, 4, 4, 1);
+  layout->addWidget(list_persons_used, 2, 4, 4, 3);
   lbl_person_details = new QLabel("Fill: 0 / 5", this);
-  layout->addWidget(lbl_person_details, 6, 3, 1, 2, Qt::AlignHCenter);
+  layout->addWidget(lbl_person_details, 6, 3, 1, 4, Qt::AlignHCenter);
 
   /* Reset / Save Buttons */
   QPushButton* btn_reset = new QPushButton("Reset", this);
   connect(btn_reset, SIGNAL(clicked()), this, SLOT(btnReset()));
-  layout->addWidget(btn_reset, 8, 3);
+  layout->addWidget(btn_reset, 8, 5);
   QPushButton* btn_save = new QPushButton("Save", this);
   connect(btn_save, SIGNAL(clicked()), this, SLOT(btnSave()));
-  layout->addWidget(btn_save, 8, 4);
+  layout->addWidget(btn_save, 8, 6);
 }
 
 /*
@@ -374,30 +382,42 @@ void EditorParty::updatePersonList()
 {
   int index = list_persons_used->currentRow();
   list_persons_used->clear();
-  QVector<bool> person_used;
+  QVector<EditorPerson*> person_used;
   for(int i = 0; i < person_set.size(); i++)
-    person_used.push_back(false);
+    person_used.push_back(nullptr);
 
-  sortPersons();
+  //sortPersons(); /* Removed so party order can be chosen */
 
-  /* Loop through persons */
+  /* Loop through persons and determine valid entries */
   for(int i = 0; i < person_set.size(); i++)
-  {
     for(int j = 0; !person_used[i] && j < persons_all.size(); j++)
-    {
       if(persons_all[j]->getID() == person_set[i].first)
-      {
-        person_used[i] = true;
-        list_persons_used->addItem(persons_all[j]->getNameList() + " - LVL " +
-                                   QString::number(person_set[i].second));
-      }
-    }
-  }
+        person_used[i] = persons_all[j];
 
   /* If not found, delete IDs */
   for(int i = person_set.size() - 1; i >= 0; i--)
-    if(!person_used[i])
+  {
+    if(person_used[i] == nullptr)
+    {
       person_set.remove(i);
+      person_used.remove(i);
+    }
+  }
+
+  /* Proceed to add the list of persons to the list widget */
+  for(int i = 0; i < person_set.size(); i++)
+  {
+    /* Determine suffix */
+    QString suffix = "";
+    if(person_set.size() > 1 && i == 0)
+      suffix = " - {LEFT SIDE}";
+    else if(person_set.size() > 1 && i == (person_set.size() - 1))
+      suffix = " - {RIGHT SIDE}";
+    else if(person_set.size() == 1)
+      suffix = " - {SO ALONE...}";
+    list_persons_used->addItem(person_used[i]->getNameList() + " - LVL " +
+                               QString::number(person_set[i].second) + suffix);
+  }
 
   /* If index is valid, select row */
   if(index >= 0)
@@ -548,6 +568,27 @@ void EditorParty::btnPersonAdd()
 }
 
 /*
+ * Description: Button trigger on person down for list widget displaying used
+ *              persons that are included in the party. Will update the used
+ *              persons list if a valid person position is changed.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorParty::btnPersonDown()
+{
+  int index = list_persons_used->currentRow();
+  if(index >= 0 && index < (list_persons_used->count() - 1))
+  {
+    QPair<int,int> swap = person_set[index];
+    person_set[index] = person_set[index + 1];
+    person_set[index + 1] = swap;
+    list_persons_used->setCurrentRow(index + 1);
+    updatePersonList();
+  }
+}
+
+/*
  * Description: Button trigger on person remove for list widget displaying used
  *              persons that are included in the party. Will update the used
  *              persons list if a valid person is removed.
@@ -560,6 +601,27 @@ void EditorParty::btnPersonRemove()
   if(list_persons_used->currentRow() >= 0)
   {
     person_set.remove(list_persons_used->currentRow());
+    updatePersonList();
+  }
+}
+
+/*
+ * Description: Button trigger on person up for list widget displaying used
+ *              persons that are included in the party. Will update the used
+ *              persons list if a valid person position is changed.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorParty::btnPersonUp()
+{
+  int index = list_persons_used->currentRow();
+  if(index > 0 && index < list_persons_used->count())
+  {
+    QPair<int,int> swap = person_set[index];
+    person_set[index] = person_set[index - 1];
+    person_set[index - 1] = swap;
+    list_persons_used->setCurrentRow(index - 1);
     updatePersonList();
   }
 }
@@ -770,10 +832,9 @@ void EditorParty::listPersonEdited(QListWidgetItem*)
  */
 void EditorParty::listPersonUsedChanged(int index)
 {
-  if(index >= 0)
-    btn_person_rem->setEnabled(true);
-  else
-    btn_person_rem->setDisabled(true);
+  btn_person_down->setEnabled(index >= 0 && index < (person_set.size() - 1));
+  btn_person_rem->setEnabled(index >= 0);
+  btn_person_up->setEnabled(index > 0);
 }
 
 /*============================================================================
