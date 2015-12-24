@@ -267,6 +267,8 @@ void EditorCategory::createLayout()
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
+    lbl->setToolTip(QString::fromStdString(
+                                 Helpers::attributeToStr((Attribute)i, false)));
     layout_stats_base->addWidget(lbl, i + 1, 0);
     spin_atts_base.push_back(new QSpinBox(this));
     if(i == 0)
@@ -293,6 +295,8 @@ void EditorCategory::createLayout()
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
+    lbl->setToolTip(QString::fromStdString(
+                                 Helpers::attributeToStr((Attribute)i, false)));
     layout_stats_max->addWidget(lbl, i + 1, 0);
     spin_atts_max.push_back(new QSpinBox(this));
     if(i == 0)
