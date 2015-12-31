@@ -6,7 +6,7 @@
  *              EditorEvent class.
  ******************************************************************************/
 #include "View/EventView.h"
-//#include <QDebug>
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -124,9 +124,40 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for battle execution control */
   QWidget* widget_battle = new QWidget(this);
-  QLabel* lbl_no_edit = new QLabel("NO SETTINGS", this);
+  battle_windisappear = new QCheckBox("If win, the thing disappear",
+                                                this);
+  connect(battle_windisappear, SIGNAL(stateChanged(int)),
+          this, SLOT(battleWinFlagChange(int)));
+  battle_losegg = new QCheckBox("If you lose, game over", this);
+  connect(battle_losegg, SIGNAL(stateChanged(int)),
+          this, SLOT(battleLoseFlagChange(int)));
+  battle_restorehealth = new QCheckBox("Restore health on battle end",
+                                                 this);
+  connect(battle_restorehealth, SIGNAL(stateChanged(int)),
+          this, SLOT(battleHealthFlagChange(int)));
+  battle_restoreqd = new QCheckBox("Restore QD on battle end", this);
+  connect(battle_restoreqd, SIGNAL(stateChanged(int)),
+          this, SLOT(battleQDFlagChange(int)));
+  battle_eventwin = new QPushButton("Win Event", this);
+  connect(battle_eventwin, SIGNAL(clicked()), this, SLOT(battleEventWinEdit()));
+  battle_eventlose = new QPushButton("Lose Event", this);
+  connect(battle_eventlose, SIGNAL(clicked()),
+          this, SLOT(battleEventLoseEdit()));
   QVBoxLayout* layout_battle = new QVBoxLayout(widget_battle);
-  layout_battle->addWidget(lbl_no_edit, 0, Qt::AlignCenter);
+  layout_battle->addStretch(1);
+  layout_battle->addWidget(battle_windisappear, 0, Qt::AlignCenter);
+  layout_battle->addWidget(battle_losegg, 0, Qt::AlignCenter);
+  layout_battle->addSpacing(12);
+  QHBoxLayout* layout_battle_h = new QHBoxLayout();
+  layout_battle_h->addStretch(1);
+  layout_battle_h->addWidget(battle_eventwin);
+  layout_battle_h->addWidget(battle_eventlose);
+  layout_battle_h->addStretch(1);
+  layout_battle->addLayout(layout_battle_h);
+  layout_battle->addSpacing(12);
+  layout_battle->addWidget(battle_restorehealth, 0, Qt::AlignCenter);
+  layout_battle->addWidget(battle_restoreqd, 0, Qt::AlignCenter);
+  layout_battle->addStretch(1);
 
   /* Widget for switching the map */
   QWidget* widget_map = new QWidget(this);
@@ -598,6 +629,19 @@ void EventView::setLayoutData()
     {
       notification_edit->setPlainText(event->getNotification());
     }
+    else if(event->getEventType() == EventClassifier::RUNBATTLE)
+    {
+      /* Flag check boxes */
+      bool win_disappear, lose_gg, restore_health, restore_qd;
+      EventSet::dataEnumBattleFlags(event->getStartBattleFlags(), win_disappear,
+                                    lose_gg, restore_health, restore_qd);
+      battle_windisappear->setChecked(win_disappear);
+      battle_losegg->setChecked(lose_gg);
+      battle_restorehealth->setChecked(restore_health);
+      battle_restoreqd->setChecked(restore_qd);
+
+      // TODO: EVENT DATA HERE
+    }
     else if(event->getEventType() == EventClassifier::RUNMAP)
     {
       /* Attempt to find the map name in the combo box */
@@ -925,6 +969,122 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Slot triggered on start battle event on the lose event edit
+ *              button being pressed. Opens the dialog to edit the lose event.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::battleEventLoseEdit()
+{
+  qDebug() << "TODO: Lose Event Edit";
+}
+
+/*
+ * Description: Slot triggered on start battle event on the win event edit
+ *              button being pressed. Opens the dialog to edit the lose event.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::battleEventWinEdit()
+{
+  qDebug() << "TODO: Win Event Edit";
+}
+
+/*
+ * Description: Slot triggered on start battle event on the restore health flag
+ *              upon battle ending change of state. Updates settings within
+ *              the event.
+ *
+ * Inputs: int state - the new state of the dialog (3 possible)
+ * Output: none
+ */
+void EventView::battleHealthFlagChange(int state)
+{
+  bool win_disappear, lose_gg, restore_health, restore_qd;
+  BattleFlags flags = event->getStartBattleFlags();
+  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                restore_health, restore_qd);
+  restore_health = (state == Qt::Checked);
+  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                          restore_health, restore_qd);
+  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                             *event->getStartBattleEventLose(),
+                             event->getSoundID());
+}
+
+/*
+ * Description: Slot triggered on start battle event on the lose causes game
+ *              over flag change of state. Updates settings within the event.
+ *
+ * Inputs: int state - the new state of the dialog (3 possible)
+ * Output: none
+ */
+void EventView::battleLoseFlagChange(int state)
+{
+  bool win_disappear, lose_gg, restore_health, restore_qd;
+  BattleFlags flags = event->getStartBattleFlags();
+  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                restore_health, restore_qd);
+  lose_gg = (state == Qt::Checked);
+  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                          restore_health, restore_qd);
+  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                             *event->getStartBattleEventLose(),
+                             event->getSoundID());
+
+  /* Enable/Disable of the edit button for the lose event */
+  battle_eventlose->setDisabled(lose_gg);
+}
+
+/*
+ * Description: Slot triggered on start battle event on the restore QD flag
+ *              upon battle ending change of state. Updates settings within
+ *              the event.
+ *
+ * Inputs: int state - the new state of the dialog (3 possible)
+ * Output: none
+ */
+void EventView::battleQDFlagChange(int state)
+{
+  bool win_disappear, lose_gg, restore_health, restore_qd;
+  BattleFlags flags = event->getStartBattleFlags();
+  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                restore_health, restore_qd);
+  restore_qd = (state == Qt::Checked);
+  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                          restore_health, restore_qd);
+  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                             *event->getStartBattleEventLose(),
+                             event->getSoundID());
+}
+
+/*
+ * Description: Slot triggered on start battle event on the win causes game
+ *              over flag change of state. Updates settings within the event.
+ *
+ * Inputs: int state - the new state of the dialog (3 possible)
+ * Output: none
+ */
+void EventView::battleWinFlagChange(int state)
+{
+  bool win_disappear, lose_gg, restore_health, restore_qd;
+  BattleFlags flags = event->getStartBattleFlags();
+  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                restore_health, restore_qd);
+  win_disappear = (state == Qt::Checked);
+  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                          restore_health, restore_qd);
+  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                             *event->getStartBattleEventLose(),
+                             event->getSoundID());
+
+  /* Enable/Disable of the edit button for the win event */
+  battle_eventwin->setDisabled(win_disappear);
+}
 
 /*
  * Description: Slot which triggers when the category drop down changes.

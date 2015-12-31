@@ -88,6 +88,11 @@ public:
   /* Returns the soun reference ID, for the related event */
   int getSoundID();
 
+  /* Returns data relating to the start battle event */
+  Event* getStartBattleEventLose();
+  Event* getStartBattleEventWin();
+  BattleFlags getStartBattleFlags();
+
   /* Returns the start map ID, for the related event */
   int getStartMapID();
 
@@ -165,6 +170,8 @@ public:
 
   /* Sets the event to start battle */
   bool setEventStartBattle(int sound_id = EventSet::kUNSET_ID);
+  bool setEventStartBattle(BattleFlags flags, Event event_win, Event event_lose,
+                           int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to start map */
   bool setEventStartMap(int id = 0, int sound_id = EventSet::kUNSET_ID);

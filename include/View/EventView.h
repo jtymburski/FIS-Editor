@@ -46,6 +46,14 @@ private:
   QAction* action_delete;
   QAction* action_option;
 
+  /* Start battle event control widgets */
+  QPushButton* battle_eventlose;
+  QPushButton* battle_eventwin;
+  QCheckBox* battle_losegg;
+  QCheckBox* battle_restorehealth;
+  QCheckBox* battle_restoreqd;
+  QCheckBox* battle_windisappear;
+
   /* The one shot selection in the view */
   QCheckBox* check_oneshot;
 
@@ -157,6 +165,9 @@ signals:
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
 
+  /* Edit event trigger */
+  void editEvent(Event* edit_event);
+
   /* Select tile trigger */
   void selectTile();
 
@@ -167,6 +178,14 @@ signals:
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
+  /* The start battle event slot changes */
+  void battleEventLoseEdit();
+  void battleEventWinEdit();
+  void battleHealthFlagChange(int state);
+  void battleLoseFlagChange(int state);
+  void battleQDFlagChange(int state);
+  void battleWinFlagChange(int state);
+
   /* Category changed */
   void categoryChanged(int index);
 
@@ -202,7 +221,7 @@ public slots:
   void rightClickInsertBefore();
   void rightClickInsertOption();
 
-  /* The give item event slot changes */
+  /* The take item event slot changes */
   void takeCountChanged(int index);
   void takeItemChanged(int index);
 

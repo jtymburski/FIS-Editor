@@ -41,6 +41,11 @@ private:
   /* The conversation dialog */
   ConvoDialog* convo_dialog;
 
+  /* The single event dialog and control/view widgets */
+  EditorEvent* event_ctrl;
+  QDialog* event_dialog;
+  EventView* event_view;
+
   /* Label widgets */
   QLabel* lbl_lock_event;
   QLabel* lbl_lock;

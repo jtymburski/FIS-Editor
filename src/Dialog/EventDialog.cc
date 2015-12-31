@@ -178,6 +178,21 @@ void EventDialog::createLayout(QString window_title)
   /* Finally resize and lock size at minimum */
   updateGeometry();
   setFixedSize(minimumSizeHint());
+
+  /* Create event dialog */
+  event_dialog = new QDialog(this);
+  event_dialog->setWindowTitle("Event Edit");
+  QGridLayout* e_layout = new QGridLayout(event_dialog);
+  event_ctrl = new EditorEvent();
+  event_view = new EventView(nullptr, event_dialog);
+  e_layout->addWidget(event_view, 0, 0, 1, 4);
+  QPushButton* btn_lock_ok = new QPushButton("Ok", event_dialog);
+  //connect(btn_lock_ok, SIGNAL(clicked()), this, SLOT(buttonLockOk()));
+  e_layout->addWidget(btn_lock_ok, 1, 2);
+  QPushButton* btn_lock_cancel = new QPushButton("Cancel", event_dialog);
+  //connect(btn_lock_cancel, SIGNAL(clicked()), this, SLOT(buttonLockCancel()));
+  e_layout->addWidget(btn_lock_cancel);
+  event_dialog->hide();
 }
 
 /*

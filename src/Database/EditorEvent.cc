@@ -452,6 +452,51 @@ int EditorEvent::getSoundID()
 }
 
 /*
+ * Description: Returns the start battle related lose event
+ *
+ * Inputs: none
+ * Output: Event* - the returned event reference
+ */
+Event* EditorEvent::getStartBattleEventLose()
+{
+  Event *event_lose, *event_win;
+  BattleFlags flags;
+  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
+    return event_lose;
+  return nullptr;
+}
+
+/*
+ * Description: Returns the start battle related win event
+ *
+ * Inputs: none
+ * Output; Event* - the returned event reference
+ */
+Event* EditorEvent::getStartBattleEventWin()
+{
+  Event *event_lose, *event_win;
+  BattleFlags flags;
+  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
+    return event_win;
+  return nullptr;
+}
+
+/*
+ * Description: Returns the start battle related flags
+ *
+ * Inputs: none
+ * Output: BattleFlags - the return battle flags enumerator set
+ */
+BattleFlags EditorEvent::getStartBattleFlags()
+{
+  Event *event_lose, *event_win;
+  BattleFlags flags;
+  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
+    return flags;
+  return BattleFlags::NONE;
+}
+
+/*
  * Description: Returns the trigger map ID for the switching map event. If
  *              it's not the switch map event, -1 is returned.
  *
@@ -1134,11 +1179,45 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     /* -- EXECUTE BATTLE EVENT -- */
     else if(event.classification == EventClassifier::RUNBATTLE)
     {
-      if(getSoundID() >= 0 || isOneShot())
+      Event* event_lose = getStartBattleEventLose();
+      Event* event_win = getStartBattleEventWin();
+      BattleFlags flags = getStartBattleFlags();
+
+      if(getSoundID() >= 0 || isOneShot() || flags != BattleFlags::NONE ||
+         event_lose->classification != EventClassifier::NOEVENT ||
+         event_win->classification != EventClassifier::NOEVENT)
       {
         fh->writeXmlElement("startbattle");
 
-        /* Data */
+        /* Flags */
+        bool win_disappear, lose_gg, restore_health, restore_qd;
+        EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                      restore_health, restore_qd);
+        if(win_disappear)
+          fh->writeXmlData("windisappear", win_disappear);
+        if(lose_gg)
+          fh->writeXmlData("losegg", lose_gg);
+        if(restore_health)
+          fh->writeXmlData("restorehealth", restore_health);
+        if(restore_qd)
+          fh->writeXmlData("restoreqd", restore_qd);
+
+        /* Win Event */
+        if(!win_disappear &&
+           event_win->classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent editor_win(*event_win);
+          editor_win.save(fh, game_only, "eventwin");
+        }
+
+        /* Lose Event */
+        if(!lose_gg && event_lose->classification != EventClassifier::NOEVENT)
+        {
+          EditorEvent editor_lose(*event_lose);
+          editor_lose.save(fh, game_only, "eventlose");
+        }
+
+        /* Remaining data */
         if(isOneShot())
           fh->writeXmlData("one_shot", isOneShot());
         if(getSoundID() >= 0)
@@ -1529,6 +1608,27 @@ bool EditorEvent::setEventStartBattle(int sound_id)
   setEventBlank();
   event = EventSet::createEventStartBattle(sound_id);
   event.one_shot = one_shot;
+  return true;
+}
+
+/*
+ * Description: Sets the event in the class to the start battle event. This is
+ *              the additional properties call with events and flags.
+ *
+ * Inputs: BattleFlags flags - the battle set flags
+ *         Event event_win - the event triggered upon battle win
+ *         Event event_lose - the event triggered upon battle lose
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the battle event was created
+ */
+bool EditorEvent::setEventStartBattle(BattleFlags flags, Event event_win,
+                                      Event event_lose, int sound_id)
+{
+  Event new_event = EventSet::createEventStartBattle(flags, event_win,
+                                                     event_lose, sound_id);
+  new_event.one_shot = event.one_shot;
+  setEventBlank();
+  event = new_event;
   return true;
 }
 
