@@ -6,6 +6,7 @@
  *              EditorEvent class.
  ******************************************************************************/
 #include "View/EventView.h"
+#include "Dialog/ConvoDialog.h"
 #include <QDebug>
 
 /*============================================================================
@@ -28,8 +29,12 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
   /* Initialize variables */
   //database = NULL;
   this->event = NULL;
+  pop_convo = nullptr;
   rightclick_index = "";
   this->view_only = view_only;
+  waiting_tile_convo = false;
+  waiting_tile_event = false;
+  waiting_tile = false;
 
   /* Create the layout */
   createLayout(conversation_enabled);
@@ -43,6 +48,8 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
  */
 EventView::~EventView()
 {
+  closeAllPopups();
+
   disconnect(combo_category, SIGNAL(currentIndexChanged(int)),
              this, SLOT(categoryChanged(int)));
 }
@@ -489,6 +496,114 @@ void EventView::createLayout(bool conversation_enabled)
   setPalette(palette);
   setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
   setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
+
+  /* Event Pop-Up for isolated event edits */
+  pop_event = new QDialog(this);
+  pop_event->setWindowTitle("Event Edit");
+  pop_event_layout = new QGridLayout(pop_event);
+  pop_event_edit = nullptr;
+  pop_event_view = nullptr;
+  QPushButton* btn_event_ok = new QPushButton("Ok", pop_event);
+  connect(btn_event_ok, SIGNAL(clicked()), this, SLOT(popEventOk()));
+  pop_event_layout->addWidget(btn_event_ok, 1, 2);
+  QPushButton* btn_event_cancel = new QPushButton("Cancel", pop_event);
+  connect(btn_event_cancel, SIGNAL(clicked()), this, SLOT(popEventCancel()));
+  pop_event_layout->addWidget(btn_event_cancel, 1, 3);
+  pop_event->hide();
+  connect(pop_event, SIGNAL(rejected()), this, SLOT(popEventCancel()));
+}
+
+/*
+ * Description: Edits the current conversation instance trigger. Triggered
+ *              from EventView. Required to lock out the pop-up.
+ *
+ * Inputs: Conversation* convo - the conversation segment to edit
+ *         bool is_option - true if the segment is an option
+ * Output: none
+ */
+void EventView::editConversation(Conversation* convo, bool is_option)
+{
+  /* Close conversation dialog */
+  if(pop_convo != nullptr)
+  {
+    disconnect(pop_convo->getEventView(), SIGNAL(selectTile()),
+               this, SLOT(selectTileConvo()));
+    disconnect(pop_convo, SIGNAL(success()),
+               this, SLOT(updateConversation()));
+    delete pop_convo;
+  }
+  pop_convo = nullptr;
+
+  if(pop_event_edit != nullptr)
+    editEvent(nullptr);
+
+  /* Create the new conversation dialog */
+  if(convo != nullptr)
+  {
+    pop_convo = new ConvoDialog(convo, is_option, this);
+    pop_convo->setListThings(getListThings());
+    pop_convo->getEventView()->setListIOs(list_ios);
+    pop_convo->getEventView()->setListItems(list_items);
+    pop_convo->getEventView()->setListMaps(list_maps);
+    pop_convo->getEventView()->setListSounds(list_sounds);
+    pop_convo->getEventView()->setListSubmaps(list_submaps);
+    connect(pop_convo->getEventView(), SIGNAL(selectTile()),
+            this, SLOT(selectTileConvo()));
+    connect(pop_convo, SIGNAL(success()),
+            this, SLOT(updateConversation()));
+    pop_convo->show();
+  }
+}
+
+/*
+ * Description: Starts the edit event processing by spawning the event pop-up
+ *              for the specific passed event structure reference.
+ *
+ * Inputs: Event* edit_event - the event to edit. If null, just closes the pop
+ * Output: none
+ */
+void EventView::editEvent(Event* edit_event)
+{
+  /* Check if the current event dialog is being used */
+  if(pop_event_edit != nullptr)
+  {
+    pop_event->hide();
+    pop_event_view->setEvent(nullptr);
+    pop_event_layout->removeWidget(pop_event_view);
+    pop_event_ctrl.setEventBlank();
+    delete pop_event_view;
+    pop_event_view = nullptr;
+    pop_event_edit = nullptr;
+  }
+
+  if(pop_convo != nullptr)
+    editConversation(nullptr, false);
+
+  /* Open the new dialog */
+  if(edit_event != nullptr)
+  {
+    /* Set data */
+    pop_event_edit = edit_event;
+
+    /* Add view */
+    pop_event_view = new EventView(nullptr, pop_event);
+    pop_event_view->setListIOs(list_ios);
+    pop_event_view->setListItems(list_items);
+    pop_event_view->setListMaps(list_maps);
+    pop_event_view->setListSounds(list_sounds);
+    pop_event_view->setListSubmaps(list_submaps);
+    pop_event_view->setListThings(list_things);
+    //connect(event_view, SIGNAL(editConversation(Conversation*, bool)),
+    //        this, SLOT(editConversationSub(Conversation*, bool)));
+    connect(pop_event_view, SIGNAL(selectTile()),
+            this, SLOT(selectTileEvent()));
+    pop_event_layout->addWidget(pop_event_view, 0, 0, 1, 4);
+
+    /* Connect up edit event and data */
+    pop_event_ctrl.setEvent(*pop_event_edit);
+    pop_event_view->setEvent(&pop_event_ctrl);
+    pop_event->show();
+  }
 }
 
 /*
@@ -574,6 +689,22 @@ QString EventView::getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent)
 }
 
 /*
+ * Description: Triggers the select tile dialog for the primary event view.
+ *              This emits the signal to the parent pop-up to hide and select
+ *              the tile from the main map.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::selectTileMain()
+{
+  waiting_tile = true;
+  waiting_tile_convo = false;
+  waiting_tile_event = false;
+  emit selectTile();
+}
+
+/*
  * Description: Updates the data in the widgets. CreateLayout() must be called
  *              prior.
  *
@@ -640,7 +771,23 @@ void EventView::setLayoutData()
       battle_restorehealth->setChecked(restore_health);
       battle_restoreqd->setChecked(restore_qd);
 
-      // TODO: EVENT DATA HERE
+      /* Win event */
+      Event* event_win = event->getStartBattleEventWin();
+      QFont bold = battle_eventwin->font();
+      bold.setBold(true);
+      QFont not_bold = bold;
+      not_bold.setBold(false);
+      if(event_win->classification != EventClassifier::NOEVENT)
+        battle_eventwin->setFont(bold);
+      else
+        battle_eventwin->setFont(not_bold);
+
+      /* Lose event */
+      Event* event_lose = event->getStartBattleEventLose();
+      if(event_lose->classification != EventClassifier::NOEVENT)
+        battle_eventlose->setFont(bold);
+      else
+        battle_eventlose->setFont(not_bold);
     }
     else if(event->getEventType() == EventClassifier::RUNMAP)
     {
@@ -979,7 +1126,10 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
  */
 void EventView::battleEventLoseEdit()
 {
-  qDebug() << "TODO: Lose Event Edit";
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(event->getStartBattleEventLose());
+  }
 }
 
 /*
@@ -991,7 +1141,10 @@ void EventView::battleEventLoseEdit()
  */
 void EventView::battleEventWinEdit()
 {
-  qDebug() << "TODO: Win Event Edit";
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(event->getStartBattleEventWin());
+  }
 }
 
 /*
@@ -1004,16 +1157,24 @@ void EventView::battleEventWinEdit()
  */
 void EventView::battleHealthFlagChange(int state)
 {
-  bool win_disappear, lose_gg, restore_health, restore_qd;
-  BattleFlags flags = event->getStartBattleFlags();
-  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
-                                restore_health, restore_qd);
-  restore_health = (state == Qt::Checked);
-  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
-                                          restore_health, restore_qd);
-  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
-                             *event->getStartBattleEventLose(),
-                             event->getSoundID());
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(nullptr);
+
+    /* Update the flag */
+    bool win_disappear, lose_gg, restore_health, restore_qd;
+    BattleFlags flags = event->getStartBattleFlags();
+    EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                  restore_health, restore_qd);
+    restore_health = (state == Qt::Checked);
+    flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                            restore_health, restore_qd);
+
+    /* Update the event data */
+    event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                               *event->getStartBattleEventLose(),
+                               event->getSoundID());
+  }
 }
 
 /*
@@ -1025,19 +1186,27 @@ void EventView::battleHealthFlagChange(int state)
  */
 void EventView::battleLoseFlagChange(int state)
 {
-  bool win_disappear, lose_gg, restore_health, restore_qd;
-  BattleFlags flags = event->getStartBattleFlags();
-  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
-                                restore_health, restore_qd);
-  lose_gg = (state == Qt::Checked);
-  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
-                                          restore_health, restore_qd);
-  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
-                             *event->getStartBattleEventLose(),
-                             event->getSoundID());
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(nullptr);
 
-  /* Enable/Disable of the edit button for the lose event */
-  battle_eventlose->setDisabled(lose_gg);
+    /* Update the flag */
+    bool win_disappear, lose_gg, restore_health, restore_qd;
+    BattleFlags flags = event->getStartBattleFlags();
+    EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                  restore_health, restore_qd);
+    lose_gg = (state == Qt::Checked);
+    flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                            restore_health, restore_qd);
+
+    /* Update the event data */
+    event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                               *event->getStartBattleEventLose(),
+                               event->getSoundID());
+
+    /* Enable/Disable of the edit button for the lose event */
+    battle_eventlose->setDisabled(lose_gg);
+  }
 }
 
 /*
@@ -1050,16 +1219,24 @@ void EventView::battleLoseFlagChange(int state)
  */
 void EventView::battleQDFlagChange(int state)
 {
-  bool win_disappear, lose_gg, restore_health, restore_qd;
-  BattleFlags flags = event->getStartBattleFlags();
-  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
-                                restore_health, restore_qd);
-  restore_qd = (state == Qt::Checked);
-  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
-                                          restore_health, restore_qd);
-  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
-                             *event->getStartBattleEventLose(),
-                             event->getSoundID());
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(nullptr);
+
+    /* Update the flag */
+    bool win_disappear, lose_gg, restore_health, restore_qd;
+    BattleFlags flags = event->getStartBattleFlags();
+    EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                  restore_health, restore_qd);
+    restore_qd = (state == Qt::Checked);
+    flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                            restore_health, restore_qd);
+
+    /* Update the event data */
+    event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                               *event->getStartBattleEventLose(),
+                               event->getSoundID());
+  }
 }
 
 /*
@@ -1071,19 +1248,27 @@ void EventView::battleQDFlagChange(int state)
  */
 void EventView::battleWinFlagChange(int state)
 {
-  bool win_disappear, lose_gg, restore_health, restore_qd;
-  BattleFlags flags = event->getStartBattleFlags();
-  EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
-                                restore_health, restore_qd);
-  win_disappear = (state == Qt::Checked);
-  flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
-                                          restore_health, restore_qd);
-  event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
-                             *event->getStartBattleEventLose(),
-                             event->getSoundID());
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    editEvent(nullptr);
 
-  /* Enable/Disable of the edit button for the win event */
-  battle_eventwin->setDisabled(win_disappear);
+    /* Update the flag */
+    bool win_disappear, lose_gg, restore_health, restore_qd;
+    BattleFlags flags = event->getStartBattleFlags();
+    EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
+                                  restore_health, restore_qd);
+    win_disappear = (state == Qt::Checked);
+    flags = EventSet::createEnumBattleFlags(win_disappear, lose_gg,
+                                            restore_health, restore_qd);
+
+    /* Update the event data */
+    event->setEventStartBattle(flags, *event->getStartBattleEventWin(),
+                               *event->getStartBattleEventLose(),
+                               event->getSoundID());
+
+    /* Enable/Disable of the edit button for the win event */
+    battle_eventwin->setDisabled(win_disappear);
+  }
 }
 
 /*
@@ -1107,6 +1292,7 @@ void EventView::categoryChanged(int index)
 //  {
 
   /* Update the stack */
+  closeAllPopups();
   view_stack->setCurrentIndex(index);
 
   /* If anything except no classification, enables sound widget */
@@ -1240,6 +1426,8 @@ void EventView::convoMenuRequested(QPoint point)
   QTreeWidgetItem* clicked_item = convo_tree->itemAt(point);
   if(clicked_item != NULL)
   {
+    closeAllPopups();
+
     /* Get the index */
     QString base_index = getConvoIndex(clicked_item);
     QString item_index = EditorEvent::convertConversationIndex(base_index);
@@ -1305,6 +1493,36 @@ void EventView::notificationTextChanged()
 {
   event->setEventNotification(notification_edit->toPlainText(),
                               event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers on the cancel button within the edit event
+ *              pop-up. Ends the edit without saving
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::popEventCancel()
+{
+  editEvent(nullptr);
+}
+
+/*
+ * Description: Slot which triggers on the ok button within the edit event
+ *              pop-up. Ends the edit after saving the changes
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::popEventOk()
+{
+  if(pop_event_edit != nullptr)
+  {
+    *pop_event_edit = EventSet::deleteEvent(*pop_event_edit);
+    *pop_event_edit = EventSet::copyEvent(*pop_event_ctrl.getEvent());
+    editEvent(nullptr);
+    updateBattle();
+  }
 }
 
 /*
@@ -1409,7 +1627,7 @@ void EventView::rightClickEdit()
       if(list.size() % 2 == 0)
         is_option = true;
 
-      emit editConversation(ref, is_option);
+      editConversation(ref, is_option);
     }
   }
 
@@ -1516,6 +1734,42 @@ void EventView::rightClickInsertOption()
 }
 
 /*
+ * Description: Triggers the select tile dialog for the separate convo pop-up
+ *              of the event view. This hides the event pop-up and passes the
+ *              call to the main select tile trigger (selectTileMain).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::selectTileConvo()
+{
+  if(pop_convo != nullptr)
+  {
+    pop_convo->hide();
+    selectTileMain();
+    waiting_tile_convo = true;
+  }
+}
+
+/*
+ * Description: Triggers the select tile dialog for the separate event pop-up
+ *              of the event view. This hides the event pop-up and passes the
+ *              call to the main select tile trigger (selectTileMain).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::selectTileEvent()
+{
+  if(pop_event_edit != nullptr)
+  {
+    pop_event->hide();
+    selectTileMain();
+    waiting_tile_event = true;
+  }
+}
+
+/*
  * Description: Slot which triggers when the take item count widget in the take
  *              item event is changed. Updates the event
  *
@@ -1555,7 +1809,7 @@ void EventView::takeItemChanged(int index)
  */
 void EventView::teleportMapPressed()
 {
-  emit selectTile();
+  selectTileMain();
 }
 
 /*
@@ -1947,7 +2201,7 @@ void EventView::unlockTileExit(int state)
  */
 void EventView::unlockTilePressed()
 {
-  emit selectTile();
+  selectTileMain();
 }
 
 /*
@@ -2015,6 +2269,21 @@ void EventView::unlockTileViewTime(int time)
 }
 
 /*
+ * Description: Updates the battle information after an edit. Attempts to
+ *              maintain the same index after execution.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::updateBattle()
+{
+  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  {
+    setLayoutData();
+  }
+}
+
+/*
  * Description: Updates the conversation after an edit. Attempts to maintain
  *              the same index after execution.
  *
@@ -2034,6 +2303,18 @@ void EventView::updateConversation()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Closes all pop-ups and cleans up edits within the view.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::closeAllPopups()
+{
+  editConversation(nullptr, false);
+  editEvent(nullptr);
+}
 
 /*
  * Description: Returns the editor event which is being manipulated by the
@@ -2309,15 +2590,33 @@ void EventView::updateEvent()
  */
 void EventView::updateSelectedTile(int id, int x, int y)
 {
-  if(event != nullptr)
+  if(event != nullptr && waiting_tile)
   {
-    if(event->getEventType() == EventClassifier::TELEPORTTHING)
-      event->setEventTeleport(event->getTeleportThingID(), id, x, y,
-                              event->getSoundID());
-    else if(event->getEventType() == EventClassifier::UNLOCKTILE)
-      event->setEventUnlockTile(id, x, y, event->getUnlockTileMode(),
-                                event->getUnlockViewMode(),
-                                event->getUnlockViewTime(), event->getSoundID());
-    setLayoutData();
+    waiting_tile = false;
+
+    /* -- EVENT DIALOG -- */
+    if(waiting_tile_convo)
+    {
+      pop_convo->getEventView()->updateSelectedTile(id, x, y);
+      pop_convo->show();
+    }
+    else if(waiting_tile_event)
+    {
+      pop_event_view->updateSelectedTile(id, x, y);
+      pop_event->show();
+    }
+    /* -- EMBEDDED MAIN EVENT -- */
+    else
+    {
+      if(event->getEventType() == EventClassifier::TELEPORTTHING)
+        event->setEventTeleport(event->getTeleportThingID(), id, x, y,
+                                event->getSoundID());
+      else if(event->getEventType() == EventClassifier::UNLOCKTILE)
+        event->setEventUnlockTile(id, x, y, event->getUnlockTileMode(),
+                                  event->getUnlockViewMode(),
+                                  event->getUnlockViewTime(),
+                                  event->getSoundID());
+      setLayoutData();
+    }
   }
 }

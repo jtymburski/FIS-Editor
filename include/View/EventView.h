@@ -8,6 +8,8 @@
 #ifndef EVENTVIEW_H
 #define EVENTVIEW_H
 
+class ConvoDialog;
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFrame>
@@ -92,6 +94,16 @@ private:
   /* Notification event text edit box */
   QTextEdit* notification_edit;
 
+  /* Conversation pop-up */
+  ConvoDialog* pop_convo;
+
+  /* Event pop-up for battle executes */
+  QDialog* pop_event;
+  EditorEvent pop_event_ctrl;
+  Event* pop_event_edit;
+  QGridLayout* pop_event_layout;
+  EventView* pop_event_view;
+
   /* Right click menu on conversation dialog */
   QString rightclick_index;
   QMenu* rightclick_menu;
@@ -138,6 +150,11 @@ private:
   /* View stack for sub-widgets */
   QStackedWidget* view_stack;
 
+  /* Waiting triggers */
+  bool waiting_tile_convo;
+  bool waiting_tile_event;
+  bool waiting_tile;
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
@@ -145,11 +162,20 @@ private:
   /* Creates the layout and widgets for this controller */
   void createLayout(bool conversation_enabled = true);
 
+  /* Edit conversation trigger */
+  void editConversation(Conversation* convo, bool is_option);
+
+  /* Edit event trigger to spawn the event pop-up */
+  void editEvent(Event* edit_event = nullptr);
+
   /* Returns the convesation item, based on the index, of the tree widget */
   QTreeWidgetItem* getConvo(QString base_index);
 
   /* Returns the conversation index of the tree widget */
   QString getConvoIndex(QTreeWidgetItem* ref, QTreeWidgetItem* parent = NULL);
+
+  /* Tile select main call */
+  void selectTileMain();
 
   /* Set layout data */
   void setLayoutData();
@@ -163,10 +189,10 @@ private:
  *===========================================================================*/
 signals:
   /* Edit conversation trigger */
-  void editConversation(Conversation* convo, bool is_option);
+  //void editConversation(Conversation* convo, bool is_option);
 
   /* Edit event trigger */
-  void editEvent(Event* edit_event);
+  //void editEvent(Event* edit_event);
 
   /* Select tile trigger */
   void selectTile();
@@ -211,6 +237,10 @@ public slots:
   /* The notification event text changes */
   void notificationTextChanged();
 
+  /* Event pop-up slot triggers */
+  void popEventCancel();
+  void popEventOk();
+
   /* Resize the QTreeWidget for the items */
   void resizeTree(QTreeWidgetItem*);
 
@@ -220,6 +250,10 @@ public slots:
   void rightClickInsertAfter();
   void rightClickInsertBefore();
   void rightClickInsertOption();
+
+  /* Select tile sub calls */
+  void selectTileConvo();
+  void selectTileEvent();
 
   /* The take item event slot changes */
   void takeCountChanged(int index);
@@ -257,12 +291,16 @@ public slots:
   void unlockTileViewTime(int time);
 
   /* Update the layout trigger */
+  void updateBattle();
   void updateConversation();
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Close all pop-ups */
+  void closeAllPopups();
+
   /* Returns the event */
   EditorEvent* getEvent();
 

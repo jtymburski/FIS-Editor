@@ -6,7 +6,7 @@
  *              EditorEventSet class - within a QDialog widget.
  ******************************************************************************/
 #include "Dialog/EventDialog.h"
-//#include <QDebug>
+#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -24,9 +24,7 @@ EventDialog::EventDialog(EditorEventSet* set, QWidget* parent,
                          QString window_title, bool view_only)
            : QDialog(parent)
 {
-  convo_dialog = nullptr;
   this->view_only = view_only;
-  waiting_convo = false;
   waiting_for_submap = false;
 
   /* Set-up the event set */
@@ -140,8 +138,10 @@ void EventDialog::createLayout(QString window_title)
   /* Event and Lock View */
   view_stack = new QStackedWidget(this);
   view_event = new EventView(nullptr, this, true, view_only);
-  connect(view_event, SIGNAL(editConversation(Conversation*,bool)),
-          this, SLOT(editConversation(Conversation*,bool)));
+  //connect(view_event, SIGNAL(editConversation(Conversation*,bool)),
+  //        this, SLOT(editConversation(Conversation*,bool)));
+  //connect(view_event, SIGNAL(editEvent(Event*)),
+  //        this, SLOT(editEvent(Event*)));
   connect(view_event, SIGNAL(selectTile()), this, SLOT(selectTileMain()));
   connect(view_event, SIGNAL(updated()), this, SLOT(updateEvent()));
   view_stack->addWidget(view_event);
@@ -178,21 +178,6 @@ void EventDialog::createLayout(QString window_title)
   /* Finally resize and lock size at minimum */
   updateGeometry();
   setFixedSize(minimumSizeHint());
-
-  /* Create event dialog */
-  event_dialog = new QDialog(this);
-  event_dialog->setWindowTitle("Event Edit");
-  QGridLayout* e_layout = new QGridLayout(event_dialog);
-  event_ctrl = new EditorEvent();
-  event_view = new EventView(nullptr, event_dialog);
-  e_layout->addWidget(event_view, 0, 0, 1, 4);
-  QPushButton* btn_lock_ok = new QPushButton("Ok", event_dialog);
-  //connect(btn_lock_ok, SIGNAL(clicked()), this, SLOT(buttonLockOk()));
-  e_layout->addWidget(btn_lock_ok, 1, 2);
-  QPushButton* btn_lock_cancel = new QPushButton("Cancel", event_dialog);
-  //connect(btn_lock_cancel, SIGNAL(clicked()), this, SLOT(buttonLockCancel()));
-  e_layout->addWidget(btn_lock_cancel);
-  event_dialog->hide();
 }
 
 /*
@@ -225,7 +210,7 @@ void EventDialog::setLayoutData()
 void EventDialog::setViewEvent(EditorEvent* event)
 {
   /* Make sure the sub-dialogs are removed */
-  editConversation(nullptr, false);
+  view_event->closeAllPopups();
 
   /* Update the unlock */
   if(event != view_event->getEvent())
@@ -248,7 +233,7 @@ void EventDialog::setViewEvent(EditorEvent* event)
 void EventDialog::setViewLock(EditorLock* lock)
 {
   /* Make sure the sub-dialogs are removed */
-  editConversation(nullptr, false);
+  view_event->closeAllPopups();
 
   /* Update the lock */
   if(lock != view_lock->getLock())
@@ -368,7 +353,7 @@ void EventDialog::updateDataUnlocks()
  */
 void EventDialog::closeEvent(QCloseEvent* event)
 {
-  editConversation(nullptr, false);
+  view_event->closeAllPopups();
   setEventSet(nullptr);
 
   event->accept();
@@ -479,7 +464,7 @@ void EventDialog::btnEditUnlock()
  */
 void EventDialog::btnOk()
 {
-  editConversation(nullptr, false);
+  view_event->closeAllPopups();
   updateSet();
   close();
   emit ok();
@@ -525,44 +510,6 @@ void EventDialog::btnUpUnlock()
 }
 
 /*
- * Description: Edits the current conversation instance trigger. Triggered
- *              from EventView. Required to lock out the pop-up.
- *
- * Inputs: Conversation* convo - the conversation segment to edit
- *         bool is_option - true if the segment is an option
- * Output: none
- */
-void EventDialog::editConversation(Conversation* convo, bool is_option)
-{
-  if(convo_dialog != NULL)
-  {
-    disconnect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-               this, SLOT(selectTileConvo()));
-    disconnect(convo_dialog, SIGNAL(success()),
-               view_event, SLOT(updateConversation()));
-    delete convo_dialog;
-  }
-  convo_dialog = NULL;
-
-  /* Create the new conversation dialog */
-  if(convo != nullptr)
-  {
-    convo_dialog = new ConvoDialog(convo, is_option, this);
-    convo_dialog->setListThings(getListThings());
-    convo_dialog->getEventView()->setListIOs(getListIOs());
-    convo_dialog->getEventView()->setListItems(getListItems());
-    convo_dialog->getEventView()->setListMaps(getListMaps());
-    convo_dialog->getEventView()->setListSounds(getListSounds());
-    convo_dialog->getEventView()->setListSubmaps(getListSubmaps());
-    connect(convo_dialog->getEventView(), SIGNAL(selectTile()),
-            this, SLOT(selectTileConvo()));
-    connect(convo_dialog, SIGNAL(success()),
-            view_event, SLOT(updateConversation()));
-    convo_dialog->show();
-  }
-}
-
-/*
  * Description: Slot which triggers when the selected unlock event in the list
  *              changes. Updates enabled/disabled buttons.
  *
@@ -596,24 +543,6 @@ void EventDialog::listUnlockDouble(QListWidgetItem*)
 }
 
 /*
- * Description: Triggers the select tile dialog for the conversation in the
- *              event view in the pop-up. This hides the pop-up and waits for a
- *              tile to be selected on the map render.
- *
- * Inputs: none
- * Output: none
- */
-void EventDialog::selectTileConvo()
-{
-  if(convo_dialog != nullptr)
-  {
-    convo_dialog->hide();
-    selectTileMain();
-    waiting_convo = true;
-  }
-}
-
-/*
  * Description: Triggers the select tile dialog for the pop-up. This hides the
  *              pop-up and waits for a tile to be selected on the map render.
  *
@@ -622,7 +551,6 @@ void EventDialog::selectTileConvo()
  */
 void EventDialog::selectTileMain()
 {
-  waiting_convo = false;
   waiting_for_submap = true;
   hide();
   emit selectTile();
@@ -896,14 +824,6 @@ void EventDialog::updateSelectedTile(int id, int x, int y)
   {
     waiting_for_submap = false;
     show();
-    if(waiting_convo)
-    {
-      convo_dialog->getEventView()->updateSelectedTile(id, x, y);
-      convo_dialog->show();
-    }
-    else
-    {
-      view_event->updateSelectedTile(id, x, y);
-    }
+    view_event->updateSelectedTile(id, x, y);
   }
 }

@@ -38,14 +38,6 @@ private:
   QPushButton* btn_rem;
   QPushButton* btn_up;
 
-  /* The conversation dialog */
-  ConvoDialog* convo_dialog;
-
-  /* The single event dialog and control/view widgets */
-  EditorEvent* event_ctrl;
-  QDialog* event_dialog;
-  EventView* event_view;
-
   /* Label widgets */
   QLabel* lbl_lock_event;
   QLabel* lbl_lock;
@@ -68,7 +60,6 @@ private:
   bool view_only;
 
   /* Waiting for sub-map data */
-  bool waiting_convo;
   bool waiting_for_submap;
 
 /*============================================================================
@@ -126,15 +117,11 @@ public slots:
   void btnRemoveUnlock();
   void btnUpUnlock();
 
-  /* Edit conversation trigger */
-  void editConversation(Conversation* convo, bool is_option);
-
   /* Unlock list changes */
   void listUnlockChange(int current_row);
   void listUnlockDouble(QListWidgetItem*);
 
   /* Select tile trigger */
-  void selectTileConvo();
   void selectTileMain();
 
   /* Unlock parse changed */

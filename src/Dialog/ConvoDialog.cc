@@ -175,7 +175,9 @@ void ConvoDialog::buttonOk()
   {
     /* Copy the data across */
     convo_original->text = text_box->toPlainText().toStdString();
-    convo_original->action_event = *event_ctrl->getEvent();
+    convo_original->action_event =
+                           EventSet::deleteEvent(convo_original->action_event);
+    convo_original->action_event = EventSet::copyEvent(*event_ctrl->getEvent());
     QString selected_thing = thing_combo->currentText();
     QStringList list = selected_thing.split(":");
     if(list.size() == 2 && list.front().toInt() >= -1)
