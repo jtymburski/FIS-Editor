@@ -131,11 +131,11 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for battle execution control */
   QWidget* widget_battle = new QWidget(this);
-  battle_windisappear = new QCheckBox("If win, the thing disappear",
+  battle_windisappear = new QCheckBox("On a win, the source thing disappears",
                                                 this);
   connect(battle_windisappear, SIGNAL(stateChanged(int)),
           this, SLOT(battleWinFlagChange(int)));
-  battle_losegg = new QCheckBox("If you lose, game over", this);
+  battle_losegg = new QCheckBox("On a loss, game over", this);
   connect(battle_losegg, SIGNAL(stateChanged(int)),
           this, SLOT(battleLoseFlagChange(int)));
   battle_restorehealth = new QCheckBox("Restore health on battle end",

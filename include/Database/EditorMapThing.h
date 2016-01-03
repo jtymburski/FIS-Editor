@@ -74,6 +74,9 @@ protected:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the active respawn active time delay of the thing */
+  int getActiveRespawn() const;
+
   /* Gets the base thing of the thing */
   EditorMapThing* getBaseThing() const;
 
@@ -109,6 +112,9 @@ public:
   int getX();
   int getY();
 
+  /* Checks if the thing is set to be active */
+  bool isActive() const;
+
   /* Returns if the tile sprites in all matrixes at that x, y are null */
   virtual bool isAllNull(int x, int y) const;
 
@@ -128,6 +134,10 @@ public:
 
   /* Saves the thing data */
   virtual void save(FileHandler* fh, bool game_only = false);
+
+  /* Sets if the thing is active */
+  bool setActive(bool active);
+  void setActiveRespawn(int time);
 
   /* Sets the base reference thing */
   virtual void setBase(EditorMapThing* thing);

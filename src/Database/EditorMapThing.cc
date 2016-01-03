@@ -75,6 +75,8 @@ EditorMapThing::~EditorMapThing()
 void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
 {
   /* Copy the thing data */
+  setActive(source.isActive());
+  setActiveRespawn(source.getActiveRespawn());
   setBase(source.getBaseThing());
   setDescription(source.getDescription());
   event_base = source.event_base;
@@ -200,6 +202,18 @@ void EditorMapThing::unsetMatrix()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Returns the active respawn time of the thing. If less than 0,
+ *              the respawn is disabled
+ *
+ * Inputs: none
+ * Output: int - the respawn time in milliseconds
+ */
+int EditorMapThing::getActiveRespawn() const
+{
+  return thing.getActiveRespawn();
+}
 
 /*
  * Description: Returns the base thing. Default to NULL.
@@ -383,6 +397,17 @@ int EditorMapThing::getY()
 }
 
 /*
+ * Description: Checks if the thing is set to start as active on the map space.
+ *
+ * Inputs: none
+ * Output: bool - true if starting active. false otherwise
+ */
+bool EditorMapThing::isActive() const
+{
+  return thing.isActive();
+}
+
+/*
  * Description: Checks the matrix at the given x and y location, if the sprites
  *              within are null. Virtualized.
  *
@@ -554,6 +579,30 @@ void EditorMapThing::save(FileHandler* fh, bool game_only)
     saveData(fh, game_only);
     fh->writeXmlElementEnd();
   }
+}
+
+/*
+ * Description: Sets if the thing is active and usable within the space
+ *
+ * Inputs: bool active - true if the thing should be active. false otherwise
+ * Output: bool - returns if the thing is active
+ */
+bool EditorMapThing::setActive(bool active)
+{
+  return thing.setActive(active, false);
+}
+
+/*
+ * Description: Sets the time once a thing is inactive before it will respawn
+ *              on the map (assuming no thing is placed in its starting tile
+ *              location). If set less than 0, it will never respawn (default).
+ *
+ * Inputs: int time - the time in milliseconds before respawning the thing
+ * Output: none
+ */
+void EditorMapThing::setActiveRespawn(int time)
+{
+  thing.setActiveRespawn(time);
 }
 
 /*
