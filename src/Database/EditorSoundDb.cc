@@ -268,11 +268,26 @@ void EditorSoundDb::createReserved()
                                            "Loading Music"));
   music_reserved.push_back(new EditorSound(Sound::kID_MUSIC_TITLE,
                                            "Title Screen Music"));
+
   for(int i = 0; i < music_reserved.size(); i++)
     music_reserved[i]->setNameLock(true);
   qSort(music_reserved.begin(), music_reserved.end(), EditorSound::lessThan);
 
-  /* Sounds */
+  /* System Sounds */
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_CHG,
+                                           "Menu: Selection Changed"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_NEXT,
+                                           "Menu: Enter (Select)"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_PREV,
+                                           "Menu: Backspace (Unselect)"));
+
+  /* Map Sounds */
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_COIN,
+                                           "Pick Up: Generic Coin"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_ITEM,
+                                           "Pick Up: Generic Item"));
+
+  /* Battle */
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_CONFUSE,
                                            "Battle: Confused"));
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_DEATH,
@@ -291,18 +306,10 @@ void EditorSoundDb::createReserved()
                                            "Battle: Stats Raised"));
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_SILENCE,
                                            "Battle: Silenced"));
-  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_CHG,
-                                           "Menu: Selection Changed"));
-  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_NEXT,
-                                           "Menu: Enter (Select)"));
-  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_PREV,
-                                           "Menu: Backspace (Unselect)"));
-  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_COIN,
-                                           "Pick Up: Generic Coin"));
-  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_ITEM,
-                                           "Pick Up: Generic Item"));
+
   for(int i = 0; i < sound_reserved.size(); i++)
     sound_reserved[i]->setNameLock(true);
+
   qSort(sound_reserved.begin(), sound_reserved.end(), EditorSound::lessThan);
 }
 
