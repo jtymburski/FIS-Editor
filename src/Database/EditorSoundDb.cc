@@ -306,6 +306,8 @@ void EditorSoundDb::createReserved()
                                            "Battle: Stats Raised"));
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_SILENCE,
                                            "Battle: Silenced"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_POISON,
+                                           "Battle: Poison"));
 
   for(int i = 0; i < sound_reserved.size(); i++)
     sound_reserved[i]->setNameLock(true);
