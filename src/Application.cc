@@ -24,6 +24,7 @@ Application::Application(QWidget* parent)
   username = getenv("USERNAME");
 
   game_db_dock = new QDockWidget(this);
+  game_db_dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   game_database = new GameDatabase(this);
   game_db_dock->setWindowIcon(QIcon(":/images/fbs_icon.ico"));
   game_db_dock->setWidget(new QWidget(this));
@@ -64,7 +65,7 @@ Application::Application(QWidget* parent)
   game_view = new GameView(this);
   setCentralWidget(game_view);
   game_view->setViewSounds(game_database->getSoundDatabase());
-  game_view->setGeometry(QApplication::desktop()->availableGeometry());
+  //game_view->setGeometry(QApplication::desktop()->availableGeometry());
 
   /* Connections between game view and game database */
   connect(game_view,SIGNAL(nameChange(QString)),game_database,

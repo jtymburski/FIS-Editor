@@ -256,6 +256,9 @@ public:
   /* Save the game */
   void save(FileHandler* fh, QProgressDialog* dialog, bool game_only = false,
             bool selected_map = false, int sub_index = -1);
+
+  /* The widget preferred size */
+  QSize sizeHint() const;
 };
 
 #endif // GAMEDATABASE_H

@@ -17,8 +17,8 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   mapsize_dialog = NULL;
 
   QVBoxLayout* main_layout = new QVBoxLayout(this);
-  QHBoxLayout* button_layout = new QHBoxLayout();
-  QHBoxLayout* button_layout2 = new QHBoxLayout();
+  //QHBoxLayout* button_layout = new QHBoxLayout();
+  //QHBoxLayout* button_layout2 = new QHBoxLayout();
 
   /* Sets up top toggle buttons */
   grid_toggle = new QPushButton("Grid", this);
@@ -30,17 +30,20 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   passability_toggle->setCheckable(true);
   connect(passability_toggle, SIGNAL(toggled(bool)),
           this, SLOT(togglePassability(bool)));
-  button_layout->addWidget(grid_toggle);
-  button_layout->addWidget(passability_toggle);
-  main_layout->addLayout(button_layout);
+  //button_layout->addWidget(grid_toggle);
+  //button_layout->addWidget(passability_toggle);
+  //main_layout->addLayout(button_layout);
+  main_layout->addWidget(grid_toggle);
+  main_layout->addWidget(passability_toggle);
 
   /* Sets up second row of toggle buttons */
   events_toggle = new QPushButton("Events", this);
   events_toggle->setCheckable(true);
   connect(events_toggle, SIGNAL(toggled(bool)),
           this, SLOT(toggleEvents(bool)));
-  button_layout2->addWidget(events_toggle);
-  main_layout->addLayout(button_layout2);
+  //button_layout2->addWidget(events_toggle);
+  //main_layout->addLayout(button_layout2);
+  main_layout->addWidget(events_toggle);
 
   /* Sets up the active layer actions, makes them checkable and adds them to
      an action group which allows only one to be active at a time */ 
@@ -86,26 +89,30 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   resize_index = 0;
 
   /* Sets up the bottom buttons that interact with the sub-map list */
-  QHBoxLayout* bottom_button_layout = new QHBoxLayout();
+  //QHBoxLayout* bottom_button_layout = new QHBoxLayout();
   button_new = new QPushButton("New",this);
   button_delete = new QPushButton("Delete",this);
-  bottom_button_layout->addWidget(button_new);
-  bottom_button_layout->addWidget(button_delete);
+  //bottom_button_layout->addWidget(button_new);
+  //bottom_button_layout->addWidget(button_delete);
   connect(button_new, SIGNAL(clicked()), this, SLOT(newSubMap()));
   connect(button_delete, SIGNAL(clicked()), this, SLOT(deleteSubMap()));
-  main_layout->addLayout(bottom_button_layout);
+  //main_layout->addLayout(bottom_button_layout);
+  main_layout->addWidget(button_new);
+  main_layout->addWidget(button_delete);
 
   /* Sets up the second set of bottom buttons */
-  QHBoxLayout* bottom_button_layout2 = new QHBoxLayout();
+  //QHBoxLayout* bottom_button_layout2 = new QHBoxLayout();
   button_duplicate = new QPushButton("Duplicate",this);
   button_import = new QPushButton("Import",this);
-  bottom_button_layout2->addWidget(button_import);
-  bottom_button_layout2->addWidget(button_duplicate);
+  //bottom_button_layout2->addWidget(button_import);
+  //bottom_button_layout2->addWidget(button_duplicate);
   connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateSubMap()));
   connect(button_import, SIGNAL(clicked()), this, SLOT(importSubMap()));
-  main_layout->addLayout(bottom_button_layout2);
+  //main_layout->addLayout(bottom_button_layout2);
+  main_layout->addWidget(button_duplicate);
+  main_layout->addWidget(button_import);
 
-  setMaximumWidth(190);
+  //setMaximumWidth(190);
 }
 
 MapControl::~MapControl()
@@ -526,4 +533,10 @@ void MapControl::setMapEditor(EditorMap* editor)
   /* Update map list */
   updateMapList();
   list_bottom->setCurrentRow(0);
+}
+
+/* The widget preferred size - reimplemented */
+QSize MapControl::sizeHint() const
+{
+  return minimumSizeHint();
 }

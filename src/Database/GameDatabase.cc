@@ -9,6 +9,8 @@
 
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {
+  //setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
   /* Clear out variables */
   current_action = NULL;
   current_battleclass = NULL;
@@ -83,14 +85,19 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(button_saveall);
   layout->addWidget(view_top);
   layout->addWidget(view_bottom);
-  QHBoxLayout* button_layout = new QHBoxLayout();
-  button_layout->addWidget(button_new);
-  button_layout->addWidget(button_delete);
-  layout->addLayout(button_layout);
-  QHBoxLayout* button_layout2 = new QHBoxLayout();
-  button_layout2->addWidget(button_import);
-  button_layout2->addWidget(button_duplicate);
-  layout->addLayout(button_layout2);
+  //QHBoxLayout* button_layout = new QHBoxLayout();
+  //button_layout->addWidget(button_new);
+  //button_layout->addWidget(button_delete);
+  //layout->addLayout(button_layout);
+  //QHBoxLayout* button_layout2 = new QHBoxLayout();
+  //button_layout2->addWidget(button_import);
+  //button_layout2->addWidget(button_duplicate);
+  //layout->addLayout(button_layout2);
+  layout->addWidget(button_new);
+  layout->addWidget(button_delete);
+  layout->addWidget(button_duplicate);
+  layout->addWidget(button_import);
+  //layout->setSizeConstraint(QLayout::SetMinimumSize);
 
   /* Update the bottom list */
   rowChange(view_top->currentRow());
@@ -105,7 +112,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   tile_icons.nopassS = new QPixmap(":/images/nopass_S.png");
   tile_icons.nopassW = new QPixmap(":/images/nopass_W.png");
 
-  setMaximumWidth(190);
+  /* Create start objects */
   createStartObjects();
 }
 
@@ -2285,4 +2292,10 @@ void GameDatabase::save(FileHandler* fh, QProgressDialog* dialog,
     /* -- Write end game data -- */
     fh->writeXmlElementEnd();
   }
+}
+
+/* The widget preferred size - reimplemented */
+QSize GameDatabase::sizeHint() const
+{
+  return minimumSizeHint();
 }

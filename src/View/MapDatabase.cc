@@ -132,8 +132,8 @@ void MapDatabase::setupMain()
   QHBoxLayout* hlayout = new QHBoxLayout();
   hlayout->addWidget(button_new);
   hlayout->addWidget(button_delete);
-  hlayout->addWidget(button_import);
   hlayout->addWidget(button_duplicate);
+  hlayout->addWidget(button_import);
   connect(button_delete, SIGNAL(clicked()), this, SLOT(buttonDelete()));
   connect(button_duplicate, SIGNAL(clicked()), this, SLOT(buttonDuplicate()));
   connect(button_import, SIGNAL(clicked()), this, SLOT(buttonImport()));

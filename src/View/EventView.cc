@@ -123,11 +123,11 @@ void EventView::createLayout(bool conversation_enabled)
   /* Widget for notification control */
   QWidget* widget_notification = new QWidget(this);
   notification_edit = new QTextEdit(this);
-  notification_edit->setMinimumWidth(320);
+  //notification_edit->setMinimumWidth(320);
   connect(notification_edit, SIGNAL(textChanged()),
           this, SLOT(notificationTextChanged()));
   QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
-  layout_notification->addWidget(notification_edit);
+  layout_notification->addWidget(notification_edit, 1);
 
   /* Widget for battle execution control */
   QWidget* widget_battle = new QWidget(this);
@@ -494,8 +494,10 @@ void EventView::createLayout(bool conversation_enabled)
   QPalette palette;
   palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
   setPalette(palette);
-  setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
-  setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
+  //updateGeometry();
+  //setMaximumSize(minimumSizeHint());
+  //setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
+  //setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
 
   /* Event Pop-Up for isolated event edits */
   pop_event = new QDialog(this);

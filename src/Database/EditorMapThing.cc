@@ -130,9 +130,7 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
 
     /* Event save, if relevant (isBaseEvent() is true) */
     if(!event_base)
-    {
       set.save(fh, game_only, "eventset", false, false);
-    }
   }
   /* Otherwise, is base - write core data */
   else
@@ -468,7 +466,15 @@ void EditorMapThing::load(XmlData data, int index)
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
-  if(element == "description")
+  if(element == "active")
+  {
+    setActive(data.getDataBool());
+  }
+  else if(element == "activetime")
+  {
+    setActiveRespawn(data.getDataInteger());
+  }
+  else if(element == "description")
   {
     setDescription(QString::fromStdString(data.getDataString()));
   }

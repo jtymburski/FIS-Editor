@@ -173,6 +173,10 @@ public:
 
   /* Sets the map being edited */
   void setMapEditor(EditorMap* editor);
+
+  /* The widget preferred size */
+  QSize sizeHint() const;
+
 };
 
 #endif // MAPCONTROL_H
