@@ -94,6 +94,8 @@ void PersonDialog::createLayout(bool instance)
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setColumnStretch(2, 1);
   layout->setColumnStretch(5, 1);
+  layout->setRowStretch(6, 1);
+  layout->setRowStretch(7, 1);
 
   /* The ID widget */
   QLabel* lbl_id = new QLabel("ID:", this);
@@ -138,12 +140,12 @@ void PersonDialog::createLayout(bool instance)
 
   /* The sprite view widget */
   QLabel* lbl_frame = new QLabel("Dialog Image:", this);
-  layout->addWidget(lbl_frame, 5, 0, 2, 1);
+  layout->addWidget(lbl_frame, 5, 0);//, 2, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
   lbl_frame_img->setStyleSheet("border: 1px solid black");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_frame_img, 5, 1, 2, 3);
+  layout->addWidget(lbl_frame_img, 6, 0, 1, 4);
   QPushButton* btn_frame_click = new QPushButton(this);
   btn_frame_click->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_frame_click->setIconSize(QSize(24,24));
@@ -151,13 +153,13 @@ void PersonDialog::createLayout(bool instance)
   if(instance)
     btn_frame_click->setDisabled(true);
   connect(btn_frame_click, SIGNAL(clicked()), this, SLOT(buttonFrameEdit()));
-  layout->addWidget(btn_frame_click, 5, 3, 2, 1, Qt::AlignTop);
+  layout->addWidget(btn_frame_click, 6, 3, 2, 1, Qt::AlignTop);
 
   /* Event View */
   event_view = new EventSetView(nullptr, this);
   connect(event_view, SIGNAL(editSet(EditorEventSet*)),
           this, SLOT(editEventSet(EditorEventSet*)));
-  layout->addWidget(event_view, 7, 0, 2, 4, Qt::AlignBottom);
+  layout->addWidget(event_view, 7, 0, 2, 4);//, Qt::AlignBottom);
 
   /* The description widget */
   QLabel* lbl_description = new QLabel("Description:", this);

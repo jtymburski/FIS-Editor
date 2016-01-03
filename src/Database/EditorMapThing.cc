@@ -128,6 +128,12 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
     if(getGameID() >= 0)
       fh->writeXmlData("game_id", getGameID());
 
+    /* Activity status' */
+    if(default_thing.isActive() != isActive())
+      fh->writeXmlData("active", isActive());
+    if(default_thing.getActiveRespawn() != getActiveRespawn())
+      fh->writeXmlData("activetime", getActiveRespawn());
+
     /* Event save, if relevant (isBaseEvent() is true) */
     if(!event_base)
       set.save(fh, game_only, "eventset", false, false);
@@ -546,7 +552,7 @@ bool EditorMapThing::paint(QPainter* painter, QRect rect,
                         int offset_x, int offset_y)
 {
   if(getMatrix() != NULL)
-    return getMatrix()->paint(painter, rect, offset_x, offset_y);
+    return getMatrix()->paint(painter, rect, offset_x, offset_y, !isActive());
   return false;
 }
 
@@ -563,10 +569,11 @@ bool EditorMapThing::paint(QPainter* painter, QRect rect,
  * Output: bool - true if the sprite was rendered
  */
 bool EditorMapThing::paint(int frame_index, QPainter* painter, QRect rect,
-                        int offset_x, int offset_y)
+                           int offset_x, int offset_y)
 {
   if(getMatrix() != NULL)
-    return getMatrix()->paint(frame_index, painter, rect, offset_x, offset_y);
+    return getMatrix()->paint(frame_index, painter, rect, offset_x, offset_y,
+                              !isActive());
   return false;
 }
 

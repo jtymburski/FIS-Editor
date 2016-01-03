@@ -37,10 +37,12 @@ public:
 
 private:
   /* Check boxes for base event and interaction control */
+  QCheckBox* box_active;
   QCheckBox* box_base_event;
   QCheckBox* box_base_speed;
   QCheckBox* box_interaction;
   QCheckBox* box_lock_base;
+  QCheckBox* box_respawn;
   QCheckBox* box_states_enter;
   QCheckBox* box_states_exit;
   QCheckBox* box_states_use;
@@ -100,6 +102,7 @@ private:
   QDialog* pop_lock;
 
   /* Spin control widgets */
+  QSpinBox* spin_respawn;
   QSpinBox* spin_speed;
   QSpinBox* spin_track_maintain;
   QSpinBox* spin_track_release;
@@ -187,10 +190,12 @@ public slots:
   void changedName(QString name);
 
   /* Check box triggers */
+  void checkActiveChange(int state);
   void checkBaseChange(int state);
   void checkBaseSpeed(int state);
   void checkInteractionChange(int state);
   void checkLockBase(int state);
+  void checkRespawnChange(int state);
   void checkStateEnter(int state);
   void checkStateExit(int state);
   void checkStateUse(int state);
@@ -212,6 +217,9 @@ public slots:
 
   /* Edit event set clicked ok finish - update event */
   void eventUpdated();
+
+  /* Respawn time changed */
+  void respawnChanged(int value);
 
   /* Select tile trigger */
   void selectTile();

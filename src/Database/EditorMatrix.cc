@@ -1326,12 +1326,13 @@ void EditorMatrix::load(XmlData data, int index)
  *         QRect rect - the bounding box of the rendering frame
  *         int offset_x - the offset from left of the sprite in matrix
  *         int offset_y - the offset from top of the sprite in matrix
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - true if the sprite was rendered
  */
 bool EditorMatrix::paint(QPainter* painter, QRect rect,
-                         int offset_x, int offset_y)
+                         int offset_x, int offset_y, bool shadow)
 {
-  return paint(active_frame, painter, rect, offset_x, offset_y);
+  return paint(active_frame, painter, rect, offset_x, offset_y, shadow);
 }
 
 /*
@@ -1344,17 +1345,18 @@ bool EditorMatrix::paint(QPainter* painter, QRect rect,
  *         QRect rect - the bounding box of the rendering frame
  *         int offset_x - the offset from left of the sprite in matrix
  *         int offset_y - the offset from top of the sprite in matrix
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - true if the sprite was rendered
  */
 bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
-                         int offset_x, int offset_y)
+                         int offset_x, int offset_y, bool shadow)
 {
   if(offset_x >= 0 && offset_x < getWidth() &&
      offset_y >= 0 && offset_y < getHeight() &&
      matrix[offset_x][offset_y] != NULL)
   {
     EditorSprite* paint_sprite = matrix[offset_x][offset_y];
-    return paint_sprite->paint(frame_index, painter, rect);
+    return paint_sprite->paint(frame_index, painter, rect, shadow);
   }
   return false;
 }

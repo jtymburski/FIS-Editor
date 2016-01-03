@@ -10,6 +10,7 @@
 
 /* Constant Implementation - see header file for descriptions */
 const float EditorSprite::kREF_RGB = 255.0;
+const float EditorSprite::kSHADOW_OPACITY = 0.8;
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -146,9 +147,10 @@ QList<QString> EditorSprite::splitPath(QString base_path)
  * Inputs: int index - the frame index
  *         int w - the width of the pixmap
  *         int h - the height of the pixmap
+ *         bool shadow - render as shadow. false by default
  * Output: QPixmap - the transformed pixmap
  */
-QPixmap EditorSprite::transformPixmap(int index, int w, int h)
+QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow)
 {
   QTransform transform;
   qreal m11 = transform.m11();    /* Horizontal scaling */
@@ -198,6 +200,12 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h)
   int r_mod = getColorRed();
   int g_mod = getColorGreen();
   int b_mod = getColorBlue();
+  if(shadow)
+  {
+    r_mod = 0;
+    g_mod = 0;
+    b_mod = 0;
+  }
   int r,g,b;
 
   for(int i = 0; i < editing_image.width(); i++)
@@ -1065,11 +1073,13 @@ void EditorSprite::load(XmlData data, int index)
  *
  * Inputs: QPainter* painter - the paint controller
  *         QRect rect - the bounding rectangle
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - did it get rendered?
  */
-bool EditorSprite::paint(QPainter* painter, QRect rect)
+bool EditorSprite::paint(QPainter* painter, QRect rect, bool shadow)
 {
-  return paint(painter, rect.x(), rect.y(), rect.width(), rect.height());
+  return paint(painter, rect.x(), rect.y(), rect.width(), rect.height(),
+               shadow);
 }
 
 /*
@@ -1081,11 +1091,13 @@ bool EditorSprite::paint(QPainter* painter, QRect rect)
  *         int y - y offset from top of QPainter object
  *         int w - width of rendering image
  *         int h - height of rendering image
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - did it get rendered?
  */
-bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h)
+bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h,
+                         bool shadow)
 {
-  return paint(active_frame, painter, x, y, w, h);
+  return paint(active_frame, painter, x, y, w, h, shadow);
 
 }
 
@@ -1096,11 +1108,13 @@ bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h)
  * Inputs: int index - the index in the frame stack
  *         QPainter* painter - the paint controller
  *         QRect rect - the bounding rectangle
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - did it get rendered?
  */
-bool EditorSprite::paint(int index, QPainter* painter, QRect rect)
+bool EditorSprite::paint(int index, QPainter* painter, QRect rect, bool shadow)
 {
-  return paint(index, painter, rect.x(), rect.y(), rect.width(), rect.height());
+  return paint(index, painter, rect.x(), rect.y(), rect.width(), rect.height(),
+               shadow);
 }
 
 /*
@@ -1113,10 +1127,11 @@ bool EditorSprite::paint(int index, QPainter* painter, QRect rect)
  *         int y - y offset from top of QPainter object
  *         int w - width of rendering image
  *         int h - height of rendering image
+ *         bool shadow - true to render as shadow instead. Default false
  * Output: bool - did it get rendered?
  */
 bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
-                         int w, int h)
+                         int w, int h, bool shadow)
 {
   if(painter != NULL && index >= 0 && index < frame_info.size())
   {
@@ -1125,7 +1140,9 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
 
     /* Paint pixmap */
     painter->setOpacity(getOpacity() / kREF_RGB);
-    painter->drawPixmap(bound, transformPixmap(index, w, h));
+    if(shadow)
+      painter->setOpacity(kSHADOW_OPACITY);
+    painter->drawPixmap(bound, transformPixmap(index, w, h, shadow));
 
     /* Restore values */
     painter->setOpacity(old_opacity);

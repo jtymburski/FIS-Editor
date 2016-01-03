@@ -538,5 +538,7 @@ void MapControl::setMapEditor(EditorMap* editor)
 /* The widget preferred size - reimplemented */
 QSize MapControl::sizeHint() const
 {
-  return minimumSizeHint();
+  //QSize(list_top->sizeHintForColumn(0), minimumSizeHint().height());
+  //return minimumSizeHint();
+  return QSize(minimumSizeHint().width() * 1.3, minimumSizeHint().height());
 }

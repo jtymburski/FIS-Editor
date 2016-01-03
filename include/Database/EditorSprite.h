@@ -59,6 +59,7 @@ private:
 
   /*------------------- Constants -----------------------*/
   const static float kREF_RGB; /* The max reference RGB value */
+  const static float kSHADOW_OPACITY; /* Shadow opacity value */
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -74,7 +75,7 @@ protected:
   QList<QString> splitPath(QString base_path);
 
   /* Returns a transformed image */
-  QPixmap transformPixmap(int index, int w, int h);
+  QPixmap transformPixmap(int index, int w, int h, bool shadow = false);
 
 /*============================================================================
  * SIGNALS
@@ -232,10 +233,12 @@ public:
   void load(XmlData data, int index);
 
   /* Paint the base sprite */
-  bool paint(QPainter* painter, QRect rect);
-  bool paint(QPainter* painter, int x, int y, int w, int h);
-  bool paint(int index, QPainter* painter, QRect rect);
-  bool paint(int index, QPainter* painter, int x, int y, int w, int h);
+  bool paint(QPainter* painter, QRect rect, bool shadow = false);
+  bool paint(QPainter* painter, int x, int y, int w, int h,
+             bool shadow = false);
+  bool paint(int index, QPainter* painter, QRect rect, bool shadow = false);
+  bool paint(int index, QPainter* painter, int x, int y, int w, int h,
+             bool shadow = false);
 
   /* Saves the sprite data */
   void save(FileHandler* fh, bool game_only = false, bool core_only = false,

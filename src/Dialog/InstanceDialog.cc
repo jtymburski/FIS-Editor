@@ -167,37 +167,59 @@ void InstanceDialog::createLayout()
           this, SLOT(changedDescription()));
   layout->addWidget(edit_description, 2, 1, 2, 3);
 
+  /* Active enable widget */
+  box_active = new QCheckBox("Spawned on Start", this);
+  connect(box_active, SIGNAL(stateChanged(int)),
+          this, SLOT(checkActiveChange(int)));
+  layout->addWidget(box_active, 4, 1, 1, 2);
+
+  /* Respawn time widget */
+  QLabel* lbl_respawn = new QLabel("Respawn Time", this);
+  layout->addWidget(lbl_respawn, 5, 0);
+  spin_respawn = new QSpinBox(this);
+  spin_respawn->setSuffix(" ms");
+  spin_respawn->setMinimum(1);
+  spin_respawn->setMaximum(1800000);
+  spin_respawn->setValue(5000);
+  connect(spin_respawn, SIGNAL(valueChanged(int)),
+          this, SLOT(respawnChanged(int)));
+  layout->addWidget(spin_respawn, 5, 1);
+  box_respawn = new QCheckBox("Disabled", this);
+  connect(box_respawn, SIGNAL(stateChanged(int)),
+          this, SLOT(checkRespawnChange(int)));
+  layout->addWidget(box_respawn, 5, 2, 1, 2);
+
   /* Upper Game Party Connection */
   QLabel* lbl_party = new QLabel("Party", this);
-  layout->addWidget(lbl_party, 4, 0);
+  layout->addWidget(lbl_party, 6, 0);
   combo_party = new QComboBox(this);
   combo_party->addItem("None");
   connect(combo_party, SIGNAL(currentIndexChanged(int)),
           this, SLOT(comboPartyChange(int)));
-  layout->addWidget(combo_party, 4, 1, 1, 3);
+  layout->addWidget(combo_party, 6, 1, 1, 3);
 
   /* Person/NPC exclusive settings */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
   {
     /* Speed */
     QLabel* lbl_speed = new QLabel("Speed", this);
-    layout->addWidget(lbl_speed, 5, 0);
+    layout->addWidget(lbl_speed, 7, 0);
     spin_speed = new QSpinBox(this);
     spin_speed->setMinimum(0);
     spin_speed->setMaximum(256);
     connect(spin_speed, SIGNAL(valueChanged(int)),
             this, SLOT(speedChanged(int)));
-    layout->addWidget(spin_speed, 5, 1);
+    layout->addWidget(spin_speed, 7, 1);
     lbl_speed_result = new QLabel("X ms/tile");
-    layout->addWidget(lbl_speed_result, 5, 2);
+    layout->addWidget(lbl_speed_result, 7, 2);
     box_base_speed = new QCheckBox("Use Base", this);
     connect(box_base_speed, SIGNAL(stateChanged(int)),
             this, SLOT(checkBaseSpeed(int)));
-    layout->addWidget(box_base_speed, 5, 3);
+    layout->addWidget(box_base_speed, 7, 3);
 
     /* Default direction */
     QLabel* lbl_dir = new QLabel("Direction", this);
-    layout->addWidget(lbl_dir, 6, 0);
+    layout->addWidget(lbl_dir, 8, 0);
     combo_dir = new QComboBox(this);
     combo_dir->addItem("North");
     combo_dir->addItem("East");
@@ -205,7 +227,7 @@ void InstanceDialog::createLayout()
     combo_dir->addItem("West");
     connect(combo_dir, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(comboDirectionChange(QString)));
-    layout->addWidget(combo_dir, 6, 1, 1, 2);
+    layout->addWidget(combo_dir, 8, 1, 1, 2);
   }
 
   /* Events that are relevant if not IO */
@@ -217,85 +239,85 @@ void InstanceDialog::createLayout()
             this, SLOT(checkBaseChange(int)));
     //if(thing_type == EditorEnumDb::IO)
     //  box_base_event->setDisabled(true);
-    layout->addWidget(box_base_event, 7, 1, 1, 2, Qt::AlignBottom);
+    layout->addWidget(box_base_event, 9, 1, 1, 2, Qt::AlignBottom);
 
     /* Event View */
     event_view = new EventSetView(nullptr, this);
     connect(event_view, SIGNAL(editSet(EditorEventSet*)),
             this, SLOT(editEventSet(EditorEventSet*)));
-    layout->addWidget(event_view, 8, 0, 8, 4,
-                      Qt::AlignHCenter | Qt::AlignBottom);
+    layout->addWidget(event_view, 10, 0, 8, 4);//,
+                      //Qt::AlignHCenter | Qt::AlignBottom);
   }
   /* Events that are relevant if IO - different layout */
   else
   {
     /* Lock data */
-    layout->setRowMinimumHeight(7, 9);
+    layout->setRowMinimumHeight(9, 9);
     QLabel* lbl_lock = new QLabel("Lock", this);
-    layout->addWidget(lbl_lock, 8, 0);
+    layout->addWidget(lbl_lock, 10, 0);
     box_lock_base = new QCheckBox("Use Base", this);
     connect(box_lock_base, SIGNAL(stateChanged(int)),
             this, SLOT(checkLockBase(int)));
-    layout->addWidget(box_lock_base, 8, 1);
+    layout->addWidget(box_lock_base, 10, 1);
     lbl_lock_data = new QLabel("UNCONNECTED", this);
     lbl_lock_data->setStyleSheet("border: 1px solid #a8a8a8");
-    layout->addWidget(lbl_lock_data, 9, 1, 1, 2);
+    layout->addWidget(lbl_lock_data, 11, 1, 1, 2);
     btn_lock = new QPushButton("View", this);
     connect(btn_lock, SIGNAL(clicked()), this, SLOT(buttonLockEdit()));
-    layout->addWidget(btn_lock, 9, 3);
-    layout->setRowMinimumHeight(10, 9);
+    layout->addWidget(btn_lock, 11, 3);
+    layout->setRowMinimumHeight(12, 9);
 
     /* Overall state data */
     QLabel* lbl_states = new QLabel("States", this);
-    layout->addWidget(lbl_states, 11, 0);
+    layout->addWidget(lbl_states, 13, 0);
     combo_states = new QComboBox(this);
     connect(combo_states, SIGNAL(currentIndexChanged(int)),
             this, SLOT(comboStateChange(int)));
-    layout->addWidget(combo_states, 11, 1, 1, 3);
+    layout->addWidget(combo_states, 13, 1, 1, 3);
 
     /* State enter */
     QLabel* lbl_states_enter = new QLabel("Enter", this);
-    layout->addWidget(lbl_states_enter, 12, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_enter, 14, 1, Qt::AlignRight);
     btn_states_enter = new QPushButton("View", this);
     connect(btn_states_enter, SIGNAL(clicked()), this, SLOT(buttonStateEnter()));
-    layout->addWidget(btn_states_enter, 12, 2);
+    layout->addWidget(btn_states_enter, 14, 2);
     box_states_enter = new QCheckBox("Use Base", this);
     connect(box_states_enter, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateEnter(int)));
-    layout->addWidget(box_states_enter, 12, 3);
+    layout->addWidget(box_states_enter, 14, 3);
 
     /* State exit */
     QLabel* lbl_states_exit = new QLabel("Exit", this);
-    layout->addWidget(lbl_states_exit, 13, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_exit, 15, 1, Qt::AlignRight);
     btn_states_exit = new QPushButton("View", this);
     connect(btn_states_exit, SIGNAL(clicked()), this, SLOT(buttonStateExit()));
-    layout->addWidget(btn_states_exit, 13, 2);
+    layout->addWidget(btn_states_exit, 15, 2);
     box_states_exit = new QCheckBox("Use Base", this);
     connect(box_states_exit, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateExit(int)));
-    layout->addWidget(box_states_exit, 13, 3);
+    layout->addWidget(box_states_exit, 15, 3);
 
     /* State use */
     QLabel* lbl_states_use = new QLabel("Use", this);
-    layout->addWidget(lbl_states_use, 14, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_use, 16, 1, Qt::AlignRight);
     btn_states_use = new QPushButton("View", this);
     connect(btn_states_use, SIGNAL(clicked()), this, SLOT(buttonStateUse()));
-    layout->addWidget(btn_states_use, 14, 2);
+    layout->addWidget(btn_states_use, 16, 2);
     box_states_use = new QCheckBox("Use Base", this);
     connect(box_states_use, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateUse(int)));
-    layout->addWidget(box_states_use, 14, 3);
+    layout->addWidget(box_states_use, 16, 3);
 
     /* State walkover */
     QLabel* lbl_states_walk = new QLabel("Walkover", this);
-    layout->addWidget(lbl_states_walk, 15, 1, Qt::AlignRight);
+    layout->addWidget(lbl_states_walk, 17, 1, Qt::AlignRight);
     btn_states_walk = new QPushButton("View", this);
     connect(btn_states_walk, SIGNAL(clicked()), this, SLOT(buttonStateWalk()));
-    layout->addWidget(btn_states_walk, 15, 2);
+    layout->addWidget(btn_states_walk, 17, 2);
     box_states_walk = new QCheckBox("Use Base", this);
     connect(box_states_walk, SIGNAL(stateChanged(int)),
             this, SLOT(checkStateWalk(int)));
-    layout->addWidget(box_states_walk, 15, 3);
+    layout->addWidget(box_states_walk, 17, 3);
   }
 
   /* Movement section only relevant if npc */
@@ -384,26 +406,26 @@ void InstanceDialog::createLayout()
     list_nodes = new QListWidget(this);
     connect(list_nodes, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(editNode(QListWidgetItem*)));
-    layout->addWidget(list_nodes, 8, 5, 8, 4);
+    layout->addWidget(list_nodes, 8, 5, 10, 4);
 
     btn_offset = 5;
   }
 
   /* The button control */
-  layout->setRowMinimumHeight(16, 15);
+  layout->setRowMinimumHeight(18, 15);
   QPushButton* btn_base_edit = new QPushButton("Edit Base", this);
   btn_base_edit->setMaximumWidth(75);
   connect(btn_base_edit, SIGNAL(clicked()), this, SLOT(buttonBaseEdit()));
-  layout->addWidget(btn_base_edit, 17, 0);
+  layout->addWidget(btn_base_edit, 19, 0);
   QPushButton* btn_ok = new QPushButton("Ok", this);
   btn_ok->setMaximumWidth(75);
   btn_ok->setDefault(true);
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 17, 2 + btn_offset);
+  layout->addWidget(btn_ok, 19, 2 + btn_offset);
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   btn_cancel->setMaximumWidth(75);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_cancel, 17, 3 + btn_offset);
+  layout->addWidget(btn_cancel, 19, 3 + btn_offset);
 
   /* Dialog control */
   if(thing_type == EditorEnumDb::THING)
@@ -466,6 +488,12 @@ void InstanceDialog::updateData()
   /* Name and descrip */
   line_name->setText(thing_working->getName());
   edit_description->setPlainText(thing_working->getDescription());
+
+  /* Active and respawn status */
+  box_active->setChecked(thing_working->isActive());
+  box_respawn->setChecked(thing_working->getActiveRespawn() < 0);
+  if(thing_working->getActiveRespawn() >= 0)
+    spin_respawn->setValue(thing_working->getActiveRespawn());
 
   /* Game ID Party */
   combo_party->setCurrentIndex(0);
@@ -900,6 +928,19 @@ void InstanceDialog::changedName(QString name)
 }
 
 /*
+ * Description: Slot triggered when the state of the check box for the make
+ *              thing active changes. This is used to make the thing active on
+ *              the map on start-up of the game.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
+void InstanceDialog::checkActiveChange(int state)
+{
+  thing_working->setActive(state == Qt::Checked);
+}
+
+/*
  * Description: Slot triggered when the state of the check box for the "use
  *              base" event changes. This is used to use a different event for
  *              the thing instance, as opposed to the base event.
@@ -989,6 +1030,24 @@ void InstanceDialog::checkLockBase(int state)
     else
       btn_lock->setFont(bold);
   }
+}
+
+/*
+ * Description: Slot triggered when the check box for the respawn enabled or
+ *              disabled is changed. Updates if the respawn time should be used
+ *              or if inactive it never appears again.
+ *
+ * Inputs: int state - the new state of the check box
+ * Output: none
+ */
+void InstanceDialog::checkRespawnChange(int state)
+{
+  bool respawn_disabled = (state == Qt::Checked);
+  spin_respawn->setDisabled(respawn_disabled);
+  if(respawn_disabled)
+    thing_working->setActiveRespawn(-1);
+  else
+    thing_working->setActiveRespawn(spin_respawn->value());
 }
 
 /*
@@ -1408,6 +1467,19 @@ void InstanceDialog::eventUpdated()
   {
     event_view->eventUpdated();
   }
+}
+
+/*
+ * Description: Slot triggered when the respawn time delay is changed within
+ *              the spin box.
+ *
+ * Inputs: int value - the changed value of the spin box
+ * Output: none
+ */
+void InstanceDialog::respawnChanged(int value)
+{
+  if(value > 0)
+    thing_working->setActiveRespawn(value);
 }
 
 /*

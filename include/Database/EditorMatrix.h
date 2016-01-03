@@ -188,9 +188,10 @@ public:
   void load(XmlData data, int index);
 
   /* Paint a single sprite in the matrix */
-  bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
+  bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0,
+             bool shadow = false);
   bool paint(int frame_index, QPainter* painter, QRect rect,
-             int offset_x = 0, int offset_y = 0);
+             int offset_x = 0, int offset_y = 0, bool shadow = false);
 
   /* Rebase the matrix to match the passed in matrix */
   bool rebase(EditorMatrix* base_matrix, bool passability = true);
