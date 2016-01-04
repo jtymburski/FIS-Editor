@@ -25,6 +25,7 @@ class ConvoDialog : public QDialog
 public:
   /* Constructor Function */
   ConvoDialog(Conversation* edit_convo = NULL, bool is_option = false, 
+              EventClassifier limiter = EventClassifier::NOEVENT,
               QWidget* parent = NULL);
 
   /* Destructor Function */
@@ -56,7 +57,8 @@ private:
  *===========================================================================*/
 private:
   /* Creates the dialog */
-  void createDialog(bool is_option = false);
+  void createDialog(bool is_option = false,
+                    EventClassifier limiter = EventClassifier::NOEVENT);
 
   /* Fill with data */
   void updateData();

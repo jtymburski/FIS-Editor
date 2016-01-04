@@ -38,7 +38,8 @@ class EventView : public QFrame
 public:
   /* Constructor function */
   EventView(EditorEvent* event = NULL, QWidget* parent = NULL,
-            bool conversation_enabled = true, bool view_only = false);
+            EventClassifier limiter = EventClassifier::NOEVENT,
+            bool view_only = false);
 
   /* Destructor function */
   ~EventView();
@@ -47,6 +48,9 @@ private:
   /* Right click actions that can be disabled */
   QAction* action_delete;
   QAction* action_option;
+
+  /* List of available events to edit in this set */
+  QVector<EventClassifier> available_events;
 
   /* Start battle event control widgets */
   QPushButton* battle_eventlose;
@@ -77,6 +81,9 @@ private:
   /* Give item event control widgets */
   QSpinBox* item_count;
   QComboBox* item_name;
+
+  /* The limiter for view events */
+  EventClassifier limiter;
 
   /* The list of objects used in possible events */
   //QVector<QString> list_ios;
@@ -160,7 +167,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the layout and widgets for this controller */
-  void createLayout(bool conversation_enabled = true);
+  void createLayout();//bool conversation_enabled = true);
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);

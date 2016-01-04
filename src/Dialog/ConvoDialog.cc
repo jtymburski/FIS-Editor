@@ -20,10 +20,11 @@
  *
  * Inputs: Conversation* edit_convo - the reference conversation segment
  *         bool is_option - is the segment an option in a list?
+ *         EventClassifier limiter - the restrictions on the event view
  *         QWidget* parent - the parent widget
  */
 ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option, 
-                         QWidget* parent)
+                         EventClassifier limiter, QWidget* parent)
            : QDialog(parent)
 {
   /* Initialize variables */
@@ -42,7 +43,7 @@ ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
   event_ctrl = new EditorEvent(convo_working.action_event);
 
   /* Create the dialog */
-  createDialog(is_option);
+  createDialog(is_option, limiter);
 
   /* Fill with data */
   updateData();
@@ -66,13 +67,14 @@ ConvoDialog::~ConvoDialog()
  * Description: Creates the dialog layout with QT functional widgets.
  *
  * Inputs: bool is_option - is the segment conversation an option?
+ *         EventClassifier limiter - the restrictions on the event view
  * Output: none
  */
-void ConvoDialog::createDialog(bool is_option)
+void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
 {
   /* Layout */
   QGridLayout* layout = new QGridLayout(this);
-  layout->setSizeConstraint(QLayout::SetFixedSize);
+  //layout->setSizeConstraint(QLayout::SetFixedSize);
 
   /* The text edit widget */
   text_box = new QTextEdit(this);
@@ -87,7 +89,8 @@ void ConvoDialog::createDialog(bool is_option)
   layout->addWidget(thing_combo, 1, 1, 1, 3);
 
   /* The event widget */
-  event_view = new EventView(event_ctrl, this, false);
+  int limit_int = ((int)limiter | (int)EventClassifier::CONVERSATION);
+  event_view = new EventView(event_ctrl, this, (EventClassifier)limit_int);
   layout->addWidget(event_view, 2, 0, 1, 4);
 
   /* The push buttons */

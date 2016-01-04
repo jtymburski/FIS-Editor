@@ -246,7 +246,8 @@ void MapView::editEventSet(EditorEventSet* set, QString window_title)
   /* Create the new conversation dialog */
   if(set != nullptr)
   {
-    event_dialog = new EventDialog(set, this, window_title);
+    event_dialog = new EventDialog(set, this, window_title,
+                                   EventClassifier::BATTLESTART);
     fillEventWithData();
     connect(event_dialog, SIGNAL(cancel()),
             this, SLOT(buttonEventCancel()));

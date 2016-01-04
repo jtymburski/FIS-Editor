@@ -19,16 +19,17 @@
  *
  * Inputs: EditorEvent* event - the event controller for the Event from handler
  *         QWidget* parent - the parent widget
- *         bool conversation_enabled - is the conversation option available??
+ *         EventClassifier limiter - which events to limit and not allow
  *         bool view_only - true if the event is only for viewing and no edit
  */
 EventView::EventView(EditorEvent* event, QWidget* parent,
-                     bool conversation_enabled, bool view_only)
+                     EventClassifier limiter, bool view_only)
          : QFrame(parent)
 {
   /* Initialize variables */
   //database = NULL;
   this->event = NULL;
+  this->limiter = limiter;
   pop_convo = nullptr;
   rightclick_index = "";
   this->view_only = view_only;
@@ -36,8 +37,26 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
   waiting_tile_event = false;
   waiting_tile = false;
 
+  /* Create list of available events */
+  int index = 0;
+  while(index <= (int)EventClassifier::UNLOCKTILE)
+  {
+    /* Get classification */
+    EventClassifier curr_opt = static_cast<EventClassifier>(index);
+
+    /* Push back if applicable */
+    if((((int)limiter) & ((int)curr_opt)) == 0)
+      available_events.push_back(curr_opt);
+
+    /* Increment index */
+    if(index < 1)
+      index = 1;
+    else
+      index = (index << 1);
+  }
+
   /* Create the layout */
-  createLayout(conversation_enabled);
+  createLayout();//conversation_enabled);
 
   /* Set the event */
   setEvent(event);
@@ -61,10 +80,10 @@ EventView::~EventView()
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *
- * Inputs: bool conversation_enabled - is the conversation widget enabled?
+ * Inputs: none
  * Output: none
  */
-void EventView::createLayout(bool conversation_enabled)
+void EventView::createLayout()//bool conversation_enabled)
 {
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -75,19 +94,22 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Combo box for event category */
   combo_category = new QComboBox(this);
-  combo_category->addItem("--");
-  combo_category->addItem("Give Item");
-  combo_category->addItem("Notification");
-  combo_category->addItem("Execute Battle");
-  combo_category->addItem("Switch Maps");
-  combo_category->addItem("Teleport Thing");
-  combo_category->addItem("Just Sound");
-  combo_category->addItem("Take Item");
-  combo_category->addItem("Unlock: Thing");
-  combo_category->addItem("Unlock: Tile");
-  combo_category->addItem("Unlock: IO");
-  if(conversation_enabled)
-    combo_category->addItem("Conversation");
+  for(int i = 0; i < available_events.size(); i++)
+    combo_category->addItem(QString::fromStdString(
+                              EventSet::classifierToStr(available_events[i])));
+  //combo_category->addItem("--");
+  //combo_category->addItem("Give Item");
+  //combo_category->addItem("Notification");
+  //combo_category->addItem("Execute Battle");
+  //combo_category->addItem("Switch Maps");
+  //combo_category->addItem("Teleport Thing");
+  //combo_category->addItem("Just Sound");
+  //combo_category->addItem("Take Item");
+  //combo_category->addItem("Unlock: Thing");
+  //combo_category->addItem("Unlock: Tile");
+  //combo_category->addItem("Unlock: IO");
+  //if(conversation_enabled)
+  //  combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
           this, SLOT(categoryChanged(int)));
   layout->addWidget(combo_category, 0, Qt::AlignCenter);
@@ -409,63 +431,92 @@ void EventView::createLayout(bool conversation_enabled)
 
   /* Widget for conversation control */
   QWidget* widget_convo;
-  if(conversation_enabled)
-  {
-    widget_convo = new QWidget(this);
-    convo_tree = new QTreeWidget(this);
-    convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-    //convo_tree->setMinimumWidth(320);
-    convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    convo_tree->header()->hide();
-    connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
-            this, SLOT(resizeTree(QTreeWidgetItem*)));
-    connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
-            this, SLOT(resizeTree(QTreeWidgetItem*)));
-    connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(convoMenuRequested(QPoint)));
-    connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
-    QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
-    layout_convo->addWidget(convo_tree);
+  //if(conversation_enabled)
+  //{
+  widget_convo = new QWidget(this);
+  convo_tree = new QTreeWidget(this);
+  convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+  //convo_tree->setMinimumWidth(320);
+  convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  convo_tree->header()->hide();
+  connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
+          this, SLOT(resizeTree(QTreeWidgetItem*)));
+  connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
+          this, SLOT(resizeTree(QTreeWidgetItem*)));
+  connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
+          this, SLOT(convoMenuRequested(QPoint)));
+  connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+          this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
+  QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
+  layout_convo->addWidget(convo_tree);
 
-    /* Right click menu control */
-    rightclick_menu = new QMenu("Convo Edit", this);
-    QAction* action_edit = new QAction("Edit", rightclick_menu);
-    connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
-    rightclick_menu->addAction(action_edit);
-    QAction* action_before = new QAction("Insert Before", rightclick_menu);
-    connect(action_before, SIGNAL(triggered()),
-            this, SLOT(rightClickInsertBefore()));
-    rightclick_menu->addAction(action_before);
-    QAction* action_after = new QAction("Insert After", rightclick_menu);
-    connect(action_after, SIGNAL(triggered()),
-            this, SLOT(rightClickInsertAfter()));
-    rightclick_menu->addAction(action_after);
-    action_option = new QAction("Insert Option", rightclick_menu);
-    connect(action_option, SIGNAL(triggered()),
-            this, SLOT(rightClickInsertOption()));
-    rightclick_menu->addAction(action_option);
-    action_delete = new QAction("Delete", rightclick_menu);
-    connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
-    rightclick_menu->addAction(action_delete);
-    rightclick_menu->hide();
-  }
+  /* Right click menu control */
+  rightclick_menu = new QMenu("Convo Edit", this);
+  QAction* action_edit = new QAction("Edit", rightclick_menu);
+  connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
+  rightclick_menu->addAction(action_edit);
+  QAction* action_before = new QAction("Insert Before", rightclick_menu);
+  connect(action_before, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertBefore()));
+  rightclick_menu->addAction(action_before);
+  QAction* action_after = new QAction("Insert After", rightclick_menu);
+  connect(action_after, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertAfter()));
+  rightclick_menu->addAction(action_after);
+  action_option = new QAction("Insert Option", rightclick_menu);
+  connect(action_option, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertOption()));
+  rightclick_menu->addAction(action_option);
+  action_delete = new QAction("Delete", rightclick_menu);
+  connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
+  rightclick_menu->addAction(action_delete);
+  rightclick_menu->hide();
+  //}
 
   /* Stacked widget for housing all the different views for categories */
   view_stack = new QStackedWidget(this);
-  view_stack->addWidget(widget_unset);
-  view_stack->addWidget(widget_give);
-  view_stack->addWidget(widget_notification);
-  view_stack->addWidget(widget_battle);
-  view_stack->addWidget(widget_map);
-  view_stack->addWidget(widget_teleport);
-  view_stack->addWidget(widget_sound);
-  view_stack->addWidget(widget_take);
-  view_stack->addWidget(widget_unlock_thing);
-  view_stack->addWidget(widget_unlock_tile);
-  view_stack->addWidget(widget_unlock_io);
-  if(conversation_enabled)
-    view_stack->addWidget(widget_convo);
+  for(int i = 0; i < available_events.size(); i++)
+  {
+    if(available_events[i] == EventClassifier::BATTLESTART)
+      view_stack->addWidget(widget_battle);
+    else if(available_events[i] == EventClassifier::CONVERSATION)
+      view_stack->addWidget(widget_convo);
+    else if(available_events[i] == EventClassifier::ITEMGIVE)
+      view_stack->addWidget(widget_give);
+    else if(available_events[i] == EventClassifier::ITEMTAKE)
+      view_stack->addWidget(widget_take);
+    else if(available_events[i] == EventClassifier::MAPSWITCH)
+      view_stack->addWidget(widget_map);
+    else if(available_events[i] == EventClassifier::NOEVENT)
+      view_stack->addWidget(widget_unset);
+    else if(available_events[i] == EventClassifier::NOTIFICATION)
+      view_stack->addWidget(widget_notification);
+    else if(available_events[i] == EventClassifier::PROPERTY)
+      view_stack->addWidget(new QWidget(this)); // TODO
+    else if(available_events[i] == EventClassifier::SOUNDONLY)
+      view_stack->addWidget(widget_sound);
+    else if(available_events[i] == EventClassifier::TELEPORTTHING)
+      view_stack->addWidget(widget_teleport);
+    else if(available_events[i] == EventClassifier::UNLOCKIO)
+      view_stack->addWidget(widget_unlock_io);
+    else if(available_events[i] == EventClassifier::UNLOCKTHING)
+      view_stack->addWidget(widget_unlock_thing);
+    else if(available_events[i] == EventClassifier::UNLOCKTILE)
+      view_stack->addWidget(widget_unlock_tile);
+  }
+  //view_stack->addWidget(widget_unset);
+  //view_stack->addWidget(widget_give);
+  //view_stack->addWidget(widget_notification);
+  //view_stack->addWidget(widget_battle);
+  //view_stack->addWidget(widget_map);
+  //view_stack->addWidget(widget_teleport);
+  //view_stack->addWidget(widget_sound);
+  //view_stack->addWidget(widget_take);
+  //view_stack->addWidget(widget_unlock_thing);
+  //view_stack->addWidget(widget_unlock_tile);
+  //view_stack->addWidget(widget_unlock_io);
+  //if(conversation_enabled)
+  //  view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
   /* One Shot widget */
@@ -542,7 +593,7 @@ void EventView::editConversation(Conversation* convo, bool is_option)
   /* Create the new conversation dialog */
   if(convo != nullptr)
   {
-    pop_convo = new ConvoDialog(convo, is_option, this);
+    pop_convo = new ConvoDialog(convo, is_option, limiter, this);
     pop_convo->setListThings(getListThings());
     pop_convo->getEventView()->setListIOs(list_ios);
     pop_convo->getEventView()->setListItems(list_items);
@@ -588,7 +639,8 @@ void EventView::editEvent(Event* edit_event)
     pop_event_edit = edit_event;
 
     /* Add view */
-    pop_event_view = new EventView(nullptr, pop_event);
+    pop_event_view = new EventView(nullptr, pop_event,
+                                   EventClassifier::BATTLESTART);
     pop_event_view->setListIOs(list_ios);
     pop_event_view->setListItems(list_items);
     pop_event_view->setListMaps(list_maps);
@@ -718,10 +770,13 @@ void EventView::setLayoutData()
   if(event != nullptr)
   {
     /* Set the selected category */
-    if((int)event->getEventType() != combo_category->currentIndex())
+    QString curr_event = QString::fromStdString(
+                             EventSet::classifierToStr(event->getEventType()));
+    if(curr_event != combo_category->currentText())
     {
       //combo_category->blockSignals(true);
-      combo_category->setCurrentIndex((int)event->getEventType());
+      combo_category->setCurrentText(curr_event);
+      //combo_category->setCurrentIndex((int)event->getEventType());
       //int index = (int)event->getEventType();
       //combo_category->setCurrentIndex(index);
       //view_stack->setCurrentIndex(index);
@@ -731,38 +786,8 @@ void EventView::setLayoutData()
     }
 
     /* Set the data, based on the event */
-    if(event->getEventType() == EventClassifier::GIVEITEM)
-    {
-      item_count->setValue(event->getGiveItemCount());
-
-      /* Attempt to find the item name in the combo box */
-      int index = -1;
-      for(int i = 0; i < list_items.size(); i++)
-      {
-        QStringList set = list_items[i].split(":");
-        if(set.size() == 2)
-        {
-          if(set.front().toInt() == event->getGiveItemID())
-          {
-            item_name->setCurrentIndex(i);
-            index = i;
-          }
-        }
-      }
-
-      /* If index < 0 (not found), set to first */
-      if(index < 0)
-      {
-        item_name->setCurrentIndex(0);
-        if(list_items.size() > 0)
-          giveItemChanged(0);
-      }
-    }
-    else if(event->getEventType() == EventClassifier::NOTIFICATION)
-    {
-      notification_edit->setPlainText(event->getNotification());
-    }
-    else if(event->getEventType() == EventClassifier::RUNBATTLE)
+    /* -- BATTLE START -- */
+    if(event->getEventType() == EventClassifier::BATTLESTART)
     {
       /* Flag check boxes */
       bool win_disappear, lose_gg, restore_health, restore_qd;
@@ -791,32 +816,8 @@ void EventView::setLayoutData()
       else
         battle_eventlose->setFont(not_bold);
     }
-    else if(event->getEventType() == EventClassifier::RUNMAP)
-    {
-      /* Attempt to find the map name in the combo box */
-      int index = -1;
-      for(int i = 0; i < list_maps.size(); i++)
-      {
-        QStringList set = list_maps[i].split(":");
-        if(set.size() == 2)
-        {
-          if(set.front().toInt() == event->getStartMapID())
-          {
-            map_name->setCurrentIndex(i);
-            index = i;
-          }
-        }
-      }
-
-      /* If index < 0 (not found), set to first */
-      if(index < 0)
-      {
-        map_name->setCurrentIndex(0);
-        if(list_maps.size() > 0)
-          changeMapChanged(0);
-      }
-    }
-    else if(event->getEventType() == EventClassifier::STARTCONVO)
+    /* -- CONVERSATION -- */
+    else if(event->getEventType() == EventClassifier::CONVERSATION)
     {
       /* Clear the tree */
       convo_tree->clear();
@@ -833,7 +834,36 @@ void EventView::setLayoutData()
         convo_tree->resizeColumnToContents(0);
       }
     }
-    if(event->getEventType() == EventClassifier::TAKEITEM)
+    /* -- ITEM GIVE -- */
+    else if(event->getEventType() == EventClassifier::ITEMGIVE)
+    {
+      item_count->setValue(event->getGiveItemCount());
+
+      /* Attempt to find the item name in the combo box */
+      int index = -1;
+      for(int i = 0; i < list_items.size(); i++)
+      {
+        QStringList set = list_items[i].split(":");
+        if(set.size() == 2)
+        {
+          if(set.front().toInt() == event->getGiveItemID())
+          {
+            item_name->setCurrentIndex(i);
+            index = i;
+          }
+        }
+      }
+
+      /* If index < 0 (not found), set to first */
+      if(index < 0)
+      {
+        item_name->setCurrentIndex(0);
+        if(list_items.size() > 0)
+          giveItemChanged(0);
+      }
+    }
+    /* -- ITEM TAKE -- */
+    else if(event->getEventType() == EventClassifier::ITEMTAKE)
     {
       take_count->setValue(event->getTakeItemCount());
 
@@ -860,6 +890,38 @@ void EventView::setLayoutData()
           takeItemChanged(0);
       }
     }
+    /* -- MAP SWITCH -- */
+    else if(event->getEventType() == EventClassifier::MAPSWITCH)
+    {
+      /* Attempt to find the map name in the combo box */
+      int index = -1;
+      for(int i = 0; i < list_maps.size(); i++)
+      {
+        QStringList set = list_maps[i].split(":");
+        if(set.size() == 2)
+        {
+          if(set.front().toInt() == event->getStartMapID())
+          {
+            map_name->setCurrentIndex(i);
+            index = i;
+          }
+        }
+      }
+
+      /* If index < 0 (not found), set to first */
+      if(index < 0)
+      {
+        map_name->setCurrentIndex(0);
+        if(list_maps.size() > 0)
+          changeMapChanged(0);
+      }
+    }
+    /* -- NOTIFICATION -- */
+    else if(event->getEventType() == EventClassifier::NOTIFICATION)
+    {
+      notification_edit->setPlainText(event->getNotification());
+    }
+    /* -- TELEPORT THING -- */
     else if(event->getEventType() == EventClassifier::TELEPORTTHING)
     {
       /* Attempt to find the map name in the combo box */
@@ -901,67 +963,7 @@ void EventView::setLayoutData()
           teleportThingChanged(0);
       }
     }
-    else if(event->getEventType() == EventClassifier::UNLOCKTHING)
-    {
-      /* Attempt to find thing in combo box */
-      int index = -1;
-      for(int i = 0; (index < 0) && (i < list_things_no_io.size()); i++)
-      {
-        QStringList set = list_things_no_io[i].split(":");
-        if(set.size() == 2)
-          if(set.front().toInt() == event->getUnlockThingID())
-            index = i;
-      }
-      if(index >= 0)
-      {
-        unth_name->setCurrentIndex(index);
-      }
-      else
-      {
-        unth_name->setCurrentIndex(0);
-        if(list_things_no_io.size() > 0)
-          unlockThingChanged(list_things_no_io.front());
-      }
-
-      /* View data */
-      bool view, scroll;
-      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
-      unth_view_enable->setChecked(view);
-      unth_view_scroll->setChecked(scroll);
-      unth_view_time->setValue(event->getUnlockViewTime());
-    }
-    else if(event->getEventType() == EventClassifier::UNLOCKTILE)
-    {
-      /* Attempt to find the map name */
-      QString name = "";
-      for(int i = 0; i < list_submaps.size(); i++)
-      {
-        QStringList set = list_submaps[i].split(":");
-        if(set.size() == 2)
-          if(set.front().toInt() == event->getUnlockTileSection())
-            name = set.last();
-      }
-
-      /* Load the name and information */
-      unti_location->setText(QString::number(event->getUnlockTileSection()) +
-                             ": " + name + "  | X: " +
-                             QString::number(event->getUnlockTileX()) +
-                             " | Y: " +
-                             QString::number(event->getUnlockTileY()));
-
-      /* Event data */
-      bool enter, exit;
-      EventSet::dataEnumTileEvent(event->getUnlockTileMode(), enter, exit);
-      unti_event_enter->setChecked(enter);
-      unti_event_exit->setChecked(exit);
-
-      /* View data */
-      bool view, scroll;
-      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
-      unti_view_enable->setChecked(view);
-      unti_view_scroll->setChecked(scroll);
-      unti_view_time->setValue(event->getUnlockViewTime());
-    }
+    /* -- UNLOCK IO -- */
     else if(event->getEventType() == EventClassifier::UNLOCKIO)
     {
       /* Initial reference data */
@@ -1017,6 +1019,69 @@ void EventView::setLayoutData()
       unio_view_scroll->setChecked(scroll);
       unio_view_time->setValue(event->getUnlockViewTime());
     }
+    /* -- UNLOCK THING -- */
+    else if(event->getEventType() == EventClassifier::UNLOCKTHING)
+    {
+      /* Attempt to find thing in combo box */
+      int index = -1;
+      for(int i = 0; (index < 0) && (i < list_things_no_io.size()); i++)
+      {
+        QStringList set = list_things_no_io[i].split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getUnlockThingID())
+            index = i;
+      }
+      if(index >= 0)
+      {
+        unth_name->setCurrentIndex(index);
+      }
+      else
+      {
+        unth_name->setCurrentIndex(0);
+        if(list_things_no_io.size() > 0)
+          unlockThingChanged(list_things_no_io.front());
+      }
+
+      /* View data */
+      bool view, scroll;
+      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
+      unth_view_enable->setChecked(view);
+      unth_view_scroll->setChecked(scroll);
+      unth_view_time->setValue(event->getUnlockViewTime());
+    }
+    /* -- UNLOCK TILE -- */
+    else if(event->getEventType() == EventClassifier::UNLOCKTILE)
+    {
+      /* Attempt to find the map name */
+      QString name = "";
+      for(int i = 0; i < list_submaps.size(); i++)
+      {
+        QStringList set = list_submaps[i].split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getUnlockTileSection())
+            name = set.last();
+      }
+
+      /* Load the name and information */
+      unti_location->setText(QString::number(event->getUnlockTileSection()) +
+                             ": " + name + "  | X: " +
+                             QString::number(event->getUnlockTileX()) +
+                             " | Y: " +
+                             QString::number(event->getUnlockTileY()));
+
+      /* Event data */
+      bool enter, exit;
+      EventSet::dataEnumTileEvent(event->getUnlockTileMode(), enter, exit);
+      unti_event_enter->setChecked(enter);
+      unti_event_exit->setChecked(exit);
+
+      /* View data */
+      bool view, scroll;
+      EventSet::dataEnumView(event->getUnlockViewMode(), view, scroll);
+      unti_view_enable->setChecked(view);
+      unti_view_scroll->setChecked(scroll);
+      unti_view_time->setValue(event->getUnlockViewTime());
+    }
 
     /* Data for one shot */
     if(event->getEventType() != EventClassifier::NOEVENT)
@@ -1057,7 +1122,9 @@ void EventView::setLayoutData()
   }
   else
   {
-    combo_category->setCurrentIndex(0);
+    combo_category->setCurrentText(QString::fromStdString(
+                         EventSet::classifierToStr(EventClassifier::NOEVENT)));
+    //combo_category->setCurrentIndex(0);
     combo_category->setDisabled(true);
   }
 
@@ -1128,7 +1195,7 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
  */
 void EventView::battleEventLoseEdit()
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(event->getStartBattleEventLose());
   }
@@ -1143,7 +1210,7 @@ void EventView::battleEventLoseEdit()
  */
 void EventView::battleEventWinEdit()
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(event->getStartBattleEventWin());
   }
@@ -1159,7 +1226,7 @@ void EventView::battleEventWinEdit()
  */
 void EventView::battleHealthFlagChange(int state)
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(nullptr);
 
@@ -1188,7 +1255,7 @@ void EventView::battleHealthFlagChange(int state)
  */
 void EventView::battleLoseFlagChange(int state)
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(nullptr);
 
@@ -1221,7 +1288,7 @@ void EventView::battleLoseFlagChange(int state)
  */
 void EventView::battleQDFlagChange(int state)
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(nullptr);
 
@@ -1250,7 +1317,7 @@ void EventView::battleQDFlagChange(int state)
  */
 void EventView::battleWinFlagChange(int state)
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     editEvent(nullptr);
 
@@ -1302,35 +1369,37 @@ void EventView::categoryChanged(int index)
   combo_sound->setEnabled(index != (int)EventClassifier::NOEVENT);
 
   /* Update the event */
-  if(event != nullptr)
+  if(event != nullptr && index >= 0 && index < available_events.size())
   {
-    if((int)event->getEventType() != index)
+    EventClassifier new_class = available_events[index];
+
+    if(event->getEventType() != new_class)
     {
       /* Change the event */
-      if(index == (int)EventClassifier::GIVEITEM)
-        event->setEventGiveItem();
-      else if(index == (int)EventClassifier::JUSTSOUND)
-        event->setEventSound();
-      else if(index == (int)EventClassifier::NOEVENT)
-        event->setEventBlank();
-      else if(index == (int)EventClassifier::NOTIFICATION)
-        event->setEventNotification();
-      else if(index == (int)EventClassifier::RUNBATTLE)
+      if(new_class == EventClassifier::BATTLESTART)
         event->setEventStartBattle();
-      else if(index == (int)EventClassifier::RUNMAP)
-        event->setEventStartMap();
-      else if(index == (int)EventClassifier::STARTCONVO)
+      else if(new_class == EventClassifier::CONVERSATION)
         event->setEventConversation();
-      else if(index == (int)EventClassifier::TAKEITEM)
+      else if(new_class == EventClassifier::ITEMGIVE)
+        event->setEventGiveItem();
+      else if(new_class == EventClassifier::ITEMTAKE)
         event->setEventTakeItem();
-      else if(index == (int)EventClassifier::TELEPORTTHING)
+      else if(new_class == EventClassifier::MAPSWITCH)
+        event->setEventStartMap();
+      else if(new_class == EventClassifier::NOTIFICATION)
+        event->setEventNotification();
+      else if(new_class == EventClassifier::SOUNDONLY)
+        event->setEventSound();
+      else if(new_class == EventClassifier::TELEPORTTHING)
         event->setEventTeleport();
-      else if(index == (int)EventClassifier::UNLOCKIO)
+      else if(new_class == EventClassifier::UNLOCKIO)
         event->setEventUnlockIO();
-      else if(index == (int)EventClassifier::UNLOCKTHING)
+      else if(new_class == EventClassifier::UNLOCKTHING)
         event->setEventUnlockThing();
-      else if(index == (int)EventClassifier::UNLOCKTILE)
+      else if(new_class == EventClassifier::UNLOCKTILE)
         event->setEventUnlockTile();
+      else if(new_class == EventClassifier::NOEVENT)
+        event->setEventBlank();
     }
 
     /* Update the layout */
@@ -2279,7 +2348,7 @@ void EventView::unlockTileViewTime(int time)
  */
 void EventView::updateBattle()
 {
-  if(event->getEventType() == EventClassifier::RUNBATTLE)
+  if(event->getEventType() == EventClassifier::BATTLESTART)
   {
     setLayoutData();
   }
@@ -2294,7 +2363,7 @@ void EventView::updateBattle()
  */
 void EventView::updateConversation()
 {
-  if(event->getEventType() == EventClassifier::STARTCONVO)
+  if(event->getEventType() == EventClassifier::CONVERSATION)
   {
     QString index = getConvoIndex(convo_tree->currentItem());
     setLayoutData();

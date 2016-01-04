@@ -21,7 +21,8 @@
  *         bool view_only - true if only for viewing and not editing. Defaulted
  */
 EventDialog::EventDialog(EditorEventSet* set, QWidget* parent,
-                         QString window_title, bool view_only)
+                         QString window_title, EventClassifier limiter,
+                         bool view_only)
            : QDialog(parent)
 {
   this->view_only = view_only;
@@ -33,9 +34,9 @@ EventDialog::EventDialog(EditorEventSet* set, QWidget* parent,
 
   /* Layout setup */
   if(window_title.isEmpty())
-    createLayout();
+    createLayout("Event Set Edit", limiter);
   else
-    createLayout(window_title);
+    createLayout(window_title, limiter);
   setEventSet(set);
 }
 
@@ -56,10 +57,11 @@ EventDialog::~EventDialog()
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *
- * Inputs: QString window_title -
+ * Inputs: QString window_title - the window title for the dialog
+ *         EventClassifier limiter - the events not allowed in view
  * Output: none
  */
-void EventDialog::createLayout(QString window_title)
+void EventDialog::createLayout(QString window_title, EventClassifier limiter)
 {
   /* General dialog control */
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -137,7 +139,7 @@ void EventDialog::createLayout(QString window_title)
 
   /* Event and Lock View */
   view_stack = new QStackedWidget(this);
-  view_event = new EventView(nullptr, this, true, view_only);
+  view_event = new EventView(nullptr, this, limiter, view_only);
   //connect(view_event, SIGNAL(editConversation(Conversation*,bool)),
   //        this, SLOT(editConversation(Conversation*,bool)));
   //connect(view_event, SIGNAL(editEvent(Event*)),

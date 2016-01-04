@@ -275,7 +275,7 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
  */
 QString EditorEvent::deleteConversation(QString index)
 {
-  if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
+  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
   {
     Conversation* previous = convoManipulator(index, false, true);
     Conversation* current = convoManipulator(index);
@@ -335,7 +335,7 @@ QString EditorEvent::deleteConversation(QString index)
  */
 Conversation* EditorEvent::getConversation()
 {
-  if(event.classification == EventClassifier::STARTCONVO)
+  if(event.classification == EventClassifier::CONVERSATION)
     return event.convo;
   return NULL;
 }
@@ -351,7 +351,7 @@ Conversation* EditorEvent::getConversation()
  */
 Conversation* EditorEvent::getConversation(QString index, bool before)
 {
-  if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
+  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
     return convoManipulator(index, false, before);
   return NULL;
 }
@@ -365,7 +365,7 @@ Conversation* EditorEvent::getConversation(QString index, bool before)
  */
 QString EditorEvent::getConversationIndex(Conversation* convo)
 {
-  if(event.classification == EventClassifier::STARTCONVO)
+  if(event.classification == EventClassifier::CONVERSATION)
     return recursiveConversationFind(convo, conversation);
   return "";
 }
@@ -610,31 +610,8 @@ int EditorEvent::getTeleportY()
  */
 QString EditorEvent::getTextSummary(QString prefix)
 {
-  QString content = "";
-  if(getEventType() == EventClassifier::GIVEITEM)
-    content = "Give Item";
-  else if(getEventType() == EventClassifier::NOTIFICATION)
-    content = "Notification";
-  else if(getEventType() == EventClassifier::RUNBATTLE)
-    content = "Start Battle";
-  else if(getEventType() == EventClassifier::RUNMAP)
-    content = "Switch Map";
-  else if(getEventType() == EventClassifier::TELEPORTTHING)
-    content = "Teleport Thing";
-  else if(getEventType() == EventClassifier::JUSTSOUND)
-    content = "Sound Trigger";
-  else if(getEventType() == EventClassifier::TAKEITEM)
-    content = "Take Item";
-  else if(getEventType() == EventClassifier::UNLOCKTHING)
-    content = "Unlock Thing";
-  else if(getEventType() == EventClassifier::UNLOCKTILE)
-    content = "Unlock Tile";
-  else if(getEventType() == EventClassifier::UNLOCKIO)
-    content = "Unlock IO";
-  else if(getEventType() == EventClassifier::STARTCONVO)
-    content = "Conversation";
-  else
-    content = "None";
+  QString content = QString::fromStdString(
+                                 EventSet::classifierToStr(getEventType()));
 
   QString suffix = "";
   if(isOneShot())
@@ -915,7 +892,7 @@ int EditorEvent::getUnlockViewTime()
 QString EditorEvent::insertConversationAfter(QString index, Conversation convo,
                                              bool option_node)
 {
-  if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
+  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
   {
     Conversation* ref = convoManipulator(index, true);
     if(ref != NULL)
@@ -981,7 +958,7 @@ QString EditorEvent::insertConversationAfter(QString index, Conversation convo,
 QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
                                               bool option_node)
 {
-  if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
+  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
   {
     Conversation* ref = convoManipulator(index, true, true);
     if(ref != NULL || (index == "1" && conversation != NULL))
@@ -1117,67 +1094,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     if(!no_preface)
       fh->writeXmlElement(preface.toStdString());
 
-    /* -- GIVE ITEM EVENT -- */
-    if(event.classification == EventClassifier::GIVEITEM)
-    {
-      fh->writeXmlElement("giveitem");
-
-      /* Data */
-      fh->writeXmlData("id", getGiveItemID());
-      fh->writeXmlData("count", getGiveItemCount());
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
-    }
-    /* -- JUST SOUND EVENT -- */
-    else if(event.classification == EventClassifier::JUSTSOUND)
-    {
-      if(getSoundID() >= 0)
-      {
-        /* Two properties: more complex save */
-        if(isOneShot())
-        {
-          fh->writeXmlElement("justsound");
-
-          /* Data */
-          fh->writeXmlData("sound_id", getSoundID());
-          fh->writeXmlData("one_shot", isOneShot());
-
-          fh->writeXmlElementEnd();
-        }
-        /* Just the sound ID: simpler save */
-        else
-        {
-          fh->writeXmlData("justsound", getSoundID());
-        }
-      }
-    }
-    /* -- NOTIFICATION EVENT -- */
-    else if(event.classification == EventClassifier::NOTIFICATION)
-    {
-      if(getSoundID() >= 0 || isOneShot())
-      {
-        fh->writeXmlElement("notification");
-
-        /* Data */
-        fh->writeXmlData("text", getNotification().toStdString());
-        if(isOneShot())
-          fh->writeXmlData("one_shot", isOneShot());
-        if(getSoundID() >= 0)
-          fh->writeXmlData("sound_id", getSoundID());
-
-        fh->writeXmlElementEnd();
-      }
-      else
-      {
-        fh->writeXmlData("notification", getNotification().toStdString());
-      }
-    }
-    /* -- EXECUTE BATTLE EVENT -- */
-    else if(event.classification == EventClassifier::RUNBATTLE)
+    /* -- BATTLE START EVENT -- */
+    if(event.classification == EventClassifier::BATTLESTART)
     {
       Event* event_lose = getStartBattleEventLose();
       Event* event_win = getStartBattleEventWin();
@@ -1231,13 +1149,19 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("startbattle", zero);
       }
     }
-    /* -- EXECUTE MAP EVENT -- */
-    else if(event.classification == EventClassifier::RUNMAP)
+    /* -- CONVERSATION EVENT -- */
+    else if(event.classification == EventClassifier::CONVERSATION)
     {
-      fh->writeXmlElement("startmap");
+      saveConversation(fh);
+    }
+    /* -- ITEM GIVE EVENT -- */
+    else if(event.classification == EventClassifier::ITEMGIVE)
+    {
+      fh->writeXmlElement("giveitem");
 
       /* Data */
-      fh->writeXmlData("id", getStartMapID());
+      fh->writeXmlData("id", getGiveItemID());
+      fh->writeXmlData("count", getGiveItemCount());
       if(isOneShot())
         fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
@@ -1245,13 +1169,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
 
       fh->writeXmlElementEnd();
     }
-    /* -- START CONVERSATION EVENT -- */
-    else if(event.classification == EventClassifier::STARTCONVO)
-    {
-      saveConversation(fh);
-    }
-    /* -- TAKE ITEM EVENT -- */
-    if(event.classification == EventClassifier::TAKEITEM)
+    /* -- ITEM TAKE EVENT -- */
+    else if(event.classification == EventClassifier::ITEMTAKE)
     {
       fh->writeXmlElement("takeitem");
 
@@ -1264,6 +1183,64 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("sound_id", getSoundID());
 
       fh->writeXmlElementEnd();
+    }
+    /* -- MAP SWITCH EVENT -- */
+    else if(event.classification == EventClassifier::MAPSWITCH)
+    {
+      fh->writeXmlElement("startmap");
+
+      /* Data */
+      fh->writeXmlData("id", getStartMapID());
+      if(isOneShot())
+        fh->writeXmlData("one_shot", isOneShot());
+      if(getSoundID() >= 0)
+        fh->writeXmlData("sound_id", getSoundID());
+
+      fh->writeXmlElementEnd();
+    }
+    /* -- NOTIFICATION EVENT -- */
+    else if(event.classification == EventClassifier::NOTIFICATION)
+    {
+      if(getSoundID() >= 0 || isOneShot())
+      {
+        fh->writeXmlElement("notification");
+
+        /* Data */
+        fh->writeXmlData("text", getNotification().toStdString());
+        if(isOneShot())
+          fh->writeXmlData("one_shot", isOneShot());
+        if(getSoundID() >= 0)
+          fh->writeXmlData("sound_id", getSoundID());
+
+        fh->writeXmlElementEnd();
+      }
+      else
+      {
+        fh->writeXmlData("notification", getNotification().toStdString());
+      }
+    }
+    /* -- SOUND ONLY EVENT -- */
+    else if(event.classification == EventClassifier::SOUNDONLY)
+    {
+      if(getSoundID() >= 0)
+      {
+        /* Two properties: more complex save */
+        if(isOneShot())
+        {
+          fh->writeXmlElement("justsound");
+
+          /* Data */
+          fh->writeXmlData("sound_id", getSoundID());
+          fh->writeXmlData("one_shot", isOneShot());
+
+          fh->writeXmlElementEnd();
+        }
+        /* Just the sound ID: simpler save */
+        else
+        {
+          fh->writeXmlData("justsound", getSoundID());
+        }
+      }
     }
     /* -- TELEPORT THING EVENT -- */
     else if(event.classification == EventClassifier::TELEPORTTHING)
@@ -1460,7 +1437,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
  */
 bool EditorEvent::setConversation(QString index, Conversation convo)
 {
-  if(event.classification == EventClassifier::STARTCONVO && !index.isEmpty())
+  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
   {
     /* Attempt to get the convo. Generates any on the way that don't exist */
     Conversation* existing = convoManipulator(index, true);
@@ -1489,7 +1466,7 @@ void EditorEvent::setEvent(Event event)
 
   /* Create new event */
   this->event = EventSet::copyEvent(event);
-  if(event.classification == EventClassifier::STARTCONVO)
+  if(event.classification == EventClassifier::CONVERSATION)
     conversation = this->event.convo;
 }
 
@@ -1930,7 +1907,7 @@ Conversation EditorEvent::createConversation(QString text, int id, Event event)
   Conversation convo = EventSet::createBlankConversation();
   convo.text = text.toStdString();
   convo.thing_id = id;
-  if(event.classification != EventClassifier::STARTCONVO)
+  if(event.classification != EventClassifier::CONVERSATION)
     convo.action_event = event;
 
   return convo;
@@ -1957,7 +1934,7 @@ Conversation EditorEvent::createConversation(QString text, int id, Event event,
   {
     convo.next.push_back(EventSet::createBlankConversation());
     convo.next.back().text = options[i].first.toStdString();
-    if(options[i].second.classification != EventClassifier::STARTCONVO)
+    if(options[i].second.classification != EventClassifier::CONVERSATION)
       convo.next.back().action_event = options[i].second;
   }
 

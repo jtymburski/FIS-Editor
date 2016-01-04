@@ -1401,7 +1401,8 @@ void InstanceDialog::editEventSet(EditorEventSet* set,
   /* Create the new conversation dialog */
   if(set != nullptr)
   {
-    event_dialog = new EventDialog(set, this, window_title, view_only);
+    event_dialog = new EventDialog(set, this, window_title,
+                                   EventClassifier::NOEVENT, view_only);
     event_dialog->setListIOs(list_ios);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);

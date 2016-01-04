@@ -36,7 +36,6 @@ Application::Application(QWidget* parent)
 
   connect(game_database, SIGNAL(changeMode(EditorEnumDb::ViewMode)),
           this, SLOT(setView(EditorEnumDb::ViewMode)));
-
   connect(game_database, SIGNAL(changeMap(EditorMap*)),
           this, SLOT(setMap(EditorMap*)));
   connect(game_database, SIGNAL(changePerson(EditorPerson*)),
