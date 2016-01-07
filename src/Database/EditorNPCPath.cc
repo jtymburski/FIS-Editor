@@ -61,7 +61,7 @@ EditorNPCPath::EditorNPCPath(int x, int y, int delay, bool xy_flip)
   track_dist_max = MapNPC::kTRACK_DIST_MAX;
   track_dist_min = MapNPC::kTRACK_DIST_MIN;
   track_dist_run = MapNPC::kTRACK_DIST_RUN;
-  tracking = MapNPC::NOTRACK;
+  tracking = TrackingState::NOTRACK;
   visible_by_control = true;
   visible_by_edit = true;
 
@@ -1300,9 +1300,9 @@ int EditorNPCPath::getTrackDistRun()
  *              defined in the MapNPC::TrackingState.
  *
  * Inputs: none
- * Output: MapNPC::TrackingState - the tracking state currently being used
+ * Output: TrackingState - the tracking state currently being used
  */
-MapNPC::TrackingState EditorNPCPath::getTracking()
+TrackingState EditorNPCPath::getTracking()
 {
   return tracking;
 }
@@ -1510,11 +1510,11 @@ void EditorNPCPath::load(XmlData data, int index)
   {
     QString tracking = QString::fromStdString(data.getDataString());
     if(tracking == "none")
-      setTracking(MapNPC::NOTRACK);
+      setTracking(TrackingState::NOTRACK);
     else if(tracking == "toplayer")
-      setTracking(MapNPC::TOPLAYER);
+      setTracking(TrackingState::TOPLAYER);
     else if(tracking == "avoidplayer")
-      setTracking(MapNPC::AVOIDPLAYER);
+      setTracking(TrackingState::AVOIDPLAYER);
   }
   /* -- FORCED INTERACTION -- */
   else if(element == "forcedinteraction")
@@ -1621,7 +1621,7 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
       }
 
       /* Write the setpoints */
-      if(getTracking() != MapNPC::NOTRACK)
+      if(getTracking() != TrackingState::NOTRACK)
       {
         /* Max */
         if(getState() != MapNPC::RANDOM)
@@ -1633,7 +1633,7 @@ void EditorNPCPath::save(FileHandler* fh, bool game_only)
           fh->writeXmlData("trackmin", getTrackDistMin());
 
         /* Run */
-        if(getTracking() == MapNPC::AVOIDPLAYER)
+        if(getTracking() == TrackingState::AVOIDPLAYER)
           if(default_path.getTrackDistRun() != getTrackDistRun())
             fh->writeXmlData("trackrun", getTrackDistRun());
       }
@@ -1947,10 +1947,10 @@ bool EditorNPCPath::setTrackDistRun(int dist)
  * Description: Sets the tracking state of the node set. This defines how the
  *              npc will behave when a player is in the vicinity.
  *
- * Inputs: MapNPC::TrackingState tracking - the new tracking definition for NPC
+ * Inputs: TrackingState tracking - the new tracking definition for NPC
  * Output: none
  */
-void EditorNPCPath::setTracking(MapNPC::TrackingState tracking)
+void EditorNPCPath::setTracking(TrackingState tracking)
 {
   if(this->tracking != tracking)
   {

@@ -77,7 +77,7 @@ private:
   int track_dist_run;
 
   /* Tracking properties */
-  MapNPC::TrackingState tracking;
+  TrackingState tracking;
 
   /* Visibility control */
   bool visible_by_control;
@@ -193,7 +193,7 @@ public:
   int getTrackDistRun();
 
   /* Returns the tracking state of the npc on the path */
-  MapNPC::TrackingState getTracking();
+  TrackingState getTracking();
 
   /* Insert nodes at location */
   bool insertNodeAfter(int index, int x, int y, int delay = 0,
@@ -250,7 +250,7 @@ public:
   bool setTrackDistRun(int dist);
 
   /* Sets the tracking state of the npc on the path */
-  void setTracking(MapNPC::TrackingState tracking);
+  void setTracking(TrackingState tracking);
 
   /* Set visibility control */
   void setVisibleControl(bool visible);

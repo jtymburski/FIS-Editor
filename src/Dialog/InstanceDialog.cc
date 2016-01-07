@@ -577,11 +577,11 @@ void InstanceDialog::updateData()
 
     /* Combo box tracking */
     combo_tracking->blockSignals(true);
-    if(path->getTracking() == MapNPC::NOTRACK)
+    if(path->getTracking() == TrackingState::NOTRACK)
       combo_tracking->setCurrentIndex(0);
-    else if(path->getTracking() == MapNPC::AVOIDPLAYER)
+    else if(path->getTracking() == TrackingState::AVOIDPLAYER)
       combo_tracking->setCurrentIndex(1);
-    else if(path->getTracking() == MapNPC::TOPLAYER)
+    else if(path->getTracking() == TrackingState::TOPLAYER)
       combo_tracking->setCurrentIndex(2);
     combo_tracking->blockSignals(false);
 
@@ -1353,21 +1353,21 @@ void InstanceDialog::comboTrackingChange(int index)
 
     /* Update tracking */
     if(index == 0)
-      npc->getPath()->setTracking(MapNPC::NOTRACK);
+      npc->getPath()->setTracking(TrackingState::NOTRACK);
     else if(index == 1)
-      npc->getPath()->setTracking(MapNPC::AVOIDPLAYER);
+      npc->getPath()->setTracking(TrackingState::AVOIDPLAYER);
     else if(index == 2)
-      npc->getPath()->setTracking(MapNPC::TOPLAYER);
+      npc->getPath()->setTracking(TrackingState::TOPLAYER);
 
     /* Enable/Disable of setpoint widgets */
     MapNPC::NodeState node_state = npc->getPath()->getState();
-    MapNPC::TrackingState state = npc->getPath()->getTracking();
-    spin_track_maintain->setEnabled(state == MapNPC::AVOIDPLAYER &&
+    TrackingState state = npc->getPath()->getTracking();
+    spin_track_maintain->setEnabled(state == TrackingState::AVOIDPLAYER &&
                                     node_state != MapNPC::LOCKED);
-    spin_track_release->setEnabled(state != MapNPC::NOTRACK &&
+    spin_track_release->setEnabled(state != TrackingState::NOTRACK &&
                                    node_state != MapNPC::RANDOM &&
                                    node_state != MapNPC::LOCKED);
-    spin_track_start->setEnabled(state != MapNPC::NOTRACK &&
+    spin_track_start->setEnabled(state != TrackingState::NOTRACK &&
                                  node_state != MapNPC::LOCKED);
   }
 }
