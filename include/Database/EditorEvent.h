@@ -85,6 +85,16 @@ public:
   /* Returns the string notification. If not that event, data is blank */
   QString getNotification();
 
+  /* Returns data relating to the property mod event */
+  ThingProperty getPropertyBools();
+  int getPropertyID();
+  int getPropertyInactive();
+  ThingProperty getPropertyMods();
+  int getPropertyRespawn();
+  int getPropertySpeed();
+  TrackingState getPropertyTrack();
+  ThingBase getPropertyType();
+
   /* Returns the soun reference ID, for the related event */
   int getSoundID();
 
@@ -164,6 +174,13 @@ public:
   /* Sets the event to notification text */
   bool setEventNotification(QString notification = "Blank",
                             int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to a property modifier event */
+  bool setEventPropMod(ThingBase type = ThingBase::THING,
+        int id = EventSet::kUNSET_ID, ThingProperty props = ThingProperty::NONE,
+        ThingProperty bools = ThingProperty::NONE, int respawn = 0,
+        int speed = 0, TrackingState track = TrackingState::NOTRACK,
+        int inactive = 0, int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to strictly a sound event */
   bool setEventSound(int sound_id = EventSet::kUNSET_ID);

@@ -439,6 +439,179 @@ QString EditorEvent::getNotification()
 }
 
 /*
+ * Description: Returns the property modifier event bool values associated with
+ *              settings to be modified. If the event is not a property event,
+ *              an empty ThingProperty is returned
+ *
+ * Inputs: none
+ * Output: ThingProperty - the returned property which defines modded bools
+ */
+ThingProperty EditorEvent::getPropertyBools()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return bools;
+  }
+  return ThingProperty::NONE;
+}
+
+/*
+ * Description: Returns the property modifier integer ID of the object to edit.
+ *              If the event is not a property event, -1 is returned
+ *
+ * Inputs: none
+ * Output: int - the returned property thing ID
+ */
+int EditorEvent::getPropertyID()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return id;
+  }
+  return EventSet::kUNSET_ID;
+}
+
+/*
+ * Description: Returns the property modifier integer inactive time of the IO
+ *              to edit. If the event is not a property event, -1 is returned
+ *
+ * Inputs: none
+ * Output: int - the returned property IO inactive time in ms
+ */
+int EditorEvent::getPropertyInactive()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return inactive;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the property modifier event definitions of which
+ *              properties are being modified. If the event is not a property
+ *              event, an empty ThingProperty is returned
+ *
+ * Inputs: none
+ * Output: ThingProperty - the returned property which defines all modded props
+ */
+ThingProperty EditorEvent::getPropertyMods()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return props;
+  }
+  return ThingProperty::NONE;
+}
+
+/*
+ * Description: Returns the property modifier integer active respawn time of
+ *              the thing to edit. If the event is not a property event, -1 is
+ *              returned
+ *
+ * Inputs: none
+ * Output: int - the returned property thing active respawn time in ms
+ */
+int EditorEvent::getPropertyRespawn()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return respawn;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the property modifier integer speed of the person to
+ *              edit. If the event is not a property event, -1 is returned
+ *
+ * Inputs: none
+ * Output: int - the returned property person speed in (4096 / value) ms/tile
+ */
+int EditorEvent::getPropertySpeed()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return speed;
+  }
+  return -1;
+}
+
+/*
+ * Description: Returns the property modifier tracking state definition of the
+ *              NPC to edit. If the event is not a property event, NOTRACK is
+ *              returned
+ *
+ * Inputs: none
+ * Output: TrackingState - the new tracking state property for the npc
+ */
+TrackingState EditorEvent::getPropertyTrack()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return track;
+  }
+  return TrackingState::NOTRACK;
+}
+
+/*
+ * Description: Returns the property modifier type which defines either a thing,
+ *              person, npc, io, or item that the event modifies. If the event
+ *              is not a property event, ISBASE (ie no define) is returned
+ *
+ * Inputs: none
+ * Output: ThingBase - the defined thing type for the modifying property event
+ */
+ThingBase EditorEvent::getPropertyType()
+{
+  ThingProperty bools, props;
+  int id, inactive, respawn, speed;
+  TrackingState track;
+  ThingBase type;
+  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
+                                track, inactive))
+  {
+    return type;
+  }
+  return ThingBase::ISBASE;
+}
+
+/*
  * Description: Returns the connected sound ID from the event.
  *
  * Inputs: none
@@ -1219,6 +1392,95 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("notification", getNotification().toStdString());
       }
     }
+    /* -- PROPERTY EVENT -- */
+    else if(event.classification == EventClassifier::PROPERTY)
+    {
+      if(getPropertyType() != ThingBase::ISBASE)
+      {
+        fh->writeXmlElement("propertymod");
+
+        /* Get data */
+        ThingProperty bools, props;
+        int id, inactive_int, respawn_int, speed_int;
+        TrackingState track_enum;
+        ThingBase type;
+        EventSet::dataEventPropMod(event, type, id, props, bools, respawn_int,
+                                   speed_int, track_enum, inactive_int);
+
+        /* Break out property */
+        bool active, forced, inactive, move, reset, respawn, speed,
+             track, visible;
+        bool active_v, forced_v, inactive_v, move_v, reset_v, respawn_v,
+             speed_v, track_v, visible_v;
+        EventSet::dataEnumProperties(props, active, forced, inactive, move,
+                                     reset, respawn, speed, track, visible);
+        EventSet::dataEnumProperties(bools, active_v, forced_v, inactive_v,
+                                     move_v, reset_v, respawn_v, speed_v,
+                                     track_v, visible_v);
+
+        /* Thing type classifier */
+        QString type_str = "";
+        if(type == ThingBase::THING)
+          type_str = "thing";
+        else if(type == ThingBase::ITEM)
+          type_str = "item";
+        else if(type == ThingBase::PERSON)
+          type_str = "person";
+        else if(type == ThingBase::NPC)
+          type_str = "npc";
+        else if(type == ThingBase::INTERACTIVE)
+          type_str = "io";
+        if(!type_str.isEmpty())
+          fh->writeXmlData("class", type_str.toStdString());
+
+        /* Thing ID */
+        fh->writeXmlData("id", id);
+
+        /* Thing Data */
+        if(active)
+          fh->writeXmlData("active", active_v);
+        if(respawn)
+          fh->writeXmlData("respawn", respawn_int);
+        if(visible)
+          fh->writeXmlData("visible", visible_v);
+
+        /* Person Data */
+        if(type == ThingBase::PERSON || type == ThingBase::NPC)
+        {
+          if(move)
+            fh->writeXmlData("movedisable", move_v);
+          if(reset)
+            fh->writeXmlData("resetlocation", reset_v);
+          if(speed)
+            fh->writeXmlData("speed", speed_int);
+        }
+
+        /* NPC Data */
+        if(type == ThingBase::NPC)
+        {
+          if(forced)
+            fh->writeXmlData("forcedinteract", forced_v);
+          if(track)
+          {
+            QString track_str = "notrack";
+            if(track_enum == TrackingState::AVOIDPLAYER)
+              track_str = "avoidplayer";
+            else if(track_enum == TrackingState::TOPLAYER)
+              track_str = "toplayer";
+            fh->writeXmlData("tracking", track_str.toStdString());
+          }
+        }
+
+        /* IO Data */
+        if(type == ThingBase::INTERACTIVE)
+        {
+          if(inactive)
+            fh->writeXmlData("inactive", inactive_int);
+        }
+
+        fh->writeXmlElementEnd();
+      }
+    }
     /* -- SOUND ONLY EVENT -- */
     else if(event.classification == EventClassifier::SOUNDONLY)
     {
@@ -1553,6 +1815,34 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets the event to a new property modifier event with the
+ *              passed in various properties (as defined by inputs).
+ *
+ * Inputs: ThingBase type - the type of thing modified by the event
+ *         int id - the id of the thing
+ *         ThingProperty props - which properties are being modified by the call
+ *         ThingProperty bools - the bool values of the properties being modded
+ *         int respawn - the modified respawn time (thing+)
+ *         int speed - the modified speed (person+)
+ *         TrackingState track - the modification of what tracking (npc)
+ *         int inactive - modify the time before going inactive (io)
+ *         int sound_id - the sound reference ID. Default to invalid
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventPropMod(ThingBase type, int id, ThingProperty props,
+                                  ThingProperty bools, int respawn, int speed,
+                                  TrackingState track, int inactive,
+                                  int sound_id)
+{
+  bool one_shot = event.one_shot;
+  setEventBlank();
+  event = EventSet::createEventPropMod(type, id, props, bools, respawn, speed,
+                                       track, inactive, sound_id);
+  event.one_shot = one_shot;
+  return true;
 }
 
 /*
