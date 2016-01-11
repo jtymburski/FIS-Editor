@@ -97,19 +97,6 @@ void EventView::createLayout()//bool conversation_enabled)
   for(int i = 0; i < available_events.size(); i++)
     combo_category->addItem(QString::fromStdString(
                               EventSet::classifierToStr(available_events[i])));
-  //combo_category->addItem("--");
-  //combo_category->addItem("Give Item");
-  //combo_category->addItem("Notification");
-  //combo_category->addItem("Execute Battle");
-  //combo_category->addItem("Switch Maps");
-  //combo_category->addItem("Teleport Thing");
-  //combo_category->addItem("Just Sound");
-  //combo_category->addItem("Take Item");
-  //combo_category->addItem("Unlock: Thing");
-  //combo_category->addItem("Unlock: Tile");
-  //combo_category->addItem("Unlock: IO");
-  //if(conversation_enabled)
-  //  combo_category->addItem("Conversation");
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
           this, SLOT(categoryChanged(int)));
   layout->addWidget(combo_category, 0, Qt::AlignCenter);
@@ -198,6 +185,160 @@ void EventView::createLayout()//bool conversation_enabled)
   QGridLayout* layout_map = new QGridLayout(widget_map);
   layout_map->addWidget(lbl_map_name, 0, 0);
   layout_map->addWidget(map_name, 0, 1);
+
+  /* Widget for property modifier */
+  QWidget* widget_property = new QWidget(this);
+  QLabel* lbl_type = new QLabel("Type", this);
+  QComboBox* prop_type = new QComboBox(this);
+  for(int i = 1; i <= static_cast<int>(ThingBase::INTERACTIVE); i++)
+    prop_type->addItem(QString::fromStdString(
+                              Helpers::typeToStr(static_cast<ThingBase>(i))));
+  connect(prop_type, SIGNAL(currentTextChanged(QString)),
+          this, SLOT(propertyTypeChange(QString)));
+  QLabel* lbl_id = new QLabel("ID", this);
+  prop_id = new QComboBox(this);
+  connect(prop_id, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(propertyIDChange(QString)));
+  QLabel* lbl_head_prop = new QLabel("Property", this);
+  QLabel* lbl_head_mod = new QLabel("Modify", this);
+  QLabel* lbl_head_new = new QLabel("New Value", this);
+  QFont font = lbl_head_prop->font();
+  font.setUnderline(true);
+  lbl_head_prop->setFont(font);
+  lbl_head_mod->setFont(font);
+  lbl_head_new->setFont(font);
+  /* -- thing -- */
+  QLabel* lbl_active = new QLabel("Active", this);
+  prop_active_mod = new QCheckBox(this);
+  connect(prop_active_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyActiveMod(int)));
+  prop_active_val = new QCheckBox("Is Spawned", this);
+  connect(prop_active_val, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyActiveVal(int)));
+  /* -- */
+  QLabel* lbl_respawn = new QLabel("Respawn", this);
+  prop_respawn_mod = new QCheckBox(this);
+  connect(prop_respawn_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyRespawnMod(int)));
+  prop_respawn_val = new QSpinBox(this);
+  prop_respawn_val->setSuffix(" ms");
+  prop_respawn_val->setMinimum(1);
+  prop_respawn_val->setMaximum(1800000);
+  connect(prop_respawn_val, SIGNAL(valueChanged(int)),
+          this, SLOT(propertyRespawnVal(int)));
+  prop_respawn_dis = new QCheckBox("Disable", this);
+  connect(prop_respawn_dis, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyRespawnDisable(int)));
+  /* -- */
+  QLabel* lbl_visible = new QLabel("Visible", this);
+  prop_visible_mod = new QCheckBox(this);
+  connect(prop_visible_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyVisibleMod(int)));
+  prop_visible_val = new QCheckBox("Is Visible", this);
+  connect(prop_visible_val, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyVisibleVal(int)));
+  /* -- person -- */
+  QLabel* lbl_freeze = new QLabel("Freeze", this);
+  prop_freeze_mod = new QCheckBox(this);
+  connect(prop_freeze_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyFreezeMod(int)));
+  prop_freeze_val = new QCheckBox("Freeze Movement", this);
+  connect(prop_freeze_val, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyFreezeVal(int)));
+  /* -- */
+  QLabel* lbl_reset = new QLabel("Reset", this);
+  prop_reset_mod = new QCheckBox(this);
+  connect(prop_reset_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyResetMod(int)));
+  prop_reset_val = new QCheckBox("Reset to Start", this);
+  connect(prop_reset_val, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyResetVal(int)));
+  /* -- */
+  QLabel* lbl_speed = new QLabel("Speed", this);
+  prop_speed_mod = new QCheckBox(this);
+  connect(prop_speed_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertySpeedMod(int)));
+  prop_speed_val = new QSpinBox(this);
+  prop_speed_val->setMinimum(0);
+  prop_speed_val->setMaximum(256);
+  connect(prop_speed_val, SIGNAL(valueChanged(int)),
+          this, SLOT(propertySpeedVal(int)));
+  prop_speed_desc = new QLabel("XXXX ms/tile", this);
+  /* -- npc -- */
+  QLabel* lbl_forced = new QLabel("Forced", this);
+  prop_forced_mod = new QCheckBox(this);
+  connect(prop_forced_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyForcedMod(int)));
+  prop_forced_val = new QCheckBox("Force Interaction", this);
+  connect(prop_forced_val, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyForcedVal(int)));
+  /* -- */
+  QLabel* lbl_track = new QLabel("Track", this);
+  prop_track_mod = new QCheckBox(this);
+  connect(prop_track_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyTrackMod(int)));
+  prop_track_opt = new QComboBox(this);
+  for(int i = 0; i <= static_cast<int>(TrackingState::TOPLAYER); i++)
+    prop_track_opt->addItem(QString::fromStdString(
+                      Helpers::trackingToStr(static_cast<TrackingState>(i))));
+  connect(prop_track_opt, SIGNAL(currentTextChanged(QString)),
+          this, SLOT(propertyTrackChange(QString)));
+  /* -- io -- */
+  QLabel* lbl_inactive = new QLabel("Inactive", this);
+  prop_inactive_mod = new QCheckBox(this);
+  connect(prop_inactive_mod, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyInactiveMod(int)));
+  prop_inactive_val = new QSpinBox(this);
+  prop_inactive_val->setMaximum(99999999);
+  prop_inactive_val->setSuffix(" ms");
+  connect(prop_inactive_val, SIGNAL(valueChanged(int)),
+          this, SLOT(propertyInactiveVal(int)));
+  prop_inactive_dis = new QCheckBox("Disable", this);
+  connect(prop_inactive_dis, SIGNAL(stateChanged(int)),
+          this, SLOT(propertyInactiveDisable(int)));
+  /* -- LAYOUT -- */
+  QGridLayout* layout_property = new QGridLayout(widget_property);
+  layout_property->addWidget(lbl_type, 0, 0);
+  layout_property->addWidget(prop_type, 0, 1, 1, 3);
+  layout_property->addWidget(lbl_id, 1, 0);
+  layout_property->addWidget(prop_id, 1, 1, 1, 3);
+  layout_property->addWidget(lbl_head_prop, 2, 0);
+  layout_property->addWidget(lbl_head_mod, 2, 1, Qt::AlignHCenter);
+  layout_property->addWidget(lbl_head_new, 2, 2, 1, 2, Qt::AlignHCenter);
+  /* -- thing -- */
+  layout_property->addWidget(lbl_active, 3, 0);
+  layout_property->addWidget(prop_active_mod, 3, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_active_val, 3, 2, 1, 2, Qt::AlignHCenter);
+  layout_property->addWidget(lbl_respawn, 4, 0);
+  layout_property->addWidget(prop_respawn_mod, 4, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_respawn_val, 4, 2, Qt::AlignRight);
+  layout_property->addWidget(prop_respawn_dis, 4, 3, Qt::AlignLeft);
+  layout_property->addWidget(lbl_visible, 5, 0);
+  layout_property->addWidget(prop_visible_mod, 5, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_visible_val, 5, 2, 1, 2, Qt::AlignHCenter);
+  /* -- person -- */
+  layout_property->addWidget(lbl_freeze, 6, 0);
+  layout_property->addWidget(prop_freeze_mod, 6, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_freeze_val, 6, 2, 1, 2, Qt::AlignHCenter);
+  layout_property->addWidget(lbl_reset, 7, 0);
+  layout_property->addWidget(prop_reset_mod, 7, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_reset_val, 7, 2, 1, 2, Qt::AlignHCenter);
+  layout_property->addWidget(lbl_speed, 8, 0);
+  layout_property->addWidget(prop_speed_mod, 8, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_speed_val, 8, 2, Qt::AlignRight);
+  layout_property->addWidget(prop_speed_desc, 8, 3, Qt::AlignLeft);
+  /* -- npc -- */
+  layout_property->addWidget(lbl_forced, 9, 0);
+  layout_property->addWidget(prop_forced_mod, 9, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_forced_val, 9, 2, 1, 2, Qt::AlignHCenter);
+  layout_property->addWidget(lbl_track, 10, 0);
+  layout_property->addWidget(prop_track_mod, 10, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_track_opt, 10, 2, 1, 2);
+  /* -- io -- */
+  layout_property->addWidget(lbl_inactive, 11, 0);
+  layout_property->addWidget(prop_inactive_mod, 11, 1, Qt::AlignHCenter);
+  layout_property->addWidget(prop_inactive_val, 11, 2, Qt::AlignRight);
+  layout_property->addWidget(prop_inactive_dis, 11, 3, Qt::AlignLeft);
 
   /* Widget for teleportation thing control */
   QWidget* widget_teleport = new QWidget(this);
@@ -421,19 +562,18 @@ void EventView::createLayout()//bool conversation_enabled)
   /* -- */
   QGridLayout* layout_unio = new QGridLayout(widget_unlock_io);
   layout_unio->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unio->addWidget(lbl_unio, 0, 0);
-  layout_unio->addWidget(unio_name, 0, 1, 1, 3);
-  layout_unio->addWidget(unio_mode, 1, 0, 1, 4);
-  layout_unio->addWidget(lbl_unio_state, 2, 0);
-  layout_unio->addWidget(unio_state, 2, 1, 1, 3);
-  layout_unio->addWidget(unio_event, 3, 0, 1, 4);
-  layout_unio->addWidget(unio_view, 4, 0, 1, 4);
+  layout_unio->setRowStretch(0, 1);
+  layout_unio->addWidget(lbl_unio, 1, 0);
+  layout_unio->addWidget(unio_name, 1, 1, 1, 3);
+  layout_unio->addWidget(unio_mode, 2, 0, 1, 4);
+  layout_unio->addWidget(lbl_unio_state, 3, 0);
+  layout_unio->addWidget(unio_state, 3, 1, 1, 3);
+  layout_unio->addWidget(unio_event, 4, 0, 1, 4);
+  layout_unio->addWidget(unio_view, 5, 0, 1, 4);
+  layout_unio->setRowStretch(6, 1);
 
   /* Widget for conversation control */
-  QWidget* widget_convo;
-  //if(conversation_enabled)
-  //{
-  widget_convo = new QWidget(this);
+  QWidget* widget_convo = new QWidget(this);
   convo_tree = new QTreeWidget(this);
   convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
   //convo_tree->setMinimumWidth(320);
@@ -471,7 +611,6 @@ void EventView::createLayout()//bool conversation_enabled)
   connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
   rightclick_menu->addAction(action_delete);
   rightclick_menu->hide();
-  //}
 
   /* Stacked widget for housing all the different views for categories */
   view_stack = new QStackedWidget(this);
@@ -492,7 +631,7 @@ void EventView::createLayout()//bool conversation_enabled)
     else if(available_events[i] == EventClassifier::NOTIFICATION)
       view_stack->addWidget(widget_notification);
     else if(available_events[i] == EventClassifier::PROPERTY)
-      view_stack->addWidget(new QWidget(this)); // TODO
+      view_stack->addWidget(widget_property);
     else if(available_events[i] == EventClassifier::SOUNDONLY)
       view_stack->addWidget(widget_sound);
     else if(available_events[i] == EventClassifier::TELEPORTTHING)
@@ -504,19 +643,6 @@ void EventView::createLayout()//bool conversation_enabled)
     else if(available_events[i] == EventClassifier::UNLOCKTILE)
       view_stack->addWidget(widget_unlock_tile);
   }
-  //view_stack->addWidget(widget_unset);
-  //view_stack->addWidget(widget_give);
-  //view_stack->addWidget(widget_notification);
-  //view_stack->addWidget(widget_battle);
-  //view_stack->addWidget(widget_map);
-  //view_stack->addWidget(widget_teleport);
-  //view_stack->addWidget(widget_sound);
-  //view_stack->addWidget(widget_take);
-  //view_stack->addWidget(widget_unlock_thing);
-  //view_stack->addWidget(widget_unlock_tile);
-  //view_stack->addWidget(widget_unlock_io);
-  //if(conversation_enabled)
-  //  view_stack->addWidget(widget_convo);
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
   /* One Shot widget */
@@ -594,8 +720,8 @@ void EventView::editConversation(Conversation* convo, bool is_option)
   if(convo != nullptr)
   {
     pop_convo = new ConvoDialog(convo, is_option, limiter, this);
-    pop_convo->setListThings(getListThings());
-    pop_convo->getEventView()->setListIOs(list_ios);
+    pop_convo->setListMapThings(list_map_things, list_map_ios, list_map_items,
+                                list_map_persons, list_map_npcs);
     pop_convo->getEventView()->setListItems(list_items);
     pop_convo->getEventView()->setListMaps(list_maps);
     pop_convo->getEventView()->setListSounds(list_sounds);
@@ -641,12 +767,13 @@ void EventView::editEvent(Event* edit_event)
     /* Add view */
     pop_event_view = new EventView(nullptr, pop_event,
                                    EventClassifier::BATTLESTART);
-    pop_event_view->setListIOs(list_ios);
     pop_event_view->setListItems(list_items);
     pop_event_view->setListMaps(list_maps);
+    pop_event_view->setListMapThings(list_map_things, list_map_ios,
+                                     list_map_items, list_map_persons,
+                                     list_map_npcs);
     pop_event_view->setListSounds(list_sounds);
     pop_event_view->setListSubmaps(list_submaps);
-    pop_event_view->setListThings(list_things);
     //connect(event_view, SIGNAL(editConversation(Conversation*, bool)),
     //        this, SLOT(editConversationSub(Conversation*, bool)));
     connect(pop_event_view, SIGNAL(selectTile()),
@@ -921,6 +1048,11 @@ void EventView::setLayoutData()
     {
       notification_edit->setPlainText(event->getNotification());
     }
+    /* -- PROPERTY -- */
+    else if(event->getEventType() == EventClassifier::PROPERTY)
+    {
+      // TODO
+    }
     /* -- TELEPORT THING -- */
     else if(event->getEventType() == EventClassifier::TELEPORTTHING)
     {
@@ -942,9 +1074,9 @@ void EventView::setLayoutData()
 
       /* Attempt to find the thing in the combo box */
       int index = -1;
-      for(int i = 0; (index < 0) && (i < list_things.size()); i++)
+      for(int i = 0; (index < 0) && (i < tele_thing->count()); i++)
       {
-        QStringList set = list_things[i].split(":");
+        QStringList set = tele_thing->itemText(i).split(":");
         if(set.size() == 2)
         {
           if(set.front().toInt() == event->getTeleportThingID())
@@ -954,14 +1086,11 @@ void EventView::setLayoutData()
           }
         }
       }
-
-      /* If index < 0 (not found), set to first */
-      if(index < 0)
-      {
+      if(index >= 0)
+        tele_thing->setCurrentIndex(index);
+      else
         tele_thing->setCurrentIndex(0);
-        if(list_things.size() > 0)
-          teleportThingChanged(0);
-      }
+      teleportThingChanged(tele_thing->currentIndex());
     }
     /* -- UNLOCK IO -- */
     else if(event->getEventType() == EventClassifier::UNLOCKIO)
@@ -971,9 +1100,9 @@ void EventView::setLayoutData()
 
       /* Attempt to find thing in combo box */
       int index = -1;
-      for(int i = 0; (index < 0) && (i < list_ios.size()); i++)
+      for(int i = 0; (index < 0) && (i < unio_name->count()); i++)
       {
-        QStringList set = list_ios[i].first.split(":");
+        QStringList set = unio_name->itemText(i).split(":");
         if(set.size() == 2)
           if(set.front().toInt() == event->getUnlockIOID())
             index = i;
@@ -1024,23 +1153,18 @@ void EventView::setLayoutData()
     {
       /* Attempt to find thing in combo box */
       int index = -1;
-      for(int i = 0; (index < 0) && (i < list_things_no_io.size()); i++)
+      for(int i = 0; (index < 0) && (i < unth_name->count()); i++)
       {
-        QStringList set = list_things_no_io[i].split(":");
+        QStringList set = unth_name->itemText(i).split(":");
         if(set.size() == 2)
           if(set.front().toInt() == event->getUnlockThingID())
             index = i;
       }
       if(index >= 0)
-      {
         unth_name->setCurrentIndex(index);
-      }
       else
-      {
         unth_name->setCurrentIndex(0);
-        if(list_things_no_io.size() > 0)
-          unlockThingChanged(list_things_no_io.front());
-      }
+      unlockThingChanged(unth_name->currentText());
 
       /* View data */
       bool view, scroll;
@@ -1388,6 +1512,8 @@ void EventView::categoryChanged(int index)
         event->setEventStartMap();
       else if(new_class == EventClassifier::NOTIFICATION)
         event->setEventNotification();
+      else if(new_class == EventClassifier::PROPERTY)
+        event->setEventPropMod();
       else if(new_class == EventClassifier::SOUNDONLY)
         event->setEventSound();
       else if(new_class == EventClassifier::TELEPORTTHING)
@@ -1594,6 +1720,343 @@ void EventView::popEventOk()
     editEvent(nullptr);
     updateBattle();
   }
+}
+
+/*
+ * Description: Slot which triggers when the active modifier check box is
+ *              changed. Enables the active to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyActiveMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the active value mod check box is
+ *              changed. If checked, the thing will be set to active
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyActiveVal(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the selected ID to be modified in the
+ *              combo box is changed.
+ *
+ * Inputs: const QString& text - the new ID text set
+ * Output: none
+ */
+void EventView::propertyIDChange(const QString& text)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the inactive value disable check box is
+ *              changed. If checked, the inactive delay return will be disabled
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyInactiveDisable(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the inactive modifier check box is
+ *              changed. Enables the inactive to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyInactiveMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the inactive value mod spin box is
+ *              changed. This new value is the new inactive time in ms
+ *
+ * Inputs: int value - the inactive value in ms
+ * Output: none
+ */
+void EventView::propertyInactiveVal(int value)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the forced modifier check box is
+ *              changed. Enables the forced to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyForcedMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the forced value mod check box is
+ *              changed. If checked, the thing will be set to forced interact
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyForcedVal(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the freeze modifier check box is
+ *              changed. Enables the freeze to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyFreezeMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the freeze value mod check box is
+ *              changed. If checked, the thing will be set to frozen
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyFreezeVal(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the reset location modifier check box
+ *              is changed. Enables the reset location to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyResetMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the reset value mod check box is
+ *              changed. If checked, the thing location will be reset
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyResetVal(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the respawn value disable check box is
+ *              changed. If checked, the respawn delay return will be disabled
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyRespawnDisable(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the respawn time modifier check box is
+ *              changed. Enables the respawn time to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyRespawnMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the respawn value mod spin box is
+ *              changed. This new value is the new respawn time in ms
+ *
+ * Inputs: int value - the respawn value in ms
+ * Output: none
+ */
+void EventView::propertyRespawnVal(int value)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the speed modifier check box is
+ *              changed. Enables the speed to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertySpeedMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the speed value mod spin box is
+ *              changed. This new value is the new speed time in 4096/val =
+ *              X tiles/ms
+ *
+ * Inputs: int value - the speed value
+ * Output: none
+ */
+void EventView::propertySpeedVal(int value)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the selected tracking state to be
+ *              modified in the combo box is changed.
+ *
+ * Inputs: const QString& text - the new tracking text set
+ * Output: none
+ */
+void EventView::propertyTrackChange(const QString& text)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the track modifier check box is
+ *              changed. Enables the track to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyTrackMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the selected thing type to be modified
+ *              in the combo box is changed.
+ *
+ * Inputs: const QString& text - the new thing type text set
+ * Output: none
+ */
+// TODO: NEW DATA TO USE
+//event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+//                       event->getPropertyMods(), event->getPropertyBools(),
+//                       event->getPropertyRespawn(), event->getPropertySpeed(),
+//                       event->getPropertyTrack(),
+//                       event->getPropertyInactive(), event->getSoundID());
+void EventView::propertyTypeChange(const QString& text)
+{
+  ThingBase new_type = Helpers::typeFromStr(text.toStdString());
+
+  /* Update the event */
+  event->setEventPropMod(new_type, event->getPropertyID(),
+                         event->getPropertyMods(), event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Update the ID data */
+  prop_id->blockSignals(true);
+  prop_id->clear();
+  if(new_type == ThingBase::THING)
+    prop_id->addItems(list_map_things.toList());
+  else if(new_type == ThingBase::PERSON)
+    prop_id->addItems(list_map_persons.toList());
+  else if(new_type == ThingBase::NPC)
+    prop_id->addItems(list_map_npcs.toList());
+  else if(new_type == ThingBase::ITEM)
+    prop_id->addItems(list_map_items.toList());
+  else if(new_type == ThingBase::INTERACTIVE)
+    for(int i = 0; i < list_map_ios.size(); i++)
+      prop_id->addItem(list_map_ios[i].first);
+  prop_id->blockSignals(false);
+  propertyIDChange(prop_id->currentText());
+
+  /* Enable the data accordingly */
+  /* -- thing -- */
+  prop_active_mod->setEnabled(true);
+  prop_active_val->setEnabled(prop_active_mod->isEnabled() &&
+                              prop_active_mod->isChecked());
+  prop_respawn_mod->setEnabled(true);
+  prop_respawn_dis->setEnabled(prop_respawn_mod->isEnabled() &&
+                               prop_respawn_mod->isChecked());
+  prop_respawn_val->setEnabled(prop_respawn_mod->isEnabled() &&
+                               prop_respawn_mod->isChecked());
+  prop_visible_mod->setEnabled(true);
+  prop_visible_val->setEnabled(prop_visible_mod->isEnabled() &&
+                               prop_visible_mod->isChecked());
+  /* -- person -- */
+  prop_freeze_mod->setEnabled(new_type == ThingBase::PERSON ||
+                              new_type == ThingBase::NPC);
+  prop_freeze_val->setEnabled(prop_freeze_mod->isEnabled() &&
+                              prop_freeze_mod->isChecked());
+  prop_reset_mod->setEnabled(new_type == ThingBase::PERSON ||
+                             new_type == ThingBase::NPC);
+  prop_reset_val->setEnabled(prop_reset_mod->isEnabled() &&
+                             prop_reset_mod->isChecked());
+  prop_speed_mod->setEnabled(new_type == ThingBase::PERSON ||
+                             new_type == ThingBase::NPC);
+  prop_speed_desc->setEnabled(prop_speed_mod->isEnabled() &&
+                              prop_speed_mod->isChecked());
+  prop_speed_val->setEnabled(prop_speed_mod->isEnabled() &&
+                             prop_speed_mod->isChecked());
+  /* -- npc -- */
+  prop_forced_mod->setEnabled(new_type == ThingBase::NPC);
+  prop_forced_val->setEnabled(prop_forced_mod->isEnabled() &&
+                              prop_forced_mod->isChecked());
+  prop_track_mod->setEnabled(new_type == ThingBase::NPC);
+  prop_track_opt->setEnabled(prop_track_mod->isEnabled() &&
+                             prop_track_mod->isChecked());
+  /* -- io -- */
+  prop_inactive_mod->setEnabled(new_type == ThingBase::INTERACTIVE);
+  prop_inactive_dis->setEnabled(prop_inactive_mod->isEnabled() &&
+                                prop_inactive_mod->isChecked());
+  prop_inactive_val->setEnabled(prop_inactive_mod->isEnabled() &&
+                                prop_inactive_mod->isChecked());
+}
+
+/*
+ * Description: Slot which triggers when the visible modifier check box is
+ *              changed. Enables the visible to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyVisibleMod(int state)
+{
+
+}
+
+/*
+ * Description: Slot which triggers when the visible value mod check box is
+ *              changed. If checked, the thing visibility will be set
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyVisibleVal(int state)
+{
+
 }
 
 /*
@@ -1892,9 +2355,9 @@ void EventView::teleportMapPressed()
  */
 void EventView::teleportThingChanged(int index)
 {
-  if(index >= 0 && index < list_things.size())
+  if(index >= 0 && index < tele_thing->count())
   {
-    QStringList list = list_things[index].split(":");
+    QStringList list = tele_thing->itemText(index).split(":");
     if(list.size() == 2)
       event->setEventTeleport(list.front().toInt(), event->getTeleportSection(),
                               event->getTeleportX(), event->getTeleportY(),
@@ -1922,9 +2385,9 @@ void EventView::unlockIOChanged(const QString & text)
     /* Update state to combo */
     int index = unio_name->currentIndex();
     unio_state->clear();
-    if(index >= 0 && index < list_ios.size())
+    if(index >= 0 && index < list_map_ios.size())
     {
-      QStringList split_set = list_ios[index].second.split(',');
+      QStringList split_set = list_map_ios[index].second.split(',');
       unio_state->addItem("-1: All States");
       for(int i = 0; i < split_set.size(); i++)
         unio_state->addItem(split_set[i] + ": State");
@@ -1989,10 +2452,10 @@ void EventView::unlockIOModeStates(int state)
 void EventView::unlockIOStateChanged(int index)
 {
   int main_index = unio_name->currentIndex();
-  if(main_index >= 0 && main_index < list_ios.size())
+  if(main_index >= 0 && main_index < list_map_ios.size())
   {
     int new_state = -1;
-    QStringList split_set = list_ios[main_index].second.split(',');
+    QStringList split_set = list_map_ios[main_index].second.split(',');
     if(index > 0)
       new_state = split_set[index - 1].toInt();
 
@@ -2371,6 +2834,84 @@ void EventView::updateConversation()
   }
 }
 
+/*
+ * Description: Updates all map object lists within event sets, based on what
+ *              has changed
+ *
+ * Inputs: bool things - true if the things list was updated. default false
+ *         bool ios - true if the ios list was updated. default false
+ *         bool items - true if the items list was updated. default false
+ *         bool persons - true if the persons list was updated. default false
+ *         bool npcs - true if the npcs list was updated. default false
+ * Output: none
+ */
+void EventView::updateLists(bool things, bool ios, bool items,
+                            bool persons, bool npcs)
+{
+  /* Signal blocks */
+  tele_thing->blockSignals(true);
+  unio_name->blockSignals(true);
+  unth_name->blockSignals(true);
+
+  /* Check what is updated */
+  bool update_tele = (things || ios || persons || npcs);
+  if(update_tele)
+    tele_thing->clear();
+  bool update_unio = ios;
+  if(update_unio)
+    unio_name->clear();
+  bool update_unth = (things || persons || npcs);
+  if(update_unth)
+    unth_name->clear();
+
+  /* Processing */
+  /* -- PERSONS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_persons.size(); i++)
+    {
+      tele_thing->addItem(list_map_persons[i]);
+      unth_name->addItem(list_map_persons[i]);
+    }
+  }
+  /* -- NPCS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_npcs.size(); i++)
+    {
+      tele_thing->addItem(list_map_npcs[i]);
+      unth_name->addItem(list_map_npcs[i]);
+    }
+  }
+  /* -- THINGS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_things.size(); i++)
+    {
+      tele_thing->addItem(list_map_things[i]);
+      unth_name->addItem(list_map_things[i]);
+    }
+  }
+  /* -- IOS -- */
+  if(update_tele || update_unio)
+  {
+    for(int i = 0; i < list_map_ios.size(); i++)
+    {
+      tele_thing->addItem(list_map_ios[i].first);
+      unio_name->addItem(list_map_ios[i].first);
+    }
+  }
+  /* -- ITEMS -- */
+  if(false)
+  {}
+
+  /* Restore signal blocks */
+  setLayoutData();
+  tele_thing->blockSignals(false);
+  unio_name->blockSignals(false);
+  unth_name->blockSignals(false);
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -2400,17 +2941,6 @@ EditorEvent* EventView::getEvent()
 }
 
 /*
- * Description: Returns the list of IOs, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QPair<QString,QString> - list of all IOs (for unlock event)
- */
-QVector<QPair<QString,QString>> EventView::getListIOs()
-{
-  return list_ios;
-}
-
-/*
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
@@ -2430,6 +2960,61 @@ QVector<QString> EventView::getListItems()
 QVector<QString> EventView::getListMaps()
 {
   return list_maps;
+}
+
+/*
+ * Description: Returns the list of map IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString> - list of all IOs (for unlock event)
+ */
+QVector<QPair<QString,QString>> EventView::getListMapIOs()
+{
+  return list_map_ios;
+}
+
+/*
+ * Description: Returns the list of map items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all items (for events)
+ */
+QVector<QString> EventView::getListMapItems()
+{
+  return list_map_items;
+}
+
+/*
+ * Description: Returns the list of map npcs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all npcs (for events)
+ */
+QVector<QString> EventView::getListMapNPCs()
+{
+  return list_map_npcs;
+}
+
+/*
+ * Description: Returns the list of map persons, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all persons (for events)
+ */
+QVector<QString> EventView::getListMapPersons()
+{
+  return list_map_persons;
+}
+
+/*
+ * Description: Returns the list of map things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all things (for events)
+ */
+QVector<QString> EventView::getListMapThings()
+{
+  return list_map_things;
 }
 
 /*
@@ -2455,17 +3040,6 @@ QVector<QString> EventView::getListSubmaps()
 }
 
 /*
- * Description: Returns the list of things, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QString> - list of all things (for teleport event)
- */
-QVector<QString> EventView::getListThings()
-{
-  return list_things;
-}
-
-/*
  * Description: Sets the event being edited by the event view.
  *
  * Inputs: EditorEvent* event - the new reference event to edit
@@ -2482,30 +3056,6 @@ void EventView::setEvent(EditorEvent* event)
 
   /* After-math processing */
   setLayoutData();
-}
-
-/*
- * Description: Sets the list of IOs, used for event creation
- *
- * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
- * Output: none
- */
-void EventView::setListIOs(QVector<QPair<QString,QString>> ios)
-{
-  /* Data parsing - main IO list */
-  list_ios = ios;
-
-  /* Block singals */
-  unio_name->blockSignals(true);
-
-  /* Load in to unlock IO combo box */
-  unio_name->clear();
-  for(int i = 0; i < list_ios.size(); i++)
-    unio_name->addItem(list_ios[i].first);
-
-  /* Update data and unblock signals */
-  setLayoutData();
-  unio_name->blockSignals(false);
 }
 
 /*
@@ -2557,6 +3107,91 @@ void EventView::setListMaps(QVector<QString> maps)
 }
 
 /*
+ * Description: Sets the list of map IOs, used for event creation
+ *
+ * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for event lists)
+ * Output: none
+ */
+void EventView::setListMapIOs(QVector<QPair<QString,QString>> ios)
+{
+  list_map_ios = ios;
+  updateLists(false, true, false, false, false);
+}
+
+/*
+ * Description: Sets the list of map items, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all map items (for event lists)
+ * Output: none
+ */
+void EventView::setListMapItems(QVector<QString> items)
+{
+  list_map_items = items;
+  updateLists(false, false, true, false, false);
+}
+
+/*
+ * Description: Sets the list of map npcs, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all map npcs (for event lists)
+ * Output: none
+ */
+void EventView::setListMapNPCs(QVector<QString> npcs)
+{
+  list_map_npcs = npcs;
+  updateLists(false, false, false, false, true);
+}
+
+/*
+ * Description: Sets the list of map persons, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all map persons (for event lists)
+ * Output: none
+ */
+void EventView::setListMapPersons(QVector<QString> persons)
+{
+  list_map_persons = persons;
+  updateLists(false, false, false, true, false);
+}
+
+/*
+ * Description: Sets the list of map things, used for event creation.
+ *
+ * Inputs: QVector<QString> - list of all map things (for event lists)
+ * Output: none
+ */
+void EventView::setListMapThings(QVector<QString> things)
+{
+  list_map_things = things;
+  updateLists(true, false, false, false, false);
+}
+
+/*
+ * Description: Sets the list of map things, items, ios, persons, npcs, used
+ *              for event creation.
+ *
+ * Inputs: QVector<QString> things - list of all map things
+ *         QVector<QPair<QString,QString>> ios - list of all map ios
+ *         QVector<QString> items - list of all map items
+ *         QVector<QString> persons - list of all map persons
+ *         QVector<QString npcs - list of all map npcs
+ * Output: none
+ */
+void EventView::setListMapThings(QVector<QString> things,
+                                 QVector<QPair<QString,QString>> ios,
+                                 QVector<QString> items,
+                                 QVector<QString> persons,
+                                 QVector<QString> npcs)
+{
+  list_map_things = things;
+  list_map_ios = ios;
+  list_map_items = items;
+  list_map_persons = persons;
+  list_map_npcs = npcs;
+  updateLists(true, true, true, true, true);
+}
+
+/*
  * Description: Sets the list of sounds, used for event creation
  *
  * Inputs: QList<QString> - list of all sounds (for all valid events)
@@ -2583,58 +3218,6 @@ void EventView::setListSubmaps(QVector<QString> sub_maps)
 {
   list_submaps = sub_maps;
   setLayoutData();
-}
-
-/*
- * Description: Sets the list of things, used for event creation.
- *
- * Inputs: QVector<QString> - list of all things (for teleport event)
- * Output: none
- */
-void EventView::setListThings(QVector<QString> things)
-{
-  /* Data parsing - main thing list */
-  list_things = things;
-
-  /* Data parsing - thing with no IO/IO split */
-  //list_ios.clear();
-  list_things_no_io.clear();
-  for(int i = 0; i < things.size(); i++)
-  {
-    QStringList set = things[i].split(":");
-
-    //if(set.size() == 2 && set.front().toInt() >= EditorEnumDb::kBASE_ID_IOS)
-    //  list_ios.push_back(things[i]);
-    //else
-    if(set.size() != 2 || set.front().toInt() < EditorEnumDb::kBASE_ID_IOS)
-      list_things_no_io.push_back(things[i]);
-  }
-
-  /* Block singals */
-  tele_thing->blockSignals(true);
-  unth_name->blockSignals(true);
-  //unio_name->blockSignals(true);
-
-  /* Load in to teleport thing combo box */
-  tele_thing->clear();
-  for(int i = 0; i < list_things.size(); i++)
-    tele_thing->addItem(list_things[i]);
-
-  /* Load in to unlock thing combo box */
-  unth_name->clear();
-  for(int i = 0; i < list_things_no_io.size(); i++)
-    unth_name->addItem(list_things_no_io[i]);
-
-  /* Load in to unlock IO combo box */
-  //unio_name->clear();
-  //for(int i = 0; i < list_ios.size(); i++)
-  //  unio_name->addItem(list_ios[i]);
-
-  /* Update data and unblock signals */
-  setLayoutData();
-  tele_thing->blockSignals(false);
-  unth_name->blockSignals(false);
-  //unio_name->blockSignals(false);
 }
 
 /*

@@ -93,10 +93,14 @@ public:
   EventView* getEventView();
   
   /* Returns the list of objects, used for event creation */
-  QVector<QString> getListThings();
+  QVector<QString> getListMapThings();
 
   /* Sets the list of objects, used for event creation */
-  void setListThings(QVector<QString> things, bool is_thing = true);
+  void setListMapThings(QVector<QString> things,
+                        QVector<QPair<QString,QString>> ios,
+                        QVector<QString> items, QVector<QString> persons,
+                        QVector<QString> npcs, bool is_thing = true);
+
 };
 
 #endif // CONVODIALOG_H

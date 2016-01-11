@@ -599,17 +599,6 @@ void EventDialog::updateLock()
  *===========================================================================*/
 
 /*
- * Description: Returns the list of IOs, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
- */
-QVector<QPair<QString,QString>> EventDialog::getListIOs()
-{
-  return view_event->getListIOs();
-}
-
-/*
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
@@ -629,6 +618,61 @@ QVector<QString> EventDialog::getListItems()
 QVector<QString> EventDialog::getListMaps()
 {
   return view_event->getListMaps();
+}
+
+/*
+ * Description: Returns the list of map IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all map IOs
+ */
+QVector<QPair<QString,QString>> EventDialog::getListMapIOs()
+{
+  return view_event->getListMapIOs();
+}
+
+/*
+ * Description: Returns the list of map items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all map items
+ */
+QVector<QString> EventDialog::getListMapItems()
+{
+  return view_event->getListMapItems();
+}
+
+/*
+ * Description: Returns the list of map npcs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all map npcs
+ */
+QVector<QString> EventDialog::getListMapNPCs()
+{
+  return view_event->getListMapNPCs();
+}
+
+/*
+ * Description: Returns the list of map persons, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all map persons
+ */
+QVector<QString> EventDialog::getListMapPersons()
+{
+  return view_event->getListMapPersons();
+}
+
+/*
+ * Description: Returns the list of map things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all map things
+ */
+QVector<QString> EventDialog::getListMapThings()
+{
+  return view_event->getListMapThings();
 }
 
 /*
@@ -652,17 +696,6 @@ QList<QString> EventDialog::getListSounds()
 QVector<QString> EventDialog::getListSubmaps()
 {
   return view_event->getListSubmaps();
-}
-
-/*
- * Description: Returns the list of things, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QString> - list of all things (for teleport event)
- */
-QVector<QString> EventDialog::getListThings()
-{
-  return view_event->getListThings();
 }
 
 /*
@@ -712,17 +745,6 @@ LockView* EventDialog::getViewLock()
 }
 
 /*
- * Description: Sets the list of IOs, used for event creation
- *
- * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
- * Output: none
- */
-void EventDialog::setListIOs(QVector<QPair<QString,QString>> ios)
-{
-  view_event->setListIOs(ios);
-}
-
-/*
  * Description: Sets the list of items, used for event creation
  *
  * Inputs: QVector<QString> - list of all items (for give item event)
@@ -746,6 +768,26 @@ void EventDialog::setListMaps(QVector<QString> maps)
 }
 
 /*
+ * Description: Sets the list of things, ios, items, persons, npcs, used for
+ *              event creation.
+ *
+ * Inputs: QVector<QString> things - list of all map things
+ *         QVector<QPair<QString,QString>> ios - list of all map ios
+ *         QVector<QString items - list of all map items
+ *         QVector<QString> persons - list of all map persons
+ *         QVector<QString> npcs - list of all map npcs
+ * Output: none
+ */
+void EventDialog::setListMapThings(QVector<QString> things,
+                                   QVector<QPair<QString,QString>> ios,
+                                   QVector<QString> items,
+                                   QVector<QString> persons,
+                                   QVector<QString> npcs)
+{
+  view_event->setListMapThings(things, ios, items, persons, npcs);
+}
+
+/*
  * Description: Sets the list of sounds, to be used within the event dialog for
  *              the drop down selection and within the event.
  *
@@ -766,17 +808,6 @@ void EventDialog::setListSounds(QList<QString> sounds)
 void EventDialog::setListSubmaps(QVector<QString> sub_maps)
 {
   view_event->setListSubmaps(sub_maps);
-}
-
-/*
- * Description: Sets the list of things, used for event creation.
- *
- * Inputs: QVector<QString> - list of all things (for teleport event)
- * Output: none
- */
-void EventDialog::setListThings(QVector<QString> things)
-{
-  view_event->setListThings(things);
 }
 
 /*

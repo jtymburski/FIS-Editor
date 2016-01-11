@@ -693,20 +693,6 @@ void MapThingView::setEditorMap(EditorMap* map)
 }
 
 /*
- * Description: Sets the list of IOs, used for event creation
- *
- * Inputs: QVector<QPair<QString,QString>> - list of all IOs with states pair
- * Output: none
- */
-void MapThingView::updateListIOs(QVector<QPair<QString,QString>> ios)
-{
-  if(thing_dialog != nullptr)
-    thing_dialog->setListIOs(ios);
-  if(instance_dialog != nullptr)
-    instance_dialog->setListIOs(ios);
-}
-
-/*
  * Description: Sets the list of items, used for event creation
  *
  * Inputs: QVector<QString> - list of all items (for give item event)
@@ -732,6 +718,29 @@ void MapThingView::updateListMaps(QVector<QString> list)
     thing_dialog->setListMaps(list);
   if(instance_dialog != NULL)
     instance_dialog->setListMaps(list);
+}
+
+/*
+ * Description: Sets the list of things, ios, items, persons, npcs, used for
+ *              event creation.
+ *
+ * Inputs: QVector<QString> things - list of all map things
+ *         QVector<QPair<QString,QString>> ios - list of all map ios
+ *         QVector<QString> items - list of all map items
+ *         QVector<QString> persons - list of all map persons
+ *         QVector<QString> npcs - list of all map npcs
+ * Output: none
+ */
+void MapThingView::updateListMapThings(QVector<QString> things,
+                                     QVector<QPair<QString,QString>> ios,
+                                     QVector<QString> items,
+                                     QVector<QString> persons,
+                                     QVector<QString> npcs)
+{
+  if(thing_dialog != nullptr)
+    thing_dialog->setListMapThings(things, ios, items, persons, npcs);
+  if(instance_dialog != nullptr)
+    instance_dialog->setListMapThings(things, ios, items, persons, npcs);
 }
 
 /*
@@ -772,20 +781,6 @@ void MapThingView::updateListSubmaps(QVector<QString> list)
     thing_dialog->setListSubmaps(list);
   if(instance_dialog != NULL)
     instance_dialog->setListSubmaps(list);
-}
-
-/*
- * Description: Sets the list of things, used for event creation.
- *
- * Inputs: QVector<QString> - list of all things (for teleport event)
- * Output: none
- */
-void MapThingView::updateListThings(QVector<QString> list)
-{
-  if(thing_dialog != NULL)
-    thing_dialog->setListThings(list);
-  if(instance_dialog != NULL)
-    instance_dialog->setListThings(list);
 }
 
 /*

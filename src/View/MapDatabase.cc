@@ -311,43 +311,41 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     /* Set who called the update */
     mode_for_data = view;
 
-    /* Compile thing list */
-    QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
-    thing_list.push_front("0: Player");
-    thing_list << editing_map->getNPCList(0, true, true);
-    thing_list << editing_map->getThingList(0, true, true);
-    thing_list << editing_map->getIOList(0, true, true);
-
-    /* Compile io list */
+    /* Compile thing lists */
+    QVector<QString> thing_list = editing_map->getThingList(0, true, true);
     QVector<QPair<QString,QString>> io_set =
                                        editing_map->getIOListSet(0, true, true);
+    QVector<QString> item_list = editing_map->getItemList(0, true, true);
+    QVector<QString> person_list = editing_map->getPersonList(0, true, true);
+    person_list.push_front("0: Player");
+    QVector<QString> npc_list = editing_map->getNPCList(0, true, true);
 
     /* Update things */
     if(view == EditorEnumDb::THING_VIEW)
     {
-      view_thing->updateListIOs(io_set);
+      view_thing->updateListMapThings(thing_list, io_set, item_list,
+                                      person_list, npc_list);
       view_thing->updateListSubmaps(editing_map->getMapList());
-      view_thing->updateListThings(thing_list);
     }
     /* Update IOs */
     else if(view == EditorEnumDb::IO_VIEW)
     {
-      view_io->updateListIOs(io_set);
+      view_io->updateListMapThings(thing_list, io_set, item_list,
+                                   person_list, npc_list);
       view_io->updateListSubmaps(editing_map->getMapList());
-      view_io->updateListThings(thing_list);
     }
     /* Update persons */
     else if(view == EditorEnumDb::PERSON_VIEW)
     {
-      view_person->updateListIOs(io_set);
+      view_person->updateListMapThings(thing_list, io_set, item_list,
+                                       person_list, npc_list);
       view_person->updateListSubmaps(editing_map->getMapList());
-      view_person->updateListThings(thing_list);
     }
     else if(view == EditorEnumDb::NPC_VIEW)
     {
-      view_npc->updateListIOs(io_set);
+      view_npc->updateListMapThings(thing_list, io_set, item_list,
+                                    person_list, npc_list);
       view_npc->updateListSubmaps(editing_map->getMapList());
-      view_npc->updateListThings(thing_list);
     }
 
     /* Emit signal to get other lists (items, maps, sound, music) */

@@ -15,11 +15,8 @@ const std::string InstanceDialog::kALGO_STATES[] = {"None", "Path Circular",
                                                     "Path Back and Forth",
                                                     "Random In Range",
                                                     "Random"};
-const int InstanceDialog::kTRACK_COUNT = 3;
 const int InstanceDialog::kTRACK_MAX = 100;
 const int InstanceDialog::kTRACK_MIN = 1;
-const std::string InstanceDialog::kTRACK_STATES[] = {"None", "Away From Player",
-                                                     "To The Player"};
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -346,8 +343,9 @@ void InstanceDialog::createLayout()
     QLabel* lbl_tracking = new QLabel("Tracking", this);
     layout->addWidget(lbl_tracking, 2, 5);
     combo_tracking = new QComboBox(this);
-    for(int i = 0; i < kTRACK_COUNT; i++)
-      combo_tracking->addItem(QString::fromStdString(kTRACK_STATES[i]));
+    for(int i = 0; i <= static_cast<int>(TrackingState::TOPLAYER); i++)
+      combo_tracking->addItem(QString::fromStdString(
+                        Helpers::trackingToStr(static_cast<TrackingState>(i))));
     connect(combo_tracking, SIGNAL(currentIndexChanged(int)),
             this, SLOT(comboTrackingChange(int)));
     layout->addWidget(combo_tracking, 2, 6, 1, 3);
@@ -577,12 +575,8 @@ void InstanceDialog::updateData()
 
     /* Combo box tracking */
     combo_tracking->blockSignals(true);
-    if(path->getTracking() == TrackingState::NOTRACK)
-      combo_tracking->setCurrentIndex(0);
-    else if(path->getTracking() == TrackingState::AVOIDPLAYER)
-      combo_tracking->setCurrentIndex(1);
-    else if(path->getTracking() == TrackingState::TOPLAYER)
-      combo_tracking->setCurrentIndex(2);
+    combo_tracking->setCurrentText(QString::fromStdString(
+                                 Helpers::trackingToStr(path->getTracking())));
     combo_tracking->blockSignals(false);
 
     /* Tracking setpoints */
@@ -1352,12 +1346,7 @@ void InstanceDialog::comboTrackingChange(int index)
     EditorMapNPC* npc = (EditorMapNPC*)thing_working;
 
     /* Update tracking */
-    if(index == 0)
-      npc->getPath()->setTracking(TrackingState::NOTRACK);
-    else if(index == 1)
-      npc->getPath()->setTracking(TrackingState::AVOIDPLAYER);
-    else if(index == 2)
-      npc->getPath()->setTracking(TrackingState::TOPLAYER);
+    npc->getPath()->setTracking(static_cast<TrackingState>(index));
 
     /* Enable/Disable of setpoint widgets */
     MapNPC::NodeState node_state = npc->getPath()->getState();
@@ -1403,12 +1392,13 @@ void InstanceDialog::editEventSet(EditorEventSet* set,
   {
     event_dialog = new EventDialog(set, this, window_title,
                                    EventClassifier::NOEVENT, view_only);
-    event_dialog->setListIOs(list_ios);
     event_dialog->setListItems(list_items);
     event_dialog->setListMaps(list_maps);
+    event_dialog->setListMapThings(list_map_things, list_map_ios,
+                                   list_map_items, list_map_persons,
+                                   list_map_npcs);
     event_dialog->setListSounds(list_sounds);
     event_dialog->setListSubmaps(list_submaps);
-    event_dialog->setListThings(list_things);
     connect(event_dialog, SIGNAL(selectTile()),
             this, SLOT(selectTile()));
     connect(event_dialog, SIGNAL(ok()),
@@ -1606,17 +1596,6 @@ EventDialog* InstanceDialog::getEventDialog()
 }
 
 /*
- * Description: Returns the list of IOs, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
- */
-QVector<QPair<QString,QString>> InstanceDialog::getListIOs()
-{
-  return list_ios;
-}
-
-/*
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
@@ -1636,6 +1615,61 @@ QVector<QString> InstanceDialog::getListItems()
 QVector<QString> InstanceDialog::getListMaps()
 {
   return list_maps;
+}
+
+/*
+ * Description: Returns the list of map IOs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all map IOs
+ */
+QVector<QPair<QString,QString>> InstanceDialog::getListMapIOs()
+{
+  return list_map_ios;
+}
+
+/*
+ * Description: Returns the list of map items, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all map items
+ */
+QVector<QString> InstanceDialog::getListMapItems()
+{
+  return list_map_items;
+}
+
+/*
+ * Description: Returns the list of map npcs, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all map npcs
+ */
+QVector<QString> InstanceDialog::getListMapNPCs()
+{
+  return list_map_npcs;
+}
+
+/*
+ * Description: Returns the list of map persons, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QPair<QString,QString>> - list of all map persons
+ */
+QVector<QString> InstanceDialog::getListMapPersons()
+{
+  return list_map_persons;
+}
+
+/*
+ * Description: Returns the list of map things, used for event creation.
+ *
+ * Inputs: none
+ * Output: QVector<QString> - list of all map things
+ */
+QVector<QString> InstanceDialog::getListMapThings()
+{
+  return list_map_things;
 }
 
 /*
@@ -1672,32 +1706,6 @@ QVector<QString> InstanceDialog::getListSubmaps()
 }
 
 /*
- * Description: Returns the list of things, used for event creation.
- *
- * Inputs: none
- * Output: QVector<QString> - list of all things (for teleport event)
- */
-QVector<QString> InstanceDialog::getListThings()
-{
-  return list_things;
-}
-
-/*
- * Description: Sets the list of IOs, used for event creation
- *
- * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for unlock event)
- * Output: none
- */
-void InstanceDialog::setListIOs(QVector<QPair<QString,QString>> ios)
-{
-  list_ios = ios;
-
-  /* Event dialog data */
-  if(event_dialog != nullptr)
-    event_dialog->setListIOs(ios);
-}
-
-/*
  * Description: Sets the list of items, used for event creation
  *
  * Inputs: QVector<QString> - list of all items (for give item event)
@@ -1727,6 +1735,34 @@ void InstanceDialog::setListMaps(QVector<QString> maps)
   /* Event dialog data */
   if(event_dialog != nullptr)
     event_dialog->setListMaps(maps);
+}
+
+/*
+ * Description: Sets the list of things, ios, items, persons, npcs, used for
+ *              event creation.
+ *
+ * Inputs: QVector<QString> things - list of all map things
+ *         QVector<QPair<QString,QString>> ios - list of all map ios
+ *         QVector<QString> items - list of all map items
+ *         QVector<QString> persons - list of all map persons
+ *         QVector<QString> npcs - list of all map npcs
+ * Output: none
+ */
+void InstanceDialog::setListMapThings(QVector<QString> things,
+                                      QVector<QPair<QString,QString>> ios,
+                                      QVector<QString> items,
+                                      QVector<QString> persons,
+                                      QVector<QString> npcs)
+{
+  list_map_things = things;
+  list_map_ios = ios;
+  list_map_items = items;
+  list_map_persons = persons;
+  list_map_npcs = npcs;
+
+  /* Event dialog data */
+  if(event_dialog != nullptr)
+    event_dialog->setListMapThings(things, ios, items, persons, npcs);
 }
 
 /*
@@ -1776,21 +1812,6 @@ void InstanceDialog::setListSubmaps(QVector<QString> sub_maps)
   /* Event dialog data */
   if(event_dialog != nullptr)
     event_dialog->setListSubmaps(sub_maps);
-}
-
-/*
- * Description: Sets the list of things, used for event creation.
- *
- * Inputs: QVector<QString> - list of all things (for teleport event)
- * Output: none
- */
-void InstanceDialog::setListThings(QVector<QString> things)
-{
-  list_things = things;
-
-  /* Event dialog data */
-  if(event_dialog != nullptr)
-    event_dialog->setListThings(things);
 }
 
 /*

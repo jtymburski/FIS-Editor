@@ -139,12 +139,15 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the list of objects, used for event creation */
-  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
+  QVector<QPair<QString,QString>> getListMapIOs();
+  QVector<QString> getListMapItems();
+  QVector<QString> getListMapNPCs();
+  QVector<QString> getListMapPersons();
+  QVector<QString> getListMapThings();
   QList<QString> getListSounds();
   QVector<QString> getListSubmaps();
-  QVector<QString> getListThings();
 
   /* Returns the event set */
   EditorEventSet* getSetOriginal();
@@ -155,12 +158,14 @@ public:
   LockView* getViewLock();
 
   /* Sets the list of objects, used for event creation */
-  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
+  void setListMapThings(QVector<QString> things,
+                        QVector<QPair<QString,QString>> ios,
+                        QVector<QString> items, QVector<QString> persons,
+                        QVector<QString> npcs);
   void setListSounds(QList<QString> sounds);
   void setListSubmaps(QVector<QString> sub_maps);
-  void setListThings(QVector<QString> things);
 
   /* Sets the event set */
   void setEventSet(EditorEventSet* set);

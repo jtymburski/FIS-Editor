@@ -1419,19 +1419,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
                                      track_v, visible_v);
 
         /* Thing type classifier */
-        QString type_str = "";
-        if(type == ThingBase::THING)
-          type_str = "thing";
-        else if(type == ThingBase::ITEM)
-          type_str = "item";
-        else if(type == ThingBase::PERSON)
-          type_str = "person";
-        else if(type == ThingBase::NPC)
-          type_str = "npc";
-        else if(type == ThingBase::INTERACTIVE)
-          type_str = "io";
-        if(!type_str.isEmpty())
-          fh->writeXmlData("class", type_str.toStdString());
+        QString type_str = QString::fromStdString(Helpers::typeToStr(type));
+        fh->writeXmlData("class", type_str.toStdString());
 
         /* Thing ID */
         fh->writeXmlData("id", id);

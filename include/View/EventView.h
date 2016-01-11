@@ -86,14 +86,16 @@ private:
   EventClassifier limiter;
 
   /* The list of objects used in possible events */
-  //QVector<QString> list_ios;
-  QVector<QPair<QString,QString>> list_ios;
   QVector<QString> list_items;
   QVector<QString> list_maps;
+  QVector<QPair<QString,QString>> list_map_ios;
+  QVector<QString> list_map_items;
+  QVector<QString> list_map_npcs;
+  QVector<QString> list_map_persons;
+  QVector<QString> list_map_things;
   QList<QString> list_sounds;
   QVector<QString> list_submaps;
-  QVector<QString> list_things;
-  QVector<QString> list_things_no_io;
+  //QVector<QString> list_things_no_io;
 
   /* Switch maps event - map name view box */
   QComboBox* map_name;
@@ -110,6 +112,30 @@ private:
   Event* pop_event_edit;
   QGridLayout* pop_event_layout;
   EventView* pop_event_view;
+
+  /* Property control widgets */
+  QCheckBox* prop_active_mod;
+  QCheckBox* prop_active_val;
+  QCheckBox* prop_forced_mod;
+  QCheckBox* prop_forced_val;
+  QCheckBox* prop_freeze_mod;
+  QCheckBox* prop_freeze_val;
+  QComboBox* prop_id;
+  QCheckBox* prop_inactive_dis;
+  QCheckBox* prop_inactive_mod;
+  QSpinBox* prop_inactive_val;
+  QCheckBox* prop_reset_mod;
+  QCheckBox* prop_reset_val;
+  QCheckBox* prop_respawn_dis;
+  QCheckBox* prop_respawn_mod;
+  QSpinBox* prop_respawn_val;
+  QLabel* prop_speed_desc;
+  QCheckBox* prop_speed_mod;
+  QSpinBox* prop_speed_val;
+  QCheckBox* prop_track_mod;
+  QComboBox* prop_track_opt;
+  QCheckBox* prop_visible_mod;
+  QCheckBox* prop_visible_val;
 
   /* Right click menu on conversation dialog */
   QString rightclick_index;
@@ -248,6 +274,30 @@ public slots:
   void popEventCancel();
   void popEventOk();
 
+  /* The property widget slots */
+  void propertyActiveMod(int state);
+  void propertyActiveVal(int state);
+  void propertyIDChange(const QString& text);
+  void propertyInactiveDisable(int state);
+  void propertyInactiveMod(int state);
+  void propertyInactiveVal(int value);
+  void propertyForcedMod(int state);
+  void propertyForcedVal(int state);
+  void propertyFreezeMod(int state);
+  void propertyFreezeVal(int state);
+  void propertyResetMod(int state);
+  void propertyResetVal(int state);
+  void propertyRespawnDisable(int state);
+  void propertyRespawnMod(int state);
+  void propertyRespawnVal(int value);
+  void propertySpeedMod(int state);
+  void propertySpeedVal(int value);
+  void propertyTrackChange(const QString& text);
+  void propertyTrackMod(int state);
+  void propertyTypeChange(const QString& text);
+  void propertyVisibleMod(int state);
+  void propertyVisibleVal(int state);
+
   /* Resize the QTreeWidget for the items */
   void resizeTree(QTreeWidgetItem*);
 
@@ -300,6 +350,8 @@ public slots:
   /* Update the layout trigger */
   void updateBattle();
   void updateConversation();
+  void updateLists(bool things = false, bool ios = false, bool items = false,
+                   bool persons = false, bool npcs = false);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
@@ -312,23 +364,34 @@ public:
   EditorEvent* getEvent();
 
   /* Returns the list of objects, used for event creation */
-  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
+  QVector<QPair<QString,QString>> getListMapIOs();
+  QVector<QString> getListMapItems();
+  QVector<QString> getListMapNPCs();
+  QVector<QString> getListMapPersons();
+  QVector<QString> getListMapThings();
   QList<QString> getListSounds();
   QVector<QString> getListSubmaps();
-  QVector<QString> getListThings();
+
 
   /* Sets the editor event */
   void setEvent(EditorEvent* event);
 
   /* Sets the list of objects, used for event creation */
-  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
+  void setListMapIOs(QVector<QPair<QString,QString>> ios);
+  void setListMapItems(QVector<QString> items);
+  void setListMapNPCs(QVector<QString> npcs);
+  void setListMapPersons(QVector<QString> persons);
+  void setListMapThings(QVector<QString> things);
+  void setListMapThings(QVector<QString> things,
+                        QVector<QPair<QString,QString>> ios,
+                        QVector<QString> items, QVector<QString> persons,
+                        QVector<QString> npcs);
   void setListSounds(QList<QString> sounds);
   void setListSubmaps(QVector<QString> sub_maps);
-  void setListThings(QVector<QString> things);
 
   /* Updates the event */
   void updateEvent();

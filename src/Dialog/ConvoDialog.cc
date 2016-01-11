@@ -213,7 +213,7 @@ EventView* ConvoDialog::getEventView()
  * Inputs: none
  * Output: QVector<QString> - the list of things as string with "ID: NAME"
  */
-QVector<QString> ConvoDialog::getListThings()
+QVector<QString> ConvoDialog::getListMapThings()
 {
   return list_things;
 }
@@ -222,14 +222,24 @@ QVector<QString> ConvoDialog::getListThings()
  * Description: Sets the list of things that are being used in the event view
  *              of the dialog (for teleport events). Updates the event view.
  *
- * Inputs: QVector<QString> things - the list of things
+ * Inputs: QVector<QString> things - the list of map things
+ *         QVector<QPair<QString,QString>> ios - the list of map ios
+ *         QVector<QString> items - the list of map items
+ *         QVector<QString> persons - the list of map persons
+ *         QVector<QString> npcs - the list of map npcs
  *         bool is_thing - is the event on a thing? Default true.
  * Output: none
  */
-void ConvoDialog::setListThings(QVector<QString> things, bool is_thing)
+void ConvoDialog::setListMapThings(QVector<QString> things,
+                                   QVector<QPair<QString,QString>> ios,
+                                   QVector<QString> items,
+                                   QVector<QString> persons,
+                                   QVector<QString> npcs,  bool is_thing)
 {
-  list_things = things;
-  event_view->setListThings(things);
+  list_things = (persons + npcs + things);
+  for(int i = 0; i < ios.size(); i++)
+    list_things.push_back(ios[i].first);
+  event_view->setListMapThings(things, ios, items, persons, npcs);
 
   /* Modify the list and append -1 entry to the very front */
   if(is_thing)

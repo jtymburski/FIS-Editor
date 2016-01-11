@@ -53,12 +53,15 @@ private:
   QLabel* lbl_speed_result;
 
   /* The list of objects used in possible events */
-  QVector<QPair<QString,QString>> list_ios;
   QVector<QString> list_items;
   QVector<QString> list_maps;
+  QVector<QPair<QString,QString>> list_map_ios;
+  QVector<QString> list_map_items;
+  QVector<QString> list_map_npcs;
+  QVector<QString> list_map_persons;
+  QVector<QString> list_map_things;
   QList<QString> list_sounds;
   QVector<QString> list_submaps;
-  QVector<QString> list_things;
 
   /* Matrix control */
   Direction matrix_direction;
@@ -150,20 +153,25 @@ public:
   EventDialog* getEventDialog();
 
   /* Returns the list of objects, used for dialog and event creation */
-  QVector<QPair<QString,QString>> getListIOs();
   QVector<QString> getListItems();
   QVector<QString> getListMaps();
+  QVector<QPair<QString,QString>> getListMapIOs();
+  QVector<QString> getListMapItems();
+  QVector<QString> getListMapNPCs();
+  QVector<QString> getListMapPersons();
+  QVector<QString> getListMapThings();
   QList<QString> getListSounds();
   QVector<QString> getListSubmaps();
-  QVector<QString> getListThings();
 
   /* Sets the list of objects, used for dialog and event creation */
-  void setListIOs(QVector<QPair<QString,QString>> ios);
   void setListItems(QVector<QString> items);
   void setListMaps(QVector<QString> maps);
+  void setListMapThings(QVector<QString> things,
+                        QVector<QPair<QString,QString>> ios,
+                        QVector<QString> items, QVector<QString> persons,
+                        QVector<QString> npcs);
   void setListSounds(QList<QString> sounds);
   void setListSubmaps(QVector<QString> sub_maps);
-  void setListThings(QVector<QString> things);
 
   /* Sets the working thing to the original */
   void updateOriginal();

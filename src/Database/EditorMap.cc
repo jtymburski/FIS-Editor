@@ -2684,7 +2684,7 @@ QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
                                         bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("-- ITEMS --");
+  //stack.push_back("-- ITEMS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3341,7 +3341,7 @@ QVector<QString> EditorMap::getNPCList(int sub_map, bool all_submaps,
                                        bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("-- NPCS --");
+  //stack.push_back("-- NPCS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3511,7 +3511,7 @@ QVector<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
                                           bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("-- PERSONS --");
+  //stack.push_back("-- PERSONS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)
@@ -3829,7 +3829,7 @@ QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
                                          bool shortened)
 {
   QVector<QString> stack;
-  stack.push_back("-- THINGS --");
+  //stack.push_back("-- THINGS --");
 
   /* If sub map ref is less than 0, get from base set */
   if(sub_map < 0)

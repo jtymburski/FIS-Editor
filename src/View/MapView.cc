@@ -20,7 +20,7 @@ const float MapView::kZOOM_STATES[] = {0.0625, 0.125, 0.25, 0.5, 0.75, 1,
 /*
  * Description: Constructor function
  *
- * Input: Parent Widget
+ * Input: QWidget* parent - Parent Widget object
  */
 MapView::MapView(QWidget* parent)
        : QMainWindow(parent)
@@ -62,21 +62,19 @@ void MapView::fillEventWithData()
 {
   if(editing_map != nullptr)
   {
-    /* Get data */
-    QVector<QString> thing_list = editing_map->getPersonList(0, true, true);
-    thing_list.push_front("0: Player");
-    thing_list << editing_map->getNPCList(0, true, true);
-    thing_list << editing_map->getThingList(0, true, true);
-    thing_list << editing_map->getIOList(0, true, true);
-
-    /* Compile io list */
+    /* Compile thing lists */
+    QVector<QString> thing_list = editing_map->getThingList(0, true, true);
     QVector<QPair<QString,QString>> io_set =
                                        editing_map->getIOListSet(0, true, true);
+    QVector<QString> item_list = editing_map->getItemList(0, true, true);
+    QVector<QString> person_list = editing_map->getPersonList(0, true, true);
+    person_list.push_front("0: Player");
+    QVector<QString> npc_list = editing_map->getNPCList(0, true, true);
 
     /* Load data in */
-    event_dialog->setListIOs(io_set);
+    event_dialog->setListMapThings(thing_list, io_set, item_list,
+                                   person_list, npc_list);
     event_dialog->setListSubmaps(editing_map->getMapList());
-    event_dialog->setListThings(thing_list);
 
     data_db = false;
     emit updateEventObjects();
