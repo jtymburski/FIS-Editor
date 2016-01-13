@@ -189,7 +189,7 @@ void EventView::createLayout()//bool conversation_enabled)
   /* Widget for property modifier */
   QWidget* widget_property = new QWidget(this);
   QLabel* lbl_type = new QLabel("Type", this);
-  QComboBox* prop_type = new QComboBox(this);
+  prop_type = new QComboBox(this);
   for(int i = 1; i <= static_cast<int>(ThingBase::INTERACTIVE); i++)
     prop_type->addItem(QString::fromStdString(
                               Helpers::typeToStr(static_cast<ThingBase>(i))));
@@ -1051,7 +1051,78 @@ void EventView::setLayoutData()
     /* -- PROPERTY -- */
     else if(event->getEventType() == EventClassifier::PROPERTY)
     {
-      // TODO
+      int ref_id = event->getPropertyID();
+
+      /* Select the type */
+      int type_index = prop_type->currentIndex();
+      prop_type->setCurrentText(QString::fromStdString(
+                                Helpers::typeToStr(event->getPropertyType())));
+      if(type_index == prop_type->currentIndex())
+        propertyTypeChange(prop_type->currentText());
+
+      /* Select the ID */
+      int index = -1;
+      for(int i = 0; i < prop_id->count(); i++)
+      {
+        QStringList str_list = prop_id->itemText(i).split(':');
+        if(str_list.size() >= 2)
+          if(str_list.front().toInt() == ref_id)
+            index = i;
+      }
+      if(index >= 0)
+        prop_id->setCurrentIndex(index);
+      else
+        prop_id->setCurrentIndex(0);
+
+      /* Select the properties to be modded */
+      bool active,forced,inactive,move,reset,respawn,speed,track,visible;
+      EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                                   inactive, move, reset, respawn, speed,
+                                   track, visible);
+      prop_active_mod->setChecked(active);
+      prop_forced_mod->setChecked(forced);
+      prop_freeze_mod->setChecked(move);
+      prop_inactive_mod->setChecked(inactive);
+      prop_reset_mod->setChecked(reset);
+      prop_respawn_mod->setChecked(respawn);
+      prop_speed_mod->setChecked(speed);
+      prop_track_mod->setChecked(track);
+      prop_visible_mod->setChecked(visible);
+
+      /* The bool properties */
+      EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                                   inactive, move, reset, respawn, speed,
+                                   track, visible);
+      prop_active_val->setChecked(active);
+      prop_forced_val->setChecked(forced);
+      prop_freeze_val->setChecked(move);
+      prop_reset_val->setChecked(reset);
+      prop_visible_val->setChecked(visible);
+
+      /* Inactive */
+      int inactive_val = event->getPropertyInactive();
+      prop_inactive_dis->setChecked(inactive_val < 0);
+      propertyInactiveDisable(prop_inactive_dis->checkState());
+      if(inactive_val >= 0)
+        prop_inactive_val->setValue(inactive_val);
+
+      /* Respawn */
+      int respawn_val = event->getPropertyRespawn();
+      prop_respawn_dis->setChecked(respawn_val < 0);
+      propertyRespawnDisable(prop_respawn_dis->checkState());
+      if(respawn_val >= 0)
+        prop_respawn_val->setValue(respawn_val);
+
+      /* Speed */
+      int speed_val = event->getPropertySpeed();
+      if(speed_val >= 0)
+        prop_speed_val->setValue(speed_val);
+
+      /* Tracking */
+      TrackingState track_val = event->getPropertyTrack();
+      prop_track_opt->setCurrentText(QString::fromStdString(
+                                         Helpers::trackingToStr(track_val)));
+
     }
     /* -- TELEPORT THING -- */
     else if(event->getEventType() == EventClassifier::TELEPORTTHING)
@@ -1731,7 +1802,27 @@ void EventView::popEventOk()
  */
 void EventView::propertyActiveMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  active = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_active_mod->isEnabled())
+  {
+    prop_active_val->setEnabled(active);
+  }
 }
 
 /*
@@ -1743,55 +1834,21 @@ void EventView::propertyActiveMod(int state)
  */
 void EventView::propertyActiveVal(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
-}
-
-/*
- * Description: Slot which triggers when the selected ID to be modified in the
- *              combo box is changed.
- *
- * Inputs: const QString& text - the new ID text set
- * Output: none
- */
-void EventView::propertyIDChange(const QString& text)
-{
-
-}
-
-/*
- * Description: Slot which triggers when the inactive value disable check box is
- *              changed. If checked, the inactive delay return will be disabled
- *
- * Inputs: int state - the state of the checkbox
- * Output: none
- */
-void EventView::propertyInactiveDisable(int state)
-{
-
-}
-
-/*
- * Description: Slot which triggers when the inactive modifier check box is
- *              changed. Enables the inactive to be modified.
- *
- * Inputs: int state - the state of the checkbox
- * Output: none
- */
-void EventView::propertyInactiveMod(int state)
-{
-
-}
-
-/*
- * Description: Slot which triggers when the inactive value mod spin box is
- *              changed. This new value is the new inactive time in ms
- *
- * Inputs: int value - the inactive value in ms
- * Output: none
- */
-void EventView::propertyInactiveVal(int value)
-{
-
+  /* Modify and set */
+  active = (state == Qt::Checked);
+  ThingProperty prop = EventSet::createEnumProperties(active, forced, inactive,
+                                  move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), prop,
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1803,7 +1860,27 @@ void EventView::propertyInactiveVal(int value)
  */
 void EventView::propertyForcedMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  forced = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_forced_mod->isEnabled())
+  {
+    prop_forced_val->setEnabled(forced);
+  }
 }
 
 /*
@@ -1815,7 +1892,21 @@ void EventView::propertyForcedMod(int state)
  */
 void EventView::propertyForcedVal(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  forced = (state == Qt::Checked);
+  ThingProperty prop = EventSet::createEnumProperties(active, forced, inactive,
+                                  move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), prop,
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1827,7 +1918,27 @@ void EventView::propertyForcedVal(int state)
  */
 void EventView::propertyFreezeMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  move = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_freeze_mod->isEnabled())
+  {
+    prop_freeze_val->setEnabled(move);
+  }
 }
 
 /*
@@ -1839,7 +1950,120 @@ void EventView::propertyFreezeMod(int state)
  */
 void EventView::propertyFreezeVal(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  move = (state == Qt::Checked);
+  ThingProperty prop = EventSet::createEnumProperties(active, forced, inactive,
+                                  move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), prop,
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers when the selected ID to be modified in the
+ *              combo box is changed.
+ *
+ * Inputs: const QString& text - the new ID text set
+ * Output: none
+ */
+void EventView::propertyIDChange(const QString& text)
+{
+  int id = -1;
+  QStringList str_list = text.split(':');
+  if(str_list.size() >= 2)
+    id = str_list.front().toInt();
+
+  event->setEventPropMod(event->getPropertyType(), id,
+                         event->getPropertyMods(), event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers when the inactive value disable check box is
+ *              changed. If checked, the inactive delay return will be disabled
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyInactiveDisable(int state)
+{
+  int new_value = 0;
+
+  if(state == Qt::Checked)
+  {
+    new_value = -1;
+    if(prop_inactive_mod->isChecked())
+      prop_inactive_val->setEnabled(false);
+  }
+  else
+  {
+    new_value = prop_inactive_val->value();
+    if(prop_inactive_mod->isChecked())
+      prop_inactive_val->setEnabled(true);
+  }
+
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), event->getPropertyBools(),
+                         event->getPropertyRespawn(),
+                         event->getPropertySpeed(), event->getPropertyTrack(),
+                         new_value, event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers when the inactive modifier check box is
+ *              changed. Enables the inactive to be modified.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::propertyInactiveMod(int state)
+{
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
+
+  /* Modify and set */
+  inactive = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  prop_inactive_dis->setEnabled(prop_inactive_mod->isEnabled() && inactive);
+  prop_inactive_val->setEnabled(prop_inactive_mod->isEnabled() && inactive);
+}
+
+/*
+ * Description: Slot which triggers when the inactive value mod spin box is
+ *              changed. This new value is the new inactive time in ms
+ *
+ * Inputs: int value - the inactive value in ms
+ * Output: none
+ */
+void EventView::propertyInactiveVal(int value)
+{
+  if(value >= 0)
+    event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                           event->getPropertyMods(), event->getPropertyBools(),
+                           event->getPropertyRespawn(),
+                           event->getPropertySpeed(), event->getPropertyTrack(),
+                           value, event->getSoundID());
 }
 
 /*
@@ -1851,7 +2075,27 @@ void EventView::propertyFreezeVal(int state)
  */
 void EventView::propertyResetMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  reset = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_reset_mod->isEnabled())
+  {
+    prop_reset_val->setEnabled(reset);
+  }
 }
 
 /*
@@ -1863,7 +2107,21 @@ void EventView::propertyResetMod(int state)
  */
 void EventView::propertyResetVal(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  reset = (state == Qt::Checked);
+  ThingProperty prop = EventSet::createEnumProperties(active, forced, inactive,
+                                  move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), prop,
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1875,7 +2133,26 @@ void EventView::propertyResetVal(int state)
  */
 void EventView::propertyRespawnDisable(int state)
 {
+  int new_value = 0;
 
+  if(state == Qt::Checked)
+  {
+    new_value = -1;
+    if(prop_respawn_mod->isChecked())
+      prop_respawn_val->setEnabled(false);
+  }
+  else
+  {
+    new_value = prop_respawn_val->value();
+    if(prop_respawn_mod->isChecked())
+      prop_respawn_val->setEnabled(true);
+  }
+
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), event->getPropertyBools(),
+                         new_value, event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1887,7 +2164,28 @@ void EventView::propertyRespawnDisable(int state)
  */
 void EventView::propertyRespawnMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  respawn = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_respawn_mod->isEnabled())
+  {
+    prop_respawn_dis->setEnabled(respawn);
+    prop_respawn_val->setEnabled(respawn);
+  }
 }
 
 /*
@@ -1899,7 +2197,12 @@ void EventView::propertyRespawnMod(int state)
  */
 void EventView::propertyRespawnVal(int value)
 {
-
+  if(value >= 0)
+    event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                           event->getPropertyMods(), event->getPropertyBools(),
+                           value, event->getPropertySpeed(),
+                           event->getPropertyTrack(),
+                           event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1911,7 +2214,28 @@ void EventView::propertyRespawnVal(int value)
  */
 void EventView::propertySpeedMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  speed = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_speed_mod->isEnabled())
+  {
+    prop_speed_desc->setEnabled(speed);
+    prop_speed_val->setEnabled(speed);
+  }
 }
 
 /*
@@ -1924,7 +2248,19 @@ void EventView::propertySpeedMod(int state)
  */
 void EventView::propertySpeedVal(int value)
 {
+  if(value >= 0)
+  {
+    event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                           event->getPropertyMods(), event->getPropertyBools(),
+                           event->getPropertyRespawn(), value,
+                           event->getPropertyTrack(),
+                           event->getPropertyInactive(), event->getSoundID());
 
+    if(value > 0)
+      prop_speed_desc->setText(QString::number(4096 / value) + " ms/tile");
+    else
+      prop_speed_desc->setText("0 ms/tile");
+  }
 }
 
 /*
@@ -1936,7 +2272,11 @@ void EventView::propertySpeedVal(int value)
  */
 void EventView::propertyTrackChange(const QString& text)
 {
-
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         Helpers::trackingFromStr(text.toStdString()),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -1948,7 +2288,27 @@ void EventView::propertyTrackChange(const QString& text)
  */
 void EventView::propertyTrackMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  track = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_track_mod->isEnabled())
+  {
+    prop_track_opt->setEnabled(track);
+  }
 }
 
 /*
@@ -1958,12 +2318,6 @@ void EventView::propertyTrackMod(int state)
  * Inputs: const QString& text - the new thing type text set
  * Output: none
  */
-// TODO: NEW DATA TO USE
-//event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
-//                       event->getPropertyMods(), event->getPropertyBools(),
-//                       event->getPropertyRespawn(), event->getPropertySpeed(),
-//                       event->getPropertyTrack(),
-//                       event->getPropertyInactive(), event->getSoundID());
 void EventView::propertyTypeChange(const QString& text)
 {
   ThingBase new_type = Helpers::typeFromStr(text.toStdString());
@@ -1978,6 +2332,7 @@ void EventView::propertyTypeChange(const QString& text)
   /* Update the ID data */
   prop_id->blockSignals(true);
   prop_id->clear();
+  prop_id->addItem("-1: This Thing");
   if(new_type == ThingBase::THING)
     prop_id->addItems(list_map_things.toList());
   else if(new_type == ThingBase::PERSON)
@@ -2044,7 +2399,27 @@ void EventView::propertyTypeChange(const QString& text)
  */
 void EventView::propertyVisibleMod(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyMods(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  visible = (state == Qt::Checked);
+  ThingProperty prop_mods = EventSet::createEnumProperties(active, forced,
+                        inactive, move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         prop_mods, event->getPropertyBools(),
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
+
+  /* Enable */
+  if(prop_visible_mod->isEnabled())
+  {
+    prop_visible_val->setEnabled(visible);
+  }
 }
 
 /*
@@ -2056,7 +2431,21 @@ void EventView::propertyVisibleMod(int state)
  */
 void EventView::propertyVisibleVal(int state)
 {
+  /* Get the existing */
+  bool active, forced, inactive, move, reset, respawn, speed, track, visible;
+  EventSet::dataEnumProperties(event->getPropertyBools(), active, forced,
+                               inactive, move, reset, respawn, speed,
+                               track, visible);
 
+  /* Modify and set */
+  visible = (state == Qt::Checked);
+  ThingProperty prop = EventSet::createEnumProperties(active, forced, inactive,
+                                  move, reset, respawn, speed, track, visible);
+  event->setEventPropMod(event->getPropertyType(), event->getPropertyID(),
+                         event->getPropertyMods(), prop,
+                         event->getPropertyRespawn(), event->getPropertySpeed(),
+                         event->getPropertyTrack(),
+                         event->getPropertyInactive(), event->getSoundID());
 }
 
 /*
@@ -2902,6 +3291,7 @@ void EventView::updateLists(bool things, bool ios, bool items,
     }
   }
   /* -- ITEMS -- */
+  (void)items;
   if(false)
   {}
 

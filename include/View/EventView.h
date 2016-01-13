@@ -134,6 +134,7 @@ private:
   QSpinBox* prop_speed_val;
   QCheckBox* prop_track_mod;
   QComboBox* prop_track_opt;
+  QComboBox* prop_type;
   QCheckBox* prop_visible_mod;
   QCheckBox* prop_visible_val;
 
@@ -277,14 +278,14 @@ public slots:
   /* The property widget slots */
   void propertyActiveMod(int state);
   void propertyActiveVal(int state);
-  void propertyIDChange(const QString& text);
-  void propertyInactiveDisable(int state);
-  void propertyInactiveMod(int state);
-  void propertyInactiveVal(int value);
   void propertyForcedMod(int state);
   void propertyForcedVal(int state);
   void propertyFreezeMod(int state);
   void propertyFreezeVal(int state);
+  void propertyIDChange(const QString& text);
+  void propertyInactiveDisable(int state);
+  void propertyInactiveMod(int state);
+  void propertyInactiveVal(int value);
   void propertyResetMod(int state);
   void propertyResetVal(int state);
   void propertyRespawnDisable(int state);
