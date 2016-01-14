@@ -1448,7 +1448,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         if(type == ThingBase::NPC)
         {
           if(forced)
-            fh->writeXmlData("forcedinteract", forced_v);
+            fh->writeXmlData("forceinteract", forced_v);
           if(track)
           {
             QString track_str = "notrack";
@@ -1466,6 +1466,12 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           if(inactive)
             fh->writeXmlData("inactive", inactive_int);
         }
+
+        /* Sound / One Shot Data */
+        if(isOneShot())
+          fh->writeXmlData("one_shot", isOneShot());
+        if(getSoundID() >= 0)
+          fh->writeXmlData("sound_id", getSoundID());
 
         fh->writeXmlElementEnd();
       }

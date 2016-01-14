@@ -145,7 +145,7 @@ void EventView::createLayout()//bool conversation_enabled)
   connect(battle_windisappear, SIGNAL(stateChanged(int)),
           this, SLOT(battleWinFlagChange(int)));
   battle_losegg = new QCheckBox("On a loss, game over", this);
-  connect(battle_losegg, SIGNAL(stateChanged(int)),
+  connect(battle_losegg, SIGNAL(stateChanged(inint valuet)),
           this, SLOT(battleLoseFlagChange(int)));
   battle_restorehealth = new QCheckBox("Restore health on battle end",
                                                  this);
@@ -263,7 +263,7 @@ void EventView::createLayout()//bool conversation_enabled)
   prop_speed_val->setMaximum(256);
   connect(prop_speed_val, SIGNAL(valueChanged(int)),
           this, SLOT(propertySpeedVal(int)));
-  prop_speed_desc = new QLabel("XXXX ms/tile", this);
+  prop_speed_desc = new QLabel("X ms/tile", this);
   /* -- npc -- */
   QLabel* lbl_forced = new QLabel("Forced", this);
   prop_forced_mod = new QCheckBox(this);
@@ -2235,6 +2235,7 @@ void EventView::propertySpeedMod(int state)
   {
     prop_speed_desc->setEnabled(speed);
     prop_speed_val->setEnabled(speed);
+    propertySpeedVal(event->getPropertySpeed());
   }
 }
 
