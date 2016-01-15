@@ -1953,9 +1953,11 @@ bool EditorEvent::setEventTakeItem(int id, int count, int sound_id)
 bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
                                    int sound_id)
 {
-  if(thing_id >= 0 && section_id >= 0 && x >= 0 && y >= 0)
+  if(section_id >= 0 && x >= 0 && y >= 0)
   {
     bool one_shot = event.one_shot;
+    if(thing_id < 0)
+      thing_id = EventSet::kUNSET_ID;
     setEventBlank();
     event = EventSet::createEventTeleport(thing_id, x, y, section_id, sound_id);
     event.one_shot = one_shot;
@@ -1982,11 +1984,13 @@ bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
                    UnlockIOEvent events, UnlockView view_mode, int view_time,
                    int sound_id)
 {
-  if(io_id >= 0 && view_time >= 0)
+  if(view_time >= 0)
   {
     bool one_shot = event.one_shot;
     if(state_num < 0)
       state_num = EventSet::kUNSET_ID;
+    if(io_id < 0)
+      io_id = EventSet::kUNSET_ID;
     setEventBlank();
     event = EventSet::createEventUnlockIO(io_id, mode, state_num, events,
                                           view_mode, view_time, sound_id);
@@ -2009,9 +2013,11 @@ bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
 bool EditorEvent::setEventUnlockThing(int thing_id, UnlockView view_mode,
                                       int view_time, int sound_id)
 {
-  if(thing_id >= 0 && view_time >= 0)
+  if(view_time >= 0)
   {
     bool one_shot = event.one_shot;
+    if(thing_id < 0)
+      thing_id = EventSet::kUNSET_ID;
     setEventBlank();
     event = EventSet::createEventUnlockThing(thing_id, view_mode, view_time,
                                              sound_id);

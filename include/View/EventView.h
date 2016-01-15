@@ -218,6 +218,12 @@ private:
   void updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
                        bool option = false);
 
+  /* Update data lists */
+  void updateListProperty(const QString& type_text);
+  void updateListProperty(const ThingBase& type);
+  void updateLists(bool things = false, bool ios = false, bool items = false,
+                   bool persons = false, bool npcs = false);
+
 /*============================================================================
  * SIGNALS
  *===========================================================================*/
@@ -351,8 +357,6 @@ public slots:
   /* Update the layout trigger */
   void updateBattle();
   void updateConversation();
-  void updateLists(bool things = false, bool ios = false, bool items = false,
-                   bool persons = false, bool npcs = false);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

@@ -145,7 +145,7 @@ void EventView::createLayout()//bool conversation_enabled)
   connect(battle_windisappear, SIGNAL(stateChanged(int)),
           this, SLOT(battleWinFlagChange(int)));
   battle_losegg = new QCheckBox("On a loss, game over", this);
-  connect(battle_losegg, SIGNAL(stateChanged(inint valuet)),
+  connect(battle_losegg, SIGNAL(stateChanged(int)),
           this, SLOT(battleLoseFlagChange(int)));
   battle_restorehealth = new QCheckBox("Restore health on battle end",
                                                  this);
@@ -1377,6 +1377,132 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
   }
 }
 
+/*
+ * Description: Updates the property list within the event set. This is based
+ *              on the current type.
+ *
+ * Inputs: QString type_text - the type string for the list update
+ * Output: none
+ */
+void EventView::updateListProperty(const QString& type_text)
+{
+  updateListProperty(Helpers::typeFromStr(type_text.toStdString()));
+}
+
+/*
+ * Description: Updates the property list within the event set. This is based
+ *              on the current type.
+ *
+ * Inputs: ThingBase type - the type category for the list update
+ * Output: none
+ */
+void EventView::updateListProperty(const ThingBase& type)
+{
+  prop_id->blockSignals(true);
+  prop_id->clear();
+  prop_id->addItem("-1: This Thing");
+  if(type == ThingBase::THING)
+    prop_id->addItems(list_map_things.toList());
+  else if(type == ThingBase::PERSON)
+    prop_id->addItems(list_map_persons.toList());
+  else if(type == ThingBase::NPC)
+    prop_id->addItems(list_map_npcs.toList());
+  else if(type == ThingBase::ITEM)
+    prop_id->addItems(list_map_items.toList());
+  else if(type == ThingBase::INTERACTIVE)
+    for(int i = 0; i < list_map_ios.size(); i++)
+      prop_id->addItem(list_map_ios[i].first);
+  prop_id->blockSignals(false);
+}
+
+/*
+ * Description: Updates all map object lists within event sets, based on what
+ *              has changed
+ *
+ * Inputs: bool things - true if the things list was updated. default false
+ *         bool ios - true if the ios list was updated. default false
+ *         bool items - true if the items list was updated. default false
+ *         bool persons - true if the persons list was updated. default false
+ *         bool npcs - true if the npcs list was updated. default false
+ * Output: none
+ */
+void EventView::updateLists(bool things, bool ios, bool items,
+                            bool persons, bool npcs)
+{
+  /* Signal blocks */
+  tele_thing->blockSignals(true);
+  unio_name->blockSignals(true);
+  unth_name->blockSignals(true);
+
+  /* Check what is updated */
+  bool update_tele = (things || ios || persons || npcs);
+  if(update_tele)
+  {
+    tele_thing->clear();
+    //tele_thing->addItem("-1: This Thing");
+  }
+  bool update_unio = ios;
+  if(update_unio)
+  {
+    unio_name->clear();
+    unio_name->addItem("-1: This Thing");
+  }
+  bool update_unth = (things || persons || npcs);
+  if(update_unth)
+  {
+    unth_name->clear();
+    unth_name->addItem("-1: This Thing");
+  }
+
+  /* Processing */
+  /* -- PERSONS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_persons.size(); i++)
+    {
+      tele_thing->addItem(list_map_persons[i]);
+      unth_name->addItem(list_map_persons[i]);
+    }
+  }
+  /* -- NPCS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_npcs.size(); i++)
+    {
+      tele_thing->addItem(list_map_npcs[i]);
+      unth_name->addItem(list_map_npcs[i]);
+    }
+  }
+  /* -- THINGS -- */
+  if(update_tele || update_unth)
+  {
+    for(int i = 0; i < list_map_things.size(); i++)
+    {
+      tele_thing->addItem(list_map_things[i]);
+      unth_name->addItem(list_map_things[i]);
+    }
+  }
+  /* -- IOS -- */
+  if(update_tele || update_unio)
+  {
+    for(int i = 0; i < list_map_ios.size(); i++)
+    {
+      tele_thing->addItem(list_map_ios[i].first);
+      unio_name->addItem(list_map_ios[i].first);
+    }
+  }
+  /* -- ITEMS -- */
+  (void)items;
+  if(false)
+  {}
+
+  /* Restore signal blocks */
+  setLayoutData();
+  tele_thing->blockSignals(false);
+  unio_name->blockSignals(false);
+  unth_name->blockSignals(false);
+}
+
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
@@ -2331,21 +2457,7 @@ void EventView::propertyTypeChange(const QString& text)
                          event->getPropertyInactive(), event->getSoundID());
 
   /* Update the ID data */
-  prop_id->blockSignals(true);
-  prop_id->clear();
-  prop_id->addItem("-1: This Thing");
-  if(new_type == ThingBase::THING)
-    prop_id->addItems(list_map_things.toList());
-  else if(new_type == ThingBase::PERSON)
-    prop_id->addItems(list_map_persons.toList());
-  else if(new_type == ThingBase::NPC)
-    prop_id->addItems(list_map_npcs.toList());
-  else if(new_type == ThingBase::ITEM)
-    prop_id->addItems(list_map_items.toList());
-  else if(new_type == ThingBase::INTERACTIVE)
-    for(int i = 0; i < list_map_ios.size(); i++)
-      prop_id->addItem(list_map_ios[i].first);
-  prop_id->blockSignals(false);
+  updateListProperty(new_type);
   propertyIDChange(prop_id->currentText());
 
   /* Enable the data accordingly */
@@ -3222,85 +3334,6 @@ void EventView::updateConversation()
     setLayoutData();
     convo_tree->setCurrentItem(getConvo(index));
   }
-}
-
-/*
- * Description: Updates all map object lists within event sets, based on what
- *              has changed
- *
- * Inputs: bool things - true if the things list was updated. default false
- *         bool ios - true if the ios list was updated. default false
- *         bool items - true if the items list was updated. default false
- *         bool persons - true if the persons list was updated. default false
- *         bool npcs - true if the npcs list was updated. default false
- * Output: none
- */
-void EventView::updateLists(bool things, bool ios, bool items,
-                            bool persons, bool npcs)
-{
-  /* Signal blocks */
-  tele_thing->blockSignals(true);
-  unio_name->blockSignals(true);
-  unth_name->blockSignals(true);
-
-  /* Check what is updated */
-  bool update_tele = (things || ios || persons || npcs);
-  if(update_tele)
-    tele_thing->clear();
-  bool update_unio = ios;
-  if(update_unio)
-    unio_name->clear();
-  bool update_unth = (things || persons || npcs);
-  if(update_unth)
-    unth_name->clear();
-
-  /* Processing */
-  /* -- PERSONS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_persons.size(); i++)
-    {
-      tele_thing->addItem(list_map_persons[i]);
-      unth_name->addItem(list_map_persons[i]);
-    }
-  }
-  /* -- NPCS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_npcs.size(); i++)
-    {
-      tele_thing->addItem(list_map_npcs[i]);
-      unth_name->addItem(list_map_npcs[i]);
-    }
-  }
-  /* -- THINGS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_things.size(); i++)
-    {
-      tele_thing->addItem(list_map_things[i]);
-      unth_name->addItem(list_map_things[i]);
-    }
-  }
-  /* -- IOS -- */
-  if(update_tele || update_unio)
-  {
-    for(int i = 0; i < list_map_ios.size(); i++)
-    {
-      tele_thing->addItem(list_map_ios[i].first);
-      unio_name->addItem(list_map_ios[i].first);
-    }
-  }
-  /* -- ITEMS -- */
-  (void)items;
-  if(false)
-  {}
-
-  /* Restore signal blocks */
-  setLayoutData();
-  tele_thing->blockSignals(false);
-  unio_name->blockSignals(false);
-  unth_name->blockSignals(false);
 }
 
 /*============================================================================
