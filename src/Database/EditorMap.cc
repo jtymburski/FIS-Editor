@@ -2538,7 +2538,7 @@ QVector<QPair<QString,QString>> EditorMap::getIOListSet(int sub_map,
       for(int j = 0; j < sub_maps[i]->ios.size(); j++)
         set.push_back(QPair<QString,QString>(
                         sub_maps[i]->ios[j]->getNameList(shortened),
-                        sub_maps[i]->ios[j]->getStateList()));
+                        sub_maps[i]->ios[j]->getBaseIO()->getStateList()));
   }
 
   return set;

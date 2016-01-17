@@ -626,6 +626,8 @@ void EventView::createLayout()//bool conversation_enabled)
       view_stack->addWidget(widget_take);
     else if(available_events[i] == EventClassifier::MAPSWITCH)
       view_stack->addWidget(widget_map);
+    else if(available_events[i] == EventClassifier::MULTIPLE)
+      view_stack->addWidget(new QWidget(this)); // TODO
     else if(available_events[i] == EventClassifier::NOEVENT)
       view_stack->addWidget(widget_unset);
     else if(available_events[i] == EventClassifier::NOTIFICATION)
@@ -642,6 +644,8 @@ void EventView::createLayout()//bool conversation_enabled)
       view_stack->addWidget(widget_unlock_thing);
     else if(available_events[i] == EventClassifier::UNLOCKTILE)
       view_stack->addWidget(widget_unlock_tile);
+    else
+      view_stack->addWidget(new QWidget(this));
   }
   layout->addWidget(view_stack, 1, Qt::AlignCenter);
 
@@ -2887,12 +2891,15 @@ void EventView::unlockIOChanged(const QString & text)
     /* Update state to combo */
     int index = unio_name->currentIndex();
     unio_state->clear();
-    if(index >= 0 && index < list_map_ios.size())
+    if(index >= 0 && index <= list_map_ios.size())
     {
-      QStringList split_set = list_map_ios[index].second.split(',');
       unio_state->addItem("-1: All States");
-      for(int i = 0; i < split_set.size(); i++)
-        unio_state->addItem(split_set[i] + ": State");
+      if(index > 0)
+      {
+        QStringList split_set = list_map_ios[index - 1].second.split(',');
+        for(int i = 0; i < split_set.size(); i++)
+          unio_state->addItem(split_set[i] + ": State");
+      }
     }
   }
 }
@@ -2953,20 +2960,16 @@ void EventView::unlockIOModeStates(int state)
  */
 void EventView::unlockIOStateChanged(int index)
 {
-  int main_index = unio_name->currentIndex();
-  if(main_index >= 0 && main_index < list_map_ios.size())
-  {
-    int new_state = -1;
-    QStringList split_set = list_map_ios[main_index].second.split(',');
-    if(index > 0)
-      new_state = split_set[index - 1].toInt();
+  int new_state = -1;
+  QStringList str_list = unio_state->itemText(index).split(':');
+  if(str_list.size() >= 2)
+    new_state = str_list.front().toInt();
 
-    /* Set data */
-    event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
-                            new_state, event->getUnlockIOEventMode(),
-                            event->getUnlockViewMode(),
-                            event->getUnlockViewTime(), event->getSoundID());
-  }
+  /* Set data */
+  event->setEventUnlockIO(event->getUnlockIOID(), event->getUnlockIOMode(),
+                          new_state, event->getUnlockIOEventMode(),
+                          event->getUnlockViewMode(),
+                          event->getUnlockViewTime(), event->getSoundID());
 }
 
 /*
