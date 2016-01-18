@@ -423,6 +423,39 @@ int EditorEvent::getGiveItemID()
 }
 
 /*
+ * Description: Returns the event reference at the given index. If the event is
+ *              not a multiple event or the index is out of range, returns null.
+ *
+ * Inputs: int index - the index in the event stack within the multiple set
+ * Output: Event* - the event reference at the given index
+ */
+Event* EditorEvent::getMultipleEvent(int index)
+{
+  std::vector<Event*> event_list;
+  if(EventSet::dataEventMultiple(&event, event_list))
+  {
+    if(index >= 0 && index < static_cast<int>(event_list.size()))
+      return event_list[index];
+  }
+  return nullptr;
+}
+
+/*
+ * Description: Returns the set of events within the multiple event in the
+ *              correct order. If the event is not a multiple event, returns a
+ *              blank set.
+ *
+ * Inputs: none
+ * Output: std::vector<Event> - the set of events with the multiple
+ */
+std::vector<Event> EditorEvent::getMultipleEvents()
+{
+  std::vector<Event> event_list;
+  EventSet::dataEventMultiple(event, event_list);
+  return event_list;
+}
+
+/*
  * Description: Returns the string notification, from the notification event.
  *              If the event is not the notification event, an empty string is
  *              returned.
@@ -783,14 +816,7 @@ int EditorEvent::getTeleportY()
  */
 QString EditorEvent::getTextSummary(QString prefix)
 {
-  QString content = QString::fromStdString(
-                                 EventSet::classifierToStr(getEventType()));
-
-  QString suffix = "";
-  if(isOneShot())
-    suffix += " (once)";
-
-  return (prefix + content + suffix);
+  return classToText(getEventType(), prefix, isOneShot());
 }
 
 /*
@@ -1371,6 +1397,47 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
 
       fh->writeXmlElementEnd();
     }
+    /* -- MULTIPLE EVENT -- */
+    else if(event.classification == EventClassifier::MULTIPLE)
+    {
+      /* Determine if data is valid */
+      bool valid = (getSoundID() >= 0 || isOneShot());
+      if(!valid)
+        for(uint32_t i = 0; i < event.events.size(); i++)
+          valid |= (event.events[i].classification != EventClassifier::NOEVENT);
+
+      /* If valid, print normal multiple event */
+      if(valid)
+      {
+        fh->writeXmlElement("multiple");
+
+        /* Event data */
+        for(uint32_t i = 0; i < event.events.size(); i++)
+        {
+          if(event.events[i].classification != EventClassifier::NOEVENT)
+          {
+            fh->writeXmlElement("event", "id", i);
+            EditorEvent save_event(event.events[i]);
+            save_event.save(fh, game_only, "", true);
+            fh->writeXmlElementEnd();
+          }
+        }
+
+        /* Remaining data */
+        if(isOneShot())
+          fh->writeXmlData("one_shot", isOneShot());
+        if(getSoundID() >= 0)
+          fh->writeXmlData("sound_id", getSoundID());
+
+        fh->writeXmlElementEnd();
+      }
+      /* Otherwise, just print blank holder */
+      else
+      {
+        int zero = 0;
+        fh->writeXmlData("multiple", zero);
+      }
+    }
     /* -- NOTIFICATION EVENT -- */
     else if(event.classification == EventClassifier::NOTIFICATION)
     {
@@ -1791,6 +1858,58 @@ bool EditorEvent::setEventGiveItem(int id, int count, int sound_id)
 }
 
 /*
+ * Description: Sets the event in the class to the multiple trigger event,
+ *              with the passed in set of events.
+ *
+ * Inputs: QVector<Event> events - the set of events to trigger
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the multiple event was created
+ */
+bool EditorEvent::setEventMultiple(std::vector<Event> events, int sound_id)
+{
+  /* Existing data */
+  bool one_shot = event.one_shot;
+
+  /* New data */
+  setEventBlank();
+  event = EventSet::createEventMultiple(events, sound_id);
+  event.one_shot = one_shot;
+  return true;
+}
+
+/*
+ * Description: Sets the event in the class to the multiple trigger event and
+ *              modifies the selected index event to the new event. If the index
+ *              does not exist, create blanks up to size and set the new index
+ *
+ * Inputs: int index - the index of the new event to modify in the stack
+ *         Event new_event - the new event to load at said index
+ * Output: bool - true if the multiple event was modified/created
+ */
+bool EditorEvent::setEventMultiple(int index, Event new_event)
+{
+  if(index >= 0)
+  {
+    /* First check if the event is multiple */
+    if(getEventType() != EventClassifier::MULTIPLE)
+      setEventMultiple();
+
+    /* Proceed to edit if the event was set */
+    if(getEventType() == EventClassifier::MULTIPLE)
+    {
+      /* Add events if the index is out of range */
+      while(static_cast<int>(event.events.size()) <= index)
+        event.events.push_back(EventSet::createBlankEvent());
+
+      /* Modify the event */
+      event.events[index] = new_event;
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
  * Description: Sets the event in the class to the notification string event,
  *              with a passed in notification string (not empty).
  *
@@ -2118,6 +2237,26 @@ EditorEvent& EditorEvent::operator= (const EditorEvent &source)
 /*============================================================================
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
+
+/*
+ * Description: Returns the text summary for the given classification and
+ *              additional information as indicated by inputs.
+ *
+ * Inputs: EventClassifier classification - the classification of the event
+ *         QString prefix - prefix text. Default "Event: "
+ *         bool one_shot - true if the event is a one shot
+ * Output: QString - the summary text result
+ */
+QString EditorEvent::classToText(EventClassifier classification, QString prefix,
+                                 bool one_shot)
+{
+  QString content = QString::fromStdString(
+                                 EventSet::classifierToStr(classification));
+  QString suffix = "";
+  if(one_shot)
+    suffix += " (once)";
+  return (prefix + content + suffix);
+}
 
 /*
  * Description: Converts the conversation index generated in EventView ("4.5.4")

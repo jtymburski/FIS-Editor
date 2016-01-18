@@ -292,11 +292,22 @@ void EditorMapIO::consolidate(int ref_index)
  * Inputs: none
  * Output: EditorMapIO* - the base IO reference pointer
  */
-EditorMapIO* EditorMapIO:: getBaseIO() const
+EditorMapIO* EditorMapIO::getBaseIO() const
 {
   if(getBaseThing() != NULL)
     return (EditorMapIO*)getBaseThing();
   return NULL;
+}
+
+/*
+ * Description: Returns the IO classification - when dealing with casting.
+ *
+ * Inputs: none
+ * Output: ThingBase - the IO classification
+ */
+ThingBase EditorMapIO::getClass() const
+{
+  return ThingBase::INTERACTIVE;
 }
 
 /*

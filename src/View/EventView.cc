@@ -90,7 +90,7 @@ void EventView::createLayout()//bool conversation_enabled)
 
   /* Label title for widget */
   QLabel* lbl_title = new QLabel("<b>Event</b>", this);
-  layout->addWidget(lbl_title, 0, Qt::AlignCenter);
+  layout->addWidget(lbl_title, 0, Qt::AlignHCenter);
 
   /* Combo box for event category */
   combo_category = new QComboBox(this);
@@ -99,555 +99,585 @@ void EventView::createLayout()//bool conversation_enabled)
                               EventSet::classifierToStr(available_events[i])));
   connect(combo_category, SIGNAL(currentIndexChanged(int)),
           this, SLOT(categoryChanged(int)));
-  layout->addWidget(combo_category, 0, Qt::AlignCenter);
-
-  /* Widget for blank control */
-  QWidget* widget_unset = new QWidget(this);
-  QLabel* lbl_not_used = new QLabel("NOT USED", this);
-  QVBoxLayout* layout_unset = new QVBoxLayout(widget_unset);
-  layout_unset->addWidget(lbl_not_used, 0, Qt::AlignCenter);
-
-  /* Widget for give item control */
-  QWidget* widget_give = new QWidget(this);
-  QLabel* lbl_give_item = new QLabel("Item:", this);
-  QLabel* lbl_give_count = new QLabel("Count:", this);
-  item_name = new QComboBox(this);
-  item_name->setMinimumWidth(200);
-  connect(item_name, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(giveItemChanged(int)));
-  item_count = new QSpinBox(this);
-  item_count->setMinimum(1);
-  item_count->setMaximum(100000);
-  connect(item_count, SIGNAL(valueChanged(int)),
-          this, SLOT(giveCountChanged(int)));
-  QGridLayout* layout_give = new QGridLayout(widget_give);
-  layout_give->setRowStretch(0, 1);
-  layout_give->addWidget(lbl_give_item, 1, 0);
-  layout_give->addWidget(item_name, 1, 1, 1, 2);
-  layout_give->addWidget(lbl_give_count, 2, 0);
-  layout_give->addWidget(item_count, 2, 1);
-  layout_give->setColumnStretch(2, 1);
-  layout_give->setRowStretch(3, 1);
-
-  /* Widget for notification control */
-  QWidget* widget_notification = new QWidget(this);
-  notification_edit = new QTextEdit(this);
-  //notification_edit->setMinimumWidth(320);
-  connect(notification_edit, SIGNAL(textChanged()),
-          this, SLOT(notificationTextChanged()));
-  QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
-  layout_notification->addWidget(notification_edit, 1);
-
-  /* Widget for battle execution control */
-  QWidget* widget_battle = new QWidget(this);
-  battle_windisappear = new QCheckBox("On a win, the source thing disappears",
-                                                this);
-  connect(battle_windisappear, SIGNAL(stateChanged(int)),
-          this, SLOT(battleWinFlagChange(int)));
-  battle_losegg = new QCheckBox("On a loss, game over", this);
-  connect(battle_losegg, SIGNAL(stateChanged(int)),
-          this, SLOT(battleLoseFlagChange(int)));
-  battle_restorehealth = new QCheckBox("Restore health on battle end",
-                                                 this);
-  connect(battle_restorehealth, SIGNAL(stateChanged(int)),
-          this, SLOT(battleHealthFlagChange(int)));
-  battle_restoreqd = new QCheckBox("Restore QD on battle end", this);
-  connect(battle_restoreqd, SIGNAL(stateChanged(int)),
-          this, SLOT(battleQDFlagChange(int)));
-  battle_eventwin = new QPushButton("Win Event", this);
-  connect(battle_eventwin, SIGNAL(clicked()), this, SLOT(battleEventWinEdit()));
-  battle_eventlose = new QPushButton("Lose Event", this);
-  connect(battle_eventlose, SIGNAL(clicked()),
-          this, SLOT(battleEventLoseEdit()));
-  QVBoxLayout* layout_battle = new QVBoxLayout(widget_battle);
-  layout_battle->addStretch(1);
-  layout_battle->addWidget(battle_windisappear, 0, Qt::AlignCenter);
-  layout_battle->addWidget(battle_losegg, 0, Qt::AlignCenter);
-  layout_battle->addSpacing(12);
-  QHBoxLayout* layout_battle_h = new QHBoxLayout();
-  layout_battle_h->addStretch(1);
-  layout_battle_h->addWidget(battle_eventwin);
-  layout_battle_h->addWidget(battle_eventlose);
-  layout_battle_h->addStretch(1);
-  layout_battle->addLayout(layout_battle_h);
-  layout_battle->addSpacing(12);
-  layout_battle->addWidget(battle_restorehealth, 0, Qt::AlignCenter);
-  layout_battle->addWidget(battle_restoreqd, 0, Qt::AlignCenter);
-  layout_battle->addStretch(1);
-
-  /* Widget for switching the map */
-  QWidget* widget_map = new QWidget(this);
-  QLabel* lbl_map_name = new QLabel("Map:");
-  map_name = new QComboBox(this);
-  map_name->setMinimumWidth(200);
-  connect(map_name, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(changeMapChanged(int)));
-  QGridLayout* layout_map = new QGridLayout(widget_map);
-  layout_map->addWidget(lbl_map_name, 0, 0);
-  layout_map->addWidget(map_name, 0, 1);
-
-  /* Widget for property modifier */
-  QWidget* widget_property = new QWidget(this);
-  QLabel* lbl_type = new QLabel("Type", this);
-  prop_type = new QComboBox(this);
-  for(int i = 1; i <= static_cast<int>(ThingBase::INTERACTIVE); i++)
-    prop_type->addItem(QString::fromStdString(
-                              Helpers::typeToStr(static_cast<ThingBase>(i))));
-  connect(prop_type, SIGNAL(currentTextChanged(QString)),
-          this, SLOT(propertyTypeChange(QString)));
-  QLabel* lbl_id = new QLabel("ID", this);
-  prop_id = new QComboBox(this);
-  connect(prop_id, SIGNAL(currentIndexChanged(QString)),
-          this, SLOT(propertyIDChange(QString)));
-  QLabel* lbl_head_prop = new QLabel("Property", this);
-  QLabel* lbl_head_mod = new QLabel("Modify", this);
-  QLabel* lbl_head_new = new QLabel("New Value", this);
-  QFont font = lbl_head_prop->font();
-  font.setUnderline(true);
-  lbl_head_prop->setFont(font);
-  lbl_head_mod->setFont(font);
-  lbl_head_new->setFont(font);
-  /* -- thing -- */
-  QLabel* lbl_active = new QLabel("Active", this);
-  prop_active_mod = new QCheckBox(this);
-  connect(prop_active_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyActiveMod(int)));
-  prop_active_val = new QCheckBox("Is Spawned", this);
-  connect(prop_active_val, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyActiveVal(int)));
-  /* -- */
-  QLabel* lbl_respawn = new QLabel("Respawn", this);
-  prop_respawn_mod = new QCheckBox(this);
-  connect(prop_respawn_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyRespawnMod(int)));
-  prop_respawn_val = new QSpinBox(this);
-  prop_respawn_val->setSuffix(" ms");
-  prop_respawn_val->setMinimum(1);
-  prop_respawn_val->setMaximum(1800000);
-  connect(prop_respawn_val, SIGNAL(valueChanged(int)),
-          this, SLOT(propertyRespawnVal(int)));
-  prop_respawn_dis = new QCheckBox("Disable", this);
-  connect(prop_respawn_dis, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyRespawnDisable(int)));
-  /* -- */
-  QLabel* lbl_visible = new QLabel("Visible", this);
-  prop_visible_mod = new QCheckBox(this);
-  connect(prop_visible_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyVisibleMod(int)));
-  prop_visible_val = new QCheckBox("Is Visible", this);
-  connect(prop_visible_val, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyVisibleVal(int)));
-  /* -- person -- */
-  QLabel* lbl_freeze = new QLabel("Freeze", this);
-  prop_freeze_mod = new QCheckBox(this);
-  connect(prop_freeze_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyFreezeMod(int)));
-  prop_freeze_val = new QCheckBox("Freeze Movement", this);
-  connect(prop_freeze_val, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyFreezeVal(int)));
-  /* -- */
-  QLabel* lbl_reset = new QLabel("Reset", this);
-  prop_reset_mod = new QCheckBox(this);
-  connect(prop_reset_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyResetMod(int)));
-  prop_reset_val = new QCheckBox("Reset to Start", this);
-  connect(prop_reset_val, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyResetVal(int)));
-  /* -- */
-  QLabel* lbl_speed = new QLabel("Speed", this);
-  prop_speed_mod = new QCheckBox(this);
-  connect(prop_speed_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertySpeedMod(int)));
-  prop_speed_val = new QSpinBox(this);
-  prop_speed_val->setMinimum(0);
-  prop_speed_val->setMaximum(256);
-  connect(prop_speed_val, SIGNAL(valueChanged(int)),
-          this, SLOT(propertySpeedVal(int)));
-  prop_speed_desc = new QLabel("X ms/tile", this);
-  /* -- npc -- */
-  QLabel* lbl_forced = new QLabel("Forced", this);
-  prop_forced_mod = new QCheckBox(this);
-  connect(prop_forced_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyForcedMod(int)));
-  prop_forced_val = new QCheckBox("Force Interaction", this);
-  connect(prop_forced_val, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyForcedVal(int)));
-  /* -- */
-  QLabel* lbl_track = new QLabel("Track", this);
-  prop_track_mod = new QCheckBox(this);
-  connect(prop_track_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyTrackMod(int)));
-  prop_track_opt = new QComboBox(this);
-  for(int i = 0; i <= static_cast<int>(TrackingState::TOPLAYER); i++)
-    prop_track_opt->addItem(QString::fromStdString(
-                      Helpers::trackingToStr(static_cast<TrackingState>(i))));
-  connect(prop_track_opt, SIGNAL(currentTextChanged(QString)),
-          this, SLOT(propertyTrackChange(QString)));
-  /* -- io -- */
-  QLabel* lbl_inactive = new QLabel("Inactive", this);
-  prop_inactive_mod = new QCheckBox(this);
-  connect(prop_inactive_mod, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyInactiveMod(int)));
-  prop_inactive_val = new QSpinBox(this);
-  prop_inactive_val->setMaximum(99999999);
-  prop_inactive_val->setSuffix(" ms");
-  connect(prop_inactive_val, SIGNAL(valueChanged(int)),
-          this, SLOT(propertyInactiveVal(int)));
-  prop_inactive_dis = new QCheckBox("Disable", this);
-  connect(prop_inactive_dis, SIGNAL(stateChanged(int)),
-          this, SLOT(propertyInactiveDisable(int)));
-  /* -- LAYOUT -- */
-  QGridLayout* layout_property = new QGridLayout(widget_property);
-  layout_property->addWidget(lbl_type, 0, 0);
-  layout_property->addWidget(prop_type, 0, 1, 1, 3);
-  layout_property->addWidget(lbl_id, 1, 0);
-  layout_property->addWidget(prop_id, 1, 1, 1, 3);
-  layout_property->addWidget(lbl_head_prop, 2, 0);
-  layout_property->addWidget(lbl_head_mod, 2, 1, Qt::AlignHCenter);
-  layout_property->addWidget(lbl_head_new, 2, 2, 1, 2, Qt::AlignHCenter);
-  /* -- thing -- */
-  layout_property->addWidget(lbl_active, 3, 0);
-  layout_property->addWidget(prop_active_mod, 3, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_active_val, 3, 2, 1, 2, Qt::AlignHCenter);
-  layout_property->addWidget(lbl_respawn, 4, 0);
-  layout_property->addWidget(prop_respawn_mod, 4, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_respawn_val, 4, 2, Qt::AlignRight);
-  layout_property->addWidget(prop_respawn_dis, 4, 3, Qt::AlignLeft);
-  layout_property->addWidget(lbl_visible, 5, 0);
-  layout_property->addWidget(prop_visible_mod, 5, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_visible_val, 5, 2, 1, 2, Qt::AlignHCenter);
-  /* -- person -- */
-  layout_property->addWidget(lbl_freeze, 6, 0);
-  layout_property->addWidget(prop_freeze_mod, 6, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_freeze_val, 6, 2, 1, 2, Qt::AlignHCenter);
-  layout_property->addWidget(lbl_reset, 7, 0);
-  layout_property->addWidget(prop_reset_mod, 7, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_reset_val, 7, 2, 1, 2, Qt::AlignHCenter);
-  layout_property->addWidget(lbl_speed, 8, 0);
-  layout_property->addWidget(prop_speed_mod, 8, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_speed_val, 8, 2, Qt::AlignRight);
-  layout_property->addWidget(prop_speed_desc, 8, 3, Qt::AlignLeft);
-  /* -- npc -- */
-  layout_property->addWidget(lbl_forced, 9, 0);
-  layout_property->addWidget(prop_forced_mod, 9, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_forced_val, 9, 2, 1, 2, Qt::AlignHCenter);
-  layout_property->addWidget(lbl_track, 10, 0);
-  layout_property->addWidget(prop_track_mod, 10, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_track_opt, 10, 2, 1, 2);
-  /* -- io -- */
-  layout_property->addWidget(lbl_inactive, 11, 0);
-  layout_property->addWidget(prop_inactive_mod, 11, 1, Qt::AlignHCenter);
-  layout_property->addWidget(prop_inactive_val, 11, 2, Qt::AlignRight);
-  layout_property->addWidget(prop_inactive_dis, 11, 3, Qt::AlignLeft);
-
-  /* Widget for teleportation thing control */
-  QWidget* widget_teleport = new QWidget(this);
-  QLabel* lbl_tele_map = new QLabel("Sub-Map:", this);
-  QLabel* lbl_tele_thing = new QLabel("Thing:", this);
-  tele_map = new QLineEdit("", this);
-  tele_map->setDisabled(true);
-  tele_map->setMinimumWidth(200);
-  QPalette pal = tele_map->palette();
-  pal.setColor(QPalette::Disabled, QPalette::Text,
-               pal.color(QPalette::Active, QPalette::Text));
-  tele_map->setPalette(pal);
-  tele_thing = new QComboBox(this);
-  tele_thing->setMinimumWidth(200);
-  connect(tele_thing, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(teleportThingChanged(int)));
-  QPushButton* btn_tele_map = new QPushButton(this);
-  btn_tele_map->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_tele_map->setIconSize(QSize(24,24));
-  btn_tele_map->setMaximumSize(30, 30);
-  connect(btn_tele_map, SIGNAL(clicked()), this, SLOT(teleportMapPressed()));
-  QGridLayout* layout_tele = new QGridLayout(widget_teleport);
-  layout_tele->setRowStretch(0, 1);
-  layout_tele->addWidget(lbl_tele_map, 1, 0);
-  layout_tele->addWidget(tele_map, 1, 1);
-  layout_tele->addWidget(btn_tele_map, 1, 2);
-  layout_tele->addWidget(lbl_tele_thing, 2, 0);
-  layout_tele->addWidget(tele_thing, 2, 1);
-  layout_tele->setRowStretch(3, 1);
-
-  /* Widget for sound control */
-  QWidget* widget_sound = new QWidget(this);
-  QLabel* lbl_sound = new QLabel("NO SETTINGS", this);
-  QVBoxLayout* layout_sound = new QVBoxLayout(widget_sound);
-  layout_sound->addWidget(lbl_sound, 0, Qt::AlignCenter);
-
-  /* Widget for take item control */
-  QWidget* widget_take = new QWidget(this);
-  QLabel* lbl_take_item = new QLabel("Item:", this);
-  QLabel* lbl_take_count = new QLabel("Count:", this);
-  take_name = new QComboBox(this);
-  take_name->setMinimumWidth(200);
-  connect(take_name, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(takeItemChanged(int)));
-  take_count = new QSpinBox(this);
-  take_count->setMinimum(1);
-  take_count->setMaximum(100000);
-  connect(take_count, SIGNAL(valueChanged(int)),
-          this, SLOT(takeCountChanged(int)));
-  QGridLayout* layout_take = new QGridLayout(widget_take);
-  layout_take->setRowStretch(0, 1);
-  layout_take->addWidget(lbl_take_item, 1, 0);
-  layout_take->addWidget(take_name, 1, 1, 1, 2);
-  layout_take->addWidget(lbl_take_count, 2, 0);
-  layout_take->addWidget(take_count, 2, 1);
-  layout_take->setColumnStretch(2, 1);
-  layout_take->setRowStretch(3, 1);
-
-  /* Widget for unlock thing control */
-  QWidget* widget_unlock_thing = new QWidget(this);
-  QLabel* lbl_unth = new QLabel("Thing:", this);
-  unth_name = new QComboBox(this);
-  connect(unth_name, SIGNAL(currentIndexChanged(QString)),
-          this, SLOT(unlockThingChanged(QString)));
-  /* -- */
-  QGroupBox* unth_view = new QGroupBox("View", this);
-  unth_view_enable = new QCheckBox("GoTo Unlock", unth_view);
-  connect(unth_view_enable, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockThingView(int)));
-  unth_view_scroll = new QCheckBox("Scroll", unth_view);
-  unth_view_scroll->setDisabled(true);
-  connect(unth_view_scroll, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockThingViewScroll(int)));
-  QLabel* lbl_unth_view = new QLabel("Time at Unlock", this);
-  unth_view_time = new QSpinBox(this);
-  unth_view_time->setMaximum(1000000);
-  unth_view_time->setDisabled(true);
-  connect(unth_view_time, SIGNAL(valueChanged(int)),
-          this, SLOT(unlockThingViewTime(int)));
-  QGridLayout* layout_unth_view = new QGridLayout(unth_view);
-  QMargins m = layout_unth_view->contentsMargins();
-  layout_unth_view->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unth_view->addWidget(unth_view_enable, 0, 0);
-  layout_unth_view->addWidget(unth_view_scroll, 0, 1);
-  layout_unth_view->addWidget(lbl_unth_view, 1, 0);
-  layout_unth_view->addWidget(unth_view_time, 1, 1);
-  /* -- */
-  QGridLayout* layout_unth = new QGridLayout(widget_unlock_thing);
-  layout_unth->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unth->setRowStretch(0, 1);
-  layout_unth->addWidget(lbl_unth, 1, 0);
-  layout_unth->addWidget(unth_name, 1, 1, 1, 3);
-  layout_unth->addWidget(unth_view, 2, 0, 1, 4);
-  layout_unth->setRowStretch(3, 1);
-
-  /* Widget for unlock tile control */
-  QWidget* widget_unlock_tile = new QWidget(this);
-  QLabel* lbl_unti = new QLabel("Tile:", this);
-  unti_location = new QLineEdit("", this);
-  unti_location->setDisabled(true);
-  QPalette pal2 = unti_location->palette();
-  pal2.setColor(QPalette::Disabled, QPalette::Text,
-                pal2.color(QPalette::Active, QPalette::Text));
-  unti_location->setPalette(pal2);
-  QPushButton* btn_unti_map = new QPushButton(this);
-  connect(btn_unti_map, SIGNAL(clicked()), this, SLOT(unlockTilePressed()));
-  btn_unti_map->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_unti_map->setIconSize(QSize(24,24));
-  btn_unti_map->setMaximumSize(30, 30);
-  /* -- */
-  QGroupBox* unti_event = new QGroupBox("Events", this);
-  unti_event_enter = new QCheckBox("Enter", unti_event);
-  connect(unti_event_enter, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockTileEnter(int)));
-  unti_event_exit = new QCheckBox("Exit", unti_event);
-  connect(unti_event_exit, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockTileExit(int)));
-  QGridLayout* layout_unti_event = new QGridLayout(unti_event);
-  layout_unti_event->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unti_event->addWidget(unti_event_enter, 0, 0);
-  layout_unti_event->addWidget(unti_event_exit, 0, 1);
-  /* -- */
-  QGroupBox* unti_view = new QGroupBox("View", this);
-  unti_view_enable = new QCheckBox("GoTo Unlock", unti_view);
-  connect(unti_view_enable, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockTileView(int)));
-  unti_view_scroll = new QCheckBox("Scroll", unti_view);
-  unti_view_scroll->setDisabled(true);
-  connect(unti_view_scroll, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockTileViewScroll(int)));
-  QLabel* lbl_unti_view = new QLabel("Time at Unlock", this);
-  unti_view_time = new QSpinBox(this);
-  unti_view_time->setMaximum(1000000);
-  unti_view_time->setDisabled(true);
-  connect(unti_view_time, SIGNAL(valueChanged(int)),
-          this, SLOT(unlockTileViewTime(int)));
-  QGridLayout* layout_unti_view = new QGridLayout(unti_view);
-  layout_unti_view->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unti_view->addWidget(unti_view_enable, 0, 0);
-  layout_unti_view->addWidget(unti_view_scroll, 0, 1);
-  layout_unti_view->addWidget(lbl_unti_view, 1, 0);
-  layout_unti_view->addWidget(unti_view_time, 1, 1);
-  /* -- */
-  QGridLayout* layout_unti = new QGridLayout(widget_unlock_tile);
-  layout_unti->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unti->setRowStretch(0, 1);
-  layout_unti->addWidget(lbl_unti, 1, 0);
-  layout_unti->addWidget(unti_location, 1, 1, 1, 2);
-  layout_unti->addWidget(btn_unti_map, 1, 3);
-  layout_unti->addWidget(unti_event, 2, 0, 1, 4);
-  layout_unti->addWidget(unti_view, 3, 0, 1, 4);
-  layout_unti->setRowStretch(4, 1);
-  layout_unti->setColumnStretch(1, 1);
-
-  /* Widget for unlock io control */
-  QWidget* widget_unlock_io = new QWidget(this);
-  QLabel* lbl_unio = new QLabel("IO:", this);
-  unio_name = new QComboBox(this);
-  connect(unio_name, SIGNAL(currentIndexChanged(QString)),
-          this, SLOT(unlockIOChanged(QString)));
-  /* -- */
-  QGroupBox* unio_mode = new QGroupBox("Mode", this);
-  unio_mode_lock = new QCheckBox("Main Lock", unio_mode);
-  connect(unio_mode_lock, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOModeLock(int)));
-  unio_mode_states = new QCheckBox("States", unio_mode);
-  connect(unio_mode_states, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOModeStates(int)));
-  QHBoxLayout* layout_unio_mode = new QHBoxLayout(unio_mode);
-  layout_unio_mode->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unio_mode->addWidget(unio_mode_lock);
-  layout_unio_mode->addWidget(unio_mode_states);
-  /* -- */
-  QLabel* lbl_unio_state = new QLabel("State:", this);
-  unio_state = new QComboBox(this);
-  unio_state->setDisabled(true);
-  connect(unio_state, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(unlockIOStateChanged(int)));
-  /* -- */
-  unio_event = new QGroupBox("Events", this);
-  unio_event->setDisabled(true);
-  unio_event_enter = new QCheckBox("Enter", unio_event);
-  connect(unio_event_enter, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOStateEnter(int)));
-  unio_event_exit = new QCheckBox("Exit", unio_event);
-  connect(unio_event_exit, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOStateExit(int)));
-  unio_event_use = new QCheckBox("Use", unio_event);
-  connect(unio_event_use, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOStateUse(int)));
-  unio_event_walk = new QCheckBox("Walkover", unio_event);
-  connect(unio_event_walk, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOStateWalk(int)));
-  QGridLayout* layout_unio_event = new QGridLayout(unio_event);
-  layout_unio_event->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unio_event->addWidget(unio_event_enter, 0, 0);
-  layout_unio_event->addWidget(unio_event_exit, 0, 1);
-  layout_unio_event->addWidget(unio_event_use, 1, 0);
-  layout_unio_event->addWidget(unio_event_walk, 1, 1);
-  /* -- */
-  QGroupBox* unio_view = new QGroupBox("View", this);
-  unio_view_enable = new QCheckBox("GoTo Unlock", unio_view);
-  connect(unio_view_enable, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOView(int)));
-  unio_view_scroll = new QCheckBox("Scroll", unio_view);
-  unio_view_scroll->setDisabled(true);
-  connect(unio_view_scroll, SIGNAL(stateChanged(int)),
-          this, SLOT(unlockIOViewScroll(int)));
-  QLabel* lbl_unio_view = new QLabel("Time at Unlock", this);
-  unio_view_time = new QSpinBox(this);
-  unio_view_time->setMaximum(1000000);
-  unio_view_time->setDisabled(true);
-  connect(unio_view_time, SIGNAL(valueChanged(int)),
-          this, SLOT(unlockIOViewTime(int)));
-  QGridLayout* layout_unio_view = new QGridLayout(unio_view);
-  layout_unio_view->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unio_view->addWidget(unio_view_enable, 0, 0);
-  layout_unio_view->addWidget(unio_view_scroll, 0, 1);
-  layout_unio_view->addWidget(lbl_unio_view, 1, 0);
-  layout_unio_view->addWidget(unio_view_time, 1, 1);
-  /* -- */
-  QGridLayout* layout_unio = new QGridLayout(widget_unlock_io);
-  layout_unio->setContentsMargins(m.left(), 0, m.right(), 0);
-  layout_unio->setRowStretch(0, 1);
-  layout_unio->addWidget(lbl_unio, 1, 0);
-  layout_unio->addWidget(unio_name, 1, 1, 1, 3);
-  layout_unio->addWidget(unio_mode, 2, 0, 1, 4);
-  layout_unio->addWidget(lbl_unio_state, 3, 0);
-  layout_unio->addWidget(unio_state, 3, 1, 1, 3);
-  layout_unio->addWidget(unio_event, 4, 0, 1, 4);
-  layout_unio->addWidget(unio_view, 5, 0, 1, 4);
-  layout_unio->setRowStretch(6, 1);
-
-  /* Widget for conversation control */
-  QWidget* widget_convo = new QWidget(this);
-  convo_tree = new QTreeWidget(this);
-  convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  //convo_tree->setMinimumWidth(320);
-  convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  convo_tree->header()->hide();
-  connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
-          this, SLOT(resizeTree(QTreeWidgetItem*)));
-  connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
-          this, SLOT(resizeTree(QTreeWidgetItem*)));
-  connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
-          this, SLOT(convoMenuRequested(QPoint)));
-  connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-          this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
-  QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
-  layout_convo->addWidget(convo_tree);
-
-  /* Right click menu control */
-  rightclick_menu = new QMenu("Convo Edit", this);
-  QAction* action_edit = new QAction("Edit", rightclick_menu);
-  connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
-  rightclick_menu->addAction(action_edit);
-  QAction* action_before = new QAction("Insert Before", rightclick_menu);
-  connect(action_before, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertBefore()));
-  rightclick_menu->addAction(action_before);
-  QAction* action_after = new QAction("Insert After", rightclick_menu);
-  connect(action_after, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertAfter()));
-  rightclick_menu->addAction(action_after);
-  action_option = new QAction("Insert Option", rightclick_menu);
-  connect(action_option, SIGNAL(triggered()),
-          this, SLOT(rightClickInsertOption()));
-  rightclick_menu->addAction(action_option);
-  action_delete = new QAction("Delete", rightclick_menu);
-  connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
-  rightclick_menu->addAction(action_delete);
-  rightclick_menu->hide();
+  layout->addWidget(combo_category, 0, Qt::AlignHCenter);
 
   /* Stacked widget for housing all the different views for categories */
   view_stack = new QStackedWidget(this);
   for(int i = 0; i < available_events.size(); i++)
   {
+    /* ---- BATTLE START ---- */
     if(available_events[i] == EventClassifier::BATTLESTART)
+    {
+      QWidget* widget_battle = new QWidget(this);
+      battle_windisappear = new QCheckBox(
+                                "On a win, the source thing disappears", this);
+      connect(battle_windisappear, SIGNAL(stateChanged(int)),
+              this, SLOT(battleWinFlagChange(int)));
+      battle_losegg = new QCheckBox("On a loss, game over", this);
+      connect(battle_losegg, SIGNAL(stateChanged(int)),
+              this, SLOT(battleLoseFlagChange(int)));
+      battle_restorehealth = new QCheckBox("Restore health on battle end",
+                                                     this);
+      connect(battle_restorehealth, SIGNAL(stateChanged(int)),
+              this, SLOT(battleHealthFlagChange(int)));
+      battle_restoreqd = new QCheckBox("Restore QD on battle end", this);
+      connect(battle_restoreqd, SIGNAL(stateChanged(int)),
+              this, SLOT(battleQDFlagChange(int)));
+      battle_eventwin = new QPushButton("Win Event", this);
+      connect(battle_eventwin, SIGNAL(clicked()),
+              this, SLOT(battleEventWinEdit()));
+      battle_eventlose = new QPushButton("Lose Event", this);
+      connect(battle_eventlose, SIGNAL(clicked()),
+              this, SLOT(battleEventLoseEdit()));
+      QVBoxLayout* layout_battle = new QVBoxLayout(widget_battle);
+      layout_battle->addStretch(1);
+      layout_battle->addWidget(battle_windisappear, 0, Qt::AlignCenter);
+      layout_battle->addWidget(battle_losegg, 0, Qt::AlignCenter);
+      layout_battle->addSpacing(12);
+      QHBoxLayout* layout_battle_h = new QHBoxLayout();
+      layout_battle_h->addStretch(1);
+      layout_battle_h->addWidget(battle_eventwin);
+      layout_battle_h->addWidget(battle_eventlose);
+      layout_battle_h->addStretch(1);
+      layout_battle->addLayout(layout_battle_h);
+      layout_battle->addSpacing(12);
+      layout_battle->addWidget(battle_restorehealth, 0, Qt::AlignCenter);
+      layout_battle->addWidget(battle_restoreqd, 0, Qt::AlignCenter);
+      layout_battle->addStretch(1);
       view_stack->addWidget(widget_battle);
+    }
+    /* ---- CONVERSATION ---- */
     else if(available_events[i] == EventClassifier::CONVERSATION)
+    {
+      QWidget* widget_convo = new QWidget(this);
+      convo_tree = new QTreeWidget(this);
+      convo_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+      //convo_tree->setMinimumWidth(320);
+      convo_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+      convo_tree->header()->hide();
+      connect(convo_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)),
+              this, SLOT(resizeTree(QTreeWidgetItem*)));
+      connect(convo_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
+              this, SLOT(resizeTree(QTreeWidgetItem*)));
+      connect(convo_tree, SIGNAL(customContextMenuRequested(QPoint)),
+              this, SLOT(convoMenuRequested(QPoint)));
+      connect(convo_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+              this, SLOT(convoDoubleClick(QTreeWidgetItem*,int)));
+      QVBoxLayout* layout_convo = new QVBoxLayout(widget_convo);
+      layout_convo->addWidget(convo_tree);
       view_stack->addWidget(widget_convo);
+    }
+    /* ---- ITEM: GIVE ---- */
     else if(available_events[i] == EventClassifier::ITEMGIVE)
+    {
+      QWidget* widget_give = new QWidget(this);
+      QLabel* lbl_give_item = new QLabel("Item:", this);
+      QLabel* lbl_give_count = new QLabel("Count:", this);
+      item_name = new QComboBox(this);
+      item_name->setMinimumWidth(200);
+      connect(item_name, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(giveItemChanged(int)));
+      item_count = new QSpinBox(this);
+      item_count->setMinimum(1);
+      item_count->setMaximum(100000);
+      connect(item_count, SIGNAL(valueChanged(int)),
+              this, SLOT(giveCountChanged(int)));
+      QGridLayout* layout_give = new QGridLayout(widget_give);
+      layout_give->setRowStretch(0, 1);
+      layout_give->addWidget(lbl_give_item, 1, 0);
+      layout_give->addWidget(item_name, 1, 1, 1, 2);
+      layout_give->addWidget(lbl_give_count, 2, 0);
+      layout_give->addWidget(item_count, 2, 1);
+      layout_give->setColumnStretch(2, 1);
+      layout_give->setRowStretch(3, 1);
       view_stack->addWidget(widget_give);
+    }
+    /* ---- ITEM: TAKE ---- */
     else if(available_events[i] == EventClassifier::ITEMTAKE)
+    {
+      QWidget* widget_take = new QWidget(this);
+      QLabel* lbl_take_item = new QLabel("Item:", this);
+      QLabel* lbl_take_count = new QLabel("Count:", this);
+      take_name = new QComboBox(this);
+      take_name->setMinimumWidth(200);
+      connect(take_name, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(takeItemChanged(int)));
+      take_count = new QSpinBox(this);
+      take_count->setMinimum(1);
+      take_count->setMaximum(100000);
+      connect(take_count, SIGNAL(valueChanged(int)),
+              this, SLOT(takeCountChanged(int)));
+      QGridLayout* layout_take = new QGridLayout(widget_take);
+      layout_take->setRowStretch(0, 1);
+      layout_take->addWidget(lbl_take_item, 1, 0);
+      layout_take->addWidget(take_name, 1, 1, 1, 2);
+      layout_take->addWidget(lbl_take_count, 2, 0);
+      layout_take->addWidget(take_count, 2, 1);
+      layout_take->setColumnStretch(2, 1);
+      layout_take->setRowStretch(3, 1);
       view_stack->addWidget(widget_take);
+    }
+    /* ---- MAP SWITCH ---- */
     else if(available_events[i] == EventClassifier::MAPSWITCH)
+    {
+      QWidget* widget_map = new QWidget(this);
+      QLabel* lbl_map_name = new QLabel("Map:");
+      map_name = new QComboBox(this);
+      map_name->setMinimumWidth(200);
+      connect(map_name, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(changeMapChanged(int)));
+      QGridLayout* layout_map = new QGridLayout(widget_map);
+      layout_map->addWidget(lbl_map_name, 0, 0);
+      layout_map->addWidget(map_name, 0, 1);
+      layout_map->setColumnStretch(1, 1);
       view_stack->addWidget(widget_map);
+    }
+    /* ---- MULTIPLE TRIGGER ---- */
     else if(available_events[i] == EventClassifier::MULTIPLE)
-      view_stack->addWidget(new QWidget(this)); // TODO
+    {
+      QWidget* widget_multiple = new QWidget(this);
+      mult_list = new QListWidget(this);
+      connect(mult_list, SIGNAL(currentRowChanged(int)),
+              this, SLOT(multListChange(int)));
+      connect(mult_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+              this, SLOT(multListDouble(QListWidgetItem*)));
+      QPushButton* mult_btn_add = new QPushButton("Add", this);
+      connect(mult_btn_add, SIGNAL(clicked()), this, SLOT(multBtnAdd()));
+      mult_btn_edit = new QPushButton("Edit", this);
+      mult_btn_edit->setDisabled(true);
+      connect(mult_btn_edit, SIGNAL(clicked()), this, SLOT(multBtnEdit()));
+      mult_btn_rem = new QPushButton("Remove", this);
+      mult_btn_rem->setDisabled(true);
+      connect(mult_btn_rem, SIGNAL(clicked()), this, SLOT(multBtnRem()));
+      mult_btn_up = new QPushButton("Up", this);
+      mult_btn_up->setDisabled(true);
+      connect(mult_btn_up, SIGNAL(clicked()), this, SLOT(multBtnUp()));
+      mult_btn_down = new QPushButton("Down", this);
+      mult_btn_down->setDisabled(true);
+      connect(mult_btn_down, SIGNAL(clicked()), this, SLOT(multBtnDown()));
+      QVBoxLayout* layout_multiple = new QVBoxLayout(widget_multiple);
+      layout_multiple->addWidget(mult_list);
+      QHBoxLayout* layout_multiple_btns = new QHBoxLayout();
+      layout_multiple_btns->addWidget(mult_btn_add);
+      layout_multiple_btns->addWidget(mult_btn_edit);
+      layout_multiple_btns->addWidget(mult_btn_rem);
+      layout_multiple_btns->addWidget(mult_btn_up);
+      layout_multiple_btns->addWidget(mult_btn_down);
+      layout_multiple->addLayout(layout_multiple_btns);
+      view_stack->addWidget(widget_multiple);
+    }
+    /* ---- NO EVENT ---- */
     else if(available_events[i] == EventClassifier::NOEVENT)
+    {
+      QWidget* widget_unset = new QWidget(this);
+      QLabel* lbl_not_used = new QLabel("NOT USED", this);
+      QVBoxLayout* layout_unset = new QVBoxLayout(widget_unset);
+      layout_unset->addWidget(lbl_not_used, 0, Qt::AlignCenter);
       view_stack->addWidget(widget_unset);
+    }
+    /* ---- NOTIFICATION ---- */
     else if(available_events[i] == EventClassifier::NOTIFICATION)
+    {
+      QWidget* widget_notification = new QWidget(this);
+      notification_edit = new QTextEdit(this);
+      //notification_edit->setMinimumWidth(320);
+      connect(notification_edit, SIGNAL(textChanged()),
+              this, SLOT(notificationTextChanged()));
+      QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
+      layout_notification->addWidget(notification_edit, 1);
       view_stack->addWidget(widget_notification);
+    }
+    /* ---- PROPERTY MODIFIER ---- */
     else if(available_events[i] == EventClassifier::PROPERTY)
+    {
+      QWidget* widget_property = new QWidget(this);
+      QLabel* lbl_type = new QLabel("Type", this);
+      prop_type = new QComboBox(this);
+      for(int i = 1; i <= static_cast<int>(ThingBase::INTERACTIVE); i++)
+        prop_type->addItem(QString::fromStdString(
+                               Helpers::typeToStr(static_cast<ThingBase>(i))));
+      connect(prop_type, SIGNAL(currentTextChanged(QString)),
+              this, SLOT(propertyTypeChange(QString)));
+      QLabel* lbl_id = new QLabel("ID", this);
+      prop_id = new QComboBox(this);
+      connect(prop_id, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(propertyIDChange(QString)));
+      QLabel* lbl_head_prop = new QLabel("Property", this);
+      QLabel* lbl_head_mod = new QLabel("Modify", this);
+      QLabel* lbl_head_new = new QLabel("New Value", this);
+      QFont font = lbl_head_prop->font();
+      font.setUnderline(true);
+      lbl_head_prop->setFont(font);
+      lbl_head_mod->setFont(font);
+      lbl_head_new->setFont(font);
+      /* -- thing -- */
+      QLabel* lbl_active = new QLabel("Active", this);
+      prop_active_mod = new QCheckBox(this);
+      connect(prop_active_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyActiveMod(int)));
+      prop_active_val = new QCheckBox("Is Spawned", this);
+      connect(prop_active_val, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyActiveVal(int)));
+      /* -- */
+      QLabel* lbl_respawn = new QLabel("Respawn", this);
+      prop_respawn_mod = new QCheckBox(this);
+      connect(prop_respawn_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyRespawnMod(int)));
+      prop_respawn_val = new QSpinBox(this);
+      prop_respawn_val->setSuffix(" ms");
+      prop_respawn_val->setMinimum(1);
+      prop_respawn_val->setMaximum(1800000);
+      connect(prop_respawn_val, SIGNAL(valueChanged(int)),
+              this, SLOT(propertyRespawnVal(int)));
+      prop_respawn_dis = new QCheckBox("Disable", this);
+      connect(prop_respawn_dis, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyRespawnDisable(int)));
+      /* -- */
+      QLabel* lbl_visible = new QLabel("Visible", this);
+      prop_visible_mod = new QCheckBox(this);
+      connect(prop_visible_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyVisibleMod(int)));
+      prop_visible_val = new QCheckBox("Is Visible", this);
+      connect(prop_visible_val, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyVisibleVal(int)));
+      /* -- person -- */
+      QLabel* lbl_freeze = new QLabel("Freeze", this);
+      prop_freeze_mod = new QCheckBox(this);
+      connect(prop_freeze_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyFreezeMod(int)));
+      prop_freeze_val = new QCheckBox("Freeze Movement", this);
+      connect(prop_freeze_val, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyFreezeVal(int)));
+      /* -- */
+      QLabel* lbl_reset = new QLabel("Reset", this);
+      prop_reset_mod = new QCheckBox(this);
+      connect(prop_reset_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyResetMod(int)));
+      prop_reset_val = new QCheckBox("Reset to Start", this);
+      connect(prop_reset_val, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyResetVal(int)));
+      /* -- */
+      QLabel* lbl_speed = new QLabel("Speed", this);
+      prop_speed_mod = new QCheckBox(this);
+      connect(prop_speed_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertySpeedMod(int)));
+      prop_speed_val = new QSpinBox(this);
+      prop_speed_val->setMinimum(0);
+      prop_speed_val->setMaximum(256);
+      connect(prop_speed_val, SIGNAL(valueChanged(int)),
+              this, SLOT(propertySpeedVal(int)));
+      prop_speed_desc = new QLabel("X ms/tile", this);
+      /* -- npc -- */
+      QLabel* lbl_forced = new QLabel("Forced", this);
+      prop_forced_mod = new QCheckBox(this);
+      connect(prop_forced_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyForcedMod(int)));
+      prop_forced_val = new QCheckBox("Force Interaction", this);
+      connect(prop_forced_val, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyForcedVal(int)));
+      /* -- */
+      QLabel* lbl_track = new QLabel("Track", this);
+      prop_track_mod = new QCheckBox(this);
+      connect(prop_track_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyTrackMod(int)));
+      prop_track_opt = new QComboBox(this);
+      for(int i = 0; i <= static_cast<int>(TrackingState::TOPLAYER); i++)
+        prop_track_opt->addItem(QString::fromStdString(
+                       Helpers::trackingToStr(static_cast<TrackingState>(i))));
+      connect(prop_track_opt, SIGNAL(currentTextChanged(QString)),
+              this, SLOT(propertyTrackChange(QString)));
+      /* -- io -- */
+      QLabel* lbl_inactive = new QLabel("Inactive", this);
+      prop_inactive_mod = new QCheckBox(this);
+      connect(prop_inactive_mod, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyInactiveMod(int)));
+      prop_inactive_val = new QSpinBox(this);
+      prop_inactive_val->setMaximum(99999999);
+      prop_inactive_val->setSuffix(" ms");
+      connect(prop_inactive_val, SIGNAL(valueChanged(int)),
+              this, SLOT(propertyInactiveVal(int)));
+      prop_inactive_dis = new QCheckBox("Disable", this);
+      connect(prop_inactive_dis, SIGNAL(stateChanged(int)),
+              this, SLOT(propertyInactiveDisable(int)));
+      /* -- LAYOUT -- */
+      QGridLayout* layout_prop = new QGridLayout(widget_property);
+      layout_prop->addWidget(lbl_type, 0, 0);
+      layout_prop->addWidget(prop_type, 0, 1, 1, 3);
+      layout_prop->addWidget(lbl_id, 1, 0);
+      layout_prop->addWidget(prop_id, 1, 1, 1, 3);
+      layout_prop->addWidget(lbl_head_prop, 2, 0);
+      layout_prop->addWidget(lbl_head_mod, 2, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(lbl_head_new, 2, 2, 1, 2, Qt::AlignHCenter);
+      /* -- thing -- */
+      layout_prop->addWidget(lbl_active, 3, 0);
+      layout_prop->addWidget(prop_active_mod, 3, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_active_val, 3, 2, 1, 2, Qt::AlignHCenter);
+      layout_prop->addWidget(lbl_respawn, 4, 0);
+      layout_prop->addWidget(prop_respawn_mod, 4, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_respawn_val, 4, 2, Qt::AlignRight);
+      layout_prop->addWidget(prop_respawn_dis, 4, 3, Qt::AlignLeft);
+      layout_prop->addWidget(lbl_visible, 5, 0);
+      layout_prop->addWidget(prop_visible_mod, 5, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_visible_val, 5, 2, 1, 2, Qt::AlignHCenter);
+      /* -- person -- */
+      layout_prop->addWidget(lbl_freeze, 6, 0);
+      layout_prop->addWidget(prop_freeze_mod, 6, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_freeze_val, 6, 2, 1, 2, Qt::AlignHCenter);
+      layout_prop->addWidget(lbl_reset, 7, 0);
+      layout_prop->addWidget(prop_reset_mod, 7, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_reset_val, 7, 2, 1, 2, Qt::AlignHCenter);
+      layout_prop->addWidget(lbl_speed, 8, 0);
+      layout_prop->addWidget(prop_speed_mod, 8, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_speed_val, 8, 2, Qt::AlignRight);
+      layout_prop->addWidget(prop_speed_desc, 8, 3, Qt::AlignLeft);
+      /* -- npc -- */
+      layout_prop->addWidget(lbl_forced, 9, 0);
+      layout_prop->addWidget(prop_forced_mod, 9, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_forced_val, 9, 2, 1, 2, Qt::AlignHCenter);
+      layout_prop->addWidget(lbl_track, 10, 0);
+      layout_prop->addWidget(prop_track_mod, 10, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_track_opt, 10, 2, 1, 2);
+      /* -- io -- */
+      layout_prop->addWidget(lbl_inactive, 11, 0);
+      layout_prop->addWidget(prop_inactive_mod, 11, 1, Qt::AlignHCenter);
+      layout_prop->addWidget(prop_inactive_val, 11, 2, Qt::AlignRight);
+      layout_prop->addWidget(prop_inactive_dis, 11, 3, Qt::AlignLeft);
       view_stack->addWidget(widget_property);
+    }
+    /* ---- SOUND ONLY ---- */
     else if(available_events[i] == EventClassifier::SOUNDONLY)
+    {
+      QWidget* widget_sound = new QWidget(this);
+      QLabel* lbl_sound = new QLabel("NO SETTINGS", this);
+      QVBoxLayout* layout_sound = new QVBoxLayout(widget_sound);
+      layout_sound->addWidget(lbl_sound, 0, Qt::AlignCenter);
       view_stack->addWidget(widget_sound);
+    }
+    /* ---- TELEPORT THING ---- */
     else if(available_events[i] == EventClassifier::TELEPORTTHING)
+    {
+      QWidget* widget_teleport = new QWidget(this);
+      QLabel* lbl_tele_map = new QLabel("Sub-Map:", this);
+      QLabel* lbl_tele_thing = new QLabel("Thing:", this);
+      tele_map = new QLineEdit("", this);
+      tele_map->setDisabled(true);
+      tele_map->setMinimumWidth(200);
+      QPalette pal = tele_map->palette();
+      pal.setColor(QPalette::Disabled, QPalette::Text,
+                   pal.color(QPalette::Active, QPalette::Text));
+      tele_map->setPalette(pal);
+      tele_thing = new QComboBox(this);
+      tele_thing->setMinimumWidth(200);
+      connect(tele_thing, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(teleportThingChanged(int)));
+      QPushButton* btn_tele_map = new QPushButton(this);
+      btn_tele_map->setIcon(QIcon(":/images/icons/32_settings.png"));
+      btn_tele_map->setIconSize(QSize(24,24));
+      btn_tele_map->setMaximumSize(30, 30);
+      connect(btn_tele_map, SIGNAL(clicked()), this, SLOT(teleportMapPressed()));
+      QGridLayout* layout_tele = new QGridLayout(widget_teleport);
+      layout_tele->setRowStretch(0, 1);
+      layout_tele->addWidget(lbl_tele_map, 1, 0);
+      layout_tele->addWidget(tele_map, 1, 1);
+      layout_tele->addWidget(btn_tele_map, 1, 2);
+      layout_tele->addWidget(lbl_tele_thing, 2, 0);
+      layout_tele->addWidget(tele_thing, 2, 1);
+      layout_tele->setRowStretch(3, 1);
       view_stack->addWidget(widget_teleport);
+    }
+    /* ---- UNLOCK: IO ---- */
     else if(available_events[i] == EventClassifier::UNLOCKIO)
+    {
+      QWidget* widget_unlock_io = new QWidget(this);
+      QLabel* lbl_unio = new QLabel("IO:", this);
+      unio_name = new QComboBox(this);
+      connect(unio_name, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(unlockIOChanged(QString)));
+      /* -- */
+      QGroupBox* unio_mode = new QGroupBox("Mode", this);
+      unio_mode_lock = new QCheckBox("Main Lock", unio_mode);
+      connect(unio_mode_lock, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOModeLock(int)));
+      unio_mode_states = new QCheckBox("States", unio_mode);
+      connect(unio_mode_states, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOModeStates(int)));
+      QHBoxLayout* layout_unio_mode = new QHBoxLayout(unio_mode);
+      QMargins m = layout_unio_mode->contentsMargins();
+      layout_unio_mode->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unio_mode->addWidget(unio_mode_lock);
+      layout_unio_mode->addWidget(unio_mode_states);
+      /* -- */
+      QLabel* lbl_unio_state = new QLabel("State:", this);
+      unio_state = new QComboBox(this);
+      unio_state->setDisabled(true);
+      connect(unio_state, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(unlockIOStateChanged(int)));
+      /* -- */
+      unio_event = new QGroupBox("Events", this);
+      unio_event->setDisabled(true);
+      unio_event_enter = new QCheckBox("Enter", unio_event);
+      connect(unio_event_enter, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOStateEnter(int)));
+      unio_event_exit = new QCheckBox("Exit", unio_event);
+      connect(unio_event_exit, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOStateExit(int)));
+      unio_event_use = new QCheckBox("Use", unio_event);
+      connect(unio_event_use, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOStateUse(int)));
+      unio_event_walk = new QCheckBox("Walkover", unio_event);
+      connect(unio_event_walk, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOStateWalk(int)));
+      QGridLayout* layout_unio_event = new QGridLayout(unio_event);
+      layout_unio_event->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unio_event->addWidget(unio_event_enter, 0, 0);
+      layout_unio_event->addWidget(unio_event_exit, 0, 1);
+      layout_unio_event->addWidget(unio_event_use, 1, 0);
+      layout_unio_event->addWidget(unio_event_walk, 1, 1);
+      /* -- */
+      QGroupBox* unio_view = new QGroupBox("View", this);
+      unio_view_enable = new QCheckBox("GoTo Unlock", unio_view);
+      connect(unio_view_enable, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOView(int)));
+      unio_view_scroll = new QCheckBox("Scroll", unio_view);
+      unio_view_scroll->setDisabled(true);
+      connect(unio_view_scroll, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockIOViewScroll(int)));
+      QLabel* lbl_unio_view = new QLabel("Time at Unlock", this);
+      unio_view_time = new QSpinBox(this);
+      unio_view_time->setMaximum(1000000);
+      unio_view_time->setDisabled(true);
+      connect(unio_view_time, SIGNAL(valueChanged(int)),
+              this, SLOT(unlockIOViewTime(int)));
+      QGridLayout* layout_unio_view = new QGridLayout(unio_view);
+      layout_unio_view->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unio_view->addWidget(unio_view_enable, 0, 0);
+      layout_unio_view->addWidget(unio_view_scroll, 0, 1);
+      layout_unio_view->addWidget(lbl_unio_view, 1, 0);
+      layout_unio_view->addWidget(unio_view_time, 1, 1);
+      /* -- */
+      QGridLayout* layout_unio = new QGridLayout(widget_unlock_io);
+      layout_unio->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unio->setRowStretch(0, 1);
+      layout_unio->addWidget(lbl_unio, 1, 0);
+      layout_unio->addWidget(unio_name, 1, 1, 1, 3);
+      layout_unio->addWidget(unio_mode, 2, 0, 1, 4);
+      layout_unio->addWidget(lbl_unio_state, 3, 0);
+      layout_unio->addWidget(unio_state, 3, 1, 1, 3);
+      layout_unio->addWidget(unio_event, 4, 0, 1, 4);
+      layout_unio->addWidget(unio_view, 5, 0, 1, 4);
+      layout_unio->setRowStretch(6, 1);
       view_stack->addWidget(widget_unlock_io);
+    }
+    /* ---- UNLOCK: THING ---- */
     else if(available_events[i] == EventClassifier::UNLOCKTHING)
+    {
+      QWidget* widget_unlock_thing = new QWidget(this);
+      QLabel* lbl_unth = new QLabel("Thing:", this);
+      unth_name = new QComboBox(this);
+      connect(unth_name, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(unlockThingChanged(QString)));
+      /* -- */
+      QGroupBox* unth_view = new QGroupBox("View", this);
+      unth_view_enable = new QCheckBox("GoTo Unlock", unth_view);
+      connect(unth_view_enable, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockThingView(int)));
+      unth_view_scroll = new QCheckBox("Scroll", unth_view);
+      unth_view_scroll->setDisabled(true);
+      connect(unth_view_scroll, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockThingViewScroll(int)));
+      QLabel* lbl_unth_view = new QLabel("Time at Unlock", this);
+      unth_view_time = new QSpinBox(this);
+      unth_view_time->setMaximum(1000000);
+      unth_view_time->setDisabled(true);
+      connect(unth_view_time, SIGNAL(valueChanged(int)),
+              this, SLOT(unlockThingViewTime(int)));
+      QGridLayout* layout_unth_view = new QGridLayout(unth_view);
+      QMargins m = layout_unth_view->contentsMargins();
+      layout_unth_view->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unth_view->addWidget(unth_view_enable, 0, 0);
+      layout_unth_view->addWidget(unth_view_scroll, 0, 1);
+      layout_unth_view->addWidget(lbl_unth_view, 1, 0);
+      layout_unth_view->addWidget(unth_view_time, 1, 1);
+      /* -- */
+      QGridLayout* layout_unth = new QGridLayout(widget_unlock_thing);
+      layout_unth->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unth->setRowStretch(0, 1);
+      layout_unth->addWidget(lbl_unth, 1, 0);
+      layout_unth->addWidget(unth_name, 1, 1, 1, 3);
+      layout_unth->addWidget(unth_view, 2, 0, 1, 4);
+      layout_unth->setRowStretch(3, 1);
       view_stack->addWidget(widget_unlock_thing);
+    }
+    /* ---- UNLOCK: TILE ---- */
     else if(available_events[i] == EventClassifier::UNLOCKTILE)
+    {
+      QWidget* widget_unlock_tile = new QWidget(this);
+      QLabel* lbl_unti = new QLabel("Tile:", this);
+      unti_location = new QLineEdit("", this);
+      unti_location->setDisabled(true);
+      QPalette pal2 = unti_location->palette();
+      pal2.setColor(QPalette::Disabled, QPalette::Text,
+                    pal2.color(QPalette::Active, QPalette::Text));
+      unti_location->setPalette(pal2);
+      QPushButton* btn_unti_map = new QPushButton(this);
+      connect(btn_unti_map, SIGNAL(clicked()), this, SLOT(unlockTilePressed()));
+      btn_unti_map->setIcon(QIcon(":/images/icons/32_settings.png"));
+      btn_unti_map->setIconSize(QSize(24,24));
+      btn_unti_map->setMaximumSize(30, 30);
+      /* -- */
+      QGroupBox* unti_event = new QGroupBox("Events", this);
+      unti_event_enter = new QCheckBox("Enter", unti_event);
+      connect(unti_event_enter, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockTileEnter(int)));
+      unti_event_exit = new QCheckBox("Exit", unti_event);
+      connect(unti_event_exit, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockTileExit(int)));
+      QGridLayout* layout_unti_event = new QGridLayout(unti_event);
+      QMargins m = layout_unti_event->contentsMargins();
+      layout_unti_event->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unti_event->addWidget(unti_event_enter, 0, 0);
+      layout_unti_event->addWidget(unti_event_exit, 0, 1);
+      /* -- */
+      QGroupBox* unti_view = new QGroupBox("View", this);
+      unti_view_enable = new QCheckBox("GoTo Unlock", unti_view);
+      connect(unti_view_enable, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockTileView(int)));
+      unti_view_scroll = new QCheckBox("Scroll", unti_view);
+      unti_view_scroll->setDisabled(true);
+      connect(unti_view_scroll, SIGNAL(stateChanged(int)),
+              this, SLOT(unlockTileViewScroll(int)));
+      QLabel* lbl_unti_view = new QLabel("Time at Unlock", this);
+      unti_view_time = new QSpinBox(this);
+      unti_view_time->setMaximum(1000000);
+      unti_view_time->setDisabled(true);
+      connect(unti_view_time, SIGNAL(valueChanged(int)),
+              this, SLOT(unlockTileViewTime(int)));
+      QGridLayout* layout_unti_view = new QGridLayout(unti_view);
+      layout_unti_view->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unti_view->addWidget(unti_view_enable, 0, 0);
+      layout_unti_view->addWidget(unti_view_scroll, 0, 1);
+      layout_unti_view->addWidget(lbl_unti_view, 1, 0);
+      layout_unti_view->addWidget(unti_view_time, 1, 1);
+      /* -- */
+      QGridLayout* layout_unti = new QGridLayout(widget_unlock_tile);
+      layout_unti->setContentsMargins(m.left(), 0, m.right(), 0);
+      layout_unti->setRowStretch(0, 1);
+      layout_unti->addWidget(lbl_unti, 1, 0);
+      layout_unti->addWidget(unti_location, 1, 1, 1, 2);
+      layout_unti->addWidget(btn_unti_map, 1, 3);
+      layout_unti->addWidget(unti_event, 2, 0, 1, 4);
+      layout_unti->addWidget(unti_view, 3, 0, 1, 4);
+      layout_unti->setRowStretch(4, 1);
+      layout_unti->setColumnStretch(1, 1);
       view_stack->addWidget(widget_unlock_tile);
+    }
+    /* ---- OUT OF RANGE: EMPTY WIDGET ---- */
     else
+    {
       view_stack->addWidget(new QWidget(this));
+    }
   }
-  layout->addWidget(view_stack, 1, Qt::AlignCenter);
+  layout->addWidget(view_stack, 1, Qt::AlignHCenter);
 
   /* One Shot widget */
   check_oneshot = new QCheckBox("Only Trigger Once", this);
@@ -670,15 +700,37 @@ void EventView::createLayout()//bool conversation_enabled)
 
   /* Configure parent widget */
   setFrameStyle(QFrame::Panel);
-  setLayout(layout);
+  //setLayout(layout);
   setLineWidth(1);
   QPalette palette;
   palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
   setPalette(palette);
-  //updateGeometry();
+  updateGeometry();
   //setMaximumSize(minimumSizeHint());
   //setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
   //setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
+
+  /* Right click menu control */
+  rightclick_menu = new QMenu("Convo Edit", this);
+  QAction* action_edit = new QAction("Edit", rightclick_menu);
+  connect(action_edit, SIGNAL(triggered()), this, SLOT(rightClickEdit()));
+  rightclick_menu->addAction(action_edit);
+  QAction* action_before = new QAction("Insert Before", rightclick_menu);
+  connect(action_before, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertBefore()));
+  rightclick_menu->addAction(action_before);
+  QAction* action_after = new QAction("Insert After", rightclick_menu);
+  connect(action_after, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertAfter()));
+  rightclick_menu->addAction(action_after);
+  action_option = new QAction("Insert Option", rightclick_menu);
+  connect(action_option, SIGNAL(triggered()),
+          this, SLOT(rightClickInsertOption()));
+  rightclick_menu->addAction(action_option);
+  action_delete = new QAction("Delete", rightclick_menu);
+  connect(action_delete, SIGNAL(triggered()), this, SLOT(rightClickDelete()));
+  rightclick_menu->addAction(action_delete);
+  rightclick_menu->hide();
 
   /* Event Pop-Up for isolated event edits */
   pop_event = new QDialog(this);
@@ -769,8 +821,19 @@ void EventView::editEvent(Event* edit_event)
     pop_event_edit = edit_event;
 
     /* Add view */
+    int limit_int = static_cast<int>(limiter);
+    if(event->getEventType() == EventClassifier::BATTLESTART)
+    {
+      limit_int = static_cast<int>(EventClassifier::BATTLESTART);
+    }
+    else if(event->getEventType() == EventClassifier::MULTIPLE)
+    {
+      limit_int |= static_cast<int>(EventClassifier::MULTIPLE) |
+                   static_cast<int>(EventClassifier::CONVERSATION) |
+                   static_cast<int>(EventClassifier::BATTLESTART);
+    }
     pop_event_view = new EventView(nullptr, pop_event,
-                                   EventClassifier::BATTLESTART);
+                                   (EventClassifier)limit_int);
     pop_event_view->setListItems(list_items);
     pop_event_view->setListMaps(list_maps);
     pop_event_view->setListMapThings(list_map_things, list_map_ios,
@@ -1045,6 +1108,18 @@ void EventView::setLayoutData()
         map_name->setCurrentIndex(0);
         if(list_maps.size() > 0)
           changeMapChanged(0);
+      }
+    }
+    /* -- MULTIPLE -- */
+    else if(event->getEventType() == EventClassifier::MULTIPLE)
+    {
+      mult_list->clear();
+      std::vector<Event> events = event->getMultipleEvents();
+      for(uint32_t i = 0; i < events.size(); i++)
+      {
+        QString prefix = QString::number(i) + ": ";
+        mult_list->addItem(EditorEvent::classToText(events[i].classification,
+                                                  prefix, events[i].one_shot));
       }
     }
     /* -- NOTIFICATION -- */
@@ -1711,6 +1786,8 @@ void EventView::categoryChanged(int index)
         event->setEventTakeItem();
       else if(new_class == EventClassifier::MAPSWITCH)
         event->setEventStartMap();
+      else if(new_class == EventClassifier::MULTIPLE)
+        event->setEventMultiple();
       else if(new_class == EventClassifier::NOTIFICATION)
         event->setEventNotification();
       else if(new_class == EventClassifier::PROPERTY)
@@ -1881,6 +1958,161 @@ void EventView::giveItemChanged(int index)
 }
 
 /*
+ * Description: Slot which triggers when the multiple event add button is
+ *              pressed. Adds an event to the bottom of the stack
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::multBtnAdd()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    /* Clear out any edits */
+    editEvent();
+
+    /* Access data and update */
+    std::vector<Event> set = event->getMultipleEvents();
+    event->setEventMultiple(set.size(), EventSet::createBlankEvent());
+    updateMultiple();
+    mult_list->setCurrentRow(mult_list->count() - 1);
+  }
+}
+
+/*
+ * Description: Slot which triggers when the multiple event down button is
+ *              pressed. Takes the selected event and moves it one spot down
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::multBtnDown()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    /* Clear out any edits */
+    editEvent();
+
+    /* Access data */
+    Event* event_struct = event->getEvent();
+
+    /* Get the current index */
+    int index = mult_list->currentRow();
+    int new_index = index + 1;
+    if(index >= 0 && new_index < static_cast<int>(event_struct->events.size()))
+    {
+      Event old_loc = event_struct->events[index];
+      event_struct->events[index] = event_struct->events[new_index];
+      event_struct->events[new_index] = old_loc;
+      updateMultiple();
+      mult_list->setCurrentRow(new_index);
+    }
+  }
+}
+
+/*
+ * Description: Slot which triggers when the multiple event edit button is
+ *              pressed. Edits the selected event in the list
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::multBtnEdit()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    editEvent(event->getMultipleEvent(mult_list->currentRow()));
+  }
+}
+
+/*
+ * Description: Slot which triggers when the multiple event remove button is
+ *              pressed. Removes the selected event from the list
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::multBtnRem()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    /* Clear out any edits */
+    editEvent();
+
+    /* Access data */
+    Event* event_struct = event->getEvent();
+    int index = mult_list->currentRow();
+
+    /* Determine if index is valid and delete */
+    if(index >= 0 && index < static_cast<int>(event_struct->events.size()))
+    {
+      EventSet::deleteEvent(event_struct->events[index]);
+      event_struct->events.erase(event_struct->events.begin() + index);
+      updateMultiple();
+    }
+  }
+}
+
+/*
+ * Description: Slot which triggers when the multiple event up button is
+ *              pressed. Takes the selected event and moves it one spot up
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::multBtnUp()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    /* Clear out any edits */
+    editEvent();
+
+    /* Access data */
+    Event* event_struct = event->getEvent();
+
+    /* Get the current index */
+    int index = mult_list->currentRow();
+    int new_index = index - 1;
+    if(new_index >= 0 && index < static_cast<int>(event_struct->events.size()))
+    {
+      Event old_loc = event_struct->events[index];
+      event_struct->events[index] = event_struct->events[new_index];
+      event_struct->events[new_index] = old_loc;
+      updateMultiple();
+      mult_list->setCurrentRow(new_index);
+    }
+  }
+}
+
+/*
+ * Description: Slot which triggers when the selected index in the list is
+ *              changed. Updates the enabled status of the modifier buttons
+ *
+ * Inputs: int current_row - the new selected row
+ * Output: none
+ */
+void EventView::multListChange(int current_row)
+{
+  mult_btn_down->setEnabled(current_row >= 0 &&
+                            (current_row + 1) < mult_list->count());
+  mult_btn_edit->setEnabled(current_row >= 0);
+  mult_btn_rem->setEnabled(current_row >= 0);
+  mult_btn_up->setEnabled(current_row >= 1);
+}
+
+/*
+ * Description: Slot which triggers when the selected index in the list is
+ *              double clicked. Triggers an edit on the selected event
+ *
+ * Inputs: QListWidgetItem* - not used
+ * Output: none
+ */
+void EventView::multListDouble(QListWidgetItem*)
+{
+  multBtnEdit();
+}
+
+/*
  * Description: Slot which triggers when the notification text in the edit
  *              text box is manipulated. Updates the event.
  *
@@ -1916,10 +2148,16 @@ void EventView::popEventOk()
 {
   if(pop_event_edit != nullptr)
   {
+    /* Update event */
     *pop_event_edit = EventSet::deleteEvent(*pop_event_edit);
     *pop_event_edit = EventSet::copyEvent(*pop_event_ctrl.getEvent());
     editEvent(nullptr);
-    updateBattle();
+
+    /* Update data visible */
+    if(event->getEventType() == EventClassifier::BATTLESTART)
+      updateBattle();
+    else if(event->getEventType() == EventClassifier::MULTIPLE)
+      updateMultiple();
   }
 }
 
@@ -3336,6 +3574,32 @@ void EventView::updateConversation()
     QString index = getConvoIndex(convo_tree->currentItem());
     setLayoutData();
     convo_tree->setCurrentItem(getConvo(index));
+  }
+}
+
+/*
+ * Description: Updates the multiple after an edit. Attempts to maintain the
+ *              same index after execution.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::updateMultiple()
+{
+  if(event->getEventType() == EventClassifier::MULTIPLE)
+  {
+    /* Grab the old index and update the data */
+    int index = mult_list->currentRow();
+    setLayoutData();
+
+    /* Update the index */
+    if(mult_list->count() > 0)
+    {
+      if(mult_list->count() > index)
+        mult_list->setCurrentRow(index);
+      else
+        mult_list->setCurrentRow(mult_list->count() - 1);
+    }
   }
 }
 

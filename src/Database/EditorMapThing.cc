@@ -231,6 +231,17 @@ EditorMapThing* EditorMapThing::getBaseThing() const
 }
 
 /*
+ * Description: Returns the thing classification - when dealing with casting.
+ *
+ * Inputs: none
+ * Output: ThingBase - the thing classification
+ */
+ThingBase EditorMapThing::getClass() const
+{
+  return ThingBase::THING;
+}
+
+/*
  * Description: Returns the editor description string.
  *
  * Inputs: none

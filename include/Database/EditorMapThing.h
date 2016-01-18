@@ -80,6 +80,9 @@ public:
   /* Gets the base thing of the thing */
   EditorMapThing* getBaseThing() const;
 
+  /* Gets the thing classification */
+  virtual ThingBase getClass() const;
+
   /* Gets the description of the thing */
   QString getDescription() const;
 

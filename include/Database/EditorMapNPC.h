@@ -56,6 +56,9 @@ public:
   /* Gets the base npc of the person */
   EditorMapNPC* getBaseNPC() const;
 
+  /* Gets the npc classification */
+  virtual ThingBase getClass() const;
+
   /* Gets the npc path container */
   EditorNPCPath* getPath();
 

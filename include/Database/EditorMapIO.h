@@ -96,6 +96,9 @@ public:
   /* Gets the base ref of the io */
   EditorMapIO* getBaseIO() const;
 
+  /* Gets the IO classification */
+  virtual ThingBase getClass() const;
+
   /* Returns event sets for the different state indexes */
   EditorEventSet* getEventEnter(int index);
   EditorEventSet* getEventExit(int index);

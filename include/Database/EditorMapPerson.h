@@ -66,6 +66,9 @@ public:
   /* Gets the base person of the person */
   EditorMapPerson* getBasePerson() const;
 
+  /* Gets the person classification */
+  virtual ThingBase getClass() const;
+
   /* Returns the matrix associated to the current direction */
   EditorMatrix* getMatrix() const;
 

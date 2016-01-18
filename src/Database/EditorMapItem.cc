@@ -119,6 +119,17 @@ EditorMapItem* EditorMapItem::getBaseItem() const
 }
 
 /*
+ * Description: Returns the item classification - when dealing with casting.
+ *
+ * Inputs: none
+ * Output: ThingBase - the item classification
+ */
+ThingBase EditorMapItem::getClass() const
+{
+  return ThingBase::ITEM;
+}
+
+/*
  * Description: Returns the item count of this item that will be on map.
  *
  * Inputs: none

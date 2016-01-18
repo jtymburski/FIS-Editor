@@ -19,6 +19,7 @@ class ConvoDialog;
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -99,6 +100,13 @@ private:
 
   /* Switch maps event - map name view box */
   QComboBox* map_name;
+
+  /* Multiple event widgets */
+  QPushButton* mult_btn_down;
+  QPushButton* mult_btn_edit;
+  QPushButton* mult_btn_rem;
+  QPushButton* mult_btn_up;
+  QListWidget* mult_list;
 
   /* Notification event text edit box */
   QTextEdit* notification_edit;
@@ -274,6 +282,15 @@ public slots:
   void giveCountChanged(int index);
   void giveItemChanged(int index);
 
+  /* The multiple event slot changes */
+  void multBtnAdd();
+  void multBtnDown();
+  void multBtnEdit();
+  void multBtnRem();
+  void multBtnUp();
+  void multListChange(int current_row);
+  void multListDouble(QListWidgetItem*);
+
   /* The notification event text changes */
   void notificationTextChanged();
 
@@ -357,6 +374,7 @@ public slots:
   /* Update the layout trigger */
   void updateBattle();
   void updateConversation();
+  void updateMultiple();
 
 /*============================================================================
  * PUBLIC FUNCTIONS

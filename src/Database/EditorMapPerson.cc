@@ -207,6 +207,17 @@ EditorMapPerson* EditorMapPerson::getBasePerson() const
 }
 
 /*
+ * Description: Returns the person classification - when dealing with casting.
+ *
+ * Inputs: none
+ * Output: ThingBase - the person classification
+ */
+ThingBase EditorMapPerson::getClass() const
+{
+  return ThingBase::PERSON;
+}
+
+/*
  * Description: Returns the matrix from the base associated to the current
  *              direction.
  *

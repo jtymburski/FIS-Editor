@@ -108,6 +108,17 @@ EditorMapNPC* EditorMapNPC::getBaseNPC() const
 }
 
 /*
+ * Description: Returns the npc classification - when dealing with casting.
+ *
+ * Inputs: none
+ * Output: ThingBase - the npc classification
+ */
+ThingBase EditorMapNPC::getClass() const
+{
+  return ThingBase::NPC;
+}
+
+/*
  * Description: Returns a pointer to the stored the path of the npc (used for
  *              movement).
  *

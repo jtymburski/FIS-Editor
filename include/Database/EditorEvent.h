@@ -82,6 +82,10 @@ public:
   int getGiveItemCount();
   int getGiveItemID();
 
+  /* Returns the multiple event information. If none, data is invalid */
+  Event* getMultipleEvent(int index);
+  std::vector<Event> getMultipleEvents();
+
   /* Returns the string notification. If not that event, data is blank */
   QString getNotification();
 
@@ -171,6 +175,11 @@ public:
   bool setEventGiveItem(int id = 0, int count = 1,
                         int sound_id = EventSet::kUNSET_ID);
 
+  /* Sets the event to multiple set */
+  bool setEventMultiple(std::vector<Event> events = std::vector<Event>(),
+                        int sound_id = EventSet::kUNSET_ID);
+  bool setEventMultiple(int index, Event new_event);
+
   /* Sets the event to notification text */
   bool setEventNotification(QString notification = "Blank",
                             int sound_id = EventSet::kUNSET_ID);
@@ -240,6 +249,10 @@ public:
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the text summary for the given classification */
+  static QString classToText(EventClassifier classification,
+                             QString prefix = "Event: ", bool one_shot = false);
+
   /* Converts the conversation index to usable form */
   static QString convertConversationIndex(QString index);
 

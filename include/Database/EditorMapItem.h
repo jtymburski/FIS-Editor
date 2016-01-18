@@ -56,6 +56,9 @@ public:
   /* Gets the base item of the item */
   EditorMapItem* getBaseItem() const;
 
+  /* Gets the item classification */
+  virtual ThingBase getClass() const;
+
   /* Returns the count of how many of these items are available */
   uint32_t getCount();
 
