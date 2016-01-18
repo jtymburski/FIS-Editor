@@ -74,10 +74,15 @@ void PersonDialog::consolidateAll()
   if(matrix != NULL)
   {
     QList<QList<EditorMatrix*>> matrix_set = person_working->getStates();
-    for(int i = 0; i < matrix_set.size(); i++)
-      for(int j = 0; j < matrix_set[i].size(); j++)
-        if(matrix_set[i][j] != matrix)
-          matrix_set[i][j]->rebase(matrix);
+    // for(int i = 0; i < matrix_set.size(); i++)
+    //  for(int j = 0; j < matrix_set[i].size(); j++)
+    //    if(matrix_set[i][j] != matrix)
+    //      matrix_set[i][j]->rebase(matrix);
+
+    for(auto& matrix_s : matrix_set)
+      for(auto& element : matrix_s)
+        if(element != matrix)
+          element->rebase(matrix);
   }
 }
 

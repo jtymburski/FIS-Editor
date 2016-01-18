@@ -119,8 +119,10 @@ void ConvoDialog::updateData()
 
   thing_combo->clear();
   int index = -1;
-  for(int i = 0; i < list_things.size(); i++)
-    thing_combo->addItem(list_things[i]);
+  for(auto& list_thing : list_things)
+    thing_combo->addItem(list_thing);
+  //for(int i = 0; i < list_things.size(); i++)
+  //  thing_combo->addItem(list_things[i]);
   for(int i = 0; (index < 0) && (i < list_things.size()); i++)
   {
     QStringList list = list_things[i].split(":");
