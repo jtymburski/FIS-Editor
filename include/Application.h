@@ -68,6 +68,7 @@ private:
   QAction* action_basic;
   QAction* action_blockplace;
   QAction* action_fill;
+  QAction* action_move;
   QAction* action_passall;
   QAction* action_passE;
   QAction* action_passN;
@@ -174,6 +175,7 @@ public slots:
   void setCursorBlock(bool checked);
   void setCursorEraser(bool checked);
   void setCursorFill(bool checked);
+  void setCursorMove(bool checked);
 
   /* Sets To Equipment */
   void setEquipment(EditorEquipment* equipment);

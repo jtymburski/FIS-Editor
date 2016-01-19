@@ -385,6 +385,35 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
 }
 
 /*
+ * Description: Attempts to add the thing to the current sub-map. Thing needs
+ *              to be given an x and y start location prior to calling this
+ *              function. This class will work for all things (and children).
+ *
+ * Inputs: EditorMapThing* thing - the thing to attempt to add
+ *         SubMapInfo* map - the map to add the thing to
+ *         bool existing - false if new thing. true otherwise
+ * Output: bool - true if the thing was added (does not delete if fails)
+ */
+bool EditorMap::addThingGeneric(EditorMapThing* thing, SubMapInfo* map,
+                                bool existing)
+{
+  if(thing != nullptr)
+  {
+    if(thing->getClass() == ThingBase::THING)
+      return addThing(thing, map, existing);
+    else if(thing->getClass() == ThingBase::ITEM)
+      return addItem(static_cast<EditorMapItem*>(thing), map, existing);
+    else if(thing->getClass() == ThingBase::INTERACTIVE)
+      return addIO(static_cast<EditorMapIO*>(thing), map, existing);
+    else if(thing->getClass() == ThingBase::PERSON)
+      return addPerson(static_cast<EditorMapPerson*>(thing), map, existing);
+    else if(thing->getClass() == ThingBase::NPC)
+      return addNPC(static_cast<EditorMapNPC*>(thing), map, existing);
+  }
+  return false;
+}
+
+/*
  * Description: Adds tile pass data to the file handler from the selected sub
  *              map index in the layer and optimizes the data set. The data
  *              set is sorted with the first level is based on the passability
@@ -1545,19 +1574,25 @@ bool EditorMap::updateHoverThing(bool unset)
 {
   /* Determine the thing to work with */
   EditorMapThing* thing = NULL;
-  if(active_submap != NULL && active_info.hover_tile != NULL &&
-     active_info.active_cursor == EditorEnumDb::BASIC)
+  if(active_submap != NULL && active_info.hover_tile != NULL)
   {
-    if(active_info.active_layer == EditorEnumDb::THING)
-      thing = active_info.active_thing;
-    else if(active_info.active_layer == EditorEnumDb::IO)
-      thing = active_info.active_io;
-    else if(active_info.active_layer == EditorEnumDb::ITEM)
-      thing = active_info.active_item;
-    else if(active_info.active_layer == EditorEnumDb::PERSON)
-      thing = active_info.active_person;
-    else if(active_info.active_layer == EditorEnumDb::NPC)
-      thing = active_info.active_npc;
+    if(active_info.active_cursor == EditorEnumDb::BASIC)
+    {
+      if(active_info.active_layer == EditorEnumDb::THING)
+        thing = active_info.active_thing;
+      else if(active_info.active_layer == EditorEnumDb::IO)
+        thing = active_info.active_io;
+      else if(active_info.active_layer == EditorEnumDb::ITEM)
+        thing = active_info.active_item;
+      else if(active_info.active_layer == EditorEnumDb::PERSON)
+        thing = active_info.active_person;
+      else if(active_info.active_layer == EditorEnumDb::NPC)
+        thing = active_info.active_npc;
+    }
+    else if(active_info.active_cursor == EditorEnumDb::MOVE)
+    {
+      thing = active_info.move_thing;
+    }
   }
 
   /* Pre-checks to determine if this is valid to execute */
@@ -1674,6 +1709,8 @@ void EditorMap::clearHoverInfo()
   active_info.active_sprite = NULL;
   active_info.active_thing = NULL;
 
+  active_info.move_thing = nullptr;
+
   active_info.hover_tile = NULL;
   active_info.selected_thing = QRect();
 
@@ -1762,6 +1799,94 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       {
         active_info.hover_tile->setPassability(layer, Direction::WEST,
                                                !right_click);
+      }
+    }
+    /* ---- APPLIES TO ALL THINGS ---- */
+    else if(cursor == EditorEnumDb::MOVE && single)
+    {
+      /* Non-right click, main initiate */
+      if(!right_click)
+      {
+        /* Start move */
+        if(active_info.move_thing == nullptr)
+        {
+          active_info.move_thing = active_info.hover_tile->getThingTop(layer);
+          if(active_info.move_thing != nullptr)
+            updateHoverThing();
+        }
+        /* Attempt to move */
+        else
+        {
+          updateHoverThing(true);
+          EditorMapThing* ref_thing = active_info.move_thing;
+          active_info.move_thing = nullptr;
+
+          /* If reference thing is valid, attempt move */
+          if(ref_thing != nullptr)
+          {
+            /* Data */
+            int old_x = ref_thing->getX();
+            int old_y = ref_thing->getY();
+            int new_x = active_info.hover_tile->getX();
+            int new_y = active_info.hover_tile->getY();
+            ThingBase type = ref_thing->getClass();
+            int w = ref_thing->getMatrix()->getWidth();
+            int h = ref_thing->getMatrix()->getHeight();
+
+            /* Remove */
+            if(type == ThingBase::THING)
+            {
+              for(int i = 0; i < w; i++)
+                for(int j = 0; j < h; j++)
+                  active_submap->tiles[old_x + i][old_y + j]->unsetThing(
+                                ref_thing->getMatrix()->getRenderDepth(i, j));
+            }
+            else if(type == ThingBase::ITEM)
+            {
+              active_submap->tiles[old_x][old_y]->unsetItem(
+                                       static_cast<EditorMapItem*>(ref_thing));
+            }
+            else if(type == ThingBase::INTERACTIVE)
+            {
+              for(int i = 0; i < w; i++)
+                for(int j = 0; j < h; j++)
+                  active_submap->tiles[old_x + i][old_y + j]->unsetIO(
+                                ref_thing->getMatrix()->getRenderDepth(i, j));
+            }
+            else if(type == ThingBase::PERSON)
+            {
+              for(int i = 0; i < w; i++)
+                for(int j = 0; j < h; j++)
+                  active_submap->tiles[old_x + i][old_y + j]->unsetPerson(
+                                ref_thing->getMatrix()->getRenderDepth(i, j));
+            }
+            else if(type == ThingBase::NPC)
+            {
+              for(int i = 0; i < w; i++)
+                for(int j = 0; j < h; j++)
+                  active_submap->tiles[old_x + i][old_y + j]->unsetNPC(
+                                ref_thing->getMatrix()->getRenderDepth(i, j));
+            }
+
+            /* Set the new X/Y */
+            ref_thing->setX(new_x);
+            ref_thing->setY(new_y);
+
+            /* Try and add - if not, put back */
+            if(!addThingGeneric(ref_thing))
+            {
+              ref_thing->setX(old_x);
+              ref_thing->setY(old_y);
+              addThingGeneric(ref_thing);
+            }
+          }
+        }
+      }
+      /* Otherwise it is right click: deactivate */
+      else
+      {
+        updateHoverThing(true);
+        active_info.move_thing = nullptr;
       }
     }
     /* Check on the layer - thing */
@@ -4199,6 +4324,7 @@ bool EditorMap::setCurrentMap(int index)
 
     /* Clear out the hover info */
     active_info.hover_tile = NULL;
+    active_info.move_thing = nullptr;
     active_info.selected_thing = QRect();
 
     /* Clear the new sub-map hover tiles */
@@ -4351,6 +4477,7 @@ void EditorMap::setHoverCursor(EditorEnumDb::CursorMode cursor)
 
   /* Set the cursor */
   active_info.active_cursor = cursor;
+  active_info.move_thing = nullptr;
 
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)
@@ -4399,6 +4526,7 @@ void EditorMap::setHoverLayer(EditorEnumDb::Layer layer)
 
   /* Set the layer */
   active_info.active_layer = layer;
+  active_info.move_thing = nullptr;
 
   /* Try and set hover, if relevant */
   if(!updateHoverThing() && active_info.hover_tile != NULL)

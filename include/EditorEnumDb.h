@@ -31,7 +31,7 @@ public:
   enum Border {STANDARD, HOVERED, SELECTED};
 
   /* Enum for cursor mode */
-  enum CursorMode {BASIC,ERASER,BLOCKPLACE,FILL,PASS_ALL,
+  enum CursorMode {BASIC,ERASER,MOVE,BLOCKPLACE,FILL,PASS_ALL,
                    PASS_N,PASS_E,PASS_S,PASS_W,NO_CURSOR};
 
   /* Enum for type of FrameView */

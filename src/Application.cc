@@ -310,6 +310,10 @@ void Application::setupTopMenu()
   QAction* action_eraser = new QAction("&Eraser",cursor_group);
   action_eraser->setCheckable(true);
   action_eraser->setIcon(QIcon(":/images/icons/32_eraser.png"));
+  action_move = new QAction("&Move", cursor_group);
+  action_move->setDisabled(true);
+  action_move->setCheckable(true);
+  action_move->setIcon(QIcon(":/images/icons/32_move.png"));
   action_blockplace = new QAction("&Block Place",cursor_group);
   action_blockplace->setCheckable(true);
   action_blockplace->setIcon(QIcon(":/images/icons/32_rect_fill.png"));
@@ -364,6 +368,7 @@ void Application::setupTopMenu()
   bar_brush = new QToolBar("Brushes", this);
   bar_brush->addAction(action_basic);
   bar_brush->addAction(action_eraser);
+  bar_brush->addAction(action_move);
   bar_brush->addAction(action_blockplace);
   bar_brush->addAction(action_fill);
   bar_brush->addAction(action_passall);
@@ -374,6 +379,7 @@ void Application::setupTopMenu()
   addToolBar(Qt::TopToolBarArea,bar_brush);
   menu_cursor->addAction(action_basic);
   menu_cursor->addAction(action_eraser);
+  menu_cursor->addAction(action_move);
   menu_cursor->addAction(action_blockplace);
   menu_cursor->addAction(action_fill);
   menu_cursor->addAction(action_passall);
@@ -385,6 +391,7 @@ void Application::setupTopMenu()
   bar_brush->setMovable(false);
   connect(action_basic,SIGNAL(toggled(bool)),this,SLOT(setCursorBasic(bool)));
   connect(action_eraser,SIGNAL(toggled(bool)),this,SLOT(setCursorEraser(bool)));
+  connect(action_move, SIGNAL(toggled(bool)), this, SLOT(setCursorMove(bool)));
   connect(action_blockplace,SIGNAL(toggled(bool)),
           this,SLOT(setCursorBlock(bool)));
   connect(action_fill,SIGNAL(toggled(bool)),this,SLOT(setCursorFill(bool)));
@@ -469,11 +476,13 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
   {
     action_blockplace->setEnabled(true);
     action_fill->setEnabled(true);
+    action_move->setDisabled(true);
   }
   else
   {
     action_blockplace->setDisabled(true);
     action_fill->setDisabled(true);
+    action_move->setEnabled(true);
 
     /* If either selected, change to place pen */
     //if(action_blockplace->isChecked() || action_fill->isChecked())
@@ -718,6 +727,18 @@ void Application::setCursorFill(bool checked)
 {
   if(checked)
     game_view->getMapView()->setCursorMode(EditorEnumDb::FILL);
+}
+
+/*
+ * Description: Sets to move cursor mode
+ *
+ * Inputs: bool checked - true if button triggered on
+ * Output: none
+ */
+void Application::setCursorMove(bool checked)
+{
+  if(checked)
+    game_view->getMapView()->setCursorMode(EditorEnumDb::MOVE);
 }
 
 /*

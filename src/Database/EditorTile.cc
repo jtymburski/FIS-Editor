@@ -192,6 +192,23 @@ bool EditorTile::isHoverItem()
 }
 
 /*
+ * Description: Returns if there is a valid hover move thing.
+ *
+ * Inputs: none
+ * Output: bool - true if the hover move thing should be shown
+ */
+bool EditorTile::isHoverMove()
+{
+  if(hover_info->hover_tile != nullptr && hover_info->move_thing != nullptr &&
+     hover_info->active_cursor == EditorEnumDb::MOVE &&
+     !hover_info->path_edit_mode)
+  {
+    return true;
+  }
+  return false;
+}
+
+/*
  * Description: Returns if there is a valid hover npc, the active layer is
  *              a npc layer, and the placing pen is a npc placement.
  *
@@ -884,6 +901,52 @@ QVector<EditorMapThing*> EditorTile::getThings()
 }
 
 /*
+ * Description: Returns the top thing (or children) address based on the layer.
+ *              If the layer is not a thing layer or nothing is found, it
+ *              returns null.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to search for the thing
+ * Output: EditorMapThing* - the thing reference found (instance)
+ */
+EditorMapThing* EditorTile::getThingTop(EditorEnumDb::Layer layer)
+{
+  EditorMapThing* found = nullptr;
+
+  /* ---- THINGS ---- */
+  if(layer == EditorEnumDb::THING)
+  {
+    for(int i = things.size() - 1; found == nullptr && i >= 0; i--)
+      found = things[i].thing;
+  }
+  /* ---- IOS ---- */
+  else if(layer == EditorEnumDb::IO)
+  {
+    for(int i = ios.size() - 1; found == nullptr && i >= 0; i--)
+      found = ios[i].thing;
+  }
+  /* ---- ITEMS ---- */
+  else if(layer == EditorEnumDb::ITEM)
+  {
+    for(int i = items.size() - 1; found == nullptr && i >= 0; i--)
+      found = items[i].thing;
+  }
+  /* ---- PERSONS ---- */
+  else if(layer == EditorEnumDb::PERSON)
+  {
+    for(int i = persons.size() - 1; found == nullptr && i >= 0; i--)
+      found = persons[i].thing;
+  }
+  /* ---- NPCS ---- */
+  else if(layer == EditorEnumDb::NPC)
+  {
+    for(int i = npcs.size() - 1; found == nullptr && i >= 0; i--)
+      found = npcs[i].thing;
+  }
+
+  return found;
+}
+
+/*
  * Description: Returns the visibility of the passed in layer.
  *
  * Inputs: EditorEnumDb::Layer layer - the layer to get visibility for
@@ -1077,11 +1140,12 @@ void EditorTile::paint(QPainter *painter,
   int diff_y = 0;
   bool hover_io = isHoverIO();
   bool hover_item = isHoverItem();
+  bool hover_move = isHoverMove();
   bool hover_npc = isHoverNPC();
   bool hover_person = isHoverPerson();
   bool hover_sprite = isHoverSprite();
   bool hover_thing = isHoverThing();
-  if(hover_thing || hover_io || hover_person || hover_npc)
+  if(hover_thing || hover_io || hover_person || hover_npc || hover_move)
   {
     diff_x = x_pos - hover_info->hover_tile->getX();
     diff_y = y_pos - hover_info->hover_tile->getY();
@@ -1091,6 +1155,8 @@ void EditorTile::paint(QPainter *painter,
       hover_thing = false;
     if(hover_io && hover_info->active_io->isAllNull(diff_x, diff_y))
       hover_io = false;
+    else if(hover_move && hover_info->move_thing->isAllNull(diff_x, diff_y))
+      hover_move = false;
     if(hover_person && hover_info->active_person->isAllNull(diff_x, diff_y))
       hover_person = false;
     if(hover_npc && hover_info->active_npc->isAllNull(diff_x, diff_y))
@@ -1181,6 +1247,8 @@ void EditorTile::paint(QPainter *painter,
   /* If hover npc is true, render it */
   else if(hover_npc)
     hover_info->active_npc->paint(painter, bound, diff_x, diff_y);
+  else if(hover_move)
+    hover_info->move_thing->paint(painter, bound, diff_x, diff_y);
 
   /* Render the upper */
   for(int i = 0; i < layers_upper.size(); i++)
@@ -1282,6 +1350,37 @@ void EditorTile::paint(QPainter *painter,
       int depth = matrix->getRenderDepth(diff_x, diff_y);
 
       if(hovered_invalid || getPerson(depth) != NULL || getNPC(depth) != NULL)
+        color = QColor(200, 0, 0, 128);
+      else
+        color = QColor(0, 200, 0, 128);
+    }
+    /* -- HOVER MOVE CONTROL -- */
+    else if(hover_move)
+    {
+      EditorMapThing* ref_thing = hover_info->move_thing;
+      int depth = ref_thing->getMatrix()->getRenderDepth(diff_x, diff_y);
+
+      /* Determine type and if valid */
+      bool invalid = hovered_invalid;
+      if(!invalid)
+      {
+        ThingBase type = hover_info->move_thing->getClass();
+        if(type == ThingBase::THING)
+          invalid = (getThing(depth) != NULL && getThing(depth) != ref_thing);
+        else if(type == ThingBase::INTERACTIVE)
+          invalid = (getIO(depth) != NULL && getIO(depth) != ref_thing);
+        else if(type == ThingBase::ITEM)
+          invalid = (items.size() >= kMAX_ITEMS);
+        else if(type == ThingBase::PERSON)
+          invalid = ((getPerson(depth) != NULL &&
+                      getPerson(depth) != ref_thing) || getNPC(depth) != NULL);
+        else if(type == ThingBase::NPC)
+          invalid = ((getNPC(depth) != NULL &&
+                      getNPC(depth) != ref_thing) || getPerson(depth) != NULL);
+      }
+
+      /* Final decision */
+      if(invalid)
         color = QColor(200, 0, 0, 128);
       else
         color = QColor(0, 200, 0, 128);

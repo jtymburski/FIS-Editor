@@ -124,6 +124,10 @@ protected:
   bool addThing(EditorMapThing* thing, SubMapInfo* map = NULL,
                 bool existing = true);
 
+  /* Attempts to add thing by internal type */
+  bool addThingGeneric(EditorMapThing* thing, SubMapInfo* map = nullptr,
+                       bool existing = true);
+
   /* Adds tile sprite data */
   void addTilePassData(FileHandler* fh, QProgressDialog* save_dialog,
                        QList<QList<QPoint>> data_set);

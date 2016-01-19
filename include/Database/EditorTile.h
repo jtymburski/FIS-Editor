@@ -42,6 +42,8 @@ struct HoverInfo
   EditorSprite* active_sprite;
   EditorMapThing* active_thing;
 
+  EditorMapThing* move_thing;
+
   EditorTile* hover_tile;
   QRect selected_thing;
 };
@@ -124,6 +126,7 @@ protected:
   /* Determine if hovering sprite or thing in tile */
   bool isHoverIO();
   bool isHoverItem();
+  bool isHoverMove();
   bool isHoverNPC();
   bool isHoverPerson();
   bool isHoverSprite();
@@ -197,6 +200,9 @@ public:
   /* Returns the map thing pointer(s) for the generic thing */
   EditorMapThing* getThing(int render_level);
   QVector<EditorMapThing*> getThings();
+
+  /* Returns the top thing based on the layer */
+  EditorMapThing* getThingTop(EditorEnumDb::Layer layer);
 
   /* Returns layer visibility */
   bool getVisibility(EditorEnumDb::Layer layer);

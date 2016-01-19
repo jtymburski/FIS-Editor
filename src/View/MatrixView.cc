@@ -73,7 +73,7 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
   {
     button_view_pass = new QPushButton(this);
     button_view_pass->setCheckable(true);
-    button_view_pass->setIcon(QIcon(":/images/icons/32_pass_vis.png"));
+    button_view_pass->setIcon(QIcon(":/images/icons/32_passA.png"));
     button_view_pass->setIconSize(QSize(icon_size,icon_size));
     button_view_pass->setMaximumSize(button_size, button_size);
     connect(button_view_pass, SIGNAL(toggled(bool)),

@@ -1479,7 +1479,8 @@ void EventView::updateListProperty(const ThingBase& type)
 {
   prop_id->blockSignals(true);
   prop_id->clear();
-  prop_id->addItem("-1: This Thing");
+  prop_id->addItem("-1: This " +
+                   QString::fromStdString(Helpers::typeToStr(type)));
   if(type == ThingBase::THING)
     prop_id->addItems(list_map_things.toList());
   else if(type == ThingBase::PERSON)
