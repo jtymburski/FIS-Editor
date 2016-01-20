@@ -14,6 +14,29 @@
 //#include "Sound.h"
 
 /*============================================================================
+ * MESSAGE OUTPUT MANIPULATOR FUNCTION
+ *===========================================================================*/
+
+void messageOutput(QtMsgType type, const QMessageLogContext &context,
+                     const QString &msg)
+{
+  (void)context;
+
+  QString output;
+  switch (type) {
+    case QtDebugMsg:    output = QString("mesage: ") + msg; break;
+    case QtWarningMsg:  output = QString("warning: ") + msg; break;
+    case QtCriticalMsg: output = QString("critical: ") + msg; break;
+    case QtFatalMsg:    output = QString("fatal: ") + msg; break;
+    default: return;
+  }
+
+  QFile file("output_log.txt");
+  if (file.open(QIODevice::WriteOnly | QIODevice::Append))
+    QTextStream(&file) << output << "\n";
+}
+
+/*============================================================================
  * MAIN FUNCTION
  *===========================================================================*/
 
@@ -22,6 +45,9 @@ int main(int argc, char *argv[])
   /* Setup the sound */
 //  Sound::initiateSDL();
 //  qDebug() << "[DEBUG] Sound configured: " << Sound::statusSDL();
+
+  /* Trigger output to log file - uncomment when needed */
+  //qInstallMessageHandler(messageOutput);
 
   /* Setup QT */
   QApplication qt_app(argc, argv);

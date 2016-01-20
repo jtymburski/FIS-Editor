@@ -659,12 +659,14 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   /* -------------- WIDTH -------------- */
   else if(element == "width")
   {
-    setMap(map->id, map->name, data.getDataInteger(),map->tiles.front().size());
+    setMap(map->id, map->name, data.getDataInteger(),map->tiles.front().size(),
+           false);
   }
   /* -------------- HEIGHT -------------- */
   else if(element == "height")
   {
-    setMap(map->id, map->name, map->tiles.size(), data.getDataInteger());
+    setMap(map->id, map->name, map->tiles.size(), data.getDataInteger(),
+           false);
   }
   /* -------------- MUSIC ----------------*/
   else if(element == "music")
@@ -4142,7 +4144,7 @@ void EditorMap::load(XmlData data, int index)
     SubMapInfo* access_map = getMap(id);
     if(access_map == NULL)
     {
-      int index = setMap(id, "TEMP", 1, 1);
+      int index = setMap(id, "TEMP", 1, 1, false);
       access_map = getMapByIndex(index);
     }
 
@@ -4840,10 +4842,11 @@ int EditorMap::setItem(EditorMapItem* item, int sub_map)
  * Inputs: int id - the id of the Map
  *         QString name - the name of the map
  *         QVector<QVector<EditorTile*>> tiles - the set of tiles
+ *         bool update_vis - true to update visibility to core set
  * Output: int - if >= 0, it's the index where set in list. Otherwise unset
  */
 int EditorMap::setMap(int id, QString name,
-                      QVector<QVector<EditorTile*>> tiles)
+                      QVector<QVector<EditorTile*>> tiles, bool update_vis)
 {
   if(id >= 0)
   {
@@ -4899,16 +4902,8 @@ int EditorMap::setMap(int id, QString name,
     }
 
     /* Modifiy grid and passability */
-    EditorTile* ref_tile = sub_maps.front()->tiles.front().front();
-    bool events = ref_tile->getVisibilityEvents();
-    bool grid = ref_tile->getVisibilityGrid();
-    bool pass = ref_tile->getVisibilityPass();
-    setVisibilityEvents(events);
-    setVisibilityGrid(grid);
-    setVisibilityPass(pass);
-    for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
-      setVisibility((EditorEnumDb::Layer)i,
-                    ref_tile->getVisibility((EditorEnumDb::Layer)i));
+    if(update_vis)
+      setVisibilityRef();
 
     return index;
   }
@@ -4923,9 +4918,11 @@ int EditorMap::setMap(int id, QString name,
  *         QString name - the name of the map
  *         int width - width of tiles in matrix
  *         int height - height of tiles in matrix
+ *         bool update_vis - true to update visibility to core set
  * Output: int - if >= 0, it's the index where set in list. Otherwise unset
  */
-int EditorMap::setMap(int id, QString name, int width, int height)
+int EditorMap::setMap(int id, QString name, int width, int height,
+                      bool update_vis)
 {
   if(id >= 0 && width > 0 && height > 0)
   {
@@ -4946,7 +4943,7 @@ int EditorMap::setMap(int id, QString name, int width, int height)
     }
 
     /* Set up the map */
-    return setMap(id, name, tiles);
+    return setMap(id, name, tiles, update_vis);
   }
 
   return -1;
@@ -5356,6 +5353,10 @@ void EditorMap::setTileIcons(TileIcons* icons)
  */
 void EditorMap::setVisibility(EditorEnumDb::Layer layer, bool visible)
 {
+  /* Reference tile */
+  ref_tile.setVisibility(layer, visible);
+
+  /* Main tile set */
   for(int i = 0; i < sub_maps.size(); i++)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
@@ -5377,6 +5378,10 @@ void EditorMap::setVisibility(EditorEnumDb::Layer layer, bool visible)
  */
 void EditorMap::setVisibilityEvents(bool visible)
 {
+  /* Reference tile set */
+  ref_tile.setVisibilityEvents(visible);
+
+  /* Main tile set */
   for(int i = 0; i < sub_maps.size(); i++)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
@@ -5392,6 +5397,10 @@ void EditorMap::setVisibilityEvents(bool visible)
  */
 void EditorMap::setVisibilityGrid(bool visible)
 {
+  /* Reference tile set */
+  ref_tile.setVisibilityGrid(visible);
+
+  /* Main tile set */
   for(int i = 0; i < sub_maps.size(); i++)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
@@ -5407,6 +5416,10 @@ void EditorMap::setVisibilityGrid(bool visible)
  */
 void EditorMap::setVisibilityPass(bool visible)
 {
+  /* Reference tile set */
+  ref_tile.setVisibilityPass(visible);
+
+  /* Main tile set */
   for(int i = 0; i < sub_maps.size(); i++)
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
@@ -5429,6 +5442,29 @@ void EditorMap::setVisibilityPaths(bool visible)
     for(int i = 0; i < sub_maps.size(); i++)
       for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
         sub_maps[i]->npcs[j]->getPath()->setVisibleControl(visible);
+  }
+}
+
+/*
+ * Description: Sets the visibility of all sub-maps based on reference
+ *              internal tile.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::setVisibilityRef()
+{
+  /* Main tile s*/
+  for(int i = 0; i < sub_maps.size(); i++)
+  {
+    /* Main tile set */
+    for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
+      for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
+        sub_maps[i]->tiles[j][k]->setVisibilityTile(&ref_tile);
+
+    /* NPC paths */
+    for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+      sub_maps[i]->npcs[j]->getPath()->setVisibleControl(visible_path);
   }
 }
 

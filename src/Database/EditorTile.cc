@@ -1990,7 +1990,8 @@ bool EditorTile::setVisibilityNPC(int render_level, bool visible)
 /*
  * Description: Sets the passability visibility
  *
- * Input: Visibility toggle
+ * Input: bool toggle - Visibility toggle
+ * Output: none
  */
 void EditorTile::setVisibilityPass(bool toggle)
 {
@@ -2056,6 +2057,45 @@ bool EditorTile::setVisibilityThing(int render_level, bool visible)
     return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets the visibility to mirror all the information in said
+ *              reference tile.
+ *
+ * Inputs: EditorTile* ref - the reference to extract the information from
+ * Output: none
+ */
+void EditorTile::setVisibilityTile(EditorTile* ref)
+{
+  if(ref != nullptr)
+  {
+    /* Tile based visibility */
+    layer_base.visible = ref->layer_base.visible;
+    layer_enhancer.visible = ref->layer_enhancer.visible;
+    for(int i = 0; i < layers_lower.size(); i++)
+      layers_lower[i].visible = ref->layers_lower.front().visible;
+    for(int i = 0; i < layers_upper.size(); i++)
+      layers_upper[i].visible = ref->layers_upper.front().visible;
+    for(int i = 0; i < ios.size(); i++)
+      ios[i].visible = ref->ios.front().visible;
+    for(int i = 0; i < items.size(); i++)
+      items[i].visible = ref->items.front().visible;
+    for(int i = 0; i < npcs.size(); i++)
+      npcs[i].visible = ref->npcs.front().visible;
+    for(int i = 0; i < persons.size(); i++)
+      persons[i].visible = ref->persons.front().visible;
+    for(int i = 0; i < things.size(); i++)
+      things[i].visible = ref->things.front().visible;
+
+    /* Interface based visibility */
+    visible_events = ref->visible_events;
+    visible_grid = ref->visible_grid;
+    visible_passability = ref->visible_passability;
+
+    /* Finally update */
+    update();
+  }
 }
 
 /*

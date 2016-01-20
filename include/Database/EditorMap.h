@@ -85,6 +85,9 @@ private:
   /* The name of the map set */
   QString name;
 
+  /* Reference tile - contains information stored in tiles */
+  EditorTile ref_tile;
+
   /* The map sprites */
   QVector<EditorSprite*> sprites;
 
@@ -369,8 +372,10 @@ public:
   int setItem(EditorMapItem* item, int sub_map = -1);
 
   /* Sets a map, based on ID */
-  int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles);
-  int setMap(int id, QString name, int width, int height);
+  int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles,
+             bool update_vis = true);
+  int setMap(int id, QString name, int width, int height,
+             bool update_vis = true);
 
   /* Sets the name of the map set */
   virtual void setName(QString name, bool update = true);
@@ -403,6 +408,9 @@ public:
 
   /* Sets visibility of npc paths */
   void setVisibilityPaths(bool visible);
+
+  /* Sets the visibility of all sub-maps based on reference internal tile */
+  void setVisibilityRef();
 
   /* Thing processing for updating with the new data */
   void tilesIOAdd(bool update_all = false);

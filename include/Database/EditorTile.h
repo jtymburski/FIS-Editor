@@ -286,6 +286,7 @@ public:
   void setVisibilityEvents(bool);
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);
+  void setVisibilityTile(EditorTile* ref);
 
   /* Function for removing a sprite from the maps active layer */
   void unplace(EditorEnumDb::Layer layer);
