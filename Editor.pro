@@ -33,6 +33,7 @@ SOURCES += \
     src/Application.cc \
     src/EditorHelpers.cc \
     src/Database/EditorAction.cc \
+    src/Database/EditorBattleScene.cc \
     src/Database/EditorBubby.cc \
     src/Database/EditorCategory.cc \
     src/Database/EditorEquipment.cc \
@@ -71,6 +72,7 @@ SOURCES += \
     src/Dialog/PersonDialog.cc \
     src/Dialog/SpriteDialog.cc \
     src/Dialog/ThingDialog.cc \
+    src/View/BattleSceneView.cc \
     src/View/EventSetView.cc \
     src/View/EventView.cc \
     src/View/GameView.cc \
@@ -133,6 +135,7 @@ HEADERS += \
     include/EditorEnumDb.h \
     include/EditorHelpers.h \
     include/Database/EditorAction.h \
+    include/Database/EditorBattleScene.h \
     include/Database/EditorBubby.h \
     include/Database/EditorCategory.h \
     include/Database/EditorEquipment.h \
@@ -172,6 +175,7 @@ HEADERS += \
     include/Dialog/PersonDialog.h \
     include/Dialog/SpriteDialog.h \
     include/Dialog/ThingDialog.h \
+    include/View/BattleSceneView.h \
     include/View/EventSetView.h \
     include/View/EventView.h \
     include/View/GameView.h \

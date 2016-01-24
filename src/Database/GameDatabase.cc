@@ -14,6 +14,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   /* Clear out variables */
   current_action = NULL;
   current_battleclass = NULL;
+  current_battlescene = nullptr;
   current_bubby = NULL;
   current_equipment = NULL;
   current_item = NULL;
@@ -38,7 +39,7 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   QStringList items;
   items << "Maps" << "--" << "Parties" << "Persons" << "B.U.B.B.I.E's"
         << "Equipments" << "Items" << "Classes" << "Races" << "Skill Sets"
-        << "Skills" << "Actions" << "--" << "Music / Sound";
+        << "Skills" << "Actions" << "--" << "Music / Sound" << "Battle Scenes";
   view_top->addItems(items);
   view_top->setCurrentRow(0);
   connect(view_top,SIGNAL(currentRowChanged(int)),
@@ -160,6 +161,25 @@ void GameDatabase::addAction(EditorAction* action)
   /* If not inserted, insert at tail */
   if(!inserted)
     data_action.push_back(action);
+}
+
+/* Add object in the correct spot in the stack */
+void GameDatabase::addBattleScene(EditorBattleScene* scene)
+{
+  bool inserted = false;
+
+  for(int i = 0; (i < data_battlescene.size() && !inserted); i++)
+  {
+    if(data_battlescene[i]->getID() > scene->getID())
+    {
+      data_battlescene.insert(i, scene);
+      inserted = true;
+    }
+  }
+
+  /* If not inserted, append */
+  if(!inserted)
+    data_battlescene.push_back(scene);
 }
 
 /* Add object in the correct spot in the array */
@@ -350,6 +370,61 @@ void GameDatabase::changeAction(int index, bool forced, bool save)
 
     /* Change object */
     emit changeAction(current_action);
+  }
+}
+
+/* Change objects trigger call */
+void GameDatabase::changeBattleScene(int index, bool forced, bool save)
+{
+  bool proceed = forced;
+  bool save_object = false;
+
+  /* If current battle class is valid, either save or load */
+  if(current_battlescene != nullptr)
+  {
+    /* Forced - Do not show dialog */
+    if(forced || !current_battlescene->isChanged())
+    {
+      proceed = true;
+      if(save)
+        save_object = true;
+    }
+    /* Not Forced - Create warning about changing object */
+    else
+    {
+      QMessageBox msg_box;
+      msg_box.setText(QString("Changing to another BattleScene. All unsaved ") +
+                      QString("changes to the existing will be lost."));
+      msg_box.setInformativeText("Save changes to existing BattleScene?");
+      msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+      /* Execute and get result */
+      int result = msg_box.exec();
+      if(result == QMessageBox::Yes || result == QMessageBox::No)
+      {
+        proceed = true;
+        if(result == QMessageBox::Yes)
+          save_object = true;
+      }
+    }
+  }
+  else
+  {
+    proceed = true;
+  }
+
+  /* If proceed, change battle class */
+  if(proceed)
+  {
+    /* Check index */
+    if(index >= 0)
+      current_battlescene = data_battlescene[index];
+    else
+      current_battlescene = nullptr;
+
+    /* Change object */
+    emit changeBattleScene(current_battlescene, save_object);
   }
 }
 
@@ -769,6 +844,15 @@ EditorAction* GameDatabase::getAction(int id)
 }
 
 /* Get object, based on ID */
+EditorBattleScene* GameDatabase::getBattleScene(int id)
+{
+  for(int i = 0; i < data_battlescene.size(); i++)
+    if(data_battlescene[i]->getID() == id)
+      return data_battlescene[i];
+  return nullptr;
+}
+
+/* Get object, based on ID */
 EditorCategory* GameDatabase::getClass(int id)
 {
   for(int i = 0; i < data_battleclass.size(); i++)
@@ -890,6 +974,26 @@ void GameDatabase::loadAction(XmlData data, int index)
       addAction(found_action);
     }
     found_action->load(data, index);
+  }
+}
+
+/* Called to load object data */
+void GameDatabase::loadBattleScene(XmlData data, int index)
+{
+  int id = -1;
+  if(!data.getKeyValue(index).empty())
+    id = std::stoi(data.getKeyValue(index));
+
+  /* If the ID is valid, try and add/create */
+  if(id >= 0)
+  {
+    EditorBattleScene* found_scene = getBattleScene(id);
+    if(found_scene == nullptr)
+    {
+      found_scene = new EditorBattleScene(id);
+      addBattleScene(found_scene);
+    }
+    found_scene->load(data, index + 1);
   }
 }
 
@@ -1095,6 +1199,8 @@ void GameDatabase::loadFinish()
 
   /* Update music */
   emit updatedMusic(data_sounds->getListMusic());
+
+  /* Update battle scenes - nothing to do at this time */
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -1285,6 +1391,14 @@ void GameDatabase::createNewResource()
       updateItems();
       updateSkillSets();
       break;
+    /* -- BATTLE SCENE -- */
+    case EditorEnumDb::BATTLESCENEVIEW:
+      if(data_battlescene.size() > 0)
+        data_battlescene.push_back(
+                   new EditorBattleScene(data_battlescene.last()->getID() + 1));
+      else
+        data_battlescene.push_back(new EditorBattleScene(0));
+      break;
     /* -- EQUIPMENT -- */
     case EditorEnumDb::EQUIPMENTVIEW:
       name = "New Equipment";
@@ -1416,6 +1530,13 @@ void GameDatabase::deleteResource()
             updateItems();
             updateSkillSets();
             break;
+          /* -- BATTLE SCENE -- */
+          case EditorEnumDb::BATTLESCENEVIEW:
+            if(data_battlescene[index] == current_battlescene)
+              changeBattleScene(-1, true);
+            delete data_battlescene[index];
+            data_battlescene.remove(index);
+            break;
           /* -- EQUIPMENT -- */
           case EditorEnumDb::EQUIPMENTVIEW:
             if(data_equipment[index] == current_equipment)
@@ -1529,6 +1650,11 @@ void GameDatabase::duplicateResource()
         *data_skill.last() = *data_skill[index];
         data_skill.last()->setID(id);
         break;
+      /* -- BATTLE SCENE -- */
+      case EditorEnumDb::BATTLESCENEVIEW:
+        id = data_battlescene.last()->getID();
+        *data_battlescene.last() = *data_battlescene[index];
+        data_battlescene.last()->setID(id);
       /* -- EQUIPMENT -- */
       case EditorEnumDb::EQUIPMENTVIEW:
         id = data_equipment.last()->getID();
@@ -1626,6 +1752,10 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
     /* -- SKILL -- */
     case EditorEnumDb::SKILLVIEW:
       changeSkill(index);
+      break;
+    /* -- BATTLE SCENE -- */
+    case EditorEnumDb::BATTLESCENEVIEW:
+      changeBattleScene(index);
       break;
     /* -- EQUIPMENT -- */
     case EditorEnumDb::EQUIPMENTVIEW:
@@ -1731,6 +1861,9 @@ void GameDatabase::saveAll()
 
     /* Music / Sound */
     data_sounds->saveWorking();
+
+    /* Battle Scenes */
+    changeBattleScene(-1, true, true);
 
     /* Fix back to visible row */
     rowChange(view_top->currentRow());
@@ -1902,6 +2035,12 @@ void GameDatabase::deleteAll()
   /* Music / Sound clean-up */
   data_sounds->clear();
 
+  /* Battle Scenes */
+  changeBattleScene(-1, true);
+  for(int i = 0; i < data_battlescene.size(); i++)
+    delete data_battlescene[i];
+  data_battlescene.clear();
+
   /* Reset the view */
   if(index == 0)
     view_top->setCurrentRow(1);
@@ -1936,6 +2075,7 @@ int GameDatabase::getSaveCount(bool selected_map, int sub_index)
   count += data_person.size();
   count += data_party.size();
   count += data_sounds->getSaveCount();
+  count += data_battlescene.size();
 
   return count;
 }
@@ -1987,6 +2127,8 @@ void GameDatabase::load(FileHandler* fh, QProgressDialog* dialog)
           /* Action */
           if(data.getElement(2) == "action")
             loadAction(data, 2);
+          else if(data.getElement(2) == "battlescene")
+            loadBattleScene(data, 2);
           else if(data.getElement(2) == "class")
             loadClass(data, 2);
           else if(data.getElement(2) == "item")
@@ -2147,6 +2289,15 @@ void GameDatabase::modifyBottomList(int index)
           bold_index = i;
       }
       break;
+    /* -- BATTLE SCENE -- */
+    case EditorEnumDb::BATTLESCENEVIEW:
+      for(int i = 0; i < data_battlescene.size(); i++)
+      {
+        bottom_list << data_battlescene[i]->getNameList();
+        if(data_battlescene[i] == current_battlescene)
+          bold_index = i;
+      }
+      break;
     /* -- EQUIPMENT -- */
     case EditorEnumDb::EQUIPMENTVIEW:
       for(int i = 0; i < data_equipment.size(); i++)
@@ -2219,6 +2370,13 @@ void GameDatabase::save(FileHandler* fh, QProgressDialog* dialog,
 
     /* Core data */
     fh->writeXmlElement("core");
+
+    /* Battle Scenes */
+    for(int i = 0; i < data_battlescene.size(); i++)
+    {
+      data_battlescene[i]->save(fh, game_only);
+      dialog->setValue(dialog->value() + 1);
+    }
 
     /* Actions */
     for(int i = 0; i < data_action.size(); i++)

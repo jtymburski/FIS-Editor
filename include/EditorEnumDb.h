@@ -100,7 +100,8 @@ public:
                  SKILLVIEW = 10,
                  ACTIONVIEW = 11,
                  BLANKVIEW2 = 12,
-                 AUDIOVIEW = 13
+                 AUDIOVIEW = 13,
+                 BATTLESCENEVIEW = 14
                 };
 };
 #endif // EDITORENUMDB_H

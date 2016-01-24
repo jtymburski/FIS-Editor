@@ -25,8 +25,6 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
           view_map, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),
           view_map, SLOT(updatedMaps(QVector<QString>)));
-  connect(this, SIGNAL(updatedMusic(QList<QString>)),
-          view_map, SLOT(updatedMusic(QList<QString>)));
   connect(this, SIGNAL(updatedParties(QVector<QString>)),
           view_map, SLOT(updatedParties(QVector<QString>)));
   connect(this, SIGNAL(updatedSounds(QList<QString>)),
@@ -91,6 +89,9 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   null_sounds = view_sounds;
   addWidget(view_sounds);
 
+  view_battlescene = new BattleSceneView(this);
+  addWidget(view_battlescene);
+
   /* Styling, as required */
   blank_widget1->setStyleSheet("background-color:black;");
   blank_widget2->setStyleSheet("background-color:black;");
@@ -113,6 +114,12 @@ GameView::~GameView()
 EditorAction* GameView::getActionView()
 {
   return view_action;
+}
+
+/* Returns the Editor Battle Scene view */
+EditorBattleScene* GameView::getBattleSceneView()
+{
+  return view_battlescene->getScene();
 }
 
 /* Returns the Editor Class Category View */
@@ -177,6 +184,14 @@ void GameView::setActionView(EditorAction *action)
   view_action = action;
   connect(view_action,SIGNAL(nameChange(QString)),
           this,SIGNAL(nameChange(QString)));
+}
+
+/* Sets the Editor Battle Scene View */
+void GameView::setBattleSceneView(EditorBattleScene* scene, bool save)
+{
+  if(save && scene != view_battlescene->getScene())
+    view_battlescene->saveWorking();
+  view_battlescene->setScene(scene);
 }
 
 /* Sets the Editor Class Category View */
@@ -297,6 +312,13 @@ void GameView::setViewMode(EditorEnumDb::ViewMode v)
 {
   mode = v;
   setCurrentIndex(static_cast<int>(v));
+}
+
+/* Updated list sets */
+void GameView::updatedMusic(QList<QString> list)
+{
+  view_battlescene->updateListMusic(list);
+  view_map->updatedMusic(list);
 }
 
 /*============================================================================

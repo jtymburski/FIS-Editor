@@ -48,9 +48,10 @@ Application::Application(QWidget* parent)
           this, SLOT(setAction(EditorAction*)));
   connect(game_database, SIGNAL(changeRace(EditorCategory*)),
           this, SLOT(setRace(EditorCategory*)));
-  connect(game_database, SIGNAL(changeBattleclass
-                                (EditorCategory*)),
+  connect(game_database, SIGNAL(changeBattleclass(EditorCategory*)),
           this, SLOT(setBattleClass(EditorCategory*)));
+  connect(game_database, SIGNAL(changeBattleScene(EditorBattleScene*,bool)),
+          this, SLOT(setBattleScene(EditorBattleScene*,bool)));
   connect(game_database, SIGNAL(changeSkillset(EditorSkillset*))
           ,this, SLOT(setSkillset(EditorSkillset*)));
   connect(game_database, SIGNAL(changeSkill(EditorSkill*)),
@@ -82,11 +83,12 @@ Application::Application(QWidget* parent)
   connect(game_database, SIGNAL(updatedMaps(QVector<QString>)),
           game_view, SIGNAL(updatedMaps(QVector<QString>)));
   connect(game_database, SIGNAL(updatedMusic(QList<QString>)),
-          game_view, SIGNAL(updatedMusic(QList<QString>)));
+          game_view, SLOT(updatedMusic(QList<QString>)));
   connect(game_database, SIGNAL(updatedParties(QVector<QString>)),
           game_view, SIGNAL(updatedParties(QVector<QString>)));
   connect(game_database, SIGNAL(updatedSounds(QList<QString>)),
           game_view, SIGNAL(updatedSounds(QList<QString>)));
+  game_database->updateMusicObjects();
 
   connect(game_view->getMapView(), SIGNAL(disableControl(bool)),
           this, SLOT(disableControl(bool)));
@@ -671,6 +673,18 @@ void Application::setAction(EditorAction* action)
 void Application::setBattleClass(EditorCategory* battle_class)
 {
   game_view->setClassView(battle_class);
+}
+
+/*
+ * Description: Sets to battle scene and updates the view
+ *
+ * Inputs: EditorBattleScene* scene - the new edit scene
+ *         bool save - true to save if existing is not null
+ * Output: none
+ */
+void Application::setBattleScene(EditorBattleScene* scene, bool save)
+{
+  game_view->setBattleSceneView(scene, save);
 }
 
 /*

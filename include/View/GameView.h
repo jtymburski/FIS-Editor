@@ -9,8 +9,10 @@
 #define GAMEVIEW_H
 
 #include <QStackedWidget>
-#include "View/MapView.h"
+
 #include "Database/GameDatabase.h"
+#include "View/BattleSceneView.h"
+#include "View/MapView.h"
 
 class GameView : public QStackedWidget
 {
@@ -39,6 +41,7 @@ private:
   /* The views, as they're set */
   EditorAction* view_action;
   EditorCategory* view_battleclass;
+  BattleSceneView* view_battlescene;
   QWidget* view_bubby;
   QWidget* view_equipment;
   EditorItem* view_item;
@@ -69,7 +72,7 @@ signals:
   /* Updated data to pass into map database */
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
-  void updatedMusic(QList<QString> music_list);
+  //void updatedMusic(QList<QString> music_list);
   void updatedParties(QVector<QString> parties);
   void updatedSounds(QList<QString> sound_list);
 
@@ -84,6 +87,7 @@ signals:
 public slots:
   /* View gets */
   EditorAction* getActionView();
+  EditorBattleScene* getBattleSceneView();
   EditorCategory* getClassView();
   EditorItem* getItemView();
   MapView* getMapView();
@@ -95,6 +99,7 @@ public slots:
 
   /* View sets */
   void setActionView(EditorAction* sprite);
+  void setBattleSceneView(EditorBattleScene* scene, bool save);
   void setClassView(EditorCategory* class_cat);
   void setItemView(EditorItem* item);
   void setPartyView(EditorParty* party);
@@ -105,6 +110,9 @@ public slots:
 
   /* Sets The View Mode */
   void setViewMode(EditorEnumDb::ViewMode);
+
+  /* Updated list sets */
+  void updatedMusic(QList<QString> list);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

@@ -167,6 +167,9 @@ public slots:
   /* Sets To Battle Class */
   void setBattleClass(EditorCategory* battle_class);
 
+  /* Sets to battle scene */
+  void setBattleScene(EditorBattleScene* scene, bool save);
+
   /* Sets To Bubby */
   void setBubby(EditorBubby* bubby);
 

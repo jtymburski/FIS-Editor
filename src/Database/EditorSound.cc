@@ -41,7 +41,7 @@ EditorSound::EditorSound(int id, QString name) : EditorSound()
  *
  * Inputs: const EditorSound &source - the source object to copy
  */
-EditorSound::EditorSound(const EditorSound &source)
+EditorSound::EditorSound(const EditorSound &source) : EditorSound()
 {
   copySelf(source);
 }
@@ -389,13 +389,27 @@ EditorSound& EditorSound::operator= (const EditorSound &source)
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 
-/* Sort Compare */
+/*
+ * Description: Compares ID of two editor sound references and returns if input
+ *              1 is greater than input 2.
+ *
+ * Inputs: EditorSound* s1 - the first sound reference to check
+ *         EditorSound* s2 - the second sound reference to check
+ * Output: bool - true if s1 ID is greater than s2 ID
+ */
 bool EditorSound::greaterThan(EditorSound* s1, EditorSound* s2)
 {
   return (s1->getID() > s2->getID());
 }
 
-/* Sort Compare */
+/*
+ * Description: Compares ID of two editor sound references and returns if input
+ *              1 is less than input 2.
+ *
+ * Inputs: EditorSound* s1 - the first sound reference to check
+ *         EditorSound* s2 - the second sound reference to check
+ * Output: bool - true if s1 ID is less than s2 ID
+ */
 bool EditorSound::lessThan(EditorSound* s1, EditorSound* s2)
 {
   return (s1->getID() < s2->getID());

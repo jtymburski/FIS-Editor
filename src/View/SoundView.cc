@@ -621,7 +621,7 @@ void SoundView::setEditSound(EditorSound* sound)
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another

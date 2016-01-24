@@ -18,6 +18,7 @@
 #include <QWidget>
 
 #include "Database/EditorAction.h"
+#include "Database/EditorBattleScene.h"
 #include "Database/EditorBubby.h"
 #include "Database/EditorCategory.h"
 #include "Database/EditorEquipment.h"
@@ -51,6 +52,7 @@ private:
   /* Currently selected object */
   EditorAction* current_action;
   EditorCategory* current_battleclass;
+  EditorBattleScene* current_battlescene;
   EditorBubby* current_bubby;
   EditorEquipment* current_equipment;
   EditorItem* current_item;
@@ -64,6 +66,7 @@ private:
   /* Vector for actual data in bottom list, populated from game xml data */
   QVector<EditorAction*> data_action;
   QVector<EditorCategory*> data_battleclass;
+  QVector<EditorBattleScene*> data_battlescene;
   QVector<EditorBubby*> data_bubby;
   QVector<EditorEquipment*> data_equipment;
   QVector<EditorItem*> data_item;
@@ -97,6 +100,7 @@ private:
 private:
   /* Add object in the correct spot in the array */
   void addAction(EditorAction* action);
+  void addBattleScene(EditorBattleScene* scene);
   void addClass(EditorCategory* cat_class);
   void addItem(EditorItem* item);
   void addParty(EditorParty* party);
@@ -107,6 +111,7 @@ private:
 
   /* Change objects trigger call */
   void changeAction(int index, bool forced = false, bool save = false);
+  void changeBattleScene(int index, bool forced = false, bool save = false);
   void changeClass(int index, bool forced = false, bool save = false);
   void changeItem(int index, bool forced = false, bool save = false);
   void changeParty(int index, bool forced = false, bool save = false);
@@ -117,6 +122,7 @@ private:
 
   /* Get object, based on ID */
   EditorAction* getAction(int id);
+  EditorBattleScene* getBattleScene(int id);
   EditorCategory* getClass(int id);
   EditorItem* getItem(int id);
   EditorParty* getParty(int id);
@@ -130,6 +136,7 @@ private:
 
   /* Called to load object data */
   void loadAction(XmlData data, int index);
+  void loadBattleScene(XmlData data, int index);
   void loadClass(XmlData data, int index);
   void loadItem(XmlData data, int index);
   void loadParty(XmlData data, int index);
@@ -160,6 +167,7 @@ protected:
 signals:
   void changeAction(EditorAction* action);
   void changeBattleclass(EditorCategory* battle_class);
+  void changeBattleScene(EditorBattleScene* scene, bool save); // TODO
   void changeBubby(EditorBubby* bubby);
   void changeEquipment(EditorEquipment* equipment);
   void changeItem(EditorItem* item);
