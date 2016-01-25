@@ -13,6 +13,7 @@
 #include "EditorHelpers.h"
 #include "FileHandler.h"
 #include "Helpers.h"
+#include "Sound.h"
 
 class EditorBattleScene : public EditorTemplate
 {
@@ -65,6 +66,8 @@ public:
   
   /* Returns the midlay(s) LayOver struct */
   LayOver getMidlay(int index) const;
+  LayOver* getMidlayRef(int index);
+  int getMidlaySize() const;
   QVector<LayOver> getMidlays() const;
   
   /* Returns the music reference ID of the scene */
@@ -78,10 +81,14 @@ public:
 
   /* Returns the overlay(s) LayOver struct */
   LayOver getOverlay(int index) const;
+  LayOver* getOverlayRef(int index);
+  int getOverlaySize() const;
   QVector<LayOver> getOverlays() const;
 
   /* Returns the underlay(s) LayOver struct */
   LayOver getUnderlay(int index) const;
+  LayOver* getUnderlayRef(int index);
+  int getUnderlaySize() const;
   QVector<LayOver> getUnderlays() const;
 
   /* Returns if the scene has active edits in view */
@@ -125,6 +132,18 @@ public:
   bool setUnderlay(int index, LayOver lay_over);
   bool setUnderlay(int index, QString path, int anim_time, 
                    float velocity_x, float velocity_y);
+
+  /* Unsets the midlay(s) */
+  bool unsetMidlay(int index);
+  void unsetMidlays();
+
+  /* Unsets the overlay(s) */
+  bool unsetOverlay(int index);
+  void unsetOverlays();
+
+  /* Unset the underlay(s) */
+  bool unsetUnderlay(int index);
+  void unsetUnderlays();
 
 /*============================================================================
  * OPERATOR FUNCTIONS

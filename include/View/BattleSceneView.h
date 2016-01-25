@@ -9,15 +9,19 @@
 #define BATTLESCENEVIEW_H
 
 #include <QComboBox>
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QPainter>
+#include <QPixmap>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QWidget>
 
 #include "Database/EditorBattleScene.h"
+#include "Database/EditorSprite.h"
 
 class BattleSceneView : public QWidget
 {
@@ -56,6 +60,10 @@ private:
   QLabel* lbl_lay_path_list;
   QLabel* lbl_preview_img;
 
+  /* Lay Over Edit Information */
+  EditorSprite* lay_edit_sprite;
+  LayOver* lay_edit_struct;
+
   /* List Widgets */
   QListWidget* list_layover;
 
@@ -66,10 +74,19 @@ private:
   EditorBattleScene* scene_base;
   EditorBattleScene scene_curr;
 
+  /* Scene preview */
+  QPixmap scene_preview;
+
   /* Spin Box Widgets */
   QSpinBox* spin_lay_anim ;
   QSpinBox* spin_lay_velx;
   QSpinBox* spin_lay_vely;
+
+  /* Sprite lays */
+  EditorSprite sprite_background;
+  QList<EditorSprite> sprite_midlays;
+  QList<EditorSprite> sprite_overlays;
+  QList<EditorSprite> sprite_underlays;
 
   /*------------------- Constants -----------------------*/
   //const static int kFADE_INTERVAL; /* The fade interval, in milliseconds */
@@ -84,8 +101,17 @@ protected:
   /* Creates interface layout */
   void createLayout();
 
+  /* Edits the layover selected index based on the selected index */
+  void editLayOver(QString category, int index);
+
   /* Loads working info into UI objects */
   void loadWorkingInfo();
+
+  /* Flag called everytime a change is made to the curr set */
+  void setChanged();
+
+  /* Update preview image */
+  void updatePreview();
 
 /*============================================================================
  * SIGNALS

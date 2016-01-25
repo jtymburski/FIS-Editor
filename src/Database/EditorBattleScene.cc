@@ -19,6 +19,7 @@ EditorBattleScene::EditorBattleScene()
 {
   changed = false;
   clear();
+  scene.music_id = Sound::kID_MUSIC_BATTLE;
 }
 
 /*
@@ -163,6 +164,31 @@ LayOver EditorBattleScene::getMidlay(int index) const
 }
 
 /*
+ * Description: Returns the mid lay reference over at the index within the
+ *              stack. If the index is out of range, it returns a null ref.
+ *
+ * Inputs: int index - the index of the midlay within the stack of midlays
+ * Output: LayOver* - the returned structure reference at given index
+ */
+LayOver* EditorBattleScene::getMidlayRef(int index)
+{
+  if(index >= 0 && index < static_cast<int>(scene.midlays.size()))
+    return &scene.midlays[index];
+  return nullptr;
+}
+
+/*
+ * Description: Returns the number of midlays in the stack
+ *
+ * Inputs: none
+ * Output: int - the size of the stack
+ */
+int EditorBattleScene::getMidlaySize() const
+{
+  return scene.midlays.size();
+}
+
+/*
  * Description: Returns the stack of lay overs for the midlay of the scene.
  *
  * Inputs: none
@@ -221,6 +247,31 @@ LayOver EditorBattleScene::getOverlay(int index) const
 }
 
 /*
+ * Description: Returns the over lay reference over at the index within the
+ *              stack. If the index is out of range, it returns a null ref.
+ *
+ * Inputs: int index - the index of the overlay within the stack of overlays
+ * Output: LayOver* - the returned structure reference at given index
+ */
+LayOver* EditorBattleScene::getOverlayRef(int index)
+{
+  if(index >= 0 && index < static_cast<int>(scene.overlays.size()))
+    return &scene.overlays[index];
+  return nullptr;
+}
+
+/*
+ * Description: Returns the number of overlays in the stack
+ *
+ * Inputs: none
+ * Output: int - the size of the stack
+ */
+int EditorBattleScene::getOverlaySize() const
+{
+  return scene.overlays.size();
+}
+
+/*
  * Description: Returns the stack of lay overs for the overlay of the scene.
  *
  * Inputs: none
@@ -243,6 +294,31 @@ LayOver EditorBattleScene::getUnderlay(int index) const
   if(index >= 0 && index < static_cast<int>(scene.underlays.size()))
     return scene.underlays[index];
   return Helpers::createBlankLayOver();
+}
+
+/*
+ * Description: Returns the under lay reference over at the index within the
+ *              stack. If the index is out of range, it returns a null ref.
+ *
+ * Inputs: int index - the index of the underlay within the stack of underlays
+ * Output: LayOver* - the returned structure reference at given index
+ */
+LayOver* EditorBattleScene::getUnderlayRef(int index)
+{
+  if(index >= 0 && index < static_cast<int>(scene.underlays.size()))
+    return &scene.underlays[index];
+  return nullptr;
+}
+
+/*
+ * Description: Returns the number of underlays in the stack
+ *
+ * Inputs: none
+ * Output: int - the size of the stack
+ */
+int EditorBattleScene::getUnderlaySize() const
+{
+  return scene.underlays.size();
 }
 
 /*
@@ -557,6 +633,87 @@ bool EditorBattleScene::setUnderlay(int index, QString path, int anim_time,
   lay_over.velocity_x = velocity_x;
   lay_over.velocity_y = velocity_y;
   return setUnderlay(index, lay_over);
+}
+
+/*
+ * Description: Unsets the midlay and removes it at the given index.
+ *
+ * Inputs: int index - the index in the midlay stack
+ * Output: bool - true if the index was removed
+ */
+bool EditorBattleScene::unsetMidlay(int index)
+{
+  if(index >= 0 && static_cast<uint32_t>(index) < scene.midlays.size())
+  {
+    scene.midlays.erase(scene.midlays.begin() + index);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets the entire stack of midlays.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorBattleScene::unsetMidlays()
+{
+  scene.midlays.clear();
+}
+
+/*
+ * Description: Unsets the overlay and removes it at the given index.
+ *
+ * Inputs: int index - the index in the overlay stack
+ * Output: bool - true if the index was removed
+ */
+bool EditorBattleScene::unsetOverlay(int index)
+{
+  if(index >= 0 && static_cast<uint32_t>(index) < scene.overlays.size())
+  {
+    scene.overlays.erase(scene.overlays.begin() + index);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets the entire stack of overlays.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorBattleScene::unsetOverlays()
+{
+  scene.overlays.clear();
+}
+
+/*
+ * Description: Unsets the underlay and removes it at the given index.
+ *
+ * Inputs: int index - the index in the underlay stack
+ * Output: bool - true if the index was removed
+ */
+bool EditorBattleScene::unsetUnderlay(int index)
+{
+  if(index >= 0 && static_cast<uint32_t>(index) < scene.underlays.size())
+  {
+    scene.underlays.erase(scene.underlays.begin() + index);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets the entire stack of underlays.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorBattleScene::unsetUnderlays()
+{
+  scene.underlays.clear();
 }
 
 /*============================================================================

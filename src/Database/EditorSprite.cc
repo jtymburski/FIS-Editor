@@ -245,7 +245,8 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow)
         g *= (g_mod / kREF_RGB);
         b *= (b_mod / kREF_RGB);
 
-        editing_image.setPixel(i, j, qRgb(r, g, b));
+        editing_image.setPixel(i, j, qRgba(r, g, b,
+                                           qAlpha(editing_image.pixel(i, j))));
       }
     }
   }
