@@ -51,12 +51,13 @@ void MapDatabase::setupMain()
   combo_top = new QComboBox(widget_main);
   QStringList items;
   items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects"
-        << "Items" << "Persons" << "NPCs" << "Music";
+        << "Items" << "Persons" << "NPCs" << "Music" << "Battle Scenes";
   combo_top->addItems(items);
   connect(combo_top, SIGNAL(currentIndexChanged(int)),
           this, SLOT(updateSelected(int)));
 
   /* Sets up the various views */
+  view_battlescene = new MapBattleSceneView(widget_main);
   view_io = new MapIOView(widget_main);
   view_item = new MapItemView(widget_main);
   view_music = new MapMusicView(widget_main);
@@ -151,6 +152,7 @@ void MapDatabase::setupMain()
   layout->addWidget(view_person);
   layout->addWidget(view_npc);
   layout->addWidget(view_music);
+  layout->addWidget(view_battlescene);
 }
 
 /* Set-up path editor widget */
@@ -515,6 +517,7 @@ void MapDatabase::updateAllLists()
   view_person->updateList();
   view_npc->updateList();
   view_music->updateData();
+  view_battlescene->updateData();
 }
 
 /* Updated data from higher up in the stack */
@@ -646,6 +649,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
 
     /* Raw view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -663,6 +667,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::THING_VIEW)
   {
@@ -674,6 +679,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::IO_VIEW)
   {
@@ -685,6 +691,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::ITEM_VIEW)
   {
@@ -696,6 +703,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::PERSON_VIEW)
   {
@@ -707,6 +715,7 @@ void MapDatabase::updateSelected(int index)
     view_person->show();
     view_npc->hide();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::NPC_VIEW)
   {
@@ -718,6 +727,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->show();
     view_music->hide();
+    view_battlescene->hide();
   }
   else if(index == EditorEnumDb::MUSIC_VIEW)
   {
@@ -729,6 +739,7 @@ void MapDatabase::updateSelected(int index)
     view_person->hide();
     view_npc->hide();
     view_music->show();
+    view_battlescene->hide();
 
     /* Music view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -739,42 +750,73 @@ void MapDatabase::updateSelected(int index)
     if(view_music->getDataMusic().size() == 0)
       emit updateMusicObjects();
   }
+  else if(index == EditorEnumDb::MAPBATTLESCENE_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_io->hide();
+    view_item->hide();
+    view_person->hide();
+    view_npc->hide();
+    view_music->hide();
+    view_battlescene->show();
+
+    /* Music view has no buttons enabled */
+    button_delete->setEnabled(false);
+    button_duplicate->setEnabled(false);
+    button_import->setEnabled(false);
+    button_new->setEnabled(false);
+  }
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
+/* Returns the views */
+MapBattleSceneView* MapDatabase::getBattleSceneView()
+{
+  return view_battlescene;
+}
+
+/* Returns the views */
 MapIOView* MapDatabase::getIOView()
 {
   return view_io;
 }
 
+/* Returns the views */
 MapItemView* MapDatabase::getItemView()
 {
   return view_item;
 }
 
+/* Returns the views */
 MapNPCView* MapDatabase::getNPCView()
 {
   return view_npc;
 }
 
+/* Returns the views */
 MapPersonView* MapDatabase::getPersonView()
 {
   return view_person;
 }
 
+/* Returns the views */
 RawImageView* MapDatabase::getRawView()
 {
   return view_raw;
 }
 
+/* Returns the views */
 SpriteView* MapDatabase::getSpriteView()
 {
   return view_sprite;
 }
 
+/* Returns the views */
 MapThingView* MapDatabase::getThingView()
 {
   return view_thing;
@@ -805,4 +847,7 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the music view */
   view_music->setEditorMap(editing_map);
+
+  /* Add to the battle scene view */
+  view_battlescene->setEditorMap(editing_map);
 }

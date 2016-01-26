@@ -38,6 +38,7 @@ struct SubMapInfo
   QVector<EditorMapPerson*> persons;
   QVector<EditorMapThing*> things;
 
+  QVector<int> battle_scenes;
   QVector<int> music;
   int weather;
 };
@@ -78,6 +79,9 @@ private:
   QVector<EditorMapNPC*> base_npcs;
   QVector<EditorMapPerson*> base_persons;
   QVector<EditorMapThing*> base_things;
+
+  /* The base set of battle scenes */
+  QVector<int> battle_scenes;
 
   /* The map set ID */
   int id;
@@ -226,6 +230,11 @@ public:
   /* Ctrl + click trigger in map */
   void ctrlClickTrigger();
 
+  /* Battle scene core access information */
+  int getBattleScene(int index);
+  int getBattleSceneCount();
+  QVector<int> getBattleScenes();
+
   /* Returns current references for lists in map */
   int getCurrentIOIndex();
   int getCurrentItemIndex();
@@ -342,6 +351,9 @@ public:
   void save(FileHandler* fh, QProgressDialog* save_dialog,
             bool game_only = false, int sub_index = -1);
 
+  /* Sets the battle scene reference ID for the core base */
+  bool setBattleScene(int index, int id, bool insert = false);
+
   /* Sets the current references for the selected sprite(s) or thing(s) */
   bool setCurrentIO(int index);
   bool setCurrentItem(int index);
@@ -429,6 +441,10 @@ public:
 
   /* Updates tiles related to person reference */
   void updateTiles(EditorMapPerson* ref);
+
+  /* Unset calls for battle scene information on core */
+  bool unsetBattleScene(int index);
+  void unsetBattleScenes();
 
   /* Unset io(s) */
   bool unsetIO(int id, bool from_sub = false);

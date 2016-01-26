@@ -505,6 +505,9 @@ void EditorMap::clearAll()
 
   /* Remove all sprites */
   unsetSprites();
+
+  /* Remove anciliary data */
+  unsetBattleScenes();
 }
 
 /*
@@ -521,6 +524,7 @@ void EditorMap::copySelf(const EditorMap &source)
 
   /* Add const values */
   name = source.name;
+  battle_scenes = source.battle_scenes;
 
   /* Add sprites */
   for(int i = 0; i < source.sprites.size(); i++)
@@ -554,6 +558,7 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
     sub_maps.last()->path_top = NULL;
+    sub_maps.last()->battle_scenes = source.sub_maps[i]->battle_scenes;
     sub_maps.last()->music = source.sub_maps[i]->music;
     sub_maps.last()->weather = source.sub_maps[i]->weather;
     for(int j = 0; j < source.sub_maps[i]->tiles.size(); j++)
@@ -667,6 +672,13 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
   {
     setMap(map->id, map->name, map->tiles.size(), data.getDataInteger(),
            false);
+  }
+  /* ----------- BATTLE SCENES --------------*/
+  else if(element == "battlescene")
+  {
+    int scene_id = data.getDataInteger();
+    if(scene_id >= 0)
+      map->battle_scenes.push_back(scene_id);
   }
   /* -------------- MUSIC ----------------*/
   else if(element == "music")
@@ -1305,6 +1317,11 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
     fh->writeXmlData("name", map->name.toStdString());
   fh->writeXmlData("width", map->tiles.size());
   fh->writeXmlData("height", map->tiles.front().size());
+
+  /* Add battle scenes */
+  for(int i = 0;i < map->battle_scenes.size(); i++)
+    if(map->battle_scenes[i] >= 0)
+      fh->writeXmlData("battlescene", map->battle_scenes[i]);
 
   /* Add music and weather IDs */
   for(int i = 0; i < map->music.size(); i++)
@@ -2105,6 +2122,7 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
   if(copy_map != NULL && new_map != NULL)
   {
     new_map->name = copy_map->name;
+    new_map->battle_scenes = copy_map->battle_scenes;
     new_map->music = copy_map->music;
     new_map->weather = copy_map->weather;
 
@@ -2282,6 +2300,42 @@ void EditorMap::ctrlClickTrigger()
         emit spriteIndexChange(getSpriteIndex(sprite->getID()));
     }
   }
+}
+
+/*
+ * Description: Accesses and returns the ID at the given index for the battle
+ *              scene. If out of range, returns invalid (-1).
+ *
+ * Inputs: int index - the index within the battle scene stack
+ * Output: int - the battle scene reference ID to the upper level
+ */
+int EditorMap::getBattleScene(int index)
+{
+  if(index >= 0 && index < battle_scenes.size())
+    return battle_scenes[index];
+  return -1;
+}
+
+/*
+ * Description: Returns the number of battle scenes in the core stack
+ *
+ * Inputs: none
+ * Output: int - the battle scene count in stack
+ */
+int EditorMap::getBattleSceneCount()
+{
+  return battle_scenes.size();
+}
+
+/*
+ * Description: Returns the entire stack of the core battle scenes.
+ *
+ * Inputs: none
+ * Output: QVector<int> - the stack of scene IDs. If empty, there are none set
+ */
+QVector<int> EditorMap::getBattleScenes()
+{
+  return battle_scenes;
 }
 
 /*
@@ -4035,6 +4089,12 @@ void EditorMap::load(XmlData data, int index)
   {
     setName(QString::fromStdString(data.getDataString()));
   }
+  else if(data.getElement(index) == "battlescene")
+  {
+    int scene_id = data.getDataInteger();
+    if(scene_id >= 0)
+      battle_scenes.push_back(scene_id);
+  }
   else if(data.getElement(index) == "sprite" && data.getKey(index) == "id")
   {
     int sprite_id = QString::fromStdString(data.getKeyValue(index)).toInt();
@@ -4188,6 +4248,11 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
     if(!game_only)
       fh->writeXmlData("name", getName().toStdString());
 
+    /* Add battle scenes */
+    for(int i = 0; i < battle_scenes.size(); i++)
+      if(battle_scenes[i] >= 0)
+        fh->writeXmlData("battlescene", battle_scenes[i]);
+
     /* Add sprites */
     for(int i = 0; i < sprites.size(); i++)
     {
@@ -4244,6 +4309,37 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
 
     fh->writeXmlElementEnd();
   }
+}
+
+/*
+ * Description: Sets the battle scene reference ID for the core base. This
+ *              function is capable of replacing at index or inserting.
+ *
+ * Inputs: int index - the index to replace or insert
+ *         int id - the new id to replace or insert
+ *         bool insert - true to insert at index. false to replace
+ * Output: bool - true if inserted/replaced
+ */
+bool EditorMap::setBattleScene(int index, int id, bool insert)
+{
+  if(index >= 0)
+  {
+    /* If index is greater than or equal to size, just append */
+    if(index >= battle_scenes.size())
+    {
+      battle_scenes.push_back(id);
+    }
+    /* Otherwise, decide if insert or replace on index */
+    else
+    {
+      if(insert)
+        battle_scenes.insert(index, id);
+      else
+        battle_scenes[index] = id;
+    }
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -6024,6 +6120,34 @@ void EditorMap::updateTiles(EditorMapPerson* ref)
   if(sub_ref != nullptr)
     updateTiles(getPersonSub(ref), ref->getX(), ref->getY(),
                 ref->getMatrix()->getWidth(), ref->getMatrix()->getHeight());
+}
+
+/*
+ * Description: Unset call for the battle scene ID at the given index on the
+ *              core
+ *
+ * Inputs: int index - the index in the stack
+ * Output: bool - true if the index was removed
+ */
+bool EditorMap::unsetBattleScene(int index)
+{
+  if(index >= 0 && index < battle_scenes.size())
+  {
+    battle_scenes.remove(index);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Unsets all the battle scenes in the core ID stack.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::unsetBattleScenes()
+{
+  battle_scenes.clear();
 }
 
 /*

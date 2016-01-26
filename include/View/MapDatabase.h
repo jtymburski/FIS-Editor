@@ -13,6 +13,7 @@
 #include <QStackedWidget>
 
 #include "Dialog/NodeDialog.h"
+#include "View/MapBattleSceneView.h"
 #include "View/MapIOView.h"
 #include "View/MapItemView.h"
 #include "View/MapMusicView.h"
@@ -57,6 +58,7 @@ private:
   EditorNPCPath* path_working;
 
   /* The Views */
+  MapBattleSceneView* view_battlescene;
   MapIOView* view_io;
   MapItemView* view_item;
   MapMusicView* view_music;
@@ -162,6 +164,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the views */
+  MapBattleSceneView* getBattleSceneView();
   MapIOView* getIOView();
   MapItemView* getItemView();
   MapNPCView* getNPCView();
