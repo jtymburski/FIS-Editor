@@ -111,6 +111,7 @@ signals:
   void selectTile();
 
   /* Updates event objects in this class */
+  void updateBattleSceneObjects();
   void updateEventObjects();
   void updateMusicObjects();
   void updateSoundObjects();
@@ -147,6 +148,7 @@ public slots:
   void updateAllLists();
 
   /* Updated data from higher up in the stack */
+  void updatedBattleScenes(QList<QPair<int,QString>> scenes);
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   void updatedMusic(QList<QString> music);

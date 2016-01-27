@@ -125,6 +125,10 @@ void MapDatabase::setupMain()
   connect(view_thing, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
           this, SLOT(selectTile(EditorEnumDb::MapObjectMode)));
 
+  /* Battle scene connections */
+  connect(view_battlescene, SIGNAL(fillWithData(EditorEnumDb::MapObjectMode)),
+          this, SLOT(fillWithData(EditorEnumDb::MapObjectMode)));
+
   /* Push buttons at the bottom of the layout */
   button_delete = new QPushButton("Delete", widget_main);
   button_duplicate = new QPushButton("Duplicate", widget_main);
@@ -351,10 +355,15 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     }
 
     /* Emit signal to get other lists (items, maps, sound, music) */
-    if(view != EditorEnumDb::MUSIC_VIEW)
+    if(view != EditorEnumDb::MUSIC_VIEW ||
+       view != EditorEnumDb::MAPBATTLESCENE_VIEW)
     {
       emit updateEventObjects();
       emit updateSoundObjects();
+    }
+    else if(view == EditorEnumDb::MAPBATTLESCENE_VIEW)
+    {
+      emit updateBattleSceneObjects();
     }
     else
     {
@@ -518,6 +527,17 @@ void MapDatabase::updateAllLists()
   view_npc->updateList();
   view_music->updateData();
   view_battlescene->updateData();
+}
+
+/* Updated data from higher up in the stack */
+void MapDatabase::updatedBattleScenes(QList<QPair<int,QString>> scenes)
+{
+  /* Made it such that whenever called, it updates the scene list, since
+   * it's the only one. If it ever changes where there is two, evaluate.
+   * The reason for this was the requirement of scene view in map needs to be
+   * updated whenever music is changed - trigger by gamedb */
+  //if(mode_for_data == EditorEnumDb::MAPBATTLESCENE_VIEW)
+  view_battlescene->updateListScenes(scenes);
 }
 
 /* Updated data from higher up in the stack */

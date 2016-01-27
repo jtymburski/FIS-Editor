@@ -1200,7 +1200,8 @@ void GameDatabase::loadFinish()
   /* Update music */
   emit updatedMusic(data_sounds->getListMusic());
 
-  /* Update battle scenes - nothing to do at this time */
+  /* Update battle scenes */
+  updateBattleSceneObjects();
 }
 
 /* Update calls for objects (to fill in information required from others) */
@@ -1398,6 +1399,7 @@ void GameDatabase::createNewResource()
                    new EditorBattleScene(data_battlescene.last()->getID() + 1));
       else
         data_battlescene.push_back(new EditorBattleScene(0));
+      updateBattleSceneObjects();
       break;
     /* -- EQUIPMENT -- */
     case EditorEnumDb::EQUIPMENTVIEW:
@@ -1536,6 +1538,7 @@ void GameDatabase::deleteResource()
               changeBattleScene(-1, true);
             delete data_battlescene[index];
             data_battlescene.remove(index);
+            updateBattleSceneObjects();
             break;
           /* -- EQUIPMENT -- */
           case EditorEnumDb::EQUIPMENTVIEW:
@@ -1655,6 +1658,7 @@ void GameDatabase::duplicateResource()
         id = data_battlescene.last()->getID();
         *data_battlescene.last() = *data_battlescene[index];
         data_battlescene.last()->setID(id);
+        updateBattleSceneObjects();
       /* -- EQUIPMENT -- */
       case EditorEnumDb::EQUIPMENTVIEW:
         id = data_equipment.last()->getID();
@@ -1904,6 +1908,21 @@ void GameDatabase::updateBottomListName(QString str)
   {
     updateParties();
   }
+  else if(view_top->currentRow() == EditorEnumDb::BATTLESCENEVIEW)
+  {
+    updateBattleSceneObjects();
+  }
+}
+
+/* Updates battle scenes in the map database class */
+// TODO: Comment
+void GameDatabase::updateBattleSceneObjects()
+{
+  QList<QPair<int,QString>> list;
+  for(int i = 0; i < data_battlescene.size(); i++)
+    list.push_back(QPair<int,QString>(data_battlescene[i]->getID(),
+                                      data_battlescene[i]->getName()));
+  emit updatedBattleScenes(list);
 }
 
 /* Updates event objects in the map database class */
@@ -2040,6 +2059,7 @@ void GameDatabase::deleteAll()
   for(int i = 0; i < data_battlescene.size(); i++)
     delete data_battlescene[i];
   data_battlescene.clear();
+  updateBattleSceneObjects();
 
   /* Reset the view */
   if(index == 0)

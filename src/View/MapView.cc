@@ -90,6 +90,8 @@ void MapView::fillEventWithData()
 void MapView::setupLeftBar()
 {
   map_database = new MapDatabase(this);
+  connect(map_database, SIGNAL(updateBattleSceneObjects()),
+          this, SIGNAL(updateBattleSceneObjects()));
   connect(map_database, SIGNAL(updateEventObjects()),
           this, SLOT(updateEventObjectsDb()));
   connect(map_database, SIGNAL(updateMusicObjects()),
@@ -406,6 +408,13 @@ void MapView::updateSoundObjectsDb()
 {
   data_db = true;
   emit updateSoundObjects();
+}
+
+/* Updated data to pass into map database */
+// TODO: Comment
+void MapView::updatedBattleScenes(QList<QPair<int,QString>> scenes)
+{
+  map_database->updatedBattleScenes(scenes);
 }
 
 /* Updated data to pass into map database */

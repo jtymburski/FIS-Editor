@@ -70,6 +70,7 @@ signals:
   void nameChange(QString);
 
   /* Updated data to pass into map database */
+  void updatedBattleScenes(QList<QPair<int,QString>> scenes);
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   //void updatedMusic(QList<QString> music_list);
@@ -77,6 +78,7 @@ signals:
   void updatedSounds(QList<QString> sound_list);
 
   /* Updates event objects in the map database class */
+  void updateBattleSceneObjects();
   void updateEventObjects();
   void updateMusicObjects();
   void updateSoundObjects();

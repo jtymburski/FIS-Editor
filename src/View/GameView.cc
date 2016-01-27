@@ -14,6 +14,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   view_map = new MapView(this);
   addWidget(view_map);
 
+  connect(view_map, SIGNAL(updateBattleSceneObjects()),
+          this, SIGNAL(updateBattleSceneObjects()));
   connect(view_map, SIGNAL(updateEventObjects()),
           this, SIGNAL(updateEventObjects()));
   connect(view_map, SIGNAL(updateMusicObjects()),
@@ -21,6 +23,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   connect(view_map, SIGNAL(updateSoundObjects()),
           this, SIGNAL(updateSoundObjects()));
 
+  connect(this, SIGNAL(updatedBattleScenes(QList<QPair<int,QString>>)),
+          view_map, SLOT(updatedBattleScenes(QList<QPair<int,QString>>)));
   connect(this, SIGNAL(updatedItems(QVector<QString>)),
           view_map, SLOT(updatedItems(QVector<QString>)));
   connect(this, SIGNAL(updatedMaps(QVector<QString>)),

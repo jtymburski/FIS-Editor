@@ -45,7 +45,7 @@ private:
   QListWidget* list_sub_used;
 
   /* Battle scene information, for dropdown and selection list */
-  QList<QString> scene_list;
+  QList<QPair<int,QString>> scene_list;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -64,20 +64,23 @@ protected:
  *===========================================================================*/
 signals:
   /* Triggers the update the data of objects for use in events */
-  //void fillWithData(EditorEnumDb::MapObjectMode view);
+  void fillWithData(EditorEnumDb::MapObjectMode view);
 
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 public slots:
   /* Button control triggers */
-  //void buttonAdd();
-  //void buttonRemove();
+  void buttonCoreAdd();
+  void buttonCoreRemove();
+  void buttonSubAdd();
+  void buttonSubRemove();
 
   /* Changed triggers in widgets */
-  //void changedListLower(int row);
-  //void changedListUpper(int row);
-  //void changedWeather(const QString & text);
+  void changedListCoreAvail(int row);
+  void changedListCoreUsed(int row);
+  void changedListSubAvail(int row);
+  void changedListSubUsed(int row);
 
   /* Refreshes the entire data set within the widget */
   void updateData();
@@ -87,7 +90,7 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns data, as required */
-  QList<QString> getDataScenes();
+  QList<QPair<int,QString>> getDataScenes();
 
   /* Gets the editor map */
   EditorMap* getEditorMap();
@@ -96,6 +99,6 @@ public:
   void setEditorMap(EditorMap* map);
 
   /* Updates list used within the view for battle scene information */
-  void updateListScenes(QList<QString> list);
+  void updateListScenes(QList<QPair<int,QString>> list);
 };
 #endif // MAPMUSICVIEW_H

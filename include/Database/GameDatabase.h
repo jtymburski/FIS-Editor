@@ -180,6 +180,7 @@ signals:
   void changeSkillset(EditorSkillset* skill_set);
 
   /* Updated data to pass into map database */
+  void updatedBattleScenes(QList<QPair<int,QString>> scenes);
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   void updatedMusic(QList<QString> music_list);
@@ -226,6 +227,9 @@ public slots:
 
   /* Updates the bottom list -> when a name changes */
   void updateBottomListName(QString str);
+
+  /* Updates battle scenes in the map database class */
+  void updateBattleSceneObjects();
 
   /* Updates event objects in the map database class */
   void updateEventObjects();

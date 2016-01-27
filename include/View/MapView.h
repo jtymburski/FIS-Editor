@@ -124,6 +124,7 @@ signals:
   void sendUpEditorSprite(EditorSprite* e);
 
   /* Updates event objects in the map database or view class */
+  void updateBattleSceneObjects();
   void updateEventObjects();
   void updateMusicObjects();
   void updateSoundObjects();
@@ -165,6 +166,7 @@ public slots:
   void updateSoundObjectsDb();
 
   /* Updated data to pass into map database */
+  void updatedBattleScenes(QList<QPair<int,QString>> scenes);
   void updatedItems(QVector<QString> items);
   void updatedMaps(QVector<QString> maps);
   void updatedMusic(QList<QString> music_list);
