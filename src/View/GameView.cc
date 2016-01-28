@@ -94,6 +94,8 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   addWidget(view_sounds);
 
   view_battlescene = new BattleSceneView(this);
+  connect(view_battlescene, SIGNAL(nameChange(QString)),
+          this, SIGNAL(nameChange(QString)));
   addWidget(view_battlescene);
 
   /* Styling, as required */

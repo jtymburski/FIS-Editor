@@ -6,7 +6,7 @@
  *              preview and edit capabilities to the scene.
  ******************************************************************************/
 #include "View/BattleSceneView.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -276,10 +276,20 @@ void BattleSceneView::editLayOver(QString category, int index)
                                                    lay_edit_struct->path));
 
       spin_lay_anim->setValue(lay_edit_struct->anim_time);
-      spin_lay_velx->setValue(
-                         static_cast<int>(lay_edit_struct->velocity_x * 1000));
-      spin_lay_vely->setValue(
-                         static_cast<int>(lay_edit_struct->velocity_y * 1000));
+
+      float velx = (lay_edit_struct->velocity_x * 1000);
+      if(velx > 0)
+        velx += 0.1;
+      else if(velx < 0)
+        velx -= 0.1;
+      spin_lay_velx->setValue(static_cast<int>(velx));
+
+      float vely = (lay_edit_struct->velocity_y * 1000);
+      if(vely > 0)
+        vely += 0.1;
+      else if(vely < 0)
+        vely -= 0.1;
+      spin_lay_vely->setValue(static_cast<int>(vely));
     }
   }
 

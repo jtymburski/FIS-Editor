@@ -115,6 +115,9 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
  */
 void ConvoDialog::updateData()
 {
+  // TODO: This is the chunk for how HTML can be used...
+  //text_box->setHtml("<b>This text is bold</b>\n<i>This text is italic</i>\n"+
+  //         "<u>This text is underline</u>\n<font color=\"red\">Test</font>");
   text_box->setPlainText(QString::fromStdString(convo_working.text));
 
   thing_combo->clear();

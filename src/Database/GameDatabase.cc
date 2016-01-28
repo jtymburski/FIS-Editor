@@ -5,7 +5,7 @@
  * Description: Far left view that determines what the game view will become.
  ******************************************************************************/
 #include "Database/GameDatabase.h"
-#include <QDebug>
+//#include <QDebug>
 
 GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
 {

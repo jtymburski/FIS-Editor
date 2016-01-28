@@ -1428,6 +1428,12 @@ void EventView::updateConvoTree(Conversation* ref, QTreeWidgetItem* parent,
   else
     item = new QTreeWidgetItem(convo_tree);
 
+  /* This will be used for flattening once new HTML tags are used */
+  //QString s = "<i>Test:</i><img src=\"blah.png\" /><br> A test case";
+  //s.remove(QRegExp("<[^>]*>"));
+  // // s == "Test: A test case"
+  /* End test */
+
   /* Generate the text */
   QString text = "";
   if(ref->action_event.classification != EventClassifier::NOEVENT)
