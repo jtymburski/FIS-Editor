@@ -119,6 +119,8 @@ void ConvoDialog::updateData()
   //text_box->setHtml("<b>This text is bold</b>\n<i>This text is italic</i>\n"+
   //         "<u>This text is underline</u>\n<font color=\"red\">Test</font>");
   text_box->setPlainText(QString::fromStdString(convo_working.text));
+  //text_box->setTextColor(QColor(255,0,0));
+  //qDebug() << text_box->toHtml(); // TODO: Outputs crap...
 
   thing_combo->clear();
   int index = -1;
