@@ -14,6 +14,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QTextBlock>
 #include <QTextEdit>
 
 #include "Game/EventSet.h"

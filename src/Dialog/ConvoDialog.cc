@@ -116,11 +116,34 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
 void ConvoDialog::updateData()
 {
   // TODO: This is the chunk for how HTML can be used...
-  //text_box->setHtml("<b>This text is bold</b>\n<i>This text is italic</i>\n"+
-  //         "<u>This text is underline</u>\n<font color=\"red\">Test</font>");
+  //text_box->setHtml(
+  //  QString("<b>This text is bold</b> <i>This text is italic</i> ") +
+  //  QString("<u>This text is underline</u> <font color=\"red\">Test</font>"));
   text_box->setPlainText(QString::fromStdString(convo_working.text));
   //text_box->setTextColor(QColor(255,0,0));
-  //qDebug() << text_box->toHtml(); // TODO: Outputs crap...
+  //qDebug() << text_box->toHtml(); // TODO: Outputs crap...see below
+
+  // TODO: PARSING INFORMATION FOR TEXT
+//  QTextDocument* doc = text_box->document();
+//  for(int i = 0; i < doc->blockCount(); i++)
+//  {
+//    QTextBlock block = doc->findBlockByNumber(i);
+//    QTextBlock::iterator it = block.begin();
+//    while(!it.atEnd())
+//    {
+//      QTextFragment fragment = it.fragment();
+//      QTextCharFormat format = fragment.charFormat();
+//      qDebug() << fragment.text();
+//      qDebug() << "  - Bold: " << format.font().bold();
+//      qDebug() << "  - Italic: " << format.font().italic();
+//      qDebug() << "  - Underline: " << format.font().underline();
+//      qDebug() << "  - Color: " << format.foreground().color().red() << ","
+//                                << format.foreground().color().green() << ","
+//                                << format.foreground().color().blue();
+
+//      it++;
+//    }
+//  }
 
   thing_combo->clear();
   int index = -1;
