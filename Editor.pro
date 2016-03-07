@@ -13,7 +13,7 @@ unix {
   LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
 }
 macx {
-  INCLUDEPATH = "/usr/include"
+  INCLUDEPATH = "/opt/local/include"
   QMAKE_LFLAGS += -F/Library/Frameworks
   LIBS += -framework SDL2 -framework SDL2_image -framework SDL2_mixer -framework SDL2_ttf
   LIBS -= -lGLU
