@@ -76,22 +76,61 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   QGridLayout* layout = new QGridLayout(this);
   //layout->setSizeConstraint(QLayout::SetFixedSize);
 
+  /* The push buttons */
+  QHBoxLayout* btn_layout = new QHBoxLayout();
+  QPushButton* btn_brush = new QPushButton(this);
+  btn_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
+  btn_brush->setIconSize(QSize(24,24));
+  btn_brush->setMaximumSize(30, 30);
+  //connect(btn_brush, SIGNAL(clicked()),
+  //        this, SLOT(teleportMapPressed()));
+  btn_layout->addWidget(btn_brush);
+  QPushButton* btn_bold = new QPushButton(this);
+  btn_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
+  btn_bold->setIconSize(QSize(24,24));
+  btn_bold->setMaximumSize(30, 30);
+  //connect(btn_bold, SIGNAL(clicked()),
+  //        this, SLOT(teleportMapPressed()));
+  btn_layout->addWidget(btn_bold);
+  QPushButton* btn_italic = new QPushButton(this);
+  btn_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
+  btn_italic->setIconSize(QSize(24,24));
+  btn_italic->setMaximumSize(30, 30);
+  //connect(btn_italic, SIGNAL(clicked()),
+  //        this, SLOT(teleportMapPressed()));
+  btn_layout->addWidget(btn_italic);
+  QPushButton* btn_underline = new QPushButton(this);
+  btn_underline->setIcon(QIcon(":/images/icons/32_font_underline.png"));
+  btn_underline->setIconSize(QSize(24,24));
+  btn_underline->setMaximumSize(30, 30);
+  //connect(btn_underline, SIGNAL(clicked()),
+  //        this, SLOT(teleportMapPressed()));
+  btn_layout->addWidget(btn_underline);
+  QPushButton* btn_thing = new QPushButton(this);
+  btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
+  btn_thing->setIconSize(QSize(24,24));
+  btn_thing->setMaximumSize(30, 30);
+  //connect(btn_thing, SIGNAL(clicked()),
+  //        this, SLOT(teleportMapPressed()));
+  btn_layout->addWidget(btn_thing);
+  layout->addLayout(btn_layout, 0, 0, 1, 4);
+
   /* The text edit widget */
   text_box = new QTextEdit(this);
-  layout->addWidget(text_box, 0, 0, 1, 4);
+  layout->addWidget(text_box, 1, 0, 1, 4);
 
   /* The thing choice widget */
   QLabel* lbl_thing = new QLabel("Interactor", this);
   thing_combo = new QComboBox(this);
   if(is_option)
     thing_combo->setDisabled(true);
-  layout->addWidget(lbl_thing, 1, 0, 1, 1);
-  layout->addWidget(thing_combo, 1, 1, 1, 3);
+  layout->addWidget(lbl_thing, 2, 0, 1, 1);
+  layout->addWidget(thing_combo, 2, 1, 1, 3);
 
   /* The event widget */
   int limit_int = ((int)limiter | (int)EventClassifier::CONVERSATION);
   event_view = new EventView(event_ctrl, this, (EventClassifier)limit_int);
-  layout->addWidget(event_view, 2, 0, 1, 4);
+  layout->addWidget(event_view, 3, 0, 1, 4);
 
   /* The push buttons */
   QPushButton* btn_ok = new QPushButton("Ok", this);
@@ -99,8 +138,8 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_ok, 3, 1);
-  layout->addWidget(btn_cancel, 3, 2);
+  layout->addWidget(btn_ok, 4, 1);
+  layout->addWidget(btn_cancel, 4, 2);
 
   /* Dialog control */
   setWindowTitle("Conversation Edit");

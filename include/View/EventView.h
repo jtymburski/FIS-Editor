@@ -108,8 +108,13 @@ private:
   QPushButton* mult_btn_up;
   QListWidget* mult_list;
 
-  /* Notification event text edit box */
+  /* Notification event text edit box and buttons */
   QTextEdit* notification_edit;
+  QPushButton* btn_notify_brush;
+  QPushButton* btn_notify_bold;
+  QPushButton* btn_notify_italic;
+  QPushButton* btn_notify_thing;
+  QPushButton* btn_notify_underline;
 
   /* Conversation pop-up */
   ConvoDialog* pop_convo;
@@ -291,7 +296,14 @@ public slots:
   void multListChange(int current_row);
   void multListDouble(QListWidgetItem*);
 
-  /* The notification event text changes */
+  /* The notification event text changes and buttons */
+  void notificationBtnBrush();
+  void notificationBtnBold();
+  void notificationBtnItalic();
+  void notificationBtnPreview();
+  void notificationBtnThing();
+  void notificationBtnUnderline();
+  void notificationSelected(bool yes);
   void notificationTextChanged();
 
   /* Event pop-up slot triggers */

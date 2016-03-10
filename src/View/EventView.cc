@@ -281,9 +281,57 @@ void EventView::createLayout()//bool conversation_enabled)
       QWidget* widget_notification = new QWidget(this);
       notification_edit = new QTextEdit(this);
       //notification_edit->setMinimumWidth(320);
+      connect(notification_edit, SIGNAL(copyAvailable(bool)),
+              this, SLOT(notificationSelected(bool)));
       connect(notification_edit, SIGNAL(textChanged()),
               this, SLOT(notificationTextChanged()));
+      btn_notify_brush = new QPushButton(this);
+      btn_notify_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
+      btn_notify_brush->setIconSize(QSize(24,24));
+      btn_notify_brush->setMaximumSize(30, 30);
+      connect(btn_notify_brush, SIGNAL(clicked()),
+              this, SLOT(notificationBtnBrush()));
+      btn_notify_bold = new QPushButton(this);
+      btn_notify_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
+      btn_notify_bold->setIconSize(QSize(24,24));
+      btn_notify_bold->setMaximumSize(30, 30);
+      connect(btn_notify_bold, SIGNAL(clicked()),
+              this, SLOT(notificationBtnBold()));
+      btn_notify_italic = new QPushButton(this);
+      btn_notify_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
+      btn_notify_italic->setIconSize(QSize(24,24));
+      btn_notify_italic->setMaximumSize(30, 30);
+      connect(btn_notify_italic, SIGNAL(clicked()),
+              this, SLOT(notificationBtnItalic()));
+      btn_notify_underline = new QPushButton(this);
+      btn_notify_underline->setIcon(
+                               QIcon(":/images/icons/32_font_underline.png"));
+      btn_notify_underline->setIconSize(QSize(24,24));
+      btn_notify_underline->setMaximumSize(30, 30);
+      connect(btn_notify_underline, SIGNAL(clicked()),
+              this, SLOT(notificationBtnUnderline()));
+      btn_notify_thing = new QPushButton(this);
+      btn_notify_thing->setIcon(QIcon(":/images/icons/32_user.png"));
+      btn_notify_thing->setIconSize(QSize(24,24));
+      btn_notify_thing->setMaximumSize(30, 30);
+      connect(btn_notify_thing, SIGNAL(clicked()),
+              this, SLOT(notificationBtnThing()));
+      QPushButton* btn_notify_preview = new QPushButton(this);
+      btn_notify_preview->setIcon(QIcon(":/images/icons/32_export.png"));
+      btn_notify_preview->setIconSize(QSize(24,24));
+      btn_notify_preview->setMaximumSize(30, 30);
+      connect(btn_notify_preview, SIGNAL(clicked()),
+              this, SLOT(notificationBtnPreview()));
+      notificationSelected(false);
       QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
+      QHBoxLayout* layout_notify_btns = new QHBoxLayout();
+      layout_notify_btns->addWidget(btn_notify_brush);
+      layout_notify_btns->addWidget(btn_notify_bold);
+      layout_notify_btns->addWidget(btn_notify_italic);
+      layout_notify_btns->addWidget(btn_notify_underline);
+      layout_notify_btns->addWidget(btn_notify_thing);
+      layout_notify_btns->addWidget(btn_notify_preview);
+      layout_notification->addLayout(layout_notify_btns);
       layout_notification->addWidget(notification_edit, 1);
       view_stack->addWidget(widget_notification);
     }
@@ -474,7 +522,8 @@ void EventView::createLayout()//bool conversation_enabled)
       btn_tele_map->setIcon(QIcon(":/images/icons/32_settings.png"));
       btn_tele_map->setIconSize(QSize(24,24));
       btn_tele_map->setMaximumSize(30, 30);
-      connect(btn_tele_map, SIGNAL(clicked()), this, SLOT(teleportMapPressed()));
+      connect(btn_tele_map, SIGNAL(clicked()),
+              this, SLOT(teleportMapPressed()));
       QGridLayout* layout_tele = new QGridLayout(widget_teleport);
       layout_tele->setRowStretch(0, 1);
       layout_tele->addWidget(lbl_tele_map, 1, 0);
@@ -2117,6 +2166,100 @@ void EventView::multListChange(int current_row)
 void EventView::multListDouble(QListWidgetItem*)
 {
   multBtnEdit();
+}
+
+/*
+ * Description: Slot which triggers when the notification color changing button
+ *              is pressed. Opens dialog to select from color selection
+ *              (QColorDialog).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnBrush()
+{
+  qDebug() << "TODO: Color Brush - QColorDialog";
+}
+
+/*
+ * Description: Slot which triggers when the notification bold button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection bold.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnBold()
+{
+  qDebug() << "TODO: Bold";
+}
+
+/*
+ * Description: Slot which triggers when the notification italic button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection italic.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnItalic()
+{
+  qDebug() << "TODO: Italic";
+}
+
+/*
+ * Description: Slot which triggers when the notification preview is selected.
+ *              This loads the current xml for a quick preview of how it will
+ *              render.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnPreview()
+{
+  qDebug() << "TODO: Preview";
+}
+
+/*
+ * Description: Slot which triggers when the notification thing insertion is
+ *              pressed. Allows for selection of a thing ID to insert into the
+ *              notification.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnThing()
+{
+  qDebug() << "TODO: Thing Insertion";
+}
+
+/*
+ * Description: Slot which triggers when the notification underline button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection underlined.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnUnderline()
+{
+  qDebug() << "TODO: Underline";
+}
+
+/*
+ * Description: Slot triggered when the text selection in the notification
+ *              changes. This controls if the buttons are enabled.
+ *
+ * Inputs: bool yes - text is selected
+ * Output: none
+ */
+void EventView::notificationSelected(bool yes)
+{
+  btn_notify_brush->setEnabled(yes);
+  btn_notify_bold->setEnabled(yes);
+  btn_notify_italic->setEnabled(yes);
+  btn_notify_thing->setEnabled(yes);
+  btn_notify_underline->setEnabled(yes);
 }
 
 /*
