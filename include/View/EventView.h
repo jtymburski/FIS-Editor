@@ -110,11 +110,11 @@ private:
 
   /* Notification event text edit box and buttons */
   QTextEdit* notification_edit;
-  QPushButton* btn_notify_brush;
-  QPushButton* btn_notify_bold;
-  QPushButton* btn_notify_italic;
-  QPushButton* btn_notify_thing;
-  QPushButton* btn_notify_underline;
+  QPushButton* notify_btn_brush;
+  QPushButton* notify_btn_bold;
+  QPushButton* notify_btn_italic;
+  QPushButton* notify_btn_thing;
+  QPushButton* notify_btn_underline;
 
   /* Conversation pop-up */
   ConvoDialog* pop_convo;

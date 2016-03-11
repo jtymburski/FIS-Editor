@@ -78,45 +78,55 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
 
   /* The push buttons */
   QHBoxLayout* btn_layout = new QHBoxLayout();
-  QPushButton* btn_brush = new QPushButton(this);
+  btn_brush = new QPushButton(this);
   btn_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
   btn_brush->setIconSize(QSize(24,24));
   btn_brush->setMaximumSize(30, 30);
-  //connect(btn_brush, SIGNAL(clicked()),
-  //        this, SLOT(teleportMapPressed()));
+  connect(btn_brush, SIGNAL(clicked()),
+          this, SLOT(textBtnBrush()));
   btn_layout->addWidget(btn_brush);
-  QPushButton* btn_bold = new QPushButton(this);
+  btn_bold = new QPushButton(this);
   btn_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
   btn_bold->setIconSize(QSize(24,24));
   btn_bold->setMaximumSize(30, 30);
-  //connect(btn_bold, SIGNAL(clicked()),
-  //        this, SLOT(teleportMapPressed()));
+  connect(btn_bold, SIGNAL(clicked()),
+          this, SLOT(textBtnBold()));
   btn_layout->addWidget(btn_bold);
-  QPushButton* btn_italic = new QPushButton(this);
+  btn_italic = new QPushButton(this);
   btn_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
   btn_italic->setIconSize(QSize(24,24));
   btn_italic->setMaximumSize(30, 30);
-  //connect(btn_italic, SIGNAL(clicked()),
-  //        this, SLOT(teleportMapPressed()));
+  connect(btn_italic, SIGNAL(clicked()),
+          this, SLOT(textBtnItalic()));
   btn_layout->addWidget(btn_italic);
-  QPushButton* btn_underline = new QPushButton(this);
+  btn_underline = new QPushButton(this);
   btn_underline->setIcon(QIcon(":/images/icons/32_font_underline.png"));
   btn_underline->setIconSize(QSize(24,24));
   btn_underline->setMaximumSize(30, 30);
-  //connect(btn_underline, SIGNAL(clicked()),
-  //        this, SLOT(teleportMapPressed()));
+  connect(btn_underline, SIGNAL(clicked()),
+          this, SLOT(textBtnUnderline()));
   btn_layout->addWidget(btn_underline);
-  QPushButton* btn_thing = new QPushButton(this);
+  btn_thing = new QPushButton(this);
   btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
   btn_thing->setIconSize(QSize(24,24));
   btn_thing->setMaximumSize(30, 30);
-  //connect(btn_thing, SIGNAL(clicked()),
-  //        this, SLOT(teleportMapPressed()));
+  connect(btn_thing, SIGNAL(clicked()),
+          this, SLOT(textBtnThing()));
   btn_layout->addWidget(btn_thing);
+  QPushButton* btn_preview = new QPushButton(this);
+  btn_preview->setIcon(QIcon(":/images/icons/32_export.png"));
+  btn_preview->setIconSize(QSize(24,24));
+  btn_preview->setMaximumSize(30, 30);
+  connect(btn_preview, SIGNAL(clicked()),
+          this, SLOT(textBtnPreview()));
+  btn_layout->addWidget(btn_preview);
+  textSelected(false);
   layout->addLayout(btn_layout, 0, 0, 1, 4);
 
   /* The text edit widget */
   text_box = new QTextEdit(this);
+  connect(text_box, SIGNAL(copyAvailable(bool)),
+          this, SLOT(textSelected(bool)));
   layout->addWidget(text_box, 1, 0, 1, 4);
 
   /* The thing choice widget */
@@ -258,6 +268,100 @@ void ConvoDialog::buttonOk()
 
   emit success();
   close();
+}
+
+/*
+ * Description: Slot which triggers when the text color changing button
+ *              is pressed. Opens dialog to select from color selection
+ *              (QColorDialog).
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnBrush()
+{
+  qDebug() << "TODO: Color Brush - QColorDialog";
+}
+
+/*
+ * Description: Slot which triggers when the text bold button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection bold.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnBold()
+{
+  qDebug() << "TODO: Bold";
+}
+
+/*
+ * Description: Slot which triggers when the text italic button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection italic.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnItalic()
+{
+  qDebug() << "TODO: Italic";
+}
+
+/*
+ * Description: Slot which triggers when the text preview is selected.
+ *              This loads the current xml for a quick preview of how it will
+ *              render.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnPreview()
+{
+  qDebug() << "TODO: Preview";
+}
+
+/*
+ * Description: Slot which triggers when the text thing insertion is
+ *              pressed. Allows for selection of a thing ID to insert into the
+ *              conversation text.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnThing()
+{
+  qDebug() << "TODO: Thing Insertion";
+}
+
+/*
+ * Description: Slot which triggers when the text underline button is
+ *              pressed. Inserts the relevant pseudo xml for making the
+ *              selection underlined.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnUnderline()
+{
+  qDebug() << "TODO: Underline";
+}
+
+/*
+ * Description: Slot triggered when the text selection in the text
+ *              changes. This controls if the buttons are enabled.
+ *
+ * Inputs: bool yes - text is selected
+ * Output: none
+ */
+void ConvoDialog::textSelected(bool yes)
+{
+  btn_brush->setEnabled(yes);
+  btn_bold->setEnabled(yes);
+  btn_italic->setEnabled(yes);
+  btn_thing->setEnabled(yes);
+  btn_underline->setEnabled(yes);
 }
 
 /*============================================================================

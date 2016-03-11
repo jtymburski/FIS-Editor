@@ -33,6 +33,13 @@ public:
   ~ConvoDialog();
 
 private:
+  /* Buttons for text manipulation */
+  QPushButton* btn_brush;
+  QPushButton* btn_bold;
+  QPushButton* btn_italic;
+  QPushButton* btn_thing;
+  QPushButton* btn_underline;
+
   /* Conversation reference */
   Conversation convo_working;
   Conversation* convo_original;
@@ -85,6 +92,15 @@ public slots:
   /* Button triggers */
   void buttonCancel();
   void buttonOk();
+
+  /* Text manipulator triggers */
+  void textBtnBrush();
+  void textBtnBold();
+  void textBtnItalic();
+  void textBtnPreview();
+  void textBtnThing();
+  void textBtnUnderline();
+  void textSelected(bool yes);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

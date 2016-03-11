@@ -285,52 +285,52 @@ void EventView::createLayout()//bool conversation_enabled)
               this, SLOT(notificationSelected(bool)));
       connect(notification_edit, SIGNAL(textChanged()),
               this, SLOT(notificationTextChanged()));
-      btn_notify_brush = new QPushButton(this);
-      btn_notify_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
-      btn_notify_brush->setIconSize(QSize(24,24));
-      btn_notify_brush->setMaximumSize(30, 30);
-      connect(btn_notify_brush, SIGNAL(clicked()),
+      notify_btn_brush = new QPushButton(this);
+      notify_btn_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
+      notify_btn_brush->setIconSize(QSize(24,24));
+      notify_btn_brush->setMaximumSize(30, 30);
+      connect(notify_btn_brush, SIGNAL(clicked()),
               this, SLOT(notificationBtnBrush()));
-      btn_notify_bold = new QPushButton(this);
-      btn_notify_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
-      btn_notify_bold->setIconSize(QSize(24,24));
-      btn_notify_bold->setMaximumSize(30, 30);
-      connect(btn_notify_bold, SIGNAL(clicked()),
+      notify_btn_bold = new QPushButton(this);
+      notify_btn_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
+      notify_btn_bold->setIconSize(QSize(24,24));
+      notify_btn_bold->setMaximumSize(30, 30);
+      connect(notify_btn_bold, SIGNAL(clicked()),
               this, SLOT(notificationBtnBold()));
-      btn_notify_italic = new QPushButton(this);
-      btn_notify_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
-      btn_notify_italic->setIconSize(QSize(24,24));
-      btn_notify_italic->setMaximumSize(30, 30);
-      connect(btn_notify_italic, SIGNAL(clicked()),
+      notify_btn_italic = new QPushButton(this);
+      notify_btn_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
+      notify_btn_italic->setIconSize(QSize(24,24));
+      notify_btn_italic->setMaximumSize(30, 30);
+      connect(notify_btn_italic, SIGNAL(clicked()),
               this, SLOT(notificationBtnItalic()));
-      btn_notify_underline = new QPushButton(this);
-      btn_notify_underline->setIcon(
+      notify_btn_underline = new QPushButton(this);
+      notify_btn_underline->setIcon(
                                QIcon(":/images/icons/32_font_underline.png"));
-      btn_notify_underline->setIconSize(QSize(24,24));
-      btn_notify_underline->setMaximumSize(30, 30);
-      connect(btn_notify_underline, SIGNAL(clicked()),
+      notify_btn_underline->setIconSize(QSize(24,24));
+      notify_btn_underline->setMaximumSize(30, 30);
+      connect(notify_btn_underline, SIGNAL(clicked()),
               this, SLOT(notificationBtnUnderline()));
-      btn_notify_thing = new QPushButton(this);
-      btn_notify_thing->setIcon(QIcon(":/images/icons/32_user.png"));
-      btn_notify_thing->setIconSize(QSize(24,24));
-      btn_notify_thing->setMaximumSize(30, 30);
-      connect(btn_notify_thing, SIGNAL(clicked()),
+      notify_btn_thing = new QPushButton(this);
+      notify_btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
+      notify_btn_thing->setIconSize(QSize(24,24));
+      notify_btn_thing->setMaximumSize(30, 30);
+      connect(notify_btn_thing, SIGNAL(clicked()),
               this, SLOT(notificationBtnThing()));
-      QPushButton* btn_notify_preview = new QPushButton(this);
-      btn_notify_preview->setIcon(QIcon(":/images/icons/32_export.png"));
-      btn_notify_preview->setIconSize(QSize(24,24));
-      btn_notify_preview->setMaximumSize(30, 30);
-      connect(btn_notify_preview, SIGNAL(clicked()),
+      QPushButton* notify_btn_preview = new QPushButton(this);
+      notify_btn_preview->setIcon(QIcon(":/images/icons/32_export.png"));
+      notify_btn_preview->setIconSize(QSize(24,24));
+      notify_btn_preview->setMaximumSize(30, 30);
+      connect(notify_btn_preview, SIGNAL(clicked()),
               this, SLOT(notificationBtnPreview()));
       notificationSelected(false);
       QVBoxLayout* layout_notification = new QVBoxLayout(widget_notification);
       QHBoxLayout* layout_notify_btns = new QHBoxLayout();
-      layout_notify_btns->addWidget(btn_notify_brush);
-      layout_notify_btns->addWidget(btn_notify_bold);
-      layout_notify_btns->addWidget(btn_notify_italic);
-      layout_notify_btns->addWidget(btn_notify_underline);
-      layout_notify_btns->addWidget(btn_notify_thing);
-      layout_notify_btns->addWidget(btn_notify_preview);
+      layout_notify_btns->addWidget(notify_btn_brush);
+      layout_notify_btns->addWidget(notify_btn_bold);
+      layout_notify_btns->addWidget(notify_btn_italic);
+      layout_notify_btns->addWidget(notify_btn_underline);
+      layout_notify_btns->addWidget(notify_btn_thing);
+      layout_notify_btns->addWidget(notify_btn_preview);
       layout_notification->addLayout(layout_notify_btns);
       layout_notification->addWidget(notification_edit, 1);
       view_stack->addWidget(widget_notification);
@@ -2191,6 +2191,10 @@ void EventView::notificationBtnBrush()
  */
 void EventView::notificationBtnBold()
 {
+  QString text_set = notification_edit->toPlainText();
+  //notification_edit->textCursor().s
+  qDebug() << notification_edit->textCursor().selectedText();
+
   qDebug() << "TODO: Bold";
 }
 
@@ -2255,11 +2259,11 @@ void EventView::notificationBtnUnderline()
  */
 void EventView::notificationSelected(bool yes)
 {
-  btn_notify_brush->setEnabled(yes);
-  btn_notify_bold->setEnabled(yes);
-  btn_notify_italic->setEnabled(yes);
-  btn_notify_thing->setEnabled(yes);
-  btn_notify_underline->setEnabled(yes);
+  notify_btn_brush->setEnabled(yes);
+  notify_btn_bold->setEnabled(yes);
+  notify_btn_italic->setEnabled(yes);
+  notify_btn_thing->setEnabled(yes);
+  notify_btn_underline->setEnabled(yes);
 }
 
 /*
@@ -2271,8 +2275,10 @@ void EventView::notificationSelected(bool yes)
  */
 void EventView::notificationTextChanged()
 {
-  event->setEventNotification(notification_edit->toPlainText(),
-                              event->getSoundID());
+  QString text_set = notification_edit->toPlainText();
+  text_set.replace('<', '[');
+  text_set.replace('>', ']');
+  event->setEventNotification(text_set, event->getSoundID());
 }
 
 /*
