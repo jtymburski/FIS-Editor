@@ -43,6 +43,9 @@ public:
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the converted from pseudo xml [ to true xml for rendering */
+  static QString convertXml(QString orig_text, QVector<QString> list);
+
   /* Returns the corresponding layer string */
   static QString getLayerString(EditorEnumDb::Layer layer);
 

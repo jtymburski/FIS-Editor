@@ -310,7 +310,7 @@ void EventView::createLayout()//bool conversation_enabled)
       notify_btn_underline->setMaximumSize(30, 30);
       connect(notify_btn_underline, SIGNAL(clicked()),
               this, SLOT(notificationBtnUnderline()));
-      notify_btn_thing = new QPushButton(this);
+      QPushButton* notify_btn_thing = new QPushButton(this);
       notify_btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
       notify_btn_thing->setIconSize(QSize(24,24));
       notify_btn_thing->setMaximumSize(30, 30);
@@ -2178,7 +2178,19 @@ void EventView::multListDouble(QListWidgetItem*)
  */
 void EventView::notificationBtnBrush()
 {
-  qDebug() << "TODO: Color Brush - QColorDialog";
+  /* Get the color */
+  QColorDialog color_dialog;
+  if(color_dialog.exec() == QDialog::Accepted)
+  {
+    QString selected_color = color_dialog.selectedColor().name();
+    selected_color.remove(0, 1);
+
+    /* Convert to format and insert in as pseudo html */
+    QString selected_text = notification_edit->textCursor().selectedText();
+    selected_text = "[" + selected_color + "]" + selected_text +
+                    "[/" + selected_color + "]";
+    notification_edit->textCursor().insertText(selected_text);
+  }
 }
 
 /*
@@ -2191,11 +2203,9 @@ void EventView::notificationBtnBrush()
  */
 void EventView::notificationBtnBold()
 {
-  QString text_set = notification_edit->toPlainText();
-  //notification_edit->textCursor().s
-  qDebug() << notification_edit->textCursor().selectedText();
-
-  qDebug() << "TODO: Bold";
+  QString selected_text = notification_edit->textCursor().selectedText();
+  selected_text = "[b]" + selected_text + "[/b]";
+  notification_edit->textCursor().insertText(selected_text);
 }
 
 /*
@@ -2208,7 +2218,9 @@ void EventView::notificationBtnBold()
  */
 void EventView::notificationBtnItalic()
 {
-  qDebug() << "TODO: Italic";
+  QString selected_text = notification_edit->textCursor().selectedText();
+  selected_text = "[i]" + selected_text + "[/i]";
+  notification_edit->textCursor().insertText(selected_text);
 }
 
 /*
@@ -2221,7 +2233,28 @@ void EventView::notificationBtnItalic()
  */
 void EventView::notificationBtnPreview()
 {
-  qDebug() << "TODO: Preview";
+  /* Compile list */
+  QVector<QString> list_vec = list_map_persons;
+  list_vec += list_map_npcs;
+  list_vec += list_map_things;
+  for(int i = 0; i < list_map_ios.size(); i++)
+    list_vec.push_back(list_map_ios[i].first);
+  list_vec += list_map_items;
+
+  /* Handle conversion */
+  QString render_text = EditorHelpers::convertXml(
+                                    notification_edit->toPlainText(), list_vec);
+
+  /* Insert warning */
+  QString info_text = QString("<font color=\"#900\">* Overlap nested color ") +
+                      QString("rendering might not be exactly as shown</font>");
+
+  /* Render */
+  QMessageBox msg_box;
+  msg_box.setText(render_text);
+  msg_box.setInformativeText(info_text);
+  msg_box.setWindowTitle("Preview");
+  msg_box.exec();
 }
 
 /*
@@ -2234,7 +2267,38 @@ void EventView::notificationBtnPreview()
  */
 void EventView::notificationBtnThing()
 {
-  qDebug() << "TODO: Thing Insertion";
+  /* Compile list of all things */
+  QVector<QString> list_vec = list_map_persons;
+  QString player = list_vec.first();
+  list_vec.removeFirst();
+  list_vec += list_map_npcs;
+  list_vec += list_map_things;
+  for(int i = 0; i < list_map_ios.size(); i++)
+    list_vec.push_back(list_map_ios[i].first);
+  list_vec += list_map_items;
+  qSort(list_vec);
+  list_vec.push_front(player);
+  QStringList list(list_vec.toList());
+
+  /* Create input dialog to get selected thing */
+  QInputDialog input_dialog;
+  input_dialog.setComboBoxItems(list);
+  if(input_dialog.exec() == QDialog::Accepted)
+  {
+    /* Check if the selected is valid and an ID */
+    QStringList split = input_dialog.textValue().split(':');
+    if(split.size() >= 2)
+    {
+      /* If valid, insert the number */
+      bool ok;
+      split.first().toInt(&ok);
+      if(ok)
+      {
+        QString insert_text = "{" + split.first() + "}";
+        notification_edit->textCursor().insertText(insert_text);
+      }
+    }
+  }
 }
 
 /*
@@ -2247,7 +2311,9 @@ void EventView::notificationBtnThing()
  */
 void EventView::notificationBtnUnderline()
 {
-  qDebug() << "TODO: Underline";
+  QString selected_text = notification_edit->textCursor().selectedText();
+  selected_text = "[u]" + selected_text + "[/u]";
+  notification_edit->textCursor().insertText(selected_text);
 }
 
 /*
@@ -2262,7 +2328,7 @@ void EventView::notificationSelected(bool yes)
   notify_btn_brush->setEnabled(yes);
   notify_btn_bold->setEnabled(yes);
   notify_btn_italic->setEnabled(yes);
-  notify_btn_thing->setEnabled(yes);
+  //notify_btn_thing->setEnabled(yes);
   notify_btn_underline->setEnabled(yes);
 }
 

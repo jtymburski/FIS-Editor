@@ -11,12 +11,14 @@
 class ConvoDialog;
 
 #include <QCheckBox>
+#include <QColorDialog>
 #include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -32,6 +34,7 @@ class ConvoDialog;
 #include "Database/EditorEvent.h"
 //#include "Database/GameDatabase.h"
 #include "EditorEnumDb.h"
+#include "EditorHelpers.h"
 
 class EventView : public QFrame
 {
@@ -113,7 +116,7 @@ private:
   QPushButton* notify_btn_brush;
   QPushButton* notify_btn_bold;
   QPushButton* notify_btn_italic;
-  QPushButton* notify_btn_thing;
+  //QPushButton* notify_btn_thing;
   QPushButton* notify_btn_underline;
 
   /* Conversation pop-up */

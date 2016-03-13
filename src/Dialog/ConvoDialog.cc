@@ -106,7 +106,7 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   connect(btn_underline, SIGNAL(clicked()),
           this, SLOT(textBtnUnderline()));
   btn_layout->addWidget(btn_underline);
-  btn_thing = new QPushButton(this);
+  QPushButton* btn_thing = new QPushButton(this);
   btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
   btn_thing->setIconSize(QSize(24,24));
   btn_thing->setMaximumSize(30, 30);
@@ -280,7 +280,19 @@ void ConvoDialog::buttonOk()
  */
 void ConvoDialog::textBtnBrush()
 {
-  qDebug() << "TODO: Color Brush - QColorDialog";
+  /* Get the color */
+  QColorDialog color_dialog;
+  if(color_dialog.exec() == QDialog::Accepted)
+  {
+    QString selected_color = color_dialog.selectedColor().name();
+    selected_color.remove(0, 1);
+
+    /* Convert to format and insert in as pseudo html */
+    QString selected_text = text_box->textCursor().selectedText();
+    selected_text = "[" + selected_color + "]" + selected_text +
+                    "[/" + selected_color + "]";
+    text_box->textCursor().insertText(selected_text);
+  }
 }
 
 /*
@@ -293,7 +305,9 @@ void ConvoDialog::textBtnBrush()
  */
 void ConvoDialog::textBtnBold()
 {
-  qDebug() << "TODO: Bold";
+  QString selected_text = text_box->textCursor().selectedText();
+  selected_text = "[b]" + selected_text + "[/b]";
+  text_box->textCursor().insertText(selected_text);
 }
 
 /*
@@ -306,7 +320,9 @@ void ConvoDialog::textBtnBold()
  */
 void ConvoDialog::textBtnItalic()
 {
-  qDebug() << "TODO: Italic";
+  QString selected_text = text_box->textCursor().selectedText();
+  selected_text = "[i]" + selected_text + "[/i]";
+  text_box->textCursor().insertText(selected_text);
 }
 
 /*
@@ -319,7 +335,29 @@ void ConvoDialog::textBtnItalic()
  */
 void ConvoDialog::textBtnPreview()
 {
-  qDebug() << "TODO: Preview";
+  /* Compile list */
+  QVector<QString> list_vec = event_view->getListMapPersons();
+  list_vec += event_view->getListMapNPCs();
+  list_vec += event_view->getListMapThings();
+  QVector<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
+  for(int i = 0; i < list_map_ios.size(); i++)
+    list_vec.push_back(list_map_ios[i].first);
+  list_vec += event_view->getListMapItems();
+
+  /* Handle conversion */
+  QString render_text = EditorHelpers::convertXml(
+                                             text_box->toPlainText(), list_vec);
+
+  /* Insert warning */
+  QString info_text = QString("<font color=\"#900\">* Overlap nested color ") +
+                      QString("rendering might not be exactly as shown</font>");
+
+  /* Render */
+  QMessageBox msg_box;
+  msg_box.setText(render_text);
+  msg_box.setInformativeText(info_text);
+  msg_box.setWindowTitle("Preview");
+  msg_box.exec();
 }
 
 /*
@@ -332,7 +370,39 @@ void ConvoDialog::textBtnPreview()
  */
 void ConvoDialog::textBtnThing()
 {
-  qDebug() << "TODO: Thing Insertion";
+  /* Compile list of all things */
+  QVector<QString> list_vec = event_view->getListMapPersons();
+  QString player = list_vec.first();
+  list_vec.removeFirst();
+  list_vec += event_view->getListMapNPCs();
+  list_vec += event_view->getListMapThings();
+  QVector<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
+  for(int i = 0; i < list_map_ios.size(); i++)
+    list_vec.push_back(list_map_ios[i].first);
+  list_vec += event_view->getListMapItems();
+  qSort(list_vec);
+  list_vec.push_front(player);
+  QStringList list(list_vec.toList());
+
+  /* Create input dialog to get selected thing */
+  QInputDialog input_dialog;
+  input_dialog.setComboBoxItems(list);
+  if(input_dialog.exec() == QDialog::Accepted)
+  {
+    /* Check if the selected is valid and an ID */
+    QStringList split = input_dialog.textValue().split(':');
+    if(split.size() >= 2)
+    {
+      /* If valid, insert the number */
+      bool ok;
+      split.first().toInt(&ok);
+      if(ok)
+      {
+        QString insert_text = "{" + split.first() + "}";
+        text_box->textCursor().insertText(insert_text);
+      }
+    }
+  }
 }
 
 /*
@@ -345,7 +415,9 @@ void ConvoDialog::textBtnThing()
  */
 void ConvoDialog::textBtnUnderline()
 {
-  qDebug() << "TODO: Underline";
+  QString selected_text = text_box->textCursor().selectedText();
+  selected_text = "[u]" + selected_text + "[/u]";
+  text_box->textCursor().insertText(selected_text);
 }
 
 /*
@@ -360,7 +432,7 @@ void ConvoDialog::textSelected(bool yes)
   btn_brush->setEnabled(yes);
   btn_bold->setEnabled(yes);
   btn_italic->setEnabled(yes);
-  btn_thing->setEnabled(yes);
+  //btn_thing->setEnabled(yes);
   btn_underline->setEnabled(yes);
 }
 

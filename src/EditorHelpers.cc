@@ -19,7 +19,137 @@ QString EditorHelpers::previous_path = "";
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 
-/* Returns the corresponding layer string */
+/*
+ * Description: Returns the converted xml from pseudo game style '[' and ID
+ *              references ({ID}) to name string to the version to render with
+ *              CSS.
+ *
+ * Inputs: QString orig_text - the original text to render
+ *         QVector<QString> list - the list of thing and ID association
+ *                                 00000: NAME
+ * Output: QString - the resulting text after the conversion
+ */
+QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
+{
+  /* Handle color replacements */
+  QString clr_text = "";
+  QStringList split1 = orig_text.split('[');
+  for(int i = 0; i < split1.size(); i++)
+  {
+    QString entry = split1[i];
+
+    /* Root case */
+    if(i == 0 && orig_text.at(0) != '[')
+    {
+      clr_text += entry;
+    }
+    else
+    {
+      /* Check if the second delimiter exists */
+      if(entry.contains(']'))
+      {
+        QStringList split2 = entry.split(']');
+        for(int j = 0; j < split2.size(); j++)
+        {
+          QString entry2 = split2[j];
+
+          /* Walk through the inside states */
+          if(j == 0)
+          {
+            if(entry2.size() <= 2)
+              clr_text += "[" + entry2 + "]";
+            else if(entry2.at(0) == '/')
+              clr_text+= "[/font]";
+            else
+              clr_text += "[font color=\"#" + entry2 + "\"]";
+          }
+          else
+          {
+            clr_text += entry2;
+          }
+        }
+      }
+      else
+      {
+        clr_text += entry;
+      }
+    }
+  }
+
+  /* Handle thing replacements */
+  QString render_text = "";
+  if(clr_text.contains('{') && clr_text.contains('}'))
+  {
+    /* Search through splits */
+    QStringList split1 = clr_text.split('{');
+    for(int i = 0; i < split1.size(); i++)
+    {
+      QString entry = split1[i];
+
+      /* Root case */
+      if(i == 0 && clr_text.at(0) != '{')
+      {
+        render_text += entry;
+      }
+      else
+      {
+        /* Check if the second delimiter exists */
+        if(entry.contains('}'))
+        {
+          QStringList split2 = entry.split('}');
+          for(int j = 0; j < split2.size(); j++)
+          {
+            QString entry2 = split2[j];
+
+            /* Walk through the inside states */
+            if(j == 0)
+            {
+              QString name = "";
+              int id_ref = entry2.toInt();
+
+              /* Try and find the ID */
+              for(int k = 0; name.isEmpty() && k < list.size(); k++)
+              {
+                QStringList name_list = list[k].split(':');
+                int name_id = name_list.first().toInt();
+                if(name_id == id_ref)
+                  if(name_list.size() > 0)
+                    name = name_list.back();
+              }
+
+              render_text += "[font color=\"#00eaff\"]" + name + "[/font]";
+            }
+            else
+            {
+              render_text += entry2;
+            }
+          }
+        }
+        else
+        {
+          render_text += entry;
+        }
+      }
+    }
+  }
+  else
+  {
+    render_text = clr_text;
+  }
+
+  /* Do final replacement to proper css */
+  render_text.replace('[', '<');
+  render_text.replace(']', '>');
+
+  return render_text;
+}
+
+/*
+ * Description: Returns the corresponding layer string from the enum.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to convert
+ * Output: QString - the output string result from layer
+ */
 QString EditorHelpers::getLayerString(EditorEnumDb::Layer layer)
 {
   if(layer == EditorEnumDb::BASE)
