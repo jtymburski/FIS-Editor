@@ -283,9 +283,11 @@ void EditorSoundDb::createReserved()
 
   /* Map Sounds */
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_COIN,
-                                           "Pick Up: Generic Coin"));
+                                           "Map: Pick Up Generic Coin"));
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_ITEM,
-                                           "Pick Up: Generic Item"));
+                                           "Map: Pick Up Generic Item"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_SPOTTED,
+                                           "Map: Player Spotted by NPC"));
 
   /* Battle */
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_CONFUSE,
