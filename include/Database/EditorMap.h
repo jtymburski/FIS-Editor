@@ -38,6 +38,9 @@ struct SubMapInfo
   QVector<EditorMapPerson*> persons;
   QVector<EditorMapThing*> things;
 
+  QVector<LayOver> lays_over;
+  QVector<LayOver> lays_under;
+
   QVector<int> battle_scenes;
   QVector<int> music;
   int weather;

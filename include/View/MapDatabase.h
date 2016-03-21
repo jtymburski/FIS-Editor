@@ -16,6 +16,7 @@
 #include "View/MapBattleSceneView.h"
 #include "View/MapIOView.h"
 #include "View/MapItemView.h"
+#include "View/MapLayView.h"
 #include "View/MapMusicView.h"
 #include "View/MapNPCView.h"
 #include "View/MapPersonView.h"
@@ -61,6 +62,7 @@ private:
   MapBattleSceneView* view_battlescene;
   MapIOView* view_io;
   MapItemView* view_item;
+  MapLayView* view_lays;
   MapMusicView* view_music;
   MapNPCView* view_npc;
   MapPersonView* view_person;
@@ -169,6 +171,7 @@ public:
   MapBattleSceneView* getBattleSceneView();
   MapIOView* getIOView();
   MapItemView* getItemView();
+  MapLayView* getLayView();
   MapNPCView* getNPCView();
   MapPersonView* getPersonView();
   RawImageView* getRawView();

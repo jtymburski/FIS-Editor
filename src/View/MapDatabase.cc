@@ -51,7 +51,8 @@ void MapDatabase::setupMain()
   combo_top = new QComboBox(widget_main);
   QStringList items;
   items << "Raw Images" << "Sprites" << "Things" << "Interactive Objects"
-        << "Items" << "Persons" << "NPCs" << "Music" << "Battle Scenes";
+        << "Items" << "Persons" << "NPCs" << "Music" << "Battle Scenes"
+        << "Lay Overs";
   combo_top->addItems(items);
   connect(combo_top, SIGNAL(currentIndexChanged(int)),
           this, SLOT(updateSelected(int)));
@@ -60,6 +61,7 @@ void MapDatabase::setupMain()
   view_battlescene = new MapBattleSceneView(widget_main);
   view_io = new MapIOView(widget_main);
   view_item = new MapItemView(widget_main);
+  view_lays = new MapLayView(widget_main);
   view_music = new MapMusicView(widget_main);
   view_npc = new MapNPCView(widget_main);
   view_person = new MapPersonView(widget_main);
@@ -157,6 +159,7 @@ void MapDatabase::setupMain()
   layout->addWidget(view_npc);
   layout->addWidget(view_music);
   layout->addWidget(view_battlescene);
+  layout->addWidget(view_lays);
 }
 
 /* Set-up path editor widget */
@@ -527,6 +530,7 @@ void MapDatabase::updateAllLists()
   view_npc->updateList();
   view_music->updateData();
   view_battlescene->updateData();
+  view_lays->updateData();
 }
 
 /* Updated data from higher up in the stack */
@@ -670,6 +674,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
 
     /* Raw view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -688,6 +693,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::THING_VIEW)
   {
@@ -700,6 +706,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::IO_VIEW)
   {
@@ -712,6 +719,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::ITEM_VIEW)
   {
@@ -724,6 +732,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::PERSON_VIEW)
   {
@@ -736,6 +745,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::NPC_VIEW)
   {
@@ -748,6 +758,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->show();
     view_music->hide();
     view_battlescene->hide();
+    view_lays->hide();
   }
   else if(index == EditorEnumDb::MUSIC_VIEW)
   {
@@ -760,6 +771,7 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->show();
     view_battlescene->hide();
+    view_lays->hide();
 
     /* Music view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -781,6 +793,26 @@ void MapDatabase::updateSelected(int index)
     view_npc->hide();
     view_music->hide();
     view_battlescene->show();
+    view_lays->hide();
+
+    /* Music view has no buttons enabled */
+    button_delete->setEnabled(false);
+    button_duplicate->setEnabled(false);
+    button_import->setEnabled(false);
+    button_new->setEnabled(false);
+  }
+  else if(index == EditorEnumDb::MAPLAY_VIEW)
+  {
+    view_raw->hide();
+    view_sprite->hide();
+    view_thing->hide();
+    view_io->hide();
+    view_item->hide();
+    view_person->hide();
+    view_npc->hide();
+    view_music->hide();
+    view_battlescene->hide();
+    view_lays->show();
 
     /* Music view has no buttons enabled */
     button_delete->setEnabled(false);
@@ -810,6 +842,12 @@ MapIOView* MapDatabase::getIOView()
 MapItemView* MapDatabase::getItemView()
 {
   return view_item;
+}
+
+/* Returns the lay view reference pointer */
+MapLayView* MapDatabase::getLayView()
+{
+  return view_lays;
 }
 
 /* Returns the views */
@@ -870,4 +908,7 @@ void MapDatabase::setMapEditor(EditorMap* editing_map)
 
   /* Add to the battle scene view */
   view_battlescene->setEditorMap(editing_map);
+
+  /* Add to the lay managing view */
+  view_lays->setEditorMap(editing_map);
 }

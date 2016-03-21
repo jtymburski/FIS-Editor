@@ -250,6 +250,9 @@ MatrixView::MatrixView(EditorMatrix* matrix, QWidget* parent, bool no_grow)
   /* Configure parent widget */
   setFrameStyle(QFrame::Panel);
   setLineWidth(1);
+  QPalette grey_palette;
+  grey_palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
+  setPalette(grey_palette);
 
   /* Sets the matrix */
   setMatrix(matrix);

@@ -110,19 +110,19 @@ void MapThingView::createLayout()
   lbl_image = new QLabel(this);
   lbl_image->setMinimumSize(200, 200);
   lbl_image->setAlignment(Qt::AlignCenter);
-  lbl_image->setStyleSheet("border: 1px solid black");
+  lbl_image->setStyleSheet("border: 1px solid #a8a8a8");
   layout->addWidget(lbl_image, 0, Qt::AlignHCenter);
 
   /* Name label */
-  lbl_name = new QLabel("Name:", this);
+  lbl_name = new QLabel("", this);
   layout->addWidget(lbl_name, 0, Qt::AlignHCenter);
 
   /* ID label */
-  lbl_id = new QLabel("ID:", this);
+  lbl_id = new QLabel("", this);
   layout->addWidget(lbl_id, 0, Qt::AlignHCenter);
 
   /* Size label */
-  lbl_size = new QLabel("Size:", this);
+  lbl_size = new QLabel("", this);
   layout->addWidget(lbl_size, 0, Qt::AlignHCenter);
 }
 
@@ -222,10 +222,10 @@ void MapThingView::updateInfo()
   if(editor_map != NULL)
   {
     /* Blank the labels */
-    lbl_id->setText("ID:");
+    lbl_id->setText("");
     lbl_image->setPixmap(QPixmap());
-    lbl_name->setText("Name:");
-    lbl_size->setText("Size:  |  Frames:");
+    lbl_name->setText("");
+    lbl_size->setText("");
 
     EditorMapThing* thing = getSelected();
     if(thing != NULL)

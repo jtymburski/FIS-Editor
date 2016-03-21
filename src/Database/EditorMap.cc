@@ -680,6 +680,37 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     if(scene_id >= 0)
       map->battle_scenes.push_back(scene_id);
   }
+  /* --------- UNDERLAYS / OVERLAYS -----------*/
+  else if(element == "overlay" || element == "underlay")
+  {
+    /* Get index */
+    int index_ref = -1;
+    std::string index_str = data.getKeyValue(index);
+    if(!index_str.empty())
+      index_ref = std::stoi(index_str);
+
+    /* Proceed if index is valid */
+    if(index_ref >= 0)
+    {
+      /* Get referenced layer */
+      LayOver* lay_ref = nullptr;
+      if(element == "overlay")
+      {
+        while(static_cast<int>(map->lays_over.size()) <= index_ref)
+          map->lays_over.push_back(Helpers::createBlankLayOver());
+        lay_ref = &map->lays_over[index_ref];
+      }
+      else /* underlay */
+      {
+        while(static_cast<int>(map->lays_under.size()) <= index_ref)
+          map->lays_under.push_back(Helpers::createBlankLayOver());
+        lay_ref = &map->lays_under[index_ref];
+      }
+
+      /* Modify referenced lay */
+      *lay_ref = Helpers::updateLayOver(*lay_ref, data, index + 1);
+    }
+  }
   /* -------------- MUSIC ----------------*/
   else if(element == "music")
   {
@@ -1306,6 +1337,8 @@ bool EditorMap::resizeMap(SubMapInfo* map, int width, int height)
 void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
                            bool game_only, SubMapInfo* map, bool first)
 {
+  LayOver ref_lay = Helpers::createBlankLayOver();
+
   /* Initial element */
   if(first)
     fh->writeXmlElement("main");
@@ -1322,6 +1355,48 @@ void EditorMap::saveSubMap(FileHandler* fh, QProgressDialog* save_dialog,
   for(int i = 0;i < map->battle_scenes.size(); i++)
     if(map->battle_scenes[i] >= 0)
       fh->writeXmlData("battlescene", map->battle_scenes[i]);
+
+  /* Add the underlay(s) */
+  for(int i = 0; i < map->lays_under.size(); i++)
+  {
+    if(!map->lays_under[i].path.empty())
+    {
+      fh->writeXmlElement("underlay", "id", i);
+
+      fh->writeXmlData("path", map->lays_under[i].path);
+      if(map->lays_under[i].anim_time != ref_lay.anim_time)
+        fh->writeXmlData("animation", map->lays_under[i].anim_time);
+      if(map->lays_under[i].velocity_x != ref_lay.velocity_x)
+        fh->writeXmlData("velx", map->lays_under[i].velocity_x);
+      if(map->lays_under[i].velocity_y != ref_lay.velocity_y)
+        fh->writeXmlData("vely", map->lays_under[i].velocity_y);
+      if(map->lays_under[i].player_relative != ref_lay.player_relative)
+        fh->writeXmlData("player", map->lays_under[i].player_relative);
+
+      fh->writeXmlElementEnd();
+    }
+  }
+
+  /* Add the overlay(s) */
+  for(int i = 0; i < map->lays_over.size(); i++)
+  {
+    if(!map->lays_over[i].path.empty())
+    {
+      fh->writeXmlElement("overlay", "id", i);
+
+      fh->writeXmlData("path", map->lays_over[i].path);
+      if(map->lays_over[i].anim_time != ref_lay.anim_time)
+        fh->writeXmlData("animation", map->lays_over[i].anim_time);
+      if(map->lays_over[i].velocity_x != ref_lay.velocity_x)
+        fh->writeXmlData("velx", map->lays_over[i].velocity_x);
+      if(map->lays_over[i].velocity_y != ref_lay.velocity_y)
+        fh->writeXmlData("vely", map->lays_over[i].velocity_y);
+      if(map->lays_over[i].player_relative != ref_lay.player_relative)
+        fh->writeXmlData("player", map->lays_over[i].player_relative);
+
+      fh->writeXmlElementEnd();
+    }
+  }
 
   /* Add music and weather IDs */
   for(int i = 0; i < map->music.size(); i++)

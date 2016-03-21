@@ -52,10 +52,15 @@ void MapMusicView::createLayout()
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(this);
 
+  /* Grey color */
+  QPalette palette;
+  palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
+
   /* Horizontal separator */
   QFrame* frm_horiz1 = new QFrame(this);
   frm_horiz1->setFrameShape(QFrame::HLine);
   frm_horiz1->setLineWidth(1);
+  frm_horiz1->setPalette(palette);
   layout->addWidget(frm_horiz1);
 
   /* Weather dropdown selection */
@@ -72,6 +77,7 @@ void MapMusicView::createLayout()
   QFrame* frm_horiz2 = new QFrame(this);
   frm_horiz2->setFrameShape(QFrame::HLine);
   frm_horiz2->setLineWidth(1);
+  frm_horiz2->setPalette(palette);
   layout->addWidget(frm_horiz2);
 
   /* Available sub-map music list */

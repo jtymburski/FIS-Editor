@@ -66,7 +66,7 @@ void SpriteView::paintEvent(QPaintEvent *)
     painter.setBackgroundMode(Qt::TransparentMode);
 
     /* Set bounds */
-    QRect border(bottom_view->x(), bottom_view->y(), l + 2, l + 2);
+    QRect border(bottom_view->x(), bottom_view->y(), l + 1, l + 1);
 
     /* Paint the sprite */
     EditorSprite* current = getSelected();
@@ -74,13 +74,14 @@ void SpriteView::paintEvent(QPaintEvent *)
       current->paint(&painter, bottom_view->x() + 1, bottom_view->y() + 1, l, l);
 
     /* Paint the border */
-    painter.setPen(QPen(QBrush(Qt::black), 2));
+    painter.setPen(QPen(QBrush(QColor(168, 168, 168)), 1));
     painter.setOpacity(1.0);
     painter.drawRect(border);
 
     /* Name and frame count text */
     if(current != NULL)
     {
+      painter.setPen(QPen(QBrush(Qt::black), 1));
       painter.setFont(QFont("helvetica", 14, QFont::Bold));
       painter.drawText(l * 1.5, bottom_view->y() + 20, current->getName());
 

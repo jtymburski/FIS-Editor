@@ -76,7 +76,8 @@ public:
                       PERSON_VIEW = 5,
                       NPC_VIEW = 6,
                       MUSIC_VIEW = 7,
-                      MAPBATTLESCENE_VIEW = 8
+                      MAPBATTLESCENE_VIEW = 8,
+                      MAPLAY_VIEW = 9
                      };
 
   /* Sprite edit mode */

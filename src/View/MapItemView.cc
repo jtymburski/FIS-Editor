@@ -109,19 +109,19 @@ void MapItemView::createLayout()
   lbl_image = new QLabel(this);
   lbl_image->setMinimumSize(200, 200);
   lbl_image->setAlignment(Qt::AlignCenter);
-  lbl_image->setStyleSheet("border: 1px solid black");
+  lbl_image->setStyleSheet("border: 1px solid #a8a8a8");
   layout->addWidget(lbl_image, 0, Qt::AlignHCenter);
 
   /* Name label */
-  lbl_name = new QLabel("Name:", this);
+  lbl_name = new QLabel("", this);
   layout->addWidget(lbl_name, 0, Qt::AlignHCenter);
 
   /* ID label */
-  lbl_id = new QLabel("ID:", this);
+  lbl_id = new QLabel("", this);
   layout->addWidget(lbl_id, 0, Qt::AlignHCenter);
 
   /* Walkover label */
-  lbl_walkover = new QLabel("Walkover:", this);
+  lbl_walkover = new QLabel("", this);
   layout->addWidget(lbl_walkover, 0, Qt::AlignHCenter);
 }
 
@@ -191,10 +191,10 @@ void MapItemView::updateInfo()
   if(editor_map != NULL)
   {
     /* Blank the labels */
-    lbl_id->setText("ID:");
+    lbl_id->setText("");
     lbl_image->setPixmap(QPixmap());
-    lbl_name->setText("Name:");
-    lbl_walkover->setText("Walkover:");
+    lbl_name->setText("");
+    lbl_walkover->setText("");
 
     EditorMapItem* item = getSelected();
     if(item != NULL)

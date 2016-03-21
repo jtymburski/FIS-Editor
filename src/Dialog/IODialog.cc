@@ -193,7 +193,7 @@ void IODialog::createLayout(bool instance)
   layout->addWidget(lbl_frame, 7, 0, 2, 1);
   lbl_frame_img = new QLabel(this);
   lbl_frame_img->setMinimumSize(200, 200);
-  lbl_frame_img->setStyleSheet("border: 1px solid black");
+  lbl_frame_img->setStyleSheet("border: 1px solid #a8a8a8");
   lbl_frame_img->setAlignment(Qt::AlignCenter);
   layout->addWidget(lbl_frame_img, 7, 1, 2, 3);
   QPushButton* btn_frame_click = new QPushButton(this);

@@ -106,6 +106,10 @@ void EditorCategory::createLayout()
   layout->setRowMinimumHeight(8, 15);
   layout->setRowStretch(7, 1);
 
+  /* Grey color */
+  QPalette grey_palette;
+  grey_palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
+
   /* ID */
   QLabel* lbl_id = new QLabel("ID", this);
   layout->addWidget(lbl_id, 0, 0);
@@ -189,6 +193,7 @@ void EditorCategory::createLayout()
   box_layout->addWidget(chk_power_grd);
   QFrame* line1 = new QFrame(this);
   line1->setFrameShape(QFrame::HLine);
+  line1->setPalette(grey_palette);
   box_layout->addWidget(line1);
   chk_e_claws = new QCheckBox("Equip: Claws", this);
   connect(chk_e_claws, SIGNAL(stateChanged(int)),
@@ -204,6 +209,7 @@ void EditorCategory::createLayout()
   box_layout->addWidget(chk_e_sword);
   QFrame* line2 = new QFrame(this);
   line2->setFrameShape(QFrame::HLine);
+  line2->setPalette(grey_palette);
   box_layout->addWidget(line2);
   chk_e_light_armor = new QCheckBox("Equip: Light Armor", this);
   connect(chk_e_light_armor, SIGNAL(stateChanged(int)),
@@ -219,6 +225,7 @@ void EditorCategory::createLayout()
   box_layout->addWidget(chk_e_heavy_armor);
   QFrame* line3 = new QFrame(this);
   line3->setFrameShape(QFrame::HLine);
+  line3->setPalette(grey_palette);
   box_layout->addWidget(line3);
   chk_e_small_arms = new QCheckBox("Equip: Small Arms", this);
   connect(chk_e_small_arms, SIGNAL(stateChanged(int)),
