@@ -30,6 +30,12 @@ public:
   /* Destructor function */
   ~MapLayView();
 
+  /* Enum for lay types */
+  enum LayType {
+    UNDERLAYS = 0,
+    OVERLAYS = 1
+  };
+
 private:
   /* Button widgets */
   QPushButton* btn_del;
@@ -64,6 +70,9 @@ private:
   /* Creates the layout - only called on initial construction */
   void createLayout();
 
+  /* Returns the selected lay over in the list */
+  LayOver* getSelectedLay();
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -88,7 +97,7 @@ public slots:
   void buttonUp();
 
   /* Changed triggers in widgets */
-  void changedLayType(const QString &text);
+  void changedLayType(QString);
   void changedListLay(int row);
 
   /* Check box change triggers */

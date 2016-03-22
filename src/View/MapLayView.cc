@@ -41,7 +41,7 @@ void MapLayView::createLayout()
   /* Layover selection */
   combo_laytype = new QComboBox(this);
   QStringList items;
-  items << "Underlays" << "Overlays";
+  items << "Underlays" << "Overlays"; /* If changed, update LayType enum */
   combo_laytype->addItems(items);
   connect(combo_laytype, SIGNAL(currentTextChanged(QString)),
           this, SLOT(changedLayType(QString)));
@@ -75,6 +75,7 @@ void MapLayView::createLayout()
   QLabel* lbl_path = new QLabel("Path", this);
   lbl_path_list = new QLabel("path/sample/here.png", this);
   lbl_path_list->setStyleSheet("border: 1px solid #afafaf");
+  lbl_path_list->setDisabled(true);
   btn_path = new QToolButton(this);
   btn_path->setIcon(QIcon(":/images/icons/32_settings.png"));
   btn_path->setDisabled(true);
@@ -126,6 +127,35 @@ void MapLayView::createLayout()
   layout->addWidget(chk_player, 7, 1, 1, 4);
 }
 
+/* Returns the selected lay over in the list */
+LayOver* MapLayView::getSelectedLay()
+{
+  LayOver* lay_ref = nullptr;
+
+  /* Now determine if row is valid and get information */
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
+  {
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    int index = list_lays->currentRow();
+    if(index >= 0)
+    {
+      if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+      {
+        if(index < map->lays_under.size())
+          lay_ref = &map->lays_under[index];
+      }
+      else /* OVERLAYS */
+      {
+        if(index < map->lays_over.size())
+          lay_ref = &map->lays_over[index];
+      }
+    }
+  }
+
+  return lay_ref;
+}
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
@@ -137,7 +167,24 @@ void MapLayView::createLayout()
 /* Button control triggers */
 void MapLayView::buttonAdd()
 {
-  // TODO
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
+  {
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Determine which type to add and add it */
+    if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+    {
+      map->lays_under.push_back(Helpers::createBlankLayOver());
+    }
+    else /* OVERLAYS */
+    {
+      map->lays_over.push_back(Helpers::createBlankLayOver());
+    }
+
+    /* Update view and select new row */
+    updateData();
+    list_lays->setCurrentRow(list_lays->count() - 1);
+  }
 }
 
 /* Button control triggers */
@@ -165,45 +212,140 @@ void MapLayView::buttonUp()
 }
 
 /* Changed triggers in widgets */
-void MapLayView::changedLayType(const QString &text)
+void MapLayView::changedLayType(QString)
 {
-  // TODO
+  updateData();
 }
 
 /* Changed triggers in widgets */
 void MapLayView::changedListLay(int row)
 {
-  // TODO
+  /* Set widgets as initially disabled */
+  btn_del->setDisabled(true);
+  btn_down->setDisabled(true);
+  btn_path->setDisabled(true);
+  btn_up->setDisabled(true);
+  chk_player->setDisabled(true);
+  lbl_path_list->setDisabled(true);
+  spin_anim->setDisabled(true);
+  spin_velx->setDisabled(true);
+  spin_vely->setDisabled(true);
+
+  /* Now determine if row is valid and get information */
+  if(row >= 0)
+  {
+    /* Button enables */
+    btn_del->setEnabled(true);
+    btn_down->setEnabled(row < (list_lays->count() - 1));
+    btn_up->setEnabled(row > 0);
+
+    /* Get the reference lay over */
+    LayOver* lay_ref = getSelectedLay();
+    if(lay_ref != nullptr)
+    {
+      /* Set widgets as enabled */
+      lbl_path_list->setEnabled(true);
+      btn_path->setEnabled(true);
+      spin_anim->setEnabled(true);
+      spin_velx->setEnabled(true);
+      spin_vely->setEnabled(true);
+      chk_player->setEnabled(true);
+
+      /* Load in new information */
+      lbl_path_list->setText(QString::fromStdString(lay_ref->path));
+      spin_anim->setValue(lay_ref->anim_time);
+      float velx = (lay_ref->velocity_x * 1000);
+      if(velx > 0)
+        velx += 0.1;
+      else if(velx < 0)
+        velx -= 0.1;
+      spin_velx->setValue(static_cast<int>(velx));
+      float vely = (lay_ref->velocity_y * 1000);
+      if(vely > 0)
+        vely += 0.1;
+      else if(vely < 0)
+        vely -= 0.1;
+      spin_vely->setValue(static_cast<int>(vely));
+      chk_player->setChecked(lay_ref->player_relative);
+    }
+  }
 }
 
 /* Check box change triggers */
 void MapLayView::checkPlayerChanged(int state)
 {
-  // TODO
+  LayOver* lay_ref = getSelectedLay();
+  if(lay_ref != nullptr)
+  {
+    lay_ref->player_relative = (state == Qt::Checked);
+  }
 }
 
 /* Spin box change triggers */
 void MapLayView::spinAnimChanged(int value)
 {
-  // TODO
+  LayOver* lay_ref = getSelectedLay();
+  if(lay_ref != nullptr)
+  {
+    lay_ref->anim_time = value;
+  }
 }
 
 /* Spin box change triggers */
 void MapLayView::spinVelXChanged(int value)
 {
-  // TODO
+  LayOver* lay_ref = getSelectedLay();
+  if(lay_ref != nullptr)
+  {
+    lay_ref->velocity_x = (value / 1000.0);
+  }
 }
 
 /* Spin box change triggers */
 void MapLayView::spinVelYChanged(int value)
 {
-  // TODO
+  LayOver* lay_ref = getSelectedLay();
+  if(lay_ref != nullptr)
+  {
+    lay_ref->velocity_y = (value / 1000.0);
+  }
 }
 
 /* Refreshes the entire data set within the widget */
 void MapLayView::updateData()
 {
-  // TODO
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
+  {
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Clear list */
+    list_lays->clear();
+    changedListLay(-1);
+
+    /* Load in new information */
+    if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+    {
+      for(int i = 0; i < map->lays_under.size(); i++)
+      {
+        if(map->lays_under[i].path.empty())
+          list_lays->addItem(QString::number(i) + ": <no path set>");
+        else
+          list_lays->addItem(QString::number(i) + ": " +
+                             QString::fromStdString(map->lays_under[i].path));
+      }
+    }
+    else /* OVERLAYS */
+    {
+      for(int i = 0; i < map->lays_over.size(); i++)
+      {
+        if(map->lays_over[i].path.empty())
+          list_lays->addItem(QString::number(i) + ": <no path set>");
+        else
+          list_lays->addItem(QString::number(i) + ": " +
+                             QString::fromStdString(map->lays_over[i].path));
+      }
+    }
+  }
 }
 
 /*============================================================================
