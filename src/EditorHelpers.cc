@@ -145,6 +145,21 @@ QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
 }
 
 /*
+ * Description: Returns the file name extracted from a path. This assumes
+ *              QDir::separator() is used as the delimiter
+ *
+ * Inputs: QString path - the path to process
+ * Output: QString - the return file name. Blank if none found
+ */
+QString EditorHelpers::getFilename(const QString &path)
+{
+  QStringList sep_set = path.split(QDir::separator());
+  if(sep_set.size() > 0)
+    return sep_set.back();
+  return "";
+}
+
+/*
  * Description: Returns the corresponding layer string from the enum.
  *
  * Inputs: EditorEnumDb::Layer layer - the layer to convert

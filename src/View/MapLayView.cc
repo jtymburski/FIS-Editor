@@ -6,13 +6,18 @@
  *              lay overs for each sub map.
  ******************************************************************************/
 #include "View/MapLayView.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTOR / DESTRUCTOR FUNCTIONS
  *===========================================================================*/
 
-/* Constructor Function */
+/*
+ * Description: Base constructor function. Just defines parent and creates
+ *              layout.
+ *
+ * Inputs: QWidget* parent - parent widget
+ */
 MapLayView::MapLayView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
@@ -22,7 +27,9 @@ MapLayView::MapLayView(QWidget* parent) : QWidget(parent)
   createLayout();
 }
 
-/* Destructor function */
+/*
+ * Description: Destructor function
+ */
 MapLayView::~MapLayView()
 {
   setEditorMap(nullptr);
@@ -32,7 +39,12 @@ MapLayView::~MapLayView()
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 
-/* Creates the layout - only called on initial construction */
+/*
+ * Description: Creates the map lay view layout with QT functional widgets.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::createLayout()
 {
   /* Layout */
@@ -127,7 +139,14 @@ void MapLayView::createLayout()
   layout->addWidget(chk_player, 7, 1, 1, 4);
 }
 
-/* Returns the selected lay over in the list */
+/*
+ * Description: Processes the current settings of the widgets to return the
+ *              lay over reference struct selected. If nothing found or any
+ *              error, a null pointer is returned.
+ *
+ * Inputs: none
+ * Output: LayOver* - the lay over reference struct connected to the selection
+ */
 LayOver* MapLayView::getSelectedLay()
 {
   LayOver* lay_ref = nullptr;
@@ -164,7 +183,14 @@ LayOver* MapLayView::getSelectedLay()
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
 
-/* Button control triggers */
+/*
+ * Description: Button trigger on layover add press. This will access the
+ *              correct category (underlay, overlay) and adds it to the
+ *              appropriate set.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::buttonAdd()
 {
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
@@ -187,37 +213,240 @@ void MapLayView::buttonAdd()
   }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button trigger on layover delete press. This will access the
+ *              correct category (underlay, overlay) and delete the
+ *              selected index in the appropriate set.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::buttonDelete()
 {
-  // TODO
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
+     list_lays->currentRow() >= 0)
+  {
+    int index = list_lays->currentRow();
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Determine which type and attempt to remove it */
+    if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+    {
+      if(index < map->lays_under.size())
+        map->lays_under.remove(index);
+    }
+    else /* OVERLAYS */
+    {
+      if(index < map->lays_over.size())
+        map->lays_over.remove(index);
+    }
+
+    /* Update view and select row at same location */
+    updateData();
+    if(list_lays->count() > 0)
+    {
+      if(index < list_lays->count())
+        list_lays->setCurrentRow(index);
+      else
+        list_lays->setCurrentRow(list_lays->count() - 1);
+    }
+  }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button trigger on layover down press. This will access the
+ *              correct category (underlay, overlay) and move the
+ *              selected index down by one spot in the appropriate set.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::buttonDown()
 {
-  // TODO
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
+     list_lays->currentRow() >= 0)
+  {
+    int index = list_lays->currentRow();
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Determine which type and attempt to shift it down */
+    if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+    {
+      if((index + 1) < map->lays_under.size())
+      {
+        LayOver swap = map->lays_under[index];
+        map->lays_under[index] = map->lays_under[index + 1];
+        map->lays_under[index + 1] = swap;
+        index++;
+      }
+    }
+    else /* OVERLAYS */
+    {
+      if((index + 1) < map->lays_over.size())
+      {
+        LayOver swap = map->lays_over[index];
+        map->lays_over[index] = map->lays_over[index + 1];
+        map->lays_over[index + 1] = swap;
+        index++;
+      }
+    }
+
+    /* Update view and select new row */
+    updateData();
+    if(list_lays->count() > 0)
+    {
+      if(index < list_lays->count())
+        list_lays->setCurrentRow(index);
+      else
+        list_lays->setCurrentRow(list_lays->count() - 1);
+    }
+  }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button trigger on layover edit path select button. This will
+ *              select a new path for the selected edit layover if one exists.
+ *              This call can handle sprite selection (instead of just frame)
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::buttonPath()
 {
-  // TODO
+  LayOver* lay_ref = getSelectedLay();
+  if(lay_ref != nullptr)
+  {
+    /* Choose the layover path */
+    QString last_path = EditorHelpers::getPreviousPath();
+    QString path = QFileDialog::getOpenFileName(this,
+                                                tr("Select a layover sprite"),
+                                                last_path,
+                                                tr("Image Files (*.png)"));
+    if(path != "")
+    {
+      /* Path parsing */
+      EditorHelpers::setPreviousPath(path);
+      path = QDir::toNativeSeparators(path);
+      QStringList path_set = path.split(QDir::separator());
+      QString initial_file = path_set.last();
+      QString initial_path = path;
+      initial_path.remove(initial_file);
+
+      /* Split file and determine if last two in file name are digits */
+      QString no_tail = initial_file;
+      no_tail.chop(QString(".png").size());
+      QChar dig1_str = no_tail.at(no_tail.size() - 2);
+      QChar dig2_str = no_tail.at(no_tail.size() - 1);
+      if(dig1_str.isDigit() && dig2_str.isDigit())
+      {
+        /* Check if the last two are 0; therefore base sprite */
+        int dig1 = dig1_str.digitValue();
+        int dig2 = dig2_str.digitValue();
+        if(dig1 == 0 && dig2 == 0)
+        {
+          /* Load into sprite struct and determine valid summarized path */
+          QString no_tail_or_num = no_tail;
+          no_tail_or_num.chop(2);
+          EditorSprite sprite_test;
+          sprite_test.addPath(initial_path + no_tail_or_num + "|" +
+                              QString::number(20) + "|.png");
+
+          /* Clean out tail frames */
+          int max_size = sprite_test.getLastValidFrame();
+          while((max_size + 1) < sprite_test.frameCount())
+            sprite_test.deleteFrame(sprite_test.frameCount() - 1);
+          \
+          /* Set the new path */
+          QList<QPair<QString,QString>> set = sprite_test.getPathSet();
+          if(set.size() == 1)
+            path = EditorHelpers::getProjectDir() + QDir::separator() +
+                   set.front().second;
+        }
+      }
+
+      /* Final path output */
+      lay_ref->path = EditorHelpers::trimPath(path).toStdString();
+
+      /* Update the display */
+      QString display_txt = EditorHelpers::getFilename(
+                                        QString::fromStdString(lay_ref->path));
+      lbl_path_list->setText(display_txt);
+      list_lays->currentItem()->setText(
+                QString::number(list_lays->currentRow()) + ": " + display_txt);
+    }
+  }
 }
 
-/* Button control triggers */
+/*
+ * Description: Button trigger on layover up press. This will access the
+ *              correct category (underlay, overlay) and move the
+ *              selected index up by one spot in the appropriate set.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::buttonUp()
 {
-  // TODO
+  if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
+     list_lays->currentRow() > 0)
+  {
+    int index = list_lays->currentRow();
+    SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Determine which type and attempt to shift it down */
+    if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
+    {
+      if(index < map->lays_under.size())
+      {
+        LayOver swap = map->lays_under[index];
+        map->lays_under[index] = map->lays_under[index - 1];
+        map->lays_under[index - 1] = swap;
+        index--;
+      }
+    }
+    else /* OVERLAYS */
+    {
+      if(index < map->lays_over.size())
+      {
+        LayOver swap = map->lays_over[index];
+        map->lays_over[index] = map->lays_over[index - 1];
+        map->lays_over[index - 1] = swap;
+        index--;
+      }
+    }
+
+    /* Update view and select new row */
+    updateData();
+    if(list_lays->count() > 0)
+    {
+      if(index < list_lays->count())
+        list_lays->setCurrentRow(index);
+      else
+        list_lays->setCurrentRow(list_lays->count() - 1);
+    }
+  }
 }
 
-/* Changed triggers in widgets */
+/*
+ * Description: Slot triggered when the layover combo box drop down selection
+ *              is changed. This updates which layover type is being viewed.
+ *
+ * Inputs: QString - not used
+ * Output: none
+ */
 void MapLayView::changedLayType(QString)
 {
   updateData();
 }
 
-/* Changed triggers in widgets */
+/*
+ * Description: Slot triggered when the selected lay over in the list is
+ *              modified. This changes which lay over is being edited
+ *              automatically
+ *
+ * Inputs: int row - the selected row in the list
+ * Output: none
+ */
 void MapLayView::changedListLay(int row)
 {
   /* Set widgets as initially disabled */
@@ -252,7 +481,8 @@ void MapLayView::changedListLay(int row)
       chk_player->setEnabled(true);
 
       /* Load in new information */
-      lbl_path_list->setText(QString::fromStdString(lay_ref->path));
+      lbl_path_list->setText(EditorHelpers::getFilename(
+                                       QString::fromStdString(lay_ref->path)));
       spin_anim->setValue(lay_ref->anim_time);
       float velx = (lay_ref->velocity_x * 1000);
       if(velx > 0)
@@ -281,7 +511,13 @@ void MapLayView::checkPlayerChanged(int state)
   }
 }
 
-/* Spin box change triggers */
+/*
+ * Description: Slot triggered when the animation delay change is modified.
+ *              This function is only valid if an edit is active
+ *
+ * Inputs: int value - the new animation time value, in ms
+ * Output: none
+ */
 void MapLayView::spinAnimChanged(int value)
 {
   LayOver* lay_ref = getSelectedLay();
@@ -291,7 +527,13 @@ void MapLayView::spinAnimChanged(int value)
   }
 }
 
-/* Spin box change triggers */
+/*
+ * Description: Slot triggered when the layover velocity x value is changed.
+ *              This function is only valid if an edit is active
+ *
+ * Inputs: int value - the new velocity x value, in tiles/second
+ * Output: none
+ */
 void MapLayView::spinVelXChanged(int value)
 {
   LayOver* lay_ref = getSelectedLay();
@@ -301,7 +543,13 @@ void MapLayView::spinVelXChanged(int value)
   }
 }
 
-/* Spin box change triggers */
+/*
+ * Description: Slot triggered when the layover velocity y value is changed.
+ *              This function is only valid if an edit is active
+ *
+ * Inputs: int value - the new velocity y value, in tiles/second
+ * Output: none
+ */
 void MapLayView::spinVelYChanged(int value)
 {
   LayOver* lay_ref = getSelectedLay();
@@ -311,7 +559,12 @@ void MapLayView::spinVelYChanged(int value)
   }
 }
 
-/* Refreshes the entire data set within the widget */
+/*
+ * Description: Updates the info in the QT widgets within the view.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void MapLayView::updateData()
 {
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr)
@@ -331,7 +584,8 @@ void MapLayView::updateData()
           list_lays->addItem(QString::number(i) + ": <no path set>");
         else
           list_lays->addItem(QString::number(i) + ": " +
-                             QString::fromStdString(map->lays_under[i].path));
+                          EditorHelpers::getFilename(QString::fromStdString(
+                                                    map->lays_under[i].path)));
       }
     }
     else /* OVERLAYS */
@@ -342,7 +596,8 @@ void MapLayView::updateData()
           list_lays->addItem(QString::number(i) + ": <no path set>");
         else
           list_lays->addItem(QString::number(i) + ": " +
-                             QString::fromStdString(map->lays_over[i].path));
+                          EditorHelpers::getFilename(QString::fromStdString(
+                                                    map->lays_over[i].path)));
       }
     }
   }
@@ -352,13 +607,24 @@ void MapLayView::updateData()
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 
-/* Gets the editor map */
+/*
+ * Description: Returns the editor map, which contains all things and instances.
+ *
+ * Inputs: none
+ * Output: EditorMap* - pointer to the editor map. NULL if none set.
+ */
 EditorMap* MapLayView::getEditorMap()
 {
   return editor_map;
 }
 
-/* Sets the editor map, which contains the data needed */
+/*
+ * Description: Sets the control editor map. This contains the things, sprites
+ *              and all data relevant to display.
+ *
+ * Inputs: EditorMap* map - the map to use for control
+ * Output: none
+ */
 void MapLayView::setEditorMap(EditorMap* map)
 {
   if(editor_map != map)

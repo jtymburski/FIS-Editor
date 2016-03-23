@@ -88,6 +88,10 @@ protected:
   /* General event processing */
   bool event(QEvent *event);
 
+  /* Draw background and foreground processing */
+  void drawBackground(QPainter* painter, const QRectF &rect);
+  void drawForeground(QPainter* painter, const QRectF &rect);
+
   /* Mouse move events */
   void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);

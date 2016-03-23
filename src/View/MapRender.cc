@@ -30,7 +30,9 @@ MapRender::MapRender(QWidget* parent)
   tile_select = false;
 
   /* Sets the background to be black */
-  setBackgroundBrush(QBrush(Qt::black));
+  //setBackgroundBrush(QBrush(Qt::black));
+  //setBackgroundBrush(QBrush(QPixmap("/home/jordan/Programming/FBS/Univursa/
+  //    Project/sprites/Map/EnviromentEffects/Overlays/forest_underlay.png")));
 }
 
 /*
@@ -541,6 +543,44 @@ bool MapRender::event(QEvent *event)
   return QGraphicsScene::event(event);
 }
 
+/* Draw background processing */
+void MapRender::drawBackground(QPainter* painter, const QRectF &rect)
+{
+  /* Draw base */
+  painter->setPen(Qt::black);
+  painter->fillRect(rect, Qt::SolidPattern);
+
+  /* Draw underlays */
+  if(editing_map != nullptr && editing_map->getCurrentMap() != nullptr)
+  {
+    SubMapInfo* map = editing_map->getCurrentMap();
+
+    // TODO: ADD FOR SPLIT PATHS > AND FORCE UPDATE ON LAY CHANGE
+    for(int i = 0; i < map->lays_under.size(); i++)
+      painter->drawTiledPixmap(sceneRect(),
+                QPixmap(EditorHelpers::getProjectDir() + QDir::separator() +
+                        QString::fromStdString(map->lays_under[i].path)));
+  }
+}
+
+/* Draw foreground processing */
+void MapRender::drawForeground(QPainter* painter, const QRectF &rect)
+{
+  (void)rect;
+
+  /* Draw overlays */
+  if(editing_map != nullptr && editing_map->getCurrentMap() != nullptr)
+  {
+    SubMapInfo* map = editing_map->getCurrentMap();
+
+    // TODO: ADD FOR SPLIT PATHS > AND FORCE UPDATE ON LAY CHANGE
+    for(int i = 0; i < map->lays_over.size(); i++)
+      painter->drawTiledPixmap(sceneRect(),
+                QPixmap(EditorHelpers::getProjectDir() + QDir::separator() +
+                        QString::fromStdString(map->lays_over[i].path)));
+  }
+}
+
 /*
  * Description: Mouse Move Event (Handles all individual tile events, including
  *              hovering box color changes, and placement while the mouse
@@ -848,7 +888,8 @@ EditorMap* MapRender::getMapEditor()
 /*
  * Description: Gets the height
  *
- * Output: Height
+ * Inputs: none
+ * Output: int - map height
  */
 int MapRender::getMapHeight()
 {
@@ -861,7 +902,8 @@ int MapRender::getMapHeight()
 /*
  * Description: Gets the width
  *
- * Output: Width
+ * Inputs: none
+ * Output: int - map width
  */
 int MapRender::getMapWidth()
 {
