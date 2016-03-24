@@ -193,6 +193,9 @@ signals:
   /* Item instant changed */
   void itemInstanceChanged(QString name_list);
 
+  /* Lay-over change on active sub trigger */
+  void laysChanged();
+
   /* NPC instant changed */
   void npcInstanceChanged(QString name_list);
 
@@ -441,6 +444,7 @@ public:
 
   /* Update all tiles */
   void updateAll();
+  void updateLays();
 
   /* Updates tiles related to person reference */
   void updateTiles(EditorMapPerson* ref);

@@ -197,6 +197,9 @@ public slots:
   void tileThing8();
   void tileThing9();
 
+  /* Update the entire scene */
+  void updateAll();
+
   /* Update the rendering sub-map */
   void updateRenderingMap();
 
@@ -213,9 +216,6 @@ public:
 
   /* Sets the map being edited */
   void setMapEditor(EditorMap* editor);
-
-  /* Update the entire scene */
-  void updateAll();
 };
 
 #endif // MAPRENDER_H

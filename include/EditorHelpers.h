@@ -102,6 +102,9 @@ public:
   /* Sets the previous path used for file access */
   static void setPreviousPath(QString path, bool includes_file = true); // TODO
 
+  /* Takes a path from file and splits it to determine if there is more than 1*/
+  static QList<QString> splitPath(QString base_path);
+
   /* Trim path */
   static QString trimPath(QString path);
 };

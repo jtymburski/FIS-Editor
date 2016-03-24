@@ -558,6 +558,8 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
     sub_maps.last()->path_top = NULL;
+    sub_maps.last()->lays_over = source.sub_maps[i]->lays_over;
+    sub_maps.last()->lays_under = source.sub_maps[i]->lays_under;
     sub_maps.last()->battle_scenes = source.sub_maps[i]->battle_scenes;
     sub_maps.last()->music = source.sub_maps[i]->music;
     sub_maps.last()->weather = source.sub_maps[i]->weather;
@@ -2197,6 +2199,8 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
   if(copy_map != NULL && new_map != NULL)
   {
     new_map->name = copy_map->name;
+    new_map->lays_over = copy_map->lays_over;
+    new_map->lays_under = copy_map->lays_under;
     new_map->battle_scenes = copy_map->battle_scenes;
     new_map->music = copy_map->music;
     new_map->weather = copy_map->weather;
@@ -4320,8 +4324,7 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
   if(fh != NULL)
   {
     fh->writeXmlElement("map", "id", getID());
-    if(!game_only)
-      fh->writeXmlData("name", getName().toStdString());
+    fh->writeXmlData("name", getName().toStdString());
 
     /* Add battle scenes */
     for(int i = 0; i < battle_scenes.size(); i++)
@@ -6180,6 +6183,17 @@ void EditorMap::updateAll()
     for(int j = 0; j < sub_maps[i]->tiles.size(); j++)
       for(int k = 0; k < sub_maps[i]->tiles[j].size(); k++)
         sub_maps[i]->tiles[j][k]->update();
+}
+
+/*
+ * Description: Update the lay overs on the active sub map being rendered.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EditorMap::updateLays()
+{
+  emit laysChanged();
 }
 
 /*

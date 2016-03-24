@@ -89,26 +89,18 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   resize_index = 0;
 
   /* Sets up the bottom buttons that interact with the sub-map list */
-  //QHBoxLayout* bottom_button_layout = new QHBoxLayout();
   button_new = new QPushButton("New",this);
   button_delete = new QPushButton("Delete",this);
-  //bottom_button_layout->addWidget(button_new);
-  //bottom_button_layout->addWidget(button_delete);
   connect(button_new, SIGNAL(clicked()), this, SLOT(newSubMap()));
   connect(button_delete, SIGNAL(clicked()), this, SLOT(deleteSubMap()));
-  //main_layout->addLayout(bottom_button_layout);
   main_layout->addWidget(button_new);
   main_layout->addWidget(button_delete);
 
   /* Sets up the second set of bottom buttons */
-  //QHBoxLayout* bottom_button_layout2 = new QHBoxLayout();
   button_duplicate = new QPushButton("Duplicate",this);
   button_import = new QPushButton("Import",this);
-  //bottom_button_layout2->addWidget(button_import);
-  //bottom_button_layout2->addWidget(button_duplicate);
   connect(button_duplicate, SIGNAL(clicked()), this, SLOT(duplicateSubMap()));
   connect(button_import, SIGNAL(clicked()), this, SLOT(importSubMap()));
-  //main_layout->addLayout(bottom_button_layout2);
   main_layout->addWidget(button_duplicate);
   main_layout->addWidget(button_import);
 

@@ -242,6 +242,7 @@ void MapLayView::buttonDelete()
     }
 
     /* Update view and select row at same location */
+    editor_map->updateLays();
     updateData();
     if(list_lays->count() > 0)
     {
@@ -292,6 +293,7 @@ void MapLayView::buttonDown()
     }
 
     /* Update view and select new row */
+    editor_map->updateLays();
     updateData();
     if(list_lays->count() > 0)
     {
@@ -366,6 +368,7 @@ void MapLayView::buttonPath()
 
       /* Final path output */
       lay_ref->path = EditorHelpers::trimPath(path).toStdString();
+      editor_map->updateLays();
 
       /* Update the display */
       QString display_txt = EditorHelpers::getFilename(
@@ -416,6 +419,7 @@ void MapLayView::buttonUp()
     }
 
     /* Update view and select new row */
+    editor_map->updateLays();
     updateData();
     if(list_lays->count() > 0)
     {
@@ -508,6 +512,16 @@ void MapLayView::checkPlayerChanged(int state)
   if(lay_ref != nullptr)
   {
     lay_ref->player_relative = (state == Qt::Checked);
+    if(lay_ref->player_relative)
+    {
+      spin_velx->setSuffix(" px / kpx moved");
+      spin_vely->setSuffix(" px / kpx moved");
+    }
+    else
+    {
+      spin_velx->setSuffix(" pixels / s");
+      spin_vely->setSuffix(" pixels / s");
+    }
   }
 }
 

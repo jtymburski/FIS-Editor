@@ -153,7 +153,8 @@ QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
  */
 QString EditorHelpers::getFilename(const QString &path)
 {
-  QStringList sep_set = path.split(QDir::separator());
+  QString converted_path = QDir::toNativeSeparators(path);
+  QStringList sep_set = converted_path.split(QDir::separator());
   if(sep_set.size() > 0)
     return sep_set.back();
   return "";
@@ -750,6 +751,37 @@ void EditorHelpers::setPreviousPath(QString path, bool includes_file)
   /* Set it */
   previous_path = path;
   //qDebug() << "SET: " << previous_path;
+}
+
+/*
+ * Description: Takes a path from the load procedure of sprite and splits it
+ *              to determine if there are multiple frames.
+ *
+ * Inputs: QString base_path - the base path to split
+ * Output: QList<QString> - the set of paths from the split (possibly 1)
+ */
+QList<QString> EditorHelpers::splitPath(QString base_path)
+{
+  QList<QString> paths;
+
+  /* Split first */
+  QStringList split_set = base_path.split("|");
+  if(split_set.size() == 3 && split_set[1].toInt() > 0)
+  {
+    for(int i = 0; i < split_set[1].toInt(); i++)
+    {
+      if(i < 10)
+        paths.push_back(split_set[0] + "0" + QString::number(i) + split_set[2]);
+      else
+        paths.push_back(split_set[0] + QString::number(i) + split_set[2]);
+    }
+  }
+  else
+  {
+    paths.push_back(base_path);
+  }
+
+  return paths;
 }
 
 /*

@@ -28,11 +28,6 @@ MapRender::MapRender(QWidget* parent)
   middleclick_menu = NULL;
   path_edit = NULL;
   tile_select = false;
-
-  /* Sets the background to be black */
-  //setBackgroundBrush(QBrush(Qt::black));
-  //setBackgroundBrush(QBrush(QPixmap("/home/jordan/Programming/FBS/Univursa/
-  //    Project/sprites/Map/EnviromentEffects/Overlays/forest_underlay.png")));
 }
 
 /*
@@ -555,11 +550,19 @@ void MapRender::drawBackground(QPainter* painter, const QRectF &rect)
   {
     SubMapInfo* map = editing_map->getCurrentMap();
 
-    // TODO: ADD FOR SPLIT PATHS > AND FORCE UPDATE ON LAY CHANGE
+    /* Process all underlays for valid paths */
     for(int i = 0; i < map->lays_under.size(); i++)
-      painter->drawTiledPixmap(sceneRect(),
-                QPixmap(EditorHelpers::getProjectDir() + QDir::separator() +
-                        QString::fromStdString(map->lays_under[i].path)));
+    {
+      if(!map->lays_under[i].path.empty())
+      {
+        QString path = QString::fromStdString(map->lays_under[i].path);
+        QList<QString> path_set = EditorHelpers::splitPath(path);
+        if(path_set.size() > 0)
+          painter->drawTiledPixmap(sceneRect(),
+                                 QPixmap(EditorHelpers::getProjectDir() +
+                                         QDir::separator() + path_set.front()));
+      }
+    }
   }
 }
 
@@ -573,11 +576,19 @@ void MapRender::drawForeground(QPainter* painter, const QRectF &rect)
   {
     SubMapInfo* map = editing_map->getCurrentMap();
 
-    // TODO: ADD FOR SPLIT PATHS > AND FORCE UPDATE ON LAY CHANGE
+    /* Process all overlays for valid paths */
     for(int i = 0; i < map->lays_over.size(); i++)
-      painter->drawTiledPixmap(sceneRect(),
-                QPixmap(EditorHelpers::getProjectDir() + QDir::separator() +
-                        QString::fromStdString(map->lays_over[i].path)));
+    {
+      if(!map->lays_over[i].path.empty())
+      {
+        QString path = QString::fromStdString(map->lays_over[i].path);
+        QList<QString> path_set = EditorHelpers::splitPath(path);
+        if(path_set.size() > 0)
+          painter->drawTiledPixmap(sceneRect(),
+                                 QPixmap(EditorHelpers::getProjectDir() +
+                                         QDir::separator() + path_set.front()));
+      }
+    }
   }
 }
 
@@ -845,6 +856,12 @@ void MapRender::tileThing7() { emit tileThing(7); }
 void MapRender::tileThing8() { emit tileThing(8); }
 void MapRender::tileThing9() { emit tileThing(9); }
 
+/* Update the entire scene */
+void MapRender::updateAll()
+{
+  update(sceneRect());
+}
+
 /* Update the rendering sub-map */
 void MapRender::updateRenderingMap()
 {
@@ -918,6 +935,8 @@ void MapRender::setMapEditor(EditorMap* editor)
   /* Signal disconnection */
   if(editing_map != NULL)
   {
+    disconnect(editing_map, SIGNAL(laysChanged()),
+               this, SLOT(updateAll()));
     disconnect(editing_map, SIGNAL(npcPathAdd(EditorNPCPath*)),
                this, SLOT(npcPathAdd(EditorNPCPath*)));
     disconnect(editing_map, SIGNAL(npcPathRemove(EditorNPCPath*)),
@@ -933,15 +952,11 @@ void MapRender::setMapEditor(EditorMap* editor)
   /* Signal re-connection */
   if(editing_map != NULL)
   {
+    connect(editing_map, SIGNAL(laysChanged()),
+            this, SLOT(updateAll()));
     connect(editing_map, SIGNAL(npcPathAdd(EditorNPCPath*)),
             this, SLOT(npcPathAdd(EditorNPCPath*)));
     connect(editing_map, SIGNAL(npcPathRemove(EditorNPCPath*)),
             this, SLOT(npcPathRemove(EditorNPCPath*)));
   }
-}
-
-/* Update the entire scene */
-void MapRender::updateAll()
-{
-  update(sceneRect());
 }

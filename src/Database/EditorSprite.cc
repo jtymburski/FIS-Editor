@@ -111,37 +111,6 @@ QString EditorSprite::getFrameMods(int index)
 }
 
 /*
- * Description: Takes a path from the load procedure of sprite and splits it
- *              to determine if there are multiple frames.
- *
- * Inputs: QString base_path - the base path to split
- * Output: QList<QString> - the set of paths from the split (possibly 1)
- */
-QList<QString> EditorSprite::splitPath(QString base_path)
-{
-  QList<QString> paths;
-
-  /* Split first */
-  QStringList split_set = base_path.split("|");
-  if(split_set.size() == 3 && split_set[1].toInt() > 0)
-  {
-    for(int i = 0; i < split_set[1].toInt(); i++)
-    {
-      if(i < 10)
-        paths.push_back(split_set[0] + "0" + QString::number(i) + split_set[2]);
-      else
-        paths.push_back(split_set[0] + QString::number(i) + split_set[2]);
-    }
-  }
-  else
-  {
-    paths.push_back(base_path);
-  }
-
-  return paths;
-}
-
-/*
  * Description: Returns the transformed pixmap, with all necessary sprite mods.
  *
  * Inputs: int index - the frame index
@@ -649,9 +618,9 @@ int EditorSprite::addPath(QString path, bool hflip, bool vflip)
   /* Only proceed if path is not empty */
   if(!path.isEmpty())
   {
-    QList<QString> path_set = splitPath(path);
+    QList<QString> path_set = EditorHelpers::splitPath(path);
     count = path_set.size();
-    
+
     /* Loop through all paths */
     for(int i = 0; i < path_set.size(); i++)
     {
