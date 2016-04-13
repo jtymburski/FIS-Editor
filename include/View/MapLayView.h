@@ -13,6 +13,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QToolButton>

@@ -226,30 +226,52 @@ void MapLayView::buttonDelete()
   if(editor_map != nullptr && editor_map->getCurrentMap() != nullptr &&
      list_lays->currentRow() >= 0)
   {
+    bool deleted = false;
     int index = list_lays->currentRow();
     SubMapInfo* map = editor_map->getCurrentMap();
+
+    /* Create the message box */
+    QMessageBox msg_box;
+    msg_box.setText("Deleting lay at index " + QString::number(index));
+    msg_box.setInformativeText("Are you sure?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 
     /* Determine which type and attempt to remove it */
     if(combo_laytype->currentIndex() == LayType::UNDERLAYS)
     {
       if(index < map->lays_under.size())
-        map->lays_under.remove(index);
+      {
+        if(msg_box.exec() == QMessageBox::Yes)
+        {
+          map->lays_under.remove(index);
+          deleted = true;
+        }
+      }
     }
     else /* OVERLAYS */
     {
       if(index < map->lays_over.size())
-        map->lays_over.remove(index);
+      {
+        if(msg_box.exec() == QMessageBox::Yes)
+        {
+          map->lays_over.remove(index);
+          deleted = true;
+        }
+      }
     }
 
     /* Update view and select row at same location */
-    editor_map->updateLays();
-    updateData();
-    if(list_lays->count() > 0)
+    if(deleted)
     {
-      if(index < list_lays->count())
-        list_lays->setCurrentRow(index);
-      else
-        list_lays->setCurrentRow(list_lays->count() - 1);
+      editor_map->updateLays();
+      updateData();
+      if(list_lays->count() > 0)
+      {
+        if(index < list_lays->count())
+          list_lays->setCurrentRow(index);
+        else
+          list_lays->setCurrentRow(list_lays->count() - 1);
+      }
     }
   }
 }
