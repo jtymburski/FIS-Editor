@@ -219,7 +219,7 @@ int EditorParty::getInvMass()
     i.next();
     EditorItem* item = getItem(i.key());
     if(item != NULL)
-      total += item->getMass() * i.value();
+      total += item->getMass() * i.value() / 1000;
   }
 
   return total;
@@ -463,12 +463,14 @@ void EditorParty::btnItemAdd()
       if(ref != NULL)
       {
         /* Limit max */
-        int max = Inventory::kMIN_EACH_ITEM;
+
+        int max = Inventory::kMAX_ITEM;
+
         if(exists)
           max -= item_set.value(item_id);
         if(ref->getMass() > 0)
         {
-          int item_fit = (int)(getInvMassRemain() * 1.0 / ref->getMass());
+          int item_fit = (int)(getInvMassRemain() * 1000.0 / ref->getMass());
           if(item_fit < max)
             max = item_fit;
         }
@@ -725,10 +727,10 @@ void EditorParty::listItemEdited(QListWidgetItem*)
       if(exists)
       {
         EditorItem* ref = getItem(item_id);
-        int max = Inventory::kMIN_EACH_ITEM - item_set.value(item_id);
+        int max = Inventory::kMAX_ITEM - item_set.value(item_id);
         if(ref->getMass() > 0)
         {
-          int item_fit = (int)(getInvMassRemain() * 1.0 / ref->getMass());
+          int item_fit = (int)(getInvMassRemain() * 1000.0 / ref->getMass());
           if(item_fit < max)
             max = item_fit;
         }
