@@ -188,6 +188,7 @@ void EditorItem::createLayout()
   spin_mass = new QSpinBox(this);
   spin_mass->setMinimum(Item::kMIN_MASS);
   spin_mass->setMaximum(Item::kMAX_MASS);
+  spin_mass->setSuffix(" g");
   connect(spin_mass, SIGNAL(valueChanged(int)), this, SLOT(changedMass(int)));
   layout->addWidget(spin_mass, 6, 1);
 
