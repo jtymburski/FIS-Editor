@@ -296,10 +296,10 @@ void MapControl::listMenuRequested(const QPoint & pos)
   /* Only proceed if it's the map set */
   if(editing_map != NULL)
   {
-    if(list_bottom->currentRow() == 0)
-      rename_map->setDisabled(true);
-    else
-      rename_map->setEnabled(true);
+    //if(list_bottom->currentRow() == 0)
+    //  rename_map->setDisabled(true);
+    //else
+    //  rename_map->setEnabled(true);
     rightclick_menu->exec(QCursor::pos());
   }
 }
