@@ -202,11 +202,13 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
   layout->addWidget(degree_lbl,9,2);
 
   /* Sound input */
-  QLabel* sound_label = new QLabel("Sound:", this);
-  layout->addWidget(sound_label, 10, 0);
+  label_sound = new QLabel("Sound:", this);
+  label_sound->setDisabled(true);
+  layout->addWidget(label_sound, 10, 0);
   combo_sound = new QComboBox(this);
   connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(setSoundID(QString)));
+  combo_sound->setDisabled(true);
   layout->addWidget(combo_sound, 10, 1, 1, 3);
 
   /* Spacing */
@@ -492,6 +494,10 @@ void SpriteDialog::soundFill(QList<QString> sound_list)
         index = i;
     }
   }
+
+  /* If the item count in the combo box is greater than 0, enable */
+  combo_sound->setEnabled(combo_sound->count() > 0);
+  label_sound->setEnabled(combo_sound->count() > 0);
 
   /* If the index is valid, select it */
   if(index >= 0)

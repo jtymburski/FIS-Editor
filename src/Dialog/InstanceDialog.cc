@@ -7,7 +7,7 @@
  *              It also contains the path information used for map npcs.
  ******************************************************************************/
 #include "Dialog/InstanceDialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /* Constants */
 const int InstanceDialog::kALGO_COUNT = 5;
@@ -37,8 +37,29 @@ InstanceDialog::InstanceDialog(EditorMapIO* edit_io, QWidget* parent)
   thing_type = EditorEnumDb::IO;
   thing_original = edit_io;
   thing_working = new EditorMapIO();
-  if(thing_original != NULL)
+  if(thing_original != nullptr)
     *((EditorMapIO*)thing_working) = *((EditorMapIO*)thing_original);
+
+  setup();
+}
+
+/*
+ * Description: Constructor function for instant dialog. Takes an
+ *              editing item and a parent widget. Pop-up constructed using
+ *              data from the item.
+ *
+ * Inputs: EditorMapItem* edit_item - the item to edit the data for
+ *         QWidget* parent - the parent widget
+ */
+InstanceDialog::InstanceDialog(EditorMapItem* edit_item, QWidget* parent)
+              : QDialog(parent)
+{
+  /* Set-up the IO set - copied to working for changes */
+  thing_type = EditorEnumDb::ITEM;
+  thing_original = edit_item;
+  thing_working = new EditorMapItem();
+  if(thing_original != nullptr)
+    *((EditorMapItem*)thing_working) = *((EditorMapItem*)thing_original);
 
   setup();
 }
@@ -58,7 +79,7 @@ InstanceDialog::InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent)
   thing_type = EditorEnumDb::NPC;
   thing_original = edit_npc;
   thing_working = new EditorMapNPC();
-  if(thing_original != NULL)
+  if(thing_original != nullptr)
     *((EditorMapNPC*)thing_working) = *((EditorMapNPC*)thing_original);
 
   setup();
@@ -79,7 +100,7 @@ InstanceDialog::InstanceDialog(EditorMapPerson* edit_person, QWidget* parent)
   thing_type = EditorEnumDb::PERSON;
   thing_original = edit_person;
   thing_working = new EditorMapPerson();
-  if(thing_original != NULL)
+  if(thing_original != nullptr)
     *((EditorMapPerson*)thing_working) = *((EditorMapPerson*)thing_original);
 
   setup();
@@ -100,7 +121,7 @@ InstanceDialog::InstanceDialog(EditorMapThing* edit_thing, QWidget* parent)
   thing_type = EditorEnumDb::THING;
   thing_original = edit_thing;
   thing_working = new EditorMapThing();
-  if(thing_original != NULL)
+  if(thing_original != nullptr)
     *thing_working = *thing_original;
 
   setup();
@@ -111,12 +132,12 @@ InstanceDialog::InstanceDialog(EditorMapThing* edit_thing, QWidget* parent)
  */
 InstanceDialog::~InstanceDialog()
 {
-  thing_original = NULL;
+  thing_original = nullptr;
 
   /* Delete working thing */
-  if(thing_working != NULL)
+  if(thing_working != nullptr)
     delete thing_working;
-  thing_working = NULL;
+  thing_working = nullptr;
 }
 
 /*============================================================================
@@ -156,13 +177,16 @@ void InstanceDialog::createLayout()
   layout->addWidget(line_name, 1, 1, 1, 2);
 
   /* The description widget */
-  QLabel* lbl_description = new QLabel("Description", this);
-  layout->addWidget(lbl_description, 2, 0);
-  edit_description = new QTextEdit("", this);
-  edit_description->setMaximumHeight(60);
-  connect(edit_description, SIGNAL(textChanged()),
-          this, SLOT(changedDescription()));
-  layout->addWidget(edit_description, 2, 1, 2, 3);
+  if(thing_type != EditorEnumDb::ITEM)
+  {
+    QLabel* lbl_description = new QLabel("Description", this);
+    layout->addWidget(lbl_description, 2, 0);
+    edit_description = new QTextEdit("", this);
+    edit_description->setMaximumHeight(60);
+    connect(edit_description, SIGNAL(textChanged()),
+            this, SLOT(changedDescription()));
+    layout->addWidget(edit_description, 2, 1, 2, 3);
+  }
 
   /* Active enable widget */
   box_active = new QCheckBox("Spawned on Start", this);
@@ -187,13 +211,16 @@ void InstanceDialog::createLayout()
   layout->addWidget(box_respawn, 5, 2, 1, 2);
 
   /* Upper Game Party Connection */
-  QLabel* lbl_party = new QLabel("Party", this);
-  layout->addWidget(lbl_party, 6, 0);
-  combo_party = new QComboBox(this);
-  combo_party->addItem("None");
-  connect(combo_party, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(comboPartyChange(int)));
-  layout->addWidget(combo_party, 6, 1, 1, 3);
+  if(thing_type != EditorEnumDb::ITEM)
+  {
+    QLabel* lbl_party = new QLabel("Party", this);
+    layout->addWidget(lbl_party, 6, 0);
+    combo_party = new QComboBox(this);
+    combo_party->addItem("None");
+    connect(combo_party, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(comboPartyChange(int)));
+    layout->addWidget(combo_party, 6, 1, 1, 3);
+  }
 
   /* Person/NPC exclusive settings */
   if(thing_type == EditorEnumDb::PERSON || thing_type == EditorEnumDb::NPC)
@@ -228,7 +255,7 @@ void InstanceDialog::createLayout()
   }
 
   /* Events that are relevant if not IO */
-  if(thing_type != EditorEnumDb::IO)
+  if(thing_type != EditorEnumDb::IO && thing_type != EditorEnumDb::ITEM)
   {
     /* Use base event widget */
     box_base_event = new QCheckBox("Use Base Event", this);
@@ -246,7 +273,7 @@ void InstanceDialog::createLayout()
                       //Qt::AlignHCenter | Qt::AlignBottom);
   }
   /* Events that are relevant if IO - different layout */
-  else
+  else if(thing_type == EditorEnumDb::IO)
   {
     /* Lock data */
     layout->setRowMinimumHeight(9, 9);
@@ -434,6 +461,8 @@ void InstanceDialog::createLayout()
     setWindowTitle("NPC Instance Edit");
   else if(thing_type == EditorEnumDb::IO)
     setWindowTitle("IO Instance Edit");
+  else if(thing_type == EditorEnumDb::ITEM)
+    setWindowTitle("Item Instance Edit");
 
   /* Finally resize and lock size at minimum */
   updateGeometry();
@@ -483,9 +512,8 @@ void InstanceDialog::setup()
  */
 void InstanceDialog::updateData()
 {
-  /* Name and descrip */
+  /* Name */
   line_name->setText(thing_working->getName());
-  edit_description->setPlainText(thing_working->getDescription());
 
   /* Active and respawn status */
   box_active->setChecked(thing_working->isActive());
@@ -493,13 +521,20 @@ void InstanceDialog::updateData()
   if(thing_working->getActiveRespawn() >= 0)
     spin_respawn->setValue(thing_working->getActiveRespawn());
 
-  /* Game ID Party */
-  combo_party->setCurrentIndex(0);
-  for(int i = 0; i < list_parties.size(); i++)
+  /* Non-Item specific settings */
+  if(thing_type != EditorEnumDb::ITEM)
   {
-    int id = list_parties[i].split(":").front().toInt();
-    if(id == thing_working->getGameID())
-      combo_party->setCurrentIndex(i + 1);
+    /* Description */
+    edit_description->setPlainText(thing_working->getDescription());
+
+    /* Game ID Party */
+    combo_party->setCurrentIndex(0);
+    for(int i = 0; i < list_parties.size(); i++)
+    {
+      int id = list_parties[i].split(":").front().toInt();
+      if(id == thing_working->getGameID())
+        combo_party->setCurrentIndex(i + 1);
+    }
   }
 
   /* Person/NPC specific settings */
@@ -522,7 +557,7 @@ void InstanceDialog::updateData()
   }
 
   /* Event control */
-  if(thing_type != EditorEnumDb::IO)
+  if(thing_type != EditorEnumDb::IO && thing_type != EditorEnumDb::ITEM)
   {
     box_base_event->blockSignals(true);
     box_base_event->setChecked(thing_working->isBaseEvent());
@@ -530,7 +565,7 @@ void InstanceDialog::updateData()
     event_view->setEnabled(!thing_working->isBaseEvent());
     box_base_event->blockSignals(false);
   }
-  else
+  else if(thing_type == EditorEnumDb::IO)
   {
     EditorMapIO* io = (EditorMapIO*)thing_working;
 
@@ -649,7 +684,7 @@ void InstanceDialog::closeEvent(QCloseEvent* event)
  */
 void InstanceDialog::buttonBaseEdit()
 {
-  if(thing_original != NULL)
+  if(thing_original != nullptr)
   {
     /* Create pop-up to decide what to do with edit */
     QMessageBox msg_box;
@@ -1385,7 +1420,7 @@ void InstanceDialog::editEventSet(EditorEventSet* set,
                this, SLOT(eventUpdated()));
     delete event_dialog;
   }
-  event_dialog = NULL;
+  event_dialog = nullptr;
 
   /* Create the new conversation dialog */
   if(set != nullptr)
@@ -1420,7 +1455,7 @@ void InstanceDialog::editNode(QListWidgetItem*)
     EditorMapNPC* npc = (EditorMapNPC*)thing_working;
     int index = list_nodes->currentRow();
 
-    if(npc != NULL && npc->getPath()->getState() != MapNPC::LOCKED &&
+    if(npc != nullptr && npc->getPath()->getState() != MapNPC::LOCKED &&
        (npc->getPath()->getState() == MapNPC::LOOPED ||
         npc->getPath()->getState() == MapNPC::BACKANDFORTH || index == 0))
     {
@@ -1432,7 +1467,7 @@ void InstanceDialog::editNode(QListWidgetItem*)
       }
 
       delete dialog;
-      dialog = NULL;
+      dialog = nullptr;
     }
   }
 }
@@ -1482,18 +1517,21 @@ void InstanceDialog::respawnChanged(int value)
  */
 void InstanceDialog::selectTile()
 {
-  waiting_for_submap = true;
-  hide();
+  if(thing_type != EditorEnumDb::ITEM)
+  {
+    waiting_for_submap = true;
+    hide();
 
-  /* Emit the proper signal */
-  if(thing_type == EditorEnumDb::THING)
-    emit selectTile(EditorEnumDb::THING_VIEW);
-  else if(thing_type == EditorEnumDb::IO)
-    emit selectTile(EditorEnumDb::IO_VIEW);
-  else if(thing_type == EditorEnumDb::PERSON)
-    emit selectTile(EditorEnumDb::PERSON_VIEW);
-  else if(thing_type == EditorEnumDb::NPC)
-    emit selectTile(EditorEnumDb::NPC_VIEW);
+    /* Emit the proper signal */
+    if(thing_type == EditorEnumDb::THING)
+      emit selectTile(EditorEnumDb::THING_VIEW);
+    else if(thing_type == EditorEnumDb::IO)
+      emit selectTile(EditorEnumDb::IO_VIEW);
+    else if(thing_type == EditorEnumDb::PERSON)
+      emit selectTile(EditorEnumDb::PERSON_VIEW);
+    else if(thing_type == EditorEnumDb::NPC)
+      emit selectTile(EditorEnumDb::NPC_VIEW);
+  }
 }
 
 /*
@@ -1824,7 +1862,7 @@ void InstanceDialog::setListSubmaps(QVector<QString> sub_maps)
  */
 void InstanceDialog::updateOriginal()
 {
-  if(thing_working != NULL)
+  if(thing_working != nullptr)
   {
     /* Copy the data for the thing */
     if(thing_type == EditorEnumDb::THING)
@@ -1862,6 +1900,10 @@ void InstanceDialog::updateOriginal()
     else if(thing_type == EditorEnumDb::IO)
     {
       *((EditorMapIO*)thing_original) = *((EditorMapIO*)thing_working);
+    }
+    else if(thing_type == EditorEnumDb::ITEM)
+    {
+      *((EditorMapItem*)thing_original) = *((EditorMapItem*)thing_working);
     }
   }
 }

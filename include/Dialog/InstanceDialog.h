@@ -17,6 +17,7 @@
 #include <QMessageBox>
 
 #include "Database/EditorMapIO.h"
+#include "Database/EditorMapItem.h"
 #include "Database/EditorMapNPC.h"
 #include "Dialog/EventDialog.h"
 #include "Dialog/NodeDialog.h"
@@ -27,10 +28,11 @@ class InstanceDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor function */
-  InstanceDialog(EditorMapIO* edit_io, QWidget* parent = NULL);
-  InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent = NULL);
-  InstanceDialog(EditorMapPerson* edit_person, QWidget* parent = NULL);
-  InstanceDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = NULL);
+  InstanceDialog(EditorMapIO* edit_io, QWidget* parent = nullptr);
+  InstanceDialog(EditorMapItem* edit_item, QWidget* parent = nullptr);
+  InstanceDialog(EditorMapNPC* edit_npc, QWidget* parent = nullptr);
+  InstanceDialog(EditorMapPerson* edit_person, QWidget* parent = nullptr);
+  InstanceDialog(EditorMapThing* edit_thing = NULL, QWidget* parent = nullptr);
 
   /* Destructor function */
   ~InstanceDialog();

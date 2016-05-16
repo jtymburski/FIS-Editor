@@ -132,6 +132,8 @@ void MapView::setupMapView()//int x, int y)
   map_render_view->show();
   setCentralWidget(map_render_view);
 
+  //QPoint center_pt = map_render_view->viewport()->rect().center();
+
   /* Sets up the map status bar */
   map_data = new QStatusBar(this);
   map_data->setStyleSheet("border-top: 1px solid #999999");
@@ -192,6 +194,8 @@ void MapView::setupRightBar()
   /* Connections */
   connect(map_control, SIGNAL(layerChanged(EditorEnumDb::Layer)),
           this, SIGNAL(layerChanged(EditorEnumDb::Layer)));
+  connect(map_control, SIGNAL(saveMapLocation()),
+          this, SLOT(saveMapLocation()));
 }
 
 /*============================================================================
@@ -287,6 +291,21 @@ void MapView::pathEditTrigger(EditorNPCPath* path)
     {
       map_control->disableControl(false);
       emit disableControl(false);
+    }
+  }
+}
+
+/* Save sub-map location into structure */
+// TODO: Comment
+void MapView::saveMapLocation()
+{
+  if(editing_map != nullptr && map_render_view != nullptr)
+  {
+    SubMapInfo* sub_map = editing_map->getCurrentMap();
+    if(sub_map != nullptr)
+    {
+      sub_map->center_point = map_render_view->mapToScene(
+                                 map_render_view->viewport()->rect().center());
     }
   }
 }

@@ -124,6 +124,7 @@ void MapControl::selectSubMap(int index)
     SubMapInfo* selected = editing_map->getMapByIndex(index);
     if(selected != NULL)
     {
+      emit saveMapLocation();
       editing_map->setCurrentMap(index);
       emit updateMap();
       updateMapList();

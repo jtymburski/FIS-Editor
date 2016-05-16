@@ -563,6 +563,7 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.last()->battle_scenes = source.sub_maps[i]->battle_scenes;
     sub_maps.last()->music = source.sub_maps[i]->music;
     sub_maps.last()->weather = source.sub_maps[i]->weather;
+    sub_maps.last()->center_point = QPoint(0, 0);
     for(int j = 0; j < source.sub_maps[i]->tiles.size(); j++)
     {
       QVector<EditorTile*> row;
@@ -5063,6 +5064,7 @@ int EditorMap::setMap(int id, QString name,
       info->tiles = tiles;
       info->path_top = NULL;
       info->weather = -1;
+      info->center_point = QPoint(0, 0);
 
       /* If near, insert the information into the index */
       if(near)

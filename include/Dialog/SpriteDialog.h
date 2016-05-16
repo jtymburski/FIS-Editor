@@ -48,6 +48,7 @@ private:
 
   /* Sound selection combo box */
   QComboBox* combo_sound;
+  QLabel* label_sound;
 
   /* Data stacks */
   QList<QString> data_sounds;
@@ -69,8 +70,7 @@ private:
  * PRIVATE FUNCTIONS
  *===========================================================================*/
 private:
-  /* Sets the data sliders and frames in the dialog, based on the working
-   * sprite */
+  /* Sets the data sliders and frames in the dialog for the working sprite */
   void setToWorking();
 
 /*============================================================================

@@ -137,7 +137,7 @@ ThingBase EditorMapItem::getClass() const
  */
 uint32_t EditorMapItem::getCount()
 {
-  return item.getCount();
+  return item.getStartCount();
 }
 
 /*
@@ -221,7 +221,7 @@ void EditorMapItem::setBase(EditorMapItem* item)
  */
 void EditorMapItem::setCount(uint32_t count)
 {
-  item.setCount(count);
+  item.setStartCount(count);
 }
 
 /*

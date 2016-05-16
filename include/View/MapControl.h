@@ -80,6 +80,9 @@ signals:
   /* Signal for layer changing */
   void layerChanged(EditorEnumDb::Layer layer);
 
+  /* Signal for saving the current sub-map location */
+  void saveMapLocation();
+
   /* Signal for updating all lists in map database */
   void updateAllLists();
 

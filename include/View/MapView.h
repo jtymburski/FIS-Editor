@@ -146,8 +146,10 @@ public slots:
   /* Path edit trigger */
   void pathEditTrigger(EditorNPCPath* path);
 
+  /* Save sub-map location into structure */
+  void saveMapLocation();
+
   /* Select a tile trigger */
-  //void selectTileConvo(); // TODO: Remove?
   void selectTileDb();
   void selectTileEvent();
 

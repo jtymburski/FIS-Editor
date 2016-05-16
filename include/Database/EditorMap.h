@@ -27,23 +27,30 @@
 /* Struct for sub map info storage */
 struct SubMapInfo
 {
+  /* Core data */
   int id;
   QString name;
   QVector<QVector<EditorTile*>> tiles;
   EditorNPCPath* path_top;
 
+  /* Things and children */
   QVector<EditorMapIO*> ios;
   QVector<EditorMapItem*> items;
   QVector<EditorMapNPC*> npcs;
   QVector<EditorMapPerson*> persons;
   QVector<EditorMapThing*> things;
 
+  /* Lay Overs */
   QVector<LayOver> lays_over;
   QVector<LayOver> lays_under;
 
+  /* Scenes, music, and weather */
   QVector<int> battle_scenes;
   QVector<int> music;
   int weather;
+
+  /* Editor control variables */
+  QPointF center_point;
 };
 
 class EditorMap : public QObject, public EditorTemplate
