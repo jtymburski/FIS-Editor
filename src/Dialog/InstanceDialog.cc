@@ -9,12 +9,13 @@
 #include "Dialog/InstanceDialog.h"
 //#include <QDebug>
 
-/* Constants */
+/* Constant Implementation - see header file for descriptions */
 const int InstanceDialog::kALGO_COUNT = 5;
 const std::string InstanceDialog::kALGO_STATES[] = {"None", "Path Circular",
                                                     "Path Back and Forth",
                                                     "Random In Range",
                                                     "Random"};
+const int InstanceDialog::kMAX_ITEM_COUNT = 2000000000;
 const int InstanceDialog::kTRACK_MAX = 100;
 const int InstanceDialog::kTRACK_MIN = 1;
 
@@ -186,6 +187,18 @@ void InstanceDialog::createLayout()
     connect(edit_description, SIGNAL(textChanged()),
             this, SLOT(changedDescription()));
     layout->addWidget(edit_description, 2, 1, 2, 3);
+  }
+  /* The item count widget - for item things only */
+  else
+  {
+    QLabel* lbl_count = new QLabel("Count", this);
+    layout->addWidget(lbl_count, 2, 0);
+    spin_count = new QSpinBox(this);
+    spin_count->setMinimum(1);
+    spin_count->setMaximum(InstanceDialog::kMAX_ITEM_COUNT);
+    connect(spin_count, SIGNAL(valueChanged(int)),
+            this, SLOT(countChanged(int)));
+    layout->addWidget(spin_count, 2, 1, 1, 1);
   }
 
   /* Active enable widget */
@@ -535,6 +548,12 @@ void InstanceDialog::updateData()
       if(id == thing_working->getGameID())
         combo_party->setCurrentIndex(i + 1);
     }
+  }
+  /* Item specific settings */
+  else
+  {
+    spin_count->setValue(
+                     static_cast<EditorMapItem*>(thing_working)->getCount());
   }
 
   /* Person/NPC specific settings */
@@ -1397,6 +1416,22 @@ void InstanceDialog::comboTrackingChange(int index)
 }
 
 /*
+ * Description: Slot triggered when the item count is changed within
+ *              the spin box. This is only relevant for the map item.
+ *
+ * Inputs: int value - the changed value of the spin box
+ * Output: none
+ */
+void InstanceDialog::countChanged(int value)
+{
+  if(thing_type == EditorEnumDb::ITEM)
+  {
+    if(value > 0)
+      static_cast<EditorMapItem*>(thing_working)->setCount(value);
+  }
+}
+
+/*
  * Description: Edits the current event set instance trigger. Triggered
  *              from EventSetView. Required to lock out the pop-up.
  *
@@ -1869,6 +1904,7 @@ void InstanceDialog::updateOriginal()
     {
       *thing_original = *thing_working;
     }
+    /* Copy the data for the person */
     else if(thing_type == EditorEnumDb::PERSON)
     {
       EditorMapPerson* ref_orig = (EditorMapPerson*)thing_original;
@@ -1883,6 +1919,7 @@ void InstanceDialog::updateOriginal()
       if(dir_changed)
         emit personChanged(ref_orig);
     }
+    /* Copy the data for the npc */
     else if(thing_type == EditorEnumDb::NPC)
     {
       EditorMapNPC* ref_orig = (EditorMapNPC*)thing_original;
@@ -1897,10 +1934,12 @@ void InstanceDialog::updateOriginal()
       if(dir_changed)
         emit personChanged(ref_orig);
     }
+    /* Copy the data for the interactive object */
     else if(thing_type == EditorEnumDb::IO)
     {
       *((EditorMapIO*)thing_original) = *((EditorMapIO*)thing_working);
     }
+    /* Copy the data for the item */
     else if(thing_type == EditorEnumDb::ITEM)
     {
       *((EditorMapItem*)thing_original) = *((EditorMapItem*)thing_working);

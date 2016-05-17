@@ -14,6 +14,7 @@
 #include <QWidget>
 
 #include "Database/EditorMap.h"
+#include "Dialog/InstanceDialog.h"
 #include "Dialog/ItemDialog.h"
 #include "EditorHelpers.h"
 #include "View/MapThingView.h"
@@ -31,6 +32,9 @@ public:
 private:
   /* The current editing map */
   EditorMap* editor_map;
+
+  /* Thing instance dialog */
+  InstanceDialog* instance_dialog;
 
   /* Label views for selected item */
   QLabel* lbl_id;
@@ -60,6 +64,7 @@ private:
 
   /* Delete pop-up */
   void deletePopBase();
+  void deletePopInstance();
 
   /* Opens the item editing dialog */
   void editItem(EditorMapItem* sub_item = NULL);

@@ -65,9 +65,6 @@ private:
   QComboBox* combo_states;
   QComboBox* combo_tracking;
 
-  /* The conversation dialog */
-  //ConvoDialog* convo_dialog;
-
   /* Description text box */
   QTextEdit* edit_description;
 
@@ -107,6 +104,7 @@ private:
   QDialog* pop_lock;
 
   /* Spin control widgets */
+  QSpinBox* spin_count;
   QSpinBox* spin_respawn;
   QSpinBox* spin_speed;
   QSpinBox* spin_track_maintain;
@@ -123,11 +121,15 @@ private:
   bool waiting_for_submap;
   bool waiting_path;
 
-  /* Constants */
+  /* Private Constants */
   static const int kALGO_COUNT;
   static const std::string kALGO_STATES[];
   static const int kTRACK_MAX;
   static const int kTRACK_MIN;
+
+  /* Public Constants */
+public:
+  static const int kMAX_ITEM_COUNT; /* Maximum number of items */
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -210,6 +212,9 @@ public slots:
   void comboPartyChange(int index);
   void comboStateChange(int index);
   void comboTrackingChange(int index);
+
+  /* Item count changed */
+  void countChanged(int value);
 
   /* Edit event set trigger */
   void editEventSet(EditorEventSet* set, QString window_title = "",

@@ -9,7 +9,7 @@
 #include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
-const int ItemDialog::kMAX_COUNT = 2000000000;
+//const int ItemDialog::kMAX_COUNT = 2000000000;
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS

@@ -142,6 +142,28 @@ void MapItemView::deletePopBase()
 }
 
 /*
+ * Description: Deletes the instance dialog, if it exists.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void MapItemView::deletePopInstance()
+{
+  if(instance_dialog != nullptr)
+  {
+    disconnect(instance_dialog, SIGNAL(ok(QString)),
+               this, SLOT(itemInstanceUpdate(QString)));
+    //disconnect(instance_dialog,
+    //           SIGNAL(selectTile(EditorEnumDb::MapObjectMode)),
+    //           this, SIGNAL(selectTile(EditorEnumDb::MapObjectMode)));
+    disconnect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+               this, SLOT(editBaseItem(EditorMapThing*)));
+    delete instance_dialog;
+    instance_dialog = nullptr;
+  }
+}
+
+/*
  * Description: Opens the edit item dialog, on an existing item in the list
  *              (either base or instance).
  *
@@ -151,21 +173,23 @@ void MapItemView::deletePopBase()
 void MapItemView::editItem(EditorMapItem* sub_item)
 {
   EditorMapItem* current = getSelected();
-  if(sub_item != NULL)
+  if(sub_item != nullptr)
     current = sub_item;
 
   /* Delete all existing pop-ups first */
   deletePopBase();
+  deletePopInstance();
 
   /* -- Is an instance -- */
-  if(current->getBaseItem() != NULL)
+  if(current->getBaseItem() != nullptr)
   {
-    bool ok;
-    int result = QInputDialog::getInt(this, tr("Edit Item Count"),
-                                      tr("Item Count:"), current->getCount(),
-                                      1, ItemDialog::kMAX_COUNT, 1, &ok);
-    if(ok)
-      current->setCount(result);
+    /* Create the new instance dialog */
+    instance_dialog = new InstanceDialog(current, this);
+    connect(instance_dialog, SIGNAL(ok(QString)),
+            this, SLOT(itemInstanceUpdate(QString)));
+    connect(instance_dialog, SIGNAL(editBase(EditorMapThing*)),
+            this, SLOT(editBaseItem(EditorMapThing*)));
+    instance_dialog->show();
   }
   /* -- Is a base -- */
   else

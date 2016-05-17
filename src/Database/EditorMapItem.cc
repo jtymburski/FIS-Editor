@@ -89,7 +89,7 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   EditorMapThing::saveData(fh, game_only, inc_matrix);
 
   /* Next item data: Is base - write core data */
-  if(getBaseItem() == NULL)
+  if(getBaseItem() == nullptr)
   {
     if(default_item.isWalkover() != isWalkover())
       fh->writeXmlData("walkover", isWalkover());
@@ -97,7 +97,7 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   /* Next item data: Is not base */
   else
   {
-    fh->writeXmlData("count", (int)getCount());
+    fh->writeXmlData("startcount", (int)getCount());
   }
 }
 
@@ -164,7 +164,7 @@ void EditorMapItem::load(XmlData data, int index)
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
-  if(element == "count")
+  if(element == "startcount")
   {
     setCount(data.getDataInteger());
   }

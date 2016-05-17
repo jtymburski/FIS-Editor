@@ -891,7 +891,6 @@ void MapRender::updateRenderingMap()
                    map->tiles.front().size() * EditorHelpers::getTileSize());
 
     /* Center the scene on the existing center point */
-    qDebug() << "Center Point: " << map->center_point;
     for(int i = 0; i < views().size(); i++)
       views().at(i)->centerOn(map->center_point);
   }

@@ -59,7 +59,7 @@ private:
 
 public:
   /*------------------- Constants -----------------------*/
-  const static int kMAX_COUNT; /* Maximum number of items */
+  //const static int kMAX_COUNT; /* Maximum number of items */
 
 /*============================================================================
  * PRIVATE FUNCTIONS
