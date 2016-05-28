@@ -151,10 +151,10 @@ public slots:
 
   /* Updated data from higher up in the stack */
   void updatedBattleScenes(QList<QPair<int,QString>> scenes);
-  void updatedItems(QVector<QString> items);
-  void updatedMaps(QVector<QString> maps);
+  void updatedItems(QList<QString> items);
+  void updatedMaps(QList<QString> maps);
   void updatedMusic(QList<QString> music);
-  void updatedParties(QVector<QString> parties);
+  void updatedParties(QList<QString> parties);
   void updatedSounds(QList<QString> sounds);
 
   /* Updates the path nodes in the list widget */

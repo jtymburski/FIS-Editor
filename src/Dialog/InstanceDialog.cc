@@ -1672,9 +1672,9 @@ EventDialog* InstanceDialog::getEventDialog()
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all items (for give item event)
+ * Output: QList<QString> - list of all items (for give item event)
  */
-QVector<QString> InstanceDialog::getListItems()
+QList<QString> InstanceDialog::getListItems()
 {
   return list_items;
 }
@@ -1683,9 +1683,9 @@ QVector<QString> InstanceDialog::getListItems()
  * Description: Returns the list of maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all maps (for change map event)
+ * Output: QList<QString> - list of all maps (for change map event)
  */
-QVector<QString> InstanceDialog::getListMaps()
+QList<QString> InstanceDialog::getListMaps()
 {
   return list_maps;
 }
@@ -1694,9 +1694,9 @@ QVector<QString> InstanceDialog::getListMaps()
  * Description: Returns the list of map IOs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all map IOs
+ * Output: QList<QPair<QString,QString>> - list of all map IOs
  */
-QVector<QPair<QString,QString>> InstanceDialog::getListMapIOs()
+QList<QPair<QString,QString>> InstanceDialog::getListMapIOs()
 {
   return list_map_ios;
 }
@@ -1705,9 +1705,9 @@ QVector<QPair<QString,QString>> InstanceDialog::getListMapIOs()
  * Description: Returns the list of map items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all map items
+ * Output: QList<QPair<QString,QString>> - list of all map items
  */
-QVector<QString> InstanceDialog::getListMapItems()
+QList<QString> InstanceDialog::getListMapItems()
 {
   return list_map_items;
 }
@@ -1716,9 +1716,9 @@ QVector<QString> InstanceDialog::getListMapItems()
  * Description: Returns the list of map npcs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all map npcs
+ * Output: QList<QPair<QString,QString>> - list of all map npcs
  */
-QVector<QString> InstanceDialog::getListMapNPCs()
+QList<QString> InstanceDialog::getListMapNPCs()
 {
   return list_map_npcs;
 }
@@ -1727,9 +1727,9 @@ QVector<QString> InstanceDialog::getListMapNPCs()
  * Description: Returns the list of map persons, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all map persons
+ * Output: QList<QPair<QString,QString>> - list of all map persons
  */
-QVector<QString> InstanceDialog::getListMapPersons()
+QList<QString> InstanceDialog::getListMapPersons()
 {
   return list_map_persons;
 }
@@ -1738,9 +1738,9 @@ QVector<QString> InstanceDialog::getListMapPersons()
  * Description: Returns the list of map things, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all map things
+ * Output: QList<QString> - list of all map things
  */
-QVector<QString> InstanceDialog::getListMapThings()
+QList<QString> InstanceDialog::getListMapThings()
 {
   return list_map_things;
 }
@@ -1751,7 +1751,7 @@ QVector<QString> InstanceDialog::getListMapThings()
  * Inputs: none
  * Output: QList<QString> - list of all parties for instance connection
  */
-QVector<QString> InstanceDialog::getListParties()
+QList<QString> InstanceDialog::getListParties()
 {
   return list_parties;
 }
@@ -1771,9 +1771,9 @@ QList<QString> InstanceDialog::getListSounds()
  * Description: Returns the list of sub-maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: QList<QString> - list of all sub-maps (for teleport event)
  */
-QVector<QString> InstanceDialog::getListSubmaps()
+QList<QString> InstanceDialog::getListSubmaps()
 {
   return list_submaps;
 }
@@ -1781,10 +1781,10 @@ QVector<QString> InstanceDialog::getListSubmaps()
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void InstanceDialog::setListItems(QVector<QString> items)
+void InstanceDialog::setListItems(QList<QString> items)
 {
   list_items = items;
 
@@ -1798,10 +1798,10 @@ void InstanceDialog::setListItems(QVector<QString> items)
 /*
  * Description: Sets the list of maps, used for event creation
  *
- * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Inputs: QList<QString> - list of all maps (for change map event)
  * Output: none
  */
-void InstanceDialog::setListMaps(QVector<QString> maps)
+void InstanceDialog::setListMaps(QList<QString> maps)
 {
   list_maps = maps;
 
@@ -1814,18 +1814,18 @@ void InstanceDialog::setListMaps(QVector<QString> maps)
  * Description: Sets the list of things, ios, items, persons, npcs, used for
  *              event creation.
  *
- * Inputs: QVector<QString> things - list of all map things
- *         QVector<QPair<QString,QString>> ios - list of all map ios
- *         QVector<QString> items - list of all map items
- *         QVector<QString> persons - list of all map persons
- *         QVector<QString> npcs - list of all map npcs
+ * Inputs: QList<QString> things - list of all map things
+ *         QList<QPair<QString,QString>> ios - list of all map ios
+ *         QList<QString> items - list of all map items
+ *         QList<QString> persons - list of all map persons
+ *         QList<QString> npcs - list of all map npcs
  * Output: none
  */
-void InstanceDialog::setListMapThings(QVector<QString> things,
-                                      QVector<QPair<QString,QString>> ios,
-                                      QVector<QString> items,
-                                      QVector<QString> persons,
-                                      QVector<QString> npcs)
+void InstanceDialog::setListMapThings(QList<QString> things,
+                                      QList<QPair<QString,QString>> ios,
+                                      QList<QString> items,
+                                      QList<QString> persons,
+                                      QList<QString> npcs)
 {
   list_map_things = things;
   list_map_ios = ios;
@@ -1841,17 +1841,16 @@ void InstanceDialog::setListMapThings(QVector<QString> things,
 /*
  * Description: Sets the list of parties, used for selecting linked game objs
  *
- * Inputs: QVector<QString> - list of all parties
+ * Inputs: QList<QString> - list of all parties
  * Output: none
  */
-void InstanceDialog::setListParties(QVector<QString> parties)
+void InstanceDialog::setListParties(QList<QString> parties)
 {
   list_parties = parties;
   combo_party->blockSignals(true);
   combo_party->clear();
   combo_party->addItem("None");
-  for(int i = 0; i < list_parties.size(); i++)
-    combo_party->addItem(list_parties[i]);
+  combo_party->addItems(list_parties);
   updateData();
   combo_party->blockSignals(false);
 }
@@ -1875,10 +1874,10 @@ void InstanceDialog::setListSounds(QList<QString> sounds)
 /*
  * Description: Sets the list of sub-maps, used for event creation.
  *
- * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Inputs: QList<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void InstanceDialog::setListSubmaps(QVector<QString> sub_maps)
+void InstanceDialog::setListSubmaps(QList<QString> sub_maps)
 {
   list_submaps = sub_maps;
 

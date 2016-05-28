@@ -161,15 +161,15 @@ public:
   void setEditorMap(EditorMap* map);
 
   /* Updates list in person dialog, needed for event control */
-  void updateListItems(QVector<QString> list);
-  void updateListMaps(QVector<QString> list);
-  void updateListMapThings(QVector<QString> things,
-                           QVector<QPair<QString,QString>> ios,
-                           QVector<QString> items, QVector<QString> persons,
-                           QVector<QString> npcs);
-  void updateListParties(QVector<QString> list);
+  void updateListItems(QList<QString> list);
+  void updateListMaps(QList<QString> list);
+  void updateListMapThings(QList<QString> things,
+                           QList<QPair<QString,QString>> ios,
+                           QList<QString> items, QList<QString> persons,
+                           QList<QString> npcs);
+  void updateListParties(QList<QString> list);
   void updateListSounds(QList<QString> list);
-  void updateListSubmaps(QVector<QString> list);
+  void updateListSubmaps(QList<QString> list);
 
   /* Update path finished */
   void updatePathFinished();

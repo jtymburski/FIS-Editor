@@ -20,16 +20,37 @@ QString EditorHelpers::previous_path = "";
  *===========================================================================*/
 
 /*
+ * Description: Optimizes the default qt combo box to handle high amounts of
+ *              string data.
+ *
+ * Inputs: QComboBox* combo - the combo box to optimize
+ * Output: none
+ */
+void EditorHelpers::comboBoxOptimize(QComboBox *combo)
+{
+  /* Size adjust control to minimum */
+  combo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
+
+  QListView *view = static_cast<QListView*>(combo->view());
+
+  /* Declares that all items are uniform item sizes (strings) */
+  view->setUniformItemSizes(true);
+
+  /* Alerts the view that it is able to display and render on the fly */
+  view->setLayoutMode(QListView::Batched);
+}
+
+/*
  * Description: Returns the converted xml from pseudo game style '[' and ID
  *              references ({ID}) to name string to the version to render with
  *              CSS.
  *
  * Inputs: QString orig_text - the original text to render
- *         QVector<QString> list - the list of thing and ID association
- *                                 00000: NAME
+ *         QList<QString> list - the list of thing and ID association
+ *                               00000: NAME
  * Output: QString - the resulting text after the conversion
  */
-QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
+QString EditorHelpers::convertXml(QString orig_text, QList<QString> list)
 {
   /* Handle color replacements */
   QString clr_text = "";
@@ -142,6 +163,21 @@ QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
   render_text.replace(']', '>');
 
   return render_text;
+}
+
+/*
+ * Description: Returns the converted xml from pseudo game style '[' and ID
+ *              references ({ID}) to name string to the version to render with
+ *              CSS.
+ *
+ * Inputs: QString orig_text - the original text to render
+ *         QVector<QString> list - the list of thing and ID association
+ *                                 00000: NAME
+ * Output: QString - the resulting text after the conversion
+ */
+QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
+{
+  return convertXml(orig_text, list.toList());
 }
 
 /*

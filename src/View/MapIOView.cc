@@ -695,10 +695,10 @@ void MapIOView::setEditorMap(EditorMap* map)
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void MapIOView::updateListItems(QVector<QString> list)
+void MapIOView::updateListItems(QList<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListItems(list);
@@ -709,10 +709,10 @@ void MapIOView::updateListItems(QVector<QString> list)
 /*
  * Description: Sets the list of maps, used for event creation
  *
- * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Inputs: QList<QString> - list of all maps (for change map event)
  * Output: none
  */
-void MapIOView::updateListMaps(QVector<QString> list)
+void MapIOView::updateListMaps(QList<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListMaps(list);
@@ -724,18 +724,18 @@ void MapIOView::updateListMaps(QVector<QString> list)
  * Description: Sets the list of things, ios, items, persons, npcs, used for
  *              event creation.
  *
- * Inputs: QVector<QString> things - list of all map things
- *         QVector<QPair<QString,QString>> ios - list of all map ios
- *         QVector<QString> items - list of all map items
- *         QVector<QString> persons - list of all map persons
- *         QVector<QString> npcs - list of all map npcs
+ * Inputs: QList<QString> things - list of all map things
+ *         QList<QPair<QString,QString>> ios - list of all map ios
+ *         QList<QString> items - list of all map items
+ *         QList<QString> persons - list of all map persons
+ *         QList<QString> npcs - list of all map npcs
  * Output: none
  */
-void MapIOView::updateListMapThings(QVector<QString> things,
-                                    QVector<QPair<QString,QString>> ios,
-                                    QVector<QString> items,
-                                    QVector<QString> persons,
-                                    QVector<QString> npcs)
+void MapIOView::updateListMapThings(QList<QString> things,
+                                    QList<QPair<QString,QString>> ios,
+                                    QList<QString> items,
+                                    QList<QString> persons,
+                                    QList<QString> npcs)
 {
   if(io_dialog != nullptr)
     io_dialog->setListMapThings(things, ios, items, persons, npcs);
@@ -746,10 +746,10 @@ void MapIOView::updateListMapThings(QVector<QString> things,
 /*
  * Description: Sets the list of maps, used for the party dropdown
  *
- * Inputs: QVector<QString> - list of all parties (for selected dropdown)
+ * Inputs: QList<QString> - list of all parties (for selected dropdown)
  * Output: none
  */
-void MapIOView::updateListParties(QVector<QString> list)
+void MapIOView::updateListParties(QList<QString> list)
 {
   if(instance_dialog != NULL)
     instance_dialog->setListParties(list);
@@ -772,10 +772,10 @@ void MapIOView::updateListSounds(QList<QString> list)
 /*
  * Description: Sets the list of sub-maps, used for event creation.
  *
- * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Inputs: QList<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void MapIOView::updateListSubmaps(QVector<QString> list)
+void MapIOView::updateListSubmaps(QList<QString> list)
 {
   if(io_dialog != NULL)
     io_dialog->setListSubmaps(list);

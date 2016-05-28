@@ -169,10 +169,10 @@ public slots:
 
   /* Updated data to pass into map database */
   void updatedBattleScenes(QList<QPair<int,QString>> scenes);
-  void updatedItems(QVector<QString> items);
-  void updatedMaps(QVector<QString> maps);
+  void updatedItems(QList<QString> items);
+  void updatedMaps(QList<QString> maps);
   void updatedMusic(QList<QString> music_list);
-  void updatedParties(QVector<QString> parties);
+  void updatedParties(QList<QString> parties);
   void updatedSounds(QList<QString> sound_list);
 
 /*============================================================================

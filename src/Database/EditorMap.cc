@@ -2729,12 +2729,12 @@ int EditorMap::getIOIndex(int id, int sub_map)
  *         bool all_submaps - true if all sub-maps should be stacked together
  *         bool shortened - should the sub-map name be shortened (just ID:NAME
  *                          instead of BASEID(ID):NAME).
- * Output: QVector<QString> - list of all things
+ * Output: QList<QString> - list of all things
  */
-QVector<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
-                                      bool shortened)
+QList<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
+                                    bool shortened)
 {
-  QVector<QString> stack;
+  QList<QString> stack;
   stack.push_back("-- INTERACTIVE OBJECTS --");
 
   /* If sub map ref is less than 0, get from base set */
@@ -2765,13 +2765,22 @@ QVector<QString> EditorMap::getIOList(int sub_map, bool all_submaps,
   return stack;
 }
 
-/* Returns stored IO information */
-// TODO: Comment
-QVector<QPair<QString,QString>> EditorMap::getIOListSet(int sub_map,
-                                                        bool all_submaps,
-                                                        bool shortened)
+/*
+ * Description: Returns a list of all things in the format of a HEADER row
+ *              with the following rows as "ID: NAME" paired with a comma
+ *              delimited list of all states
+ *
+ * Inputs: int sub_map - the sub-map to get the things for (<0 is base)
+ *         bool all_submaps - true if all sub-maps should be stacked together
+ *         bool shortened - should the sub-map name be shortened (just ID:NAME
+ *                          instead of BASEID(ID):NAME).
+ * Output: QList<QPair<QString,QString>> - list of all things with states
+ */
+QList<QPair<QString,QString>> EditorMap::getIOListSet(int sub_map,
+                                                      bool all_submaps,
+                                                      bool shortened)
 {
-  QVector<QPair<QString,QString>> set;
+  QList<QPair<QString,QString>> set;
   //set.push_back(QPair<QString,QString>("-- INTERACTIVE OBJECTS --", ""));
 
   /* If sub map ref is less than 0, get from base set */
@@ -2939,12 +2948,12 @@ int EditorMap::getItemIndex(int id, int sub_map)
  *         bool all_submaps - true if all sub-maps should be stacked together
  *         bool shortened - should the sub-map name be shortened (just ID:NAME
  *                          instead of BASEID(ID):NAME).
- * Output: QVector<QString> - list of all items
+ * Output: QList<QString> - list of all items
  */
-QVector<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
-                                        bool shortened)
+QList<QString> EditorMap::getItemList(int sub_map, bool all_submaps,
+                                      bool shortened)
 {
-  QVector<QString> stack;
+  QList<QString> stack;
   //stack.push_back("-- ITEMS --");
 
   /* If sub map ref is less than 0, get from base set */
@@ -3060,11 +3069,11 @@ int EditorMap::getMapIndex(int id)
  * Description: Returns the list of maps in the format "ID: NAME"
  *
  * Inputs: none
- * Output: QVector<QString> - the list of strings of each sub-map.
+ * Output: QList<QString> - the list of strings of each sub-map.
  */
-QVector<QString> EditorMap::getMapList()
+QList<QString> EditorMap::getMapList()
 {
-  QVector<QString> list;
+  QList<QString> list;
 
   for(int i = 0; i < sub_maps.size(); i++)
     list.push_back(QString::number(sub_maps[i]->id) + ": " + sub_maps[i]->name);
@@ -3596,12 +3605,12 @@ int EditorMap::getNPCIndex(int id, int sub_map)
  *         bool all_submaps - true if all sub-maps should be stacked together
  *         bool shortened - should the sub-map name be shortened (just ID:NAME
  *                          instead of BASEID(ID):NAME).
- * Output: QVector<QString> - list of all npcs
+ * Output: QList<QString> - list of all npcs
  */
-QVector<QString> EditorMap::getNPCList(int sub_map, bool all_submaps,
-                                       bool shortened)
+QList<QString> EditorMap::getNPCList(int sub_map, bool all_submaps,
+                                     bool shortened)
 {
-  QVector<QString> stack;
+  QList<QString> stack;
   //stack.push_back("-- NPCS --");
 
   /* If sub map ref is less than 0, get from base set */
@@ -3766,12 +3775,12 @@ int EditorMap::getPersonIndex(int id, int sub_map)
  *         bool all_submaps - true if all sub-maps should be stacked together
  *         bool shortened - should the sub-map name be shortened (just ID:NAME
  *                          instead of BASEID(ID):NAME).
- * Output: QVector<QString> - list of all persons
+ * Output: QList<QString> - list of all persons
  */
-QVector<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
-                                          bool shortened)
+QList<QString> EditorMap::getPersonList(int sub_map, bool all_submaps,
+                                        bool shortened)
 {
-  QVector<QString> stack;
+  QList<QString> stack;
   //stack.push_back("-- PERSONS --");
 
   /* If sub map ref is less than 0, get from base set */
@@ -4084,12 +4093,12 @@ int EditorMap::getThingIndex(int id, int sub_map)
  *         bool all_submaps - true if all sub-maps should be stacked together
  *         bool shortened - should the sub-map name be shortened (just ID:NAME
  *                          instead of BASEID(ID):NAME).
- * Output: QVector<QString> - list of all things
+ * Output: QList<QString> - list of all things
  */
-QVector<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
-                                         bool shortened)
+QList<QString> EditorMap::getThingList(int sub_map, bool all_submaps,
+                                       bool shortened)
 {
-  QVector<QString> stack;
+  QList<QString> stack;
   //stack.push_back("-- THINGS --");
 
   /* If sub map ref is less than 0, get from base set */

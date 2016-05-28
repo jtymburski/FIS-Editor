@@ -63,13 +63,13 @@ void MapView::fillEventWithData()
   if(editing_map != nullptr)
   {
     /* Compile thing lists */
-    QVector<QString> thing_list = editing_map->getThingList(0, true, true);
-    QVector<QPair<QString,QString>> io_set =
+    QList<QString> thing_list = editing_map->getThingList(0, true, true);
+    QList<QPair<QString,QString>> io_set =
                                        editing_map->getIOListSet(0, true, true);
-    QVector<QString> item_list = editing_map->getItemList(0, true, true);
-    QVector<QString> person_list = editing_map->getPersonList(0, true, true);
+    QList<QString> item_list = editing_map->getItemList(0, true, true);
+    QList<QString> person_list = editing_map->getPersonList(0, true, true);
     person_list.push_front("0: Player");
-    QVector<QString> npc_list = editing_map->getNPCList(0, true, true);
+    QList<QString> npc_list = editing_map->getNPCList(0, true, true);
 
     /* Load data in */
     event_dialog->setListMapThings(thing_list, io_set, item_list,
@@ -438,7 +438,7 @@ void MapView::updatedBattleScenes(QList<QPair<int,QString>> scenes)
 
 /* Updated data to pass into map database */
 // TODO: Comment
-void MapView::updatedItems(QVector<QString> items)
+void MapView::updatedItems(QList<QString> items)
 {
   if(data_db)
     map_database->updatedItems(items);
@@ -448,7 +448,7 @@ void MapView::updatedItems(QVector<QString> items)
 
 /* Updated data to pass into map database */
 // TODO: Comment
-void MapView::updatedMaps(QVector<QString> maps)
+void MapView::updatedMaps(QList<QString> maps)
 {
   if(data_db)
     map_database->updatedMaps(maps);
@@ -465,7 +465,7 @@ void MapView::updatedMusic(QList<QString> music_list)
 
 /* Updated data to pass into map database */
 // TODO: Comment
-void MapView::updatedParties(QVector<QString> parties)
+void MapView::updatedParties(QList<QString> parties)
 {
   if(data_db)
     map_database->updatedParties(parties);

@@ -976,9 +976,9 @@ EventDialog* IODialog::getEventDialog()
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all items (for give item event)
+ * Output: QList<QString> - list of all items (for give item event)
  */
-QVector<QString> IODialog::getListItems()
+QList<QString> IODialog::getListItems()
 {
   return list_items;
 }
@@ -987,9 +987,9 @@ QVector<QString> IODialog::getListItems()
  * Description: Returns the list of maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all maps (for change map event)
+ * Output: QList<QString> - list of all maps (for change map event)
  */
-QVector<QString> IODialog::getListMaps()
+QList<QString> IODialog::getListMaps()
 {
   return list_maps;
 }
@@ -998,9 +998,9 @@ QVector<QString> IODialog::getListMaps()
  * Description: Returns the list of map IOs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString>> - list of all map IOs
+ * Output: QList<QPair<QString,QString>> - list of all map IOs
  */
-QVector<QPair<QString,QString>> IODialog::getListMapIOs()
+QList<QPair<QString,QString>> IODialog::getListMapIOs()
 {
   return list_map_ios;
 }
@@ -1009,9 +1009,9 @@ QVector<QPair<QString,QString>> IODialog::getListMapIOs()
  * Description: Returns the list of map items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all map items
+ * Output: QList<QString> - list of all map items
  */
-QVector<QString> IODialog::getListMapItems()
+QList<QString> IODialog::getListMapItems()
 {
   return list_map_items;
 }
@@ -1020,9 +1020,9 @@ QVector<QString> IODialog::getListMapItems()
  * Description: Returns the list of map npcs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all map npcs
+ * Output: QList<QString> - list of all map npcs
  */
-QVector<QString> IODialog::getListMapNPCs()
+QList<QString> IODialog::getListMapNPCs()
 {
   return list_map_npcs;
 }
@@ -1031,9 +1031,9 @@ QVector<QString> IODialog::getListMapNPCs()
  * Description: Returns the list of map persons, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all map persons
+ * Output: QList<QString> - list of all map persons
  */
-QVector<QString> IODialog::getListMapPersons()
+QList<QString> IODialog::getListMapPersons()
 {
   return list_map_persons;
 }
@@ -1042,9 +1042,9 @@ QVector<QString> IODialog::getListMapPersons()
  * Description: Returns the list of map things, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all map things
+ * Output: QList<QString> - list of all map things
  */
-QVector<QString> IODialog::getListMapThings()
+QList<QString> IODialog::getListMapThings()
 {
   return list_map_things;
 }
@@ -1065,9 +1065,9 @@ QList<QString> IODialog::getListSounds()
  * Description: Returns the list of sub-maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: QList<QString> - list of all sub-maps (for teleport event)
  */
-QVector<QString> IODialog::getListSubmaps()
+QList<QString> IODialog::getListSubmaps()
 {
   return list_submaps;
 }
@@ -1075,10 +1075,10 @@ QVector<QString> IODialog::getListSubmaps()
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void IODialog::setListItems(QVector<QString> items)
+void IODialog::setListItems(QList<QString> items)
 {
   list_items = items;
 
@@ -1092,10 +1092,10 @@ void IODialog::setListItems(QVector<QString> items)
 /*
  * Description: Sets the list of maps, used for event creation
  *
- * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Inputs: QList<QString> - list of all maps (for change map event)
  * Output: none
  */
-void IODialog::setListMaps(QVector<QString> maps)
+void IODialog::setListMaps(QList<QString> maps)
 {
   list_maps = maps;
 
@@ -1108,18 +1108,18 @@ void IODialog::setListMaps(QVector<QString> maps)
  * Description: Sets the list of things, ios, items, persons, npcs, used for
  *              event creation.
  *
- * Inputs: QVector<QString> things - list of all map things
- *         QVector<QPair<QString,QString>> ios - list of all map ios
- *         QVector<QString> items - list of all map items
- *         QVector<QString> persons - list of all map persons
- *         QVector<QString> npcs - list of all map npcs
+ * Inputs: QList<QString> things - list of all map things
+ *         QList<QPair<QString,QString>> ios - list of all map ios
+ *         QList<QString> items - list of all map items
+ *         QList<QString> persons - list of all map persons
+ *         QList<QString> npcs - list of all map npcs
  * Output: none
  */
-void IODialog::setListMapThings(QVector<QString> things,
-                                QVector<QPair<QString,QString>> ios,
-                                QVector<QString> items,
-                                QVector<QString> persons,
-                                QVector<QString> npcs)
+void IODialog::setListMapThings(QList<QString> things,
+                                QList<QPair<QString,QString>> ios,
+                                QList<QString> items,
+                                QList<QString> persons,
+                                QList<QString> npcs)
 {
   list_map_things = things;
   list_map_ios = ios;
@@ -1153,10 +1153,10 @@ void IODialog::setListSounds(QList<QString> sounds)
 /*
  * Description: Sets the list of sub-maps, used for event creation.
  *
- * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Inputs: QList<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void IODialog::setListSubmaps(QVector<QString> sub_maps)
+void IODialog::setListSubmaps(QList<QString> sub_maps)
 {
   list_submaps = sub_maps;
 

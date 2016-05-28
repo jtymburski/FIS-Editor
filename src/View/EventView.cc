@@ -174,6 +174,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QLabel* lbl_give_item = new QLabel("Item:", this);
       QLabel* lbl_give_count = new QLabel("Count:", this);
       item_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(item_name);
       item_name->setMinimumWidth(200);
       connect(item_name, SIGNAL(currentIndexChanged(int)),
               this, SLOT(giveItemChanged(int)));
@@ -199,6 +200,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QLabel* lbl_take_item = new QLabel("Item:", this);
       QLabel* lbl_take_count = new QLabel("Count:", this);
       take_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(take_name);
       take_name->setMinimumWidth(200);
       connect(take_name, SIGNAL(currentIndexChanged(int)),
               this, SLOT(takeItemChanged(int)));
@@ -223,6 +225,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QWidget* widget_map = new QWidget(this);
       QLabel* lbl_map_name = new QLabel("Map:");
       map_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(map_name);
       map_name->setMinimumWidth(200);
       connect(map_name, SIGNAL(currentIndexChanged(int)),
               this, SLOT(changeMapChanged(int)));
@@ -348,6 +351,7 @@ void EventView::createLayout()//bool conversation_enabled)
               this, SLOT(propertyTypeChange(QString)));
       QLabel* lbl_id = new QLabel("ID", this);
       prop_id = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(prop_id);
       connect(prop_id, SIGNAL(currentIndexChanged(QString)),
               this, SLOT(propertyIDChange(QString)));
       QLabel* lbl_head_prop = new QLabel("Property", this);
@@ -515,6 +519,7 @@ void EventView::createLayout()//bool conversation_enabled)
                    pal.color(QPalette::Active, QPalette::Text));
       tele_map->setPalette(pal);
       tele_thing = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(tele_thing);
       tele_thing->setMinimumWidth(200);
       connect(tele_thing, SIGNAL(currentIndexChanged(int)),
               this, SLOT(teleportThingChanged(int)));
@@ -540,6 +545,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QWidget* widget_unlock_io = new QWidget(this);
       QLabel* lbl_unio = new QLabel("IO:", this);
       unio_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(unio_name);
       connect(unio_name, SIGNAL(currentIndexChanged(QString)),
               this, SLOT(unlockIOChanged(QString)));
       /* -- */
@@ -623,6 +629,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QWidget* widget_unlock_thing = new QWidget(this);
       QLabel* lbl_unth = new QLabel("Thing:", this);
       unth_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(unth_name);
       connect(unth_name, SIGNAL(currentIndexChanged(QString)),
               this, SLOT(unlockThingChanged(QString)));
       /* -- */
@@ -741,6 +748,7 @@ void EventView::createLayout()//bool conversation_enabled)
   QLabel* lbl_sound_2 = new QLabel("Sound:", this);
   sound_layout->addWidget(lbl_sound_2);
   combo_sound = new QComboBox(this);
+  EditorHelpers::comboBoxOptimize(combo_sound);
   combo_sound->setDisabled(true);
   connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(changedSound(QString)));
@@ -835,7 +843,7 @@ void EventView::editConversation(Conversation* convo, bool is_option)
             this, SLOT(selectTileConvo()));
     connect(pop_convo, SIGNAL(success()),
             this, SLOT(updateConversation()));
-    pop_convo->show();
+    pop_convo->setVisible(true);
   }
 }
 
@@ -881,6 +889,7 @@ void EventView::editEvent(Event* edit_event)
                    static_cast<int>(EventClassifier::CONVERSATION) |
                    static_cast<int>(EventClassifier::BATTLESTART);
     }
+
     pop_event_view = new EventView(nullptr, pop_event,
                                    (EventClassifier)limit_int);
     pop_event_view->setListItems(list_items);
@@ -899,7 +908,7 @@ void EventView::editEvent(Event* edit_event)
     /* Connect up edit event and data */
     pop_event_ctrl.setEvent(*pop_event_edit);
     pop_event_view->setEvent(&pop_event_ctrl);
-    pop_event->show();
+    pop_event->setVisible(true);
   }
 }
 
@@ -1537,13 +1546,13 @@ void EventView::updateListProperty(const ThingBase& type)
   prop_id->addItem("-1: This " +
                    QString::fromStdString(Helpers::typeToStr(type)));
   if(type == ThingBase::THING)
-    prop_id->addItems(list_map_things.toList());
+    prop_id->addItems(list_map_things);
   else if(type == ThingBase::PERSON)
-    prop_id->addItems(list_map_persons.toList());
+    prop_id->addItems(list_map_persons);
   else if(type == ThingBase::NPC)
-    prop_id->addItems(list_map_npcs.toList());
+    prop_id->addItems(list_map_npcs);
   else if(type == ThingBase::ITEM)
-    prop_id->addItems(list_map_items.toList());
+    prop_id->addItems(list_map_items);
   else if(type == ThingBase::INTERACTIVE)
     for(int i = 0; i < list_map_ios.size(); i++)
       prop_id->addItem(list_map_ios[i].first);
@@ -1564,72 +1573,45 @@ void EventView::updateListProperty(const ThingBase& type)
 void EventView::updateLists(bool things, bool ios, bool items,
                             bool persons, bool npcs)
 {
+  (void)items;
+
+  /* The IO names and IDs */
+  QList<QString> front_ios;
+  for(int i = 0; i < list_map_ios.size(); i++)
+    front_ios.push_back(list_map_ios[i].first);
+
   /* Signal blocks */
   tele_thing->blockSignals(true);
   unio_name->blockSignals(true);
   unth_name->blockSignals(true);
 
-  /* Check what is updated */
+  /* Teleport Thing */
   bool update_tele = (things || ios || persons || npcs);
   if(update_tele)
   {
     tele_thing->clear();
     //tele_thing->addItem("-1: This Thing");
+    tele_thing->addItems(list_map_persons + list_map_npcs
+                                          + list_map_things + front_ios);
   }
+
+  /* Unlock IO */
   bool update_unio = ios;
   if(update_unio)
   {
     unio_name->clear();
-    unio_name->addItem("-1: This Thing");
+    unio_name->addItem("-1: This IO");
+    unio_name->addItems(front_ios);
   }
+
+  /* Unlock Thing */
   bool update_unth = (things || persons || npcs);
   if(update_unth)
   {
     unth_name->clear();
     unth_name->addItem("-1: This Thing");
+    unth_name->addItems(list_map_persons + list_map_npcs + list_map_things);
   }
-
-  /* Processing */
-  /* -- PERSONS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_persons.size(); i++)
-    {
-      tele_thing->addItem(list_map_persons[i]);
-      unth_name->addItem(list_map_persons[i]);
-    }
-  }
-  /* -- NPCS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_npcs.size(); i++)
-    {
-      tele_thing->addItem(list_map_npcs[i]);
-      unth_name->addItem(list_map_npcs[i]);
-    }
-  }
-  /* -- THINGS -- */
-  if(update_tele || update_unth)
-  {
-    for(int i = 0; i < list_map_things.size(); i++)
-    {
-      tele_thing->addItem(list_map_things[i]);
-      unth_name->addItem(list_map_things[i]);
-    }
-  }
-  /* -- IOS -- */
-  if(update_tele || update_unio)
-  {
-    for(int i = 0; i < list_map_ios.size(); i++)
-    {
-      tele_thing->addItem(list_map_ios[i].first);
-      unio_name->addItem(list_map_ios[i].first);
-    }
-  }
-  /* -- ITEMS -- */
-  (void)items;
-  if(false)
-  {}
 
   /* Restore signal blocks */
   setLayoutData();
@@ -2234,9 +2216,7 @@ void EventView::notificationBtnItalic()
 void EventView::notificationBtnPreview()
 {
   /* Compile list */
-  QVector<QString> list_vec = list_map_persons;
-  list_vec += list_map_npcs;
-  list_vec += list_map_things;
+  QList<QString> list_vec = list_map_persons + list_map_npcs + list_map_things;
   for(int i = 0; i < list_map_ios.size(); i++)
     list_vec.push_back(list_map_ios[i].first);
   list_vec += list_map_items;
@@ -2268,17 +2248,15 @@ void EventView::notificationBtnPreview()
 void EventView::notificationBtnThing()
 {
   /* Compile list of all things */
-  QVector<QString> list_vec = list_map_persons;
-  QString player = list_vec.first();
-  list_vec.removeFirst();
-  list_vec += list_map_npcs;
-  list_vec += list_map_things;
+  QList<QString> list = list_map_persons;
+  QString player = list.first();
+  list.removeFirst();
+  list += list_map_npcs + list_map_things;
   for(int i = 0; i < list_map_ios.size(); i++)
-    list_vec.push_back(list_map_ios[i].first);
-  list_vec += list_map_items;
-  qSort(list_vec);
-  list_vec.push_front(player);
-  QStringList list(list_vec.toList());
+    list.push_back(list_map_ios[i].first);
+  list += list_map_items;
+  qSort(list);
+  list.push_front(player);
 
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
@@ -3857,9 +3835,9 @@ EditorEvent* EventView::getEvent()
  * Description: Returns the list of items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all items (for give item event)
+ * Output: QList<QString> - list of all items (for give item event)
  */
-QVector<QString> EventView::getListItems()
+QList<QString> EventView::getListItems()
 {
   return list_items;
 }
@@ -3868,9 +3846,9 @@ QVector<QString> EventView::getListItems()
  * Description: Returns the list of maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all maps (for change map event)
+ * Output: QList<QString> - list of all maps (for change map event)
  */
-QVector<QString> EventView::getListMaps()
+QList<QString> EventView::getListMaps()
 {
   return list_maps;
 }
@@ -3879,9 +3857,9 @@ QVector<QString> EventView::getListMaps()
  * Description: Returns the list of map IOs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QPair<QString,QString> - list of all IOs (for unlock event)
+ * Output: QList<QPair<QString,QString> - list of all IOs (for unlock event)
  */
-QVector<QPair<QString,QString>> EventView::getListMapIOs()
+QList<QPair<QString,QString>> EventView::getListMapIOs()
 {
   return list_map_ios;
 }
@@ -3890,9 +3868,9 @@ QVector<QPair<QString,QString>> EventView::getListMapIOs()
  * Description: Returns the list of map items, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all items (for events)
+ * Output: QList<QString> - list of all items (for events)
  */
-QVector<QString> EventView::getListMapItems()
+QList<QString> EventView::getListMapItems()
 {
   return list_map_items;
 }
@@ -3901,9 +3879,9 @@ QVector<QString> EventView::getListMapItems()
  * Description: Returns the list of map npcs, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all npcs (for events)
+ * Output: QList<QString> - list of all npcs (for events)
  */
-QVector<QString> EventView::getListMapNPCs()
+QList<QString> EventView::getListMapNPCs()
 {
   return list_map_npcs;
 }
@@ -3912,9 +3890,9 @@ QVector<QString> EventView::getListMapNPCs()
  * Description: Returns the list of map persons, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all persons (for events)
+ * Output: QList<QString> - list of all persons (for events)
  */
-QVector<QString> EventView::getListMapPersons()
+QList<QString> EventView::getListMapPersons()
 {
   return list_map_persons;
 }
@@ -3923,9 +3901,9 @@ QVector<QString> EventView::getListMapPersons()
  * Description: Returns the list of map things, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all things (for events)
+ * Output: QList<QString> - list of all things (for events)
  */
-QVector<QString> EventView::getListMapThings()
+QList<QString> EventView::getListMapThings()
 {
   return list_map_things;
 }
@@ -3945,9 +3923,9 @@ QList<QString> EventView::getListSounds()
  * Description: Returns the list of sub-maps, used for event creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all sub-maps (for teleport event)
+ * Output: QList<QString> - list of all sub-maps (for teleport event)
  */
-QVector<QString> EventView::getListSubmaps()
+QList<QString> EventView::getListSubmaps()
 {
   return list_submaps;
 }
@@ -3974,10 +3952,10 @@ void EventView::setEvent(EditorEvent* event)
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void EventView::setListItems(QVector<QString> items)
+void EventView::setListItems(QList<QString> items)
 {
   /* Set new data */
   list_items = items;
@@ -3988,13 +3966,11 @@ void EventView::setListItems(QVector<QString> items)
 
   /* Give Items */
   item_name->clear();
-  for(int i = 0; i < list_items.size(); i++)
-    item_name->addItem(list_items[i]);
+  item_name->addItems(list_items);
 
   /* Take Items */
   take_name->clear();
-  for(int i = 0; i < list_items.size(); i++)
-    take_name->addItem(list_items[i]);
+  take_name->addItems(list_items);
 
   /* Update and unblock */
   setLayoutData();
@@ -4005,16 +3981,15 @@ void EventView::setListItems(QVector<QString> items)
 /*
  * Description: Sets the list of maps, used for event creation
  *
- * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Inputs: QList<QString> - list of all maps (for change map event)
  * Output: none
  */
-void EventView::setListMaps(QVector<QString> maps)
+void EventView::setListMaps(QList<QString> maps)
 {
   list_maps = maps;
   map_name->blockSignals(true);
   map_name->clear();
-  for(int i = 0; i < list_maps.size(); i++)
-    map_name->addItem(list_maps[i]);
+  map_name->addItems(list_maps);
   setLayoutData();
   map_name->blockSignals(false);
 }
@@ -4022,10 +3997,10 @@ void EventView::setListMaps(QVector<QString> maps)
 /*
  * Description: Sets the list of map IOs, used for event creation
  *
- * Inputs: QVector<QPair<QString,QString>> - list of all IOs (for event lists)
+ * Inputs: QList<QPair<QString,QString>> - list of all IOs (for event lists)
  * Output: none
  */
-void EventView::setListMapIOs(QVector<QPair<QString,QString>> ios)
+void EventView::setListMapIOs(QList<QPair<QString,QString>> ios)
 {
   list_map_ios = ios;
   updateLists(false, true, false, false, false);
@@ -4034,10 +4009,10 @@ void EventView::setListMapIOs(QVector<QPair<QString,QString>> ios)
 /*
  * Description: Sets the list of map items, used for event creation.
  *
- * Inputs: QVector<QString> - list of all map items (for event lists)
+ * Inputs: QList<QString> - list of all map items (for event lists)
  * Output: none
  */
-void EventView::setListMapItems(QVector<QString> items)
+void EventView::setListMapItems(QList<QString> items)
 {
   list_map_items = items;
   updateLists(false, false, true, false, false);
@@ -4046,10 +4021,10 @@ void EventView::setListMapItems(QVector<QString> items)
 /*
  * Description: Sets the list of map npcs, used for event creation.
  *
- * Inputs: QVector<QString> - list of all map npcs (for event lists)
+ * Inputs: QList<QString> - list of all map npcs (for event lists)
  * Output: none
  */
-void EventView::setListMapNPCs(QVector<QString> npcs)
+void EventView::setListMapNPCs(QList<QString> npcs)
 {
   list_map_npcs = npcs;
   updateLists(false, false, false, false, true);
@@ -4058,10 +4033,10 @@ void EventView::setListMapNPCs(QVector<QString> npcs)
 /*
  * Description: Sets the list of map persons, used for event creation.
  *
- * Inputs: QVector<QString> - list of all map persons (for event lists)
+ * Inputs: QList<QString> - list of all map persons (for event lists)
  * Output: none
  */
-void EventView::setListMapPersons(QVector<QString> persons)
+void EventView::setListMapPersons(QList<QString> persons)
 {
   list_map_persons = persons;
   updateLists(false, false, false, true, false);
@@ -4070,10 +4045,10 @@ void EventView::setListMapPersons(QVector<QString> persons)
 /*
  * Description: Sets the list of map things, used for event creation.
  *
- * Inputs: QVector<QString> - list of all map things (for event lists)
+ * Inputs: QList<QString> - list of all map things (for event lists)
  * Output: none
  */
-void EventView::setListMapThings(QVector<QString> things)
+void EventView::setListMapThings(QList<QString> things)
 {
   list_map_things = things;
   updateLists(true, false, false, false, false);
@@ -4083,18 +4058,18 @@ void EventView::setListMapThings(QVector<QString> things)
  * Description: Sets the list of map things, items, ios, persons, npcs, used
  *              for event creation.
  *
- * Inputs: QVector<QString> things - list of all map things
- *         QVector<QPair<QString,QString>> ios - list of all map ios
- *         QVector<QString> items - list of all map items
- *         QVector<QString> persons - list of all map persons
- *         QVector<QString npcs - list of all map npcs
+ * Inputs: QList<QString> things - list of all map things
+ *         QList<QPair<QString,QString>> ios - list of all map ios
+ *         QList<QString> items - list of all map items
+ *         QList<QString> persons - list of all map persons
+ *         QList<QString npcs - list of all map npcs
  * Output: none
  */
-void EventView::setListMapThings(QVector<QString> things,
-                                 QVector<QPair<QString,QString>> ios,
-                                 QVector<QString> items,
-                                 QVector<QString> persons,
-                                 QVector<QString> npcs)
+void EventView::setListMapThings(QList<QString> things,
+                                 QList<QPair<QString,QString>> ios,
+                                 QList<QString> items,
+                                 QList<QString> persons,
+                                 QList<QString> npcs)
 {
   list_map_things = things;
   list_map_ios = ios;
@@ -4115,8 +4090,7 @@ void EventView::setListSounds(QList<QString> sounds)
   list_sounds = sounds;
   combo_sound->blockSignals(true);
   combo_sound->clear();
-  for(int i = 0; i < list_sounds.size(); i++)
-    combo_sound->addItem(list_sounds[i]);
+  combo_sound->addItems(list_sounds);
   setLayoutData();
   combo_sound->blockSignals(false);
 }
@@ -4124,10 +4098,10 @@ void EventView::setListSounds(QList<QString> sounds)
 /*
  * Description: Sets the list of sub-maps, used for event creation.
  *
- * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Inputs: QList<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void EventView::setListSubmaps(QVector<QString> sub_maps)
+void EventView::setListSubmaps(QList<QString> sub_maps)
 {
   list_submaps = sub_maps;
   setLayoutData();

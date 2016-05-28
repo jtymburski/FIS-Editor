@@ -687,10 +687,10 @@ void MapItemView::setEditorMap(EditorMap* map)
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void MapItemView::updateListItems(QVector<QString> list)
+void MapItemView::updateListItems(QList<QString> list)
 {
   if(item_dialog != NULL)
     item_dialog->setListItems(list);

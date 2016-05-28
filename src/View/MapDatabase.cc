@@ -321,13 +321,20 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     mode_for_data = view;
 
     /* Compile thing lists */
-    QVector<QString> thing_list = editing_map->getThingList(0, true, true);
-    QVector<QPair<QString,QString>> io_set =
+    QList<QString> thing_list = editing_map->getThingList(0, true, true);
+    QList<QPair<QString,QString>> io_set =
                                        editing_map->getIOListSet(0, true, true);
-    QVector<QString> item_list = editing_map->getItemList(0, true, true);
-    QVector<QString> person_list = editing_map->getPersonList(0, true, true);
+    QList<QString> item_list = editing_map->getItemList(0, true, true);
+    QList<QString> person_list = editing_map->getPersonList(0, true, true);
+    QList<QString> npc_list = editing_map->getNPCList(0, true, true);
+
+    /* List sorting and extra elements */
+    qSort(thing_list);
+    qSort(io_set);
+    qSort(item_list);
+    qSort(person_list);
     person_list.push_front("0: Player");
-    QVector<QString> npc_list = editing_map->getNPCList(0, true, true);
+    qSort(npc_list);
 
     /* Update things */
     if(view == EditorEnumDb::THING_VIEW)
@@ -545,7 +552,7 @@ void MapDatabase::updatedBattleScenes(QList<QPair<int,QString>> scenes)
 }
 
 /* Updated data from higher up in the stack */
-void MapDatabase::updatedItems(QVector<QString> items)
+void MapDatabase::updatedItems(QList<QString> items)
 {
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {
@@ -570,7 +577,7 @@ void MapDatabase::updatedItems(QVector<QString> items)
 }
 
 /* Updated data from higher up in the stack */
-void MapDatabase::updatedMaps(QVector<QString> maps)
+void MapDatabase::updatedMaps(QList<QString> maps)
 {
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {
@@ -602,7 +609,7 @@ void MapDatabase::updatedMusic(QList<QString> music)
 }
 
 /* Updated data from higher up in the stack */
-void MapDatabase::updatedParties(QVector<QString> parties)
+void MapDatabase::updatedParties(QList<QString> parties)
 {
   if(mode_for_data == EditorEnumDb::THING_VIEW)
   {

@@ -8,7 +8,9 @@
 #ifndef EDITORHELPERS_H
 #define EDITORHELPERS_H
 
+#include <QComboBox>
 #include <QDir>
+#include <QListView>
 #include <QPixmap>
 #include <QPointF>
 #include <QRectF>
@@ -43,7 +45,11 @@ public:
  * PUBLIC STATIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Optimizes the combo box for high amounts of data */
+  static void comboBoxOptimize(QComboBox *combo);
+
   /* Returns the converted from pseudo xml [ to true xml for rendering */
+  static QString convertXml(QString orig_text, QList<QString> list);
   static QString convertXml(QString orig_text, QVector<QString> list);
 
   /* Returns the file name from the path */

@@ -49,7 +49,7 @@ private:
   EventView* event_view;
   
   /* The list of objects used in possible events */
-  QVector<QString> list_things;
+  QList<QString> list_things;
   
   /* Conversation text edit box */
   QTextEdit* text_box;
@@ -110,13 +110,13 @@ public:
   EventView* getEventView();
   
   /* Returns the list of objects, used for event creation */
-  QVector<QString> getListMapThings();
+  QList<QString> getListMapThings();
 
   /* Sets the list of objects, used for event creation */
-  void setListMapThings(QVector<QString> things,
-                        QVector<QPair<QString,QString>> ios,
-                        QVector<QString> items, QVector<QString> persons,
-                        QVector<QString> npcs, bool is_thing = true);
+  void setListMapThings(QList<QString> things,
+                        QList<QPair<QString,QString>> ios,
+                        QList<QString> items, QList<QString> persons,
+                        QList<QString> npcs, bool is_thing = true);
 
 };
 

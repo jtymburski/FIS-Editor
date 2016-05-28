@@ -7,7 +7,7 @@
  *              children.
  ******************************************************************************/
 #include "Dialog/ConvoDialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -132,6 +132,7 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   /* The thing choice widget */
   QLabel* lbl_thing = new QLabel("Interactor", this);
   thing_combo = new QComboBox(this);
+  EditorHelpers::comboBoxOptimize(thing_combo);
   if(is_option)
     thing_combo->setDisabled(true);
   layout->addWidget(lbl_thing, 2, 0, 1, 1);
@@ -164,40 +165,12 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
  */
 void ConvoDialog::updateData()
 {
-  // TODO: This is the chunk for how HTML can be used...
-  //text_box->setHtml(
-  //  QString("<b>This text is bold</b> <i>This text is italic</i> ") +
-  //  QString("<u>This text is underline</u> <font color=\"red\">Test</font>"));
+  /* Set the text in the box */
   text_box->setPlainText(QString::fromStdString(convo_working.text));
-  //text_box->setTextColor(QColor(255,0,0));
-  //qDebug() << text_box->toHtml(); // TODO: Outputs crap...see below
-
-  // TODO: PARSING INFORMATION FOR TEXT
-//  QTextDocument* doc = text_box->document();
-//  for(int i = 0; i < doc->blockCount(); i++)
-//  {
-//    QTextBlock block = doc->findBlockByNumber(i);
-//    QTextBlock::iterator it = block.begin();
-//    while(!it.atEnd())
-//    {
-//      QTextFragment fragment = it.fragment();
-//      QTextCharFormat format = fragment.charFormat();
-//      qDebug() << fragment.text();
-//      qDebug() << "  - Bold: " << format.font().bold();
-//      qDebug() << "  - Italic: " << format.font().italic();
-//      qDebug() << "  - Underline: " << format.font().underline();
-//      qDebug() << "  - Color: " << format.foreground().color().red() << ","
-//                                << format.foreground().color().green() << ","
-//                                << format.foreground().color().blue();
-
-//      it++;
-//    }
-//  }
 
   thing_combo->clear();
   int index = -1;
-  for(auto& list_thing : list_things)
-    thing_combo->addItem(list_thing);
+  thing_combo->addItems(list_things);
   //for(int i = 0; i < list_things.size(); i++)
   //  thing_combo->addItem(list_things[i]);
   for(int i = 0; (index < 0) && (i < list_things.size()); i++)
@@ -336,10 +309,10 @@ void ConvoDialog::textBtnItalic()
 void ConvoDialog::textBtnPreview()
 {
   /* Compile list */
-  QVector<QString> list_vec = event_view->getListMapPersons();
-  list_vec += event_view->getListMapNPCs();
-  list_vec += event_view->getListMapThings();
-  QVector<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
+  QList<QString> list_vec = event_view->getListMapPersons()
+                          + event_view->getListMapNPCs()
+                          + event_view->getListMapThings();
+  QList<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
   for(int i = 0; i < list_map_ios.size(); i++)
     list_vec.push_back(list_map_ios[i].first);
   list_vec += event_view->getListMapItems();
@@ -371,18 +344,15 @@ void ConvoDialog::textBtnPreview()
 void ConvoDialog::textBtnThing()
 {
   /* Compile list of all things */
-  QVector<QString> list_vec = event_view->getListMapPersons();
-  QString player = list_vec.first();
-  list_vec.removeFirst();
-  list_vec += event_view->getListMapNPCs();
-  list_vec += event_view->getListMapThings();
-  QVector<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
+  QList<QString> list = event_view->getListMapPersons();
+  QString player = list.first();
+  list.removeFirst();
+  list += event_view->getListMapNPCs() + event_view->getListMapThings();
+  QList<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
   for(int i = 0; i < list_map_ios.size(); i++)
-    list_vec.push_back(list_map_ios[i].first);
-  list_vec += event_view->getListMapItems();
-  qSort(list_vec);
-  list_vec.push_front(player);
-  QStringList list(list_vec.toList());
+    list.push_back(list_map_ios[i].first);
+  list += event_view->getListMapItems();
+  list.push_front(player);
 
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
@@ -456,9 +426,9 @@ EventView* ConvoDialog::getEventView()
  *              of the dialog (for teleport events).
  *
  * Inputs: none
- * Output: QVector<QString> - the list of things as string with "ID: NAME"
+ * Output: QList<QString> - the list of things as string with "ID: NAME"
  */
-QVector<QString> ConvoDialog::getListMapThings()
+QList<QString> ConvoDialog::getListMapThings()
 {
   return list_things;
 }
@@ -467,19 +437,19 @@ QVector<QString> ConvoDialog::getListMapThings()
  * Description: Sets the list of things that are being used in the event view
  *              of the dialog (for teleport events). Updates the event view.
  *
- * Inputs: QVector<QString> things - the list of map things
- *         QVector<QPair<QString,QString>> ios - the list of map ios
- *         QVector<QString> items - the list of map items
- *         QVector<QString> persons - the list of map persons
- *         QVector<QString> npcs - the list of map npcs
+ * Inputs: QList<QString> things - the list of map things
+ *         QList<QPair<QString,QString>> ios - the list of map ios
+ *         QList<QString> items - the list of map items
+ *         QList<QString> persons - the list of map persons
+ *         QList<QString> npcs - the list of map npcs
  *         bool is_thing - is the event on a thing? Default true.
  * Output: none
  */
-void ConvoDialog::setListMapThings(QVector<QString> things,
-                                   QVector<QPair<QString,QString>> ios,
-                                   QVector<QString> items,
-                                   QVector<QString> persons,
-                                   QVector<QString> npcs,  bool is_thing)
+void ConvoDialog::setListMapThings(QList<QString> things,
+                                   QList<QPair<QString,QString>> ios,
+                                   QList<QString> items,
+                                   QList<QString> persons,
+                                   QList<QString> npcs,  bool is_thing)
 {
   list_things = (persons + npcs + things);
   for(int i = 0; i < ios.size(); i++)

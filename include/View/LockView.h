@@ -43,7 +43,7 @@ private:
   QCheckBox* item_permanent;
 
   /* The list of objects used in possible events */
-  QVector<QString> list_items;
+  QList<QString> list_items;
 
   /* The connected lock */
   EditorLock* lock;
@@ -95,13 +95,13 @@ public slots:
  *===========================================================================*/
 public:
   /* Returns the list of objects, used for event creation */
-  QVector<QString> getListItems();
+  QList<QString> getListItems();
 
   /* Returns the lock */
   EditorLock* getLock();
 
   /* Sets the list of objects, used for event creation */
-  void setListItems(QVector<QString> items);
+  void setListItems(QList<QString> items);
 
   /* Sets the editor lock */
   void setLock(EditorLock* lock);

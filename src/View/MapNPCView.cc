@@ -699,28 +699,28 @@ void MapNPCView::setEditorMap(EditorMap* map)
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void MapNPCView::updateListItems(QVector<QString> list)
+void MapNPCView::updateListItems(QList<QString> list)
 {
-  if(npc_dialog != NULL)
+  if(npc_dialog != nullptr)
     npc_dialog->setListItems(list);
-  if(instance_dialog != NULL)
+  if(instance_dialog != nullptr)
     instance_dialog->setListItems(list);
 }
 
 /*
  * Description: Sets the list of maps, used for event creation
  *
- * Inputs: QVector<QString> - list of all maps (for change map event)
+ * Inputs: QList<QString> - list of all maps (for change map event)
  * Output: none
  */
-void MapNPCView::updateListMaps(QVector<QString> list)
+void MapNPCView::updateListMaps(QList<QString> list)
 {
-  if(npc_dialog != NULL)
+  if(npc_dialog != nullptr)
     npc_dialog->setListMaps(list);
-  if(instance_dialog != NULL)
+  if(instance_dialog != nullptr)
     instance_dialog->setListMaps(list);
 }
 
@@ -728,18 +728,18 @@ void MapNPCView::updateListMaps(QVector<QString> list)
  * Description: Sets the list of things, ios, items, persons, npcs, used for
  *              event creation.
  *
- * Inputs: QVector<QString> things - list of all map things
- *         QVector<QPair<QString,QString>> ios - list of all map ios
- *         QVector<QString> items - list of all map items
- *         QVector<QString> persons - list of all map persons
- *         QVector<QString> npcs - list of all map npcs
+ * Inputs: QList<QString> things - list of all map things
+ *         QList<QPair<QString,QString>> ios - list of all map ios
+ *         QList<QString> items - list of all map items
+ *         QList<QString> persons - list of all map persons
+ *         QList<QString> npcs - list of all map npcs
  * Output: none
  */
-void MapNPCView::updateListMapThings(QVector<QString> things,
-                                     QVector<QPair<QString,QString>> ios,
-                                     QVector<QString> items,
-                                     QVector<QString> persons,
-                                     QVector<QString> npcs)
+void MapNPCView::updateListMapThings(QList<QString> things,
+                                     QList<QPair<QString,QString>> ios,
+                                     QList<QString> items,
+                                     QList<QString> persons,
+                                     QList<QString> npcs)
 {
   if(npc_dialog != nullptr)
     npc_dialog->setListMapThings(things, ios, items, persons, npcs);
@@ -750,12 +750,12 @@ void MapNPCView::updateListMapThings(QVector<QString> things,
 /*
  * Description: Sets the list of maps, used for the party dropdown
  *
- * Inputs: QVector<QString> - list of all parties (for selected dropdown)
+ * Inputs: QList<QString> - list of all parties (for selected dropdown)
  * Output: none
  */
-void MapNPCView::updateListParties(QVector<QString> list)
+void MapNPCView::updateListParties(QList<QString> list)
 {
-  if(instance_dialog != NULL)
+  if(instance_dialog != nullptr)
     instance_dialog->setListParties(list);
 }
 
@@ -776,14 +776,14 @@ void MapNPCView::updateListSounds(QList<QString> list)
 /*
  * Description: Sets the list of sub-maps, used for event creation.
  *
- * Inputs: QVector<QString> - list of all sub-maps (for teleport event)
+ * Inputs: QList<QString> - list of all sub-maps (for teleport event)
  * Output: none
  */
-void MapNPCView::updateListSubmaps(QVector<QString> list)
+void MapNPCView::updateListSubmaps(QList<QString> list)
 {
-  if(npc_dialog != NULL)
+  if(npc_dialog != nullptr)
     npc_dialog->setListSubmaps(list);
-  if(instance_dialog != NULL)
+  if(instance_dialog != nullptr)
     instance_dialog->setListSubmaps(list);
 }
 

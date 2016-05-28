@@ -11,6 +11,7 @@
 #include <QDialog>
 #include <QGridLayout>
 #include <QStringList>
+#include <QTime>
 
 #include "Database/EditorMapThing.h"
 #include "Dialog/EventDialog.h"
@@ -51,15 +52,15 @@ private:
   QLineEdit* line_name;
 
   /* The list of objects used in possible events */
-  QVector<QString> list_items;
-  QVector<QString> list_maps;
-  QVector<QPair<QString,QString>> list_map_ios;
-  QVector<QString> list_map_items;
-  QVector<QString> list_map_npcs;
-  QVector<QString> list_map_persons;
-  QVector<QString> list_map_things;
+  QList<QString> list_items;
+  QList<QString> list_maps;
+  QList<QPair<QString,QString>> list_map_ios;
+  QList<QString> list_map_items;
+  QList<QString> list_map_npcs;
+  QList<QString> list_map_persons;
+  QList<QString> list_map_things;
   QList<QString> list_sounds;
-  QVector<QString> list_submaps;
+  QList<QString> list_submaps;
 
   /* Matrix view and control */
   MatrixView* matrix_view;
@@ -132,25 +133,25 @@ public:
   EventDialog* getEventDialog();
 
   /* Returns the list of objects, used for dialog and event creation */
-  QVector<QString> getListItems();
-  QVector<QString> getListMaps();
-  QVector<QPair<QString,QString>> getListMapIOs();
-  QVector<QString> getListMapItems();
-  QVector<QString> getListMapNPCs();
-  QVector<QString> getListMapPersons();
-  QVector<QString> getListMapThings();
+  QList<QString> getListItems();
+  QList<QString> getListMaps();
+  QList<QPair<QString,QString>> getListMapIOs();
+  QList<QString> getListMapItems();
+  QList<QString> getListMapNPCs();
+  QList<QString> getListMapPersons();
+  QList<QString> getListMapThings();
   QList<QString> getListSounds();
-  QVector<QString> getListSubmaps();
+  QList<QString> getListSubmaps();
 
   /* Sets the list of objects, used for dialog and event creation */
-  void setListItems(QVector<QString> items);
-  void setListMaps(QVector<QString> maps);
-  void setListMapThings(QVector<QString> things,
-                        QVector<QPair<QString,QString>> ios,
-                        QVector<QString> items, QVector<QString> persons,
-                        QVector<QString> npcs);
+  void setListItems(QList<QString> items);
+  void setListMaps(QList<QString> maps);
+  void setListMapThings(QList<QString> things,
+                        QList<QPair<QString,QString>> ios,
+                        QList<QString> items, QList<QString> persons,
+                        QList<QString> npcs);
   void setListSounds(QList<QString> sounds);
-  void setListSubmaps(QVector<QString> sub_maps);
+  void setListSubmaps(QList<QString> sub_maps);
 
   /* Sets the working thing to the original */
   void updateOriginal();

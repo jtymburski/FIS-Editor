@@ -45,7 +45,7 @@ private:
   EditorMapItem* item_working;
 
   /* The list of objects used in possible events */
-  QVector<QString> list_items;
+  QList<QString> list_items;
 
   /* The line edit for thing data */
   QLineEdit* line_description;
@@ -117,7 +117,7 @@ public:
   QList<QString> getListSounds();
 
   /* Sets the list of items, used for event creation */
-  void setListItems(QVector<QString> items);
+  void setListItems(QList<QString> items);
 
   /* Set the list of sounds, used for dropdown and in event */
   void setListSounds(QList<QString> sounds);

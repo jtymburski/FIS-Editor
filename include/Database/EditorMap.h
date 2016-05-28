@@ -269,11 +269,11 @@ public:
   EditorMapIO* getIOByIndex(int index, int sub_map = -1);
   int getIOCount(int sub_map = -1);
   int getIOIndex(int id, int sub_map = -1);
-  QVector<QString> getIOList(int sub_map = -1, bool all_submaps = false,
+  QList<QString> getIOList(int sub_map = -1, bool all_submaps = false,
                              bool shortened = false);
-  QVector<QPair<QString,QString>> getIOListSet(int sub_map = -1,
-                                               bool all_submaps = false,
-                                               bool shortened = false);
+  QList<QPair<QString,QString>> getIOListSet(int sub_map = -1,
+                                             bool all_submaps = false,
+                                             bool shortened = false);
   QVector<EditorMapIO*> getIOs(int sub_map = -1);
 
   /* Return stored item information */
@@ -281,8 +281,8 @@ public:
   EditorMapItem* getItemByIndex(int index, int sub_map = -1);
   int getItemCount(int sub_map = -1);
   int getItemIndex(int id, int sub_map = -1);
-  QVector<QString> getItemList(int sub_map = -1, bool all_submaps = false,
-                               bool shortened = false);
+  QList<QString> getItemList(int sub_map = -1, bool all_submaps = false,
+                             bool shortened = false);
   QVector<EditorMapItem*> getItems(int sub_map = -1);
 
   /* Returns the stored map information */
@@ -290,7 +290,7 @@ public:
   SubMapInfo* getMapByIndex(int index);
   int getMapCount();
   int getMapIndex(int id);
-  QVector<QString> getMapList();
+  QList<QString> getMapList();
   QString getMapNameList(int index);
   QVector<SubMapInfo*> getMaps();
 
@@ -315,8 +315,8 @@ public:
   EditorMapNPC* getNPCByIndex(int index, int sub_map = -1);
   int getNPCCount(int sub_map = -1);
   int getNPCIndex(int id, int sub_map = -1);
-  QVector<QString> getNPCList(int sub_map = -1, bool all_submaps = false,
-                              bool shortened = false);
+  QList<QString> getNPCList(int sub_map = -1, bool all_submaps = false,
+                            bool shortened = false);
   QVector<EditorMapNPC*> getNPCs(int sub_map = -1);
 
   /* Return stored person information */
@@ -324,8 +324,8 @@ public:
   EditorMapPerson* getPersonByIndex(int index, int sub_map = -1);
   int getPersonCount(int sub_map = -1);
   int getPersonIndex(int id, int sub_map = -1);
-  QVector<QString> getPersonList(int sub_map = -1, bool all_submaps = false,
-                                 bool shortened = false);
+  QList<QString> getPersonList(int sub_map = -1, bool all_submaps = false,
+                               bool shortened = false);
   SubMapInfo* getPersonSub(EditorMapPerson* ref);
   QVector<EditorMapPerson*> getPersons(int sub_map = -1);
 
@@ -347,8 +347,8 @@ public:
   EditorMapThing* getThingByIndex(int index, int sub_map = -1);
   int getThingCount(int sub_map = -1);
   int getThingIndex(int id, int sub_map = -1);
-  QVector<QString> getThingList(int sub_map = -1, bool all_submaps = false,
-                                bool shortened = false);
+  QList<QString> getThingList(int sub_map = -1, bool all_submaps = false,
+                              bool shortened = false);
   QVector<EditorMapThing*> getThings(int sub_map = -1);
 
   /* Returns the tile icons */

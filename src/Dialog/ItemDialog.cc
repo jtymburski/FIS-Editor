@@ -400,17 +400,16 @@ QList<QString> ItemDialog::getListSounds()
 /*
  * Description: Sets the list of items, used for event creation
  *
- * Inputs: QVector<QString> - list of all items (for give item event)
+ * Inputs: QList<QString> - list of all items (for give item event)
  * Output: none
  */
-void ItemDialog::setListItems(QVector<QString> items)
+void ItemDialog::setListItems(QList<QString> items)
 {
   list_items = items;
   box_core->blockSignals(true);
   box_core->clear();
   box_core->addItem("None");
-  for(int i = 0; i < list_items.size(); i++)
-    box_core->addItem(list_items[i]);
+  box_core->addItems(list_items);
   updateData();
   box_core->blockSignals(false);
 }

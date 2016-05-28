@@ -309,9 +309,9 @@ void LockView::triggerPermanentChanged(int state)
  * Description: Returns the list of items, used for lock creation.
  *
  * Inputs: none
- * Output: QVector<QString> - list of all items (for have item lock)
+ * Output: QList<QString> - list of all items (for have item lock)
  */
-QVector<QString> LockView::getListItems()
+QList<QString> LockView::getListItems()
 {
   return list_items;
 }
@@ -331,10 +331,10 @@ EditorLock* LockView::getLock()
 /*
  * Description: Sets the list of items, used for lock creation
  *
- * Inputs: QVector<QString> - list of all items (for have item lock)
+ * Inputs: QList<QString> - list of all items (for have item lock)
  * Output: none
  */
-void LockView::setListItems(QVector<QString> items)
+void LockView::setListItems(QList<QString> items)
 {
   /* Set new data */
   list_items = items;
@@ -344,8 +344,7 @@ void LockView::setListItems(QVector<QString> items)
 
   /* Give Items */
   item_name->clear();
-  for(int i = 0; i < list_items.size(); i++)
-    item_name->addItem(list_items[i]);
+  item_name->addItems(list_items);
 
   /* Update and unblock */
   setLayoutData();

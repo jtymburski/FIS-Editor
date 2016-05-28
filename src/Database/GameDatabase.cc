@@ -1930,19 +1930,19 @@ void GameDatabase::updateBattleSceneObjects()
 void GameDatabase::updateEventObjects()
 {
   /* List of items */
-  QVector<QString> item_list;
+  QList<QString> item_list;
   for(int i = 0; i < data_item.size(); i++)
     item_list.push_back(data_item[i]->getNameList());
   emit updatedItems(item_list);
 
   /* List of maps */
-  QVector<QString> map_list;
+  QList<QString> map_list;
   for(int i = 0; i < data_map.size(); i++)
     map_list.push_back(data_map[i]->getNameList());
   emit updatedMaps(map_list);
 
   /* List of parties */
-  QVector<QString> party_list;
+  QList<QString> party_list;
   for(int i = 0; i < data_party.size(); i++)
     party_list.push_back(data_party[i]->getNameList());
   emit updatedParties(party_list);
