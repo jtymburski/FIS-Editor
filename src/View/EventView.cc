@@ -1269,14 +1269,20 @@ void EventView::setLayoutData()
       for(int i = 0; i < list_submaps.size(); i++)
       {
         QStringList set = list_submaps[i].split(":");
-        if(set.size() == 2)
+        if(set.size() >= 2)
+        {
           if(set.front().toInt() == event->getTeleportSection())
-            name = set.last();
+          {
+            for(int i = 1; i < set.size(); i++)
+              name += set[i] + ":";
+            name.chop(1);
+          }
+        }
       }
 
       /* Load the name and information */
       tele_map->setText(QString::number(event->getTeleportSection()) +
-                        ": " + name + "  | X: " +
+                        ":" + name + "  | X: " +
                         QString::number(event->getTeleportX()) + " | Y: " +
                         QString::number(event->getTeleportY()));
 
@@ -1389,14 +1395,20 @@ void EventView::setLayoutData()
       for(int i = 0; i < list_submaps.size(); i++)
       {
         QStringList set = list_submaps[i].split(":");
-        if(set.size() == 2)
+        if(set.size() >= 2)
+        {
           if(set.front().toInt() == event->getUnlockTileSection())
-            name = set.last();
+          {
+            for(int i = 1; i < set.size(); i++)
+              name += set[i] + ":";
+            name.chop(1);
+          }
+        }
       }
 
       /* Load the name and information */
       unti_location->setText(QString::number(event->getUnlockTileSection()) +
-                             ": " + name + "  | X: " +
+                             ":" + name + "  | X: " +
                              QString::number(event->getUnlockTileX()) +
                              " | Y: " +
                              QString::number(event->getUnlockTileY()));

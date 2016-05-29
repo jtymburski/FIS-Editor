@@ -320,7 +320,7 @@ void MapDatabase::fillWithData(EditorEnumDb::MapObjectMode view)
     /* Set who called the update */
     mode_for_data = view;
 
-    /* Compile thing lists */
+    /* Compile thing and map lists */
     QList<QString> thing_list = editing_map->getThingList(0, true, true);
     QList<QPair<QString,QString>> io_set =
                                        editing_map->getIOListSet(0, true, true);
