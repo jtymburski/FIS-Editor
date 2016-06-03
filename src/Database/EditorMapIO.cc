@@ -812,25 +812,29 @@ void EditorMapIO::save(FileHandler* fh, bool game_only)
  *              description (which can be changed later).
  *
  * Inputs: EditorMapIO* base_io - the base IO object
+ *         bool synchronize - true to set name, description, and base event
  * Output: none
  */
-void EditorMapIO::setBase(EditorMapIO* base_io)
+void EditorMapIO::setBase(EditorMapIO* base_io, bool synchronize)
 {
-  EditorMapThing* thing = NULL;
+  EditorMapThing* thing = nullptr;
 
   /* Set the base */
-  if(base_io != NULL)
+  if(base_io != nullptr)
   {
-    thing = base_io;
-    lock_base = true;
+    thing = static_cast<EditorMapThing*>(base_io);
+    if(synchronize)
+    {
+      lock_base = true;
 
-    /* Update the states to be of similar length to base */
-    unsetStates();
-    while(states.size() < base_io->states.size())
-      appendState(EditorEnumDb::IO_STATE);
+      /* Update the states to be of similar length to base */
+      unsetStates();
+      while(states.size() < base_io->states.size())
+        appendState(EditorEnumDb::IO_STATE);
+    }
   }
 
-  EditorMapThing::setBase(thing);
+  EditorMapThing::setBase(thing, synchronize);
 }
 
 /*

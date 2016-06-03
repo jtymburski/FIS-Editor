@@ -201,16 +201,12 @@ void EditorMapItem::save(FileHandler* fh, bool game_only)
  *              description (which can be changed later).
  *
  * Inputs: EditorMapItem* item - the base item object
+ *         bool synchronize - true to set name, description, and base event
  * Output: none
  */
-void EditorMapItem::setBase(EditorMapItem* item)
+void EditorMapItem::setBase(EditorMapItem* item, bool synchronize)
 {
-  EditorMapThing* thing = NULL;
-
-  if(item != NULL)
-    thing = item;
-
-  EditorMapThing::setBase(thing);
+  EditorMapThing::setBase(static_cast<EditorMapThing*>(item), synchronize);
 }
 
 /*

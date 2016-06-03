@@ -635,14 +635,15 @@ void EditorMapThing::setActiveRespawn(int time)
  *              description (which can be changed later).
  *
  * Inputs: EditorMapThing* thing - the base thing object
+ *         bool synchronize - true to set name, description, and base event
  * Output: none
  */
-void EditorMapThing::setBase(EditorMapThing* thing)
+void EditorMapThing::setBase(EditorMapThing* thing, bool synchronize)
 {
   base = thing;
 
   /* Sets the name and description initially to what the base is */
-  if(base != NULL)
+  if(base != nullptr && synchronize)
   {
     event_base = true;
 

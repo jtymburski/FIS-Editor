@@ -453,20 +453,24 @@ void EditorMapPerson::save(FileHandler* fh, bool game_only)
  *              description (which can be changed later).
  *
  * Inputs: EditorMapPerson* person - the base person object
+ *         bool synchronize - true to set name, description, and base event
  * Output: none
  */
-void EditorMapPerson::setBase(EditorMapPerson* person)
+void EditorMapPerson::setBase(EditorMapPerson* person, bool synchronize)
 {
-  EditorMapThing* thing = NULL;
+  EditorMapThing* thing = nullptr;
 
-  if(person != NULL)
+  if(person != nullptr)
   {
-    thing = person;
-    setSpeed(person->getSpeed());
-    setUseBaseSpeed(true);
+    thing = static_cast<EditorMapThing*>(person);
+    if(synchronize)
+    {
+      setSpeed(person->getSpeed());
+      setUseBaseSpeed(true);
+    }
   }
 
-  EditorMapThing::setBase(thing);
+  EditorMapThing::setBase(thing, synchronize);
 }
 
 /*

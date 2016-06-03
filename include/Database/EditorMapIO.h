@@ -134,7 +134,7 @@ public:
   virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference io */
-  void setBase(EditorMapIO* base_io);
+  void setBase(EditorMapIO* base_io, bool synchronize = true);
 
   /* Sets the events */
   bool setEventEnter(int index, EditorEventSet set);

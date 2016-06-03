@@ -463,198 +463,6 @@ HoverInfo* EditorTile::getHoverInfo()
 }
 
 /*
- * Description: Returns the passability at the indicated layer in the
- *              indicated direction.
- *
- * Inputs: EditorEnumDb::Layer - the layer to grab the passability
- *         Direction direction - the direction to get the passability in
- * Output: bool - true if passable in that direction.
- */
-bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
-{
-  switch(layer)
-  {
-    case EditorEnumDb::BASE:
-      return tile.getBasePassability(direction);
-      break;
-    case EditorEnumDb::LOWER1:
-      return tile.getLowerPassability(0, direction);
-      break;
-    case EditorEnumDb::LOWER2:
-      return tile.getLowerPassability(1, direction);
-      break;
-    case EditorEnumDb::LOWER3:
-      return tile.getLowerPassability(2, direction);
-      break;
-    case EditorEnumDb::LOWER4:
-      return tile.getLowerPassability(3, direction);
-      break;
-    case EditorEnumDb::LOWER5:
-      return tile.getLowerPassability(4, direction);
-      break;
-    case EditorEnumDb::THING:
-      return getPassabilityThing(direction);
-      break;
-    case EditorEnumDb::IO:
-      return getPassabilityIO(direction);
-      break;
-    case EditorEnumDb::PERSON:
-      return getPassabilityPerson(direction);
-      break;
-    case EditorEnumDb::NPC:
-      return getPassabilityNPC(direction);
-      break;
-    case EditorEnumDb::ENHANCER:
-    case EditorEnumDb::ITEM:
-    case EditorEnumDb::UPPER1:
-    case EditorEnumDb::UPPER2:
-    case EditorEnumDb::UPPER3:
-    case EditorEnumDb::UPPER4:
-    case EditorEnumDb::UPPER5:
-      return true;
-      break;
-    default:
-      break;
-  }
-  return false;
-}
-
-/*
- * Description: Returns the passability of the io(s) in the tile. Only
- *              relevant if the render depth is 0. Otherwise, true
- *
- * Inputs: Direction direction - the direction leaving the tile
- * Output: bool - true if that direction is passable
- */
-bool EditorTile::getPassabilityIO(Direction direction)
-{
-  EditorMapThing* io = ios[0].thing;
-
-  if(io != NULL)
-  {
-    EditorTileSprite* sprite = io->getMatrix()->getSprite(
-                                    getX() - io->getX(), getY() - io->getY());
-    if(sprite != NULL)
-      return sprite->getPassability(direction);
-  }
-  return true;
-}
-
-/*
- * Description: Returns a number between 0 and 15 for what the passability is.
- *              This number is the binary realization in base 10 of the 4
- *              passability directions.
- *
- * Inputs: EditorEnumDb::Layer layer - the layer to check passability on
- * Output: int - the base 10 integer representation of passability
- */
-int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
-{
-  return EditorHelpers::getPassabilityNum(
-                                        getPassability(layer, Direction::NORTH),
-                                        getPassability(layer, Direction::EAST),
-                                        getPassability(layer, Direction::SOUTH),
-                                        getPassability(layer, Direction::WEST));
-}
-
-/*
- * Description: Returns the passability of the npc(s) in the tile. Only
- *              relevant if the render depth is 0. Otherwise, true
- *
- * Inputs: Direction direction - the direction leaving the tile
- * Output: bool - true if that direction is passable
- */
-bool EditorTile::getPassabilityNPC(Direction direction)
-{
-  EditorMapThing* npc = npcs[0].thing;
-
-  if(npc != NULL)
-  {
-    EditorTileSprite* sprite = npc->getMatrix()->getSprite(
-                                    getX() - npc->getX(), getY() - npc->getY());
-    if(sprite != NULL)
-      return sprite->getPassability(direction);
-  }
-  return true;
-}
-
-/*
- * Description: Returns the passability of the person(s) in the tile. Only
- *              relevant if the render depth is 0. Otherwise, true
- *
- * Inputs: Direction direction - the direction leaving the tile
- * Output: bool - true if that direction is passable
- */
-bool EditorTile::getPassabilityPerson(Direction direction)
-{
-  EditorMapThing* person = persons[0].thing;
-
-  if(person != NULL)
-  {
-    EditorTileSprite* sprite = person->getMatrix()->getSprite(
-                              getX() - person->getX(), getY() - person->getY());
-    if(sprite != NULL)
-      return sprite->getPassability(direction);
-  }
-  return true;
-}
-
-/*
- * Description: Returns the passability of the thing(s) in the tile. Only
- *              relevant if the render depth is 0. Otherwise, true
- *
- * Inputs: Direction direction - the direction leaving the tile
- * Output: bool - true if that direction is passable
- */
-bool EditorTile::getPassabilityThing(Direction direction)
-{
-  EditorMapThing* thing = things[0].thing;
-
-  if(thing != NULL)
-  {
-    EditorTileSprite* sprite = thing->getMatrix()->getSprite(
-                                getX() - thing->getX(), getY() - thing->getY());
-    if(sprite != NULL)
-      return sprite->getPassability(direction);
-  }
-  return true;
-}
-
-/*
- * Description: Returns passability based on visible layers and a direction.
- *
- * Inputs: Direction direction - the direction trying to exit.
- * Output: bool - true if passable
- */
-bool EditorTile::getPassabilityVisible(Direction direction)
-{
-  bool passable = true;
-
-  if(layer_base.visible)
-    passable &= getPassability(EditorEnumDb::BASE, direction);
-  if(layers_lower[0].visible)
-    passable &= getPassability(EditorEnumDb::LOWER1, direction);
-  if(layers_lower[1].visible)
-    passable &= getPassability(EditorEnumDb::LOWER2, direction);
-  if(layers_lower[2].visible)
-    passable &= getPassability(EditorEnumDb::LOWER3, direction);
-  if(layers_lower[3].visible)
-    passable &= getPassability(EditorEnumDb::LOWER4, direction);
-  if(layers_lower[4].visible)
-    passable &= getPassability(EditorEnumDb::LOWER5, direction);
-  if(things[0].visible)
-    passable &= getPassability(EditorEnumDb::THING, direction);
-  if(ios[0].visible)
-    passable &= getPassability(EditorEnumDb::IO, direction);
-  if(persons[0].visible)
-    passable &= getPassability(EditorEnumDb::PERSON, direction);
-  if(npcs[0].visible)
-    passable &= getPassability(EditorEnumDb::NPC, direction);
-
-  return passable;
-}
-
-/*
  * Description: Returns the map IO pointer for the IO at the rendering
  *              level.
  *
@@ -782,6 +590,198 @@ QVector<EditorMapNPC*> EditorTile::getNPCs()
     stack.push_back((EditorMapNPC*)npcs[i].thing);
 
   return stack;
+}
+
+/*
+ * Description: Returns the passability at the indicated layer in the
+ *              indicated direction.
+ *
+ * Inputs: EditorEnumDb::Layer - the layer to grab the passability
+ *         Direction direction - the direction to get the passability in
+ * Output: bool - true if passable in that direction.
+ */
+bool EditorTile::getPassability(EditorEnumDb::Layer layer, Direction direction)
+{
+  switch(layer)
+  {
+    case EditorEnumDb::BASE:
+      return tile.getBasePassability(direction);
+      break;
+    case EditorEnumDb::LOWER1:
+      return tile.getLowerPassability(0, direction);
+      break;
+    case EditorEnumDb::LOWER2:
+      return tile.getLowerPassability(1, direction);
+      break;
+    case EditorEnumDb::LOWER3:
+      return tile.getLowerPassability(2, direction);
+      break;
+    case EditorEnumDb::LOWER4:
+      return tile.getLowerPassability(3, direction);
+      break;
+    case EditorEnumDb::LOWER5:
+      return tile.getLowerPassability(4, direction);
+      break;
+    case EditorEnumDb::THING:
+      return getPassabilityThing(direction);
+      break;
+    case EditorEnumDb::IO:
+      return getPassabilityIO(direction);
+      break;
+    case EditorEnumDb::PERSON:
+      return getPassabilityPerson(direction);
+      break;
+    case EditorEnumDb::NPC:
+      return getPassabilityNPC(direction);
+      break;
+    case EditorEnumDb::ENHANCER:
+    case EditorEnumDb::ITEM:
+    case EditorEnumDb::UPPER1:
+    case EditorEnumDb::UPPER2:
+    case EditorEnumDb::UPPER3:
+    case EditorEnumDb::UPPER4:
+    case EditorEnumDb::UPPER5:
+      return true;
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+
+/*
+ * Description: Returns the passability of the io(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityIO(Direction direction)
+{
+  EditorMapThing* io = ios[0].thing;
+
+  if(io != NULL)
+  {
+    EditorTileSprite* sprite = io->getMatrix()->getSprite(
+                                    getX() - io->getX(), getY() - io->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
+}
+
+/*
+ * Description: Returns the passability of the npc(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityNPC(Direction direction)
+{
+  EditorMapThing* npc = npcs[0].thing;
+
+  if(npc != NULL)
+  {
+    EditorTileSprite* sprite = npc->getMatrix()->getSprite(
+                                    getX() - npc->getX(), getY() - npc->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
+}
+
+/*
+ * Description: Returns a number between 0 and 15 for what the passability is.
+ *              This number is the binary realization in base 10 of the 4
+ *              passability directions.
+ *
+ * Inputs: EditorEnumDb::Layer layer - the layer to check passability on
+ * Output: int - the base 10 integer representation of passability
+ */
+int EditorTile::getPassabilityNum(EditorEnumDb::Layer layer)
+{
+  return EditorHelpers::getPassabilityNum(
+                                        getPassability(layer, Direction::NORTH),
+                                        getPassability(layer, Direction::EAST),
+                                        getPassability(layer, Direction::SOUTH),
+                                        getPassability(layer, Direction::WEST));
+}
+
+/*
+ * Description: Returns the passability of the person(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityPerson(Direction direction)
+{
+  EditorMapThing* person = persons[0].thing;
+
+  if(person != NULL)
+  {
+    EditorTileSprite* sprite = person->getMatrix()->getSprite(
+                              getX() - person->getX(), getY() - person->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
+}
+
+/*
+ * Description: Returns the passability of the thing(s) in the tile. Only
+ *              relevant if the render depth is 0. Otherwise, true
+ *
+ * Inputs: Direction direction - the direction leaving the tile
+ * Output: bool - true if that direction is passable
+ */
+bool EditorTile::getPassabilityThing(Direction direction)
+{
+  EditorMapThing* thing = things[0].thing;
+
+  if(thing != NULL)
+  {
+    EditorTileSprite* sprite = thing->getMatrix()->getSprite(
+                                getX() - thing->getX(), getY() - thing->getY());
+    if(sprite != NULL)
+      return sprite->getPassability(direction);
+  }
+  return true;
+}
+
+/*
+ * Description: Returns passability based on visible layers and a direction.
+ *
+ * Inputs: Direction direction - the direction trying to exit.
+ * Output: bool - true if passable
+ */
+bool EditorTile::getPassabilityVisible(Direction direction)
+{
+  bool passable = true;
+
+  if(layer_base.visible)
+    passable &= getPassability(EditorEnumDb::BASE, direction);
+  if(layers_lower[0].visible)
+    passable &= getPassability(EditorEnumDb::LOWER1, direction);
+  if(layers_lower[1].visible)
+    passable &= getPassability(EditorEnumDb::LOWER2, direction);
+  if(layers_lower[2].visible)
+    passable &= getPassability(EditorEnumDb::LOWER3, direction);
+  if(layers_lower[3].visible)
+    passable &= getPassability(EditorEnumDb::LOWER4, direction);
+  if(layers_lower[4].visible)
+    passable &= getPassability(EditorEnumDb::LOWER5, direction);
+  if(things[0].visible)
+    passable &= getPassability(EditorEnumDb::THING, direction);
+  if(ios[0].visible)
+    passable &= getPassability(EditorEnumDb::IO, direction);
+  if(persons[0].visible)
+    passable &= getPassability(EditorEnumDb::PERSON, direction);
+  if(npcs[0].visible)
+    passable &= getPassability(EditorEnumDb::NPC, direction);
+
+  return passable;
 }
 
 /*
@@ -1642,6 +1642,38 @@ bool EditorTile::setIO(EditorMapIO* io)
 }
 
 /*
+ * Description: Sets the npc sprite pointer, stored within the class.
+ *
+ * Inputs: EditorMapNPC* npc - the npc to add to the tile (uses the
+ *                             internal render depth and position)
+ * Output: bool - true if the npc is set
+ */
+bool EditorTile::setNPC(EditorMapNPC* npc)
+{
+  if(npc != NULL)
+  {
+    /* Determine the x, y in the matrix */
+    int x = x_pos - npc->getX();
+    int y = y_pos - npc->getY();
+    if(x >= 0 && x < npc->getMatrix()->getWidth() &&
+       y >= 0 && y < npc->getMatrix()->getHeight())
+    {
+      /* Determine the render level */
+      int render_level = npc->getMatrix()->getRenderDepth(x, y);
+      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
+         !npc->isAllNull(x, y))
+      {
+        /* Set the new npc */
+        npcs[render_level].thing = npc;
+        update();
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
  * Description: Sets the passability of the passed in layer in all directions.
  *
  * Inputs: EditorEnumDb::Layer layer - the layer to update the passability for
@@ -1701,33 +1733,33 @@ void EditorTile::setPassability(EditorEnumDb::Layer layer, Direction direction,
 }
 
 /*
- * Description: Sets the npc sprite pointer, stored within the class.
+ * Description: Takes a number between 0 and 15 and extracts the directional
+ *              passability for the given layer. Then, it sets it for the
+ *              passed in layer. This number is the binary realization in base
+ *              10 of the 4 passability directions.
  *
- * Inputs: EditorMapNPC* npc - the npc to add to the tile (uses the
- *                             internal render depth and position)
- * Output: bool - true if the npc is set
+ * Inputs: EditorEnumDb::Layer layer - the layer to check passability on
+ *         int - the base 10 integer representation of passability
+ * Output: bool - returns if the layer was in range
  */
-bool EditorTile::setNPC(EditorMapNPC* npc)
+bool EditorTile::setPassabilityNum(EditorEnumDb::Layer layer, int num_ref)
 {
-  if(npc != NULL)
+  if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::LOWER1 ||
+     layer == EditorEnumDb::LOWER2 || layer == EditorEnumDb::LOWER3 ||
+     layer == EditorEnumDb::LOWER4 || layer == EditorEnumDb::LOWER5)
   {
-    /* Determine the x, y in the matrix */
-    int x = x_pos - npc->getX();
-    int y = y_pos - npc->getY();
-    if(x >= 0 && x < npc->getMatrix()->getWidth() &&
-       y >= 0 && y < npc->getMatrix()->getHeight())
-    {
-      /* Determine the render level */
-      int render_level = npc->getMatrix()->getRenderDepth(x, y);
-      if(render_level >= 0 && render_level < Helpers::getRenderDepth() &&
-         !npc->isAllNull(x, y))
-      {
-        /* Set the new npc */
-        npcs[render_level].thing = npc;
-        update();
-        return true;
-      }
-    }
+    /* Determine the passability */
+    bool north, east, south, west;
+    EditorHelpers::getPassability(EditorHelpers::getPassabilityStr(num_ref),
+                                  north, east, south, west);
+
+    /* Set the passability */
+    setPassability(layer, Direction::NORTH, north);
+    setPassability(layer, Direction::EAST, east);
+    setPassability(layer, Direction::SOUTH, south);
+    setPassability(layer, Direction::WEST, west);
+
+    return true;
   }
   return false;
 }

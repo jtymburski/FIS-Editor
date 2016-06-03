@@ -155,27 +155,6 @@ public:
   /* Gets the hover information */
   HoverInfo* getHoverInfo();
 
-  /* Returns the passability based on layer and direction */
-  bool getPassability(EditorEnumDb::Layer layer, Direction direction);
-
-  /* Returns the passability of the IO */
-  bool getPassabilityIO(Direction direction);
-
-  /* Returns a number between 0 and 15 for what the passability is */
-  int getPassabilityNum(EditorEnumDb::Layer layer);
-
-  /* Returns the passability of the npc */
-  bool getPassabilityNPC(Direction direction);
-
-  /* Returns the passability of the person */
-  bool getPassabilityPerson(Direction direction);
-
-  /* Returns the passability of the thing */
-  bool getPassabilityThing(Direction direction);
-
-  /* Returns the passability based on direction and what layers are visible */
-  bool getPassabilityVisible(Direction direction);
-
   /* Returns the map io pointer at the given render depth and all ios */
   EditorMapIO* getIO(int render_level);
   QVector<EditorMapIO*> getIOs();
@@ -189,6 +168,27 @@ public:
   /* Returns the map npc pointer at the given render depth */
   EditorMapNPC* getNPC(int render_level);
   QVector<EditorMapNPC*> getNPCs();
+
+  /* Returns the passability based on layer and direction */
+  bool getPassability(EditorEnumDb::Layer layer, Direction direction);
+
+  /* Returns the passability of the IO */
+  bool getPassabilityIO(Direction direction);
+
+  /* Returns the passability of the npc */
+  bool getPassabilityNPC(Direction direction);
+
+  /* Returns a number between 0 and 15 for what the passability is */
+  int getPassabilityNum(EditorEnumDb::Layer layer);
+
+  /* Returns the passability of the person */
+  bool getPassabilityPerson(Direction direction);
+
+  /* Returns the passability of the thing */
+  bool getPassabilityThing(Direction direction);
+
+  /* Returns the passability based on direction and what layers are visible */
+  bool getPassabilityVisible(Direction direction);
 
   /* Returns the map person pointer at the given render depth */
   EditorMapPerson* getPerson(int render_level);
@@ -249,13 +249,14 @@ public:
   /* Sets the io sprite pointer, stored within the class */
   bool setIO(EditorMapIO* io);
 
+  /* Sets the npc sprite pointer, stored within the class */
+  bool setNPC(EditorMapNPC* npc);
+
   /* Sets the passability based on layer and direction */
   void setPassability(EditorEnumDb::Layer layer, bool passable);
   void setPassability(EditorEnumDb::Layer layer, Direction direction,
                       bool passable);
-
-  /* Sets the npc sprite pointer, stored within the class */
-  bool setNPC(EditorMapNPC* npc);
+  bool setPassabilityNum(EditorEnumDb::Layer layer, int num_ref);
 
   /* Sets the person sprite pointer, stored within the class */
   bool setPerson(EditorMapPerson* person);

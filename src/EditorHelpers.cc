@@ -301,10 +301,24 @@ QString EditorHelpers::getListString(int id, QString name,
   return title;
 }
 
-/* Converts the string into passability values */
+/*
+ * Description: Converts a comma delimited string into passability values.
+ *
+ * Inputs: QString str - the comma delimited string to parse
+ *         bool north - north direction passable
+ *         bool east - east direction passable
+ *         bool south - south direction passable
+ *         bool west - west direction passable
+ * Output: none
+ */
 void EditorHelpers::getPassability(QString str, bool &north, bool &east,
                                    bool &south, bool &west)
 {
+  north = false;
+  east = false;
+  south = false;
+  west = false;
+
   QStringList set = str.split(",");
   for(int i = 0; i < set.size(); i++)
   {

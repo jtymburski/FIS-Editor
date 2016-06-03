@@ -69,7 +69,7 @@ public:
   virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference npc */
-  void setBase(EditorMapNPC* npc);
+  void setBase(EditorMapNPC* npc, bool synchronize = true);
   
   /* Sets the x and y coordinate of the npc - primarily handled by thing */
   bool setX(int x);

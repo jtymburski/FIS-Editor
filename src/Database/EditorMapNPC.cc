@@ -178,18 +178,14 @@ void EditorMapNPC::save(FileHandler* fh, bool game_only)
  *              description (which can be changed later).
  *
  * Inputs: EditorMapNPC* person - the base npc object
+ *         bool synchronize - true to set name, description, and base event
  * Output: none
  */
-void EditorMapNPC::setBase(EditorMapNPC* npc)
+void EditorMapNPC::setBase(EditorMapNPC* npc, bool synchronize)
 {
-  EditorMapThing* thing = NULL;
-
-  if(npc != NULL)
-    thing = npc;
-
-  EditorMapThing::setBase(thing);
+  EditorMapPerson::setBase(static_cast<EditorMapPerson*>(npc), synchronize);
 }
-  
+
 /*
  * Description: Sets the X coordinate of the top left of the npc (in tile
  *              units). Updates first path node as well to new location.

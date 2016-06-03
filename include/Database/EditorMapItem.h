@@ -72,7 +72,7 @@ public:
   virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference item */
-  void setBase(EditorMapItem* item);
+  void setBase(EditorMapItem* item, bool synchronize = true);
   
   /* Sets the number of this item */
   void setCount(uint32_t count);

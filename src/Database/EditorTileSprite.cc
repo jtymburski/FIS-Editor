@@ -367,10 +367,7 @@ void EditorTileSprite::setPassability(Direction dir, bool set_value)
 void EditorTileSprite::setPassability(QString pass_str)
 {
   /* Get the values for the string */
-  bool north = false;
-  bool east = false;
-  bool south = false;
-  bool west = false;
+  bool north, east, south, west;
   EditorHelpers::getPassability(pass_str, north, east, south, west);
 
   /* Set the values */

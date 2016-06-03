@@ -96,7 +96,7 @@ public:
   virtual void save(FileHandler* fh, bool game_only = false);
 
   /* Sets the base reference person */
-  void setBase(EditorMapPerson* person);
+  void setBase(EditorMapPerson* person, bool synchronize = true);
 
   /* Sets the speed of the person */
   void setSpeed(uint16_t speed);

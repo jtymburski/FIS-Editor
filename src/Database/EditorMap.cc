@@ -582,10 +582,15 @@ void EditorMap::copySelf(const EditorMap &source)
       {
         for(int m = 0; m < EditorEnumDb::NO_LAYER; m++)
         {
+          EditorEnumDb::Layer layer = static_cast<EditorEnumDb::Layer>(m);
           EditorTile* tile = sub_maps.last()->tiles[j][k];
-          EditorSprite* sprite = tile->getSprite((EditorEnumDb::Layer)m);
-          if(sprite != NULL)
-            tile->place((EditorEnumDb::Layer)m, getSprite(sprite->getID()));
+          EditorSprite* sprite = tile->getSprite(layer);
+          if(sprite != nullptr)
+          {
+            int pass_num = tile->getPassabilityNum(layer);
+            tile->place(layer, getSprite(sprite->getID()));
+            tile->setPassabilityNum(layer, pass_num);
+          }
         }
       }
     }
@@ -594,10 +599,13 @@ void EditorMap::copySelf(const EditorMap &source)
     for(int j = 0; j < source.sub_maps[i]->things.size(); j++)
     {
       EditorMapThing* ref = source.sub_maps[i]->things[j];
-      EditorMapThing* t = new EditorMapThing(*ref);
+      //EditorMapThing* t = new EditorMapThing(*ref);
+      EditorMapThing* t = new EditorMapThing(ref->getID());
+      //t->setBase(getThing(ref->getBaseThing()->getID()));
+      *t = *ref;
       t->setX(ref->getX());
       t->setY(ref->getY());
-      t->setBase(getThing(ref->getBaseThing()->getID()));
+      t->setBase(getThing(ref->getBaseThing()->getID()), false);
       setThing(t, source.sub_maps[i]->id);
     }
 
@@ -605,10 +613,13 @@ void EditorMap::copySelf(const EditorMap &source)
     for(int j = 0; j < source.sub_maps[i]->ios.size(); j++)
     {
       EditorMapIO* ref = source.sub_maps[i]->ios[j];
-      EditorMapIO* io = new EditorMapIO(*ref);
+      //EditorMapIO* io = new EditorMapIO(*ref);
+      EditorMapIO* io = new EditorMapIO(ref->getID());
+      //io->setBase(getIO(ref->getBaseIO()->getID()));
+      *io = *ref;
       io->setX(ref->getX());
       io->setY(ref->getY());
-      io->setBase(getIO(ref->getBaseIO()->getID()));
+      io->setBase(getIO(ref->getBaseIO()->getID()), false);
       setIO(io, source.sub_maps[i]->id);
     }
 
@@ -616,10 +627,13 @@ void EditorMap::copySelf(const EditorMap &source)
     for(int j = 0; j < source.sub_maps[i]->items.size(); j++)
     {
       EditorMapItem* ref = source.sub_maps[i]->items[j];
-      EditorMapItem* item = new EditorMapItem(*ref);
+      //EditorMapItem* item = new EditorMapItem(*ref);
+      EditorMapItem* item = new EditorMapItem(ref->getID());
+      //item->setBase(getItem(ref->getBaseItem()->getID()));
+      *item = *ref;
       item->setX(ref->getX());
       item->setY(ref->getY());
-      item->setBase(getItem(ref->getBaseItem()->getID()));
+      item->setBase(getItem(ref->getBaseItem()->getID()), false);
       setItem(item, source.sub_maps[i]->id);
     }
 
@@ -627,10 +641,13 @@ void EditorMap::copySelf(const EditorMap &source)
     for(int j = 0; j < source.sub_maps[i]->persons.size(); j++)
     {
       EditorMapPerson* ref = source.sub_maps[i]->persons[j];
-      EditorMapPerson* p = new EditorMapPerson(*ref);
+      //EditorMapPerson* p = new EditorMapPerson(*ref);
+      EditorMapPerson* p = new EditorMapPerson(ref->getID());
+      //p->setBase(getPerson(ref->getBasePerson()->getID()));
+      *p = *ref;
       p->setX(ref->getX());
       p->setY(ref->getY());
-      p->setBase(getPerson(ref->getBasePerson()->getID()));
+      p->setBase(getPerson(ref->getBasePerson()->getID()), false);
       setPerson(p, source.sub_maps[i]->id);
     }
 
@@ -638,10 +655,13 @@ void EditorMap::copySelf(const EditorMap &source)
     for(int j = 0; j < source.sub_maps[i]->npcs.size(); j++)
     {
       EditorMapNPC* ref = source.sub_maps[i]->npcs[j];
-      EditorMapNPC* n = new EditorMapNPC(*ref);
+      //EditorMapNPC* n = new EditorMapNPC(*ref);
+      EditorMapNPC* n = new EditorMapNPC(ref->getID());
+      //n->setBase(getNPC(ref->getBaseNPC()->getID()));
+      *n = *ref;
       n->setX(ref->getX());
       n->setY(ref->getY());
-      n->setBase(getNPC(ref->getBaseNPC()->getID()));
+      n->setBase(getNPC(ref->getBaseNPC()->getID()), false);
       setNPC(n, source.sub_maps[i]->id);
     }
   }
@@ -749,11 +769,8 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
     /* Determine the sprite, if applicable. or passability, if applicable */
     int last = data.getNumElements() - 1;
-    bool pass_north = false;
-    bool pass_east = false;
-    bool pass_south = false;
-    bool pass_west = false;
-    EditorSprite* sprite = NULL;
+    bool pass_north, pass_east, pass_south, pass_west;
+    EditorSprite* sprite = nullptr;
     if(data.getElement(last) == "sprite_id")
       sprite = getSprite(QString::fromStdString(data.getDataString()).toInt());
     else if(data.getElement(last) == "passability")
@@ -813,13 +830,6 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       {
         EditorEventSet* set = map->tiles[x][y]->getEventEnter();
         set->load(data, index + 2);
-
-        // TODO: Remove
-        //EditorEvent edit_event(map->tiles[x][y]->getEventEnter());
-        //edit_event.load(data, index + 3);
-        //if(edit_event.getEvent() != NULL)
-        //  map->tiles[x][y]->setEventEnter(*edit_event.getEvent(), false);
-        //edit_event.setEventBlank(false);
       }
       else if(category == "enterset")
       {
@@ -830,13 +840,6 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
       {
         EditorEventSet* set = map->tiles[x][y]->getEventExit();
         set->load(data, index + 2);
-
-        // TODO: Remove
-        //EditorEvent edit_event(map->tiles[x][y]->getEventExit());
-        //edit_event.load(data, index + 3);
-        //if(edit_event.getEvent() != NULL)
-        //  map->tiles[x][y]->setEventExit(*edit_event.getEvent(), false);
-        //edit_event.setEventBlank(false);
       }
       else if(category == "exitset")
       {
