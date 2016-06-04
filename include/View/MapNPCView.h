@@ -56,7 +56,7 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor npc to the editing map */
-  void addNPC(EditorMapNPC* npc);
+  bool addNPC(EditorMapNPC* npc);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();

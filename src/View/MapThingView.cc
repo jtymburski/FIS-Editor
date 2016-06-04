@@ -22,9 +22,9 @@
 MapThingView::MapThingView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
-  editor_map = NULL;
-  instance_dialog = NULL;
-  thing_dialog = NULL;
+  editor_map = nullptr;
+  instance_dialog = nullptr;
+  thing_dialog = nullptr;
 
   /* Create the layout */
   createLayout();
@@ -47,21 +47,35 @@ MapThingView::~MapThingView()
  *              press. The ID is the next available.
  *
  * Inputs: EditorMapThing* thing - the new thing to add (ID not set yet)
- * Output: none
+ * Output: bool - true if added successfully
  */
-void MapThingView::addThing(EditorMapThing* thing)
+bool MapThingView::addThing(EditorMapThing* thing)
 {
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
-    /* Sets the id and puts the thing in the library */
-    thing->setID(editor_map->getNextThingID());
-    thing->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setThing(thing);
+    /* Try and get the ID */
+    int id = editor_map->getNextThingID();
+    if(id >= 0)
+    {
+      /* Sets the id and puts the thing in the library */
+      thing->setID(id);
+      thing->setTileIcons(editor_map->getTileIcons());
+      int index = editor_map->setThing(thing);
 
-    /* Increments the id tracker and updates view */
-    updateList();
-    thing_list->setCurrentRow(index);
+      /* Increments the id tracker and updates view */
+      updateList();
+      thing_list->setCurrentRow(index);
+
+      return true;
+    }
+    else
+    {
+      delete thing;
+      QMessageBox::information(this, "No Space Remaining",
+                      "The max limit of thing bases has been reached");
+    }
   }
+  return false;
 }
 
 /*
@@ -598,8 +612,8 @@ bool MapThingView::duplicateThing()
   if(selected != NULL)
   {
     EditorMapThing* new_thing = new EditorMapThing(*selected);
-    addThing(new_thing);
-    return true;
+    if(addThing(new_thing))
+      return true;
   }
 
   return false;
@@ -659,8 +673,8 @@ void MapThingView::importThing()
 void MapThingView::newThing()
 {
   EditorMapThing* new_thing = new EditorMapThing();
-  addThing(new_thing);
-  editThing();
+  if(addThing(new_thing))
+    editThing();
 }
 
 /*

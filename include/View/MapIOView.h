@@ -56,7 +56,7 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor IO to the editing map */
-  void addIO(EditorMapIO* io);
+  bool addIO(EditorMapIO* io);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();

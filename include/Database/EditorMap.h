@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMap>
+#include <QMessageBox>
 #include <QObject>
 #include <QProgressDialog>
 #include <QPushButton>
@@ -70,13 +71,6 @@ public:
 
   /* Destructor function */
   virtual ~EditorMap();
-
-  /*------------------- Constants -----------------------*/
-  //const static int kBASE_ID_IOS; /* The instant base ID for MapIOs */
-  //const static int kBASE_ID_ITEMS; /* The instant base ID for items */
-  //const static int kBASE_ID_PERSON; /* The instant base ID for persons */
-  //const static int kBASE_ID_NPC; /* The instant base ID for npcs */
-  //const static int kBASE_ID_THING; /* The base thing ID */
 
 private:
   /* Active references in the map - used when displaying a map */
@@ -353,6 +347,13 @@ public:
 
   /* Returns the tile icons */
   TileIcons* getTileIcons();
+
+  /* Returns if a new thing (or children) is possible to be created */
+  bool isSpaceForIO(bool instance = false);
+  bool isSpaceForItem(bool instance = false);
+  bool isSpaceForNPC(bool instance = false);
+  bool isSpaceForPerson(bool instance = false);
+  bool isSpaceForThing(bool instance = false);
 
   /* Loads the map */
   void load(XmlData data, int index);

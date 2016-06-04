@@ -6,7 +6,7 @@
  *              map persons.
  ******************************************************************************/
 #include "View/MapPersonView.h"
-#include <QDebug>
+//#include <QDebug>
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -22,9 +22,9 @@
 MapPersonView::MapPersonView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
-  editor_map = NULL;
-  instance_dialog = NULL;
-  person_dialog = NULL;
+  editor_map = nullptr;
+  instance_dialog = nullptr;
+  person_dialog = nullptr;
 
   /* Create the layout */
   createLayout();
@@ -47,21 +47,35 @@ MapPersonView::~MapPersonView()
  *              press. The ID is the next available.
  *
  * Inputs: EditorMapPerson* person - the new person to add (ID not set yet)
- * Output: none
+ * Output: bool - true if added successfully
  */
-void MapPersonView::addPerson(EditorMapPerson* person)
+bool MapPersonView::addPerson(EditorMapPerson* person)
 {
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
-    /* Sets the id and puts the person in the library */
-    person->setID(editor_map->getNextPersonID());
-    person->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setPerson(person);
+    /* Try and get the ID */
+    int id = editor_map->getNextPersonID();
+    if(id >= 0)
+    {
+      /* Sets the id and puts the person in the library */
+      person->setID(id);
+      person->setTileIcons(editor_map->getTileIcons());
+      int index = editor_map->setPerson(person);
 
-    /* Increments the id tracker and updates view */
-    updateList();
-    person_list->setCurrentRow(index);
+      /* Increments the id tracker and updates view */
+      updateList();
+      person_list->setCurrentRow(index);
+
+      return true;
+    }
+    else
+    {
+      delete person;
+      QMessageBox::information(this, "No Space Remaining",
+                      "The max limit of person bases has been reached");
+    }
   }
+  return false;
 }
 
 /*
@@ -601,8 +615,8 @@ bool MapPersonView::duplicatePerson()
   if(selected != NULL)
   {
     EditorMapPerson* new_person = new EditorMapPerson(*selected);
-    addPerson(new_person);
-    return true;
+    if(addPerson(new_person))
+      return true;
   }
 
   return false;
@@ -662,8 +676,8 @@ void MapPersonView::importPerson()
 void MapPersonView::newPerson()
 {
   EditorMapPerson* new_person = new EditorMapPerson();
-  addPerson(new_person);
-  editPerson();
+  if(addPerson(new_person))
+    editPerson();
 }
 
 /*

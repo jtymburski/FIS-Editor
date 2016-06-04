@@ -57,7 +57,7 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor item to the editing map */
-  void addItem(EditorMapItem* item);
+  bool addItem(EditorMapItem* item);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();

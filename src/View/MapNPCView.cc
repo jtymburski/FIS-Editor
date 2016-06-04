@@ -22,9 +22,9 @@
 MapNPCView::MapNPCView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
-  editor_map = NULL;
-  instance_dialog = NULL;
-  npc_dialog = NULL;
+  editor_map = nullptr;
+  instance_dialog = nullptr;
+  npc_dialog = nullptr;
 
   /* Create the layout */
   createLayout();
@@ -47,21 +47,35 @@ MapNPCView::~MapNPCView()
  *              press. The ID is the next available.
  *
  * Inputs: EditorMapNPC* npc - the new npc to add (ID not set yet)
- * Output: none
+ * Output: bool - true if added successfully
  */
-void MapNPCView::addNPC(EditorMapNPC* npc)
+bool MapNPCView::addNPC(EditorMapNPC* npc)
 {
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
-    /* Sets the id and puts the npc in the library */
-    npc->setID(editor_map->getNextNPCID());
-    npc->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setNPC(npc);
+    /* Try and get the ID */
+    int id = editor_map->getNextNPCID();
+    if(id >= 0)
+    {
+      /* Sets the id and puts the npc in the library */
+      npc->setID(id);
+      npc->setTileIcons(editor_map->getTileIcons());
+      int index = editor_map->setNPC(npc);
 
-    /* Increments the id tracker and updates view */
-    updateList();
-    npc_list->setCurrentRow(index);
+      /* Increments the id tracker and updates view */
+      updateList();
+      npc_list->setCurrentRow(index);
+
+      return true;
+    }
+    else
+    {
+      delete npc;
+      QMessageBox::information(this, "No Space Remaining",
+                      "The max limit of NPC bases has been reached");
+    }
   }
+  return false;
 }
 
 /*
@@ -602,8 +616,8 @@ bool MapNPCView::duplicateNPC()
   if(selected != NULL)
   {
     EditorMapNPC* new_npc = new EditorMapNPC(*selected);
-    addNPC(new_npc);
-    return true;
+    if(addNPC(new_npc))
+      return true;
   }
 
   return false;
@@ -663,8 +677,8 @@ void MapNPCView::importNPC()
 void MapNPCView::newNPC()
 {
   EditorMapNPC* new_npc = new EditorMapNPC();
-  addNPC(new_npc);
-  editNPC();
+  if(addNPC(new_npc))
+    editNPC();
 }
 
 /*
@@ -677,7 +691,7 @@ void MapNPCView::newNPC()
 void MapNPCView::setEditorMap(EditorMap* map)
 {
   /* If existing editor map is not NULL, undo */
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
     disconnect(editor_map, SIGNAL(npcInstanceChanged(QString)),
                this, SLOT(npcInstanceUpdate(QString)));

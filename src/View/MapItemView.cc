@@ -46,21 +46,35 @@ MapItemView::~MapItemView()
  *              press. The ID is the next available.
  *
  * Inputs: EditorMapItem* item - the new item to add (ID not set yet)
- * Output: none
+ * Output: bool - true if added successfully
  */
-void MapItemView::addItem(EditorMapItem* item)
+bool MapItemView::addItem(EditorMapItem* item)
 {
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
-    /* Sets the id and puts the item in the library */
-    item->setID(editor_map->getNextItemID());
-    item->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setItem(item);
+    /* Try and get the ID */
+    int id = editor_map->getNextItemID();
+    if(id >= 0)
+    {
+      /* Sets the id and puts the item in the library */
+      item->setID(id);
+      item->setTileIcons(editor_map->getTileIcons());
+      int index = editor_map->setItem(item);
 
-    /* Increments the id tracker and updates view */
-    updateList();
-    item_list->setCurrentRow(index);
+      /* Increments the id tracker and updates view */
+      updateList();
+      item_list->setCurrentRow(index);
+
+      return true;
+    }
+    else
+    {
+      delete item;
+      QMessageBox::information(this, "No Space Remaining",
+                      "The max limit of item bases has been reached");
+    }
   }
+  return false;
 }
 
 /*
@@ -591,8 +605,8 @@ bool MapItemView::duplicateItem()
   if(selected != NULL)
   {
     EditorMapItem* new_item = new EditorMapItem(*selected);
-    addItem(new_item);
-    return true;
+    if(addItem(new_item))
+      return true;
   }
 
   return false;
@@ -651,8 +665,8 @@ void MapItemView::importItem()
 void MapItemView::newItem()
 {
   EditorMapItem* new_item = new EditorMapItem();
-  addItem(new_item);
-  editItem();
+  if(addItem(new_item))
+    editItem();
 }
 
 /*

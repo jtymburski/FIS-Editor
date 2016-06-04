@@ -56,7 +56,7 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor person to the editing map */
-  void addPerson(EditorMapPerson* person);
+  bool addPerson(EditorMapPerson* person);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();

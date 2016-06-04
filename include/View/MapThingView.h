@@ -23,7 +23,7 @@ class MapThingView : public QWidget
   Q_OBJECT
 public:
   /* Constructor Function */
-  MapThingView(QWidget* parent = NULL);
+  MapThingView(QWidget* parent = nullptr);
 
   /* Destructor function */
   ~MapThingView();
@@ -56,7 +56,7 @@ private:
  *===========================================================================*/
 private:
   /* Adds an editor thing to the editing map */
-  void addThing(EditorMapThing* thing);
+  bool addThing(EditorMapThing* thing);
 
   /* Creates the layout - only called on initial construction */
   void createLayout();
@@ -66,7 +66,7 @@ private:
   void deletePopInstance();
 
   /* Opens the thing editing dialog */
-  void editThing(EditorMapThing* sub_thing = NULL);
+  void editThing(EditorMapThing* sub_thing = nullptr);
 
   /* Refreshes the info in the lower half of the widget */
   void updateInfo();

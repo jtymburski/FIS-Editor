@@ -8,11 +8,6 @@
 #include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
-//const int EditorMap::kBASE_ID_IOS = 30000;
-//const int EditorMap::kBASE_ID_ITEMS = 40000;
-//const int EditorMap::kBASE_ID_PERSON = 0;
-//const int EditorMap::kBASE_ID_NPC = 10000;
-//const int EditorMap::kBASE_ID_THING = 20000;
 const int EditorMap::kUNSET_ID = -1;
 
 /*============================================================================
@@ -26,10 +21,10 @@ const int EditorMap::kUNSET_ID = -1;
  */
 EditorMap::EditorMap() : QObject()
 {
-  active_submap = NULL;
+  active_submap = nullptr;
   id = kUNSET_ID;
   name = "";
-  tile_icons = NULL;
+  tile_icons = nullptr;
   visible_path = true;
 
   clearHoverInfo();
@@ -1802,20 +1797,20 @@ void EditorMap::clearHoverInfo()
   active_info.active_layer = EditorEnumDb::NO_LAYER;
   active_info.path_edit_mode = false;
 
-  active_info.active_io = NULL;
-  active_info.active_item = NULL;
-  active_info.active_npc = NULL;
-  active_info.active_person = NULL;
-  active_info.active_sprite = NULL;
-  active_info.active_thing = NULL;
+  active_info.active_io = nullptr;
+  active_info.active_item = nullptr;
+  active_info.active_npc = nullptr;
+  active_info.active_person = nullptr;
+  active_info.active_sprite = nullptr;
+  active_info.active_thing = nullptr;
 
   active_info.move_thing = nullptr;
 
-  active_info.hover_tile = NULL;
+  active_info.hover_tile = nullptr;
   active_info.selected_thing = QRect();
 
   /* Clean the active submap */
-  active_submap = NULL;
+  active_submap = nullptr;
 }
 
 /*
@@ -1834,7 +1829,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
   EditorEnumDb::Layer layer = active_info.active_layer;
 
   /* Make sure there's a hover sprite */
-  if(active_info.hover_tile != NULL)
+  if(active_info.hover_tile != nullptr)
   {
     /* Check on the layer - base sprite */
     if(layer == EditorEnumDb::BASE || layer == EditorEnumDb::ENHANCER ||
@@ -1847,7 +1842,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
       EditorSprite* sprite = active_info.active_sprite;
 
       /* ---- BASIC PLACE CURSOR ---- */
-      if(cursor == EditorEnumDb::BASIC && sprite != NULL)
+      if(cursor == EditorEnumDb::BASIC && sprite != nullptr)
       {
         active_info.hover_tile->place(layer, sprite);
       }
@@ -1863,7 +1858,7 @@ void EditorMap::clickTrigger(bool single, bool right_click)
           active_info.hover_tile->unplace(layer);
       }
       /* ---- FILL CURSOR ---- */
-      else if(single && cursor == EditorEnumDb::FILL && sprite != NULL &&
+      else if(single && cursor == EditorEnumDb::FILL && sprite != nullptr &&
               sprite != active_info.hover_tile->getSprite(layer))
       {
         EditorTile* tile = active_info.hover_tile;
@@ -1993,30 +1988,38 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::THING)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_thing != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_thing != nullptr)
       {
         /* Create the thing */
         int id = getNextThingID(true);
-        EditorMapThing* new_thing = new EditorMapThing(id);
-        new_thing->setBase(active_info.active_thing);
-        new_thing->setX(active_info.hover_tile->getX());
-        new_thing->setY(active_info.hover_tile->getY());
+        if(id >= 0)
+        {
+          EditorMapThing* new_thing = new EditorMapThing(id);
+          new_thing->setBase(active_info.active_thing);
+          new_thing->setX(active_info.hover_tile->getX());
+          new_thing->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place - if failed, delete */
-        if(!addThing(new_thing, NULL, false))
-          delete new_thing;
+          /* Attempt to place - if failed, delete */
+          if(!addThing(new_thing, nullptr, false))
+            delete new_thing;
+        }
+        else
+        {
+          QMessageBox::information(nullptr, "No Space Remaining",
+                          "The max limit of thing instances has been reached");
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
         int max = Helpers::getRenderDepth();
 
         /* Loop through all to find the top thing */
-        EditorMapThing* found = NULL;
-        for(int i = max - 1; found == NULL && i >= 0; i--)
+        EditorMapThing* found = nullptr;
+        for(int i = max - 1; found == nullptr && i >= 0; i--)
           found = active_info.hover_tile->getThing(i);
 
         /* If found, remove from tiles and delete */
-        if(found != NULL)
+        if(found != nullptr)
           unsetThing(found->getID(), true);
       }
     }
@@ -2024,30 +2027,38 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::IO)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_io != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_io != nullptr)
       {
         /* Create the IO */
         int id = getNextIOID(true);
-        EditorMapIO* new_io = new EditorMapIO(id);
-        new_io->setBase(active_info.active_io);
-        new_io->setX(active_info.hover_tile->getX());
-        new_io->setY(active_info.hover_tile->getY());
+        if(id >= 0)
+        {
+          EditorMapIO* new_io = new EditorMapIO(id);
+          new_io->setBase(active_info.active_io);
+          new_io->setX(active_info.hover_tile->getX());
+          new_io->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place - if failed, delete */
-        if(!addIO(new_io, NULL, false))
-          delete new_io;
+          /* Attempt to place - if failed, delete */
+          if(!addIO(new_io, nullptr, false))
+            delete new_io;
+        }
+        else
+        {
+          QMessageBox::information(nullptr, "No Space Remaining",
+                          "The max limit of IO instances has been reached");
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
         int max = Helpers::getRenderDepth();
 
         /* Loop through all to find the top IO */
-        EditorMapIO* found = NULL;
-        for(int i = max - 1; found == NULL && i >= 0; i--)
+        EditorMapIO* found = nullptr;
+        for(int i = max - 1; found == nullptr && i >= 0; i--)
           found = active_info.hover_tile->getIO(i);
 
         /* If found, remove from tiles and delete */
-        if(found != NULL)
+        if(found != nullptr)
           unsetIO(found->getID(), true);
       }
     }
@@ -2055,28 +2066,36 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::ITEM)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_item != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_item != nullptr)
       {
         /* Create the thing */
         int id = getNextItemID(true);
-        EditorMapItem* new_item = new EditorMapItem(id);
-        new_item->setBase(active_info.active_item);
-        new_item->setX(active_info.hover_tile->getX());
-        new_item->setY(active_info.hover_tile->getY());
+        if(id >= 0)
+        {
+          EditorMapItem* new_item = new EditorMapItem(id);
+          new_item->setBase(active_info.active_item);
+          new_item->setX(active_info.hover_tile->getX());
+          new_item->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place - if failed, delete */
-        if(!addItem(new_item, NULL, false))
-          delete new_item;
+          /* Attempt to place - if failed, delete */
+          if(!addItem(new_item, nullptr, false))
+            delete new_item;
+        }
+        else
+        {
+          QMessageBox::information(nullptr, "No Space Remaining",
+                          "The max limit of item instances has been reached");
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
         /* Loop through all to find the top item */
-        EditorMapItem* found = NULL;
-        if(active_info.hover_tile->getItems().front() != NULL)
+        EditorMapItem* found = nullptr;
+        if(active_info.hover_tile->getItems().front() != nullptr)
           found = active_info.hover_tile->getItems().last();
 
         /* If found, remove from tiles and delete */
-        if(found != NULL)
+        if(found != nullptr)
           unsetItem(found->getID(), true);
       }
     }
@@ -2084,30 +2103,38 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::PERSON)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_person != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_person != nullptr)
       {
         /* Create the person */
         int id = getNextPersonID(true);
-        EditorMapPerson* new_person = new EditorMapPerson(id);
-        new_person->setBase(active_info.active_person);
-        new_person->setX(active_info.hover_tile->getX());
-        new_person->setY(active_info.hover_tile->getY());
+        if(id >= 0)
+        {
+          EditorMapPerson* new_person = new EditorMapPerson(id);
+          new_person->setBase(active_info.active_person);
+          new_person->setX(active_info.hover_tile->getX());
+          new_person->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place - if failed, delete */
-        if(!addPerson(new_person, NULL, false))
-          delete new_person;
+          /* Attempt to place - if failed, delete */
+          if(!addPerson(new_person, nullptr, false))
+            delete new_person;
+        }
+        else
+        {
+          QMessageBox::information(nullptr, "No Space Remaining",
+                          "The max limit of person instances has been reached");
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
         int max = Helpers::getRenderDepth();
 
         /* Loop through all to find the top person */
-        EditorMapPerson* found = NULL;
-        for(int i = max - 1; found == NULL && i >= 0; i--)
+        EditorMapPerson* found = nullptr;
+        for(int i = max - 1; found == nullptr && i >= 0; i--)
           found = active_info.hover_tile->getPerson(i);
 
         /* If found, remove from tiles and delete */
-        if(found != NULL)
+        if(found != nullptr)
           unsetPerson(found->getID(), true);
       }
     }
@@ -2115,30 +2142,38 @@ void EditorMap::clickTrigger(bool single, bool right_click)
     else if(layer == EditorEnumDb::NPC)
     {
       /* Check cursor */
-      if(cursor == EditorEnumDb::BASIC && active_info.active_npc != NULL)
+      if(cursor == EditorEnumDb::BASIC && active_info.active_npc != nullptr)
       {
         /* Create the npc */
         int id = getNextNPCID(true);
-        EditorMapNPC* new_npc = new EditorMapNPC(id);
-        new_npc->setBase(active_info.active_npc);
-        new_npc->setX(active_info.hover_tile->getX());
-        new_npc->setY(active_info.hover_tile->getY());
+        if(id >= 0)
+        {
+          EditorMapNPC* new_npc = new EditorMapNPC(id);
+          new_npc->setBase(active_info.active_npc);
+          new_npc->setX(active_info.hover_tile->getX());
+          new_npc->setY(active_info.hover_tile->getY());
 
-        /* Attempt to place - if failed, delete */
-        if(!addNPC(new_npc, NULL, false))
-          delete new_npc;
+          /* Attempt to place - if failed, delete */
+          if(!addNPC(new_npc, nullptr, false))
+            delete new_npc;
+        }
+        else
+        {
+          QMessageBox::information(nullptr, "No Space Remaining",
+                          "The max limit of npc instances has been reached");
+        }
       }
       else if(cursor == EditorEnumDb::ERASER)
       {
         int max = Helpers::getRenderDepth();
 
         /* Loop through all to find the top npc */
-        EditorMapNPC* found = NULL;
-        for(int i = max - 1; found == NULL && i >= 0; i--)
+        EditorMapNPC* found = nullptr;
+        for(int i = max - 1; found == nullptr && i >= 0; i--)
           found = active_info.hover_tile->getNPC(i);
 
         /* If found, remove from tiles and delete */
-        if(found != NULL)
+        if(found != nullptr)
           unsetNPC(found->getID(), true);
       }
     }
@@ -2235,11 +2270,15 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       unsetThingByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->things.size(); i++)
     {
-      EditorMapThing* thing = new EditorMapThing(*copy_map->things[i]);
-      thing->setID(getNextThingID(true));
-      thing->setX(copy_map->things[i]->getX());
-      thing->setY(copy_map->things[i]->getY());
-      setThing(thing, new_map->id);
+      int id = getNextThingID(true);
+      if(id >= 0)
+      {
+        EditorMapThing* thing = new EditorMapThing(*copy_map->things[i]);
+        thing->setID(id);
+        thing->setX(copy_map->things[i]->getX());
+        thing->setY(copy_map->things[i]->getY());
+        setThing(thing, new_map->id);
+      }
     }
 
     /* Add io instances */
@@ -2247,11 +2286,15 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       unsetIOByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->ios.size(); i++)
     {
-      EditorMapIO* io = new EditorMapIO(*copy_map->ios[i]);
-      io->setID(getNextIOID(true));
-      io->setX(copy_map->ios[i]->getX());
-      io->setY(copy_map->ios[i]->getY());
-      setIO(io, new_map->id);
+      int id = getNextIOID(true);
+      if(id >= 0)
+      {
+        EditorMapIO* io = new EditorMapIO(*copy_map->ios[i]);
+        io->setID(id);
+        io->setX(copy_map->ios[i]->getX());
+        io->setY(copy_map->ios[i]->getY());
+        setIO(io, new_map->id);
+      }
     }
 
     /* Add item instances */
@@ -2259,11 +2302,15 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       unsetItemByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->items.size(); i++)
     {
-      EditorMapItem* item = new EditorMapItem(*copy_map->items[i]);
-      item->setID(getNextItemID(true));
-      item->setX(copy_map->items[i]->getX());
-      item->setY(copy_map->items[i]->getY());
-      setItem(item, new_map->id);
+      int id = getNextItemID(true);
+      if(id >= 0)
+      {
+        EditorMapItem* item = new EditorMapItem(*copy_map->items[i]);
+        item->setID(id);
+        item->setX(copy_map->items[i]->getX());
+        item->setY(copy_map->items[i]->getY());
+        setItem(item, new_map->id);
+      }
     }
 
     /* Add person instances */
@@ -2271,11 +2318,15 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       unsetPersonByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->persons.size(); i++)
     {
-      EditorMapPerson* person = new EditorMapPerson(*copy_map->persons[i]);
-      person->setID(getNextPersonID(true));
-      person->setX(copy_map->persons[i]->getX());
-      person->setY(copy_map->persons[i]->getY());
-      setPerson(person, new_map->id);
+      int id = getNextPersonID(true);
+      if(id >= 0)
+      {
+        EditorMapPerson* person = new EditorMapPerson(*copy_map->persons[i]);
+        person->setID(id);
+        person->setX(copy_map->persons[i]->getX());
+        person->setY(copy_map->persons[i]->getY());
+        setPerson(person, new_map->id);
+      }
     }
 
     /* Add npc instances */
@@ -2283,11 +2334,15 @@ bool EditorMap::copySubMap(SubMapInfo* copy_map, SubMapInfo* new_map)
       unsetNPCByIndex(0, new_map->id);
     for(int i = 0; i < copy_map->npcs.size(); i++)
     {
-      EditorMapNPC* npc = new EditorMapNPC(*copy_map->npcs[i]);
-      npc->setID(getNextNPCID(true));
-      npc->setX(copy_map->npcs[i]->getX());
-      npc->setY(copy_map->npcs[i]->getY());
-      setNPC(npc, new_map->id);
+      int id = getNextNPCID(true);
+      if(id >= 0)
+      {
+        EditorMapNPC* npc = new EditorMapNPC(*copy_map->npcs[i]);
+        npc->setID(id);
+        npc->setX(copy_map->npcs[i]->getX());
+        npc->setY(copy_map->npcs[i]->getY());
+        setNPC(npc, new_map->id);
+      }
     }
 
     return true;
@@ -3157,54 +3212,58 @@ QString EditorMap::getNameList()
  */
 int EditorMap::getNextIOID(bool from_sub)
 {
-  bool found = false;
-  int id = 0;
-
-  /* If not from sub map, check base for base ID */
-  if(!from_sub)
+  if(isSpaceForIO(from_sub))
   {
-    for(int i = 0; !found && (i < base_ios.size()); i++)
+    bool found = false;
+    int id = 0;
+
+    /* If not from sub map, check base for base ID */
+    if(!from_sub)
     {
-      if(base_ios[i]->getID() != i)
+      for(int i = 0; !found && (i < base_ios.size()); i++)
       {
-        id = i;
-        found = true;
+        if(base_ios[i]->getID() != i)
+        {
+          id = i;
+          found = true;
+        }
       }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && base_ios.size() > 0)
+        id = base_ios.last()->getID() + 1;
+    }
+    /* Otherwise, check the sub-maps for available ID */
+    else
+    {
+      /* Compile the IDs of all IOs in all sub-maps */
+      QVector<int> id_list;
+      for(int i = 0; i < sub_maps.size(); i++)
+        for(int j = 0; j < sub_maps[i]->ios.size(); j++)
+          id_list.push_back(sub_maps[i]->ios[j]->getID());
+
+      /* Sort the list */
+      qSort(id_list);
+
+      /* Find the next available ID */
+      id = EditorEnumDb::kBASE_ID_IOS;
+      for(int i = 0; !found && (i < id_list.size()); i++)
+      {
+        if(id_list[i] != (id + i))
+        {
+          id += i;
+          found = true;
+        }
+      }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && id_list.size() > 0)
+        id = id_list.last() + 1;
     }
 
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && base_ios.size() > 0)
-      id = base_ios.last()->getID() + 1;
+    return id;
   }
-  /* Otherwise, check the sub-maps for available ID */
-  else
-  {
-    /* Compile the IDs of all IOs in all sub-maps */
-    QVector<int> id_list;
-    for(int i = 0; i < sub_maps.size(); i++)
-      for(int j = 0; j < sub_maps[i]->ios.size(); j++)
-        id_list.push_back(sub_maps[i]->ios[j]->getID());
-
-    /* Sort the list */
-    qSort(id_list);
-
-    /* Find the next available ID */
-    id = EditorEnumDb::kBASE_ID_IOS;
-    for(int i = 0; !found && (i < id_list.size()); i++)
-    {
-      if(id_list[i] != (id + i))
-      {
-        id += i;
-        found = true;
-      }
-    }
-
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && id_list.size() > 0)
-      id = id_list.last() + 1;
-  }
-
-  return id;
+  return -1;
 }
 
 /*
@@ -3216,54 +3275,58 @@ int EditorMap::getNextIOID(bool from_sub)
  */
 int EditorMap::getNextItemID(bool from_sub)
 {
-  bool found = false;
-  int id = 0;
-
-  /* If not from sub map, check base for base ID */
-  if(!from_sub)
+  if(isSpaceForItem(from_sub))
   {
-    for(int i = 0; !found && (i < base_items.size()); i++)
+    bool found = false;
+    int id = 0;
+
+    /* If not from sub map, check base for base ID */
+    if(!from_sub)
     {
-      if(base_items[i]->getID() != i)
+      for(int i = 0; !found && (i < base_items.size()); i++)
       {
-        id = i;
-        found = true;
+        if(base_items[i]->getID() != i)
+        {
+          id = i;
+          found = true;
+        }
       }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && base_items.size() > 0)
+        id = base_items.last()->getID() + 1;
+    }
+    /* Otherwise, check the sub-maps for available ID */
+    else
+    {
+      /* Compile the IDs of all things in all sub-maps */
+      QVector<int> id_list;
+      for(int i = 0; i < sub_maps.size(); i++)
+        for(int j = 0; j < sub_maps[i]->items.size(); j++)
+          id_list.push_back(sub_maps[i]->items[j]->getID());
+
+      /* Sort the list */
+      qSort(id_list);
+
+      /* Find the next available ID */
+      id = EditorEnumDb::kBASE_ID_ITEMS;
+      for(int i = 0; !found && (i < id_list.size()); i++)
+      {
+        if(id_list[i] != (id + i))
+        {
+          id += i;
+          found = true;
+        }
+      }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && id_list.size() > 0)
+        id = id_list.last() + 1;
     }
 
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && base_items.size() > 0)
-      id = base_items.last()->getID() + 1;
+    return id;
   }
-  /* Otherwise, check the sub-maps for available ID */
-  else
-  {
-    /* Compile the IDs of all things in all sub-maps */
-    QVector<int> id_list;
-    for(int i = 0; i < sub_maps.size(); i++)
-      for(int j = 0; j < sub_maps[i]->items.size(); j++)
-        id_list.push_back(sub_maps[i]->items[j]->getID());
-
-    /* Sort the list */
-    qSort(id_list);
-
-    /* Find the next available ID */
-    id = EditorEnumDb::kBASE_ID_ITEMS;
-    for(int i = 0; !found && (i < id_list.size()); i++)
-    {
-      if(id_list[i] != (id + i))
-      {
-        id += i;
-        found = true;
-      }
-    }
-
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && id_list.size() > 0)
-      id = id_list.last() + 1;
-  }
-
-  return id;
+  return -1;
 }
 
 /*
@@ -3303,53 +3366,57 @@ int EditorMap::getNextMapID()
  */
 int EditorMap::getNextNPCID(bool from_sub)
 {
-  bool found = false;
-  int id = EditorEnumDb::kBASE_ID_NPC;
-
-  /* If not from sub map, check base for base ID */
-  if(!from_sub)
+  if(isSpaceForNPC(from_sub))
   {
-    for(int i = 0; !found && (i < base_npcs.size()); i++)
+    bool found = false;
+    int id = EditorEnumDb::kBASE_ID_NPC;
+
+    /* If not from sub map, check base for base ID */
+    if(!from_sub)
     {
-      if(base_npcs[i]->getID() != (id + i))
+      for(int i = 0; !found && (i < base_npcs.size()); i++)
       {
-        id += i;
-        found = true;
+        if(base_npcs[i]->getID() != (id + i))
+        {
+          id += i;
+          found = true;
+        }
       }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && base_npcs.size() > 0)
+        id = base_npcs.last()->getID() + 1;
+    }
+    /* Otherwise, check the sub-maps for available ID */
+    else
+    {
+      /* Compile the IDs of all npcs in all sub-maps */
+      QVector<int> id_list;
+      for(int i = 0; i < sub_maps.size(); i++)
+        for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
+          id_list.push_back(sub_maps[i]->npcs[j]->getID());
+
+      /* Sort the list */
+      qSort(id_list);
+
+      /* Find the next available ID */
+      for(int i = 0; !found && (i < id_list.size()); i++)
+      {
+        if(id_list[i] != (id + i))
+        {
+          id += i;
+          found = true;
+        }
+      }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && id_list.size() > 0)
+        id = id_list.last() + 1;
     }
 
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && base_npcs.size() > 0)
-      id = base_npcs.last()->getID() + 1;
+    return id;
   }
-  /* Otherwise, check the sub-maps for available ID */
-  else
-  {
-    /* Compile the IDs of all npcs in all sub-maps */
-    QVector<int> id_list;
-    for(int i = 0; i < sub_maps.size(); i++)
-      for(int j = 0; j < sub_maps[i]->npcs.size(); j++)
-        id_list.push_back(sub_maps[i]->npcs[j]->getID());
-
-    /* Sort the list */
-    qSort(id_list);
-
-    /* Find the next available ID */
-    for(int i = 0; !found && (i < id_list.size()); i++)
-    {
-      if(id_list[i] != (id + i))
-      {
-        id += i;
-        found = true;
-      }
-    }
-
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && id_list.size() > 0)
-      id = id_list.last() + 1;
-  }
-
-  return id;
+  return -1;
 }
 
 /*
@@ -3361,54 +3428,58 @@ int EditorMap::getNextNPCID(bool from_sub)
  */
 int EditorMap::getNextPersonID(bool from_sub)
 {
-  bool found = false;
-  int id = 0;
-
-  /* If not from sub map, check base for base ID */
-  if(!from_sub)
+  if(isSpaceForPerson(from_sub))
   {
-    for(int i = 0; !found && (i < base_persons.size()); i++)
+    bool found = false;
+    int id = 0;
+
+    /* If not from sub map, check base for base ID */
+    if(!from_sub)
     {
-      if(base_persons[i]->getID() != i)
+      for(int i = 0; !found && (i < base_persons.size()); i++)
       {
-        id = i;
-        found = true;
+        if(base_persons[i]->getID() != i)
+        {
+          id = i;
+          found = true;
+        }
       }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && base_persons.size() > 0)
+        id = base_persons.last()->getID() + 1;
+    }
+    /* Otherwise, check the sub-maps for available ID */
+    else
+    {
+      /* Compile the IDs of all persons in all sub-maps */
+      QVector<int> id_list;
+      for(int i = 0; i < sub_maps.size(); i++)
+        for(int j = 0; j < sub_maps[i]->persons.size(); j++)
+          id_list.push_back(sub_maps[i]->persons[j]->getID());
+
+      /* Sort the list */
+      qSort(id_list);
+
+      /* Find the next available ID */
+      id = EditorEnumDb::kBASE_ID_PERSON;
+      for(int i = 0; !found && (i < id_list.size()); i++)
+      {
+        if(id_list[i] != (id + i))
+        {
+          id += i;
+          found = true;
+        }
+      }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && id_list.size() > 0)
+        id = id_list.last() + 1;
     }
 
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && base_persons.size() > 0)
-      id = base_persons.last()->getID() + 1;
+    return id;
   }
-  /* Otherwise, check the sub-maps for available ID */
-  else
-  {
-    /* Compile the IDs of all persons in all sub-maps */
-    QVector<int> id_list;
-    for(int i = 0; i < sub_maps.size(); i++)
-      for(int j = 0; j < sub_maps[i]->persons.size(); j++)
-        id_list.push_back(sub_maps[i]->persons[j]->getID());
-
-    /* Sort the list */
-    qSort(id_list);
-
-    /* Find the next available ID */
-    id = EditorEnumDb::kBASE_ID_PERSON;
-    for(int i = 0; !found && (i < id_list.size()); i++)
-    {
-      if(id_list[i] != (id + i))
-      {
-        id += i;
-        found = true;
-      }
-    }
-
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && id_list.size() > 0)
-      id = id_list.last() + 1;
-  }
-
-  return id;
+  return -1;
 }
 
 /*
@@ -3448,54 +3519,58 @@ int EditorMap::getNextSpriteID()
  */
 int EditorMap::getNextThingID(bool from_sub)
 {
-  bool found = false;
-  int id = 0;
-
-  /* If not from sub map, check base for base ID */
-  if(!from_sub)
+  if(isSpaceForThing(from_sub))
   {
-    for(int i = 0; !found && (i < base_things.size()); i++)
+    bool found = false;
+    int id = 0;
+
+    /* If not from sub map, check base for base ID */
+    if(!from_sub)
     {
-      if(base_things[i]->getID() != i)
+      for(int i = 0; !found && (i < base_things.size()); i++)
       {
-        id = i;
-        found = true;
+        if(base_things[i]->getID() != i)
+        {
+          id = i;
+          found = true;
+        }
       }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && base_things.size() > 0)
+        id = base_things.last()->getID() + 1;
+    }
+    /* Otherwise, check the sub-maps for available ID */
+    else
+    {
+      /* Compile the IDs of all things in all sub-maps */
+      QVector<int> id_list;
+      for(int i = 0; i < sub_maps.size(); i++)
+        for(int j = 0; j < sub_maps[i]->things.size(); j++)
+          id_list.push_back(sub_maps[i]->things[j]->getID());
+
+      /* Sort the list */
+      qSort(id_list);
+
+      /* Find the next available ID */
+      id = EditorEnumDb::kBASE_ID_THING;
+      for(int i = 0; !found && (i < id_list.size()); i++)
+      {
+        if(id_list[i] != (id + i))
+        {
+          id += i;
+          found = true;
+        }
+      }
+
+      /* If nothing found, just make it the last ID + 1 */
+      if(!found && id_list.size() > 0)
+        id = id_list.last() + 1;
     }
 
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && base_things.size() > 0)
-      id = base_things.last()->getID() + 1;
+    return id;
   }
-  /* Otherwise, check the sub-maps for available ID */
-  else
-  {
-    /* Compile the IDs of all things in all sub-maps */
-    QVector<int> id_list;
-    for(int i = 0; i < sub_maps.size(); i++)
-      for(int j = 0; j < sub_maps[i]->things.size(); j++)
-        id_list.push_back(sub_maps[i]->things[j]->getID());
-
-    /* Sort the list */
-    qSort(id_list);
-
-    /* Find the next available ID */
-    id = EditorEnumDb::kBASE_ID_THING;
-    for(int i = 0; !found && (i < id_list.size()); i++)
-    {
-      if(id_list[i] != (id + i))
-      {
-        id += i;
-        found = true;
-      }
-    }
-
-    /* If nothing found, just make it the last ID + 1 */
-    if(!found && id_list.size() > 0)
-      id = id_list.last() + 1;
-  }
-
-  return id;
+  return -1;
 }
 
 /*
@@ -4165,6 +4240,166 @@ QVector<EditorMapThing*> EditorMap::getThings(int sub_map)
 TileIcons* EditorMap::getTileIcons()
 {
   return tile_icons;
+}
+
+/*
+ * Description: Returns if there is space to add another IO, be it a base
+ *              or an instance.
+ *
+ * Inputs: bool instance - true to check instance count, false for base
+ * Output: bool - true if there is space for the addition
+ */
+bool EditorMap::isSpaceForIO(bool instance)
+{
+  bool space = true;
+
+  /* If not from sub map, check base for for space */
+  if(!instance)
+  {
+    space = (base_ios.size() < EditorEnumDb::kMAX_COUNT_BASES);
+  }
+  /* Otherwise, check all sub-maps for valid space */
+  else
+  {
+    int total_count = 0;
+
+    /* Parse subs to add count */
+    for(int i = 0; i < sub_maps.size(); i++)
+      total_count += sub_maps[i]->ios.size();
+
+    /* Check space */
+    space = (total_count < EditorEnumDb::kMAX_COUNT_IOS);
+  }
+
+  return space;
+}
+
+/*
+ * Description: Returns if there is space to add another item, be it a base
+ *              or an instance.
+ *
+ * Inputs: bool instance - true to check instance count, false for base
+ * Output: bool - true if there is space for the addition
+ */
+bool EditorMap::isSpaceForItem(bool instance)
+{
+  bool space = true;
+
+  /* If not from sub map, check base for for space */
+  if(!instance)
+  {
+    space = (base_items.size() < EditorEnumDb::kMAX_COUNT_BASES);
+  }
+  /* Otherwise, check all sub-maps for valid space */
+  else
+  {
+    int total_count = 0;
+
+    /* Parse subs to add count */
+    for(int i = 0; i < sub_maps.size(); i++)
+      total_count += sub_maps[i]->items.size();
+
+    /* Check space */
+    space = (total_count < EditorEnumDb::kMAX_COUNT_ITEMS);
+  }
+
+  return space;
+}
+
+/*
+ * Description: Returns if there is space to add another NPC, be it a base
+ *              or an instance.
+ *
+ * Inputs: bool instance - true to check instance count, false for base
+ * Output: bool - true if there is space for the addition
+ */
+bool EditorMap::isSpaceForNPC(bool instance)
+{
+  bool space = true;
+
+  /* If not from sub map, check base for for space */
+  if(!instance)
+  {
+    space = (base_npcs.size() < EditorEnumDb::kMAX_COUNT_BASES);
+  }
+  /* Otherwise, check all sub-maps for valid space */
+  else
+  {
+    int total_count = 0;
+
+    /* Parse subs to add count */
+    for(int i = 0; i < sub_maps.size(); i++)
+      total_count += sub_maps[i]->npcs.size();
+
+    /* Check space */
+    space = (total_count < EditorEnumDb::kMAX_COUNT_NPCS);
+  }
+
+  return space;
+}
+
+/*
+ * Description: Returns if there is space to add another person, be it a base
+ *              or an instance.
+ *
+ * Inputs: bool instance - true to check instance count, false for base
+ * Output: bool - true if there is space for the addition
+ */
+bool EditorMap::isSpaceForPerson(bool instance)
+{
+  bool space = true;
+
+  /* If not from sub map, check base for for space */
+  if(!instance)
+  {
+    space = (base_persons.size() < EditorEnumDb::kMAX_COUNT_BASES);
+  }
+  /* Otherwise, check all sub-maps for valid space */
+  else
+  {
+    int total_count = 0;
+
+    /* Parse subs to add count */
+    for(int i = 0; i < sub_maps.size(); i++)
+      total_count += sub_maps[i]->persons.size();
+
+    /* Check space */
+    space = (total_count < EditorEnumDb::kMAX_COUNT_PERSONS);
+  }
+
+  return space;
+}
+
+/*
+ * Description: Returns if there is space to add another thing, be it a base
+ *              or an instance.
+ *
+ * Inputs: bool instance - true to check instance count, false for base
+ * Output: bool - true if there is space for the addition
+ */
+bool EditorMap::isSpaceForThing(bool instance)
+{
+  bool space = true;
+
+  /* If not from sub map, check base for for space */
+  if(!instance)
+  {
+    space = (base_things.size() < EditorEnumDb::kMAX_COUNT_BASES);
+  }
+  /* Otherwise, check all sub-maps for valid space */
+  else
+  {
+    int total_count = 0;
+
+    /* Parse subs to add count */
+    for(int i = 0; i < sub_maps.size(); i++)
+      total_count += sub_maps[i]->things.size();
+
+    /* Check space */
+    space = (total_count < EditorEnumDb::kMAX_COUNT_THINGS);
+  }
+
+  return space;
 }
 
 /*
@@ -5429,7 +5664,7 @@ int EditorMap::setSprite(EditorSprite* sprite)
  */
 int EditorMap::setThing(EditorMapThing* thing, int sub_map)
 {
-  if(thing != NULL && thing->getID() >= 0)
+  if(thing != nullptr && thing->getID() >= 0)
   {
     bool found = false;
     int index = -1;
@@ -6115,7 +6350,7 @@ void EditorMap::tilesThingAdd(bool update_all)
   /* Or just the active one */
   else
   {
-    if(active_submap != NULL)
+    if(active_submap != nullptr)
     {
       for(int i = 0; i < active_submap->things.size(); i++)
       {

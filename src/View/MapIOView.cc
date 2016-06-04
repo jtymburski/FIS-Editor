@@ -47,21 +47,35 @@ MapIOView::~MapIOView()
  *              press. The ID is the next available.
  *
  * Inputs: EditorMapIO* io - the new IO to add (ID not set yet)
- * Output: none
+ * Output: bool - true if added successfully
  */
-void MapIOView::addIO(EditorMapIO* io)
+bool MapIOView::addIO(EditorMapIO* io)
 {
-  if(editor_map != NULL)
+  if(editor_map != nullptr)
   {
-    /* Sets the id and puts the IO in the library */
-    io->setID(editor_map->getNextIOID());
-    io->setTileIcons(editor_map->getTileIcons());
-    int index = editor_map->setIO(io);
+    /* Try and get the ID */
+    int id = editor_map->getNextIOID();
+    if(id >= 0)
+    {
+      /* Sets the id and puts the IO in the library */
+      io->setID(id);
+      io->setTileIcons(editor_map->getTileIcons());
+      int index = editor_map->setIO(io);
 
-    /* Increments the id tracker and updates view */
-    updateList();
-    io_list->setCurrentRow(index);
+      /* Increments the id tracker and updates view */
+      updateList();
+      io_list->setCurrentRow(index);
+
+      return true;
+    }
+    else
+    {
+      delete io;
+      QMessageBox::information(this, "No Space Remaining",
+                      "The max limit of IO bases has been reached");
+    }
   }
+  return false;
 }
 
 /*
@@ -598,8 +612,8 @@ bool MapIOView::duplicateIO()
   if(selected != NULL)
   {
     EditorMapIO* new_io = new EditorMapIO(*selected);
-    addIO(new_io);
-    return true;
+    if(addIO(new_io))
+      return true;
   }
 
   return false;
@@ -659,8 +673,8 @@ void MapIOView::importIO()
 void MapIOView::newIO()
 {
   EditorMapIO* new_io = new EditorMapIO();
-  addIO(new_io);
-  editIO();
+  if(addIO(new_io))
+    editIO();
 }
 
 /*

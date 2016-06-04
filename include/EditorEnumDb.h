@@ -15,14 +15,20 @@ class EditorEnumDb
 public:
   /* ---- Constants ---- */
 
-  const static int kBASE_ID_IOS = 30000; /* The instant base ID for MapIOs */
-  const static int kBASE_ID_ITEMS = 40000; /* The instant base ID for items */
+  const static int kBASE_ID_IOS = 50000; /* The instant base ID for MapIOs */
+  const static int kBASE_ID_ITEMS = 60000; /* The instant base ID for items */
   const static int kBASE_ID_PERSON = 0; /* The instant base ID for persons */
   const static int kBASE_ID_NPC = 10000; /* The instant base ID for npcs */
   const static int kBASE_ID_THING = 20000; /* The base thing ID */
   const static int kEVENT_SET_VIEW_H = 186; /* Height of event set view */
   const static int kEVENT_VIEW_H = 360;//236; /* Height of event view widget */
   const static int kEVENT_VIEW_W = 352; /* Width of event view widget */
+  const static int kMAX_COUNT_BASES = 10000; /* Max count of base things */
+  const static int kMAX_COUNT_IOS = 10000; /* Max count of instance IOs */
+  const static int kMAX_COUNT_ITEMS = 5000; /* Max count of instance items */
+  const static int kMAX_COUNT_NPCS = 10000; /* Max count of instance npcs */
+  const static int kMAX_COUNT_PERSONS = 10000; /* Max count of inst persons */
+  const static int kMAX_COUNT_THINGS = 30000; /* Max count of inst things */
   const static int kMAX_PERSON_LVL = 127; /* The max level of a person */
 
   /* ---- Enumerations ---- */
@@ -66,7 +72,7 @@ public:
 
   /* Map interactive object type */
   enum MapIOType {IO_STATE, IO_TRANSITION};
-  
+
   /* Map object mode - map database */
   enum MapObjectMode {RAW_VIEW = 0,
                       SPRITE_VIEW = 1,
