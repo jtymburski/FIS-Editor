@@ -3246,7 +3246,7 @@ int EditorMap::getNextIOID(bool from_sub)
       qSort(id_list);
 
       /* Find the next available ID */
-      id = EditorEnumDb::kBASE_ID_IOS;
+      id = EnumDb::kBASE_ID_IOS;
       for(int i = 0; !found && (i < id_list.size()); i++)
       {
         if(id_list[i] != (id + i))
@@ -3309,7 +3309,7 @@ int EditorMap::getNextItemID(bool from_sub)
       qSort(id_list);
 
       /* Find the next available ID */
-      id = EditorEnumDb::kBASE_ID_ITEMS;
+      id = EnumDb::kBASE_ID_ITEMS;
       for(int i = 0; !found && (i < id_list.size()); i++)
       {
         if(id_list[i] != (id + i))
@@ -3369,7 +3369,7 @@ int EditorMap::getNextNPCID(bool from_sub)
   if(isSpaceForNPC(from_sub))
   {
     bool found = false;
-    int id = EditorEnumDb::kBASE_ID_NPC;
+    int id = EnumDb::kBASE_ID_NPC;
 
     /* If not from sub map, check base for base ID */
     if(!from_sub)
@@ -3462,7 +3462,7 @@ int EditorMap::getNextPersonID(bool from_sub)
       qSort(id_list);
 
       /* Find the next available ID */
-      id = EditorEnumDb::kBASE_ID_PERSON;
+      id = EnumDb::kBASE_ID_PERSON;
       for(int i = 0; !found && (i < id_list.size()); i++)
       {
         if(id_list[i] != (id + i))
@@ -3553,7 +3553,7 @@ int EditorMap::getNextThingID(bool from_sub)
       qSort(id_list);
 
       /* Find the next available ID */
-      id = EditorEnumDb::kBASE_ID_THING;
+      id = EnumDb::kBASE_ID_THING;
       for(int i = 0; !found && (i < id_list.size()); i++)
       {
         if(id_list[i] != (id + i))
@@ -4256,7 +4256,7 @@ bool EditorMap::isSpaceForIO(bool instance)
   /* If not from sub map, check base for for space */
   if(!instance)
   {
-    space = (base_ios.size() < EditorEnumDb::kMAX_COUNT_BASES);
+    space = (base_ios.size() < EnumDb::kMAX_COUNT_BASES);
   }
   /* Otherwise, check all sub-maps for valid space */
   else
@@ -4268,7 +4268,7 @@ bool EditorMap::isSpaceForIO(bool instance)
       total_count += sub_maps[i]->ios.size();
 
     /* Check space */
-    space = (total_count < EditorEnumDb::kMAX_COUNT_IOS);
+    space = (total_count < EnumDb::kMAX_COUNT_IOS);
   }
 
   return space;
@@ -4288,7 +4288,7 @@ bool EditorMap::isSpaceForItem(bool instance)
   /* If not from sub map, check base for for space */
   if(!instance)
   {
-    space = (base_items.size() < EditorEnumDb::kMAX_COUNT_BASES);
+    space = (base_items.size() < EnumDb::kMAX_COUNT_BASES);
   }
   /* Otherwise, check all sub-maps for valid space */
   else
@@ -4300,7 +4300,7 @@ bool EditorMap::isSpaceForItem(bool instance)
       total_count += sub_maps[i]->items.size();
 
     /* Check space */
-    space = (total_count < EditorEnumDb::kMAX_COUNT_ITEMS);
+    space = (total_count < EnumDb::kMAX_COUNT_ITEMS);
   }
 
   return space;
@@ -4320,7 +4320,7 @@ bool EditorMap::isSpaceForNPC(bool instance)
   /* If not from sub map, check base for for space */
   if(!instance)
   {
-    space = (base_npcs.size() < EditorEnumDb::kMAX_COUNT_BASES);
+    space = (base_npcs.size() < EnumDb::kMAX_COUNT_BASES);
   }
   /* Otherwise, check all sub-maps for valid space */
   else
@@ -4332,7 +4332,7 @@ bool EditorMap::isSpaceForNPC(bool instance)
       total_count += sub_maps[i]->npcs.size();
 
     /* Check space */
-    space = (total_count < EditorEnumDb::kMAX_COUNT_NPCS);
+    space = (total_count < EnumDb::kMAX_COUNT_NPCS);
   }
 
   return space;
@@ -4352,7 +4352,7 @@ bool EditorMap::isSpaceForPerson(bool instance)
   /* If not from sub map, check base for for space */
   if(!instance)
   {
-    space = (base_persons.size() < EditorEnumDb::kMAX_COUNT_BASES);
+    space = (base_persons.size() < EnumDb::kMAX_COUNT_BASES);
   }
   /* Otherwise, check all sub-maps for valid space */
   else
@@ -4364,7 +4364,7 @@ bool EditorMap::isSpaceForPerson(bool instance)
       total_count += sub_maps[i]->persons.size();
 
     /* Check space */
-    space = (total_count < EditorEnumDb::kMAX_COUNT_PERSONS);
+    space = (total_count < EnumDb::kMAX_COUNT_PERSONS);
   }
 
   return space;
@@ -4384,7 +4384,7 @@ bool EditorMap::isSpaceForThing(bool instance)
   /* If not from sub map, check base for for space */
   if(!instance)
   {
-    space = (base_things.size() < EditorEnumDb::kMAX_COUNT_BASES);
+    space = (base_things.size() < EnumDb::kMAX_COUNT_BASES);
   }
   /* Otherwise, check all sub-maps for valid space */
   else
@@ -4396,7 +4396,7 @@ bool EditorMap::isSpaceForThing(bool instance)
       total_count += sub_maps[i]->things.size();
 
     /* Check space */
-    space = (total_count < EditorEnumDb::kMAX_COUNT_THINGS);
+    space = (total_count < EnumDb::kMAX_COUNT_THINGS);
   }
 
   return space;
