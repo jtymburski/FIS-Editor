@@ -62,8 +62,11 @@ private:
   QComboBox* combo_algorithm;
   QComboBox* combo_dir;
   QComboBox* combo_party;
+  QComboBox* combo_sound;
   QComboBox* combo_states;
   QComboBox* combo_tracking;
+  QComboBox* combo_visible;
+  QComboBox* combo_walkover;
 
   /* Description text box */
   QTextEdit* edit_description;

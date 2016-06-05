@@ -239,7 +239,7 @@ void MapItemView::updateInfo()
     {
       /* Set the labels */
       lbl_id->setText("ID: " + QString::number(item->getID()));
-      lbl_name->setText("Name: " + item->getName());
+      lbl_name->setText(item->getName());
 
       /* If matrix is valid, set the image */
       if(item->getMatrix() != NULL)
@@ -248,10 +248,17 @@ void MapItemView::updateInfo()
       }
 
       /* Walkover info */
-      if(item->isWalkover())
-        lbl_walkover->setText("Walkover: TRUE");
-      else
-        lbl_walkover->setText("Walkover: FALSE");
+      QString desc = item->getDescription();
+      if(desc.length() > 50)
+      {
+        desc.chop(desc.length() - 47);
+        desc += "...";
+      }
+      lbl_walkover->setText(desc);
+      //if(item->isWalkover())
+      //  lbl_walkover->setText("Walkover: TRUE");
+      //else
+      //  lbl_walkover->setText("Walkover: FALSE");
     }
   }
 }
@@ -399,7 +406,7 @@ void MapItemView::instanceDoubleClicked(QListWidgetItem*)
  */
 void MapItemView::instanceRowChanged(int index, bool lock_viewport)
 {
-  if(index >= 0 && editor_map != NULL)
+  if(index >= 0 && editor_map != nullptr)
   {
     /* Set the hover item in the class */
     int id = MapThingView::getInstanceID(item_instances->currentItem()->text());
@@ -407,14 +414,14 @@ void MapItemView::instanceRowChanged(int index, bool lock_viewport)
     {
       EditorMapItem* item = editor_map->getItem(id, 
                                                editor_map->getCurrentMap()->id);
-      if(item != NULL)
+      if(item != nullptr)
       {
         if(!lock_viewport)
           emit ensureVisible(editor_map->getCurrentMap()->tiles[item->getX()]
                                                                [item->getY()]);
 
         /* Select the base in the list */
-        if(item->getBaseItem() != NULL)
+        if(item->getBaseItem() != nullptr)
         {
           /* Get index and block signals */
           int index = editor_map->getItemIndex(item->getBaseItem()->getID());
@@ -470,8 +477,9 @@ void MapItemView::itemInstanceUpdate(QString name_list)
     {
       for(int i = 0; i < editor_map->getItemCount(sub_index); i++)
       {
-        item_instances->addItem(
-                       editor_map->getItemByIndex(i, sub_index)->getNameList());
+        EditorMapItem* item = editor_map->getItemByIndex(i, sub_index);
+        item_instances->addItem(item->getNameList() + " x " +
+                                QString::number(item->getCount()));
       }
       item_instances->sortItems();
     }
@@ -485,7 +493,7 @@ void MapItemView::itemInstanceUpdate(QString name_list)
   {
     for(int i = 0; i < item_instances->count(); i++)
     {
-      if(item_instances->item(i)->text() == name_list)
+      if(item_instances->item(i)->text().startsWith(name_list))
       {
         item_instances->setCurrentRow(i);
         instanceRowChanged(i, true);
@@ -681,6 +689,8 @@ void MapItemView::setEditorMap(EditorMap* map)
   /* If existing editor map is not NULL, undo */
   if(editor_map != NULL)
   {
+    disconnect(editor_map, SIGNAL(itemBasesChanged()),
+               this, SLOT(updateList()));
     disconnect(editor_map, SIGNAL(itemInstanceChanged(QString)),
                this, SLOT(itemInstanceUpdate(QString)));
   }
@@ -690,6 +700,8 @@ void MapItemView::setEditorMap(EditorMap* map)
   /* If new map is not NULL, reconnect */
   if(editor_map != NULL)
   {
+    connect(editor_map, SIGNAL(itemBasesChanged()),
+            this, SLOT(updateList()));
     connect(editor_map, SIGNAL(itemInstanceChanged(QString)),
             this, SLOT(itemInstanceUpdate(QString)));
   }

@@ -167,7 +167,7 @@ protected:
 signals:
   void changeAction(EditorAction* action);
   void changeBattleclass(EditorCategory* battle_class);
-  void changeBattleScene(EditorBattleScene* scene, bool save); // TODO
+  void changeBattleScene(EditorBattleScene* scene, bool save);
   void changeBubby(EditorBubby* bubby);
   void changeEquipment(EditorEquipment* equipment);
   void changeItem(EditorItem* item);
@@ -205,6 +205,10 @@ public slots:
 
   /* Imports a resource */
   void importResource();
+
+  /* Data change trigger for the editing item */
+  void itemDataChange(int id = -1);
+  void itemDataChange(ItemData);
 
   /* Right click list menu on bottom list */
   void listMenuRequested(const QPoint & pos);

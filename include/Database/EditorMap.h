@@ -191,6 +191,9 @@ signals:
   /* IO instant changed */
   void ioInstanceChanged(QString name_list);
 
+  /* Item base changed */
+  void itemBasesChanged();
+
   /* Item instant changed */
   void itemInstanceChanged(QString name_list);
 
@@ -396,6 +399,9 @@ public:
 
   /* Sets a item in the map */
   int setItem(EditorMapItem* item, int sub_map = -1);
+
+  /* Correlates the set of core item data with the map base items */
+  bool setItems(QList<ItemData> items, bool delete_invalid = true);
 
   /* Sets a map, based on ID */
   int setMap(int id, QString name, QVector<QVector<EditorTile*>> tiles,

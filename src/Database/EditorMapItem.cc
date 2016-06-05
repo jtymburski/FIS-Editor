@@ -221,6 +221,25 @@ void EditorMapItem::setCount(uint32_t count)
 }
 
 /*
+ * Description: Correlates the core data with this base item. Fails if the ID
+ *              does not match.
+ *
+ * Inputs: ItemData data - the data to sync
+ * Output: bool - true if successful
+ */
+bool EditorMapItem::setData(ItemData data)
+{
+  if(getBaseItem() == nullptr && data.id == getID())
+  {
+    getMatrix()->addPath(QString::fromStdString(data.frame_path), 0, 0);
+    setDescription(QString::fromStdString(data.description));
+    setName(QString::fromStdString(data.name));
+    return true;
+  }
+  return false;
+}
+
+/*
  * Description: Sets if the map item is picked up by walking over it. If false
  *              it requires that the action key is pressed prior to picking up.
  *

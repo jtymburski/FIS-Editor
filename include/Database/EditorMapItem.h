@@ -77,6 +77,9 @@ public:
   /* Sets the number of this item */
   void setCount(uint32_t count);
 
+  /* Correlates this data to the item struct */
+  bool setData(ItemData data);
+
   /* Sets if the item is picked up by merely walking over it */
   void setWalkover(bool walkover);
 

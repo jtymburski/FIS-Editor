@@ -191,6 +191,7 @@ void InstanceDialog::createLayout()
   /* The item count widget - for item things only */
   else
   {
+    /* Count */
     QLabel* lbl_count = new QLabel("Count", this);
     layout->addWidget(lbl_count, 2, 0);
     spin_count = new QSpinBox(this);
@@ -199,6 +200,16 @@ void InstanceDialog::createLayout()
     connect(spin_count, SIGNAL(valueChanged(int)),
             this, SLOT(countChanged(int)));
     layout->addWidget(spin_count, 2, 1, 1, 1);
+
+    /* Walkover */ // TODO: Integrate
+    QLabel* lbl_walkover = new QLabel("Walkover", this);
+    layout->addWidget(lbl_walkover, 3, 0);
+    combo_walkover = new QComboBox(this);
+    combo_walkover->addItem("False");
+    combo_walkover->addItem("True");
+    //connect(combo_walkover, SIGNAL(currentIndexChanged(int)),
+    //        this, SLOT(walkoverChanged(int)));
+    layout->addWidget(combo_walkover, 3, 1, 1, 1);
   }
 
   /* Active enable widget */
@@ -265,6 +276,26 @@ void InstanceDialog::createLayout()
     connect(combo_dir, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(comboDirectionChange(QString)));
     layout->addWidget(combo_dir, 8, 1, 1, 2);
+  }
+  else if(thing_type == EditorEnumDb::ITEM)
+  {
+    /* The visibility widget */ // TODO: Integrate
+    QLabel* lbl_visible = new QLabel("Visible", this);
+    layout->addWidget(lbl_visible, 7, 0);
+    combo_visible = new QComboBox(this);
+    combo_visible->addItem("False");
+    combo_visible->addItem("True");
+    //connect(combo_visible, SIGNAL(currentIndexChanged(int)),
+    //        this, SLOT(visibilityChanged(int)));
+    layout->addWidget(combo_visible, 7, 1, 1, 1);
+
+    /* The sound widget */ // TODO: Integrate
+    QLabel* lbl_sound = new QLabel("Sound", this);
+    layout->addWidget(lbl_sound, 8, 0);
+    combo_sound = new QComboBox(this);
+    //connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+    //        this, SLOT(changedSound(QString)));
+    layout->addWidget(combo_sound, 8, 1, 1, 3);
   }
 
   /* Events that are relevant if not IO */

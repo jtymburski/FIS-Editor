@@ -139,17 +139,8 @@ EditorNPCPath* EditorMapNPC::getPath()
  */
 void EditorMapNPC::load(XmlData data, int index)
 {
-  QString element = QString::fromStdString(data.getElement(index));
-
-  /* Parse path elements */
-  if(element == "nodestate" || element == "tracking" ||
-     element == "forcedinteraction" || element == "node" ||
-     element == "startnode")
-  {
-    path.load(data, index);
-  }
-  /* Otherwise, send to person for remaining elements */
-  else
+  /* Check for path items - if not, send to person */
+  if(!path.load(data, index))
   {
     EditorMapPerson::load(data, index);
   }

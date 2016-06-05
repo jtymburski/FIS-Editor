@@ -26,7 +26,7 @@ public:
 
 private:
   /* The core item selection box */
-  QComboBox* box_core;
+  //QComboBox* box_core;
 
   /* The visible control box */
   QComboBox* box_visible;

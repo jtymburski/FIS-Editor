@@ -25,19 +25,19 @@
 ItemDialog:: ItemDialog(EditorMapItem* edit_item, QWidget* parent)
           : QDialog(parent)
 {
-  frame_dialog = NULL;
+  frame_dialog = nullptr;
 
   /* Set-up the item set - copied to working for changes */
   item_original = edit_item;
   item_working = new EditorMapItem();
-  if(item_original != NULL)
+  if(item_original != nullptr)
     *item_working = *item_original;
 
   /* Layout setup */
-  createLayout(edit_item->getBaseItem() != NULL);
-  box_core->blockSignals(true);
+  createLayout(edit_item->getBaseItem() != nullptr);
+  //box_core->blockSignals(true);
   updateData();
-  box_core->blockSignals(false);
+  //box_core->blockSignals(false);
   //updateFrame();
 }
 
@@ -46,12 +46,12 @@ ItemDialog:: ItemDialog(EditorMapItem* edit_item, QWidget* parent)
  */
 ItemDialog::~ItemDialog()
 {
-  item_original = NULL;
+  item_original = nullptr;
 
   /* Delete working thing */
-  if(item_working != NULL)
+  if(item_working != nullptr)
     delete item_working;
-  item_working = NULL;
+  item_working = nullptr;
 }
 
 /*============================================================================
@@ -116,14 +116,14 @@ void ItemDialog::createLayout(bool instance)
           this, SLOT(changedSound(QString)));
   layout->addWidget(combo_sound, 4, 1, 1, 6);
 
-  /* Core ID */
-  QLabel* lbl_core = new QLabel("Game Item:", this);
-  layout->addWidget(lbl_core, 0, 4, 1, 1);
-  box_core = new QComboBox(this);
-  box_core->addItem("None");
-  connect(box_core, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(coreItemChanged(int)));
-  layout->addWidget(box_core, 0, 5, 1, 3);
+  /* Core ID - not required for new additions - remove future? */
+  //QLabel* lbl_core = new QLabel("Game Item:", this);
+  //layout->addWidget(lbl_core, 0, 4, 1, 1);
+  //box_core = new QComboBox(this);
+  //box_core->addItem("None");
+  //connect(box_core, SIGNAL(currentIndexChanged(int)),
+  //        this, SLOT(coreItemChanged(int)));
+  //layout->addWidget(box_core, 0, 5, 1, 3);
 
   /* Walkover item */
   QLabel* lbl_walkover = new QLabel("Walkover:", this);
@@ -143,16 +143,26 @@ void ItemDialog::createLayout(bool instance)
 
   /* The button control */
   layout->setRowMinimumHeight(8, 15);
-  QPushButton* btn_ok = new QPushButton("Ok", this);
-  btn_ok->setDefault(true);
-  connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
-  layout->addWidget(btn_ok, 9, 6);
-  QPushButton* btn_cancel = new QPushButton("Cancel", this);
+  //QPushButton* btn_ok = new QPushButton("Ok", this);
+  //btn_ok->setDefault(true);
+  //connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
+  //layout->addWidget(btn_ok, 9, 6);
+  QPushButton* btn_cancel = new QPushButton("Close", this);
+  btn_cancel->setDefault(true);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
   layout->addWidget(btn_cancel, 9, 7);
 
   /* Dialog control */
-  setWindowTitle("Item Edit");
+  setWindowTitle("Item View");
+
+  /* Disable calls - added in association with the core item to map item
+   * connection */
+  box_visible->setDisabled(true);
+  box_walkover->setDisabled(true);
+  combo_sound->setDisabled(true);
+  line_description->setDisabled(true);
+  line_name->setDisabled(true);
+  matrix_view->setDisabled(true);
 }
 
 /*
@@ -180,16 +190,16 @@ void ItemDialog::updateData()
   else
     box_walkover->setCurrentIndex(0);
 
-  /* Game Item */
-  box_core->blockSignals(true);
-  box_core->setCurrentIndex(0);
-  for(int i = 0; i < list_items.size(); i++)
-  {
-    int id = list_items[i].split(":").front().toInt();
-    if(id == item_working->getGameID())
-      box_core->setCurrentIndex(i + 1);
-  }
-  box_core->blockSignals(false);
+  /* Game Item - not required for new system - future remove? */
+  //box_core->blockSignals(true);
+  //box_core->setCurrentIndex(0);
+  //for(int i = 0; i < list_items.size(); i++)
+  //{
+  //  int id = list_items[i].split(":").front().toInt();
+  //  if(id == item_working->getGameID())
+  //    box_core->setCurrentIndex(i + 1);
+  //}
+  //box_core->blockSignals(false);
 
   /* Sound data - find index */
   int index = -1;
@@ -349,12 +359,14 @@ void ItemDialog::changedSound(const QString &text)
  * Inputs: int index - the index in the list
  * Output: none
  */
+// TODO: Remove? Future - not required for new system
 void ItemDialog::coreItemChanged(int index)
 {
-  if(index > 0)
-    item_working->setGameID(box_core->currentText().split(":").front().toInt());
-  else
-    item_working->setGameID(-1);
+  (void)index;
+  //if(index > 0)
+  //item_working->setGameID(box_core->currentText().split(":").front().toInt());
+  //else
+  //item_working->setGameID(-1);
 }
 
 /*
@@ -406,12 +418,12 @@ QList<QString> ItemDialog::getListSounds()
 void ItemDialog::setListItems(QList<QString> items)
 {
   list_items = items;
-  box_core->blockSignals(true);
-  box_core->clear();
-  box_core->addItem("None");
-  box_core->addItems(list_items);
-  updateData();
-  box_core->blockSignals(false);
+  //box_core->blockSignals(true);
+  //box_core->clear();
+  //box_core->addItem("None");
+  //box_core->addItems(list_items);
+  //updateData();
+  //box_core->blockSignals(false);
 }
 
 /*

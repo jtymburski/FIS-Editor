@@ -1419,9 +1419,9 @@ bool EditorNPCPath::isVisibleEdit()
  *
  * Inputs: XmlData data - the XML data tree struct
  *         int index - the offset index into the struct
- * Output: none
+ * Output: bool - returns true if category found
  */
-void EditorNPCPath::load(XmlData data, int index)
+bool EditorNPCPath::load(XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
   std::vector<std::string> elements = data.getTailElements(index);
@@ -1521,6 +1521,11 @@ void EditorNPCPath::load(XmlData data, int index)
   {
     setForcedInteraction(data.getDataBool());
   }
+  else
+  {
+    return false;
+  }
+  return true;
 }
 
 /*

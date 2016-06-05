@@ -218,6 +218,10 @@ void GameDatabase::addItem(EditorItem* item)
   /* If not inserted, insert at tail */
   if(!inserted)
     data_item.push_back(item);
+
+  connect(item, SIGNAL(dataChange(ItemData)),
+          this, SLOT(itemDataChange(ItemData)));
+  //itemDataChange();
 }
 
 /* Add object in the correct spot in the array */
@@ -1179,6 +1183,7 @@ void GameDatabase::loadFinish()
     data_item[i]->updateSkills(data_skill);
     data_item[i]->resetWorking();
   }
+  itemDataChange();
 
   /* Persons finish */
   for(int i = 0; i < data_person.size(); i++)
@@ -1274,6 +1279,7 @@ void GameDatabase::createNewMap()
                                        width, height, &tile_icons));
     else
       data_map.push_back(new EditorMap(0, name, width, height, &tile_icons));
+    itemDataChange(data_map.last()->getID());
   }
 
   /* Finally, close the dialog */
@@ -1333,6 +1339,9 @@ void GameDatabase::createNewResource()
       else
         data_item.push_back(new EditorItem(0, name));
       data_item.last()->updateSkills(data_skill);
+      connect(data_item.last(), SIGNAL(dataChange(ItemData)),
+              this, SLOT(itemDataChange(ItemData)));
+      itemDataChange();
       updateParties();
       updatePersons();
       break;
@@ -1450,7 +1459,11 @@ void GameDatabase::deleteResource()
       /* Create warning about deleting */
       QMessageBox msg_box;
       msg_box.setText("Deleting \"" + name + "\" from " + category + ".");
-      msg_box.setInformativeText("Are you sure?");
+      if(view_top->currentRow() == EditorEnumDb::ITEMVIEW)
+        msg_box.setInformativeText(
+              "This will also delete ALL connected map items. Are you sure?");
+      else
+        msg_box.setInformativeText("Are you sure?");
       msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
       if(msg_box.exec() == QMessageBox::Yes)
       {
@@ -1461,8 +1474,8 @@ void GameDatabase::deleteResource()
           case EditorEnumDb::MAPVIEW:
             if(data_map[index] == current_map)
             {
-              emit changeMap(NULL);
-              current_map = NULL;
+              emit changeMap(nullptr);
+              current_map = nullptr;
             }
             delete data_map[index];
             data_map.remove(index);
@@ -1488,6 +1501,7 @@ void GameDatabase::deleteResource()
               changeItem(-1, true);
             delete data_item[index];
             data_item.remove(index);
+            itemDataChange();
             updateParties();
             updatePersons();
             break;
@@ -1687,6 +1701,40 @@ void GameDatabase::importResource()
   // TODO: Future
   QMessageBox::information(this, "Notification",
                            "Coming soon to a production near you!");
+}
+
+/* Data change trigger for the editing item */
+void GameDatabase::itemDataChange(int id)
+{
+  /* Get the item data */
+  QList<ItemData> data_set;
+  for(int i = 0; i < data_item.size(); i++)
+    data_set.push_back(data_item[i]->getData());
+
+  /* Send to map based on ID */
+  if(id >= 0)
+  {
+    for(int i = 0; i < data_map.size(); i++)
+      if(data_map[i]->getID() == id)
+        data_map[i]->setItems(data_set);
+  }
+  /* Send to all maps */
+  else
+  {
+    for(int i = 0; i < data_map.size(); i++)
+      data_map[i]->setItems(data_set);
+  }
+}
+
+/* Data change trigger for the editing item */
+void GameDatabase::itemDataChange(ItemData data)
+{
+  QList<ItemData> data_set;
+  data_set.push_back(data);
+
+  /* Go through maps and set data */
+  for(int i = 0; i < data_map.size(); i++)
+    data_map[i]->setItems(data_set, false);
 }
 
 /* Right click list menu on bottom list */
@@ -1972,7 +2020,7 @@ void GameDatabase::updateSoundObjects()
 void GameDatabase::createStartObjects()
 {
   addSkillSet(new EditorSkillset(SkillSet::kID_BUBBIFIED, "Bubbified Skills"));
-  addItem(new EditorItem(Item::kID_MONEY, "Money"));
+  addItem(new EditorItem(Item::kID_MONEY, "Credits"));
   addPerson(new EditorPerson(Person::kID_PLAYER, "Player"));
   addParty(new EditorParty(Party::kID_SLEUTH, "Player Sleuth"));
   addParty(new EditorParty(Party::kID_BEARACKS, "Player Bearacks"));
@@ -2119,6 +2167,7 @@ void GameDatabase::load(FileHandler* fh, QProgressDialog* dialog)
   {
     XmlData data;
     bool done = false;
+    bool first_map = true;
     bool read_success = true;
     bool success = true;
 
@@ -2171,6 +2220,14 @@ void GameDatabase::load(FileHandler* fh, QProgressDialog* dialog)
           int map_id = QString::fromStdString(data.getKeyValue(1)).toInt();
           int map_index = -1;
 
+          /* If first map call, clean up items for use in map side */
+          if(first_map)
+          {
+            for(int i = 0; i < data_item.size(); i++)
+              data_item[i]->resetWorking();
+            first_map = false;
+          }
+
           /* Try and find map index */
           for(int i = 0; i < data_map.size(); i++)
             if(data_map[i]->getID() == map_id)
@@ -2181,6 +2238,7 @@ void GameDatabase::load(FileHandler* fh, QProgressDialog* dialog)
           {
             data_map.push_back(new EditorMap(map_id, "TEMP", 0, 0,&tile_icons));
             map_index = data_map.size() - 1;
+            itemDataChange(map_id);
           }
 
           /* Pass the XML data to the map */

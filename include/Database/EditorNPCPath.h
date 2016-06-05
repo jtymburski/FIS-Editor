@@ -212,7 +212,7 @@ public:
   bool isVisibleEdit();
 
   /* Loads the path data */
-  void load(XmlData data, int index);
+  bool load(XmlData data, int index);
 
   /* Painting function for Path Wrapper - virtual */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem*,

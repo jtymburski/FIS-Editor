@@ -740,6 +740,12 @@ void MapDatabase::updateSelected(int index)
     view_music->hide();
     view_battlescene->hide();
     view_lays->hide();
+
+    /* Item view has no buttons enabled */
+    button_delete->setEnabled(false);
+    button_duplicate->setEnabled(false);
+    button_import->setEnabled(false);
+    button_new->setEnabled(false);
   }
   else if(index == EditorEnumDb::PERSON_VIEW)
   {

@@ -149,6 +149,9 @@ protected:
  * SIGNALS
  *===========================================================================*/
 signals:
+  /* Data change trigger within the widget signal */
+  void dataChange(ItemData);
+
   /* Name changed within item widget signal */
   void nameChange(QString);
 
@@ -190,6 +193,9 @@ public slots:
  * PUBLIC FUNCTIONS
  *===========================================================================*/
 public:
+  /* Returns the associated critical data for the item */
+  ItemData getData();
+
   /* Returns the ID of the item */
   virtual int getID() const;
 

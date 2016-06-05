@@ -275,7 +275,7 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map,
   int h = person->getMatrix()->getHeight();
 
   /* Ensure map isn't null. If not set, use active sub-map */
-  if(map == NULL)
+  if(map == nullptr)
     map = active_submap;
 
   /* Check if person can be placed */
@@ -294,8 +294,8 @@ bool EditorMap::addPerson(EditorMapPerson* person, SubMapInfo* map,
         {
           int depth = person->getMatrix()->getRenderDepth(i, j);
 
-          if(map->tiles[x+i][y+j]->getPerson(depth) != NULL ||
-             map->tiles[x+i][y+j]->getNPC(depth) != NULL)
+          if(map->tiles[x+i][y+j]->getPerson(depth) != nullptr ||
+             map->tiles[x+i][y+j]->getNPC(depth) != nullptr)
             valid = false;
         }
       }
@@ -355,7 +355,7 @@ bool EditorMap::addThing(EditorMapThing* thing, SubMapInfo* map, bool existing)
       for(int j = 0; j < h; j++)
         if(!thing->isAllNull(i, j))
           if(map->tiles[x+i][y+j]->getThing(
-                          thing->getMatrix()->getRenderDepth(i, j)) != NULL)
+                          thing->getMatrix()->getRenderDepth(i, j)) != nullptr)
             valid = false;
   }
 
@@ -552,7 +552,7 @@ void EditorMap::copySelf(const EditorMap &source)
     sub_maps.push_back(new SubMapInfo);
     sub_maps.last()->id = source.sub_maps[i]->id;
     sub_maps.last()->name = source.sub_maps[i]->name;
-    sub_maps.last()->path_top = NULL;
+    sub_maps.last()->path_top = nullptr;
     sub_maps.last()->lays_over = source.sub_maps[i]->lays_over;
     sub_maps.last()->lays_under = source.sub_maps[i]->lays_under;
     sub_maps.last()->battle_scenes = source.sub_maps[i]->battle_scenes;
@@ -889,7 +889,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
       /* Set the base */
       EditorMapThing* base_thing = getThing(data.getDataInteger());
-      if(base_thing != NULL)
+      if(base_thing != nullptr)
       {
         thing->setBase(base_thing);
         if(default_name != "")
@@ -949,7 +949,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
       /* Set the base */
       EditorMapIO* base_io = getIO(data.getDataInteger());
-      if(base_io != NULL)
+      if(base_io != nullptr)
       {
         io->setBase(base_io);
         if(default_name != "")
@@ -970,7 +970,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     EditorMapItem* item = getItem(item_id, map->id);
 
     /* Create new item if it doesn't exist */
-    if(item == NULL)
+    if(item == nullptr)
     {
       item = new EditorMapItem(item_id);
       item->setTileIcons(getTileIcons());
@@ -1009,7 +1009,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
       /* Set the base */
       EditorMapItem* base_item = getItem(data.getDataInteger());
-      if(base_item != NULL)
+      if(base_item != nullptr)
       {
         item->setBase(base_item);
         if(default_name != "")
@@ -1030,7 +1030,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     EditorMapPerson* person = getPerson(person_id, map->id);
 
     /* Create new person if it doesn't exist */
-    if(person == NULL)
+    if(person == nullptr)
     {
       person = new EditorMapPerson(person_id);
       person->setTileIcons(getTileIcons());
@@ -1069,7 +1069,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
       /* Set the base */
       EditorMapPerson* base_person = getPerson(data.getDataInteger());
-      if(base_person != NULL)
+      if(base_person != nullptr)
       {
         person->setBase(base_person);
         if(default_name != "")
@@ -1090,7 +1090,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
     EditorMapNPC* npc = getNPC(npc_id, map->id);
 
     /* Create new npc if it doesn't exist */
-    if(npc == NULL)
+    if(npc == nullptr)
     {
       npc = new EditorMapNPC(npc_id);
       npc->setTileIcons(getTileIcons());
@@ -1129,7 +1129,7 @@ void EditorMap::loadSubMap(SubMapInfo* map, XmlData data, int index)
 
       /* Set the base */
       EditorMapNPC* base_npc = getNPC(data.getDataInteger());
-      if(base_npc != NULL)
+      if(base_npc != nullptr)
       {
         npc->setBase(base_npc);
         if(default_name != "")
@@ -4470,22 +4470,23 @@ void EditorMap::load(XmlData data, int index)
     /* Continue to parse the data in the IO */
     io->load(data, index + 1);
   }
-  else if(data.getElement(index) == "mapitem" && data.getKey(index) == "id")
-  {
-    int item_id = QString::fromStdString(data.getKeyValue(index)).toInt();
-    EditorMapItem* item = getItem(item_id);
-
-    /* Create new item if it doesn't exist */
-    if(item == NULL)
-    {
-      item = new EditorMapItem(item_id);
-      item->setTileIcons(getTileIcons());
-      setItem(item);
-    }
-
-    /* Continue to parse the data in the item */
-    item->load(data, index + 1);
-  }
+  // Note: removed for new bases controlled by core group - delete future?
+  //else if(data.getElement(index) == "mapitem" && data.getKey(index) == "id")
+  //{
+  //  int item_id = QString::fromStdString(data.getKeyValue(index)).toInt();
+  //  EditorMapItem* item = getItem(item_id);
+  //
+  //  /* Create new item if it doesn't exist */
+  //  if(item == NULL)
+  //  {
+  //    item = new EditorMapItem(item_id);
+  //    item->setTileIcons(getTileIcons());
+  //    setItem(item);
+  //  }
+  //
+  //  /* Continue to parse the data in the item */
+  //  item->load(data, index + 1);
+  //}
   else if(data.getElement(index) == "mapperson" && data.getKey(index) == "id")
   {
     int person_id = QString::fromStdString(data.getKeyValue(index)).toInt();
@@ -4600,12 +4601,13 @@ void EditorMap::save(FileHandler* fh, QProgressDialog* save_dialog,
       save_dialog->setValue(save_dialog->value()+1);
     }
 
-    /* Add items */
-    for(int i = 0; i < base_items.size(); i++)
-    {
-      base_items[i]->save(fh, game_only);
-      save_dialog->setValue(save_dialog->value()+1);
-    }
+    // Note: removed for new bases controlled by core group - delete future?
+    // /* Add items */
+    //for(int i = 0; i < base_items.size(); i++)
+    //{
+    //  base_items[i]->save(fh, game_only);
+    //  save_dialog->setValue(save_dialog->value()+1);
+    //}
 
     /* Add persons */
     for(int i = 0; i < base_persons.size(); i++)
@@ -5256,6 +5258,59 @@ int EditorMap::setItem(EditorMapItem* item, int sub_map)
     return index;
   }
   return -1;
+}
+
+/*
+ * Description: Correlates the set of core item data with the map base items.
+ *              This will create and delete as required (forewarned)
+ *
+ * Inputs: QList<ItemData> items - the key information for base items
+ *         bool delete_invalid - true to delete unfound invalid items
+ * Output: bool - true if successful
+ */
+bool EditorMap::setItems(QList<ItemData> items, bool delete_invalid)
+{
+  /* Create the correlation array */
+  QList<bool> item_used;
+  for(int i = 0; i < items.size(); i++)
+    item_used.push_back(false);
+
+  /* Check each item against the existing base items */
+  for(int i = 0; i < base_items.size(); i++)
+  {
+    bool found = false;
+
+    for(int j = 0; !found && (j < items.size()); j++)
+    {
+      if(!item_used[j] && base_items[i]->getID() == items[j].id)
+      {
+        base_items[i]->setData(items[j]);
+        item_used[j] = true;
+        found = true;
+      }
+    }
+
+    /* If not found, delete */
+    if(!found && delete_invalid)
+    {
+      unsetItemByIndex(i);
+      i--;
+    }
+  }
+
+  /* Add in all items not found */
+  for(int i = 0; i < items.size(); i++)
+  {
+    if(!item_used[i])
+    {
+      EditorMapItem* new_item = new EditorMapItem(items[i].id);
+      new_item->setData(items[i]);
+      base_items.push_back(new_item);
+    }
+  }
+
+  emit itemBasesChanged();
+  return true;
 }
 
 /*

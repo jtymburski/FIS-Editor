@@ -22,8 +22,8 @@ const int EditorItem::kMAX_PRESETS = 6;
  */
 EditorItem::EditorItem(QWidget *parent) : QWidget(parent)
 {
-  dialog_anim = NULL;
-  dialog_thumb = NULL;
+  dialog_anim = nullptr;
+  dialog_thumb = nullptr;
   id = 0;
   is_protected = false;
   skill_id = -1;
@@ -1034,6 +1034,25 @@ void EditorItem::updateThumb()
  *===========================================================================*/
 
 /*
+ * Description: Returns the associated structural critical data for the item.
+ *              This is used elsewhere for control and coordination purposes.
+ *
+ * Inputs: none
+ * Output: ItemData - the struct of data about the item
+ */
+ItemData EditorItem::getData()
+{
+  ItemData data;
+
+  data.id = getID();
+  data.description = item_curr.getBriefDescription();
+  data.frame_path = sprite_thumb.getPath(0).toStdString();
+  data.name = item_curr.getName();
+
+  return data;
+}
+
+/*
  * Description: Returns the ID of the item
  *
  * Inputs: none
@@ -1086,6 +1105,9 @@ QString EditorItem::getNameList()
  */
 void EditorItem::load(XmlData data, int index)
 {
+  //bool data_change = false;
+
+  /* Parse the load data */
   if(data.getElement(index) == "skill")
   {
     skill_id_base = data.getDataInteger();
@@ -1094,6 +1116,7 @@ void EditorItem::load(XmlData data, int index)
   {
     sprite_thumb_base.setFramePath(0, EditorHelpers::getProjectDir() + "/" +
                                   QString::fromStdString(data.getDataString()));
+    //data_change = true;
   }
   else if(data.getElement(index) == "animation")
   {
@@ -1103,7 +1126,16 @@ void EditorItem::load(XmlData data, int index)
   {
     item_base.loadData(data, index, NULL,
                        EditorHelpers::getProjectDir().toStdString() + "/");
+    //if(data.getElement(index) == "name" ||
+    //   data.getElement(index) == "brief_desc")
+    //{
+    //  data_change = true;
+    //}
   }
+
+  /* If the data changes, emit signal */
+  //if(data_change)
+  //  emit dataChange(getData());
 }
 
 /*
@@ -1301,6 +1333,14 @@ void EditorItem::saveWorking()
   buttonAnimEdit(true);
   buttonThumbEdit(true);
 
+  /* Check data differential */
+  bool descrip_diff = (item_base.getBriefDescription() !=
+                       item_curr.getBriefDescription());
+  bool name_diff = (item_base.getName() != item_curr.getName());
+  bool path_diff = (sprite_thumb_base.getPath(0) != sprite_thumb.getPath(0));
+  if(name_diff)
+    emit nameChange(QString::fromStdString(item_curr.getName()));
+
   /* Save the data */
   if(item_base.getName() != item_curr.getName())
     emit nameChange(QString::fromStdString(item_curr.getName()));
@@ -1308,6 +1348,10 @@ void EditorItem::saveWorking()
   sprite_anim_base = sprite_anim;
   sprite_thumb_base = sprite_thumb;
   skill_id_base = skill_id;
+
+  /* Update the map connected data */
+  if(descrip_diff || name_diff || path_diff)
+    emit dataChange(getData());
 }
 
 /*
