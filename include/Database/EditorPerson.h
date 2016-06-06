@@ -37,8 +37,8 @@ private:
   QGroupBox* box_flags;
 
   /* Button Widgets */
-  QPushButton* btn_item_add;
-  QPushButton* btn_item_rem;
+  //QPushButton* btn_item_add;
+  //QPushButton* btn_item_rem;
 
   /* Check Box Widgets */
   QCheckBox* chk_change_equip;
@@ -80,8 +80,8 @@ private:
   QLabel* lbl_tp_img;
 
   /* List Widgets */
-  QListWidget* list_items_all;
-  QListWidget* list_items_used;
+  //QListWidget* list_items_all;
+  //QListWidget* list_items_used;
 
   /* The reference person for data */
   Person person_base;
@@ -95,7 +95,7 @@ private:
   /* Spin Box Widgets */
   QSpinBox* spin_actionx;
   QSpinBox* spin_actiony;
-  QSpinBox* spin_credits;
+  //QSpinBox* spin_credits;
   QSpinBox* spin_xp;
 
   /* Sprite data */

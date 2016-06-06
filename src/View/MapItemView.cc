@@ -212,10 +212,10 @@ void MapItemView::editItem(EditorMapItem* sub_item)
     item_dialog = new ItemDialog(current, this);
     connect(item_dialog, SIGNAL(ok()), this, SLOT(updateItems()));
     item_dialog->show();
-
-    /* Fills the dialogs with data */
-    emit fillWithData(EditorEnumDb::ITEM_VIEW);
   }
+
+  /* Fills the dialogs with data */
+  emit fillWithData(EditorEnumDb::ITEM_VIEW);
 }
 
 /*
@@ -479,7 +479,8 @@ void MapItemView::itemInstanceUpdate(QString name_list)
       {
         EditorMapItem* item = editor_map->getItemByIndex(i, sub_index);
         item_instances->addItem(item->getNameList() + " x " +
-                                QString::number(item->getCount()));
+                              QLocale(QLocale::English, QLocale::UnitedStates)
+                                .toString(item->getCount()));
       }
       item_instances->sortItems();
     }
@@ -732,4 +733,6 @@ void MapItemView::updateListSounds(QList<QString> list)
 {
   if(item_dialog != nullptr)
     item_dialog->setListSounds(list);
+  if(instance_dialog != nullptr)
+    instance_dialog->setListSounds(list);
 }

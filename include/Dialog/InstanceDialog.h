@@ -213,8 +213,11 @@ public slots:
   void comboAlgorithmChange(int index);
   void comboDirectionChange(QString item);
   void comboPartyChange(int index);
+  void comboSoundChange(const QString& sound);
   void comboStateChange(int index);
   void comboTrackingChange(int index);
+  void comboVisibilityChange(int index);
+  void comboWalkoverChange(int index);
 
   /* Item count changed */
   void countChanged(int value);

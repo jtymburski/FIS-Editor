@@ -1786,7 +1786,7 @@ void EventView::battleWinFlagChange(int state)
                                event->getSoundID());
 
     /* Enable/Disable of the edit button for the win event */
-    battle_eventwin->setDisabled(win_disappear);
+    //battle_eventwin->setDisabled(win_disappear); // Removed [2016-06-05]
   }
 }
 
@@ -1984,7 +1984,9 @@ void EventView::convoMenuRequested(QPoint point)
  */
 void EventView::giveCountChanged(int index)
 {
-  event->setEventGiveItem(event->getGiveItemID(), index, event->getSoundID());
+  event->setEventGiveItem(event->getGiveItemID(), index,
+                          event->getGiveItemFlags(), event->getGiveItemChance(),
+                          event->getSoundID());
 }
 
 /*
@@ -2002,7 +2004,8 @@ void EventView::giveItemChanged(int index)
     if(list.size() == 2)
     {
       event->setEventGiveItem(list.front().toInt(), event->getGiveItemCount(),
-                              event->getSoundID());
+                              event->getGiveItemFlags(),
+                              event->getGiveItemChance(), event->getSoundID());
     }
   }
 }

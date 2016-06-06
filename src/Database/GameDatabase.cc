@@ -12,19 +12,19 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   //setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
   /* Clear out variables */
-  current_action = NULL;
-  current_battleclass = NULL;
+  current_action = nullptr;
+  current_battleclass = nullptr;
   current_battlescene = nullptr;
-  current_bubby = NULL;
-  current_equipment = NULL;
-  current_item = NULL;
-  current_map = NULL;
-  current_party = NULL;
-  current_person = NULL;
-  current_race = NULL;
-  current_skill = NULL;
-  current_skillset = NULL;
-  mapsize_dialog = NULL;
+  current_bubby = nullptr;
+  current_equipment = nullptr;
+  current_item = nullptr;
+  current_map = nullptr;
+  current_party = nullptr;
+  current_person = nullptr;
+  current_race = nullptr;
+  current_skill = nullptr;
+  current_skillset = nullptr;
+  mapsize_dialog = nullptr;
 
   /* Create views that will always exist */
   data_sounds = new EditorSoundDb(this);
@@ -86,14 +86,6 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   layout->addWidget(button_saveall);
   layout->addWidget(view_top);
   layout->addWidget(view_bottom);
-  //QHBoxLayout* button_layout = new QHBoxLayout();
-  //button_layout->addWidget(button_new);
-  //button_layout->addWidget(button_delete);
-  //layout->addLayout(button_layout);
-  //QHBoxLayout* button_layout2 = new QHBoxLayout();
-  //button_layout2->addWidget(button_import);
-  //button_layout2->addWidget(button_duplicate);
-  //layout->addLayout(button_layout2);
   layout->addWidget(button_new);
   layout->addWidget(button_delete);
   layout->addWidget(button_duplicate);
@@ -123,21 +115,21 @@ GameDatabase::~GameDatabase()
 
   /* UnSet the tile icons */
   delete tile_icons.passN;
-  tile_icons.passN = NULL;
+  tile_icons.passN = nullptr;
   delete tile_icons.passE;
-  tile_icons.passE = NULL;
+  tile_icons.passE = nullptr;
   delete tile_icons.passS;
-  tile_icons.passS = NULL;
+  tile_icons.passS = nullptr;
   delete tile_icons.passW;
-  tile_icons.passW = NULL;
+  tile_icons.passW = nullptr;
   delete tile_icons.nopassN;
-  tile_icons.nopassN = NULL;
+  tile_icons.nopassN = nullptr;
   delete tile_icons.nopassE;
-  tile_icons.nopassE = NULL;
+  tile_icons.nopassE = nullptr;
   delete tile_icons.nopassS;
-  tile_icons.nopassS = NULL;
+  tile_icons.nopassS = nullptr;
   delete tile_icons.nopassW;
-  tile_icons.nopassW = NULL;
+  tile_icons.nopassW = nullptr;
 }
 
 /*============================================================================

@@ -393,6 +393,22 @@ EventClassifier EditorEvent::getEventType() const
 }
 
 /*
+ * Description: Returns the give item event item chance. If it's not the
+ *              give item event, -1 is returned.
+ *
+ * Inputs: none
+ * Output: int - percent chance the give item will occur
+ */
+int EditorEvent::getGiveItemChance()
+{
+  int id,chance,count;
+  GiveItemFlags flags;
+  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
+    return chance;
+  return -1;
+}
+
+/*
  * Description: Returns the give item event item count. If it's not the
  *              give item event, -1 is returned.
  *
@@ -401,10 +417,27 @@ EventClassifier EditorEvent::getEventType() const
  */
 int EditorEvent::getGiveItemCount()
 {
-  int id,count;
-  if(EventSet::dataEventGiveItem(event, id, count))
+  int id,chance,count;
+  GiveItemFlags flags;
+  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
     return count;
   return -1;
+}
+
+/*
+ * Description: Returns the give item event item flags. If it's not the
+ *              give item event, NONE is returned.
+ *
+ * Inputs: none
+ * Output: GiveItemFlags - the flags for the give item event
+ */
+GiveItemFlags EditorEvent::getGiveItemFlags()
+{
+  int id,chance,count;
+  GiveItemFlags flags;
+  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
+    return flags;
+  return GiveItemFlags::NONE;
 }
 
 /*
@@ -416,8 +449,9 @@ int EditorEvent::getGiveItemCount()
  */
 int EditorEvent::getGiveItemID()
 {
-  int id,count;
-  if(EventSet::dataEventGiveItem(event, id, count))
+  int id,chance,count;
+  GiveItemFlags flags;
+  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
     return id;
   return -1;
 }
@@ -1320,8 +1354,8 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           fh->writeXmlData("restoreqd", restore_qd);
 
         /* Win Event */
-        if(!win_disappear &&
-           event_win->classification != EventClassifier::NOEVENT)
+        //if(!win_disappear && // Removed [2016-06-05]
+        if(event_win->classification != EventClassifier::NOEVENT)
         {
           EditorEvent editor_win(*event_win);
           editor_win.save(fh, game_only, "eventwin");
@@ -1841,16 +1875,17 @@ bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventGiveItem(int id, int count, int sound_id)
+bool EditorEvent::setEventGiveItem(int id, int count, GiveItemFlags flags,
+                                   int chance, int sound_id)
 {
-  if(id >= 0 && count > 0)
+  if(id >= 0 && count > 0 && chance >= 0)
   {
     /* Existing */
     bool one_shot = event.one_shot;
 
     /* New data */
     setEventBlank();
-    event = EventSet::createEventGiveItem(id, count, sound_id);
+    event = EventSet::createEventGiveItem(id, count, flags, chance, sound_id);
     event.one_shot = one_shot;
     return true;
   }

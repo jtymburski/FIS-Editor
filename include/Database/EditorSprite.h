@@ -59,7 +59,6 @@ private:
 
   /*------------------- Constants -----------------------*/
   const static float kREF_RGB; /* The max reference RGB value */
-  const static float kSHADOW_OPACITY; /* Shadow opacity value */
 
 /*============================================================================
  * PROTECTED FUNCTIONS
@@ -72,7 +71,8 @@ protected:
   QString getFrameMods(int index);
 
   /* Returns a transformed image */
-  QPixmap transformPixmap(int index, int w, int h, bool shadow = false);
+  QPixmap transformPixmap(int index, int w, int h, bool shadow = false,
+                          QColor shadow_color = QColor(0, 0, 0));
 
 /*============================================================================
  * SIGNALS
@@ -230,12 +230,14 @@ public:
   void load(XmlData data, int index);
 
   /* Paint the base sprite */
-  bool paint(QPainter* painter, QRect rect, bool shadow = false);
+  bool paint(QPainter* painter, QRect rect, bool shadow = false,
+             QColor shadow_color = QColor(0, 0, 0, 204));
   bool paint(QPainter* painter, int x, int y, int w, int h,
-             bool shadow = false);
-  bool paint(int index, QPainter* painter, QRect rect, bool shadow = false);
+             bool shadow = false, QColor shadow_color = QColor(0, 0, 0, 204));
+  bool paint(int index, QPainter* painter, QRect rect, bool shadow = false,
+             QColor shadow_color = QColor(0, 0, 0, 204));
   bool paint(int index, QPainter* painter, int x, int y, int w, int h,
-             bool shadow = false);
+             bool shadow = false, QColor shadow_color = QColor(0, 0, 0, 204));
 
   /* Saves the sprite data */
   void save(FileHandler* fh, bool game_only = false, bool core_only = false,

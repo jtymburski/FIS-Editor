@@ -10,7 +10,6 @@
 
 /* Constant Implementation - see header file for descriptions */
 const float EditorSprite::kREF_RGB = 255.0;
-const float EditorSprite::kSHADOW_OPACITY = 0.8;
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -46,9 +45,9 @@ EditorSprite::EditorSprite(const EditorSprite &source) : EditorSprite()
  */
 EditorSprite::~EditorSprite()
 {
-  if(sprite != NULL)
+  if(sprite != nullptr)
     delete sprite;
-  sprite = NULL;
+  sprite = nullptr;
 }
 
 /*============================================================================
@@ -117,9 +116,11 @@ QString EditorSprite::getFrameMods(int index)
  *         int w - the width of the pixmap
  *         int h - the height of the pixmap
  *         bool shadow - render as shadow. false by default
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: QPixmap - the transformed pixmap
  */
-QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow)
+QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow,
+                                      QColor shadow_color)
 {
   QTransform transform;
   qreal m11 = transform.m11();    /* Horizontal scaling */
@@ -169,12 +170,6 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow)
   int r_mod = getColorRed();
   int g_mod = getColorGreen();
   int b_mod = getColorBlue();
-  if(shadow)
-  {
-    r_mod = 0;
-    g_mod = 0;
-    b_mod = 0;
-  }
   int r,g,b;
 
   for(int i = 0; i < editing_image.width(); i++)
@@ -183,36 +178,45 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow)
     {
       if(qAlpha(editing_image.pixel(i, j)) > 0)
       {
-        old_color = QColor(editing_image.pixel(i, j));
-        r = old_color.red();
-        g = old_color.green();
-        b = old_color.blue();
-
-        /* Brightness value */
-        float delta_mod = (getBrightness() / kREF_RGB);
-        if(delta_mod < 1.0)
+        if(shadow)
         {
-          r *= delta_mod;
-          g *= delta_mod;
-          b *= delta_mod;
+          r = shadow_color.red();
+          g = shadow_color.green();
+          b = shadow_color.blue();
         }
-        else if(delta_mod > 1.0)
+        else
         {
-          int bright_value = getBrightness() - kREF_RGB;
-          r += bright_value;
-          g += bright_value;
-          b += bright_value;
+          old_color = QColor(editing_image.pixel(i, j));
+          r = old_color.red();
+          g = old_color.green();
+          b = old_color.blue();
 
-          /* Bound the values */
-          r = qBound(0, r, (int)kREF_RGB);
-          g = qBound(0, g, (int)kREF_RGB);
-          b = qBound(0, b, (int)kREF_RGB);
+          /* Brightness value */
+          float delta_mod = (getBrightness() / kREF_RGB);
+          if(delta_mod < 1.0)
+          {
+            r *= delta_mod;
+            g *= delta_mod;
+            b *= delta_mod;
+          }
+          else if(delta_mod > 1.0)
+          {
+            int bright_value = getBrightness() - kREF_RGB;
+            r += bright_value;
+            g += bright_value;
+            b += bright_value;
+
+            /* Bound the values */
+            r = qBound(0, r, (int)kREF_RGB);
+            g = qBound(0, g, (int)kREF_RGB);
+            b = qBound(0, b, (int)kREF_RGB);
+          }
+
+          /* Then, modify the color */
+          r *= (r_mod / kREF_RGB);
+          g *= (g_mod / kREF_RGB);
+          b *= (b_mod / kREF_RGB);
         }
-
-        /* Then, modify the color */
-        r *= (r_mod / kREF_RGB);
-        g *= (g_mod / kREF_RGB);
-        b *= (b_mod / kREF_RGB);
 
         editing_image.setPixel(i, j, qRgba(r, g, b,
                                            qAlpha(editing_image.pixel(i, j))));
@@ -1044,12 +1048,14 @@ void EditorSprite::load(XmlData data, int index)
  * Inputs: QPainter* painter - the paint controller
  *         QRect rect - the bounding rectangle
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - did it get rendered?
  */
-bool EditorSprite::paint(QPainter* painter, QRect rect, bool shadow)
+bool EditorSprite::paint(QPainter* painter, QRect rect, bool shadow,
+                         QColor shadow_color)
 {
   return paint(painter, rect.x(), rect.y(), rect.width(), rect.height(),
-               shadow);
+               shadow, shadow_color);
 }
 
 /*
@@ -1062,12 +1068,13 @@ bool EditorSprite::paint(QPainter* painter, QRect rect, bool shadow)
  *         int w - width of rendering image
  *         int h - height of rendering image
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - did it get rendered?
  */
 bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h,
-                         bool shadow)
+                         bool shadow, QColor shadow_color)
 {
-  return paint(active_frame, painter, x, y, w, h, shadow);
+  return paint(active_frame, painter, x, y, w, h, shadow, shadow_color);
 
 }
 
@@ -1079,12 +1086,14 @@ bool EditorSprite::paint(QPainter* painter, int x, int y, int w, int h,
  *         QPainter* painter - the paint controller
  *         QRect rect - the bounding rectangle
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - did it get rendered?
  */
-bool EditorSprite::paint(int index, QPainter* painter, QRect rect, bool shadow)
+bool EditorSprite::paint(int index, QPainter* painter, QRect rect,
+                         bool shadow, QColor shadow_color)
 {
   return paint(index, painter, rect.x(), rect.y(), rect.width(), rect.height(),
-               shadow);
+               shadow, shadow_color);
 }
 
 /*
@@ -1098,10 +1107,11 @@ bool EditorSprite::paint(int index, QPainter* painter, QRect rect, bool shadow)
  *         int w - width of rendering image
  *         int h - height of rendering image
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - did it get rendered?
  */
 bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
-                         int w, int h, bool shadow)
+                         int w, int h, bool shadow, QColor shadow_color)
 {
   if(painter != NULL && index >= 0 && index < frame_info.size())
   {
@@ -1111,8 +1121,9 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
     /* Paint pixmap */
     painter->setOpacity(getOpacity() / kREF_RGB);
     if(shadow)
-      painter->setOpacity(kSHADOW_OPACITY);
-    painter->drawPixmap(bound, transformPixmap(index, w, h, shadow));
+      painter->setOpacity(shadow_color.alphaF());
+    painter->drawPixmap(bound, transformPixmap(index, w, h, shadow,
+                                               shadow_color));
 
     /* Restore values */
     painter->setOpacity(old_opacity);

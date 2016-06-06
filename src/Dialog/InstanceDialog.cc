@@ -201,14 +201,14 @@ void InstanceDialog::createLayout()
             this, SLOT(countChanged(int)));
     layout->addWidget(spin_count, 2, 1, 1, 1);
 
-    /* Walkover */ // TODO: Integrate
+    /* Walkover */
     QLabel* lbl_walkover = new QLabel("Walkover", this);
     layout->addWidget(lbl_walkover, 3, 0);
     combo_walkover = new QComboBox(this);
     combo_walkover->addItem("False");
     combo_walkover->addItem("True");
-    //connect(combo_walkover, SIGNAL(currentIndexChanged(int)),
-    //        this, SLOT(walkoverChanged(int)));
+    connect(combo_walkover, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(comboWalkoverChange(int)));
     layout->addWidget(combo_walkover, 3, 1, 1, 1);
   }
 
@@ -279,22 +279,22 @@ void InstanceDialog::createLayout()
   }
   else if(thing_type == EditorEnumDb::ITEM)
   {
-    /* The visibility widget */ // TODO: Integrate
+    /* The visibility widget */
     QLabel* lbl_visible = new QLabel("Visible", this);
     layout->addWidget(lbl_visible, 7, 0);
     combo_visible = new QComboBox(this);
     combo_visible->addItem("False");
     combo_visible->addItem("True");
-    //connect(combo_visible, SIGNAL(currentIndexChanged(int)),
-    //        this, SLOT(visibilityChanged(int)));
+    connect(combo_visible, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(comboVisibilityChange(int)));
     layout->addWidget(combo_visible, 7, 1, 1, 1);
 
-    /* The sound widget */ // TODO: Integrate
+    /* The sound widget */
     QLabel* lbl_sound = new QLabel("Sound", this);
     layout->addWidget(lbl_sound, 8, 0);
     combo_sound = new QComboBox(this);
-    //connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
-    //        this, SLOT(changedSound(QString)));
+    connect(combo_sound, SIGNAL(currentIndexChanged(QString)),
+            this, SLOT(comboSoundChange(QString)));
     layout->addWidget(combo_sound, 8, 1, 1, 3);
   }
 
@@ -583,8 +583,41 @@ void InstanceDialog::updateData()
   /* Item specific settings */
   else
   {
+    /* Count */
     spin_count->setValue(
                      static_cast<EditorMapItem*>(thing_working)->getCount());
+
+    /* Sound data - find index */
+    int index = -1;
+    for(int i = 0; i < list_sounds.size(); i++)
+    {
+      QStringList str_split = list_sounds[i].split(':');
+      if(str_split.size() >= 2)
+        if(str_split.front().toInt() == thing_working->getSoundID())
+          index = i;
+    }
+
+    /* Sound data - load into combo */
+    combo_sound->blockSignals(true);
+    combo_sound->clear();
+    combo_sound->addItems(list_sounds);
+    if(combo_sound->count() > 0 && combo_sound->itemText(0) == "None")
+      combo_sound->setItemText(0, "Game Default");
+    if(index >= 0)
+      combo_sound->setCurrentIndex(index);
+    combo_sound->blockSignals(false);
+
+    /* Visiblity */
+    if(thing_working->isVisible())
+      combo_visible->setCurrentIndex(1);
+    else
+      combo_visible->setCurrentIndex(0);
+
+    /* Walkover */
+    if(static_cast<EditorMapItem*>(thing_working)->isWalkover())
+      combo_walkover->setCurrentIndex(1);
+    else
+      combo_walkover->setCurrentIndex(0);
   }
 
   /* Person/NPC specific settings */
@@ -1282,6 +1315,32 @@ void InstanceDialog::comboPartyChange(int index)
 }
 
 /*
+ * Description: Slot triggered on the combo box selection changed, which updates
+ *              the stored sound ID within the working object.
+ *
+ * Inputs: QString sound - the new sound row selection
+ * Output: none
+ */
+void InstanceDialog::comboSoundChange(const QString& sound)
+{
+  if(thing_type == EditorEnumDb::ITEM)
+  {
+    QStringList str_list = sound.split(':');
+
+    /* If the list is two long, it is proper format - 001: Sound Example */
+    if(str_list.size() >= 2)
+    {
+      thing_working->setSoundID(str_list.front().toInt());
+    }
+    /* Otherwise, unset the sound ID */
+    else
+    {
+      thing_working->setSoundID(-1);
+    }
+  }
+}
+
+/*
  * Description: Slot triggered when the combo box for the selected state of
  *              the IO is changed. This changes what events are viewed/editable.
  *
@@ -1443,6 +1502,36 @@ void InstanceDialog::comboTrackingChange(int index)
                                    node_state != MapNPC::LOCKED);
     spin_track_start->setEnabled(state != TrackingState::NOTRACK &&
                                  node_state != MapNPC::LOCKED);
+  }
+}
+
+/*
+ * Description: The drop down for visibility of the thing changed slot. This
+ *              updates the visibility in the working item.
+ *
+ * Inputs: int index - index in the dropdown (only two, true or false)
+ * Output: none
+ */
+void InstanceDialog::comboVisibilityChange(int index)
+{
+  if(thing_type == EditorEnumDb::ITEM)
+  {
+    thing_working->setVisibility(index == 1);
+  }
+}
+
+/*
+ * Description: Slot triggers when the walkover drop down changes state. First,
+ *              index 0, is false and second is true.
+ *
+ * Inputs: int index - index in the walkover drop down
+ * Output: none
+ */
+void InstanceDialog::comboWalkoverChange(int index)
+{
+  if(thing_type == EditorEnumDb::ITEM)
+  {
+    static_cast<EditorMapItem*>(thing_working)->setWalkover(index == 1);
   }
 }
 
@@ -1878,12 +1967,17 @@ void InstanceDialog::setListMapThings(QList<QString> things,
 void InstanceDialog::setListParties(QList<QString> parties)
 {
   list_parties = parties;
-  combo_party->blockSignals(true);
-  combo_party->clear();
-  combo_party->addItem("None");
-  combo_party->addItems(list_parties);
-  updateData();
-  combo_party->blockSignals(false);
+
+  /* If not item, set the data */
+  if(thing_type != EditorEnumDb::ITEM)
+  {
+    combo_party->blockSignals(true);
+    combo_party->clear();
+    combo_party->addItem("None");
+    combo_party->addItems(list_parties);
+    updateData();
+    combo_party->blockSignals(false);
+  }
 }
 
 /*
@@ -1896,6 +1990,10 @@ void InstanceDialog::setListSounds(QList<QString> sounds)
 {
   /* Base data */
   list_sounds = sounds;
+
+  /* If item thing, update data */
+  if(thing_type == EditorEnumDb::ITEM)
+    updateData();
 
   /* Event dialog data */
   if(event_dialog != nullptr)

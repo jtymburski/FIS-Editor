@@ -79,7 +79,9 @@ public:
   EventClassifier getEventType() const;
 
   /* Returns data relating to the give item event. If none, data is invalid */
+  int getGiveItemChance();
   int getGiveItemCount();
+  GiveItemFlags getGiveItemFlags();
   int getGiveItemID();
 
   /* Returns the multiple event information. If none, data is invalid */
@@ -173,7 +175,8 @@ public:
 
   /* Sets the event to give item */
   bool setEventGiveItem(int id = 0, int count = 1,
-                        int sound_id = EventSet::kUNSET_ID);
+                        GiveItemFlags flags = GiveItemFlags::NONE,
+                        int chance = 100, int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to multiple set */
   bool setEventMultiple(std::vector<Event> events = std::vector<Event>(),

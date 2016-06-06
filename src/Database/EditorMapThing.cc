@@ -382,7 +382,7 @@ QString EditorMapThing::getNameList(bool shortened)
  */
 int EditorMapThing::getSoundID() const
 {
-  if(base != nullptr)
+  if(base != nullptr && getClass() != ThingBase::ITEM)
     return base->getSoundID();
   return thing.getSoundID();
 }
@@ -466,7 +466,7 @@ bool EditorMapThing::isBaseEvent() const
  */
 bool EditorMapThing::isVisible() const
 {
-  if(base != NULL)
+  if(base != nullptr && getClass() != ThingBase::ITEM)
     return base->isVisible();
   return thing.isVisible();
 }
@@ -562,8 +562,15 @@ void EditorMapThing::load(XmlData data, int index)
 bool EditorMapThing::paint(QPainter* painter, QRect rect,
                         int offset_x, int offset_y)
 {
-  if(getMatrix() != NULL)
-    return getMatrix()->paint(painter, rect, offset_x, offset_y, !isActive());
+  if(getMatrix() != nullptr)
+  {
+    bool shadow = (!isActive() || !isVisible());
+    QColor shadow_color(255, 255, 255, 180);
+    if(!isActive())
+      shadow_color = QColor(0, 0, 0, 180);
+    return getMatrix()->paint(painter, rect, offset_x, offset_y,
+                              shadow, shadow_color);
+  }
   return false;
 }
 
@@ -582,9 +589,15 @@ bool EditorMapThing::paint(QPainter* painter, QRect rect,
 bool EditorMapThing::paint(int frame_index, QPainter* painter, QRect rect,
                            int offset_x, int offset_y)
 {
-  if(getMatrix() != NULL)
+  if(getMatrix() != nullptr)
+  {
+    bool shadow = (!isActive() || !isVisible());
+    QColor shadow_color(255, 255, 255, 180);
+    if(!isActive())
+      shadow_color = QColor(0, 0, 0, 180);
     return getMatrix()->paint(frame_index, painter, rect, offset_x, offset_y,
-                              !isActive());
+                              shadow, shadow_color);
+  }
   return false;
 }
 

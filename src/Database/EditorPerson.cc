@@ -210,46 +210,48 @@ void EditorPerson::createLayout()
   layout->addWidget(box_flags, 0, 2, 6, 2);
 
   /* Loot Headers */
-  QLabel* lbl_loot = new QLabel("Loot", this);
-  layout->addWidget(lbl_loot, 0, 6, 1, 4, Qt::AlignHCenter);
+  // TODO: Remove future? and all associated functions - not used for new
+  //QLabel* lbl_loot = new QLabel("Loot", this);
+  //layout->addWidget(lbl_loot, 0, 6, 1, 4, Qt::AlignHCenter);
 
   /* Loot Credits */
-  QLabel* lbl_credits = new QLabel("Credits", this);
-  layout->addWidget(lbl_credits, 1, 6);
-  spin_credits = new QSpinBox(this);
-  spin_credits->setMinimum(0);
-  spin_credits->setMaximum(Person::kMAX_CREDIT_DROP);
-  connect(spin_credits, SIGNAL(valueChanged(int)),
-          this, SLOT(changedCredits(int)));
-  layout->addWidget(spin_credits, 1, 7);
+  //QLabel* lbl_credits = new QLabel("Credits", this);
+  //layout->addWidget(lbl_credits, 1, 6);
+  //spin_credits = new QSpinBox(this);
+  //spin_credits->setMinimum(0);
+  //spin_credits->setMaximum(Person::kMAX_CREDIT_DROP);
+  //connect(spin_credits, SIGNAL(valueChanged(int)),
+  //        this, SLOT(changedCredits(int)));
+  //layout->addWidget(spin_credits, 1, 7);
 
   /* Loot Experience */
   QLabel* lbl_xp = new QLabel("Experience", this);
-  layout->addWidget(lbl_xp, 1, 8);
+  layout->addWidget(lbl_xp, 6, 0);
   spin_xp = new QSpinBox(this);
   spin_xp->setMinimum(0);
   spin_xp->setMaximum(Person::kMAX_EXP_DROP);
   connect(spin_xp, SIGNAL(valueChanged(int)),
           this, SLOT(changedExperience(int)));
-  layout->addWidget(spin_xp, 1, 9);
+  layout->addWidget(spin_xp, 6, 1);
 
   /* Loot Items */
-  btn_item_add = new QPushButton("Add Item", this);
-  btn_item_add->setDisabled(true);
-  connect(btn_item_add, SIGNAL(clicked()), this, SLOT(btnItemAdd()));
-  layout->addWidget(btn_item_add, 2, 6, 1, 2);
-  btn_item_rem = new QPushButton("Remove Item", this);
-  btn_item_rem->setDisabled(true);
-  connect(btn_item_rem, SIGNAL(clicked()), this, SLOT(btnItemRemove()));
-  layout->addWidget(btn_item_rem, 2, 8, 1, 2);
-  list_items_all = new QListWidget(this);
-  connect(list_items_all, SIGNAL(currentRowChanged(int)),
-          this, SLOT(listAllIndexChanged(int)));
-  layout->addWidget(list_items_all, 3, 6, 9, 2);
-  list_items_used = new QListWidget(this);
-  connect(list_items_used, SIGNAL(currentRowChanged(int)),
-          this, SLOT(listUsedIndexChanged(int)));
-  layout->addWidget(list_items_used, 3, 8, 9, 2);
+  // TODO: Remove future? and all associated functions - not used for new
+  //btn_item_add = new QPushButton("Add Item", this);
+  //btn_item_add->setDisabled(true);
+  //connect(btn_item_add, SIGNAL(clicked()), this, SLOT(btnItemAdd()));
+  //layout->addWidget(btn_item_add, 2, 6, 1, 2);
+  //btn_item_rem = new QPushButton("Remove Item", this);
+  //btn_item_rem->setDisabled(true);
+  //connect(btn_item_rem, SIGNAL(clicked()), this, SLOT(btnItemRemove()));
+  //layout->addWidget(btn_item_rem, 2, 8, 1, 2);
+  //list_items_all = new QListWidget(this);
+  //connect(list_items_all, SIGNAL(currentRowChanged(int)),
+  //        this, SLOT(listAllIndexChanged(int)));
+  //layout->addWidget(list_items_all, 3, 6, 9, 2);
+  //list_items_used = new QListWidget(this);
+  //connect(list_items_used, SIGNAL(currentRowChanged(int)),
+  //        this, SLOT(listUsedIndexChanged(int)));
+  //layout->addWidget(list_items_used, 3, 8, 9, 2);
 
   /* First Person Image */
   QLabel* lbl_fp = new QLabel("First Person", this);
@@ -453,16 +455,16 @@ void EditorPerson::loadWorkingInfo()
   spin_actiony->setValue(person_curr.getActionY());
 
   /* Loot Credits */
-  spin_credits->setValue(person_curr.getCreditDrop());
+  //spin_credits->setValue(person_curr.getCreditDrop());
 
   /* Loot Exp */
   spin_xp->setValue(person_curr.getExpDrop());
 
   /* Loot Items */
-  list_items_all->clear();
-  for(int i = 0; i < item_total.size(); i++)
-    list_items_all->addItem(item_total[i]->getNameList());
-  updateUsedItems();
+  //list_items_all->clear();
+  //for(int i = 0; i < item_total.size(); i++)
+  //  list_items_all->addItem(item_total[i]->getNameList());
+  //updateUsedItems();
 }
 
 /*
@@ -476,40 +478,40 @@ void EditorPerson::loadWorkingInfo()
  */
 void EditorPerson::updateUsedItems()
 {
-  int index = list_items_used->currentRow();
-  list_items_used->clear();
-  QVector<bool> item_used;
-  for(int i = 0; i < item_ids.size(); i++)
-    item_used.push_back(false);
+//  int index = list_items_used->currentRow();
+//  list_items_used->clear();
+//  QVector<bool> item_used;
+//  for(int i = 0; i < item_ids.size(); i++)
+//    item_used.push_back(false);
 
-  /* Loop through items */
-  for(int i = 0; i < item_ids.size(); i++)
-  {
-    for(int j = 0; !item_used[i] && j < item_total.size(); j++)
-    {
-      if(item_total[j]->getID() == item_ids[i])
-      {
-        item_used[i] = true;
-        list_items_used->addItem(item_total[j]->getNameList());
-      }
-    }
-  }
+//  /* Loop through items */
+//  for(int i = 0; i < item_ids.size(); i++)
+//  {
+//    for(int j = 0; !item_used[i] && j < item_total.size(); j++)
+//    {
+//      if(item_total[j]->getID() == item_ids[i])
+//      {
+//        item_used[i] = true;
+//        list_items_used->addItem(item_total[j]->getNameList());
+//      }
+//    }
+//  }
 
-  /* If not found, delete IDs */
-  for(int i = item_ids.size() - 1; i >= 0; i--)
-  {
-    if(!item_used[i])
-      item_ids.remove(i);
-  }
+//  /* If not found, delete IDs */
+//  for(int i = item_ids.size() - 1; i >= 0; i--)
+//  {
+//    if(!item_used[i])
+//      item_ids.remove(i);
+//  }
 
-  /* If index is valid, select row */
-  if(index >= 0)
-  {
-    if(index >= list_items_used->count())
-      list_items_used->setCurrentRow(list_items_used->count() - 1);
-    else
-      list_items_used->setCurrentRow(index);
-  }
+//  /* If index is valid, select row */
+//  if(index >= 0)
+//  {
+//    if(index >= list_items_used->count())
+//      list_items_used->setCurrentRow(list_items_used->count() - 1);
+//    else
+//      list_items_used->setCurrentRow(index);
+//  }
 }
 
 /*============================================================================
@@ -610,17 +612,17 @@ void EditorPerson::btnFirstPerson(bool clean_only)
  */
 void EditorPerson::btnItemAdd()
 {
-  if(list_items_all->currentRow() >= 0 &&
-     list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
-  {
-    item_ids.push_back(item_total[list_items_all->currentRow()]->getID());
-    qSort(item_ids);
-    updateUsedItems();
+//  if(list_items_all->currentRow() >= 0 &&
+//     list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
+//  {
+//    item_ids.push_back(item_total[list_items_all->currentRow()]->getID());
+//    qSort(item_ids);
+//    updateUsedItems();
 
-    /* Check the button */
-    if(list_items_used->count() >= (int)Person::kMAX_ITEM_DROPS)
-      btn_item_add->setDisabled(true);
-  }
+//    /* Check the button */
+//    if(list_items_used->count() >= (int)Person::kMAX_ITEM_DROPS)
+//      btn_item_add->setDisabled(true);
+//  }
 }
 
 /*
@@ -633,15 +635,15 @@ void EditorPerson::btnItemAdd()
  */
 void EditorPerson::btnItemRemove()
 {
-  if(list_items_used->currentRow() >= 0)
-  {
-    item_ids.remove(list_items_used->currentRow());
-    updateUsedItems();
+//  if(list_items_used->currentRow() >= 0)
+//  {
+//    item_ids.remove(list_items_used->currentRow());
+//    updateUsedItems();
 
-    /* Check the button */
-    if(list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
-      btn_item_add->setEnabled(true);
-  }
+//    /* Check the button */
+//    if(list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
+//      btn_item_add->setEnabled(true);
+//  }
 }
 
 /*
@@ -859,10 +861,11 @@ void EditorPerson::changedSecondary(QString text)
  */
 void EditorPerson::listAllIndexChanged(int index)
 {
-  if(index >= 0 && list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
-    btn_item_add->setEnabled(true);
-  else
-    btn_item_add->setDisabled(true);
+  (void)index;
+//  if(index >= 0 && list_items_used->count() < (int)Person::kMAX_ITEM_DROPS)
+//    btn_item_add->setEnabled(true);
+//  else
+//    btn_item_add->setDisabled(true);
 }
 
 /*
@@ -874,10 +877,11 @@ void EditorPerson::listAllIndexChanged(int index)
  */
 void EditorPerson::listUsedIndexChanged(int index)
 {
-  if(index >= 0)
-    btn_item_rem->setEnabled(true);
-  else
-    btn_item_rem->setDisabled(true);
+  (void)index;
+//  if(index >= 0)
+//    btn_item_rem->setEnabled(true);
+//  else
+//    btn_item_rem->setDisabled(true);
 }
 
 /*
@@ -1260,10 +1264,10 @@ void EditorPerson::setID(int id)
 
     edit_name->setDisabled(true);
 
-    list_items_all->setDisabled(true);
-    list_items_used->setDisabled(true);
+    //list_items_all->setDisabled(true);
+    //list_items_used->setDisabled(true);
 
-    spin_credits->setDisabled(true);
+    //spin_credits->setDisabled(true);
     spin_xp->setDisabled(true);
   }
   else
@@ -1272,10 +1276,10 @@ void EditorPerson::setID(int id)
 
     edit_name->setEnabled(true);
 
-    list_items_all->setEnabled(true);
-    list_items_used->setEnabled(true);
+    //list_items_all->setEnabled(true);
+    //list_items_used->setEnabled(true);
 
-    spin_credits->setEnabled(true);
+    //spin_credits->setEnabled(true);
     spin_xp->setEnabled(true);
   }
 }

@@ -189,9 +189,10 @@ public:
 
   /* Paint a single sprite in the matrix */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0,
-             bool shadow = false);
+             bool shadow = false, QColor shadow_color = QColor(0, 0, 0, 204));
   bool paint(int frame_index, QPainter* painter, QRect rect,
-             int offset_x = 0, int offset_y = 0, bool shadow = false);
+             int offset_x = 0, int offset_y = 0, bool shadow = false,
+             QColor shadow_color = QColor(0, 0, 0, 204));
 
   /* Rebase the matrix to match the passed in matrix */
   bool rebase(EditorMatrix* base_matrix, bool passability = true);

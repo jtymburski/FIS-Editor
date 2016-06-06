@@ -1093,7 +1093,7 @@ QString EditorItem::getName() const
  */
 QString EditorItem::getNameList()
 {
-  return EditorHelpers::getListString(getID(), getName());
+  return EditorHelpers::getListString(getID(), getName(), -1, true);
 }
 
 /*

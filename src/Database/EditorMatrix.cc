@@ -1327,12 +1327,14 @@ void EditorMatrix::load(XmlData data, int index)
  *         int offset_x - the offset from left of the sprite in matrix
  *         int offset_y - the offset from top of the sprite in matrix
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - true if the sprite was rendered
  */
-bool EditorMatrix::paint(QPainter* painter, QRect rect,
-                         int offset_x, int offset_y, bool shadow)
+bool EditorMatrix::paint(QPainter* painter, QRect rect, int offset_x,
+                         int offset_y, bool shadow, QColor shadow_color)
 {
-  return paint(active_frame, painter, rect, offset_x, offset_y, shadow);
+  return paint(active_frame, painter, rect, offset_x, offset_y, shadow,
+               shadow_color);
 }
 
 /*
@@ -1346,17 +1348,20 @@ bool EditorMatrix::paint(QPainter* painter, QRect rect,
  *         int offset_x - the offset from left of the sprite in matrix
  *         int offset_y - the offset from top of the sprite in matrix
  *         bool shadow - true to render as shadow instead. Default false
+ *         QColor shadow_color - the color to render the shadow if true
  * Output: bool - true if the sprite was rendered
  */
 bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
-                         int offset_x, int offset_y, bool shadow)
+                         int offset_x, int offset_y, bool shadow,
+                         QColor shadow_color)
 {
   if(offset_x >= 0 && offset_x < getWidth() &&
      offset_y >= 0 && offset_y < getHeight() &&
-     matrix[offset_x][offset_y] != NULL)
+     matrix[offset_x][offset_y] != nullptr)
   {
     EditorSprite* paint_sprite = matrix[offset_x][offset_y];
-    return paint_sprite->paint(frame_index, painter, rect, shadow);
+    return paint_sprite->paint(frame_index, painter, rect, shadow,
+                               shadow_color);
   }
   return false;
 }
@@ -1372,7 +1377,7 @@ bool EditorMatrix::paint(int frame_index, QPainter* painter, QRect rect,
  */
 bool EditorMatrix::rebase(EditorMatrix* base_matrix, bool passability)
 {
-  if(base_matrix != NULL)
+  if(base_matrix != nullptr)
   {
     /* Set the size */
     setNewSize(base_matrix->getWidth(), base_matrix->getHeight());

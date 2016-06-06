@@ -91,13 +91,26 @@ void EditorMapItem::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   /* Next item data: Is base - write core data */
   if(getBaseItem() == nullptr)
   {
-    if(default_item.isWalkover() != isWalkover())
-      fh->writeXmlData("walkover", isWalkover());
+    //if(default_item.isWalkover() != isWalkover())
+    //  fh->writeXmlData("walkover", isWalkover());
   }
   /* Next item data: Is not base */
   else
   {
+    /* Start count */
     fh->writeXmlData("startcount", (int)getCount());
+
+    /* Visible */
+    if(default_item.isVisible() != isVisible())
+      fh->writeXmlData("visible", isVisible());
+
+    /* Walkover */
+    if(default_item.isWalkover() != isWalkover())
+      fh->writeXmlData("walkover", isWalkover());
+
+    /* Check sound ID */
+    if(getSoundID() >= 0)
+      fh->writeXmlData("sound_id", getSoundID());
   }
 }
 
