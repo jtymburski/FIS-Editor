@@ -75,7 +75,7 @@ void EditorSprite::copySelf(const EditorSprite &source, bool only_base)
 
   /* Copy base data */
   int id = sprite->getId();
-  if(sprite != NULL)
+  if(sprite != nullptr)
     delete sprite;
   sprite = new Sprite();
   *sprite = *source.sprite;
@@ -471,7 +471,7 @@ void EditorSprite::setFramePath(int frame_num, QString newpath)
 {
   if(frame_num >= 0 && frame_num < frame_info.size())
   {
-    frame_info[frame_num].path = newpath;
+    frame_info[frame_num].path = QDir::toNativeSeparators(newpath);
     frame_info[frame_num].image = QImage(newpath);
 
     emit spriteChanged();
@@ -1267,7 +1267,7 @@ void EditorSprite::setMaximumFrames(int count)
 void EditorSprite::setPath(int index, QString path)
 {
   FrameInfo info;
-  info.path = path;
+  info.path = QDir::toNativeSeparators(path);
   if(path.isEmpty())
     info.image = QImage();
   else

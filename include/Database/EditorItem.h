@@ -10,6 +10,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDir>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>

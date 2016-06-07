@@ -5279,7 +5279,6 @@ bool EditorMap::setItems(QList<ItemData> items, bool delete_invalid)
   for(int i = 0; i < base_items.size(); i++)
   {
     bool found = false;
-
     for(int j = 0; !found && (j < items.size()); j++)
     {
       if(!item_used[j] && base_items[i]->getID() == items[j].id)

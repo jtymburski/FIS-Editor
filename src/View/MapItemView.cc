@@ -22,8 +22,8 @@
 MapItemView::MapItemView(QWidget* parent) : QWidget(parent)
 {
   /* Initialize variables */
-  editor_map = NULL;
-  item_dialog = NULL;
+  editor_map = nullptr;
+  item_dialog = nullptr;
 
   /* Create the layout */
   createLayout();
