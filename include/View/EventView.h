@@ -32,7 +32,6 @@ class ConvoDialog;
 #include <QVBoxLayout>
 
 #include "Database/EditorEvent.h"
-//#include "Database/GameDatabase.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
 
@@ -41,7 +40,7 @@ class EventView : public QFrame
   Q_OBJECT
 public:
   /* Constructor function */
-  EventView(EditorEvent* event = NULL, QWidget* parent = NULL,
+  EventView(EditorEvent* event = nullptr, QWidget* parent = nullptr,
             EventClassifier limiter = EventClassifier::NOEVENT,
             bool view_only = false);
 
@@ -83,6 +82,8 @@ private:
   EditorEvent* event;
 
   /* Give item event control widgets */
+  QCheckBox* item_drop;
+  QSpinBox* item_chance;
   QSpinBox* item_count;
   QComboBox* item_name;
 
@@ -210,7 +211,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the layout and widgets for this controller */
-  void createLayout();//bool conversation_enabled = true);
+  void createLayout();
 
   /* Edit conversation trigger */
   void editConversation(Conversation* convo, bool is_option);
@@ -287,7 +288,9 @@ public slots:
   void convoMenuRequested(QPoint point);
 
   /* The give item event slot changes */
-  void giveCountChanged(int index);
+  void giveAutoDropChanged(int state);
+  void giveChanceChanged(int chance);
+  void giveCountChanged(int count);
   void giveItemChanged(int index);
 
   /* The multiple event slot changes */
@@ -411,7 +414,6 @@ public:
   QList<QString> getListMapThings();
   QList<QString> getListSounds();
   QList<QString> getListSubmaps();
-
 
   /* Sets the editor event */
   void setEvent(EditorEvent* event);

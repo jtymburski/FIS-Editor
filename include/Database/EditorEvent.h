@@ -176,7 +176,8 @@ public:
   /* Sets the event to give item */
   bool setEventGiveItem(int id = 0, int count = 1,
                         GiveItemFlags flags = GiveItemFlags::NONE,
-                        int chance = 100, int sound_id = EventSet::kUNSET_ID);
+                        int chance = EventSet::kGIVE_DEF_CHANCE,
+                        int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to multiple set */
   bool setEventMultiple(std::vector<Event> events = std::vector<Event>(),

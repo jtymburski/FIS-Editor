@@ -531,7 +531,8 @@ void EditorSprite::setOpacity(int opacity)
 /*
  * Description: Sets the sprites rotation
  *
- * Input: String angle (Declared as QString or signal-slot reasons)
+ * Inputs: String angle (Declared as QString or signal-slot reasons)
+ * Output: none
  */
 void EditorSprite::setRotation(QString angle)
 {
@@ -542,7 +543,8 @@ void EditorSprite::setRotation(QString angle)
 /*
  * Description: Sets the frame vertical flip for a single index
  *
- * Input: Frame number and flip
+ * Inputs: Frame number and flip
+ * Output: none
  */
 void EditorSprite::setVerticalFlip(int frame_num, bool flip)
 {
@@ -557,6 +559,7 @@ void EditorSprite::setVerticalFlip(int frame_num, bool flip)
  * Description: Sets the frame vertical flip for all frames
  *
  * Input: bool flip - true if wanting to vertically flip the sprite
+ * Output: none
  */
 void EditorSprite::setVerticalFlips(bool flip)
 {
@@ -567,6 +570,9 @@ void EditorSprite::setVerticalFlips(bool flip)
 
 /*
  * Description: Sets the sprites rotation
+ *
+ * Inputs: none
+ * Output: none
  */
 void EditorSprite::set0()
 {
@@ -576,6 +582,9 @@ void EditorSprite::set0()
 
 /*
  * Description: Sets the sprites rotation
+ *
+ * Inputs: none
+ * Output: none
  */
 void EditorSprite::set90()
 {
@@ -585,6 +594,9 @@ void EditorSprite::set90()
 
 /*
  * Description: Sets the sprites rotation
+ *
+ * Inputs: none
+ * Output: none
  */
 void EditorSprite::set180()
 {
@@ -594,6 +606,9 @@ void EditorSprite::set180()
 
 /*
  * Description: Sets the sprites rotation
+ *
+ * Inputs: none
+ * Output: none
  */
 void EditorSprite::set270()
 {

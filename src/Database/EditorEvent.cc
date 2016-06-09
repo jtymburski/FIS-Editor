@@ -20,7 +20,7 @@
  */
 EditorEvent::EditorEvent()
 {
-  conversation = NULL;
+  conversation = nullptr;
   event = EventSet::createBlankEvent();
 }
 
@@ -1392,9 +1392,18 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     {
       fh->writeXmlElement("giveitem");
 
+      /* Flag data */
+      GiveItemFlags flags = getGiveItemFlags();
+      bool auto_drop;
+      EventSet::dataEnumGiveFlags(flags, auto_drop);
+
       /* Data */
       fh->writeXmlData("id", getGiveItemID());
       fh->writeXmlData("count", getGiveItemCount());
+      if(auto_drop)
+        fh->writeXmlData("autodrop", auto_drop);
+      if(getGiveItemChance() != EventSet::kGIVE_DEF_CHANCE)
+        fh->writeXmlData("chance", getGiveItemChance());
       if(isOneShot())
         fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)

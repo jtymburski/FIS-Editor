@@ -83,7 +83,7 @@ EventView::~EventView()
  * Inputs: none
  * Output: none
  */
-void EventView::createLayout()//bool conversation_enabled)
+void EventView::createLayout()
 {
   /* Layout */
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -173,6 +173,7 @@ void EventView::createLayout()//bool conversation_enabled)
       QWidget* widget_give = new QWidget(this);
       QLabel* lbl_give_item = new QLabel("Item:", this);
       QLabel* lbl_give_count = new QLabel("Count:", this);
+      QLabel* lbl_give_chance = new QLabel("Chance:", this);
       item_name = new QComboBox(this);
       EditorHelpers::comboBoxOptimize(item_name);
       item_name->setMinimumWidth(200);
@@ -183,14 +184,29 @@ void EventView::createLayout()//bool conversation_enabled)
       item_count->setMaximum(100000);
       connect(item_count, SIGNAL(valueChanged(int)),
               this, SLOT(giveCountChanged(int)));
+      item_drop = new QCheckBox("Drop Automatically", this);
+      item_drop->setToolTip(QString("Checked: drops the item. ") +
+                            QString("Unchecked: Insert into inventory and ") +
+                            QString("drop items that do not fit"));
+      connect(item_drop, SIGNAL(stateChanged(int)),
+              this, SLOT(giveAutoDropChanged(int)));
+      item_chance = new QSpinBox(this);
+      item_chance->setMinimum(1);
+      item_chance->setMaximum(EventSet::kGIVE_DEF_CHANCE);
+      item_chance->setSuffix(" %");
+      connect(item_chance, SIGNAL(valueChanged(int)),
+              this, SLOT(giveChanceChanged(int)));
       QGridLayout* layout_give = new QGridLayout(widget_give);
       layout_give->setRowStretch(0, 1);
       layout_give->addWidget(lbl_give_item, 1, 0);
       layout_give->addWidget(item_name, 1, 1, 1, 2);
       layout_give->addWidget(lbl_give_count, 2, 0);
       layout_give->addWidget(item_count, 2, 1);
+      layout_give->addWidget(item_drop, 3, 1);
+      layout_give->addWidget(lbl_give_chance, 4, 0);
+      layout_give->addWidget(item_chance, 4, 1);
       layout_give->setColumnStretch(2, 1);
-      layout_give->setRowStretch(3, 1);
+      layout_give->setRowStretch(5, 1);
       view_stack->addWidget(widget_give);
     }
     /* ---- ITEM: TAKE ---- */
@@ -757,13 +773,11 @@ void EventView::createLayout()//bool conversation_enabled)
 
   /* Configure parent widget */
   setFrameStyle(QFrame::Panel);
-  //setLayout(layout);
   setLineWidth(1);
   QPalette palette;
   palette.setColor(QPalette::Foreground, QColor(168, 168, 168));
   setPalette(palette);
   updateGeometry();
-  //setMaximumSize(minimumSizeHint());
   //setMaximumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
   //setMinimumSize(EditorEnumDb::kEVENT_VIEW_W, EditorEnumDb::kEVENT_VIEW_H);
 
@@ -899,8 +913,6 @@ void EventView::editEvent(Event* edit_event)
                                      list_map_npcs);
     pop_event_view->setListSounds(list_sounds);
     pop_event_view->setListSubmaps(list_submaps);
-    //connect(event_view, SIGNAL(editConversation(Conversation*, bool)),
-    //        this, SLOT(editConversationSub(Conversation*, bool)));
     connect(pop_event_view, SIGNAL(selectTile()),
             this, SLOT(selectTileEvent()));
     pop_event_layout->addWidget(pop_event_view, 0, 0, 1, 4);
@@ -1089,7 +1101,14 @@ void EventView::setLayoutData()
     /* -- ITEM GIVE -- */
     else if(event->getEventType() == EventClassifier::ITEMGIVE)
     {
+      /* Integers */
+      item_chance->setValue(event->getGiveItemChance());
       item_count->setValue(event->getGiveItemCount());
+
+      /* Flags */
+      bool auto_drop;
+      EventSet::dataEnumGiveFlags(event->getGiveItemFlags(), auto_drop);
+      item_drop->setChecked(auto_drop);
 
       /* Attempt to find the item name in the combo box */
       int index = -1;
@@ -1976,15 +1995,53 @@ void EventView::convoMenuRequested(QPoint point)
 }
 
 /*
+ * Description: Slot which triggers when the auto drop status check box is
+ *              changed.
+ *
+ * Inputs: int state - the state of the checkbox
+ * Output: none
+ */
+void EventView::giveAutoDropChanged(int state)
+{
+  /* Get the starting data */
+  bool auto_drop;
+  GiveItemFlags flags = event->getGiveItemFlags();
+  EventSet::dataEnumGiveFlags(flags, auto_drop);
+
+  /* Modify */
+  auto_drop = (state == Qt::Checked);
+
+  /* Set the new data */
+  flags = EventSet::createEnumGiveFlags(auto_drop);
+  event->setEventGiveItem(event->getGiveItemID(), event->getGiveItemCount(),
+                          flags, event->getGiveItemChance(),
+                          event->getSoundID());
+}
+
+/*
+ * Description: Slot which triggers when the give item chance widget in the give
+ *              item event is changed. Updates the event
+ *
+ * Inputs: int chance - the chance value
+ * Output: none
+ */
+void EventView::giveChanceChanged(int chance)
+{
+  event->setEventGiveItem(event->getGiveItemID(), event->getGiveItemCount(),
+                          event->getGiveItemFlags(), chance,
+                          event->getSoundID());
+}
+
+/*
  * Description: Slot which triggers when the give item count widget in the give
  *              item event is changed. Updates the event
  *
- * Inputs: int index - the count value
+ * Inputs: int count - the count value
  * Output: none
  */
-void EventView::giveCountChanged(int index)
+void EventView::giveCountChanged(int count)
 {
-  event->setEventGiveItem(event->getGiveItemID(), index,
+  event->setEventGiveItem(event->getGiveItemID(), count,
                           event->getGiveItemFlags(), event->getGiveItemChance(),
                           event->getSoundID());
 }
