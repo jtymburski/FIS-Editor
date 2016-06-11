@@ -306,6 +306,7 @@ public slots:
   void notificationBtnBrush();
   void notificationBtnBold();
   void notificationBtnItalic();
+  void notificationBtnItem();
   void notificationBtnPreview();
   void notificationBtnThing();
   void notificationBtnUnderline();

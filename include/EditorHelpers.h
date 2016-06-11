@@ -49,8 +49,10 @@ public:
   static void comboBoxOptimize(QComboBox *combo);
 
   /* Returns the converted from pseudo xml [ to true xml for rendering */
-  static QString convertXml(QString orig_text, QList<QString> list);
-  static QString convertXml(QString orig_text, QVector<QString> list);
+  static QString convertXml(QString orig_text, QList<QString> thing_list,
+                            QList<QString> item_list);
+  static QString convertXml(QString orig_text, QVector<QString> list,
+                            QVector<QString> item_list);
 
   /* Returns the file name from the path */
   static QString getFilename(const QString &path);

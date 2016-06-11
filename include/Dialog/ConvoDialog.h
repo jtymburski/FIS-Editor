@@ -97,6 +97,7 @@ public slots:
   void textBtnBrush();
   void textBtnBold();
   void textBtnItalic();
+  void textBtnItem();
   void textBtnPreview();
   void textBtnThing();
   void textBtnUnderline();

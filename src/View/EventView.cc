@@ -335,6 +335,12 @@ void EventView::createLayout()
       notify_btn_thing->setMaximumSize(30, 30);
       connect(notify_btn_thing, SIGNAL(clicked()),
               this, SLOT(notificationBtnThing()));
+      QPushButton* notify_btn_item = new QPushButton(this);
+      notify_btn_item->setIcon(QIcon(":/images/icons/32_item.png"));
+      notify_btn_item->setIconSize(QSize(24,24));
+      notify_btn_item->setMaximumSize(30, 30);
+      connect(notify_btn_item, SIGNAL(clicked()),
+              this, SLOT(notificationBtnItem()));
       QPushButton* notify_btn_preview = new QPushButton(this);
       notify_btn_preview->setIcon(QIcon(":/images/icons/32_export.png"));
       notify_btn_preview->setIconSize(QSize(24,24));
@@ -349,6 +355,7 @@ void EventView::createLayout()
       layout_notify_btns->addWidget(notify_btn_italic);
       layout_notify_btns->addWidget(notify_btn_underline);
       layout_notify_btns->addWidget(notify_btn_thing);
+      layout_notify_btns->addWidget(notify_btn_item);
       layout_notify_btns->addWidget(notify_btn_preview);
       layout_notification->addLayout(layout_notify_btns);
       layout_notification->addWidget(notification_edit, 1);
@@ -2278,6 +2285,37 @@ void EventView::notificationBtnItalic()
 }
 
 /*
+ * Description: Slot which triggers when the notification item insertion is
+ *              pressed. Allows for selection of a item ID to insert into the
+ *              notification.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void EventView::notificationBtnItem()
+{
+  /* Create input dialog to get selected thing */
+  QInputDialog input_dialog;
+  input_dialog.setComboBoxItems(list_items);
+  if(input_dialog.exec() == QDialog::Accepted)
+  {
+    /* Check if the selected is valid and an ID */
+    QStringList split = input_dialog.textValue().split(':');
+    if(split.size() >= 2)
+    {
+      /* If valid, insert the number */
+      bool ok;
+      split.first().toInt(&ok);
+      if(ok)
+      {
+        QString insert_text = "{I" + split.first() + "}";
+        notification_edit->textCursor().insertText(insert_text);
+      }
+    }
+  }
+}
+
+/*
  * Description: Slot which triggers when the notification preview is selected.
  *              This loads the current xml for a quick preview of how it will
  *              render.
@@ -2288,14 +2326,16 @@ void EventView::notificationBtnItalic()
 void EventView::notificationBtnPreview()
 {
   /* Compile list */
-  QList<QString> list_vec = list_map_persons + list_map_npcs + list_map_things;
+  QList<QString> list_things = list_map_persons + list_map_npcs +
+                               list_map_things;
   for(int i = 0; i < list_map_ios.size(); i++)
-    list_vec.push_back(list_map_ios[i].first);
-  list_vec += list_map_items;
+    list_things.push_back(list_map_ios[i].first);
+  //list_vec += list_map_items;
 
   /* Handle conversion */
   QString render_text = EditorHelpers::convertXml(
-                                    notification_edit->toPlainText(), list_vec);
+                                            notification_edit->toPlainText(),
+                                            list_things, list_items);
 
   /* Insert warning */
   QString info_text = QString("<font color=\"#900\">* Overlap nested color ") +
@@ -2326,7 +2366,7 @@ void EventView::notificationBtnThing()
   list += list_map_npcs + list_map_things;
   for(int i = 0; i < list_map_ios.size(); i++)
     list.push_back(list_map_ios[i].first);
-  list += list_map_items;
+  //list += list_map_items;
   qSort(list);
   list.push_front(player);
 

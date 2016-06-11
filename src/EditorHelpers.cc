@@ -50,7 +50,8 @@ void EditorHelpers::comboBoxOptimize(QComboBox *combo)
  *                               00000: NAME
  * Output: QString - the resulting text after the conversion
  */
-QString EditorHelpers::convertXml(QString orig_text, QList<QString> list)
+QString EditorHelpers::convertXml(QString orig_text, QList<QString> thing_list,
+                                  QList<QString> item_list)
 {
   /* Handle color replacements */
   QString clr_text = "";
@@ -123,22 +124,47 @@ QString EditorHelpers::convertXml(QString orig_text, QList<QString> list)
             QString entry2 = split2[j];
 
             /* Walk through the inside states */
-            if(j == 0)
+            if(j == 0 && entry2.size() > 0)
             {
               QString name = "";
-              int id_ref = entry2.toInt();
 
-              /* Try and find the ID */
-              for(int k = 0; name.isEmpty() && k < list.size(); k++)
+              /* If item category */
+              if(entry2.at(0) == 'I')
               {
-                QStringList name_list = list[k].split(':');
-                int name_id = name_list.first().toInt();
-                if(name_id == id_ref)
-                  if(name_list.size() > 0)
-                    name = name_list.back();
-              }
+                entry2.remove(0, 1);
+                int id_ref = entry2.toInt();
 
-              render_text += "[font color=\"#00eaff\"]" + name + "[/font]";
+                /* Try and find the ID */
+                for(int k = 0; name.isEmpty() && k < item_list.size(); k++)
+                {
+                  QStringList name_list = item_list[k].split(':');
+                  int name_id = name_list.first().toInt();
+                  if(name_id == id_ref)
+                    if(name_list.size() > 0)
+                      name = name_list.back();
+                }
+
+                /* Generate the text */
+                render_text += "[font color=\"#ffc400\"]" + name + "[/font]";
+              }
+              /* Otherwise, thing category */
+              else
+              {
+                int id_ref = entry2.toInt();
+
+                /* Try and find the ID */
+                for(int k = 0; name.isEmpty() && k < thing_list.size(); k++)
+                {
+                  QStringList name_list = thing_list[k].split(':');
+                  int name_id = name_list.first().toInt();
+                  if(name_id == id_ref)
+                    if(name_list.size() > 0)
+                      name = name_list.back();
+                }
+
+                /* Generate the text */
+                render_text += "[font color=\"#00eaff\"]" + name + "[/font]";
+              }
             }
             else
             {
@@ -171,13 +197,16 @@ QString EditorHelpers::convertXml(QString orig_text, QList<QString> list)
  *              CSS.
  *
  * Inputs: QString orig_text - the original text to render
- *         QVector<QString> list - the list of thing and ID association
- *                                 00000: NAME
+ *         QVector<QString> thing_list - the list of thing and ID association
+ *                                       00000: NAME
+ *         QVector<ItemData> item_list - the list of item and ID name struct
  * Output: QString - the resulting text after the conversion
  */
-QString EditorHelpers::convertXml(QString orig_text, QVector<QString> list)
+QString EditorHelpers::convertXml(QString orig_text,
+                                  QVector<QString> thing_list,
+                                  QVector<QString> item_list)
 {
-  return convertXml(orig_text, list.toList());
+  return convertXml(orig_text, thing_list.toList(), item_list.toList());
 }
 
 /*

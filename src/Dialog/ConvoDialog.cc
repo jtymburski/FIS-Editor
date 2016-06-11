@@ -82,43 +82,43 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   btn_brush->setIcon(QIcon(":/images/icons/32_brush.png"));
   btn_brush->setIconSize(QSize(24,24));
   btn_brush->setMaximumSize(30, 30);
-  connect(btn_brush, SIGNAL(clicked()),
-          this, SLOT(textBtnBrush()));
+  connect(btn_brush, SIGNAL(clicked()), this, SLOT(textBtnBrush()));
   btn_layout->addWidget(btn_brush);
   btn_bold = new QPushButton(this);
   btn_bold->setIcon(QIcon(":/images/icons/32_font_bold.png"));
   btn_bold->setIconSize(QSize(24,24));
   btn_bold->setMaximumSize(30, 30);
-  connect(btn_bold, SIGNAL(clicked()),
-          this, SLOT(textBtnBold()));
+  connect(btn_bold, SIGNAL(clicked()), this, SLOT(textBtnBold()));
   btn_layout->addWidget(btn_bold);
   btn_italic = new QPushButton(this);
   btn_italic->setIcon(QIcon(":/images/icons/32_font_italic.png"));
   btn_italic->setIconSize(QSize(24,24));
   btn_italic->setMaximumSize(30, 30);
-  connect(btn_italic, SIGNAL(clicked()),
-          this, SLOT(textBtnItalic()));
+  connect(btn_italic, SIGNAL(clicked()), this, SLOT(textBtnItalic()));
   btn_layout->addWidget(btn_italic);
   btn_underline = new QPushButton(this);
   btn_underline->setIcon(QIcon(":/images/icons/32_font_underline.png"));
   btn_underline->setIconSize(QSize(24,24));
   btn_underline->setMaximumSize(30, 30);
-  connect(btn_underline, SIGNAL(clicked()),
-          this, SLOT(textBtnUnderline()));
+  connect(btn_underline, SIGNAL(clicked()), this, SLOT(textBtnUnderline()));
   btn_layout->addWidget(btn_underline);
   QPushButton* btn_thing = new QPushButton(this);
   btn_thing->setIcon(QIcon(":/images/icons/32_user.png"));
   btn_thing->setIconSize(QSize(24,24));
   btn_thing->setMaximumSize(30, 30);
-  connect(btn_thing, SIGNAL(clicked()),
-          this, SLOT(textBtnThing()));
+  connect(btn_thing, SIGNAL(clicked()), this, SLOT(textBtnThing()));
   btn_layout->addWidget(btn_thing);
+  QPushButton* btn_item = new QPushButton(this);
+  btn_item->setIcon(QIcon(":/images/icons/32_item.png"));
+  btn_item->setIconSize(QSize(24, 24));
+  btn_item->setMaximumSize(30, 30);
+  connect(btn_item, SIGNAL(clicked()), this, SLOT(textBtnItem()));
+  btn_layout->addWidget(btn_item);
   QPushButton* btn_preview = new QPushButton(this);
   btn_preview->setIcon(QIcon(":/images/icons/32_export.png"));
   btn_preview->setIconSize(QSize(24,24));
   btn_preview->setMaximumSize(30, 30);
-  connect(btn_preview, SIGNAL(clicked()),
-          this, SLOT(textBtnPreview()));
+  connect(btn_preview, SIGNAL(clicked()), this, SLOT(textBtnPreview()));
   btn_layout->addWidget(btn_preview);
   textSelected(false);
   layout->addLayout(btn_layout, 0, 0, 1, 4);
@@ -299,6 +299,40 @@ void ConvoDialog::textBtnItalic()
 }
 
 /*
+ * Description: Slot which triggers when the text item insertion is
+ *              pressed. Allows for selection of a item ID to insert into the
+ *              conversation text.
+ *
+ * Inputs: none
+ * Output: none
+ */
+void ConvoDialog::textBtnItem()
+{
+  /* Compile list of all items */
+  QList<QString> list = event_view->getListItems();
+
+  /* Create input dialog to get selected thing */
+  QInputDialog input_dialog;
+  input_dialog.setComboBoxItems(list);
+  if(input_dialog.exec() == QDialog::Accepted)
+  {
+    /* Check if the selected is valid and an ID */
+    QStringList split = input_dialog.textValue().split(':');
+    if(split.size() >= 2)
+    {
+      /* If valid, insert the number */
+      bool ok;
+      split.first().toInt(&ok);
+      if(ok)
+      {
+        QString insert_text = "{I" + split.first() + "}";
+        text_box->textCursor().insertText(insert_text);
+      }
+    }
+  }
+}
+
+/*
  * Description: Slot which triggers when the text preview is selected.
  *              This loads the current xml for a quick preview of how it will
  *              render.
@@ -308,18 +342,19 @@ void ConvoDialog::textBtnItalic()
  */
 void ConvoDialog::textBtnPreview()
 {
-  /* Compile list */
-  QList<QString> list_vec = event_view->getListMapPersons()
-                          + event_view->getListMapNPCs()
-                          + event_view->getListMapThings();
+  /* Compile thing list */
+  QList<QString> list_things = event_view->getListMapPersons()
+                             + event_view->getListMapNPCs()
+                             + event_view->getListMapThings();
   QList<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
   for(int i = 0; i < list_map_ios.size(); i++)
-    list_vec.push_back(list_map_ios[i].first);
-  list_vec += event_view->getListMapItems();
+    list_things.push_back(list_map_ios[i].first);
+  //list_vec += event_view->getListMapItems();
 
   /* Handle conversion */
-  QString render_text = EditorHelpers::convertXml(
-                                             text_box->toPlainText(), list_vec);
+  QString render_text = EditorHelpers::convertXml(text_box->toPlainText(),
+                                                  list_things,
+                                                  event_view->getListItems());
 
   /* Insert warning */
   QString info_text = QString("<font color=\"#900\">* Overlap nested color ") +
@@ -351,7 +386,8 @@ void ConvoDialog::textBtnThing()
   QList<QPair<QString, QString>> list_map_ios = event_view->getListMapIOs();
   for(int i = 0; i < list_map_ios.size(); i++)
     list.push_back(list_map_ios[i].first);
-  list += event_view->getListMapItems();
+  //list += event_view->getListMapItems();
+  qSort(list);
   list.push_front(player);
 
   /* Create input dialog to get selected thing */
