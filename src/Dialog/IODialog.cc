@@ -184,6 +184,7 @@ void IODialog::createLayout(bool instance)
   combo_interaction->addItem("Walk On");
   combo_interaction->addItem("Walk Off");
   combo_interaction->addItem("Use");
+  combo_interaction->addItem("Trigger");
   connect(combo_interaction, SIGNAL(currentIndexChanged(int)),
           this, SLOT(changedComboInteract(int)));
   layout->addWidget(combo_interaction, 1, 5, 1, 3);

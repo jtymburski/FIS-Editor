@@ -141,7 +141,9 @@ void EditorMapIO::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
       {
         /* Write interaction trigger */
         QString action = "";
-        if(states[i]->interact == MapState::USE)
+        if(states[i]->interact == MapState::TRIGGER)
+          action = "trigger";
+        else if(states[i]->interact == MapState::USE)
           action = "use";
         else if(states[i]->interact == MapState::WALKOFF)
           action = "walkoff";
@@ -725,7 +727,9 @@ void EditorMapIO::load(XmlData data, int index)
         else if(element3 == "interaction")
         {
           QString interaction = QString::fromStdString(data.getDataString());
-          if(interaction == "use")
+          if(interaction == "trigger")
+            state->interact = MapState::TRIGGER;
+          else if(interaction == "use")
             state->interact = MapState::USE;
           else if(interaction == "walkoff")
             state->interact = MapState::WALKOFF;

@@ -856,6 +856,21 @@ QString EditorEvent::getTextSummary(QString prefix)
 }
 
 /*
+ * Description: Returns the target ID for the trigger IO event. Returns -2 if
+ *              the event is not the unlock IO event
+ *
+ * Inputs: none
+ * Output: int - the reference ID. -1 if self reference. -2 if invalid
+ */
+int EditorEvent::getTriggerIOID()
+{
+  int io_id;
+  if(EventSet::dataEventTriggerIO(event, io_id))
+    return io_id;
+  return -2;
+}
+
+/*
  * Description: Returns the selected events in the IO for the unlock IO event.
  *              UnlockIOEvent::NONE returned if invalid.
  *
@@ -1323,6 +1338,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
                        bool no_preface)
 {
   (void)game_only;
+  bool event_wrap = false;
 
   if(fh != NULL && event.classification != EventClassifier::NOEVENT)
   {
@@ -1341,6 +1357,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
          event_win->classification != EventClassifier::NOEVENT)
       {
         fh->writeXmlElement("startbattle");
+        event_wrap = true;
 
         /* Flags */
         bool win_disappear, lose_gg, restore_health, restore_qd;
@@ -1369,14 +1386,6 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           EditorEvent editor_lose(*event_lose);
           editor_lose.save(fh, game_only, "eventlose");
         }
-
-        /* Remaining data */
-        if(isOneShot())
-          fh->writeXmlData("one_shot", isOneShot());
-        if(getSoundID() >= 0)
-          fh->writeXmlData("sound_id", getSoundID());
-
-        fh->writeXmlElementEnd();
       }
       else
       {
@@ -1393,6 +1402,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     else if(event.classification == EventClassifier::ITEMGIVE)
     {
       fh->writeXmlElement("giveitem");
+      event_wrap = true;
 
       /* Flag data */
       GiveItemFlags flags = getGiveItemFlags();
@@ -1406,41 +1416,25 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("autodrop", auto_drop);
       if(getGiveItemChance() != EventSet::kGIVE_DEF_CHANCE)
         fh->writeXmlData("chance", getGiveItemChance());
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
     }
     /* -- ITEM TAKE EVENT -- */
     else if(event.classification == EventClassifier::ITEMTAKE)
     {
       fh->writeXmlElement("takeitem");
+      event_wrap = true;
 
       /* Data */
       fh->writeXmlData("id", getTakeItemID());
       fh->writeXmlData("count", getTakeItemCount());
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
     }
     /* -- MAP SWITCH EVENT -- */
     else if(event.classification == EventClassifier::MAPSWITCH)
     {
       fh->writeXmlElement("startmap");
+      event_wrap = true;
 
       /* Data */
       fh->writeXmlData("id", getStartMapID());
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
     }
     /* -- MULTIPLE EVENT -- */
     else if(event.classification == EventClassifier::MULTIPLE)
@@ -1455,6 +1449,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       if(valid)
       {
         fh->writeXmlElement("multiple");
+        event_wrap = true;
 
         /* Event data */
         for(uint32_t i = 0; i < event.events.size(); i++)
@@ -1467,14 +1462,6 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
             fh->writeXmlElementEnd();
           }
         }
-
-        /* Remaining data */
-        if(isOneShot())
-          fh->writeXmlData("one_shot", isOneShot());
-        if(getSoundID() >= 0)
-          fh->writeXmlData("sound_id", getSoundID());
-
-        fh->writeXmlElementEnd();
       }
       /* Otherwise, just print blank holder */
       else
@@ -1489,15 +1476,10 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       if(getSoundID() >= 0 || isOneShot())
       {
         fh->writeXmlElement("notification");
+        event_wrap = true;
 
         /* Data */
         fh->writeXmlData("text", getNotification().toStdString());
-        if(isOneShot())
-          fh->writeXmlData("one_shot", isOneShot());
-        if(getSoundID() >= 0)
-          fh->writeXmlData("sound_id", getSoundID());
-
-        fh->writeXmlElementEnd();
       }
       else
       {
@@ -1510,6 +1492,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
       if(getPropertyType() != ThingBase::ISBASE)
       {
         fh->writeXmlElement("propertymod");
+        event_wrap = true;
 
         /* Get data */
         ThingProperty bools, props;
@@ -1578,14 +1561,6 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
           if(inactive)
             fh->writeXmlData("inactive", inactive_int);
         }
-
-        /* Sound / One Shot Data */
-        if(isOneShot())
-          fh->writeXmlData("one_shot", isOneShot());
-        if(getSoundID() >= 0)
-          fh->writeXmlData("sound_id", getSoundID());
-
-        fh->writeXmlElementEnd();
       }
     }
     /* -- SOUND ONLY EVENT -- */
@@ -1597,12 +1572,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         if(isOneShot())
         {
           fh->writeXmlElement("justsound");
-
-          /* Data */
-          fh->writeXmlData("sound_id", getSoundID());
-          fh->writeXmlData("one_shot", isOneShot());
-
-          fh->writeXmlElementEnd();
+          event_wrap = true;
         }
         /* Just the sound ID: simpler save */
         else
@@ -1615,6 +1585,7 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
     else if(event.classification == EventClassifier::TELEPORTTHING)
     {
       fh->writeXmlElement("teleportthing");
+      event_wrap = true;
 
       /* Data */
       fh->writeXmlData("x", getTeleportX());
@@ -1623,17 +1594,21 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         fh->writeXmlData("section", getTeleportSection());
       if(getTeleportThingID() != 0)
         fh->writeXmlData("id", getTeleportThingID());
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
+    }
+    /* -- TRIGGER IO EVENT -- */
+    else if(event.classification == EventClassifier::TRIGGERIO)
+    {
+      fh->writeXmlElement("triggerio");
+      event_wrap = true;
 
-      fh->writeXmlElementEnd();
+      /* Data */
+      fh->writeXmlData("id", getTriggerIOID());
     }
     /* -- UNLOCK IO EVENT -- */
     else if(event.classification == EventClassifier::UNLOCKIO)
     {
       fh->writeXmlElement("unlockio");
+      event_wrap = true;
 
       /* Access data */
       int io_id, state_num, view_time;
@@ -1693,19 +1668,12 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         if(view_time != EventSet::kVIEW_TIME)
           fh->writeXmlData("viewtime", view_time);
       }
-
-      /* Sound and one shot */
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
     }
     /* -- UNLOCK THING EVENT -- */
     else if(event.classification == EventClassifier::UNLOCKTHING)
     {
       fh->writeXmlElement("unlockthing");
+      event_wrap = true;
 
       /* Access data */
       int thing_id, view_time;
@@ -1726,19 +1694,12 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         if(view_time != EventSet::kVIEW_TIME)
           fh->writeXmlData("viewtime", view_time);
       }
-
-      /* Sound and one shot */
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-
-      fh->writeXmlElementEnd();
     }
     /* -- UNLOCK TILE EVENT -- */
     else if(event.classification == EventClassifier::UNLOCKTILE)
     {
       fh->writeXmlElement("unlocktile");
+      event_wrap = true;
 
       /* Access data */
       int section_id, tile_x, tile_y, view_time;
@@ -1780,16 +1741,19 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
         if(view_time != EventSet::kVIEW_TIME)
           fh->writeXmlData("viewtime", view_time);
       }
+    }
 
-      /* Sound and one shot */
+    /* End wrapper */
+    if(event_wrap)
+    {
       if(isOneShot())
         fh->writeXmlData("one_shot", isOneShot());
       if(getSoundID() >= 0)
         fh->writeXmlData("sound_id", getSoundID());
-
       fh->writeXmlElementEnd();
     }
 
+    /* Overall wrapper */
     if(!no_preface)
       fh->writeXmlElementEnd();
   }
@@ -2132,6 +2096,23 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
 }
 
 /*
+ * Description: Sets the event in the class to the trigger IO event: using the
+ *              IO ID and optional sound ID.
+ *
+ * Inputs: int io_id - the IO reference ID
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the event was created
+ */
+bool EditorEvent::setEventTriggerIO(int io_id, int sound_id)
+{
+  bool one_shot = event.one_shot;
+  setEventBlank();
+  event = EventSet::createEventTriggerIO(io_id, sound_id);
+  event.one_shot = one_shot;
+  return true;
+}
+
+/*
  * Description: Sets the event in the class to the unlock IO event, using the
  *              IO ID, mode, state reference, event mode, view mode, and view
  *              time.
@@ -2428,7 +2409,7 @@ Conversation EditorEvent::createConversation(QString text, int id, Event event,
  */
 void EditorEvent::printConversation(Conversation* convo, QString index)
 {
-  if(convo != NULL)
+  if(convo != nullptr)
   {
     /* Print the current */
     qDebug() << index << ": " << QString::fromStdString(convo->text) << " , "

@@ -561,6 +561,24 @@ void EventView::createLayout()
       layout_tele->setRowStretch(3, 1);
       view_stack->addWidget(widget_teleport);
     }
+    /* ---- TRIGGER IO ---- */
+    else if(available_events[i] == EventClassifier::TRIGGERIO)
+    {
+      QWidget* widget_trigger = new QWidget(this);
+      QGridLayout* layout_trigger = new QGridLayout(widget_trigger);
+
+      QLabel* lbl_trigger = new QLabel("IO:", this);
+      trigger_name = new QComboBox(this);
+      EditorHelpers::comboBoxOptimize(trigger_name);
+      connect(trigger_name, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(triggerIOChanged(QString)));
+      layout_trigger->setRowStretch(0, 1);
+      layout_trigger->addWidget(lbl_trigger, 1, 0);
+      layout_trigger->addWidget(trigger_name, 1, 1, 1, 3);
+      layout_trigger->setRowStretch(2, 1);
+
+      view_stack->addWidget(widget_trigger);
+    }
     /* ---- UNLOCK: IO ---- */
     else if(available_events[i] == EventClassifier::UNLOCKIO)
     {
@@ -1331,6 +1349,24 @@ void EventView::setLayoutData()
         tele_thing->setCurrentIndex(0);
       teleportThingChanged(tele_thing->currentIndex());
     }
+    /* -- TRIGGER IO -- */
+    else if(event->getEventType() == EventClassifier::TRIGGERIO)
+    {
+      /* Attempt to find thing in combo box */
+      int index = -1;
+      for(int i = 0; (index < 0) && (i < trigger_name->count()); i++)
+      {
+        QStringList set = trigger_name->itemText(i).split(":");
+        if(set.size() == 2)
+          if(set.front().toInt() == event->getTriggerIOID())
+            index = i;
+      }
+      if(index >= 0)
+        trigger_name->setCurrentIndex(index);
+      else
+        trigger_name->setCurrentIndex(0);
+      triggerIOChanged(trigger_name->currentText());
+    }
     /* -- UNLOCK IO -- */
     else if(event->getEventType() == EventClassifier::UNLOCKIO)
     {
@@ -1349,7 +1385,7 @@ void EventView::setLayoutData()
       if(index >= 0)
         unio_name->setCurrentIndex(index);
       else
-        unth_name->setCurrentIndex(0);
+        unio_name->setCurrentIndex(0);
       unlockIOChanged(unio_name->currentText());
 
       /* Main mode check boxes */
@@ -1619,6 +1655,7 @@ void EventView::updateLists(bool things, bool ios, bool items,
 
   /* Signal blocks */
   tele_thing->blockSignals(true);
+  trigger_name->blockSignals(true);
   unio_name->blockSignals(true);
   unth_name->blockSignals(true);
 
@@ -1630,6 +1667,15 @@ void EventView::updateLists(bool things, bool ios, bool items,
     //tele_thing->addItem("-1: This Thing");
     tele_thing->addItems(list_map_persons + list_map_npcs
                                           + list_map_things + front_ios);
+  }
+
+  /* Trigger IO */
+  bool update_trigger = ios;
+  if(update_trigger)
+  {
+    trigger_name->clear();
+    trigger_name->addItem("-1: This IO");
+    trigger_name->addItems(front_ios);
   }
 
   /* Unlock IO */
@@ -1653,6 +1699,7 @@ void EventView::updateLists(bool things, bool ios, bool items,
   /* Restore signal blocks */
   setLayoutData();
   tele_thing->blockSignals(false);
+  trigger_name->blockSignals(false);
   unio_name->blockSignals(false);
   unth_name->blockSignals(false);
 }
@@ -1871,6 +1918,8 @@ void EventView::categoryChanged(int index)
         event->setEventSound();
       else if(new_class == EventClassifier::TELEPORTTHING)
         event->setEventTeleport();
+      else if(new_class == EventClassifier::TRIGGERIO)
+        event->setEventTriggerIO();
       else if(new_class == EventClassifier::UNLOCKIO)
         event->setEventUnlockIO();
       else if(new_class == EventClassifier::UNLOCKTHING)
@@ -3421,6 +3470,22 @@ void EventView::teleportThingChanged(int index)
       event->setEventTeleport(list.front().toInt(), event->getTeleportSection(),
                               event->getTeleportX(), event->getTeleportY(),
                               event->getSoundID());
+  }
+}
+
+/*
+ * Description: Slot triggered on trigger IO dropdown selection change. Updates
+ *              the targetted IO.
+ *
+ * Inputs: QString text - the selected text in the dialog to parse
+ * Output: none
+ */
+void EventView::triggerIOChanged(const QString & text)
+{
+  QStringList list = text.split(":");
+  if(list.size() == 2)
+  {
+    event->setEventTriggerIO(list.front().toInt(), event->getSoundID());
   }
 }
 

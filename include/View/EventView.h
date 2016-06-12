@@ -167,6 +167,9 @@ private:
   QLineEdit* tele_map;
   QComboBox* tele_thing;
 
+  /* Trigger IO event widgets */
+  QComboBox* trigger_name;
+
   /* Unlock thing control widgets */
   QComboBox* unth_name;
   QCheckBox* unth_view_enable;
@@ -362,6 +365,9 @@ public slots:
   /* The teleport event button presses */
   void teleportMapPressed();
   void teleportThingChanged(int index);
+
+  /* The trigger IO triggers */
+  void triggerIOChanged(const QString & text);
 
   /* The unlock IO triggers */
   void unlockIOChanged(const QString & text);

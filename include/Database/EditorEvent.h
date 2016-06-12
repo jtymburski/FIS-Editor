@@ -125,6 +125,9 @@ public:
   /* Returns a text list summary of the event */
   QString getTextSummary(QString prefix = "Event: ");
 
+  /* Trigger IO data */
+  int getTriggerIOID();
+
   /* Unlock IO data */
   UnlockIOEvent getUnlockIOEventMode();
   int getUnlockIOID();
@@ -213,6 +216,10 @@ public:
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
                         int y = 0, int sound_id = EventSet::kUNSET_ID);
+
+  /* Sets the event to the trigger IO */
+  bool setEventTriggerIO(int io_id = EventSet::kUNSET_ID,
+                         int sound_id = EventSet::kUNSET_ID);
 
   /* Sets the event to the unlock IO */
   bool setEventUnlockIO(int io_id = 0,
