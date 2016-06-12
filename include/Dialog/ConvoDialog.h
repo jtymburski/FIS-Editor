@@ -25,9 +25,9 @@ class ConvoDialog : public QDialog
   Q_OBJECT
 public:
   /* Constructor Function */
-  ConvoDialog(Conversation* edit_convo = NULL, bool is_option = false, 
+  ConvoDialog(Conversation* edit_convo = nullptr, bool is_option = false,
               EventClassifier limiter = EventClassifier::NOEVENT,
-              QWidget* parent = NULL);
+              QWidget* parent = nullptr);
 
   /* Destructor Function */
   ~ConvoDialog();
@@ -40,6 +40,9 @@ private:
   //QPushButton* btn_thing;
   QPushButton* btn_underline;
 
+  /* Check Box widgets for TRUE/FALSE entry */
+  QCheckBox* check_delay;
+
   /* Conversation reference */
   Conversation convo_working;
   Conversation* convo_original;
@@ -51,6 +54,9 @@ private:
   /* The list of objects used in possible events */
   QList<QString> list_things;
   
+  /* Spin Box widgets for integer entry */
+  QSpinBox* spin_delay;
+
   /* Conversation text edit box */
   QTextEdit* text_box;
 
@@ -65,7 +71,7 @@ private:
  *===========================================================================*/
 private:
   /* Creates the dialog */
-  void createDialog(bool is_option = false,
+  void createDialog(bool is_option = false, bool is_no_delay = false,
                     EventClassifier limiter = EventClassifier::NOEVENT);
 
   /* Fill with data */
@@ -92,6 +98,9 @@ public slots:
   /* Button triggers */
   void buttonCancel();
   void buttonOk();
+
+  /* Check Box triggers */
+  void checkDelayChange(int state);
 
   /* Text manipulator triggers */
   void textBtnBrush();

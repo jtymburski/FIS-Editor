@@ -240,6 +240,8 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
     /* Conversation Data */
     fh->writeXmlData("text", convo->text);
     fh->writeXmlData("id", convo->thing_id);
+    if(convo->delay > 0)
+      fh->writeXmlData("delay", convo->delay);
     if(first_call)
     {
       if(isOneShot())

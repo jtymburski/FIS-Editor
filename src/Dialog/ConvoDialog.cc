@@ -27,23 +27,29 @@ ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
                          EventClassifier limiter, QWidget* parent)
            : QDialog(parent)
 {
+  bool is_no_delay = false;
+
   /* Initialize variables */
   convo_original = edit_convo;
   convo_working.action_event = EventSet::createBlankEvent();
   convo_working.category = DialogCategory::TEXT;
+  convo_working.delay = EventSet::kCONVO_DELAY;
   convo_working.text = "";
   convo_working.thing_id = 0;
-  if(convo_original != NULL)
+  if(convo_original != nullptr)
   {
     convo_working.action_event = convo_original->action_event;
+    convo_working.delay = convo_original->delay;
     convo_working.category = convo_original->category;
     convo_working.text = convo_original->text;
     convo_working.thing_id = convo_original->thing_id;
+
+    is_no_delay = (convo_original->next.size() > 1);
   }
   event_ctrl = new EditorEvent(convo_working.action_event);
 
   /* Create the dialog */
-  createDialog(is_option, limiter);
+  createDialog(is_option, is_no_delay, limiter);
 
   /* Fill with data */
   updateData();
@@ -54,9 +60,9 @@ ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
  */
 ConvoDialog::~ConvoDialog()
 {
-  event_view->setEvent(NULL);
+  event_view->setEvent(nullptr);
   delete event_ctrl;
-  event_ctrl = NULL;
+  event_ctrl = nullptr;
 }
 
 /*============================================================================
@@ -67,10 +73,12 @@ ConvoDialog::~ConvoDialog()
  * Description: Creates the dialog layout with QT functional widgets.
  *
  * Inputs: bool is_option - is the segment conversation an option?
+ *         bool is_no_delay - is the delay portion disabled?
  *         EventClassifier limiter - the restrictions on the event view
  * Output: none
  */
-void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
+void ConvoDialog::createDialog(bool is_option, bool is_no_delay,
+                               EventClassifier limiter)
 {
   /* Layout */
   QGridLayout* layout = new QGridLayout(this);
@@ -133,15 +141,29 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   QLabel* lbl_thing = new QLabel("Interactor", this);
   thing_combo = new QComboBox(this);
   EditorHelpers::comboBoxOptimize(thing_combo);
-  if(is_option)
-    thing_combo->setDisabled(true);
+  thing_combo->setDisabled(is_option);
   layout->addWidget(lbl_thing, 2, 0, 1, 1);
   layout->addWidget(thing_combo, 2, 1, 1, 3);
+
+  /* The delay widget */
+  QLabel* lbl_delay = new QLabel("Delay", this);
+  spin_delay = new QSpinBox(this);
+  spin_delay->setMinimum(0);
+  spin_delay->setMaximum(3600000);
+  spin_delay->setSuffix(" ms");
+  spin_delay->setDisabled(is_option || is_no_delay);
+  check_delay = new QCheckBox("No Delay", this);
+  check_delay->setDisabled(is_option || is_no_delay);
+  connect(check_delay, SIGNAL(stateChanged(int)),
+          this, SLOT(checkDelayChange(int)));
+  layout->addWidget(lbl_delay, 3, 0);
+  layout->addWidget(spin_delay, 3, 1);
+  layout->addWidget(check_delay, 3, 2);
 
   /* The event widget */
   int limit_int = ((int)limiter | (int)EventClassifier::CONVERSATION);
   event_view = new EventView(event_ctrl, this, (EventClassifier)limit_int);
-  layout->addWidget(event_view, 3, 0, 1, 4);
+  layout->addWidget(event_view, 4, 0, 1, 4);
 
   /* The push buttons */
   QPushButton* btn_ok = new QPushButton("Ok", this);
@@ -149,8 +171,8 @@ void ConvoDialog::createDialog(bool is_option, EventClassifier limiter)
   connect(btn_ok, SIGNAL(clicked()), this, SLOT(buttonOk()));
   QPushButton* btn_cancel = new QPushButton("Cancel", this);
   connect(btn_cancel, SIGNAL(clicked()), this, SLOT(buttonCancel()));
-  layout->addWidget(btn_ok, 4, 1);
-  layout->addWidget(btn_cancel, 4, 2);
+  layout->addWidget(btn_ok, 5, 1);
+  layout->addWidget(btn_cancel, 5, 2);
 
   /* Dialog control */
   setWindowTitle("Conversation Edit");
@@ -168,6 +190,7 @@ void ConvoDialog::updateData()
   /* Set the text in the box */
   text_box->setPlainText(QString::fromStdString(convo_working.text));
 
+  /* Selected thing ID */
   thing_combo->clear();
   int index = -1;
   thing_combo->addItems(list_things);
@@ -181,6 +204,11 @@ void ConvoDialog::updateData()
   }
   if(index >= 0)
     thing_combo->setCurrentIndex(index);
+
+  /* Delay */
+  check_delay->setChecked(convo_working.delay < 0);
+  if(convo_working.delay >= 0)
+    spin_delay->setValue(convo_working.delay);
 }
 
 /*============================================================================
@@ -196,7 +224,7 @@ void ConvoDialog::updateData()
  */
 void ConvoDialog::closeEvent(QCloseEvent*)
 {
-  convo_original = NULL;
+  convo_original = nullptr;
   convo_working = EventSet::createBlankConversation();
 }
 
@@ -226,21 +254,43 @@ void ConvoDialog::buttonCancel()
  */
 void ConvoDialog::buttonOk()
 {
-  if(convo_original != NULL)
+  if(convo_original != nullptr)
   {
-    /* Copy the data across */
+    /* Copy the data across - text */
     convo_original->text = text_box->toPlainText().toStdString();
+
+    /* Event */
     convo_original->action_event =
                            EventSet::deleteEvent(convo_original->action_event);
     convo_original->action_event = EventSet::copyEvent(*event_ctrl->getEvent());
+
+    /* Thing ID */
     QString selected_thing = thing_combo->currentText();
     QStringList list = selected_thing.split(":");
     if(list.size() == 2 && list.front().toInt() >= -1)
       convo_original->thing_id = list.front().toInt();
+
+    /* Delay */
+    if(check_delay->isChecked())
+      convo_original->delay = EventSet::kCONVO_DELAY;
+    else
+      convo_original->delay = spin_delay->value();
   }
 
   emit success();
   close();
+}
+
+/*
+ * Description: Check box delay trigger state change. This disables or enables
+ *              the spin box for entering the time delay.
+ *
+ * Inputs: int state - the state of the check box
+ * Output: none
+ */
+void ConvoDialog::checkDelayChange(int state)
+{
+  spin_delay->setEnabled(state != Qt::Checked);
 }
 
 /*
@@ -314,6 +364,8 @@ void ConvoDialog::textBtnItem()
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
   input_dialog.setComboBoxItems(list);
+  input_dialog.setWindowTitle("Item Name Select");
+  input_dialog.setLabelText("Select Item Name to Insert:");
   if(input_dialog.exec() == QDialog::Accepted)
   {
     /* Check if the selected is valid and an ID */
@@ -393,6 +445,8 @@ void ConvoDialog::textBtnThing()
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
   input_dialog.setComboBoxItems(list);
+  input_dialog.setWindowTitle("Thing Name Select");
+  input_dialog.setLabelText("Select Thing Name to Insert:");
   if(input_dialog.exec() == QDialog::Accepted)
   {
     /* Check if the selected is valid and an ID */

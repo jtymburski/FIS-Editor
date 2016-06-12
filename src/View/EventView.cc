@@ -27,8 +27,7 @@ EventView::EventView(EditorEvent* event, QWidget* parent,
          : QFrame(parent)
 {
   /* Initialize variables */
-  //database = NULL;
-  this->event = NULL;
+  this->event = nullptr;
   this->limiter = limiter;
   pop_convo = nullptr;
   rightclick_index = "";
@@ -2297,6 +2296,8 @@ void EventView::notificationBtnItem()
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
   input_dialog.setComboBoxItems(list_items);
+  input_dialog.setWindowTitle("Item Name Select");
+  input_dialog.setLabelText("Select Item Name to Insert:");
   if(input_dialog.exec() == QDialog::Accepted)
   {
     /* Check if the selected is valid and an ID */
@@ -2373,6 +2374,8 @@ void EventView::notificationBtnThing()
   /* Create input dialog to get selected thing */
   QInputDialog input_dialog;
   input_dialog.setComboBoxItems(list);
+  input_dialog.setWindowTitle("Thing Name Select");
+  input_dialog.setLabelText("Select Thing Name to Insert:");
   if(input_dialog.exec() == QDialog::Accepted)
   {
     /* Check if the selected is valid and an ID */
