@@ -89,10 +89,14 @@ void EditorPerson::copySelf(const EditorPerson &source)
   id = source.id;
 
   /* Sub data */
-  sprite_as_base = source.sprite_as_base;
-  sprite_ds_base = source.sprite_ds_base;
-  sprite_fp_base = source.sprite_fp_base;
-  sprite_tp_base = source.sprite_tp_base;
+  sprite_ally_base = source.sprite_ally_base;
+  sprite_ally_off_base = source.sprite_ally_off_base;
+  sprite_ally_def_base = source.sprite_ally_def_base;
+  sprite_dialog_base = source.sprite_dialog_base;
+  sprite_face_base = source.sprite_face_base;
+  sprite_foe_base = source.sprite_foe_base;
+  sprite_foe_off_base = source.sprite_foe_off_base;
+  sprite_foe_def_base = source.sprite_foe_def_base;
 
   class_id_base = source.class_id_base;
   class_total = source.class_total;
@@ -254,88 +258,200 @@ void EditorPerson::createLayout()
   //layout->addWidget(list_items_used, 3, 8, 9, 2);
 
   /* First Person Image */
-  QLabel* lbl_fp = new QLabel("First Person", this);
-  layout->addWidget(lbl_fp, 7, 0, 1, 2, Qt::AlignHCenter);
-  lbl_fp_img = new QLabel(this);
-  lbl_fp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-  lbl_fp_img->setStyleSheet("border: 1px solid #b9b5b2");
-  lbl_fp_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_fp_img, 8, 0, 1, 2);
-  QPushButton* btn_fp = new QPushButton(this);
-  btn_fp->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_fp->setIconSize(QSize(24,24));
-  btn_fp->setMaximumSize(30, 30);
-  connect(btn_fp, SIGNAL(clicked()), this, SLOT(btnFirstPerson()));
-  layout->addWidget(btn_fp, 8, 0, 1, 2,
-                    Qt::AlignRight | Qt::AlignTop);
+//  QLabel* lbl_fp = new QLabel("First Person", this);
+//  layout->addWidget(lbl_fp, 7, 0, 1, 2, Qt::AlignHCenter);
+//  lbl_fp_img = new QLabel(this);
+//  lbl_fp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+//  lbl_fp_img->setStyleSheet("border: 1px solid #b9b5b2");
+//  lbl_fp_img->setAlignment(Qt::AlignCenter);
+//  layout->addWidget(lbl_fp_img, 8, 0, 1, 2);
+//  QPushButton* btn_fp = new QPushButton(this);
+//  btn_fp->setIcon(QIcon(":/images/icons/32_settings.png"));
+//  btn_fp->setIconSize(QSize(24,24));
+//  btn_fp->setMaximumSize(30, 30);
+//  connect(btn_fp, SIGNAL(clicked()), this, SLOT(btnFirstPerson()));
+//  layout->addWidget(btn_fp, 8, 0, 1, 2,
+//                    Qt::AlignRight | Qt::AlignTop);
 
   /* Third Person Image */
-  QLabel* lbl_tp = new QLabel("Third Person", this);
-  layout->addWidget(lbl_tp, 7, 2, 1, 2, Qt::AlignHCenter);
-  lbl_tp_img = new QLabel(this);
-  lbl_tp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-  lbl_tp_img->setStyleSheet("border: 1px solid #b9b5b2");
-  lbl_tp_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_tp_img, 8, 2, 1, 2);
-  QPushButton* btn_tp = new QPushButton(this);
-  btn_tp->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_tp->setIconSize(QSize(24,24));
-  btn_tp->setMaximumSize(30, 30);
-  connect(btn_tp, SIGNAL(clicked()), this, SLOT(btnThirdPerson()));
-  layout->addWidget(btn_tp, 8, 2, 1, 2,
-                    Qt::AlignRight | Qt::AlignTop);
+//  QLabel* lbl_tp = new QLabel("Third Person", this);
+//  layout->addWidget(lbl_tp, 7, 2, 1, 2, Qt::AlignHCenter);
+//  lbl_tp_img = new QLabel(this);
+//  lbl_tp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+//  lbl_tp_img->setStyleSheet("border: 1px solid #b9b5b2");
+//  lbl_tp_img->setAlignment(Qt::AlignCenter);
+//  layout->addWidget(lbl_tp_img, 8, 2, 1, 2);
+//  QPushButton* btn_tp = new QPushButton(this);
+//  btn_tp->setIcon(QIcon(":/images/icons/32_settings.png"));
+//  btn_tp->setIconSize(QSize(24,24));
+//  btn_tp->setMaximumSize(30, 30);
+//  connect(btn_tp, SIGNAL(clicked()), this, SLOT(btnThirdPerson()));
+//  layout->addWidget(btn_tp, 8, 2, 1, 2,
+//                    Qt::AlignRight | Qt::AlignTop);
 
   /* Action Image */
-  QLabel* lbl_as = new QLabel("Action Person", this);
-  layout->addWidget(lbl_as, 0, 4, 1, 2, Qt::AlignHCenter);
-  lbl_as_img = new QLabel(this);
-  lbl_as_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-  lbl_as_img->setStyleSheet("border: 1px solid #b9b5b2");
-  lbl_as_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_as_img, 1, 4, 6, 2);
-  QPushButton* btn_as = new QPushButton(this);
-  btn_as->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_as->setIconSize(QSize(24,24));
-  btn_as->setMaximumSize(30, 30);
-  connect(btn_as, SIGNAL(clicked()), this, SLOT(btnActionSprite()));
-  layout->addWidget(btn_as, 1, 4, 6, 2,
+//  QLabel* lbl_as = new QLabel("Action Person", this);
+//  layout->addWidget(lbl_as, 0, 4, 1, 2, Qt::AlignHCenter);
+//  lbl_as_img = new QLabel(this);
+//  lbl_as_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+//  lbl_as_img->setStyleSheet("border: 1px solid #b9b5b2");
+//  lbl_as_img->setAlignment(Qt::AlignCenter);
+//  layout->addWidget(lbl_as_img, 1, 4, 6, 2);
+//  QPushButton* btn_as = new QPushButton(this);
+//  btn_as->setIcon(QIcon(":/images/icons/32_settings.png"));
+//  btn_as->setIconSize(QSize(24,24));
+//  btn_as->setMaximumSize(30, 30);
+//  connect(btn_as, SIGNAL(clicked()), this, SLOT(btnActionSprite()));
+//  layout->addWidget(btn_as, 1, 4, 6, 2,
+//                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Ally Label */
+  QLabel* lbl_ally = new QLabel("Ally", this);
+  layout->addWidget(lbl_ally, 7, 0, 1, 2, Qt::AlignHCenter);
+  lbl_ally_img = new QLabel(this);
+  lbl_ally_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_ally_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_ally_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_ally_img, 8, 0, 1, 2);
+  QPushButton* btn_ally = new QPushButton(this);
+  btn_ally->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_ally->setIconSize(QSize(24,24));
+  btn_ally->setMaximumSize(30, 30);
+  connect(btn_ally, SIGNAL(clicked()), this, SLOT(btnAlly()));
+  layout->addWidget(btn_ally, 8, 0, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Ally Defensive Label */
+  QLabel* lbl_ally_def = new QLabel("Ally Defensive Action", this);
+  layout->addWidget(lbl_ally_def, 7, 4, 1, 2, Qt::AlignHCenter);
+  lbl_ally_def_img = new QLabel(this);
+  lbl_ally_def_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_ally_def_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_ally_def_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_ally_def_img, 8, 4, 1, 2);
+  QPushButton* btn_ally_def = new QPushButton(this);
+  btn_ally_def->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_ally_def->setIconSize(QSize(24,24));
+  btn_ally_def->setMaximumSize(30, 30);
+  connect(btn_ally_def, SIGNAL(clicked()), this, SLOT(btnAllyDef()));
+  layout->addWidget(btn_ally_def, 8, 4, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Ally Offensive Label */
+  QLabel* lbl_ally_off = new QLabel("Ally Offensive Action", this);
+  layout->addWidget(lbl_ally_off, 7, 8, 1, 2, Qt::AlignHCenter);
+  lbl_ally_off_img = new QLabel(this);
+  lbl_ally_off_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_ally_off_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_ally_off_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_ally_off_img, 8, 8, 1, 2);
+  QPushButton* btn_ally_off = new QPushButton(this);
+  btn_ally_off->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_ally_off->setIconSize(QSize(24,24));
+  btn_ally_off->setMaximumSize(30, 30);
+  connect(btn_ally_off, SIGNAL(clicked()), this, SLOT(btnAllyOff()));
+  layout->addWidget(btn_ally_off, 8, 8, 1, 2,
                     Qt::AlignRight | Qt::AlignTop);
 
   /* Dialog Image */
-  QLabel* lbl_ds = new QLabel("Dialog Person", this);
-  layout->addWidget(lbl_ds, 7, 4, 1, 2, Qt::AlignHCenter);
-  lbl_ds_img = new QLabel(this);
-  lbl_ds_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-  lbl_ds_img->setStyleSheet("border: 1px solid #b9b5b2");
-  lbl_ds_img->setAlignment(Qt::AlignCenter);
-  layout->addWidget(lbl_ds_img, 8, 4, 1, 2);
-  QPushButton* btn_ds = new QPushButton(this);
-  btn_ds->setIcon(QIcon(":/images/icons/32_settings.png"));
-  btn_ds->setIconSize(QSize(24,24));
-  btn_ds->setMaximumSize(30, 30);
-  connect(btn_ds, SIGNAL(clicked()), this, SLOT(btnDialogSprite()));
-  layout->addWidget(btn_ds, 8, 4, 1, 2,
+  QLabel* lbl_dialog = new QLabel("Dialog Person", this);
+  layout->addWidget(lbl_dialog, 7, 12, 1, 2, Qt::AlignHCenter);
+  lbl_dialog_img = new QLabel(this);
+  lbl_dialog_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_dialog_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_dialog_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_dialog_img, 8, 12, 1, 2);
+  QPushButton* btn_dialog = new QPushButton(this);
+  btn_dialog->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_dialog->setIconSize(QSize(24,24));
+  btn_dialog->setMaximumSize(30, 30);
+  connect(btn_dialog, SIGNAL(clicked()), this, SLOT(btnDialog()));
+  layout->addWidget(btn_dialog, 8, 12, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Face Label */
+  QLabel* lbl_face = new QLabel("Face", this);
+  layout->addWidget(lbl_face, 11, 0, 1, 2, Qt::AlignHCenter);
+  lbl_face_img = new QLabel(this);
+  lbl_face_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_face_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_face_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_face_img, 12, 0, 1, 2);
+  QPushButton* btn_face = new QPushButton(this);
+  btn_face->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_face->setIconSize(QSize(24,24));
+  btn_face->setMaximumSize(30, 30);
+  connect(btn_face, SIGNAL(clicked()), this, SLOT(btnFace()));
+  layout->addWidget(btn_face, 12, 0, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Foe Label */
+  QLabel* lbl_foe = new QLabel("Foe", this);
+  layout->addWidget(lbl_foe, 11, 4, 1, 2, Qt::AlignHCenter);
+  lbl_foe_img = new QLabel(this);
+  lbl_foe_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_foe_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_foe_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_foe_img, 12, 4, 1, 2);
+  QPushButton* btn_foe = new QPushButton(this);
+  btn_foe->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_foe->setIconSize(QSize(24,24));
+  btn_foe->setMaximumSize(30, 30);
+  connect(btn_foe, SIGNAL(clicked()), this, SLOT(btnFoe()));
+  layout->addWidget(btn_foe, 12, 4, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Foe Defensive Label */
+  QLabel* lbl_foe_def = new QLabel("Foe Defensive Action", this);
+  layout->addWidget(lbl_foe_def, 11, 8, 1, 2, Qt::AlignHCenter);
+  lbl_foe_def_img = new QLabel(this);
+  lbl_foe_def_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_foe_def_img->setStyleSheet("border: 1px solid #b9b5b2");
+  lbl_foe_def_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_foe_def_img, 12, 8, 1, 2);
+  QPushButton* btn_foe_def = new QPushButton(this);
+  btn_foe_def->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_foe_def->setIconSize(QSize(24,24));
+  btn_foe_def->setMaximumSize(30, 30);
+  connect(btn_foe_def, SIGNAL(clicked()), this, SLOT(btnFoeDef()));
+  layout->addWidget(btn_foe_def, 12, 8, 1, 2,
+                    Qt::AlignRight | Qt::AlignTop);
+
+  /* Foe Offensive Label */
+  QLabel* lbl_foe_off = new QLabel("Foe Offensive Action", this);
+  layout->addWidget(lbl_foe_off, 11, 12, 1, 2, Qt::AlignHCenter);
+  lbl_foe_off_img = new QLabel(this );
+  lbl_foe_off_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
+  lbl_foe_off_img->setStyleSheet("border: 1px sFolid #b9b5b2");
+  lbl_foe_off_img->setAlignment(Qt::AlignCenter);
+  layout->addWidget(lbl_foe_off_img, 12, 12, 1, 2);
+  QPushButton* btn_foe_off = new QPushButton(this);
+  btn_foe_off->setIcon(QIcon(":/images/icons/32_settings.png"));
+  btn_foe_off->setIconSize(QSize(24,24));
+  btn_foe_off->setMaximumSize(30, 30);
+  connect(btn_foe_off, SIGNAL(clicked()), this, SLOT(btnFoeOff()));
+  layout->addWidget(btn_foe_off, 12, 12, 1, 2,
                     Qt::AlignRight | Qt::AlignTop);
 
   /* Action X */
   QLabel* lbl_actionx = new QLabel("Dialog X", this);
-  layout->addWidget(lbl_actionx, 9, 4);
+  layout->addWidget(lbl_actionx, 5, 12);
   spin_actionx = new QSpinBox(this);
   spin_actionx->setMinimum(0);
   spin_actionx->setMaximum(256);
   connect(spin_actionx, SIGNAL(valueChanged(int)),
           this, SLOT(changedActionX(int)));
-  layout->addWidget(spin_actionx, 9, 5);
+  layout->addWidget(spin_actionx, 5, 13);
 
   /* Action Y */
   QLabel* lbl_actiony = new QLabel("Dialog Y", this);
-  layout->addWidget(lbl_actiony, 10, 4);
+  layout->addWidget(lbl_actiony, 6, 12);
   spin_actiony = new QSpinBox(this);
   spin_actiony->setMinimum(0);
   spin_actiony->setMaximum(256);
   connect(spin_actiony, SIGNAL(valueChanged(int)),
           this, SLOT(changedActionY(int)));
-  layout->addWidget(spin_actiony, 10, 5);
+  layout->addWidget(spin_actiony, 6, 13);
 
   /* Save / Reset Buttons */
   QPushButton* btn_reset = new QPushButton("Reset", this);
@@ -374,7 +490,8 @@ int EditorPerson::getElementIndex(Element ele, ElementCurve curve)
 }
 
 /*
- * Description: Loads all the UI elements with the contents from the working
+ * Description:
+ * s all the UI elements with the contents from the working
  *              Person information.
  *
  * Inputs: none
@@ -438,17 +555,27 @@ void EditorPerson::loadWorkingInfo()
   chk_change_equip->setChecked(person_curr.getPFlag(PState::CAN_CHANGE_EQUIP));
   chk_no_signals = false;
 
-  /* First Person Sprite */
-  updateFirstPerson();
-
-  /* Third Person Sprite */
-  updateThirdPerson();
-
-  /* Dialog Sprite */
+  /* Update the Sprites */
+  updateAllySprite();
+  updateAllyDefSprite();
+  updateAllyOffSprite();
   updateDialogSprite();
+  updateFaceSprite();
+  updateFoeSprite();
+  updateFoeDefSprite();
+  updateFoeOffSprite();
 
-  /* Action Sprite */
-  updateActionSprite();
+  /* First Person Sprite */
+//  updateFirstPerson();
+
+//  /* Third Person Sprite */
+//  updateThirdPerson();
+
+//  /* Dialog Sprite */
+//  updateDialogSprite();
+
+//  /* Action Sprite */
+//  updateActionSprite();
 
   /* Action X/Y */
   spin_actionx->setValue(person_curr.getActionX());
@@ -526,25 +653,25 @@ void EditorPerson::updateUsedItems()
  * Inputs: bool clean_only - true if only close existing dialog. Default false
  * Output: none
  */
-void EditorPerson::btnActionSprite(bool clean_only)
-{
-  /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
-  {
-    dialog_sprite->hide();
-    dialog_sprite->deleteLater();
-  }
-  dialog_sprite = NULL;
+//void EditorPerson::btnActionSprite(bool clean_only)
+//{
+//  /* Close and delete the dialog if button is pressed */
+//  if(dialog_sprite != NULL)
+//  {
+//    dialog_sprite->hide();
+//    dialog_sprite->deleteLater();
+//  }
+//  dialog_sprite = NULL;
 
-  /* Create new dialog */
-  if(!clean_only)
-  {
-    dialog_sprite = new SpriteDialog(this, &sprite_as, "", 0, false,
-                                     EditorEnumDb::SPRITE_ALL);
-    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateActionSprite()));
-    dialog_sprite->show();
-  }
-}
+//  /* Create new dialog */
+//  if(!clean_only)
+//  {
+//    dialog_sprite = new SpriteDialog(this, &sprite_ally_offensive, "", 0, false,
+//                                     EditorEnumDb::SPRITE_ALL);
+//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateActionSprite()));
+//    dialog_sprite->show();
+//  }
+//}
 
 /*
  * Description: Button trigger on dialog sprite edit. This will open the
@@ -554,7 +681,7 @@ void EditorPerson::btnActionSprite(bool clean_only)
  * Inputs: bool clean_only - true if only close existing dialog. Default false
  * Output: none
  */
-void EditorPerson::btnDialogSprite(bool clean_only)
+void EditorPerson::btnDialog(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
   if(dialog_sprite != NULL)
@@ -567,7 +694,7 @@ void EditorPerson::btnDialogSprite(bool clean_only)
   /* Create new dialog */
   if(!clean_only)
   {
-    dialog_sprite = new SpriteDialog(this, &sprite_ds, "", 0, false,
+    dialog_sprite = new SpriteDialog(this, &sprite_dialog, "", 0, false,
                                      EditorEnumDb::SPRITE_ALL);
     connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateDialogSprite()));
     dialog_sprite->show();
@@ -582,7 +709,27 @@ void EditorPerson::btnDialogSprite(bool clean_only)
  * Inputs: bool clean_only - true if only close existing dialog. Default false
  * Output: none
  */
-void EditorPerson::btnFirstPerson(bool clean_only)
+//void EditorPerson::btnFirstPerson(bool clean_only)
+//{
+//  /* Close and delete the dialog if button is pressed */
+//  if(dialog_sprite != NULL)
+//  {
+//    dialog_sprite->hide();
+//    dialog_sprite->deleteLater();
+//  }
+//  dialog_sprite = NULL;
+
+//  /* Create new dialog */
+//  if(!clean_only)
+//  {
+//    dialog_sprite = new SpriteDialog(this, &sprite_fp, "", 0, false,
+//                                     EditorEnumDb::SPRITE_ALL);
+//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFirstPerson()));
+//    dialog_sprite->show();
+//  }
+//}
+
+void EditorPerson::btnAlly(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
   if(dialog_sprite != NULL)
@@ -595,9 +742,129 @@ void EditorPerson::btnFirstPerson(bool clean_only)
   /* Create new dialog */
   if(!clean_only)
   {
-    dialog_sprite = new SpriteDialog(this, &sprite_fp, "", 0, false,
+    dialog_sprite = new SpriteDialog(this, &sprite_ally, "", 0, false,
                                      EditorEnumDb::SPRITE_ALL);
-    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFirstPerson()));
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateAllySprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnAllyDef(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_ally_def, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateAllyDefSprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnAllyOff(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_ally_off, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateAllyOffSprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnFace(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_face, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFaceSprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnFoe(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_foe, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFoeSprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnFoeDef(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_foe_def, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFoeDefSprite()));
+    dialog_sprite->show();
+  }
+}
+
+void EditorPerson::btnFoeOff(bool clean_only)
+{
+  /* Close and delete the dialog if button is pressed */
+  if(dialog_sprite != NULL)
+  {
+    dialog_sprite->hide();
+    dialog_sprite->deleteLater();
+  }
+  dialog_sprite = NULL;
+
+  /* Create new dialog */
+  if(!clean_only)
+  {
+    dialog_sprite = new SpriteDialog(this, &sprite_foe_off, "", 0, false,
+                                     EditorEnumDb::SPRITE_ALL);
+    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFoeOffSprite()));
     dialog_sprite->show();
   }
 }
@@ -676,25 +943,25 @@ void EditorPerson::btnSave()
  * Inputs: bool clean_only - true if only close existing dialog. Default false
  * Output: none
  */
-void EditorPerson::btnThirdPerson(bool clean_only)
-{
-  /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
-  {
-    dialog_sprite->hide();
-    dialog_sprite->deleteLater();
-  }
-  dialog_sprite = NULL;
+//void EditorPerson::btnThirdPerson(bool clean_only)
+//{
+//  /* Close and delete the dialog if button is pressed */
+//  if(dialog_sprite != NULL)
+//  {
+//    dialog_sprite->hide();
+//    dialog_sprite->deleteLater();
+//  }
+//  dialog_sprite = NULL;
 
-  /* Create new dialog */
-  if(!clean_only)
-  {
-    dialog_sprite = new SpriteDialog(this, &sprite_tp, "", 0, false,
-                                     EditorEnumDb::SPRITE_ALL);
-    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateThirdPerson()));
-    dialog_sprite->show();
-  }
-}
+//  /* Create new dialog */
+//  if(!clean_only)
+//  {
+//    dialog_sprite = new SpriteDialog(this, &sprite_tp, "", 0, false,
+//                                     EditorEnumDb::SPRITE_ALL);
+//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateThirdPerson()));
+//    dialog_sprite->show();
+//  }
+//}
 
 /*
  * Description: Slot triggered when the action x spin box is modified. Updates
@@ -892,23 +1159,23 @@ void EditorPerson::listUsedIndexChanged(int index)
  * Inputs: none
  * Output: none
  */
-void EditorPerson::updateActionSprite()
-{
-  int img_size = kFRAME_SIZE - 5;
-  QImage original = sprite_as.getImage(0);
+//void EditorPerson::updateActionSprite()
+//{
+//  int img_size = kFRAME_SIZE - 5;
+//  QImage original = sprite_as.getImage(0);
 
-  if(original.width() > img_size || original.height() > img_size)
-  {
-    QPixmap scaled_image = sprite_as.getPixmap(0, img_size, img_size);
-    lbl_as_img->setPixmap(scaled_image);
-  }
-  else
-  {
-    QPixmap orig_image =
-                 sprite_as.getPixmap(0, original.width(), original.height());
-    lbl_as_img->setPixmap(orig_image);
-  }
-}
+//  if(original.width() > img_size || original.height() > img_size)
+//  {
+//    QPixmap scaled_image = sprite_as.getPixmap(0, img_size, img_size);
+//    lbl_as_img->setPixmap(scaled_image);
+//  }
+//  else
+//  {
+//    QPixmap orig_image =
+//                 sprite_as.getPixmap(0, original.width(), original.height());
+//    lbl_as_img->setPixmap(orig_image);
+//  }
+//}
 
 /*
  * Description: Slot called to trigger an update of the visible dialog sprite
@@ -918,23 +1185,23 @@ void EditorPerson::updateActionSprite()
  * Inputs: none
  * Output: none
  */
-void EditorPerson::updateDialogSprite()
-{
-  int img_size = kFRAME_SIZE - 5;
-  QImage original = sprite_ds.getImage(0);
+//void EditorPerson::updateDialogSprite()
+//{
+//  int img_size = kFRAME_SIZE - 5;
+//  QImage original = sprite_ds.getImage(0);
 
-  if(original.width() > img_size || original.height() > img_size)
-  {
-    QPixmap scaled_image = sprite_ds.getPixmap(0, img_size, img_size);
-    lbl_ds_img->setPixmap(scaled_image);
-  }
-  else
-  {
-    QPixmap orig_image =
-                 sprite_ds.getPixmap(0, original.width(), original.height());
-    lbl_ds_img->setPixmap(orig_image);
-  }
-}
+//  if(original.width() > img_size || original.height() > img_size)
+//  {
+//    QPixmap scaled_image = sprite_ds.getPixmap(0, img_size, img_size);
+//    lbl_ds_img->setPixmap(scaled_image);
+//  }
+//  else
+//  {
+//    QPixmap orig_image =
+//                 sprite_ds.getPixmap(0, original.width(), original.height());
+//    lbl_ds_img->setPixmap(orig_image);
+//  }
+//}
 
 /*
  * Description: Slot called to trigger an update of the visible first person
@@ -944,23 +1211,23 @@ void EditorPerson::updateDialogSprite()
  * Inputs: none
  * Output: none
  */
-void EditorPerson::updateFirstPerson()
-{
-  int img_size = kFRAME_SIZE - 5;
-  QImage original = sprite_fp.getImage(0);
+//void EditorPerson::updateFirstPerson()
+//{
+//  int img_size = kFRAME_SIZE - 5;
+//  QImage original = sprite_fp.getImage(0);
 
-  if(original.width() > img_size || original.height() > img_size)
-  {
-    QPixmap scaled_image = sprite_fp.getPixmap(0, img_size, img_size);
-    lbl_fp_img->setPixmap(scaled_image);
-  }
-  else
-  {
-    QPixmap orig_image =
-                 sprite_fp.getPixmap(0, original.width(), original.height());
-    lbl_fp_img->setPixmap(orig_image);
-  }
-}
+//  if(original.width() > img_size || original.height() > img_size)
+//  {
+//    QPixmap scaled_image = sprite_fp.getPixmap(0, img_size, img_size);
+//    lbl_fp_img->setPixmap(scaled_image);
+//  }
+//  else
+//  {
+//    QPixmap orig_image =
+//                 sprite_fp.getPixmap(0, original.width(), original.height());
+//    lbl_fp_img->setPixmap(orig_image);
+//  }
+//}
 
 /*
  * Description: Slot called to trigger an update of the visible third person
@@ -970,21 +1237,166 @@ void EditorPerson::updateFirstPerson()
  * Inputs: none
  * Output: none
  */
-void EditorPerson::updateThirdPerson()
+//void EditorPerson::updateThirdPerson()
+//{
+//  int img_size = kFRAME_SIZE - 5;
+//  QImage original = sprite_tp.getImage(0);
+
+//  if(original.width() > img_size || original.height() > img_size)
+//  {
+//    QPixmap scaled_image = sprite_tp.getPixmap(0, img_size, img_size);
+//    lbl_tp_img->setPixmap(scaled_image);
+//  }
+//  else
+//  {
+//    QPixmap orig_image =
+//                 sprite_tp.getPixmap(0, original.width(), original.height());
+//    lbl_tp_img->setPixmap(orig_image);
+//  }
+//}
+
+void EditorPerson::updateAllySprite()
 {
   int img_size = kFRAME_SIZE - 5;
-  QImage original = sprite_tp.getImage(0);
+  QImage original = sprite_ally.getImage(0);
 
   if(original.width() > img_size || original.height() > img_size)
   {
-    QPixmap scaled_image = sprite_tp.getPixmap(0, img_size, img_size);
-    lbl_tp_img->setPixmap(scaled_image);
+    QPixmap scaled_image = sprite_ally.getPixmap(0, img_size, img_size);
+    lbl_ally_img->setPixmap(scaled_image);
   }
   else
   {
     QPixmap orig_image =
-                 sprite_tp.getPixmap(0, original.width(), original.height());
-    lbl_tp_img->setPixmap(orig_image);
+                 sprite_ally.getPixmap(0, original.width(), original.height());
+    lbl_ally_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateAllyDefSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_ally_def.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_ally_def.getPixmap(0, img_size, img_size);
+    lbl_ally_def_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_ally_def.getPixmap(0, original.width(), original.height());
+    lbl_ally_def_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateAllyOffSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_ally_off.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_ally_off.getPixmap(0, img_size, img_size);
+    lbl_ally_off_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_ally_off.getPixmap(0, original.width(), original.height());
+    lbl_ally_off_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateDialogSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_dialog.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_dialog.getPixmap(0, img_size, img_size);
+    lbl_dialog_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_dialog.getPixmap(0, original.width(), original.height());
+    lbl_dialog_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateFaceSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_face.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_face.getPixmap(0, img_size, img_size);
+    lbl_face_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_face.getPixmap(0, original.width(), original.height());
+    lbl_face_img->setPixmap(orig_image);
+  }
+}
+
+
+void EditorPerson::updateFoeSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_foe.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_foe.getPixmap(0, img_size, img_size);
+    lbl_foe_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_foe.getPixmap(0, original.width(), original.height());
+    lbl_foe_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateFoeDefSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_foe_def.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_foe_def.getPixmap(0, img_size, img_size);
+    lbl_foe_def_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_foe_def.getPixmap(0, original.width(), original.height());
+    lbl_foe_def_img->setPixmap(orig_image);
+  }
+}
+
+void EditorPerson::updateFoeOffSprite()
+{
+  int img_size = kFRAME_SIZE - 5;
+  QImage original = sprite_foe_off.getImage(0);
+
+  if(original.width() > img_size || original.height() > img_size)
+  {
+    QPixmap scaled_image = sprite_foe_off.getPixmap(0, img_size, img_size);
+    lbl_foe_off_img->setPixmap(scaled_image);
+  }
+  else
+  {
+    QPixmap orig_image =
+                 sprite_foe_off.getPixmap(0, original.width(), original.height());
+    lbl_foe_off_img->setPixmap(orig_image);
   }
 }
 
@@ -1048,21 +1460,37 @@ void EditorPerson::load(XmlData data, int index)
   {
     race_id_base = data.getDataInteger();
   }
-  else if(data.getElement(index) == "sprite_action")
+  else if(data.getElement(index) == "sprite_ally")
   {
-    sprite_as_base.load(data, index + 1);
+    sprite_ally_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_ally_off")
+  {
+    sprite_ally_off_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_ally_def")
+  {
+    sprite_ally_def_base.load(data, index + 1);
   }
   else if(data.getElement(index) == "sprite_dialog")
   {
-    sprite_ds_base.load(data, index + 1);
+    sprite_dialog_base.load(data, index + 1);
   }
-  else if(data.getElement(index) == "sprite_fp")
+  else if(data.getElement(index) == "sprite_face")
   {
-    sprite_fp_base.load(data, index + 1);
+    sprite_face_base.load(data, index + 1);
   }
-  else if(data.getElement(index) == "sprite_tp")
+  else if(data.getElement(index) == "sprite_foe")
   {
-    sprite_tp_base.load(data, index + 1);
+    sprite_foe_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_foe_off")
+  {
+    sprite_foe_off_base.load(data, index + 1);
+  }
+  else if(data.getElement(index) == "sprite_foe_def")
+  {
+    sprite_foe_def_base.load(data, index + 1);
   }
   else
   {
@@ -1081,14 +1509,30 @@ void EditorPerson::load(XmlData data, int index)
  */
 void EditorPerson::resetWorking()
 {
-  btnActionSprite(true);
+  /* Buttons */
+  btnAlly(true);
+  btnAllyDef(true);
+  btnAllyOff(true);
+  btnDialog(true);
+  btnFace(true);
+  btnFoe(true);
+  btnFoeDef(true);
+  btnFoeOff(true);
 
   /* Fix the data */
   person_curr = person_base;
-  sprite_as = sprite_as_base;
-  sprite_ds = sprite_ds_base;
-  sprite_fp = sprite_fp_base;
-  sprite_tp = sprite_tp_base;
+  sprite_ally = sprite_ally_base;
+  sprite_ally_def = sprite_ally_def_base;
+  sprite_ally_off = sprite_ally_off_base;
+  sprite_dialog = sprite_dialog_base;
+  sprite_face = sprite_face_base;
+  sprite_foe = sprite_foe_base;
+  sprite_foe_def = sprite_foe_def_base;
+  sprite_foe_off = sprite_foe_off_base;
+//  sprite_as = sprite_as_base;
+//  sprite_ds = sprite_ds_base;
+//  sprite_fp = sprite_fp_base;
+//  sprite_tp = sprite_tp_base;
   class_id = class_id_base;
   item_ids = item_ids_base;
   race_id = race_id_base;
@@ -1181,14 +1625,31 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
     fh->writeXmlElementEnd();
 
     /* Sprites */
-    if(!sprite_as_base.isAllNull())
-      sprite_as_base.save(fh, game_only, false, "sprite_action");
-    if(!sprite_ds_base.isAllNull())
-      sprite_ds_base.save(fh, game_only, false, "sprite_dialog");
-    if(!sprite_fp_base.isAllNull())
-      sprite_fp_base.save(fh, game_only, false, "sprite_fp");
-    if(!sprite_tp_base.isAllNull())
-      sprite_tp_base.save(fh, game_only, false, "sprite_tp");
+    if(!sprite_ally_base.isAllNull())
+      sprite_ally_base.save(fh, game_only, false, "sprite_ally");
+    if(!sprite_ally_def_base.isAllNull())
+      sprite_ally_def_base.save(fh, game_only, false, "sprite_ally_def");
+    if(!sprite_ally_off_base.isAllNull())
+      sprite_ally_off_base.save(fh, game_only, false, "sprite_ally_off");
+    if(!sprite_dialog_base.isAllNull())
+      sprite_dialog_base.save(fh, game_only, false, "sprite_dialog");
+    if(!sprite_face_base.isAllNull())
+      sprite_face_base.save(fh, game_only, false, "sprite_face");
+    if(!sprite_foe.isAllNull())
+      sprite_foe.save(fh, game_only, false, "sprite_foe");
+    if(!sprite_foe_def.isAllNull())
+      sprite_foe_def.save(fh, game_only, false, "sprite_foe_def");
+    if(!sprite_foe_off.isAllNull())
+      sprite_foe_off.save(fh, game_only, false, "sprite_foe_off");
+
+//    if(!sprite_as_base.isAllNull())
+//      sprite_as_base.save(fh, game_only, false, "sprite_action");
+//    if(!sprite_ds_base.isAllNull())
+//      sprite_ds_base.save(fh, game_only, false, "sprite_dialog");
+//    if(!sprite_fp_base.isAllNull())
+//      sprite_fp_base.save(fh, game_only, false, "sprite_fp");
+//    if(!sprite_tp_base.isAllNull())
+//      sprite_tp_base.save(fh, game_only, false, "sprite_tp");
 
     /* Action X Y */
     if(blank.getActionX() != person_base.getActionX())
@@ -1231,16 +1692,31 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
  */
 void EditorPerson::saveWorking()
 {
-  btnActionSprite(true);
+  btnAlly(true);
+  btnAllyDef(true);
+  btnAllyOff(true);
+  btnDialog(true);
+  btnFace(true);
+  btnFoe(true);
+  btnFoeDef(true);
+  btnFoeOff(true);
 
   /* Save the data */
   if(person_base.getName() != person_curr.getName())
     emit nameChange(QString::fromStdString(person_curr.getName()));
   person_base = person_curr;
-  sprite_as_base = sprite_as;
-  sprite_ds_base = sprite_ds;
-  sprite_fp_base = sprite_fp;
-  sprite_tp_base = sprite_tp;
+  sprite_ally_base = sprite_ally;
+  sprite_ally_def_base = sprite_ally_def;
+  sprite_ally_off_base = sprite_ally_off;
+  sprite_dialog_base = sprite_dialog;
+  sprite_face_base = sprite_face;
+  sprite_foe_base = sprite_foe;
+  sprite_foe_def_base = sprite_foe_def;
+  sprite_foe_off_base = sprite_foe_off;
+//  sprite_as_base = sprite_as;
+//  sprite_ds_base = sprite_ds;
+//  sprite_fp_base = sprite_fp;
+//  sprite_tp_base = sprite_tp;
   class_id_base = class_id;
   item_ids_base = item_ids;
   race_id_base = race_id;

@@ -74,10 +74,18 @@ private:
   QVector<EditorItem*> item_total;
 
   /* Label Widgets */
-  QLabel* lbl_as_img;
-  QLabel* lbl_ds_img;
-  QLabel* lbl_fp_img;
-  QLabel* lbl_tp_img;
+//  QLabel* lbl_as_img;
+//  QLabel* lbl_ds_img;
+//  QLabel* lbl_fp_img;
+//  QLabel* lbl_tp_img;
+  QLabel* lbl_ally_img;
+  QLabel* lbl_ally_def_img;
+  QLabel* lbl_ally_off_img;
+  QLabel* lbl_dialog_img;
+  QLabel* lbl_face_img;
+  QLabel* lbl_foe_img;
+  QLabel* lbl_foe_off_img;
+  QLabel* lbl_foe_def_img;
 
   /* List Widgets */
   //QListWidget* list_items_all;
@@ -99,14 +107,23 @@ private:
   QSpinBox* spin_xp;
 
   /* Sprite data */
-  EditorSprite sprite_as;
-  EditorSprite sprite_as_base;
-  EditorSprite sprite_ds;
-  EditorSprite sprite_ds_base;
-  EditorSprite sprite_fp;
-  EditorSprite sprite_fp_base;
-  EditorSprite sprite_tp;
-  EditorSprite sprite_tp_base;
+  EditorSprite sprite_ally;
+  EditorSprite sprite_ally_base;
+  EditorSprite sprite_ally_off;
+  EditorSprite sprite_ally_off_base;
+  EditorSprite sprite_ally_def;
+  EditorSprite sprite_ally_def_base;
+  EditorSprite sprite_dialog;
+  EditorSprite sprite_dialog_base;
+  EditorSprite sprite_face;
+  EditorSprite sprite_face_base;
+  EditorSprite sprite_foe;
+  EditorSprite sprite_foe_base;
+  EditorSprite sprite_foe_off;
+  EditorSprite sprite_foe_off_base;
+  EditorSprite sprite_foe_def;
+  EditorSprite sprite_foe_def_base;
+
 
 public:
   /*------------------- Constants -----------------------*/
@@ -143,15 +160,25 @@ signals:
  * PUBLIC SLOTS
  *===========================================================================*/
 public slots:
+//  void btnActionSprite(bool clean_only = false);
+//  void btnDialogSprite(bool clean_only = false);
+//  void btnFirstPerson(bool clean_only = false);
+
   /* Button Triggers */
-  void btnActionSprite(bool clean_only = false);
-  void btnDialogSprite(bool clean_only = false);
-  void btnFirstPerson(bool clean_only = false);
+  void btnAlly(bool clean_only = false);
+  void btnAllyDef(bool clean_only = false);
+  void btnAllyOff(bool clean_only = false);
+  void btnDialog(bool clean_only = false);
+  void btnFace(bool clean_only = false);
+  void btnFoe(bool clean_only = false);
+  void btnFoeDef(bool clean_only = false);
+  void btnFoeOff(bool clean_only = false);
+
   void btnItemAdd();
   void btnItemRemove();
   void btnReset();
   void btnSave();
-  void btnThirdPerson(bool clean_only = false);
+  //void btnThirdPerson(bool clean_only = false);
 
   /* Widget Change Triggers */
   void changedActionX(int value);
@@ -170,10 +197,21 @@ public slots:
   void listUsedIndexChanged(int index);
 
   /* Update calls for sprites */
-  void updateActionSprite();
+//  void updateActionSprite();
+//  void updateDialogSprite();
+//  void updateFirstPerson();
+//  void updateThirdPerson();
+
+  void updateAllySprite();
+  void updateAllyDefSprite();
+  void updateAllyOffSprite();
   void updateDialogSprite();
-  void updateFirstPerson();
-  void updateThirdPerson();
+  void updateFaceSprite();
+  void updateFoeSprite();
+  void updateFoeDefSprite();
+  void updateFoeOffSprite();
+
+
 
 /*============================================================================
  * PUBLIC FUNCTIONS
