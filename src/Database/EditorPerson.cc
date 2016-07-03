@@ -213,21 +213,6 @@ void EditorPerson::createLayout()
   layout_flags->addWidget(chk_change_equip);
   layout->addWidget(box_flags, 0, 2, 6, 2);
 
-  /* Loot Headers */
-  // TODO: Remove future? and all associated functions - not used for new
-  //QLabel* lbl_loot = new QLabel("Loot", this);
-  //layout->addWidget(lbl_loot, 0, 6, 1, 4, Qt::AlignHCenter);
-
-  /* Loot Credits */
-  //QLabel* lbl_credits = new QLabel("Credits", this);
-  //layout->addWidget(lbl_credits, 1, 6);
-  //spin_credits = new QSpinBox(this);
-  //spin_credits->setMinimum(0);
-  //spin_credits->setMaximum(Person::kMAX_CREDIT_DROP);
-  //connect(spin_credits, SIGNAL(valueChanged(int)),
-  //        this, SLOT(changedCredits(int)));
-  //layout->addWidget(spin_credits, 1, 7);
-
   /* Loot Experience */
   QLabel* lbl_xp = new QLabel("Experience", this);
   layout->addWidget(lbl_xp, 6, 0);
@@ -237,73 +222,6 @@ void EditorPerson::createLayout()
   connect(spin_xp, SIGNAL(valueChanged(int)),
           this, SLOT(changedExperience(int)));
   layout->addWidget(spin_xp, 6, 1);
-
-  /* Loot Items */
-  // TODO: Remove future? and all associated functions - not used for new
-  //btn_item_add = new QPushButton("Add Item", this);
-  //btn_item_add->setDisabled(true);
-  //connect(btn_item_add, SIGNAL(clicked()), this, SLOT(btnItemAdd()));
-  //layout->addWidget(btn_item_add, 2, 6, 1, 2);
-  //btn_item_rem = new QPushButton("Remove Item", this);
-  //btn_item_rem->setDisabled(true);
-  //connect(btn_item_rem, SIGNAL(clicked()), this, SLOT(btnItemRemove()));
-  //layout->addWidget(btn_item_rem, 2, 8, 1, 2);
-  //list_items_all = new QListWidget(this);
-  //connect(list_items_all, SIGNAL(currentRowChanged(int)),
-  //        this, SLOT(listAllIndexChanged(int)));
-  //layout->addWidget(list_items_all, 3, 6, 9, 2);
-  //list_items_used = new QListWidget(this);
-  //connect(list_items_used, SIGNAL(currentRowChanged(int)),
-  //        this, SLOT(listUsedIndexChanged(int)));
-  //layout->addWidget(list_items_used, 3, 8, 9, 2);
-
-  /* First Person Image */
-//  QLabel* lbl_fp = new QLabel("First Person", this);
-//  layout->addWidget(lbl_fp, 7, 0, 1, 2, Qt::AlignHCenter);
-//  lbl_fp_img = new QLabel(this);
-//  lbl_fp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-//  lbl_fp_img->setStyleSheet("border: 1px solid #b9b5b2");
-//  lbl_fp_img->setAlignment(Qt::AlignCenter);
-//  layout->addWidget(lbl_fp_img, 8, 0, 1, 2);
-//  QPushButton* btn_fp = new QPushButton(this);
-//  btn_fp->setIcon(QIcon(":/images/icons/32_settings.png"));
-//  btn_fp->setIconSize(QSize(24,24));
-//  btn_fp->setMaximumSize(30, 30);
-//  connect(btn_fp, SIGNAL(clicked()), this, SLOT(btnFirstPerson()));
-//  layout->addWidget(btn_fp, 8, 0, 1, 2,
-//                    Qt::AlignRight | Qt::AlignTop);
-
-  /* Third Person Image */
-//  QLabel* lbl_tp = new QLabel("Third Person", this);
-//  layout->addWidget(lbl_tp, 7, 2, 1, 2, Qt::AlignHCenter);
-//  lbl_tp_img = new QLabel(this);
-//  lbl_tp_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-//  lbl_tp_img->setStyleSheet("border: 1px solid #b9b5b2");
-//  lbl_tp_img->setAlignment(Qt::AlignCenter);
-//  layout->addWidget(lbl_tp_img, 8, 2, 1, 2);
-//  QPushButton* btn_tp = new QPushButton(this);
-//  btn_tp->setIcon(QIcon(":/images/icons/32_settings.png"));
-//  btn_tp->setIconSize(QSize(24,24));
-//  btn_tp->setMaximumSize(30, 30);
-//  connect(btn_tp, SIGNAL(clicked()), this, SLOT(btnThirdPerson()));
-//  layout->addWidget(btn_tp, 8, 2, 1, 2,
-//                    Qt::AlignRight | Qt::AlignTop);
-
-  /* Action Image */
-//  QLabel* lbl_as = new QLabel("Action Person", this);
-//  layout->addWidget(lbl_as, 0, 4, 1, 2, Qt::AlignHCenter);
-//  lbl_as_img = new QLabel(this);
-//  lbl_as_img->setMinimumSize(kFRAME_SIZE, kFRAME_SIZE);
-//  lbl_as_img->setStyleSheet("border: 1px solid #b9b5b2");
-//  lbl_as_img->setAlignment(Qt::AlignCenter);
-//  layout->addWidget(lbl_as_img, 1, 4, 6, 2);
-//  QPushButton* btn_as = new QPushButton(this);
-//  btn_as->setIcon(QIcon(":/images/icons/32_settings.png"));
-//  btn_as->setIconSize(QSize(24,24));
-//  btn_as->setMaximumSize(30, 30);
-//  connect(btn_as, SIGNAL(clicked()), this, SLOT(btnActionSprite()));
-//  layout->addWidget(btn_as, 1, 4, 6, 2,
-//                    Qt::AlignRight | Qt::AlignTop);
 
   /* Ally Label */
   QLabel* lbl_ally = new QLabel("Ally", this);
@@ -565,18 +483,6 @@ void EditorPerson::loadWorkingInfo()
   updateFoeDefSprite();
   updateFoeOffSprite();
 
-  /* First Person Sprite */
-//  updateFirstPerson();
-
-//  /* Third Person Sprite */
-//  updateThirdPerson();
-
-//  /* Dialog Sprite */
-//  updateDialogSprite();
-
-//  /* Action Sprite */
-//  updateActionSprite();
-
   /* Action X/Y */
   spin_actionx->setValue(person_curr.getActionX());
   spin_actiony->setValue(person_curr.getActionY());
@@ -586,12 +492,6 @@ void EditorPerson::loadWorkingInfo()
 
   /* Loot Exp */
   spin_xp->setValue(person_curr.getExpDrop());
-
-  /* Loot Items */
-  //list_items_all->clear();
-  //for(int i = 0; i < item_total.size(); i++)
-  //  list_items_all->addItem(item_total[i]->getNameList());
-  //updateUsedItems();
 }
 
 /*
@@ -646,34 +546,6 @@ void EditorPerson::updateUsedItems()
  *===========================================================================*/
 
 /*
- * Description: Button trigger on action sprite edit. This will open the
- *              sprite dialog for adding and removing frames as well as sprite
- *              properties.
- *
- * Inputs: bool clean_only - true if only close existing dialog. Default false
- * Output: none
- */
-//void EditorPerson::btnActionSprite(bool clean_only)
-//{
-//  /* Close and delete the dialog if button is pressed */
-//  if(dialog_sprite != NULL)
-//  {
-//    dialog_sprite->hide();
-//    dialog_sprite->deleteLater();
-//  }
-//  dialog_sprite = NULL;
-
-//  /* Create new dialog */
-//  if(!clean_only)
-//  {
-//    dialog_sprite = new SpriteDialog(this, &sprite_ally_offensive, "", 0, false,
-//                                     EditorEnumDb::SPRITE_ALL);
-//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateActionSprite()));
-//    dialog_sprite->show();
-//  }
-//}
-
-/*
  * Description: Button trigger on dialog sprite edit. This will open the
  *              sprite dialog for adding and removing frames as well as sprite
  *              properties.
@@ -702,33 +574,13 @@ void EditorPerson::btnDialog(bool clean_only)
 }
 
 /*
- * Description: Button trigger on first person sprite edit. This will open the
+ * Description: Button trigger on ally sprite edit. This will open the
  *              sprite dialog for adding and removing frames as well as sprite
  *              properties.
  *
  * Inputs: bool clean_only - true if only close existing dialog. Default false
  * Output: none
  */
-//void EditorPerson::btnFirstPerson(bool clean_only)
-//{
-//  /* Close and delete the dialog if button is pressed */
-//  if(dialog_sprite != NULL)
-//  {
-//    dialog_sprite->hide();
-//    dialog_sprite->deleteLater();
-//  }
-//  dialog_sprite = NULL;
-
-//  /* Create new dialog */
-//  if(!clean_only)
-//  {
-//    dialog_sprite = new SpriteDialog(this, &sprite_fp, "", 0, false,
-//                                     EditorEnumDb::SPRITE_ALL);
-//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateFirstPerson()));
-//    dialog_sprite->show();
-//  }
-//}
-
 void EditorPerson::btnAlly(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -749,6 +601,14 @@ void EditorPerson::btnAlly(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on ally defensive edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnAllyDef(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -769,6 +629,14 @@ void EditorPerson::btnAllyDef(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on ally offensive edit. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnAllyOff(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -789,6 +657,14 @@ void EditorPerson::btnAllyOff(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on face sprite. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnFace(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -809,6 +685,14 @@ void EditorPerson::btnFace(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on foe. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnFoe(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -829,6 +713,14 @@ void EditorPerson::btnFoe(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on foe defensive. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnFoeDef(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -849,6 +741,14 @@ void EditorPerson::btnFoeDef(bool clean_only)
   }
 }
 
+/*
+ * Description: Button trigger on foe offensive. This will open the
+ *              sprite dialog for adding and removing frames as well as sprite
+ *              properties.
+ *
+ * Inputs: bool clean_only - true if only close existing dialog. Default false
+ * Output: none
+ */
 void EditorPerson::btnFoeOff(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
@@ -934,34 +834,6 @@ void EditorPerson::btnSave()
 {
   saveWorking();
 }
-
-/*
- * Description: Button trigger on third person sprite edit. This will open the
- *              sprite dialog for adding and removing frames as well as sprite
- *              properties.
- *
- * Inputs: bool clean_only - true if only close existing dialog. Default false
- * Output: none
- */
-//void EditorPerson::btnThirdPerson(bool clean_only)
-//{
-//  /* Close and delete the dialog if button is pressed */
-//  if(dialog_sprite != NULL)
-//  {
-//    dialog_sprite->hide();
-//    dialog_sprite->deleteLater();
-//  }
-//  dialog_sprite = NULL;
-
-//  /* Create new dialog */
-//  if(!clean_only)
-//  {
-//    dialog_sprite = new SpriteDialog(this, &sprite_tp, "", 0, false,
-//                                     EditorEnumDb::SPRITE_ALL);
-//    connect(dialog_sprite, SIGNAL(ok()), this, SLOT(updateThirdPerson()));
-//    dialog_sprite->show();
-//  }
-//}
 
 /*
  * Description: Slot triggered when the action x spin box is modified. Updates
@@ -1152,109 +1024,13 @@ void EditorPerson::listUsedIndexChanged(int index)
 }
 
 /*
- * Description: Slot called to trigger an update of the visible action sprite
- *              frame in the UI. Triggered upon any changes to the action
- *              sprite object.
+ * Description: Slot called to trigger an update of the visible ally sprite
+ *              frame in the UI. Triggered upon any changes to the ally sprite
+ *              object.
  *
  * Inputs: none
  * Output: none
  */
-//void EditorPerson::updateActionSprite()
-//{
-//  int img_size = kFRAME_SIZE - 5;
-//  QImage original = sprite_as.getImage(0);
-
-//  if(original.width() > img_size || original.height() > img_size)
-//  {
-//    QPixmap scaled_image = sprite_as.getPixmap(0, img_size, img_size);
-//    lbl_as_img->setPixmap(scaled_image);
-//  }
-//  else
-//  {
-//    QPixmap orig_image =
-//                 sprite_as.getPixmap(0, original.width(), original.height());
-//    lbl_as_img->setPixmap(orig_image);
-//  }
-//}
-
-/*
- * Description: Slot called to trigger an update of the visible dialog sprite
- *              frame in the UI. Triggered upon any changes to the dialog
- *              sprite object.
- *
- * Inputs: none
- * Output: none
- */
-//void EditorPerson::updateDialogSprite()
-//{
-//  int img_size = kFRAME_SIZE - 5;
-//  QImage original = sprite_ds.getImage(0);
-
-//  if(original.width() > img_size || original.height() > img_size)
-//  {
-//    QPixmap scaled_image = sprite_ds.getPixmap(0, img_size, img_size);
-//    lbl_ds_img->setPixmap(scaled_image);
-//  }
-//  else
-//  {
-//    QPixmap orig_image =
-//                 sprite_ds.getPixmap(0, original.width(), original.height());
-//    lbl_ds_img->setPixmap(orig_image);
-//  }
-//}
-
-/*
- * Description: Slot called to trigger an update of the visible first person
- *              frame in the UI. Triggered upon any changes to the first
- *              person sprite object.
- *
- * Inputs: none
- * Output: none
- */
-//void EditorPerson::updateFirstPerson()
-//{
-//  int img_size = kFRAME_SIZE - 5;
-//  QImage original = sprite_fp.getImage(0);
-
-//  if(original.width() > img_size || original.height() > img_size)
-//  {
-//    QPixmap scaled_image = sprite_fp.getPixmap(0, img_size, img_size);
-//    lbl_fp_img->setPixmap(scaled_image);
-//  }
-//  else
-//  {
-//    QPixmap orig_image =
-//                 sprite_fp.getPixmap(0, original.width(), original.height());
-//    lbl_fp_img->setPixmap(orig_image);
-//  }
-//}
-
-/*
- * Description: Slot called to trigger an update of the visible third person
- *              frame in the UI. Triggered upon any changes to the third
- *              person sprite object.
- *
- * Inputs: none
- * Output: none
- */
-//void EditorPerson::updateThirdPerson()
-//{
-//  int img_size = kFRAME_SIZE - 5;
-//  QImage original = sprite_tp.getImage(0);
-
-//  if(original.width() > img_size || original.height() > img_size)
-//  {
-//    QPixmap scaled_image = sprite_tp.getPixmap(0, img_size, img_size);
-//    lbl_tp_img->setPixmap(scaled_image);
-//  }
-//  else
-//  {
-//    QPixmap orig_image =
-//                 sprite_tp.getPixmap(0, original.width(), original.height());
-//    lbl_tp_img->setPixmap(orig_image);
-//  }
-//}
-
 void EditorPerson::updateAllySprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1273,6 +1049,14 @@ void EditorPerson::updateAllySprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible ally
+ *              defensive sprite frame in the UI. Triggered upon any
+ *              changes to the ally defensive sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateAllyDefSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1291,6 +1075,14 @@ void EditorPerson::updateAllyDefSprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible ally
+ *              offensive sprite frame in the UI. Triggered upon any
+ *              changes to the ally offensive sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateAllyOffSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1309,6 +1101,14 @@ void EditorPerson::updateAllyOffSprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible
+ *              dialog sprite frame in the UI. Triggered upon any
+ *              changes to the dialog sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateDialogSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1327,6 +1127,14 @@ void EditorPerson::updateDialogSprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible face
+ *              sprite frame in the UI. Triggered upon any changes to
+ *              the face sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateFaceSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1345,7 +1153,14 @@ void EditorPerson::updateFaceSprite()
   }
 }
 
-
+/*
+ * Description: Slot called to trigger an update of the visible foe sprite
+ *              frame in the UI. Triggered upon any changes to the foe
+ *              sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateFoeSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1364,6 +1179,14 @@ void EditorPerson::updateFoeSprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible foe def
+ *              sprite frame in the UI. Triggered upon any
+ *              changes to the foe defensive sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateFoeDefSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1382,6 +1205,14 @@ void EditorPerson::updateFoeDefSprite()
   }
 }
 
+/*
+ * Description: Slot called to trigger an update of the visible foe
+ *              offensive sprite frame in the UI. Triggered upon any
+ *              changes to the foe offensive sprite object.
+ *
+ * Inputs: none
+ * Output: none
+ */
 void EditorPerson::updateFoeOffSprite()
 {
   int img_size = kFRAME_SIZE - 5;
@@ -1529,10 +1360,6 @@ void EditorPerson::resetWorking()
   sprite_foe = sprite_foe_base;
   sprite_foe_def = sprite_foe_def_base;
   sprite_foe_off = sprite_foe_off_base;
-//  sprite_as = sprite_as_base;
-//  sprite_ds = sprite_ds_base;
-//  sprite_fp = sprite_fp_base;
-//  sprite_tp = sprite_tp_base;
   class_id = class_id_base;
   item_ids = item_ids_base;
   race_id = race_id_base;
@@ -1642,15 +1469,6 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
     if(!sprite_foe_off.isAllNull())
       sprite_foe_off.save(fh, game_only, false, "sprite_foe_off");
 
-//    if(!sprite_as_base.isAllNull())
-//      sprite_as_base.save(fh, game_only, false, "sprite_action");
-//    if(!sprite_ds_base.isAllNull())
-//      sprite_ds_base.save(fh, game_only, false, "sprite_dialog");
-//    if(!sprite_fp_base.isAllNull())
-//      sprite_fp_base.save(fh, game_only, false, "sprite_fp");
-//    if(!sprite_tp_base.isAllNull())
-//      sprite_tp_base.save(fh, game_only, false, "sprite_tp");
-
     /* Action X Y */
     if(blank.getActionX() != person_base.getActionX())
       fh->writeXmlData("sprite_action_x", person_base.getActionX());
@@ -1713,10 +1531,6 @@ void EditorPerson::saveWorking()
   sprite_foe_base = sprite_foe;
   sprite_foe_def_base = sprite_foe_def;
   sprite_foe_off_base = sprite_foe_off;
-//  sprite_as_base = sprite_as;
-//  sprite_ds_base = sprite_ds;
-//  sprite_fp_base = sprite_fp;
-//  sprite_tp_base = sprite_tp;
   class_id_base = class_id;
   item_ids_base = item_ids;
   race_id_base = race_id;
@@ -1749,13 +1563,7 @@ void EditorPerson::setID(int id)
   else
   {
     box_flags->setEnabled(true);
-
     edit_name->setEnabled(true);
-
-    //list_items_all->setEnabled(true);
-    //list_items_used->setEnabled(true);
-
-    //spin_credits->setEnabled(true);
     spin_xp->setEnabled(true);
   }
 }

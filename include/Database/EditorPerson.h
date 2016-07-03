@@ -36,10 +36,6 @@ private:
   /* Group Box Widgets */
   QGroupBox* box_flags;
 
-  /* Button Widgets */
-  //QPushButton* btn_item_add;
-  //QPushButton* btn_item_rem;
-
   /* Check Box Widgets */
   QCheckBox* chk_change_equip;
   QCheckBox* chk_gain_xp;
@@ -74,10 +70,6 @@ private:
   QVector<EditorItem*> item_total;
 
   /* Label Widgets */
-//  QLabel* lbl_as_img;
-//  QLabel* lbl_ds_img;
-//  QLabel* lbl_fp_img;
-//  QLabel* lbl_tp_img;
   QLabel* lbl_ally_img;
   QLabel* lbl_ally_def_img;
   QLabel* lbl_ally_off_img;
@@ -86,10 +78,6 @@ private:
   QLabel* lbl_foe_img;
   QLabel* lbl_foe_off_img;
   QLabel* lbl_foe_def_img;
-
-  /* List Widgets */
-  //QListWidget* list_items_all;
-  //QListWidget* list_items_used;
 
   /* The reference person for data */
   Person person_base;
@@ -123,7 +111,6 @@ private:
   EditorSprite sprite_foe_off_base;
   EditorSprite sprite_foe_def;
   EditorSprite sprite_foe_def_base;
-
 
 public:
   /*------------------- Constants -----------------------*/
@@ -160,10 +147,6 @@ signals:
  * PUBLIC SLOTS
  *===========================================================================*/
 public slots:
-//  void btnActionSprite(bool clean_only = false);
-//  void btnDialogSprite(bool clean_only = false);
-//  void btnFirstPerson(bool clean_only = false);
-
   /* Button Triggers */
   void btnAlly(bool clean_only = false);
   void btnAllyDef(bool clean_only = false);
@@ -178,7 +161,6 @@ public slots:
   void btnItemRemove();
   void btnReset();
   void btnSave();
-  //void btnThirdPerson(bool clean_only = false);
 
   /* Widget Change Triggers */
   void changedActionX(int value);
@@ -196,12 +178,7 @@ public slots:
   void listAllIndexChanged(int index);
   void listUsedIndexChanged(int index);
 
-  /* Update calls for sprites */
-//  void updateActionSprite();
-//  void updateDialogSprite();
-//  void updateFirstPerson();
-//  void updateThirdPerson();
-
+  /* Update Sprites */
   void updateAllySprite();
   void updateAllyDefSprite();
   void updateAllyOffSprite();
@@ -210,8 +187,6 @@ public slots:
   void updateFoeSprite();
   void updateFoeDefSprite();
   void updateFoeOffSprite();
-
-
 
 /*============================================================================
  * PUBLIC FUNCTIONS
