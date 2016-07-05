@@ -25,7 +25,7 @@ EditorPerson::EditorPerson(QWidget* parent) : QWidget(parent)
   chk_no_signals = false;
   class_id = -1;
   class_id_base = -1;
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
   id = 0;
   person_base.setCurves(Element::PHYSICAL, ElementCurve::D,
                         Element::PHYSICAL, ElementCurve::D);
@@ -556,12 +556,12 @@ void EditorPerson::updateUsedItems()
 void EditorPerson::btnDialog(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -584,12 +584,12 @@ void EditorPerson::btnDialog(bool clean_only)
 void EditorPerson::btnAlly(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -612,12 +612,12 @@ void EditorPerson::btnAlly(bool clean_only)
 void EditorPerson::btnAllyDef(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -640,12 +640,12 @@ void EditorPerson::btnAllyDef(bool clean_only)
 void EditorPerson::btnAllyOff(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -668,12 +668,12 @@ void EditorPerson::btnAllyOff(bool clean_only)
 void EditorPerson::btnFace(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -696,12 +696,12 @@ void EditorPerson::btnFace(bool clean_only)
 void EditorPerson::btnFoe(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -724,12 +724,12 @@ void EditorPerson::btnFoe(bool clean_only)
 void EditorPerson::btnFoeDef(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -752,12 +752,12 @@ void EditorPerson::btnFoeDef(bool clean_only)
 void EditorPerson::btnFoeOff(bool clean_only)
 {
   /* Close and delete the dialog if button is pressed */
-  if(dialog_sprite != NULL)
+  if(dialog_sprite != nullptr)
   {
     dialog_sprite->hide();
     dialog_sprite->deleteLater();
   }
-  dialog_sprite = NULL;
+  dialog_sprite = nullptr;
 
   /* Create new dialog */
   if(!clean_only)
@@ -1325,7 +1325,7 @@ void EditorPerson::load(XmlData data, int index)
   }
   else
   {
-    person_base.loadData(data, index, NULL,
+    person_base.loadData(data, index, nullptr,
                          EditorHelpers::getProjectDir().toStdString() + "/");
   }
 }
@@ -1378,7 +1378,7 @@ void EditorPerson::resetWorking()
  */
 void EditorPerson::save(FileHandler* fh, bool game_only)
 {
-  if(fh != NULL)
+  if(fh != nullptr)
   {
     /* Processing */
     Person blank;
