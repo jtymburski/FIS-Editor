@@ -280,6 +280,8 @@ void EditorSoundDb::createReserved()
                                            "Menu: Enter (Select)"));
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_PREV,
                                            "Menu: Backspace (Unselect)"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_MENU_ERR,
+                                           "Menu: Error"));
 
   /* Map Sounds */
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_PICK_COIN,
