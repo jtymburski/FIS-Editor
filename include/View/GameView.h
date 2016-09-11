@@ -75,7 +75,7 @@ signals:
   void updatedMaps(QList<QString> maps);
   //void updatedMusic(QList<QString> music_list);
   void updatedParties(QList<QString> parties);
-  void updatedSounds(QList<QString> sound_list);
+  //void updatedSounds(QList<QString> sound_list);
 
   /* Updates event objects in the map database class */
   void updateBattleSceneObjects();
@@ -115,6 +115,9 @@ public slots:
 
   /* Updated list sets */
   void updatedMusic(QList<QString> list);
+
+  /* Updated list sets */
+  void updatedSounds(QList<QString> list);
 
 /*============================================================================
  * PUBLIC FUNCTIONS

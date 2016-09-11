@@ -58,9 +58,15 @@ private:
   QVector<int> actions_sel_base;
   QVector<EditorAction*> actions_total;
 
+  /* Combo Box Widgets */
+  QComboBox* combo_sound;
+
   /* The thumbnail control dialog */
   SpriteDialog* dialog_anim;
   FrameDialog* dialog_thumb;
+
+  /* Sound information, for dropdown and selection list */
+  QList<QString> sound_list;
 
   /* The thumbnail frame and animation sprite */
   EditorSprite sprite_anim;
@@ -121,6 +127,9 @@ public slots:
   void buttonAnimEdit(bool clean_only = false);
   void buttonThumbEdit(bool clean_only = false);
 
+  /* Change trigger for sound list */
+  void changedSound(const QString& text);
+
   /* Returns the base skill */
   Skill getBaseSkill();
 
@@ -159,6 +168,9 @@ public:
   /* Returns the ID of the skill */
   virtual int getID() const;
 
+  /* Returns the list of sound in the database */
+  QList<QString> getListSound();
+
   /* Returns the name of the skill */
   virtual QString getName() const;
 
@@ -174,11 +186,17 @@ public:
   /* Sets the ID of the skill */
   virtual void setID(int id);
 
+  /* Sets the music reference ID of the scene */
+  void setSoundID(int sound_id);
+
   /* Sets the name of the skill */
   virtual void setName(QString name, bool update = true);
 
   /* Update actions */
   void updateActions(QVector<EditorAction*> actions);
+
+  /* Updates the list of sounds available */
+  void updateListSound(QList<QString> list);
 
 /*============================================================================
  * OPERATOR FUNCTIONS
