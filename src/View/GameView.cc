@@ -69,17 +69,17 @@ GameView::GameView(QWidget* parent) : QStackedWidget(parent)
   view_race->setDisabled(true);
   null_race = view_race;
   addWidget(view_race);
-
+  
   view_skillset = new EditorSkillset(this);
   view_skillset->setDisabled(true);
   null_skillset = view_skillset;
   addWidget(view_skillset);
-
+  
   view_skill = new EditorSkill(this);
   view_skill->setDisabled(true);
   null_skill = view_skill;
   addWidget(view_skill);
-
+  
   view_action = new EditorAction(this);
   view_action->setDisabled(true);
   null_action = view_action;
@@ -325,11 +325,6 @@ void GameView::updatedMusic(QList<QString> list)
 {
   view_battlescene->updateListMusic(list);
   view_map->updatedMusic(list);
-}
-
-void GameView::updatedSounds(QList<QString> list)
-{
-  view_skill->updateListSound(list);
 }
 
 /*============================================================================

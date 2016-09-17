@@ -1194,8 +1194,9 @@ void GameDatabase::loadFinish()
     data_party[i]->resetWorking();
   }
 
-  /* Update music */
+  /* Update music and sound */
   emit updatedMusic(data_sounds->getListMusic());
+  emit updatedSounds(data_sounds->getListSound());
 
   /* Update battle scenes */
   updateBattleSceneObjects();
@@ -1748,7 +1749,8 @@ void GameDatabase::listMusicUpdated()
 /* List updates, from widgets */
 void GameDatabase::listSoundUpdated()
 {
-  /* Not used right now */
+  if(data_sounds != nullptr)
+    emit updatedSounds(data_sounds->getListSound());
 }
 
 /* Double click on an element */
