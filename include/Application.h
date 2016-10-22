@@ -171,7 +171,7 @@ public slots:
   void setBattleScene(EditorBattleScene* scene, bool save);
 
   /* Sets To Bubby */
-  void setBubby(EditorBubby* bubby);
+  //void setBubby(EditorBubby* bubby);
 
   /* Sets normal cursors */
   void setCursorBasic(bool checked);
@@ -181,7 +181,7 @@ public slots:
   void setCursorMove(bool checked);
 
   /* Sets To Equipment */
-  void setEquipment(EditorEquipment* equipment);
+  //void setEquipment(EditorEquipment* equipment);
 
   /* Sets To Item */
   void setItem(EditorItem* item);

@@ -695,10 +695,10 @@ void Application::setBattleScene(EditorBattleScene* scene, bool save)
 /*
  * Description: Sets the bubby
  */
-void Application::setBubby(EditorBubby* bubby)
-{
-  qDebug() << "Bubby: " << bubby;
-}
+//void Application::setBubby(EditorBubby* bubby)
+//{
+//  qDebug() << "Bubby: " << bubby;
+//}
 
 /*
  * Description: Sets to basic cursor mode
@@ -763,10 +763,10 @@ void Application::setCursorMove(bool checked)
 /*
  * Description: Sets the equipment
  */
-void Application::setEquipment(EditorEquipment* equipment)
-{
-  qDebug() << "Equipment: " << equipment;
-}
+//void Application::setEquipment(EditorEquipment* equipment)
+//{
+//  qDebug() << "Equipment: " << equipment;
+//}
 
 /*
  * Description: Sets the item

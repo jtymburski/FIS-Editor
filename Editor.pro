@@ -28,15 +28,13 @@ QMAKE_CXXFLAGS += -std=c++1y
 QMAKE_CXX_FLAGS_WARN_ON += -Wall
 QT += opengl widgets multimedia #phonon network xml, core and gui are default
 
-SOURCES += \
+SOURCES += \#$
     src/Main.cc \
     src/Application.cc \
     src/EditorHelpers.cc \
     src/Database/EditorAction.cc \
     src/Database/EditorBattleScene.cc \
-    src/Database/EditorBubby.cc \
     src/Database/EditorCategory.cc \
-    src/Database/EditorEquipment.cc \
     src/Database/EditorEvent.cc \
     src/Database/EditorEventSet.cc \
     src/Database/EditorItem.cc \
@@ -138,9 +136,7 @@ HEADERS += \
     include/EditorHelpers.h \
     include/Database/EditorAction.h \
     include/Database/EditorBattleScene.h \
-    include/Database/EditorBubby.h \
     include/Database/EditorCategory.h \
-    include/Database/EditorEquipment.h \
     include/Database/EditorEvent.h \
     include/Database/EditorEventSet.h \
     include/Database/EditorItem.h \

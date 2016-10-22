@@ -15,7 +15,7 @@ EditorBubby::EditorBubby(int id, QString name, QWidget* parent)
            : EditorBubby(parent)
 {
   setID(id);
-  setName(name);
+  //setName(name);
 }
 
 /* Copy constructor */
@@ -72,12 +72,12 @@ void EditorBubby::setID(int id)
 }
 
 /* Sets the name of the bubby */
-void EditorBubby::setName(QString name, bool update)
-{
-  (void)update;
-
-  bubby.setName(name.toStdString());
-}
+//void EditorBubby::setName(QString name, bool update)
+//{
+//  (void)update;
+//
+//  bubby.setName(name.toStdString());
+//}
 
 /*============================================================================
  * OPERATOR FUNCTIONS

@@ -19,9 +19,9 @@
 
 #include "Database/EditorAction.h"
 #include "Database/EditorBattleScene.h"
-#include "Database/EditorBubby.h"
+//#include "Database/EditorBubby.h"
 #include "Database/EditorCategory.h"
-#include "Database/EditorEquipment.h"
+//#include "Database/EditorEquipment.h"
 #include "Database/EditorItem.h"
 #include "Database/EditorMap.h"
 #include "Database/EditorParty.h"
@@ -53,8 +53,8 @@ private:
   EditorAction* current_action;
   EditorCategory* current_battleclass;
   EditorBattleScene* current_battlescene;
-  EditorBubby* current_bubby;
-  EditorEquipment* current_equipment;
+  //EditorBubby* current_bubby;
+  //EditorEquipment* current_equipment;
   EditorItem* current_item;
   EditorMap* current_map;
   EditorParty* current_party;
@@ -67,8 +67,8 @@ private:
   QVector<EditorAction*> data_action;
   QVector<EditorCategory*> data_battleclass;
   QVector<EditorBattleScene*> data_battlescene;
-  QVector<EditorBubby*> data_bubby;
-  QVector<EditorEquipment*> data_equipment;
+  //QVector<EditorBubby*> data_bubby;
+  //QVector<EditorEquipment*> data_equipment;
   QVector<EditorItem*> data_item;
   QVector<EditorMap*> data_map;
   QVector<EditorParty*> data_party;
@@ -168,8 +168,8 @@ signals:
   void changeAction(EditorAction* action);
   void changeBattleclass(EditorCategory* battle_class);
   void changeBattleScene(EditorBattleScene* scene, bool save);
-  void changeBubby(EditorBubby* bubby);
-  void changeEquipment(EditorEquipment* equipment);
+  //void changeBubby(EditorBubby* bubby);
+  //void changeEquipment(EditorEquipment* equipment);
   void changeItem(EditorItem* item);
   void changeMap(EditorMap* map);
   void changeMode(EditorEnumDb::ViewMode);

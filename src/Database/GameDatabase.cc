@@ -15,8 +15,8 @@ GameDatabase::GameDatabase(QWidget *parent) : QWidget(parent)
   current_action = nullptr;
   current_battleclass = nullptr;
   current_battlescene = nullptr;
-  current_bubby = nullptr;
-  current_equipment = nullptr;
+  //current_bubby = nullptr;
+  //current_equipment = nullptr;
   current_item = nullptr;
   current_map = nullptr;
   current_party = nullptr;
@@ -1404,23 +1404,23 @@ void GameDatabase::createNewResource()
       updateBattleSceneObjects();
       break;
     /* -- EQUIPMENT -- */
-    case EditorEnumDb::EQUIPMENTVIEW:
-      name = "New Equipment";
-      if(data_equipment.size() > 0)
-        data_equipment.push_back(
-                 new EditorEquipment(data_equipment.last()->getID() + 1, name));
-      else
-        data_equipment.push_back(new EditorEquipment(0, name));
-      break;
+//    case EditorEnumDb::EQUIPMENTVIEW:
+//      name = "New Equipment";
+//      if(data_equipment.size() > 0)
+//        data_equipment.push_back(
+//                 new EditorEquipment(data_equipment.last()->getID() + 1, name));
+//      else
+//        data_equipment.push_back(new EditorEquipment(0, name));
+//      break;
     /* -- BUBBY -- */
-    case EditorEnumDb::BUBBYVIEW:
-      name = "New Bubby";
-      if(data_bubby.size() > 0)
-        data_bubby.push_back(
-                         new EditorBubby(data_bubby.last()->getID() + 1, name));
-      else
-        data_bubby.push_back(new EditorBubby(0, name));
-      break;
+//    case EditorEnumDb::BUBBYVIEW:
+//      name = "New Bubby";
+//      if(data_bubby.size() > 0)
+//        data_bubby.push_back(
+//                         new EditorBubby(data_bubby.last()->getID() + 1, name));
+//      else
+//        data_bubby.push_back(new EditorBubby(0, name));
+//      break;
     default:
       break;
   }
@@ -1548,25 +1548,25 @@ void GameDatabase::deleteResource()
             updateBattleSceneObjects();
             break;
           /* -- EQUIPMENT -- */
-          case EditorEnumDb::EQUIPMENTVIEW:
-            if(data_equipment[index] == current_equipment)
-            {
-              emit changeEquipment(NULL);
-              current_equipment = NULL;
-            }
-            delete data_equipment[index];
-            data_equipment.remove(index);
-            break;
-          /* -- BUBBY -- */
-          case EditorEnumDb::BUBBYVIEW:
-            if(data_bubby[index] == current_bubby)
-            {
-              emit changeBubby(NULL);
-              current_bubby = NULL;
-            }
-            delete data_bubby[index];
-            data_bubby.remove(index);
-            break;
+//          case EditorEnumDb::EQUIPMENTVIEW:
+//            if(data_equipment[index] == current_equipment)
+//            {
+//              emit changeEquipment(NULL);
+//              current_equipment = NULL;
+//            }
+//            delete data_equipment[index];
+//            data_equipment.remove(index);
+//            break;
+//          /* -- BUBBY -- */
+//          case EditorEnumDb::BUBBYVIEW:
+//            if(data_bubby[index] == current_bubby)
+//            {
+//              emit changeBubby(NULL);
+//              current_bubby = NULL;
+//            }
+//            delete data_bubby[index];
+//            data_bubby.remove(index);
+//            break;
           default:
             break;
         }
@@ -1667,17 +1667,17 @@ void GameDatabase::duplicateResource()
         data_battlescene.last()->setID(id);
         updateBattleSceneObjects();
       /* -- EQUIPMENT -- */
-      case EditorEnumDb::EQUIPMENTVIEW:
-        id = data_equipment.last()->getID();
-        *data_equipment.last() = *data_equipment[index];
-        data_equipment.last()->setID(id);
-        break;
+//      case EditorEnumDb::EQUIPMENTVIEW:
+//        id = data_equipment.last()->getID();
+//        *data_equipment.last() = *data_equipment[index];
+//        data_equipment.last()->setID(id);
+//        break;
       /* -- BUBBY -- */
-      case EditorEnumDb::BUBBYVIEW:
-        id = data_bubby.last()->getID();
-        *data_bubby.last() = *data_bubby[index];
-        data_bubby.last()->setID(id);
-        break;
+//      case EditorEnumDb::BUBBYVIEW:
+//        id = data_bubby.last()->getID();
+//        *data_bubby.last() = *data_bubby[index];
+//        data_bubby.last()->setID(id);
+//        break;
       default:
         break;
     }
@@ -1804,15 +1804,15 @@ void GameDatabase::modifySelection(QListWidgetItem* item)
       changeBattleScene(index);
       break;
     /* -- EQUIPMENT -- */
-    case EditorEnumDb::EQUIPMENTVIEW:
-      current_equipment = data_equipment[index];
-      emit changeEquipment(current_equipment);
-      break;
-    /* -- BUBBY -- */
-    case EditorEnumDb::BUBBYVIEW:
-      current_bubby = data_bubby[index];
-      emit changeBubby(current_bubby);
-      break;
+//    case EditorEnumDb::EQUIPMENTVIEW:
+//      current_equipment = data_equipment[index];
+//      emit changeEquipment(current_equipment);
+//      break;
+//    /* -- BUBBY -- */
+//    case EditorEnumDb::BUBBYVIEW:
+//      current_bubby = data_bubby[index];
+//      emit changeBubby(current_bubby);
+//      break;
     default:
       break;
   }
@@ -2045,17 +2045,17 @@ void GameDatabase::deleteAll()
     delete data_person[i];
   data_person.clear();
 
-  /* Bubby clean-up */
-  emit changeBubby(NULL);
-  for(int i = 0; i < data_bubby.size(); i++)
-    delete data_bubby[i];
-  data_bubby.clear();
+//  /* Bubby clean-up */
+//  emit changeBubby(NULL);
+//  for(int i = 0; i < data_bubby.size(); i++)
+//    delete data_bubby[i];
+//  data_bubby.clear();
 
-  /* Equipment clean-up */
-  emit changeEquipment(NULL);
-  for(int i = 0; i < data_equipment.size(); i++)
-    delete data_equipment[i];
-  data_equipment.clear();
+//  /* Equipment clean-up */
+//  emit changeEquipment(NULL);
+//  for(int i = 0; i < data_equipment.size(); i++)
+//    delete data_equipment[i];
+//  data_equipment.clear();
 
   /* Item clean-up */
   changeItem(-1, true);
@@ -2371,23 +2371,23 @@ void GameDatabase::modifyBottomList(int index)
       }
       break;
     /* -- EQUIPMENT -- */
-    case EditorEnumDb::EQUIPMENTVIEW:
-      for(int i = 0; i < data_equipment.size(); i++)
-      {
-        bottom_list << data_equipment[i]->getNameList();
-        if(data_equipment[i] == current_equipment)
-          bold_index = i;
-      }
-      break;
-    /* -- BUBBY -- */
-    case EditorEnumDb::BUBBYVIEW:
-      for(int i = 0; i < data_bubby.size(); i++)
-      {
-        bottom_list << data_bubby[i]->getNameList();
-        if(data_bubby[i] == current_bubby)
-          bold_index = i;
-      }
-      break;
+//    case EditorEnumDb::EQUIPMENTVIEW:
+//      for(int i = 0; i < data_equipment.size(); i++)
+//      {
+//        bottom_list << data_equipment[i]->getNameList();
+//        if(data_equipment[i] == current_equipment)
+//          bold_index = i;
+//      }
+//      break;
+//    /* -- BUBBY -- */
+//    case EditorEnumDb::BUBBYVIEW:
+//      for(int i = 0; i < data_bubby.size(); i++)
+//      {
+//        bottom_list << data_bubby[i]->getNameList();
+//        if(data_bubby[i] == current_bubby)
+//          bold_index = i;
+//      }
+//      break;
     default:
       break;
   }

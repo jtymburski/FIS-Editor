@@ -57,7 +57,7 @@ public:
   virtual void setID(int id);
 
   /* Sets the name of the bubby */
-  virtual void setName(QString name, bool update = true);
+  //virtual void setName(QString name, bool update = true);
 
 /* Operator functions */
 public:
