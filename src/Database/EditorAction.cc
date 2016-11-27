@@ -262,51 +262,57 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
 
   /* Groupbox for the user attribute flags */
   user_flags_box = new QGroupBox("User Attribute Flags",this);
+
   /* User flags */
   user_flags_VITA = new QRadioButton("Vitality",this);
   user_flags_QTDR = new QRadioButton("Quantum Drive (QD)",this);
-  user_flags_PHAG = new QRadioButton("Physical Aggression",this);
-  user_flags_PHFD = new QRadioButton("Physical Fortitude",this);
-  user_flags_THAG = new QRadioButton("Thermal Aggression",this);
-  user_flags_THFD = new QRadioButton("Thermal Fortitude",this);
-  user_flags_PRAG = new QRadioButton("Primal Aggression",this);
-  user_flags_PRFD = new QRadioButton("Primal Fortitude",this);
-  user_flags_POAG = new QRadioButton("Polar Aggression",this);
-  user_flags_POFD = new QRadioButton("Polar Fortitude",this);
-  user_flags_CHAG = new QRadioButton("Charged Aggression",this);
-  user_flags_CHFD = new QRadioButton("Charged Fortitude",this);
-  user_flags_CYAG = new QRadioButton("Cybernetic Aggression",this);
-  user_flags_CYFD = new QRadioButton("Cybernetic Fortitude",this);
-  user_flags_NIAG = new QRadioButton("Nihil Aggression",this);
-  user_flags_NIFD = new QRadioButton("Nihil Fortitude",this);
-  user_flags_MMNT = new QRadioButton("Momentum",this);
+//  user_flags_PHAG = new QRadioButton("Physical Aggression",this);
+//  user_flags_PHFD = new QRadioButton("Physical Fortitude",this);
+//  user_flags_THAG = new QRadioButton("Thermal Aggression",this);
+//  user_flags_THFD = new QRadioButton("Thermal Fortitude",this);
+  user_flags_PRAG = new QRadioButton("Primary Aggression",this);
+  user_flags_PRFD = new QRadioButton("Primary Fortitude",this);
+  user_flags_SEAG = new QRadioButton("Secondary Aggression", this);
+  user_flags_SEFD = new QRadioButton("Secondary Fortitude", this);
+//  user_flags_POAG = new QRadioButton("Polar Aggression",this);
+//  user_flags_POFD = new QRadioButton("Polar Fortitude",this);
+//  user_flags_CHAG = new QRadioButton("Charged Aggression",this);
+//  user_flags_CHFD = new QRadioButton("Charged Fortitude",this);
+//  user_flags_CYAG = new QRadioButton("Cybernetic Aggression",this);
+//  user_flags_CYFD = new QRadioButton("Cybernetic Fortitude",this);
+//  user_flags_NIAG = new QRadioButton("Nihil Aggression",this);
+//  user_flags_NIFD = new QRadioButton("Nihil Fortitude",this);
+//  user_flags_MMNT = new QRadioButton("Momentum",this);
   user_flags_LIMB = new QRadioButton("Limbertude",this);
   user_flags_UNBR = new QRadioButton("Unbearability",this);
-  user_flags_MANN = new QRadioButton("Manna",this);
+  user_flags_WILL = new QRadioButton("Will",this);
   user_flags_NOAT = new QRadioButton("No Attribute",this);
   /* User flags layout */
   user_flags_layout = new QVBoxLayout();
   user_flags_layout->addWidget(user_flags_VITA);
   user_flags_layout->addWidget(user_flags_QTDR);
-  user_flags_layout->addWidget(user_flags_PHAG);
-  user_flags_layout->addWidget(user_flags_PHFD);
-  user_flags_layout->addWidget(user_flags_THAG);
-  user_flags_layout->addWidget(user_flags_THFD);
+//  user_flags_layout->addWidget(user_flags_PHAG);
+//  user_flags_layout->addWidget(user_flags_PHFD);
+//  user_flags_layout->addWidget(user_flags_THAG);
+//  user_flags_layout->addWidget(user_flags_THFD);
   user_flags_layout->addWidget(user_flags_PRAG);
   user_flags_layout->addWidget(user_flags_PRFD);
-  user_flags_layout->addWidget(user_flags_POAG);
-  user_flags_layout->addWidget(user_flags_POFD);
-  user_flags_layout->addWidget(user_flags_CHAG);
-  user_flags_layout->addWidget(user_flags_CHFD);
-  user_flags_layout->addWidget(user_flags_CYAG);
-  user_flags_layout->addWidget(user_flags_CYFD);
-  user_flags_layout->addWidget(user_flags_NIAG);
-  user_flags_layout->addWidget(user_flags_NIFD);
-  user_flags_layout->addWidget(user_flags_MMNT);
+  user_flags_layout->addWidget(user_flags_SEAG);
+  user_flags_layout->addWidget(user_flags_SEFD);
+//  user_flags_layout->addWidget(user_flags_POAG);
+//  user_flags_layout->addWidget(user_flags_POFD);
+//  user_flags_layout->addWidget(user_flags_CHAG);
+//  user_flags_layout->addWidget(user_flags_CHFD);
+//  user_flags_layout->addWidget(user_flags_CYAG);
+//  user_flags_layout->addWidget(user_flags_CYFD);
+//  user_flags_layout->addWidget(user_flags_NIAG);
+//  user_flags_layout->addWidget(user_flags_NIFD);
+//  user_flags_layout->addWidget(user_flags_MMNT);
   user_flags_layout->addWidget(user_flags_LIMB);
   user_flags_layout->addWidget(user_flags_UNBR);
-  user_flags_layout->addWidget(user_flags_MANN);
+  user_flags_layout->addWidget(user_flags_WILL);
   user_flags_layout->addWidget(user_flags_NOAT);
+
   /* Add the layout to the groupbox */
   user_flags_box->setLayout(user_flags_layout);
   /* Add the user flags box to the radio layout */
@@ -317,47 +323,53 @@ EditorAction::EditorAction(QWidget *parent) : QWidget(parent)
   /* Target flags */
   target_flags_VITA = new QRadioButton("Vitality",this);
   target_flags_QTDR = new QRadioButton("Quantum Drive (QD)",this);
-  target_flags_PHAG = new QRadioButton("Physical Aggression",this);
-  target_flags_PHFD = new QRadioButton("Physical Fortitude",this);
-  target_flags_THAG = new QRadioButton("Thermal Aggression",this);
-  target_flags_THFD = new QRadioButton("Thermal Fortitude",this);
-  target_flags_PRAG = new QRadioButton("Primal Aggression",this);
-  target_flags_PRFD = new QRadioButton("Primal Fortitude",this);
-  target_flags_POAG = new QRadioButton("Polar Aggression",this);
-  target_flags_POFD = new QRadioButton("Polar Fortitude",this);
-  target_flags_CHAG = new QRadioButton("Charged Aggression",this);
-  target_flags_CHFD = new QRadioButton("Charged Fortitude",this);
-  target_flags_CYAG = new QRadioButton("Cybernetic Aggression",this);
-  target_flags_CYFD = new QRadioButton("Cybernetic Fortitude",this);
-  target_flags_NIAG = new QRadioButton("Nihil Aggression",this);
-  target_flags_NIFD = new QRadioButton("Nihil Fortitude",this);
-  target_flags_MMNT = new QRadioButton("Momentum",this);
+
+//  target_flags_PHAG = new QRadioButton("Physical Aggression",this);
+//  target_flags_PHFD = new QRadioButton("Physical Fortitude",this);
+//  target_flags_THAG = new QRadioButton("Thermal Aggression",this);
+//  target_flags_THFD = new QRadioButton("Thermal Fortitude",this);
+  target_flags_PRAG = new QRadioButton("Primary Aggression",this);
+  target_flags_PRFD = new QRadioButton("Primary Fortitude",this);
+  target_flags_SEAG = new QRadioButton("Secondary Aggression", this);
+  target_flags_SEFD = new QRadioButton("Secondary Fortitude", this);
+//  target_flags_POAG = new QRadioButton("Polar Aggression",this);
+//  target_flags_POFD = new QRadioButton("Polar Fortitude",this);
+//  target_flags_CHAG = new QRadioButton("Charged Aggression",this);
+//  target_flags_CHFD = new QRadioButton("Charged Fortitude",this);
+//  target_flags_CYAG = new QRadioButton("Cybernetic Aggression",this);
+//  target_flags_CYFD = new QRadioButton("Cybernetic Fortitude",this);
+//  target_flags_NIAG = new QRadioButton("Nihil Aggression",this);
+//  target_flags_NIFD = new QRadioButton("Nihil Fortitude",this);
+//  target_flags_MMNT = new QRadioButton("Momentum",this);
   target_flags_LIMB = new QRadioButton("Limbertude",this);
   target_flags_UNBR = new QRadioButton("Unbearability",this);
-  target_flags_MANN = new QRadioButton("Manna",this);
+  target_flags_WILL = new QRadioButton("Will",this);
   target_flags_NOAT = new QRadioButton("No Attribute",this);
+
   /* Target flags layout */
   target_flags_layout = new QVBoxLayout();
   target_flags_layout->addWidget(target_flags_VITA);
   target_flags_layout->addWidget(target_flags_QTDR);
-  target_flags_layout->addWidget(target_flags_PHAG);
-  target_flags_layout->addWidget(target_flags_PHFD);
-  target_flags_layout->addWidget(target_flags_THAG);
-  target_flags_layout->addWidget(target_flags_THFD);
+//  target_flags_layout->addWidget(target_flags_PHAG);
+//  target_flags_layout->addWidget(target_flags_PHFD);
+//  target_flags_layout->addWidget(target_flags_THAG);
+//  target_flags_layout->addWidget(target_flags_THFD);
   target_flags_layout->addWidget(target_flags_PRAG);
   target_flags_layout->addWidget(target_flags_PRFD);
-  target_flags_layout->addWidget(target_flags_POAG);
-  target_flags_layout->addWidget(target_flags_POFD);
-  target_flags_layout->addWidget(target_flags_CHAG);
-  target_flags_layout->addWidget(target_flags_CHFD);
-  target_flags_layout->addWidget(target_flags_CYAG);
-  target_flags_layout->addWidget(target_flags_CYFD);
-  target_flags_layout->addWidget(target_flags_NIAG);
-  target_flags_layout->addWidget(target_flags_NIFD);
-  target_flags_layout->addWidget(target_flags_MMNT);
+  target_flags_layout->addWidget(target_flags_SEAG);
+  target_flags_layout->addWidget(target_flags_SEFD);
+  //  target_flags_layout->addWidget(target_flags_POAG);
+//  target_flags_layout->addWidget(target_flags_POFD);
+//  target_flags_layout->addWidget(target_flags_CHAG);
+//  target_flags_layout->addWidget(target_flags_CHFD);
+//  target_flags_layout->addWidget(target_flags_CYAG);
+//  target_flags_layout->addWidget(target_flags_CYFD);
+//  target_flags_layout->addWidget(target_flags_NIAG);
+//  target_flags_layout->addWidget(target_flags_NIFD);
+//  target_flags_layout->addWidget(target_flags_MMNT);
   target_flags_layout->addWidget(target_flags_LIMB);
   target_flags_layout->addWidget(target_flags_UNBR);
-  target_flags_layout->addWidget(target_flags_MANN);
+  target_flags_layout->addWidget(target_flags_WILL);
   target_flags_layout->addWidget(target_flags_NOAT);
   /* Add the layout to the groupbox */
   target_flags_box->setLayout(target_flags_layout);
@@ -638,87 +650,130 @@ Action EditorAction::getEditedAction()
     working.setAttributeUser(Attribute::VITA);
   else if(user_flags_QTDR->isChecked())
     working.setAttributeUser(Attribute::QTDR);
-  else if(user_flags_PHAG->isChecked())
-    working.setAttributeUser(Attribute::PHAG);
-  else if(user_flags_PHFD->isChecked())
-    working.setAttributeUser(Attribute::PHFD);
-  else if(user_flags_THAG->isChecked())
-    working.setAttributeUser(Attribute::THAG);
-  else if(user_flags_THFD->isChecked())
-    working.setAttributeUser(Attribute::THFD);
   else if(user_flags_PRAG->isChecked())
     working.setAttributeUser(Attribute::PRAG);
   else if(user_flags_PRFD->isChecked())
     working.setAttributeUser(Attribute::PRFD);
-  else if(user_flags_POAG->isChecked())
-    working.setAttributeUser(Attribute::POAG);
-  else if(user_flags_POFD->isChecked())
-    working.setAttributeUser(Attribute::POFD);
-  else if(user_flags_CHAG->isChecked())
-    working.setAttributeUser(Attribute::CHAG);
-  else if(user_flags_CHFD->isChecked())
-    working.setAttributeUser(Attribute::CHFD);
-  else if(user_flags_CYAG->isChecked())
-    working.setAttributeUser(Attribute::CYAG);
-  else if(user_flags_CYFD->isChecked())
-    working.setAttributeUser(Attribute::CYFD);
-  else if(user_flags_NIAG->isChecked())
-    working.setAttributeUser(Attribute::NIAG);
-  else if(user_flags_NIFD->isChecked())
-    working.setAttributeUser(Attribute::NIFD);
-  else if(user_flags_MMNT->isChecked())
-    working.setAttributeUser(Attribute::MMNT);
+  else if(user_flags_SEAG->isChecked())
+    working.setAttributeUser(Attribute::SEAG);
+  else if(user_flags_SEFD->isChecked())
+    working.setAttributeUser(Attribute::SEFD);
   else if(user_flags_LIMB->isChecked())
     working.setAttributeUser(Attribute::LIMB);
   else if(user_flags_UNBR->isChecked())
     working.setAttributeUser(Attribute::UNBR);
-  else if(user_flags_MANN->isChecked())
-    working.setAttributeUser(Attribute::MANN);
+  else if(user_flags_WILL->isChecked())
+    working.setAttributeUser(Attribute::WILL);
   else if(user_flags_NOAT->isChecked())
     working.setAttributeUser(Attribute::NONE);
+
+//  if(user_flags_VITA->isChecked())
+//    working.setAttributeUser(Attribute::VITA);
+//  else if(user_flags_QTDR->isChecked())
+//    working.setAttributeUser(Attribute::QTDR);
+//  else if(user_flags_PHAG->isChecked())
+//    working.setAttributeUser(Attribute::PHAG);
+//  else if(user_flags_PHFD->isChecked())
+//    working.setAttributeUser(Attribute::PHFD);
+//  else if(user_flags_THAG->isChecked())
+//    working.setAttributeUser(Attribute::THAG);
+//  else if(user_flags_THFD->isChecked())
+//    working.setAttributeUser(Attribute::THFD);
+//  else if(user_flags_PRAG->isChecked())
+//    working.setAttributeUser(Attribute::PRAG);
+//  else if(user_flags_PRFD->isChecked())
+//    working.setAttributeUser(Attribute::PRFD);
+//  else if(user_flags_POAG->isChecked())
+//    working.setAttributeUser(Attribute::POAG);
+//  else if(user_flags_POFD->isChecked())
+//    working.setAttributeUser(Attribute::POFD);
+//  else if(user_flags_CHAG->isChecked())
+//    working.setAttributeUser(Attribute::CHAG);
+//  else if(user_flags_CHFD->isChecked())
+//    working.setAttributeUser(Attribute::CHFD);
+//  else if(user_flags_CYAG->isChecked())
+//    working.setAttributeUser(Attribute::CYAG);
+//  else if(user_flags_CYFD->isChecked())
+//    working.setAttributeUser(Attribute::CYFD);
+//  else if(user_flags_NIAG->isChecked())
+//    working.setAttributeUser(Attribute::NIAG);
+//  else if(user_flags_NIFD->isChecked())
+//    working.setAttributeUser(Attribute::NIFD);
+//  else if(user_flags_MMNT->isChecked())
+//    working.setAttributeUser(Attribute::MMNT);
+//  else if(user_flags_LIMB->isChecked())
+//    working.setAttributeUser(Attribute::LIMB);
+//  else if(user_flags_UNBR->isChecked())
+//    working.setAttributeUser(Attribute::UNBR);
+//  else if(user_flags_MANN->isChecked())
+//    working.setAttributeUser(Attribute::MANN);
+//  else if(user_flags_NOAT->isChecked())
+//    working.setAttributeUser(Attribute::NONE);
 
   if(target_flags_VITA->isChecked())
     working.setAttributeTarget(Attribute::VITA);
   else if(target_flags_QTDR->isChecked())
     working.setAttributeTarget(Attribute::QTDR);
-  else if(target_flags_PHAG->isChecked())
-    working.setAttributeTarget(Attribute::PHAG);
-  else if(target_flags_PHFD->isChecked())
-    working.setAttributeTarget(Attribute::PHFD);
-  else if(target_flags_THAG->isChecked())
-    working.setAttributeTarget(Attribute::THAG);
-  else if(target_flags_THFD->isChecked())
-    working.setAttributeTarget(Attribute::THFD);
   else if(target_flags_PRAG->isChecked())
     working.setAttributeTarget(Attribute::PRAG);
   else if(target_flags_PRFD->isChecked())
     working.setAttributeTarget(Attribute::PRFD);
-  else if(target_flags_POAG->isChecked())
-    working.setAttributeTarget(Attribute::POAG);
-  else if(target_flags_POFD->isChecked())
-    working.setAttributeTarget(Attribute::POFD);
-  else if(target_flags_CHAG->isChecked())
-    working.setAttributeTarget(Attribute::CHAG);
-  else if(target_flags_CHFD->isChecked())
-    working.setAttributeTarget(Attribute::CHFD);
-  else if(target_flags_CYAG->isChecked())
-    working.setAttributeTarget(Attribute::CYAG);
-  else if(target_flags_CYFD->isChecked())
-    working.setAttributeTarget(Attribute::CYFD);
-  else if(target_flags_NIAG->isChecked())
-    working.setAttributeTarget(Attribute::NIAG);
-  else if(target_flags_NIFD->isChecked())
-    working.setAttributeTarget(Attribute::NIFD);
-  else if(target_flags_MMNT->isChecked())
-    working.setAttributeTarget(Attribute::MMNT);
+  else if(target_flags_SEAG->isChecked())
+    working.setAttributeTarget(Attribute::SEAG);
+  else if(target_flags_SEFD->isChecked())
+    working.setAttributeTarget(Attribute::SEFD);
   else if(target_flags_LIMB->isChecked())
     working.setAttributeTarget(Attribute::LIMB);
   else if(target_flags_UNBR->isChecked())
     working.setAttributeTarget(Attribute::UNBR);
-  else if(target_flags_MANN->isChecked())
-    working.setAttributeTarget(Attribute::MANN);
+  else if(target_flags_WILL->isChecked())
+    working.setAttributeTarget(Attribute::WILL);
   else if(target_flags_NOAT->isChecked())
     working.setAttributeTarget(Attribute::NONE);
+
+
+//  if(target_flags_VITA->isChecked())
+//    working.setAttributeTarget(Attribute::VITA);
+//  else if(target_flags_QTDR->isChecked())
+//    working.setAttributeTarget(Attribute::QTDR);
+//  else if(target_flags_PHAG->isChecked())
+//    working.setAttributeTarget(Attribute::PHAG);
+//  else if(target_flags_PHFD->isChecked())
+//    working.setAttributeTarget(Attribute::PHFD);
+//  else if(target_flags_THAG->isChecked())
+//    working.setAttributeTarget(Attribute::THAG);
+//  else if(target_flags_THFD->isChecked())
+//    working.setAttributeTarget(Attribute::THFD);
+//  else if(target_flags_PRAG->isChecked())
+//    working.setAttributeTarget(Attribute::PRAG);
+//  else if(target_flags_PRFD->isChecked())
+//    working.setAttributeTarget(Attribute::PRFD);
+//  else if(target_flags_POAG->isChecked())
+//    working.setAttributeTarget(Attribute::POAG);
+//  else if(target_flags_POFD->isChecked())
+//    working.setAttributeTarget(Attribute::POFD);
+//  else if(target_flags_CHAG->isChecked())
+//    working.setAttributeTarget(Attribute::CHAG);
+//  else if(target_flags_CHFD->isChecked())
+//    working.setAttributeTarget(Attribute::CHFD);
+//  else if(target_flags_CYAG->isChecked())
+//    working.setAttributeTarget(Attribute::CYAG);
+//  else if(target_flags_CYFD->isChecked())
+//    working.setAttributeTarget(Attribute::CYFD);
+//  else if(target_flags_NIAG->isChecked())
+//    working.setAttributeTarget(Attribute::NIAG);
+//  else if(target_flags_NIFD->isChecked())
+//    working.setAttributeTarget(Attribute::NIFD);
+//  else if(target_flags_MMNT->isChecked())
+//    working.setAttributeTarget(Attribute::MMNT);
+//  else if(target_flags_LIMB->isChecked())
+//    working.setAttributeTarget(Attribute::LIMB);
+//  else if(target_flags_UNBR->isChecked())
+//    working.setAttributeTarget(Attribute::UNBR);
+//  else if(target_flags_MANN->isChecked())
+//    working.setAttributeTarget(Attribute::MANN);
+//  else if(target_flags_NOAT->isChecked())
+//    working.setAttributeTarget(Attribute::NONE);
 
   base = working;
   outputString();
@@ -1001,7 +1056,7 @@ void EditorAction::loadWorkingInfo()
     case Attribute::QTDR:
       user_flags_QTDR->setChecked(true);
       break;
-    case Attribute::PHAG:
+    /*ase Attribute::PHAG:
       user_flags_PHAG->setChecked(true);
       break;
     case Attribute::PHFD:
@@ -1012,49 +1067,58 @@ void EditorAction::loadWorkingInfo()
       break;
     case Attribute::THFD:
       user_flags_THFD->setChecked(true);
-      break;
+      break;*/
     case Attribute::PRAG:
       user_flags_PRAG->setChecked(true);
       break;
     case Attribute::PRFD:
       user_flags_PRFD->setChecked(true);
       break;
-    case Attribute::POAG:
-      user_flags_POAG->setChecked(true);
+    case Attribute::SEAG:
+      user_flags_SEAG->setChecked(true);
       break;
-    case Attribute::POFD:
-      user_flags_POFD->setChecked(true);
+    case Attribute::SEFD:
+      user_flags_SEFD->setChecked(true);
       break;
-    case Attribute::CHAG:
-      user_flags_CHAG->setChecked(true);
-      break;
-    case Attribute::CHFD:
-      user_flags_CHFD->setChecked(true);
-      break;
-    case Attribute::CYAG:
-      user_flags_CYAG->setChecked(true);
-      break;
-    case Attribute::CYFD:
-      user_flags_CYFD->setChecked(true);
-      break;
-    case Attribute::NIAG:
-      user_flags_NIAG->setChecked(true);
-      break;
-    case Attribute::NIFD:
-      user_flags_NIFD->setChecked(true);
-      break;
-    case Attribute::MMNT:
-      user_flags_MMNT->setChecked(true);
-      break;
+//    case Attribute::POAG:
+//      user_flags_POAG->setChecked(true);
+//      break;
+//    case Attribute::POFD:
+//      user_flags_POFD->setChecked(true);
+//      break;
+//    case Attribute::CHAG:
+//      user_flags_CHAG->setChecked(true);
+//      break;
+//    case Attribute::CHFD:
+//      user_flags_CHFD->setChecked(true);
+//      break;
+//    case Attribute::CYAG:
+//      user_flags_CYAG->setChecked(true);
+//      break;
+//    case Attribute::CYFD:
+//      user_flags_CYFD->setChecked(true);
+//      break;
+//    case Attribute::NIAG:
+//      user_flags_NIAG->setChecked(true);
+//      break;
+//    case Attribute::NIFD:
+//      user_flags_NIFD->setChecked(true);
+//      break;
+//    case Attribute::MMNT:
+//      user_flags_MMNT->setChecked(true);
+//      break;
     case Attribute::LIMB:
       user_flags_LIMB->setChecked(true);
       break;
     case Attribute::UNBR:
       user_flags_UNBR->setChecked(true);
       break;
-    case Attribute::MANN:
-      user_flags_MANN->setChecked(true);
+    case Attribute::WILL:
+      user_flags_WILL->setChecked(true);
       break;
+//    case Attribute::MANN:
+//      user_flags_MANN->setChecked(true);
+//      break;
     case Attribute::NONE:
       user_flags_NOAT->setChecked(true);
       break;
@@ -1069,60 +1133,69 @@ void EditorAction::loadWorkingInfo()
     case Attribute::QTDR:
       target_flags_QTDR->setChecked(true);
       break;
-    case Attribute::PHAG:
-      target_flags_PHAG->setChecked(true);
-      break;
-    case Attribute::PHFD:
-      target_flags_PHFD->setChecked(true);
-      break;
-    case Attribute::THAG:
-      target_flags_THAG->setChecked(true);
-      break;
-    case Attribute::THFD:
-      target_flags_THFD->setChecked(true);
-      break;
+//    case Attribute::PHAG:
+//      target_flags_PHAG->setChecked(true);
+//      break;
+//    case Attribute::PHFD:
+//      target_flags_PHFD->setChecked(true);
+//      break;
+//    case Attribute::THAG:
+//      target_flags_THAG->setChecked(true);
+//      break;
+//    case Attribute::THFD:
+//      target_flags_THFD->setChecked(true);
+//      break;
     case Attribute::PRAG:
       target_flags_PRAG->setChecked(true);
       break;
     case Attribute::PRFD:
       target_flags_PRFD->setChecked(true);
       break;
-    case Attribute::POAG:
-      target_flags_POAG->setChecked(true);
+    case Attribute::SEAG:
+      target_flags_SEAG->setChecked(true);
       break;
-    case Attribute::POFD:
-      target_flags_POFD->setChecked(true);
+    case Attribute::SEFD:
+      target_flags_SEFD->setChecked(true);
       break;
-    case Attribute::CHAG:
-      target_flags_CHAG->setChecked(true);
-      break;
-    case Attribute::CHFD:
-      target_flags_CHFD->setChecked(true);
-      break;
-    case Attribute::CYAG:
-      target_flags_CYAG->setChecked(true);
-      break;
-    case Attribute::CYFD:
-      target_flags_CYFD->setChecked(true);
-      break;
-    case Attribute::NIAG:
-      target_flags_NIAG->setChecked(true);
-      break;
-    case Attribute::NIFD:
-      target_flags_NIFD->setChecked(true);
-      break;
-    case Attribute::MMNT:
-      target_flags_MMNT->setChecked(true);
-      break;
+//    case Attribute::POAG:
+//      target_flags_POAG->setChecked(true);
+//      break;
+//    case Attribute::POFD:
+//      target_flags_POFD->setChecked(true);
+//      break;
+//    case Attribute::CHAG:
+//      target_flags_CHAG->setChecked(true);
+//      break;
+//    case Attribute::CHFD:
+//      target_flags_CHFD->setChecked(true);
+//      break;
+//    case Attribute::CYAG:
+//      target_flags_CYAG->setChecked(true);
+//      break;
+//    case Attribute::CYFD:
+//      target_flags_CYFD->setChecked(true);
+//      break;
+//    case Attribute::NIAG:
+//      target_flags_NIAG->setChecked(true);
+//      break;
+//    case Attribute::NIFD:
+//      target_flags_NIFD->setChecked(true);
+//      break;
+//    case Attribute::MMNT:
+//      target_flags_MMNT->setChecked(true);
+//      break;
     case Attribute::LIMB:
       target_flags_LIMB->setChecked(true);
       break;
     case Attribute::UNBR:
       target_flags_UNBR->setChecked(true);
       break;
-    case Attribute::MANN:
-      target_flags_MANN->setChecked(true);
+    case Attribute::WILL:
+      target_flags_WILL->setChecked(true);
       break;
+//    case Attribute::MANN:
+//      target_flags_MANN->setChecked(true);
+//      break;
     case Attribute::NONE:
       target_flags_NOAT->setChecked(true);
       break;

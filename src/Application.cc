@@ -56,11 +56,11 @@ Application::Application(QWidget* parent)
           ,this, SLOT(setSkillset(EditorSkillset*)));
   connect(game_database, SIGNAL(changeSkill(EditorSkill*)),
           this, SLOT(setSkill(EditorSkill*)));
-  connect(game_database, SIGNAL(changeEquipment
-                                (EditorEquipment*)),
-          this, SLOT(setEquipment(EditorEquipment*)));
-  connect(game_database, SIGNAL(changeBubby(EditorBubby*)),
-          this, SLOT(setBubby(EditorBubby*)));
+//  connect(game_database, SIGNAL(changeEquipment
+//                                (EditorEquipment*)),
+//          this, SLOT(setEquipment(EditorEquipment*)));
+//  connect(game_database, SIGNAL(changeBubby(EditorBubby*)),
+//          this, SLOT(setBubby(EditorBubby*)));
 
   game_view = new GameView(this);
   setCentralWidget(game_view);

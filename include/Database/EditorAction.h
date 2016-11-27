@@ -180,55 +180,80 @@ private:
 
   /* Groupbox for the user attribute flags */
   QGroupBox* user_flags_box;
+
   /* User flags */
   QRadioButton* user_flags_VITA;
   QRadioButton* user_flags_QTDR;
-  QRadioButton* user_flags_PHAG;
-  QRadioButton* user_flags_PHFD;
-  QRadioButton* user_flags_THAG;
-  QRadioButton* user_flags_THFD;
   QRadioButton* user_flags_PRAG;
   QRadioButton* user_flags_PRFD;
-  QRadioButton* user_flags_POAG;
-  QRadioButton* user_flags_POFD;
-  QRadioButton* user_flags_CHAG;
-  QRadioButton* user_flags_CHFD;
-  QRadioButton* user_flags_CYAG;
-  QRadioButton* user_flags_CYFD;
-  QRadioButton* user_flags_NIAG;
-  QRadioButton* user_flags_NIFD;
-  QRadioButton* user_flags_MMNT;
+  QRadioButton* user_flags_SEAG;
+  QRadioButton* user_flags_SEFD;
   QRadioButton* user_flags_LIMB;
   QRadioButton* user_flags_UNBR;
-  QRadioButton* user_flags_MANN;
+  QRadioButton* user_flags_WILL;
   QRadioButton* user_flags_NOAT;
+
+//  QRadioButton* user_flags_VITA;
+//  QRadioButton* user_flags_QTDR;
+//  QRadioButton* user_flags_PHAG;
+//  QRadioButton* user_flags_PHFD;
+//  QRadioButton* user_flags_THAG;
+//  QRadioButton* user_flags_THFD;
+//  QRadioButton* user_flags_PRAG;
+//  QRadioButton* user_flags_PRFD;
+//  QRadioButton* user_flags_POAG;
+//  QRadioButton* user_flags_POFD;
+//  QRadioButton* user_flags_CHAG;
+//  QRadioButton* user_flags_CHFD;
+//  QRadioButton* user_flags_CYAG;
+//  QRadioButton* user_flags_CYFD;
+//  QRadioButton* user_flags_NIAG;
+//  QRadioButton* user_flags_NIFD;
+//  QRadioButton* user_flags_MMNT;
+//  QRadioButton* user_flags_LIMB;
+//  QRadioButton* user_flags_UNBR;
+//  QRadioButton* user_flags_MANN;
+//  QRadioButton* user_flags_NOAT;
   /* User flags layout */
   QVBoxLayout* user_flags_layout;
 
   /* Groupbox for the user attribute flags */
   QGroupBox* target_flags_box;
+
   /* Target flags */
   QRadioButton* target_flags_VITA;
   QRadioButton* target_flags_QTDR;
-  QRadioButton* target_flags_PHAG;
-  QRadioButton* target_flags_PHFD;
-  QRadioButton* target_flags_THAG;
-  QRadioButton* target_flags_THFD;
   QRadioButton* target_flags_PRAG;
   QRadioButton* target_flags_PRFD;
-  QRadioButton* target_flags_POAG;
-  QRadioButton* target_flags_POFD;
-  QRadioButton* target_flags_CHAG;
-  QRadioButton* target_flags_CHFD;
-  QRadioButton* target_flags_CYAG;
-  QRadioButton* target_flags_CYFD;
-  QRadioButton* target_flags_NIAG;
-  QRadioButton* target_flags_NIFD;
-  QRadioButton* target_flags_MMNT;
+  QRadioButton* target_flags_SEAG;
+  QRadioButton* target_flags_SEFD;
   QRadioButton* target_flags_LIMB;
   QRadioButton* target_flags_UNBR;
-  QRadioButton* target_flags_MANN;
+  QRadioButton* target_flags_WILL;
   QRadioButton* target_flags_NOAT;
+
+//  QRadioButton* target_flags_VITA;
+//  QRadioButton* target_flags_QTDR;
+//  QRadioButton* target_flags_PHAG;
+//  QRadioButton* target_flags_PHFD;
+//  QRadioButton* target_flags_THAG;
+//  QRadioButton* target_flags_THFD;
+//  QRadioButton* target_flags_PRAG;
+//  QRadioButton* target_flags_PRFD;
+//  QRadioButton* target_flags_POAG;
+//  QRadioButton* target_flags_POFD;
+//  QRadioButton* target_flags_CHAG;
+//  QRadioButton* target_flags_CHFD;
+//  QRadioButton* target_flags_CYAG;
+//  QRadioButton* target_flags_CYFD;
+//  QRadioButton* target_flags_NIAG;
+//  QRadioButton* target_flags_NIFD;
+//  QRadioButton* target_flags_MMNT;
+//  QRadioButton* target_flags_LIMB;
+//  QRadioButton* target_flags_UNBR;
+//  QRadioButton* target_flags_MANN;
+//  QRadioButton* target_flags_NOAT;
+
   /* Target flags layout */
   QVBoxLayout* target_flags_layout;
   QHBoxLayout* buttons_layout;

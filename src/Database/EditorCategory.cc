@@ -254,7 +254,6 @@ void EditorCategory::createLayout()
             this, SLOT(changedImmunities(int)));
     layout_immunities->addWidget(chk_immunities.back());
   }
-  layout->addWidget(box_immunities, 0, 4, 8, 1);
 
   /* Preset List for Stats */
   QStringList stat_presets;
@@ -270,7 +269,7 @@ void EditorCategory::createLayout()
   connect(combo_stats_base, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statBasePreset(int)));
   layout_stats_base->addWidget(combo_stats_base, 0, 0, 1, 2);
-  for(int i = 0; i <= (int)Attribute::MANN; i++)
+  for(int i = 0; i <= (int)Attribute::WILL; i++)
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
@@ -298,7 +297,7 @@ void EditorCategory::createLayout()
   connect(combo_stats_max, SIGNAL(currentIndexChanged(int)),
           this, SLOT(statMaxPreset(int)));
   layout_stats_max->addWidget(combo_stats_max, 0, 0, 1, 2);
-  for(int i = 0; i <= (int)Attribute::MANN; i++)
+  for(int i = 0; i <= (int)Attribute::WILL; i++)
   {
     QString att = QString::fromStdString(Helpers::attributeToStr((Attribute)i));
     QLabel* lbl = new QLabel(att, this);
@@ -395,7 +394,7 @@ void EditorCategory::loadWorkingInfo()
   }
 
   /* Base Stats */
-  for(int i = 0; i <= (int)Attribute::MANN; i++)
+  for(int i = 0; i <= (int)Attribute::WILL; i++)
   {
     spin_atts_base[i]->blockSignals(true);
     spin_atts_base[i]->setValue(cat_curr.getBaseSet().getStat(i));
@@ -403,12 +402,28 @@ void EditorCategory::loadWorkingInfo()
   }
 
   /* Max Stats */
-  for(int i = 0; i <= (int)Attribute::MANN; i++)
+  for(int i = 0; i <= (int)Attribute::WILL; i++)
   {
     spin_atts_max[i]->blockSignals(true);
     spin_atts_max[i]->setValue(cat_curr.getTopSet().getStat(i));
     spin_atts_max[i]->blockSignals(false);
   }
+
+//  /* Base Stats */
+//  for(int i = 0; i <= (int)Attribute::MANN; i++)
+//  {
+//    spin_atts_base[i]->blockSignals(true);
+//    spin_atts_base[i]->setValue(cat_curr.getBaseSet().getStat(i));
+//    spin_atts_base[i]->blockSignals(false);
+//  }
+
+//  /* Max Stats */
+//  for(int i = 0; i <= (int)Attribute::MANN; i++)
+//  {
+//    spin_atts_max[i]->blockSignals(true);
+//    spin_atts_max[i]->setValue(cat_curr.getTopSet().getStat(i));
+//    spin_atts_max[i]->blockSignals(false);
+//  }
 }
 
 /*============================================================================
@@ -816,7 +831,6 @@ void EditorCategory::save(FileHandler* fh, bool game_only, QString wrapper)
     }
     fh->writeXmlElementEnd();
 
-    /* Base Stats */
     fh->writeXmlData("stats_base",
                      AttributeSet::setToStr(cat_base.getBaseSet()));
 
