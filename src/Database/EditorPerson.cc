@@ -470,7 +470,7 @@ void EditorPerson::loadWorkingInfo()
   chk_gain_xp->setChecked(person_curr.getPFlag(PState::CAN_GAIN_EXP));
   chk_lvl_up->setChecked(person_curr.getPFlag(PState::CAN_LEVEL_UP));
   chk_learn_skills->setChecked(person_curr.getPFlag(PState::CAN_LEARN_SKILLS));
-  chk_change_equip->setChecked(person_curr.getPFlag(PState::CAN_CHANGE_EQUIP));
+  //chk_change_equip->setChecked(person_curr.getPFlag(PState::CAN_CHANGE_EQUIP));
   chk_no_signals = false;
 
   /* Update the Sprites */
@@ -911,7 +911,7 @@ void EditorPerson::changedFlags(int)
 {
   if(!chk_no_signals)
   {
-    person_curr.setPFlag(PState::CAN_CHANGE_EQUIP, chk_change_equip->isChecked());
+    //person_curr.setPFlag(PState::CAN_CHANGE_EQUIP, chk_change_equip->isChecked());
     person_curr.setPFlag(PState::CAN_GAIN_EXP, chk_gain_xp->isChecked());
     person_curr.setPFlag(PState::CAN_LEARN_SKILLS, chk_learn_skills->isChecked());
     person_curr.setPFlag(PState::CAN_LEVEL_UP, chk_lvl_up->isChecked());
@@ -1431,12 +1431,12 @@ void EditorPerson::save(FileHandler* fh, bool game_only)
       fh->writeXmlData("can_gain_exp",
                        person_base.getPFlag(PState::CAN_GAIN_EXP));
     }
-    if(blank.getPFlag(PState::CAN_CHANGE_EQUIP) !=
-       person_base.getPFlag(PState::CAN_CHANGE_EQUIP))
-    {
-      fh->writeXmlData("can_change_equip",
-                       person_base.getPFlag(PState::CAN_CHANGE_EQUIP));
-    }
+//    if(blank.getPFlag(PState::CAN_CHANGE_EQUIP) !=
+//       person_base.getPFlag(PState::CAN_CHANGE_EQUIP))
+//    {
+//      fh->writeXmlData("can_change_equip",
+//                       person_base.getPFlag(PState::CAN_CHANGE_EQUIP));
+//    }
     if(blank.getPFlag(PState::CAN_LEVEL_UP) !=
        person_base.getPFlag(PState::CAN_LEVEL_UP))
     {

@@ -127,8 +127,11 @@ SOURCES += \#$
     ../Project/src/Game/Player/Person.cc \
     ../Project/src/Game/Player/Signature.cc \
     ../Project/src/Game/Player/Skill.cc \
-    ../Project/src/Game/Player/SkillSet.cc
-
+    ../Project/src/Game/Player/SkillSet.cc \
+    ../Project/src/GFX/SDL2_framerate.cc \
+    ../Project/src/GFX/SDL2_gfxPrimitives.cc \
+    ../Project/src/GFX/SDL2_imageFilter.cc \
+    ../Project/src/GFX/SDL2_rotozoom.cc
 
 HEADERS += \
     include/Application.h \
@@ -232,8 +235,11 @@ HEADERS += \
     ../Project/include/Game/Player/Person.h \
     ../Project/include/Game/Player/Signature.h \
     ../Project/include/Game/Player/Skill.h \
-    ../Project/include/Game/Player/SkillSet.h
-
+    ../Project/include/Game/Player/SkillSet.h \
+    ../Project/include/GFX/SDL2_framerate.h \
+    ../Project/include/GFX/SDL2_gfxPrimitives.h \
+    ../Project/include/GFX/SDL2_imageFilter.h \
+    ../Project/include/GFX/SDL2_rotozoom.h
 
 INCLUDEPATH += ./include
 INCLUDEPATH += ../Project/include
