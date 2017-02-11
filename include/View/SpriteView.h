@@ -47,6 +47,9 @@ private:
   /* The sprite dialog for editing */
   SpriteDialog* sprite_dialog;
 
+  /* Sprite Images */
+  QVector<Sprite*> sprite_images;
+
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/

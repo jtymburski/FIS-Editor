@@ -205,8 +205,16 @@ void SpriteView::updateList()
   if(editor_map != NULL)
   {
     for(int i = 0; i < editor_map->getSpriteCount(); i++)
-      editor_sprite_list->addItem(editor_map->getSpriteByIndex(i)
-                                            ->getNameList());
+    {
+      EditorSprite* sprite = editor_map->getSpriteByIndex(i);
+
+      QListWidgetItem* item = new QListWidgetItem();
+
+      item->setText(sprite->getNameList());
+      item->setIcon(sprite->getPixmap(0, 32, 32));
+      editor_sprite_list->addItem(item);
+    }
+
     editor_map->updateAll();
   }
 
