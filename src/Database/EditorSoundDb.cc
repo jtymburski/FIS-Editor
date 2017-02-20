@@ -313,6 +313,16 @@ void EditorSoundDb::createReserved()
   sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_BTL_POISON,
                                            "Battle: Poison"));
 
+  /* Victory */
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_VIC_EXPUP,
+                                           "Victory: Experience Gain"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_VIC_EXPDOWN,
+                                           "Victory: Experience Loss"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_VIC_LEVEL,
+                                           "Victory: Level Up"));
+  sound_reserved.push_back(new EditorSound(Sound::kID_SOUND_VIC_SKILL,
+                                           "Victory: Skill Gain"));
+
   for(int i = 0; i < sound_reserved.size(); i++)
     sound_reserved[i]->setNameLock(true);
 
