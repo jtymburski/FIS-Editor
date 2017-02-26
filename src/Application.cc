@@ -483,7 +483,10 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
   {
     action_blockplace->setEnabled(true);
     action_fill->setEnabled(true);
+
     action_move->setDisabled(true);
+    if(action_move->isChecked())
+      action_basic->setChecked(true);
   }
   else
   {
@@ -492,10 +495,10 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
     action_move->setEnabled(true);
 
     /* If either selected, change to place pen */
-    //if(action_blockplace->isChecked() || action_fill->isChecked())
-    //{
-    //  action_basic->setChecked(true);
-    //}
+    if(action_blockplace->isChecked() || action_fill->isChecked())
+    {
+      action_basic->setChecked(true);
+    }
   }
 
   /* Enabling / Disabling passability pens */
@@ -518,17 +521,17 @@ void Application::layerChanged(EditorEnumDb::Layer layer)
     action_passW->setDisabled(true);
 
     /* If either selected, change to place pen */
-    //if(action_passall->isChecked() || action_passE->isChecked() ||
-    //   action_passN->isChecked() || action_passS->isChecked() ||
-    //   action_passW->isChecked())
-    //{
-    //  action_basic->setChecked(true);
-    //}
+    if(action_passall->isChecked() || action_passE->isChecked() ||
+       action_passN->isChecked() || action_passS->isChecked() ||
+       action_passW->isChecked())
+    {
+      action_basic->setChecked(true);
+    }
   }
 
-  /* Select place pen by default */
-  if(!action_basic->isChecked())
-    action_basic->setChecked(true);
+  /* Select place pen by default - removed at Jeff's request 2017-02-25 */
+  //if(!action_basic->isChecked())
+  //  action_basic->setChecked(true);
 }
 
 /* Load action */
