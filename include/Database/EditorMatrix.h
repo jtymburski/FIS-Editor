@@ -2,7 +2,7 @@
  * Class Name: EditorMatrix
  * Date Created: February 1, 2015
  * Inheritance: QGraphicsScene
- * Description: This class is for the editing sprite matrix, which contains a 
+ * Description: This class is for the editing sprite matrix, which contains a
  *              scene of EditorTileSprites that are used for thing creation.
  ******************************************************************************/
 #ifndef EDITORMATRIX_H
@@ -52,10 +52,10 @@ private:
 
   /* Right clicked sprite */
   EditorTileSprite* rightclick_sprite;
-  
+
   /* The rendering tile icons */
   TileIcons* tile_icons;
-  
+
   /* Visibility painting control */
   bool visible_grid;
   bool visible_passability;
@@ -109,7 +109,7 @@ signals:
   /* Triggers on click */
   void click();
 
-  /* Triggers a parent class to start matrix place process */ 
+  /* Triggers a parent class to start matrix place process */
   void initMatrixPlace();
 
   /* Matrix changes */
@@ -133,10 +133,10 @@ public slots:
  *===========================================================================*/
 public:
   /* Adds a path to the Editor Matrix. It can handle matrix format file names */
-  bool addPath(QString path, int x = 0, int y = 0, bool hflip = false, 
+  bool addPath(QString path, int x = 0, int y = 0, bool hflip = false,
                bool vflip = false, bool reset = false,
                bool clear_modified = false);
-  bool addPath(QString root_path, QString file_name, int x = 0, int y = 0, 
+  bool addPath(QString root_path, QString file_name, int x = 0, int y = 0,
                bool hflip = false, bool vflip = false, bool reset = false,
                bool clear_modified = false);
 
@@ -149,7 +149,7 @@ public:
 
   /* Called by parent to edit all sprites. Returns generic edit sprite */
   EditorTileSprite* editAllSprites();
-  
+
   /* Returns the active frame index */
   int getActiveFrameIndex();
 
@@ -209,14 +209,14 @@ public:
 
   /* Sets the cursor mode */
   void setCursorMode(EditorEnumDb::ThingCursor mode);
- 
+
   /* Sets if all tiles should be horizontally or vertically flipped */
   void setFlipHorizontal(bool flip);
   void setFlipVertical(bool flip);
-  
+
   /* Sets the rendering tile icons */
-  void setTileIcons(TileIcons* icons); 
-  
+  void setTileIcons(TileIcons* icons);
+
   /* Sets the visibility for control objects */
   void setVisibilityGrid(bool visible, bool force = false);
   void setVisibilityPass(bool visible, bool force = false);

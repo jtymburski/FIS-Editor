@@ -2,7 +2,7 @@
  * Class Name: Application
  * Date Created: November 11, 2013
  * Inheritance: QMainWindow
- * Description: The Main Application that handles all the displays for the 
+ * Description: The Main Application that handles all the displays for the
  *              entire editor. This includes the map, all applicable toolbars.
  ******************************************************************************/
 #include "Application.h"
@@ -939,7 +939,7 @@ void Application::setViewPerson()
   game_view->setViewMode(EditorEnumDb::PERSONVIEW);
 }
 
-/* 
+/*
  * Description: Show the database dock on the left side
  *
  * Inputs: none

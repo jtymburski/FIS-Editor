@@ -10,7 +10,7 @@
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
- *===========================================================================*/ 
+ *===========================================================================*/
 
 /*
  * Description: Constructor function for instantiating the lock view with an
@@ -44,7 +44,7 @@ LockView::~LockView()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Creates the view layout with QT functional widgets.
  *
@@ -192,7 +192,7 @@ void LockView::setLayoutData()
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Slot which triggers when the category drop down changes.
  *              Switches the view and changes the type of event.

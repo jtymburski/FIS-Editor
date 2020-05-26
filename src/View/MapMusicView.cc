@@ -12,7 +12,7 @@
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
  *===========================================================================*/
-  
+
 /*
  * Description: Constructor function. Creates the music view, which is the
  *              side bar within the left map database. Controls sub-map music
@@ -40,7 +40,7 @@ MapMusicView::~MapMusicView()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *

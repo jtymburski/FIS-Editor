@@ -7,10 +7,10 @@
  *              locations where it's used.
  ******************************************************************************/
 #include "Database/EditorLock.h"
- 
+
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
- *===========================================================================*/ 
+ *===========================================================================*/
 
 /*
  * Description: Blank constructor for editor lock.
@@ -298,7 +298,7 @@ void EditorLock::setLockBlank()
  *         bool permanent - true if the lock once unlocked is permanent
  * Output: bool - true if the lock was created
  */
-bool EditorLock::setLockHaveItem(int id, int count, bool consume, 
+bool EditorLock::setLockHaveItem(int id, int count, bool consume,
                                  bool permanent)
 {
   if(id >= 0 && count > 0)
@@ -324,7 +324,7 @@ bool EditorLock::setLockTrigger(bool permanent)
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another editor

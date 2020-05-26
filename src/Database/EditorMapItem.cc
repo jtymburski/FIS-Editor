@@ -2,7 +2,7 @@
  * Class Name: EditorMapItem
  * Date Created: April 25, 2015
  * Inheritance: EditorMapThing
- * Description: The class for managing the interfacing with MapItem and 
+ * Description: The class for managing the interfacing with MapItem and
  *              filling it with data. The management pop-up is PersonDialog.
  ******************************************************************************/
 #include "Database/EditorMapItem.h"
@@ -27,7 +27,7 @@ EditorMapItem::EditorMapItem(int id, QString name, QString description)
 {
   item.setCount(1);
 }
-                  
+
 /*
  * Description: Copy constructor. Calls the blank constructor and then copies
  *              the data from the source.

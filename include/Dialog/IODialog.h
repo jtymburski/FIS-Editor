@@ -62,7 +62,7 @@ private:
   /* The working and original IO */
   EditorMapIO* io_original;
   EditorMapIO* io_working;
-  
+
   /* The labels for displaying data */
   QLabel* lbl_frame_img;
   QLabel* lbl_lock_data;

@@ -2,7 +2,7 @@
  * Class Name: EditorMapPerson
  * Date Created: March 3, 2015
  * Inheritance: EditorMapThing
- * Description: The class for managing the interfacing with MapPerson and 
+ * Description: The class for managing the interfacing with MapPerson and
  *              filling it with data. The management pop-up is PersonDialog.
  ******************************************************************************/
 #include "Database/EditorMapPerson.h"
@@ -30,7 +30,7 @@ EditorMapPerson::EditorMapPerson(int id, QString name, QString description)
 
   speed_base = true;
 }
-                
+
 /*
  * Description: Copy constructor. Calls the blank constructor and then copies
  *              the data from the source.
@@ -42,7 +42,7 @@ EditorMapPerson::EditorMapPerson(const EditorMapPerson &source)
 {
   copySelf(source);
 }
-  
+
 /*
  * Description: Destructor function
  */
@@ -51,7 +51,7 @@ EditorMapPerson::~EditorMapPerson()
   unsetMatrix();
   deleteMatrixes();
 }
-  
+
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/

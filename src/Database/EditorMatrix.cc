@@ -2,7 +2,7 @@
  * Class Name: EditorMatrix
  * Date Created: February 1, 2015
  * Inheritance: QGraphicsScene
- * Description: This class is for the editing sprite matrix, which contains a 
+ * Description: This class is for the editing sprite matrix, which contains a
  *              scene of EditorTileSprites that are used for thing creation.
  ******************************************************************************/
 #include "Database/EditorMatrix.h"
@@ -76,7 +76,7 @@ EditorMatrix::~EditorMatrix()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Triggers the add frames to the active sprite. This emits
  *              initMatrixPlace() to be connected by parent.
@@ -89,7 +89,7 @@ void EditorMatrix::addFramesOnActive()
   /* Get the place X and Y, from the active sprite */
   place_x = active_sprite->getX();
   place_y = active_sprite->getY();
- 
+
   /* Trigger the start matrix place in parent class */
   emit initMatrixPlace();
 }
@@ -132,9 +132,9 @@ void EditorMatrix::copySelf(const EditorMatrix &source)
     emit matrixChange();
   }
 }
-  
+
 /*
- * Description: Decreases the render depth on the active tile by 1. 
+ * Description: Decreases the render depth on the active tile by 1.
  *
  * Inputs: bool min - push it to the min as opposed to decrement by 1
  * Output: bool - true if the depth decreased by 1. false if as low as possible
@@ -159,7 +159,7 @@ bool EditorMatrix::decrementDepthOnActive(bool min)
 }
 
 /*
- * Description: Returns the first valid sprite. It attempts to find one with 
+ * Description: Returns the first valid sprite. It attempts to find one with
  *              frames first. If there are none, returns first non-NULL sprite.
  *              Otherwise, NULL.
  *
@@ -185,7 +185,7 @@ EditorTileSprite* EditorMatrix::getValidSprite()
 }
 
 /*
- * Description: Increases the render depth on the active tile by 1. 
+ * Description: Increases the render depth on the active tile by 1.
  *
  * Inputs: bool max - push it to the max as opposed to increment by 1
  * Output: bool - true if the depth increased by 1. false if as high as possible
@@ -258,9 +258,9 @@ void EditorMatrix::removeFramesOnActive()
   active_sprite->update();
   emit matrixChange();
 }
-  
+
 /*
- * Description: Sets a new origin. This involves removes rows on the top and 
+ * Description: Sets a new origin. This involves removes rows on the top and
  *              columns on the left to rebase the matrix.
  *
  * Inputs: int x - the new x of tile for origin
@@ -281,7 +281,7 @@ bool EditorMatrix::setNewOrigin(int x, int y)
       }
       matrix.removeFirst();
     }
-    
+
     /* Trim the height next */
     for(int i = 0; i < matrix.size(); i++)
     {
@@ -446,9 +446,9 @@ void EditorMatrix::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
+
 /*
- * Description: Called when the edit sprites dialog 'ok' button is pressed, 
+ * Description: Called when the edit sprites dialog 'ok' button is pressed,
  *              which will copy the information to all sprites. This is called
  *              after initiated by editAllSprites().
  *
@@ -496,7 +496,7 @@ void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-   
+
 /*
  * Description: Adds path at x and y location. This separates the path into
  *              root path and file name and passes the function on. See other
@@ -512,13 +512,13 @@ void EditorMatrix::matrixPlace(QString result_path, bool hflip, bool vflip)
  *                               be cleared prior to the modification
  * Output: bool - true if it was added
  */
-bool EditorMatrix::addPath(QString path, int x, int y, bool hflip, 
+bool EditorMatrix::addPath(QString path, int x, int y, bool hflip,
                            bool vflip, bool reset, bool clear_modified)
 {
   if(!path.isEmpty())
   {
     QStringList path_set = path.split(QDir::separator());
-    return addPath(path.remove(path_set.last()), path_set.last(), x, y, 
+    return addPath(path.remove(path_set.last()), path_set.last(), x, y,
                    hflip, vflip, reset, clear_modified);
   }
 
@@ -542,7 +542,7 @@ bool EditorMatrix::addPath(QString path, int x, int y, bool hflip,
  *                               be cleared prior to the modification
  * Output: bool - true if it was added
  */
-bool EditorMatrix::addPath(QString root_path, QString file_name, 
+bool EditorMatrix::addPath(QString root_path, QString file_name,
                            int x, int y, bool hflip, bool vflip, bool reset,
                            bool clear_modified)
 {
@@ -553,7 +553,7 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
       decreaseWidth(getWidth());
 
     /* Split up the set of frames for the matrix */
-    std::vector<std::vector<std::string>> name_set = 
+    std::vector<std::vector<std::string>> name_set =
                                Helpers::frameSeparator(file_name.toStdString());
 
     /* Ensure the matrix is large enough */
@@ -569,7 +569,7 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
       {
         if(clear_modified)
           matrix[x + i][y + j]->deleteAllFrames();
-        matrix[x + i][y + j]->addPath(root_path + 
+        matrix[x + i][y + j]->addPath(root_path +
                                       QString::fromStdString(name_set[i][j]),
                                       hflip, vflip);
       }
@@ -583,7 +583,7 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
 }
 
 /*
- * Description: Cleans the scene. Used for when moving it to a new view. 
+ * Description: Cleans the scene. Used for when moving it to a new view.
  *
  * Inputs: bool just_hover - true if just the hover events are cleaned
  * Output: none
@@ -688,7 +688,7 @@ void EditorMatrix::decreaseWidth(int count)
   cleanScene(false);
   emit matrixChange();
 }
- 
+
 /*
  * Description: Called to get the EditorTileSprite that is used to edit all the
  *              general settings of the sprite. Edit Pop-up should be connected
@@ -1065,7 +1065,7 @@ void EditorMatrix::increaseHeight(int count)
   setVisibilityGrid(visible_grid, true);
   setVisibilityPass(visible_passability, true);
   setVisibilityRender(visible_render, true);
-  
+
   /* Clean up the scene */
   cleanScene(true);
   emit matrixChange();
@@ -1807,7 +1807,7 @@ void EditorMatrix::setCursorMode(EditorEnumDb::ThingCursor mode)
 {
   cursor_mode = mode;
 }
-  
+
 /*
  * Description: Sets all sprites in the matrix to either be horizontally flipped
  *              or not.
@@ -1873,7 +1873,7 @@ void EditorMatrix::setVisibilityGrid(bool visible, bool force)
 }
 
 /*
- * Description: Sets the visibility of the passability in all tiles. If forced, 
+ * Description: Sets the visibility of the passability in all tiles. If forced,
  *              it sets it even if the tile has it already set.
  *
  * Inputs: bool visible - true if passability should be visible
@@ -1931,7 +1931,7 @@ void EditorMatrix::trim(bool only_se)
   QRect trim_rect = getTrimRect();
 
   /* Update width / height */
-  setNewSize(trim_rect.x() + trim_rect.width(), 
+  setNewSize(trim_rect.x() + trim_rect.width(),
              trim_rect.y() + trim_rect.height());
 
   /* Update origin points */

@@ -56,7 +56,7 @@ EditorSound::~EditorSound()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copies all data from source editor object to this editor
  *              object.
@@ -363,7 +363,7 @@ void EditorSound::setVolume(uint8_t volume)
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another

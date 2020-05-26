@@ -2,7 +2,7 @@
  * Class Name: ConvoDialog
  * Date Created: February 15, 2015
  * Inheritance: QDialog
- * Description: The conversation dialog, which handles editing a singular 
+ * Description: The conversation dialog, which handles editing a singular
  *              conversation node. Used primarily by ThingDialog and all
  *              children.
  ******************************************************************************/
@@ -50,10 +50,10 @@ private:
   /* Event view and control */
   EditorEvent* event_ctrl;
   EventView* event_view;
-  
+
   /* The list of objects used in possible events */
   QList<QString> list_things;
-  
+
   /* Spin Box widgets for integer entry */
   QSpinBox* spin_delay;
 
@@ -114,11 +114,11 @@ public slots:
 
 /*============================================================================
  * PUBLIC FUNCTIONS
- *===========================================================================*/ 
+ *===========================================================================*/
 public:
   /* Returns the event view in the pop-up */
   EventView* getEventView();
-  
+
   /* Returns the list of objects, used for event creation */
   QList<QString> getListMapThings();
 

@@ -619,7 +619,7 @@ void EditorSprite::set270()
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Adds path to the tail end of the sprite stack. This also takes
  *              the path and attempts to split it by the | delimiter. This will
@@ -651,10 +651,10 @@ int EditorSprite::addPath(QString path, bool hflip, bool vflip)
 
   return count;
 }
-   
+
 /*
- * Description: Copies only the base data for sprite and nothing related to 
- *              the frames, ID, or rendering. 
+ * Description: Copies only the base data for sprite and nothing related to
+ *              the frames, ID, or rendering.
  *
  * Inputs: const EditorSprite &source - the copy object
  * Output: none
@@ -685,7 +685,7 @@ int EditorSprite::frameCount()
 {
   return frame_info.size();
 }
-  
+
 /*
  * Description: Returns the active frame reference index (what will be painted).
  *
@@ -752,7 +752,7 @@ QImage EditorSprite::getImage(int frame_num)
     return frame_info[frame_num].image;
   return QImage();
 }
-  
+
 /*
  * Description: Returns the last frame that has a valid frame index from the
  *              end of the frame stack. -1 if none are valid.
@@ -955,7 +955,7 @@ bool EditorSprite::getVerticalFlip(int frame_num)
     return frame_info[frame_num].vflip;
   return false;
 }
-  
+
 /*
  * Description: Returns true if all frames in the sprite are null images (not
  *              valid paths).
@@ -1029,7 +1029,7 @@ void EditorSprite::load(XmlData data, int index)
   {
     /* Add the path(s) */
     int start_point = frameCount();
-    addPath(EditorHelpers::getProjectDir() + QDir::separator() + 
+    addPath(EditorHelpers::getProjectDir() + QDir::separator() +
             QString::fromStdString(data.getDataString()));
     int end_point = frameCount();
 
@@ -1256,7 +1256,7 @@ void EditorSprite::setID(int id)
   if(id >= 0 && id <= 65535)
     sprite->setId(id);
 }
-  
+
 /*
  * Description: Sets the maximum number of frames to trim the sprite down to.
  *

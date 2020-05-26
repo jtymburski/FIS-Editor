@@ -2,7 +2,7 @@
  * Class Name: EditorHelpers
  * Date Created: January 4, 2015
  * Inheritance: none
- * Description: Contains helper functions for controlling the application. 
+ * Description: Contains helper functions for controlling the application.
  *              Essentially, all public static functions for outside access.
  ******************************************************************************/
 #ifndef EDITORHELPERS_H

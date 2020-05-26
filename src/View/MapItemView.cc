@@ -362,7 +362,7 @@ void MapItemView::editInstance()
   {
     int id = MapThingView::getInstanceID(item_instances->currentItem()->text());
 
-    EditorMapItem* item = editor_map->getItem(id, 
+    EditorMapItem* item = editor_map->getItem(id,
                                               editor_map->getCurrentMap()->id);
     if(item != NULL)
       editItem(item);
@@ -412,7 +412,7 @@ void MapItemView::instanceRowChanged(int index, bool lock_viewport)
     int id = MapThingView::getInstanceID(item_instances->currentItem()->text());
     if(editor_map->setHoverItem(id))
     {
-      EditorMapItem* item = editor_map->getItem(id, 
+      EditorMapItem* item = editor_map->getItem(id,
                                                editor_map->getCurrentMap()->id);
       if(item != nullptr)
       {

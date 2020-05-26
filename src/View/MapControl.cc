@@ -46,7 +46,7 @@ MapControl::MapControl(QWidget *parent): QWidget(parent)
   main_layout->addWidget(events_toggle);
 
   /* Sets up the active layer actions, makes them checkable and adds them to
-     an action group which allows only one to be active at a time */ 
+     an action group which allows only one to be active at a time */
   list_top = new QListWidget(this);
   for(int i = 0; i < (int)EditorEnumDb::NO_LAYER; i++)
   {

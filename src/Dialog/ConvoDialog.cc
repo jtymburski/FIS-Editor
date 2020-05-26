@@ -2,7 +2,7 @@
  * Class Name: ConvoDialog
  * Date Created: February 15, 2015
  * Inheritance: QDialog
- * Description: The conversation dialog, which handles editing a singular 
+ * Description: The conversation dialog, which handles editing a singular
  *              conversation node. Used primarily by ThingDialog and all
  *              children.
  ******************************************************************************/
@@ -23,7 +23,7 @@
  *         EventClassifier limiter - the restrictions on the event view
  *         QWidget* parent - the parent widget
  */
-ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option, 
+ConvoDialog::ConvoDialog(Conversation* edit_convo, bool is_option,
                          EventClassifier limiter, QWidget* parent)
            : QDialog(parent)
 {
@@ -498,7 +498,7 @@ void ConvoDialog::textSelected(bool yes)
 
 /*============================================================================
  * PUBLIC FUNCTIONS
- *===========================================================================*/ 
+ *===========================================================================*/
 
 /*
  * Description: Returns the event view within the conversation dialog.

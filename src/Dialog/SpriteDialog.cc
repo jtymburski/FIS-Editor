@@ -23,7 +23,7 @@
  *        EditorEnumDb::SpriteEditMode mode - the editing mode. default all
  */
 SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
-                           int subsequent, bool creation, 
+                           int subsequent, bool creation,
                            EditorEnumDb::SpriteEditMode mode)
             : QDialog(parent)
 {
@@ -306,14 +306,14 @@ SpriteDialog::SpriteDialog(QWidget *parent, EditorSprite *working, QString p,
     flipH->setDisabled(true);
     flipV->setDisabled(true);
     resetFlip->setDisabled(true);
-   
+
     frame_list->setDisabled(true);
   }
 
   /* Dialog control */
   setWindowTitle("Sprite Edit");
 }
-  
+
 /*
  * Description: Destructor function
  */

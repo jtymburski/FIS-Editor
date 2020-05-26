@@ -2,7 +2,7 @@
  * Class Name: EditorMapItem
  * Date Created: April 25, 2015
  * Inheritance: EditorMapThing
- * Description: The class for managing the interfacing with MapItem and 
+ * Description: The class for managing the interfacing with MapItem and
  *              filling it with data. The management pop-up is ItemDialog.
  ******************************************************************************/
 #ifndef EDITORMAPITEM_H
@@ -73,7 +73,7 @@ public:
 
   /* Sets the base reference item */
   void setBase(EditorMapItem* item, bool synchronize = true);
-  
+
   /* Sets the number of this item */
   void setCount(uint32_t count);
 

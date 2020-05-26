@@ -150,7 +150,7 @@ void MapView::setupMapView()//int x, int y)
 
   /* Connections - map control to others */
   connect(map_control, SIGNAL(updateMap()),
-          map_render, SLOT(updateRenderingMap())); 
+          map_render, SLOT(updateRenderingMap()));
   connect(map_control, SIGNAL(updateAllLists()),
           map_database, SLOT(updateAllLists()));
 

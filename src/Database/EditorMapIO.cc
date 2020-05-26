@@ -76,7 +76,7 @@ EditorMapIO::~EditorMapIO()
  *===========================================================================*/
 
 /*
- * Description: Copies all data from source editor interactive object to this 
+ * Description: Copies all data from source editor interactive object to this
  *              editor interactive object.
  *
  * Inputs: EditorMapIO &source - the source to copy from

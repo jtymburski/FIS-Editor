@@ -40,7 +40,7 @@ EventSetView::~EventSetView()
 /*============================================================================
  * PRIVATE FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Creates the dialog layout with QT functional widgets.
  *
@@ -144,7 +144,7 @@ void EventSetView::setLayoutData()
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Button slot on the edit set button. This is triggered for
  *              the event dialog within the parent class.

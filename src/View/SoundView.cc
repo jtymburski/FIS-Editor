@@ -71,7 +71,7 @@ SoundView::~SoundView()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copies all data from source editor object to this editor
  *              object.

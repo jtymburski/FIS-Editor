@@ -3,7 +3,7 @@
  * Date Created: April 1, 2015
  * Inheritance: QDialog
  * Description: The dialog that displays the map thing instant and the
- *              information related to it. Allows manipulation of the data. 
+ *              information related to it. Allows manipulation of the data.
  *              It also contains the path information used for map npcs.
  ******************************************************************************/
 #ifndef INSTANCEDIALOG_H

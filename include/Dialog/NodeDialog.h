@@ -31,7 +31,7 @@ public:
 private:
   /* Event view - future */
   EventView* event_view;
-  
+
   /* Path reference */
   int path_node;
   EditorNPCPath* path_original;
@@ -81,7 +81,7 @@ public slots:
 
 /*============================================================================
  * PUBLIC FUNCTIONS
- *===========================================================================*/ 
+ *===========================================================================*/
 public:
   /* Returns the event view in the pop-up */
   //EventView* getEventView();

@@ -3,7 +3,7 @@
  * Date Created: January 31, 2015
  * Inheritance: QGraphicsItem, EditorSprite
  * Description: This class is for editing sprites that exist within the thing
- *              structure matrix. It's inherited off of EditorSprite and 
+ *              structure matrix. It's inherited off of EditorSprite and
  *              QGraphicsItem (since it's used inside a matrix).
  ******************************************************************************/
 #include "Database/EditorTileSprite.h"
@@ -15,7 +15,7 @@
 
 /*
  * Description: Constructor function for the editor sprite. Since it's a
- *              QGraphicsItem and gets used inside a matrix, which is a 
+ *              QGraphicsItem and gets used inside a matrix, which is a
  *              QGraphicsScene, it has additonal functionality, such as x and
  *              y.
  *
@@ -143,7 +143,7 @@ QString EditorTileSprite::getPassability()
                                           getPassability(Direction::WEST));
 }
 
-/* 
+/*
  * Description: Returns the passability of a given direction.
  *
  * Inputs: Direction dir - the direction to return passability for
@@ -171,7 +171,7 @@ int EditorTileSprite::getPassabilityNum()
 }
 
 /*
- * Description: Returns the render depth of the EditorTile sprite. This is a 
+ * Description: Returns the render depth of the EditorTile sprite. This is a
  *              number from 0 to X, of the point it is rendered on the map.
  *
  * Inputs: none
@@ -181,7 +181,7 @@ uint8_t EditorTileSprite::getRenderDepth()
 {
   return tile_sprite.getRenderDepth();
 }
-  
+
 /*
  * Description: Returns the X, tile location, of the sprite.
  *
@@ -225,7 +225,7 @@ bool EditorTileSprite::incrementRenderDepth()
  *        QStyleOptionGraphicsItem*, QWidget* - unused
  * Output: none
  */
-void EditorTileSprite::paint(QPainter* painter, 
+void EditorTileSprite::paint(QPainter* painter,
                              const QStyleOptionGraphicsItem*, QWidget*)
 {
   int size = EditorHelpers::getTileSize();
@@ -313,7 +313,7 @@ void EditorTileSprite::paint(QPainter* painter,
     }
   }
 }
-  
+
 /*
  * Description: Sets the hover state of the QGraphicsItem.
  *

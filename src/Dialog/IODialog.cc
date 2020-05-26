@@ -422,7 +422,7 @@ void IODialog::updateState()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: The re-implementation of the close event for the dialog. Cleans
  *              up the existing IO references and deletes memory.

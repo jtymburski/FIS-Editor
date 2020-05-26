@@ -2,8 +2,8 @@
  * Class Name: EditorMapNPC
  * Date Created: March 30, 2015
  * Inheritance: EditorMapPerson
- * Description: The class for managing the interfacing with MapNPC and 
- *              filling it with data. The base management pop-up is 
+ * Description: The class for managing the interfacing with MapNPC and
+ *              filling it with data. The base management pop-up is
  *              PersonDialog and the instance management pop-up is ?
  ******************************************************************************/
 #ifndef EDITORMAPNPC_H
@@ -22,7 +22,7 @@ public:
 
   /* Copy constructor function */
   EditorMapNPC(const EditorMapNPC &source);
-  
+
   /* Destructor function */
   virtual ~EditorMapNPC();
 
@@ -52,7 +52,7 @@ protected:
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-public: 
+public:
   /* Gets the base npc of the person */
   EditorMapNPC* getBaseNPC() const;
 
@@ -70,7 +70,7 @@ public:
 
   /* Sets the base reference npc */
   void setBase(EditorMapNPC* npc, bool synchronize = true);
-  
+
   /* Sets the x and y coordinate of the npc - primarily handled by thing */
   bool setX(int x);
   bool setY(int y);

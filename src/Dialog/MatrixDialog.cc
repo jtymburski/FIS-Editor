@@ -2,7 +2,7 @@
  * Class Name: MatrixDialog
  * Date Created: February 5, 2015
  * Inheritance: QDialog
- * Description: The sprite matrix dialog, which handles loading in a matrix 
+ * Description: The sprite matrix dialog, which handles loading in a matrix
  *              frame, as per the standard Univursa naming convention. Used
  *              in ThingDialog and all children.
  ******************************************************************************/
@@ -19,7 +19,7 @@ const int MatrixDialog::kSCENE_SIZE = 320;
 /*
  * Description: Constructor function
  *
- * Inputs: QString path - the base path initially chosen 
+ * Inputs: QString path - the base path initially chosen
  *         QWidget* parent - the parent class of the dialog
  */
 MatrixDialog::MatrixDialog(QString path, QWidget* parent) : QDialog(parent)
@@ -60,7 +60,7 @@ MatrixDialog::~MatrixDialog()
  *===========================================================================*/
 
 /*
- * Description: Checks the initial file name from the path and disables 
+ * Description: Checks the initial file name from the path and disables
  *              the control objects that aren't valid (if the sprite doesn't
  *              conform to Univursa naming standards).
  *
@@ -173,7 +173,7 @@ void MatrixDialog::createDialog()
   layout->addWidget(width_lbl_1, 1, 3);
   cbox_width_from = new QComboBox(this);
   fillDropDown(cbox_width_from);
-  connect(cbox_width_from, SIGNAL(currentIndexChanged(int)), 
+  connect(cbox_width_from, SIGNAL(currentIndexChanged(int)),
           this, SLOT(comboWidthChanged(int)));
   layout->addWidget(cbox_width_from, 1, 4);
   QLabel* width_lbl_2 = new QLabel("TO", this);
@@ -189,14 +189,14 @@ void MatrixDialog::createDialog()
   layout->addWidget(height_lbl_1, 2, 3);
   cbox_height_from = new QComboBox(this);
   fillDropDown(cbox_height_from);
-  connect(cbox_height_from, SIGNAL(currentIndexChanged(int)), 
+  connect(cbox_height_from, SIGNAL(currentIndexChanged(int)),
           this, SLOT(comboHeightChanged(int)));
   layout->addWidget(cbox_height_from, 2, 4);
   QLabel* height_lbl_2 = new QLabel("TO", this);
   layout->addWidget(height_lbl_2, 2, 5, Qt::AlignHCenter);
   cbox_height_to = new QComboBox(this);
   fillDropDown(cbox_height_to, cbox_height_from->currentText());
-  connect(cbox_height_to, SIGNAL(currentIndexChanged(int)), 
+  connect(cbox_height_to, SIGNAL(currentIndexChanged(int)),
           this, SLOT(editObjectChanged(int)));
   layout->addWidget(cbox_height_to, 2, 6);
 
@@ -264,7 +264,7 @@ void MatrixDialog::fillDropDown(QComboBox* box, QString starting_letter)
     /* Get the range */
     int start = starting_letter.at(0).unicode();
     int end = QChar('Z').unicode();
-    
+
     /* Loop through them all */
     for(int i = start; i <= end; i++)
       box->addItem(QString(QChar(i)));
@@ -277,9 +277,9 @@ void MatrixDialog::fillDropDown(QComboBox* box, QString starting_letter)
     box->blockSignals(false);
   }
 }
-  
+
 /*
- * Description: Updates the scene matrix and prints an image of it for 
+ * Description: Updates the scene matrix and prints an image of it for
  *              rendering in the dialog.
  *
  * Inputs: none
@@ -289,7 +289,7 @@ void MatrixDialog::updateScene()
 {
   /* Update the scene with the new path */
   QString result_file = getResultFile();
-  matrix.addPath(initial_path + result_file, 0, 0, 
+  matrix.addPath(initial_path + result_file, 0, 0,
                  button_flip_h->isChecked(), button_flip_v->isChecked(), true);
 
   /* Paint the image */
@@ -305,7 +305,7 @@ void MatrixDialog::updateScene()
 /*============================================================================
  * PUBLIC SLOT FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Button trigger called on cancel click. Only closes the dialog.
  *
@@ -317,7 +317,7 @@ void MatrixDialog::buttonCancel()
   close();
 }
 
-/* 
+/*
  * Description: Button trigger called on a flip click (horizontal or vertical).
  *              Updates the scene for the new flip.
  *
@@ -355,7 +355,7 @@ void MatrixDialog::buttonNextFrame()
 }
 
 /*
- * Description: Button trigger called on ok click. Emits matrixSuccess signal 
+ * Description: Button trigger called on ok click. Emits matrixSuccess signal
  *              (necessary for determining if the data is good) and then closes
  *              the dialog.
  *
@@ -414,13 +414,13 @@ void MatrixDialog::buttonTrim()
     if(isFlipHorizontal())
       cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x1);
     else
-      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + 
+      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() +
                                        diff_x1);
   }
   if(diff_x2 > 0)
   {
     if(isFlipHorizontal())
-      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() + 
+      cbox_width_from->setCurrentIndex(cbox_width_from->currentIndex() +
                                        diff_x2);
     else
       cbox_width_to->setCurrentIndex(cbox_width_to->currentIndex() - diff_x2);
@@ -434,13 +434,13 @@ void MatrixDialog::buttonTrim()
     if(isFlipVertical())
       cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y1);
     else
-      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
+      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() +
                                         diff_y1);
   }
   if(diff_y2 > 0)
   {
     if(isFlipVertical())
-      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() + 
+      cbox_height_from->setCurrentIndex(cbox_height_from->currentIndex() +
                                         diff_y1);
     else
       cbox_height_to->setCurrentIndex(cbox_height_to->currentIndex() - diff_y2);
@@ -481,7 +481,7 @@ void MatrixDialog::comboWidthChanged(int)
 }
 
 /*
- * Description: Fires if any other edit object changes (the other two combo 
+ * Description: Fires if any other edit object changes (the other two combo
  *              boxes or the spinner). Updates the scene and frames for spinner.
  *
  * Inputs: int - not used
@@ -527,8 +527,8 @@ void MatrixDialog::editObjectChanged(int)
 
 /*============================================================================
  * PUBLIC FUNCTIONS
- *===========================================================================*/ 
-  
+ *===========================================================================*/
+
 /*
  * Description: Is the matrix flipped horizontally?
  *
@@ -552,7 +552,7 @@ bool MatrixDialog::isFlipVertical()
 }
 
 /*
- * Description: Returns the result file of the matrix in the format of 
+ * Description: Returns the result file of the matrix in the format of
  *              Univursa. This can be passed into EditorMatrix to load in the
  *              frames. Eg. archy_[A-C][B-D]_D|2|.png
  *
@@ -574,10 +574,10 @@ QString MatrixDialog::getResultFile()
     {
       file += "[";
       if(button_flip_h->isChecked())
-        file += cbox_width_to->currentText() + "-" + 
+        file += cbox_width_to->currentText() + "-" +
                 cbox_width_from->currentText();
       else
-        file += cbox_width_from->currentText() + "-" + 
+        file += cbox_width_from->currentText() + "-" +
                 cbox_width_to->currentText();
       file += "]";
     }
@@ -591,10 +591,10 @@ QString MatrixDialog::getResultFile()
     {
       file += "[";
       if(button_flip_v->isChecked())
-        file += cbox_height_to->currentText() + "-" + 
+        file += cbox_height_to->currentText() + "-" +
                 cbox_height_from->currentText();
       else
-        file += cbox_height_from->currentText() + "-" + 
+        file += cbox_height_from->currentText() + "-" +
                 cbox_height_to->currentText();
       file += "]";
     }
@@ -606,7 +606,7 @@ QString MatrixDialog::getResultFile()
 
     /* Get the frame count */
     if(num_spinner->value() > 1)
-      file += QString(file_set.last().at(0)) + "|" + 
+      file += QString(file_set.last().at(0)) + "|" +
               QString::number(num_spinner->value()) + "|.png";
     else
       file += file_set.last();
@@ -616,7 +616,7 @@ QString MatrixDialog::getResultFile()
 }
 
 /*
- * Description: Returns the result path and file appended together, in the 
+ * Description: Returns the result path and file appended together, in the
  *              format of Univursa. This can be passed into EditorMatrix to load
  *              in the frames. See getResultFile() for more info.
  *

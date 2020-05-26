@@ -89,7 +89,7 @@ public:
   /* Append a state to the tail of the list */
   void appendState(EditorEnumDb::MapIOType type);
   bool appendState(EditorState* state);
-  
+
   /* Consolidates matrix data on all states */
   void consolidate(int ref_index);
 

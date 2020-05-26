@@ -63,13 +63,13 @@ public:
 
   /* Returns the ID of the scene */
   virtual int getID() const;
-  
+
   /* Returns the midlay(s) LayOver struct */
   LayOver getMidlay(int index) const;
   LayOver* getMidlayRef(int index);
   int getMidlaySize() const;
   QVector<LayOver> getMidlays() const;
-  
+
   /* Returns the music reference ID of the scene */
   int getMusicID() const;
 
@@ -111,7 +111,7 @@ public:
 
   /* Sets the midlay(s) for the scene */
   bool setMidlay(int index, LayOver lay_over);
-  bool setMidlay(int index, QString path, int anim_time, 
+  bool setMidlay(int index, QString path, int anim_time,
                  float velocity_x, float velocity_y);
 
   /* Sets the music reference ID of the scene */
@@ -122,15 +122,15 @@ public:
 
   /* Sets the scene with the attached structure */
   void setScene(BattleScene new_scene);
-  
+
   /* Sets the overlay(s) for the scene */
   bool setOverlay(int index, LayOver lay_over);
-  bool setOverlay(int index, QString path, int anim_time, 
+  bool setOverlay(int index, QString path, int anim_time,
                   float velocity_x, float velocity_y);
 
   /* Sets the underlay(s) for the scene */
   bool setUnderlay(int index, LayOver lay_over);
-  bool setUnderlay(int index, QString path, int anim_time, 
+  bool setUnderlay(int index, QString path, int anim_time,
                    float velocity_x, float velocity_y);
 
   /* Unsets the midlay(s) */

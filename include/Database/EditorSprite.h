@@ -245,7 +245,7 @@ public:
 
   /* Sets the active frame index */
   void setActiveFrame(int index);
-  
+
   /* Sets the sprites id (Backend) */
   virtual void setID(int);
 

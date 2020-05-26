@@ -2,7 +2,7 @@
  * Class Name: MatrixDialog
  * Date Created: February 5, 2015
  * Inheritance: QDialog
- * Description: The sprite matrix dialog, which handles loading in a matrix 
+ * Description: The sprite matrix dialog, which handles loading in a matrix
  *              frame, as per the standard Univursa naming convention. Used
  *              in ThingDialog and all children.
  ******************************************************************************/
@@ -100,13 +100,13 @@ public slots:
   /* The "from" combo box for width or height change trigger */
   void comboHeightChanged(int);
   void comboWidthChanged(int);
-  
+
   /* One of the other edit objects changed */
   void editObjectChanged(int);
 
 /*============================================================================
  * PUBLIC FUNCTIONS
- *===========================================================================*/ 
+ *===========================================================================*/
 public:
   /* Is the matrix being flipped horizontally or vertically? */
   bool isFlipHorizontal();

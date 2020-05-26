@@ -1536,7 +1536,7 @@ bool EditorNPCPath::load(XmlData data, int index)
  *        QWidget* - not used
  * Output: none
  */
-void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*, 
+void EditorNPCPath::paint(QPainter* painter, const QStyleOptionGraphicsItem*,
                           QWidget*)
 {
   if(isVisible())
@@ -2076,7 +2076,7 @@ void EditorNPCPath::unsetIndexSelect(bool allow_update)
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another object.

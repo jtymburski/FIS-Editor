@@ -3,7 +3,7 @@
  * Date Created: January 31, 2015
  * Inheritance: QGraphicsItem, EditorSprite
  * Description: This class is for editing sprites that exist within the thing
- *              structure matrix. It's inherited off of EditorSprite and 
+ *              structure matrix. It's inherited off of EditorSprite and
  *              QGraphicsItem (since it's used inside a matrix).
  ******************************************************************************/
 #ifndef EDITORTILESPRITE_H
@@ -84,7 +84,7 @@ public:
     /* Painting function for Tile Sprite wrapper */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
              QWidget* widget = NULL);
-  
+
   /* Sets the hover state */
   void setHover(bool);
 
@@ -95,10 +95,10 @@ public:
 
   /* Sets the render depth. 0 is the base up to max */
   bool setRenderDepth(uint8_t depth);
-   
+
   /* Sets the rendering tile icons */
-  void setTileIcons(TileIcons* icons); 
-  
+  void setTileIcons(TileIcons* icons);
+
   /* Sets the visibility for control objects */
   void setVisibilityGrid(bool);
   void setVisibilityPass(bool);

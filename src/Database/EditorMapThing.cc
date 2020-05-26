@@ -63,7 +63,7 @@ EditorMapThing::~EditorMapThing()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copies all data from source editor thing to this editor
  *              thing.
@@ -827,7 +827,7 @@ bool EditorMapThing::setY(int y)
 /*============================================================================
  * OPERATOR FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: Copy operator construction. This is called when the variable
  *              already exists and equal operator used with another

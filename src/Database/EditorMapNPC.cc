@@ -2,8 +2,8 @@
  * Class Name: EditorMapNPC
  * Date Created: March 30, 2015
  * Inheritance: EditorMapPerson
- * Description: The class for managing the interfacing with MapNPC and 
- *              filling it with data. The base management pop-up is 
+ * Description: The class for managing the interfacing with MapNPC and
+ *              filling it with data. The base management pop-up is
  *              PersonDialog and the instance management pop-up is ?
  ******************************************************************************/
 #include "Database/EditorMapNPC.h"
@@ -39,7 +39,7 @@ EditorMapNPC::EditorMapNPC(const EditorMapNPC &source) : EditorMapNPC()
 {
   copySelf(source);
 }
-  
+
 /*
  * Description: Destructor function
  */

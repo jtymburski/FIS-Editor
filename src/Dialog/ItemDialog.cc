@@ -223,7 +223,7 @@ void ItemDialog::updateData()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: The re-implementation of the close event for the dialog. Cleans
  *              up the existing item references and deletes memory.

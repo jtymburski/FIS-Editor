@@ -3,7 +3,7 @@
  * Date Created: February 10, 2015
  * Inheritance: none
  * Description: The class is for managing the interconnection to the game with
- *              Event in EventHandler and the viewing/edit widget used in 
+ *              Event in EventHandler and the viewing/edit widget used in
  *              locations where it's used.
  ******************************************************************************/
 #ifndef EDITOREVENT_H

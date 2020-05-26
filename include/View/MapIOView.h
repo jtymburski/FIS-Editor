@@ -37,11 +37,11 @@ private:
 
   /* The IO dialog for editing */
   IODialog* io_dialog;
-  
+
   /* The list of IOs in the view */
   QListWidget* io_instances;
   QListWidget* io_list;
-  
+
   /* Label views for selected thing */
   QLabel* lbl_id;
   QLabel* lbl_image;

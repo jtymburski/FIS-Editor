@@ -412,7 +412,7 @@ void MapIOView::instanceRowChanged(int index, bool lock_viewport)
                                          io_instances->currentItem()->text());
     if(editor_map->setHoverIO(io_id))
     {
-      EditorMapIO* io = editor_map->getIO(io_id, 
+      EditorMapIO* io = editor_map->getIO(io_id,
                                           editor_map->getCurrentMap()->id);
       if(io != NULL)
       {

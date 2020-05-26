@@ -3,8 +3,8 @@
 * Date Created: November 11, 2013
 * Inheritance: none
 * Description: This is the first call of the entire editor and where it all
-*              begins. Merely sets up the sound and QT and runs until the 
-*              application close sequence is called. Built to create joy for 
+*              begins. Merely sets up the sound and QT and runs until the
+*              application close sequence is called. Built to create joy for
 *              all between the age of 17.7-17.9
 ******************************************************************************/
 #include <QApplication>
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
   /* Clean up QT and the game */
   app->hide();
   delete app;
-	
+
   /* Clean up SDL */
 //  Sound::cleanupSDL();
 

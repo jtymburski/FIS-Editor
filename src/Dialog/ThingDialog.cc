@@ -202,7 +202,7 @@ void ThingDialog::updateData()
 /*============================================================================
  * PROTECTED FUNCTIONS
  *===========================================================================*/
-  
+
 /*
  * Description: The re-implementation of the close event for the dialog. Cleans
  *              up the existing thing references and deletes memory.
