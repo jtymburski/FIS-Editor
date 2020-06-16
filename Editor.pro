@@ -1,34 +1,13 @@
-##########################################################
-# Made by Jordan. Do not edit unless you knows the secret
-# Date Created: December 10, 2012
-##########################################################
-
-TARGET = UnivursaEditor
+TARGET = FISEditor
 TEMPLATE = app
 
-CONFIG += qt console static
+QT += core gui widgets multimedia #opengl?
 
-unix {
-  LIBS += -lGLU
-  LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
-}
-macx {
-  INCLUDEPATH = "/opt/local/include"
-  QMAKE_LFLAGS += -F/Library/Frameworks
-  LIBS += -framework SDL2 -framework SDL2_image -framework SDL2_mixer -framework SDL2_ttf
-  LIBS -= -lGLU
-  LIBS -= -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf 
-}
-win32 {
-  LIBS += -lmingw32 -lSDL2main
-  LIBS += -lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf
-}
+CONFIG += c++11 #console? (console output), static? (static binary)
 
-QMAKE_CXXFLAGS += -std=c++1y
-QMAKE_CXX_FLAGS_WARN_ON += -Wall
-QT += opengl widgets multimedia #phonon network xml, core and gui are default
+DEFINES += QT_DEPRECATED_WARNINGS
 
-SOURCES += \#$
+SOURCES += \
     src/Main.cc \
     src/Application.cc \
     src/EditorHelpers.cc \
@@ -94,44 +73,8 @@ SOURCES += \#$
     src/View/SoundView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
-    ../Project/src/FileHandler.cc \
-    ../Project/src/Frame.cc \
-    ../Project/src/Helpers.cc \
-    ../Project/src/Md5.cc \
-    ../Project/src/Sound.cc \
-    ../Project/src/SoundHandler.cc \
-    ../Project/src/Sprite.cc \
-    ../Project/src/TinyXML.cc \
-    ../Project/src/XmlData.cc \
-    ../Project/src/Game/EventHandler.cc \
-    ../Project/src/Game/EventSet.cc \
-    ../Project/src/Game/KeyHandler.cc \
-    ../Project/src/Game/Map/MapInteractiveObject.cc \
-    ../Project/src/Game/Map/MapItem.cc \
-    ../Project/src/Game/Map/MapNPC.cc \
-    ../Project/src/Game/Map/MapPerson.cc \
-    ../Project/src/Game/Map/MapState.cc \
-    ../Project/src/Game/Map/MapThing.cc \
-    ../Project/src/Game/Map/SpriteMatrix.cc \
-    ../Project/src/Game/Map/Tile.cc \
-    ../Project/src/Game/Map/TileSprite.cc \
-    ../Project/src/Game/Player/Action.cc \
-    ../Project/src/Game/Player/AttributeSet.cc \
-    ../Project/src/Game/Player/Bubby.cc \
-    ../Project/src/Game/Player/Category.cc \
-    ../Project/src/Game/Player/Equipment.cc \
-    ../Project/src/Game/Player/Flavour.cc \
-    ../Project/src/Game/Player/Inventory.cc \
-    ../Project/src/Game/Player/Item.cc \
-    ../Project/src/Game/Player/Party.cc \
-    ../Project/src/Game/Player/Person.cc \
-    ../Project/src/Game/Player/Signature.cc \
-    ../Project/src/Game/Player/Skill.cc \
-    ../Project/src/Game/Player/SkillSet.cc \
-    ../Project/src/GFX/SDL2_framerate.cc \
-    ../Project/src/GFX/SDL2_gfxPrimitives.cc \
-    ../Project/src/GFX/SDL2_imageFilter.cc \
-    ../Project/src/GFX/SDL2_rotozoom.cc
+    lib/fis-types/src/Foundation/FrameCore.cc \
+    lib/fis-types/src/Foundation/SpriteCore.cc
 
 HEADERS += \
     include/Application.h \
@@ -199,49 +142,15 @@ HEADERS += \
     include/View/RawImageView.h \
     include/View/SoundView.h \
     include/View/SpriteView.h \
-    include/View/SpriteViewList.h \
-    ../Project/include/EnumDb.h \
-    ../Project/include/EnumFlags.h \
-    ../Project/include/FileHandler.h \
-    ../Project/include/Frame.h \
-    ../Project/include/Helpers.h \
-    ../Project/include/Md5.h \
-    ../Project/include/Sound.h \
-    ../Project/include/SoundHandler.h \
-    ../Project/include/Sprite.h \
-    ../Project/include/TinyXML.h \
-    ../Project/include/XmlData.h \
-    ../Project/include/Game/EventHandler.h \
-    ../Project/include/Game/EventSet.h \
-    ../Project/include/Game/KeyHandler.h \
-    ../Project/include/Game/Map/MapInteractiveObject.h \
-    ../Project/include/Game/Map/MapItem.h \
-    ../Project/include/Game/Map/MapNPC.h \
-    ../Project/include/Game/Map/MapPerson.h \
-    ../Project/include/Game/Map/MapState.h \
-    ../Project/include/Game/Map/MapThing.h \
-    ../Project/include/Game/Map/SpriteMatrix.h \
-    ../Project/include/Game/Map/Tile.h \
-    ../Project/include/Game/Map/TileSprite.h \
-    ../Project/include/Game/Player/AttributeSet.h \
-    ../Project/include/Game/Player/Action.h \
-    ../Project/include/Game/Player/Bubby.h \
-    ../Project/include/Game/Player/Category.h \
-    ../Project/include/Game/Player/Equipment.h \
-    ../Project/include/Game/Player/Flavour.h \
-    ../Project/include/Game/Player/Inventory.h \
-    ../Project/include/Game/Player/Item.h \
-    ../Project/include/Game/Player/Party.h \
-    ../Project/include/Game/Player/Person.h \
-    ../Project/include/Game/Player/Signature.h \
-    ../Project/include/Game/Player/Skill.h \
-    ../Project/include/Game/Player/SkillSet.h \
-    ../Project/include/GFX/SDL2_framerate.h \
-    ../Project/include/GFX/SDL2_gfxPrimitives.h \
-    ../Project/include/GFX/SDL2_imageFilter.h \
-    ../Project/include/GFX/SDL2_rotozoom.h
+    include/View/SpriteViewList.h
 
-INCLUDEPATH += ./include
-INCLUDEPATH += ../Project/include
+INCLUDEPATH += \
+    include \
+    lib/fis-types/include
 
 RESOURCES += resources.qrc
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target

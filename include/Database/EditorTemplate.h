@@ -8,6 +8,8 @@
 #ifndef EDITORTEMPLATE_H
 #define EDITORTEMPLATE_H
 
+#include <QString>
+
 class EditorTemplate
 {
 public:

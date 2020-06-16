@@ -1,0 +1,3 @@
+[submodule "lib/fis-types"]
+	path = lib/fis-types
+	url = git@github.com:jtymburski/FIS-Types.git
