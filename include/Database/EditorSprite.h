@@ -14,6 +14,7 @@
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
 #include "FileHandler.h"
+#include "Foundation/SpriteCore.h"
 
 /* Struct for frame option storage */
 struct FrameInfo
@@ -52,7 +53,7 @@ private:
   QString name;
 
   /* The actual Sprite for in game */
-  Sprite* sprite;
+  SpriteCore sprite;
 
   /* Frame information */
   QVector<FrameInfo> frame_info;
@@ -218,7 +219,7 @@ public:
   int getSoundID();
 
   /* Gets the sprite for alteration */
-  Sprite* getSprite();
+  SpriteCore& getSprite();
 
   /* Gets the frames vertical flip of a given frame */
   bool getVerticalFlip(int);

@@ -25,7 +25,6 @@ EditorSprite::EditorSprite(QString img_path) : QObject()
   active_frame = 0;
   mode = EditorEnumDb::STANDARD;
   name = "Default";
-  sprite = new Sprite();
   if(img_path != "")
     setPath(0, img_path);
 }
@@ -45,9 +44,6 @@ EditorSprite::EditorSprite(const EditorSprite &source) : EditorSprite()
  */
 EditorSprite::~EditorSprite()
 {
-  if(sprite != nullptr)
-    delete sprite;
-  sprite = nullptr;
 }
 
 /*============================================================================
@@ -69,17 +65,11 @@ void EditorSprite::copySelf(const EditorSprite &source, bool only_base)
   {
     mode = source.mode;
     name = source.name;
-    sprite->setId(source.sprite->getId());
     frame_info = source.frame_info;
   }
 
   /* Copy base data */
-  int id = sprite->getId();
-  if(sprite != nullptr)
-    delete sprite;
-  sprite = new Sprite();
-  *sprite = *source.sprite;
-  sprite->setId(id);
+  sprite = source.sprite;
 }
 
 /*
@@ -162,7 +152,7 @@ QPixmap EditorSprite::transformPixmap(int index, int w, int h, bool shadow,
 
   /* Transform */
   transform.setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-  transform.rotate(getFrameAngle(index) + sprite->getRotation());
+  transform.rotate(getFrameAngle(index) + sprite.getRotationDegrees());
 
   /* Modify brightness and color values */
   QImage editing_image = getImage(index);
@@ -271,7 +261,7 @@ void EditorSprite::deleteFrame(int pos)
  */
 QString EditorSprite::getAnimationTime()
 {
-  return QString::number(sprite->getAnimationTime());
+  return QString::number(sprite.getAnimationTimeMs());
 }
 
 /*
@@ -282,7 +272,7 @@ QString EditorSprite::getAnimationTime()
  */
 int EditorSprite::getBrightness()
 {
-  return sprite->getBrightness()*kREF_RGB;
+  return sprite.getBrightness()*kREF_RGB;
 }
 
 /*
@@ -294,7 +284,7 @@ int EditorSprite::getBrightness()
  */
 int EditorSprite::getColorBlue()
 {
-  return sprite->getColorBlue();
+  return sprite.getColorBlue();
 }
 
 /*
@@ -306,7 +296,7 @@ int EditorSprite::getColorBlue()
  */
 int EditorSprite::getColorRed()
 {
-  return sprite->getColorRed();
+  return sprite.getColorRed();
 }
 
 /*
@@ -318,7 +308,7 @@ int EditorSprite::getColorRed()
  */
 int EditorSprite::getColorGreen()
 {
-  return sprite->getColorGreen();
+  return sprite.getColorGreen();
 }
 
 /*
@@ -329,7 +319,7 @@ int EditorSprite::getColorGreen()
  */
 int EditorSprite::getOpacity()
 {
-  return sprite->getOpacity();
+  return sprite.getOpacity();
 }
 
 /*
@@ -360,7 +350,7 @@ void EditorSprite::setAnimationTime(QString time)
     timeint = 65535;
   else if(timeint < 0)
     timeint = 0;
-  sprite->setAnimationTime(timeint);
+  sprite.setAnimationTimeMs(timeint);
   emit spriteChanged();
 }
 
@@ -371,7 +361,7 @@ void EditorSprite::setAnimationTime(QString time)
  */
 void EditorSprite::setBrightness(int brightness)
 {
-  sprite->setBrightness(brightness / kREF_RGB);
+  sprite.setBrightness(brightness / kREF_RGB);
   emit spriteChanged();
 }
 
@@ -382,7 +372,7 @@ void EditorSprite::setBrightness(int brightness)
  */
 void EditorSprite::setColorBlue(int blue)
 {
-  sprite->setColorBlue(blue);
+  sprite.setColorBlue(blue);
   emit spriteChanged();
 }
 
@@ -393,7 +383,7 @@ void EditorSprite::setColorBlue(int blue)
  */
 void EditorSprite::setColorGreen(int green)
 {
-  sprite->setColorGreen(green);
+  sprite.setColorGreen(green);
   emit spriteChanged();
 }
 
@@ -404,7 +394,7 @@ void EditorSprite::setColorGreen(int green)
  */
 void EditorSprite::setColorRed(int red)
 {
-  sprite->setColorRed(red);
+  sprite.setColorRed(red);
   emit spriteChanged();
 }
 
@@ -415,10 +405,10 @@ void EditorSprite::setColorRed(int red)
  */
 void EditorSprite::setDirection(int dir)
 {
-  if(dir==0)
-    sprite->setDirectionForward();
+  if (dir == 0)
+    setDirectionForward();
   else
-    sprite->setDirectionReverse();
+    setDirectionReverse();
 }
 
 /*
@@ -426,7 +416,7 @@ void EditorSprite::setDirection(int dir)
  */
 void EditorSprite::setDirectionForward()
 {
-  setDirection(0);
+  sprite.setAnimationSequence(Sequence::FORWARD);
 }
 
 /*
@@ -434,7 +424,7 @@ void EditorSprite::setDirectionForward()
  */
 void EditorSprite::setDirectionReverse()
 {
-  setDirection(1);
+  sprite.setAnimationSequence(Sequence::REVERSE);
 }
 
 /*
@@ -524,7 +514,7 @@ void EditorSprite::setName(QString n, bool update)
  */
 void EditorSprite::setOpacity(int opacity)
 {
-  sprite->setOpacity(opacity);
+  sprite.setOpacity(opacity);
   emit spriteChanged();
 }
 
@@ -536,7 +526,7 @@ void EditorSprite::setOpacity(int opacity)
  */
 void EditorSprite::setRotation(QString angle)
 {
-  sprite->setRotation(angle.toInt());
+  sprite.setRotationDegrees(angle.toInt());
   emit spriteChanged();
 }
 
@@ -736,7 +726,7 @@ bool EditorSprite::getHorizontalFlip(int frame_num)
  */
 int EditorSprite::getID() const
 {
-  return sprite->getId();
+  return sprite.getId();
 }
 
 /*
@@ -929,9 +919,7 @@ int EditorSprite::getSmartCount()
  */
 int EditorSprite::getSoundID()
 {
-  if(sprite != nullptr)
-    return sprite->getSoundID();
-  return -1;
+  return sprite.getSoundId();
 }
 
 /*
@@ -939,7 +927,7 @@ int EditorSprite::getSoundID()
  *
  * Output: The Sprite for in-game
  */
-Sprite* EditorSprite::getSprite()
+SpriteCore& EditorSprite::getSprite()
 {
   return sprite;
 }
@@ -1170,14 +1158,13 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
   {
     /* Check if data is default */
     bool animate = ref.getAnimationTime() != getAnimationTime();
-    bool rotate = ref.getSprite()->getRotation() != sprite->getRotation();
-    bool bright = ref.getSprite()->getBrightness() != sprite->getBrightness();
-    bool color_r = ref.getSprite()->getColorRed() != sprite->getColorRed();
-    bool color_g = ref.getSprite()->getColorGreen() != sprite->getColorGreen();
-    bool color_b = ref.getSprite()->getColorBlue() != sprite->getColorBlue();
-    bool opac = ref.getSprite()->getOpacity() != sprite->getOpacity();
-    bool dir = ref.getSprite()->isDirectionForward() !=
-               sprite->isDirectionForward();
+    bool rotate = ref.getSprite().getRotationDegrees() != sprite.getRotationDegrees();
+    bool bright = ref.getSprite().getBrightness() != sprite.getBrightness();
+    bool color_r = ref.getSprite().getColorRed() != sprite.getColorRed();
+    bool color_g = ref.getSprite().getColorGreen() != sprite.getColorGreen();
+    bool color_b = ref.getSprite().getColorBlue() != sprite.getColorBlue();
+    bool opac = ref.getSprite().getOpacity() != sprite.getOpacity();
+    bool dir = ref.getSprite().getAnimationSequence() != sprite.getAnimationSequence();
     bool sound_id = (getSoundID() >= 0);
 
     if(!core_only)
@@ -1199,19 +1186,19 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
     if(animate)
       fh->writeXmlData("animation", getAnimationTime().toInt());
     if(rotate)
-      fh->writeXmlData("rotation", sprite->getRotation());
+      fh->writeXmlData("rotation", sprite.getRotationDegrees());
     if(bright)
-      fh->writeXmlData("brightness", (float)sprite->getBrightness());
+      fh->writeXmlData("brightness", sprite.getBrightness());
     if(color_r)
-      fh->writeXmlData("color_r", sprite->getColorRed());
+      fh->writeXmlData("color_r", sprite.getColorRed());
     if(color_g)
-      fh->writeXmlData("color_g", sprite->getColorGreen());
+      fh->writeXmlData("color_g", sprite.getColorGreen());
     if(color_b)
-      fh->writeXmlData("color_b", sprite->getColorBlue());
+      fh->writeXmlData("color_b", sprite.getColorBlue());
     if(opac)
-      fh->writeXmlData("opacity", sprite->getOpacity());
+      fh->writeXmlData("opacity", sprite.getOpacity());
     if(dir)
-      fh->writeXmlData("forward", sprite->isDirectionForward());
+      fh->writeXmlData("forward", sprite.getAnimationSequence() == Sequence::FORWARD);
     if(sound_id)
       fh->writeXmlData("sound_id", getSoundID());
 
@@ -1254,7 +1241,7 @@ void EditorSprite::setActiveFrame(int index)
 void EditorSprite::setID(int id)
 {
   if(id >= 0 && id <= 65535)
-    sprite->setId(id);
+    sprite.setId(id);
 }
 
 /*
@@ -1310,8 +1297,7 @@ void EditorSprite::setPath(int index, QString path)
  */
 void EditorSprite::setSoundID(int id)
 {
-  if(sprite != nullptr)
-    sprite->setSoundID(id);
+  sprite.setSoundId(id);
 }
 
 /*=============================================================================

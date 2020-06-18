@@ -7,9 +7,6 @@
 #ifndef EDITORENUMDB_H
 #define EDITORENUMDB_H
 
-#include "Sprite.h"
-#undef main
-
 class EditorEnumDb
 {
 public:
