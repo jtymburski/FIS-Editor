@@ -74,7 +74,9 @@ SOURCES += \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
     lib/fis-types/src/Foundation/FrameCore.cc \
-    lib/fis-types/src/Foundation/SpriteCore.cc
+    lib/fis-types/src/Foundation/SpriteCore.cc \
+    lib/fis-types/src/Persistence/XmlData.cc \
+    lib/fis-types/src/Persistence/XmlWriter.cc
 
 HEADERS += \
     include/Application.h \

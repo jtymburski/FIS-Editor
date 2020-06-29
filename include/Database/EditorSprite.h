@@ -13,8 +13,9 @@
 #include "Database/EditorTemplate.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
-#include "FileHandler.h"
 #include "Foundation/SpriteCore.h"
+#include "Persistence/XmlData.h"
+#include "Persistence/XmlWriter.h"
 
 /* Struct for frame option storage */
 struct FrameInfo
@@ -241,7 +242,7 @@ public:
              bool shadow = false, QColor shadow_color = QColor(0, 0, 0, 204));
 
   /* Saves the sprite data */
-  void save(FileHandler* fh, bool game_only = false, bool core_only = false,
+  void save(XmlWriter* writer, bool game_only = false, bool core_only = false,
             QString element = "");
 
   /* Sets the active frame index */

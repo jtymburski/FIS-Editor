@@ -1008,7 +1008,7 @@ void EditorSprite::load(XmlData data, int index)
   }
   else if(element == "forward")
   {
-    if(data.getDataBool())
+    if(data.getDataBoolean())
       setDirectionForward();
     else
       setDirectionReverse();
@@ -1140,13 +1140,13 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  * Description: Saves the data of this sprite to the file handler pointer.
  *              Game only toggle removes editor only data.
  *
- * Inputs: FileHandler* fh - the saving file handler
+ * Inputs: XmlWriter* writer - the saving file handler
  *         bool game_only - true if you only want game relevant data, not editor
  *         bool core_only - true if only core data. No frame data, names, or
  *                          wrapper
  * Output: none
  */
-void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
+void EditorSprite::save(XmlWriter* writer, bool game_only, bool core_only,
                         QString element)
 {
   QString base_path = EditorHelpers::getSpriteDir();
@@ -1154,7 +1154,7 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
   EditorSprite ref;
   bool use_name = element.isEmpty();
 
-  if(fh != NULL)
+  if(writer != NULL)
   {
     /* Check if data is default */
     bool animate = ref.getAnimationTime() != getAnimationTime();
@@ -1170,52 +1170,52 @@ void EditorSprite::save(FileHandler* fh, bool game_only, bool core_only,
     if(!core_only)
     {
       if(use_name)
-        fh->writeXmlElement("sprite", "id", getID());
+        writer->writeElement("sprite", "id", std::to_string(getID()));
       else
-        fh->writeXmlElement(element.toStdString());
+        writer->writeElement(element.toStdString());
     }
     else if(animate || rotate || bright || color_r ||
             color_g || color_b || opac || dir || sound_id)
     {
-      fh->writeXmlElement("sprite");
+      writer->writeElement("sprite");
     }
 
     /* Write sprite data */
     if(!game_only && !core_only && use_name)
-      fh->writeXmlData("name", getName().toStdString());
+      writer->writeData("name", getName().toStdString());
     if(animate)
-      fh->writeXmlData("animation", getAnimationTime().toInt());
+      writer->writeData("animation", getAnimationTime().toInt());
     if(rotate)
-      fh->writeXmlData("rotation", sprite.getRotationDegrees());
+      writer->writeData("rotation", static_cast<float>(sprite.getRotationDegrees()));
     if(bright)
-      fh->writeXmlData("brightness", sprite.getBrightness());
+      writer->writeData("brightness", sprite.getBrightness());
     if(color_r)
-      fh->writeXmlData("color_r", sprite.getColorRed());
+      writer->writeData("color_r", sprite.getColorRed());
     if(color_g)
-      fh->writeXmlData("color_g", sprite.getColorGreen());
+      writer->writeData("color_g", sprite.getColorGreen());
     if(color_b)
-      fh->writeXmlData("color_b", sprite.getColorBlue());
+      writer->writeData("color_b", sprite.getColorBlue());
     if(opac)
-      fh->writeXmlData("opacity", sprite.getOpacity());
+      writer->writeData("opacity", sprite.getOpacity());
     if(dir)
-      fh->writeXmlData("forward", sprite.getAnimationSequence() == Sequence::FORWARD);
+      writer->writeData("forward", sprite.getAnimationSequence() == Sequence::FORWARD);
     if(sound_id)
-      fh->writeXmlData("sound_id", getSoundID());
+      writer->writeData("sound_id", getSoundID());
 
     /* Write frame data */
     if(!core_only)
     {
       QList<QPair<QString,QString>> frame_set = getPathSet();
       for(int i = 0; i < frame_set.size(); i++)
-        fh->writeXmlData(frame_set[i].first.toStdString(),
-                         frame_set[i].second.toStdString());
+        writer->writeData(frame_set[i].first.toStdString(),
+                          frame_set[i].second.toStdString());
     }
 
     /* Close element, if relevant */
     if(!core_only || animate || rotate || bright || color_r ||
             color_g || color_b || opac || dir)
     {
-      fh->writeXmlElementEnd();
+      writer->jumpToParent();
     }
   }
 }
