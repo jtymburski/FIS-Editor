@@ -12,7 +12,8 @@
 #include <QGraphicsItem>
 
 #include "Database/EditorSprite.h"
-#include "Game/Map/TileSprite.h"
+#include "Foundation/Direction.h"
+#include "Foundation/TileSpriteCore.h"
 
 class EditorTileSprite : public QGraphicsItem, public EditorSprite
 {
@@ -34,7 +35,7 @@ private:
   TileIcons* tile_icons;
 
   /* Data for tile sprite */
-  TileSprite tile_sprite;
+  TileSpriteCore tile_sprite;
 
   /* Visibility painting control */
   bool visible_grid;
@@ -43,6 +44,12 @@ private:
 
   /* Positions for the tiles on the grid */
   int x_pos, y_pos;
+
+
+  /* ---- Constants ---- */
+
+  /* Max render depth of a single tile sprite */
+  const static int kMAX_RENDER_DEPTH = 10;
 
 /*============================================================================
  * PRIVATE FUNCTIONS

@@ -121,12 +121,13 @@ QRectF EditorTileSprite::boundingRect() const
 bool EditorTileSprite::decrementRenderDepth()
 {
   uint8_t render_depth = getRenderDepth();
-  bool success = false;
   if(render_depth > 0)
-    success = setRenderDepth(render_depth - 1);
-  update();
-  return success;
-
+  {
+    setRenderDepth(render_depth - 1);
+    update();
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -385,8 +386,12 @@ void EditorTileSprite::setPassability(QString pass_str)
  */
 bool EditorTileSprite::setRenderDepth(uint8_t depth)
 {
-  return tile_sprite.setRenderDepth(depth);
-  update();
+  if (depth <= kMAX_RENDER_DEPTH) {
+    tile_sprite.setRenderDepth(depth);
+    update();
+    return true;
+  }
+  return false;
 }
 
 /*
