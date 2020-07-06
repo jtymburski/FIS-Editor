@@ -13,7 +13,7 @@
 #include "Database/EditorTemplate.h"
 #include "EditorEnumDb.h"
 #include "EditorHelpers.h"
-#include "Foundation/SpriteCore.h"
+#include "Foundation/Sprite.h"
 #include "Persistence/XmlData.h"
 #include "Persistence/XmlWriter.h"
 
@@ -54,7 +54,7 @@ private:
   QString name;
 
   /* The actual Sprite for in game */
-  SpriteCore sprite;
+  core::Sprite sprite;
 
   /* Frame information */
   QVector<FrameInfo> frame_info;
@@ -220,7 +220,7 @@ public:
   int getSoundID();
 
   /* Gets the sprite for alteration */
-  SpriteCore& getSprite();
+  core::Sprite& getSprite();
 
   /* Gets the frames vertical flip of a given frame */
   bool getVerticalFlip(int);
@@ -229,7 +229,7 @@ public:
   bool isAllNull();
 
   /* Loads the sprite data */
-  void load(XmlData data, int index);
+  void load(core::XmlData data, int index);
 
   /* Paint the base sprite */
   bool paint(QPainter* painter, QRect rect, bool shadow = false,
@@ -242,7 +242,7 @@ public:
              bool shadow = false, QColor shadow_color = QColor(0, 0, 0, 204));
 
   /* Saves the sprite data */
-  void save(XmlWriter* writer, bool game_only = false, bool core_only = false,
+  void save(core::XmlWriter* writer, bool game_only = false, bool core_only = false,
             QString element = "");
 
   /* Sets the active frame index */

@@ -73,9 +73,9 @@ SOURCES += \
     src/View/SoundView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
-    lib/fis-types/src/Foundation/FrameCore.cc \
-    lib/fis-types/src/Foundation/SpriteCore.cc \
-    lib/fis-types/src/Foundation/TileSpriteCore.cc \
+    lib/fis-types/src/Foundation/Frame.cc \
+    lib/fis-types/src/Foundation/Sprite.cc \
+    lib/fis-types/src/Foundation/TileSprite.cc \
     lib/fis-types/src/Persistence/XmlData.cc \
     lib/fis-types/src/Persistence/XmlWriter.cc
 

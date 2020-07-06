@@ -416,7 +416,7 @@ void EditorSprite::setDirection(int dir)
  */
 void EditorSprite::setDirectionForward()
 {
-  sprite.setAnimationSequence(Sequence::FORWARD);
+  sprite.setAnimationSequence(core::Sequence::FORWARD);
 }
 
 /*
@@ -424,7 +424,7 @@ void EditorSprite::setDirectionForward()
  */
 void EditorSprite::setDirectionReverse()
 {
-  sprite.setAnimationSequence(Sequence::REVERSE);
+  sprite.setAnimationSequence(core::Sequence::REVERSE);
 }
 
 /*
@@ -927,7 +927,7 @@ int EditorSprite::getSoundID()
  *
  * Output: The Sprite for in-game
  */
-SpriteCore& EditorSprite::getSprite()
+core::Sprite& EditorSprite::getSprite()
 {
   return sprite;
 }
@@ -969,7 +969,7 @@ bool EditorSprite::isAllNull()
  *         int index - the offset index into the XML stack.
  * Output: none
  */
-void EditorSprite::load(XmlData data, int index)
+void EditorSprite::load(core::XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
   QStringList elements = element.split("_");
@@ -1146,7 +1146,7 @@ bool EditorSprite::paint(int index, QPainter* painter, int x, int y,
  *                          wrapper
  * Output: none
  */
-void EditorSprite::save(XmlWriter* writer, bool game_only, bool core_only,
+void EditorSprite::save(core::XmlWriter* writer, bool game_only, bool core_only,
                         QString element)
 {
   QString base_path = EditorHelpers::getSpriteDir();
@@ -1198,7 +1198,7 @@ void EditorSprite::save(XmlWriter* writer, bool game_only, bool core_only,
     if(opac)
       writer->writeData("opacity", sprite.getOpacity());
     if(dir)
-      writer->writeData("forward", sprite.getAnimationSequence() == Sequence::FORWARD);
+      writer->writeData("forward", sprite.getAnimationSequence() == core::Sequence::FORWARD);
     if(sound_id)
       writer->writeData("sound_id", getSoundID());
 

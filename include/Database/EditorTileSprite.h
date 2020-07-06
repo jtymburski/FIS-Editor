@@ -13,7 +13,7 @@
 
 #include "Database/EditorSprite.h"
 #include "Foundation/Direction.h"
-#include "Foundation/TileSpriteCore.h"
+#include "Foundation/TileSprite.h"
 
 class EditorTileSprite : public QGraphicsItem, public EditorSprite
 {
@@ -35,7 +35,7 @@ private:
   TileIcons* tile_icons;
 
   /* Data for tile sprite */
-  TileSpriteCore tile_sprite;
+  core::TileSprite tile_sprite;
 
   /* Visibility painting control */
   bool visible_grid;
