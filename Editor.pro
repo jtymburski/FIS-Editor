@@ -76,6 +76,8 @@ SOURCES += \
     lib/fis-types/src/Foundation/Frame.cc \
     lib/fis-types/src/Foundation/Sprite.cc \
     lib/fis-types/src/Foundation/TileSprite.cc \
+    lib/fis-types/src/Parser/FilePath.cc \
+    lib/fis-types/src/Parser/StringUtility.cc \
     lib/fis-types/src/Persistence/XmlData.cc \
     lib/fis-types/src/Persistence/XmlWriter.cc
 

@@ -15,7 +15,7 @@
 
 #include "Database/EditorTileSprite.h"
 #include "EditorEnumDb.h"
-#include "Helpers.h"
+#include "Parser/FilePath.h"
 
 class EditorMatrix : public QGraphicsScene
 {
@@ -185,7 +185,7 @@ public:
   void increaseWidth(int count = 1);
 
   /* Loads the matrix data */
-  void load(XmlData data, int index);
+  void load(core::XmlData data, int index);
 
   /* Paint a single sprite in the matrix */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0,
@@ -201,8 +201,8 @@ public:
   void removeAll();
 
   /* Saves the matrix data */
-  void save(FileHandler* fh, bool game_only = false, bool no_render = false);
-  void saveRender(FileHandler* fh);
+  void save(core::XmlWriter* writer, bool game_only = false, bool no_render = false);
+  void saveRender(core::XmlWriter* writer);
 
   /* Sets the active frame for all sprites in the matrix */
   void setActiveFrame(int index, bool force = false);

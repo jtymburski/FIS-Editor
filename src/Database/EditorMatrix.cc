@@ -554,7 +554,7 @@ bool EditorMatrix::addPath(QString root_path, QString file_name,
 
     /* Split up the set of frames for the matrix */
     std::vector<std::vector<std::string>> name_set =
-                               Helpers::frameSeparator(file_name.toStdString());
+                               core::FilePath::separateOnRanges(file_name.toStdString());
 
     /* Ensure the matrix is large enough */
     if((x + (int)name_set.size()) > getWidth())
@@ -1133,7 +1133,7 @@ void EditorMatrix::increaseWidth(int count)
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorMatrix::load(XmlData data, int index)
+void EditorMatrix::load(core::XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
 
@@ -1428,16 +1428,16 @@ void EditorMatrix::removeAll()
 /*
  * Description: Saves the matrix data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
+ * Inputs: XmlWriter* writer - the save persistence interface
  *         bool game_only - true if the data should include game only relevant
  *         bool no_render - include render data?
  * Output: none
  */
-void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
+void EditorMatrix::save(core::XmlWriter* writer, bool game_only, bool no_render)
 {
-  if(fh != NULL)
+  if(writer != NULL)
   {
-    fh->writeXmlElement("sprites");
+    writer->writeElement("sprites");
 
     /* Get parsing information */
     QList<QList<QList<QPair<QString,QString>>>> set;
@@ -1595,10 +1595,10 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
               path += back;
 
               /* Write data */
-              fh->writeXmlElement("multiple", "range", range.toStdString());
-              fh->writeXmlData(set[i][j].front().first.toStdString(),
-                               path.toStdString());
-              fh->writeXmlElementEnd();
+              writer->writeElement("multiple", "range", range.toStdString());
+              writer->writeData(set[i][j].front().first.toStdString(),
+                                path.toStdString());
+              writer->jumpToParent();
 
               /* Flag which tiles have been added */
               for(int x = 0; x < width; x++)
@@ -1641,16 +1641,16 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
              * in individually */
             if(set[i][j].size() > 1)
             {
-              fh->writeXmlElement("x", "index", i);
-              fh->writeXmlElement("y", "index", j);
+              writer->writeElement("x", "index", std::to_string(i));
+              writer->writeElement("y", "index", std::to_string(j));
 
               /* Path data */
               for(int k = 0; k < set[i][j].size(); k++)
-                fh->writeXmlData(set[i][j][k].first.toStdString(),
-                                 set[i][j][k].second.toStdString());
+                writer->writeData(set[i][j][k].first.toStdString(),
+                                  set[i][j][k].second.toStdString());
 
-              fh->writeXmlElementEnd();
-              fh->writeXmlElementEnd();
+              writer->jumpToParent();
+              writer->jumpToParent();
             }
             /* Otherwise, add them to the optimize array list */
             else
@@ -1696,12 +1696,12 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
         if(!path_set[j].first.isEmpty())
         {
           /* Write the data */
-          fh->writeXmlElement("x", "index", path_set[j].first.toStdString());
-          fh->writeXmlElement("y", "index", path_set[j].second.toStdString());
-          fh->writeXmlData(str_paths[j].toStdString(),
-                           str_keys[i].toStdString());
-          fh->writeXmlElementEnd();
-          fh->writeXmlElementEnd();
+          writer->writeElement("x", "index", path_set[j].first.toStdString());
+          writer->writeElement("y", "index", path_set[j].second.toStdString());
+          writer->writeData(str_paths[j].toStdString(),
+                            str_keys[i].toStdString());
+          writer->jumpToParent();
+          writer->jumpToParent();
         }
       }
     }
@@ -1714,40 +1714,39 @@ void EditorMatrix::save(FileHandler* fh, bool game_only, bool no_render)
       /* Don't proceed if pair is empty */
       if(!index_set[i].first.isEmpty())
       {
-        fh->writeXmlElement("x", "index", index_set[i].first.toStdString());
-        fh->writeXmlElement("y", "index", index_set[i].second.toStdString());
-        fh->writeXmlData("passability",
-                         EditorHelpers::getPassabilityStr(i).toStdString());
-        fh->writeXmlElementEnd();
-        fh->writeXmlElementEnd();
+        writer->writeElement("x", "index", index_set[i].first.toStdString());
+        writer->writeElement("y", "index", index_set[i].second.toStdString());
+        writer->writeData("passability",
+                          EditorHelpers::getPassabilityStr(i).toStdString());
+        writer->jumpToParent();
+        writer->jumpToParent();
       }
     }
 
     /* Save the sprite data */
     EditorTileSprite* sprite = getValidSprite();
     if(sprite != NULL)
-      sprite->save(fh, game_only, true);
+      sprite->save(writer, game_only, true);
 
-    fh->writeXmlElementEnd(); /* </sprites> */
+    writer->jumpToParent(); /* </sprites> */
 
     /* Save the render matrix */
     if(!no_render)
-      saveRender(fh);
+      saveRender(writer);
   }
 }
 
 /*
  * Description: Saves the render matrix data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
- *         bool game_only - true if the data should include game only relevant
+ * Inputs: XmlWriter* writer - the save persistence interface
  * Output: none
  */
-void EditorMatrix::saveRender(FileHandler* fh)
+void EditorMatrix::saveRender(core::XmlWriter* writer)
 {
   QString render_matrix = "";
   bool all_zero = true;
-  if(fh != NULL && matrix.size() > 0)
+  if(writer != NULL && matrix.size() > 0)
   {
     for(int j = 0; j < matrix.front().size(); j++)
     {
@@ -1767,7 +1766,7 @@ void EditorMatrix::saveRender(FileHandler* fh)
 
     /* Only render if not all zero */
     if(!all_zero)
-      fh->writeXmlData("rendermatrix", render_matrix.toStdString());
+      writer->writeData("rendermatrix", render_matrix.toStdString());
   }
 }
 
