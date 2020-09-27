@@ -138,10 +138,10 @@ bool EditorTileSprite::decrementRenderDepth()
  */
 QString EditorTileSprite::getPassability()
 {
-  return EditorHelpers::getPassabilityStr(getPassability(Direction::NORTH),
-                                          getPassability(Direction::EAST),
-                                          getPassability(Direction::SOUTH),
-                                          getPassability(Direction::WEST));
+  return EditorHelpers::getPassabilityStr(getPassability(core::Direction::NORTH),
+                                          getPassability(core::Direction::EAST),
+                                          getPassability(core::Direction::SOUTH),
+                                          getPassability(core::Direction::WEST));
 }
 
 /*
@@ -150,7 +150,7 @@ QString EditorTileSprite::getPassability()
  * Inputs: Direction dir - the direction to return passability for
  * Output: bool - true if passable leaving the tile
  */
-bool EditorTileSprite::getPassability(Direction dir)
+bool EditorTileSprite::getPassability(core::Direction dir)
 {
   return tile_sprite.getPassability(dir);
 }
@@ -165,10 +165,10 @@ bool EditorTileSprite::getPassability(Direction dir)
  */
 int EditorTileSprite::getPassabilityNum()
 {
-  return EditorHelpers::getPassabilityNum(getPassability(Direction::NORTH),
-                                          getPassability(Direction::EAST),
-                                          getPassability(Direction::SOUTH),
-                                          getPassability(Direction::WEST));
+  return EditorHelpers::getPassabilityNum(getPassability(core::Direction::NORTH),
+                                          getPassability(core::Direction::EAST),
+                                          getPassability(core::Direction::SOUTH),
+                                          getPassability(core::Direction::WEST));
 }
 
 /*
@@ -259,7 +259,7 @@ void EditorTileSprite::paint(QPainter* painter,
      getRenderDepth() == 0 && frameCount() > 0 && !isAllNull())
   {
     /* North Passability */
-    if(getPassability(Direction::NORTH))
+    if(getPassability(core::Direction::NORTH))
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->passN);
     else
@@ -267,7 +267,7 @@ void EditorTileSprite::paint(QPainter* painter,
                           *tile_icons->nopassN);
 
     /* East Passability */
-    if(getPassability(Direction::EAST))
+    if(getPassability(core::Direction::EAST))
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->passE);
     else
@@ -275,7 +275,7 @@ void EditorTileSprite::paint(QPainter* painter,
                           *tile_icons->nopassE);
 
     /* South Passability */
-    if(getPassability(Direction::SOUTH))
+    if(getPassability(core::Direction::SOUTH))
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->passS);
     else
@@ -283,7 +283,7 @@ void EditorTileSprite::paint(QPainter* painter,
                           *tile_icons->nopassS);
 
     /* West Passability */
-    if(getPassability(Direction::WEST))
+    if(getPassability(core::Direction::WEST))
       painter->drawPixmap(x_pos * size, y_pos * size, size, size,
                           *tile_icons->passW);
     else
@@ -336,10 +336,10 @@ void EditorTileSprite::setHover(bool hover)
  */
 void EditorTileSprite::setPassability(bool set_value)
 {
-  tile_sprite.setPassability(Direction::NORTH, set_value);
-  tile_sprite.setPassability(Direction::EAST, set_value);
-  tile_sprite.setPassability(Direction::SOUTH, set_value);
-  tile_sprite.setPassability(Direction::WEST, set_value);
+  tile_sprite.setPassability(core::Direction::NORTH, set_value);
+  tile_sprite.setPassability(core::Direction::EAST, set_value);
+  tile_sprite.setPassability(core::Direction::SOUTH, set_value);
+  tile_sprite.setPassability(core::Direction::WEST, set_value);
   update();
 }
 
@@ -351,7 +351,7 @@ void EditorTileSprite::setPassability(bool set_value)
  *         bool set_value - the value to set the passability to
  * Output: none
  */
-void EditorTileSprite::setPassability(Direction dir, bool set_value)
+void EditorTileSprite::setPassability(core::Direction dir, bool set_value)
 {
   tile_sprite.setPassability(dir, set_value);
   update();
@@ -372,10 +372,10 @@ void EditorTileSprite::setPassability(QString pass_str)
   EditorHelpers::getPassability(pass_str, north, east, south, west);
 
   /* Set the values */
-  setPassability(Direction::NORTH, north);
-  setPassability(Direction::EAST, east);
-  setPassability(Direction::SOUTH, south);
-  setPassability(Direction::WEST, west);
+  setPassability(core::Direction::NORTH, north);
+  setPassability(core::Direction::EAST, east);
+  setPassability(core::Direction::SOUTH, south);
+  setPassability(core::Direction::WEST, west);
 }
 
 /*

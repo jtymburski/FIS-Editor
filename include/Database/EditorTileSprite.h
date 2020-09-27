@@ -75,7 +75,7 @@ public:
 
   /* Returns the passability */
   QString getPassability();
-  bool getPassability(Direction dir);
+  bool getPassability(core::Direction dir);
   int getPassabilityNum();
 
   /* Returns the render depth */
@@ -97,7 +97,7 @@ public:
 
   /* Sets the passability */
   void setPassability(bool set_value);
-  void setPassability(Direction dir, bool set_value);
+  void setPassability(core::Direction dir, bool set_value);
   void setPassability(QString pass_str);
 
   /* Sets the render depth. 0 is the base up to max */
