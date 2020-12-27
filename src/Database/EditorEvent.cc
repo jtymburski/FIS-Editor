@@ -20,16 +20,16 @@
  */
 EditorEvent::EditorEvent()
 {
-  conversation = nullptr;
-  event = EventSet::createBlankEvent();
+  this->event = nullptr;
 }
 
 /*
- * Description: Constructor with single event, as created by EventHandler.
+ * Description: Constructor with single event, as created by EventHandler. Assigns
+ *              reference clean up of the allocated memory for the event.
  *
- * Inputs: Event event - an init event
+ * Inputs: Event* event - an init event
  */
-EditorEvent::EditorEvent(Event event) : EditorEvent()
+EditorEvent::EditorEvent(core::Event* event) : EditorEvent()
 {
   setEvent(event);
 }
@@ -50,8 +50,6 @@ EditorEvent::EditorEvent(const EditorEvent &source) : EditorEvent()
 EditorEvent::~EditorEvent()
 {
   setEventBlank();
-  //setEventBlank(false);
-  conversation = NULL;
 }
 
 /*============================================================================
@@ -59,111 +57,35 @@ EditorEvent::~EditorEvent()
  *===========================================================================*/
 
 /*
- * Description: This is the conversation stack manipulator used to modify
- *              or view the conversation stack. See inputs descriptions for
- *              functionality.
+ * Description: Converts the compressed conversation index ("4.5.4")
+ *              to the standard, expanded conversation index, as required by the
+ *              {@link Conversation} class ("1.1.1.1.5.1.1.1.1")
  *
- * Inputs: QString index - this is the working index, in the format "1.1.3"
- *         bool generate - if the path doesn't exist in the tree, generate it
- *         bool before - return the conversation struct one node before index
- *         bool break_tree - if generate is enabled and the new path that
- *                           doesn't follow the tree breaks a node sequence,
- *                           do it anyway.
- * Output: Conversation* - pointer to the conversation struct in the stack
+ * Inputs: QString index - the base simplified index
+ * Output: ConversationEntryIndex - the entry index, used to access within the conversation tree
  */
-Conversation* EditorEvent::convoManipulator(QString index, bool generate,
-                                            bool before, bool break_tree)
+core::ConversationEntryIndex EditorEvent::convertConversationIndex(QString index)
 {
-  Conversation* found = NULL;
-  QStringList index_set = index.split('.');
-  QVector<uint32_t> int_set;
+  QStringList index_split = index.split('.');
+  QStringList expanded_index;
 
-  /* Check to make sure they are all numbers */
-  bool ok;
-  int valid = true;
-  for(int i = 0; valid && (i < index_set.size()); i++)
+  for(int i = 0; i < index_split.size(); i++)
   {
-    /* Check if its valid */
-    for(int j = 0; j < index_set[i].size(); j++)
-      if(!index_set[i][j].isDigit())
-        valid = false;
-
-    /* If valid, append it to int set */
-    if(valid)
+    // Every odd index should be expanded into '1's.
+    if(i % 2 == 0)
     {
-      /* Pre-calculation */
-      uint32_t second_last = 0;
-      if(int_set.size() > 0)
-        second_last = int_set.last();
-
-      /* Push back the converted int */
-      int_set.push_back(index_set[i].toUInt(&ok));
-
-      /* Check it */
-      if(!ok || int_set.last() == 0 || int_set.front() > 1)
-        valid = false;
-      if(int_set.last() > 1 && second_last != 1)
-        valid = false;
+      int one_count = index_split.at(i).toInt();
+      for(int one_index = 0; one_index < one_count; one_index++)
+        expanded_index.append("1");
+    }
+    // Every even index is an option and should be kept unchanged
+    else
+    {
+      expanded_index.append(index_split.at(i));
     }
   }
 
-  /* If valid (all are digits), proceed */
-  if(valid)
-  {
-    Conversation* current = conversation;
-    Conversation* previous = NULL;
-
-    /* Go through the conversation and attempt to find the index */
-    for(int i = 1; valid && (i < int_set.size()); i++)
-    {
-      /* Check if the current is has the frames needed */
-      if(current != NULL && (current->next.size() >= int_set[i] || generate))
-      {
-        /* Check if the existing tree should be broken by a change */
-        if(current->next.size() < int_set[i] && current->next.size() == 1)
-        {
-          /* Check if the next convo is an option set */
-          Conversation* next_convo = &current->next.front();
-          if(next_convo->next.size() > 1)
-          {
-            /* If it is, and we're allowed to break the tree, wreck it */
-            if(break_tree)
-              next_convo->next.resize(1);
-            else
-              valid = false;
-          }
-        }
-
-        /* If tree check doesn't allow it, it can't proceed */
-        if(valid)
-        {
-          /* Generate, if one doesn't exist */
-          if(generate)
-            while(current->next.size() < int_set[i])
-              current->next.push_back(EventSet::createBlankConversation());
-
-          previous = current;
-          current = &previous->next[int_set[i]-1];
-        }
-      }
-      /* If not, it's not valid */
-      else
-      {
-        valid = false;
-      }
-    }
-
-    /* If successful, get the conversation */
-    if(valid)
-    {
-      if(before)
-        found = previous;
-      else
-        found = current;
-    }
-  }
-
-  return found;
+  return core::ConversationEntryIndex(expanded_index.join(".").toStdString());
 }
 
 /*
@@ -181,32 +103,17 @@ void EditorEvent::copySelf(const EditorEvent &source)
 }
 
 /*
- * Description: This is the recursive function call for finding the string
- *              index of the reference conversation node.
+ * Description: Returns if the configured event is an unlock base class.
  *
- * Inputs: Conversation* ref - the reference conversation pointer to the node
- *         Conversation* convo - the current point in the conversation stack
- *         QString index - the index associated to the current convo (above)
- * Output: QString - index of the found reference. Blank if not found
+ * Inputs: none
+ * Output: bool - TRUE if its unlock type event
  */
-QString EditorEvent::recursiveConversationFind(Conversation* ref,
-                                               Conversation* convo,
-                                               QString index)
+bool EditorEvent::isUnlockEvent() const
 {
-  /* Check to see if equivalent */
-  if(convo == ref)
-    return index;
-
-  /* Call all the children */
-  for(uint32_t i = 0; i < convo->next.size(); i++)
-  {
-    QString result = recursiveConversationFind(ref, &convo->next[i],
-                                            index + "." + QString::number(i+1));
-    if(result != "")
-      return result;
-  }
-
-  return "";
+  core::EventType type = getEventType();
+  return type == core::EventType::UNLOCKIO
+     || type == core::EventType::UNLOCKTILE
+     || type == core::EventType::UNLOCKTHING;
 }
 
 /*
@@ -263,6 +170,37 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
   }
 }
 
+/*
+ * Description: Updates the provided event (must be valid) with shared, top level properties.
+ *
+ * Inputs: core::Event* event - the valid event to update
+ *         bool one_shot - true if the event will only trigger once
+ *         bool sound_id - the connected sound ID. Default unset ref
+ * Output: none
+ */
+void EditorEvent::updateEvent(core::Event* event, bool one_shot, int sound_id)
+{
+  event->setOneShot(one_shot);
+  event->setSoundId(sound_id);
+}
+
+/*
+ * Description: Updates the provided unlock event with the shared properties.
+ *
+ * Inputs: core::EventUnlock* event - ?
+ *         bool view - should the unlock target be viewed by the player camera
+ *         bool view_scroll - should the camera scroll to the target instead of fading
+ *         int view_time - how long to view the point
+ * Output: none
+ */
+void EditorEvent::updateUnlockEvent(core::EventUnlock* event, bool view, bool view_scroll,
+                                    int view_time)
+{
+  event->setViewTarget(view);
+  event->setViewScroll(view_scroll);
+  event->setViewTimeMilliseconds(view_time);
+}
+
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
@@ -273,125 +211,73 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
  *              call will only execute if the current event is CONVO.
  *
  * Inputs: QString index - the index to the conversation node
- * Output: QString - the resulting index after. Blank if failed
+ * Output: none
  */
-QString EditorEvent::deleteConversation(QString index)
+void EditorEvent::deleteConversation(QString index)
 {
-  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
+  if(getEventType() == core::EventType::CONVERSATION)
   {
-    Conversation* previous = convoManipulator(index, false, true);
-    Conversation* current = convoManipulator(index);
+    core::EventConversation* conversation_event = static_cast<core::EventConversation*>(event);
 
-    /* Only relevant if the node is real */
-    if(current != NULL)
-    {
-      /* If previous is NULL, it's head. Just delete all data */
-      if(previous == NULL)
-      {
-        current->action_event = EventSet::createBlankEvent();
-        current->category = DialogCategory::TEXT;
-        current->next.clear();
-        current->text = "";
-        current->thing_id = -2;
-        return index;
-      }
-      else
-      {
-        QStringList split = index.split(".");
-
-        /* Find new index */
-        QString result_index = "";
-        if(previous->next.size() > 1)
-        {
-          if(split.last() == "1")
-            result_index = index;
-          else
-          {
-            for(int i = 0; i < split.size() - 1; i++)
-              result_index += split[i] + ".";
-            result_index += QString::number(split.last().toInt() - 1);
-          }
-        }
-        else
-        {
-          for(int i = 0; i < split.size() - 1; i++)
-            result_index += split[i] + ".";
-          result_index.chop(1);
-        }
-
-        /* Erase element */
-        previous->next.erase(previous->next.begin() + split.last().toInt() - 1);
-        return result_index;
-      }
-    }
+    core::ConversationEntryIndex entry_index = convertConversationIndex(index);
+    conversation_event->getConversation().deleteEntry(entry_index);
   }
-  return "";
 }
 
 /*
- * Description: Returns the base conveersation pointer to the stack (head
+ * Description: Returns the conversation entry reference to the node of the index.
+ *
+ * Inputs: QString index - the node reference index
+ * Output: ConversationEntry* - the returned conversation entry. NULL if not found or
+ *                              not in conversation
+ */
+core::ConversationEntry* EditorEvent::getConversation(QString index)
+{
+  if(getEventType() == core::EventType::CONVERSATION)
+  {
+    core::EventConversation* conversation_event = static_cast<core::EventConversation*>(event);
+
+    core::ConversationEntryIndex entry_index = convertConversationIndex(index);
+    if(conversation_event->getConversation().hasEntry(entry_index))
+      return &conversation_event->getConversation().getEntry(entry_index);
+  }
+  return nullptr;
+}
+
+/*
+ * Description: Returns the base conversation pointer in the tree (head entry
  *              node). Note if the event is not a convo, NULL is returned.
  *
  * Inputs: none
- * Output: Conversation* - the current conversation pointer
+ * Output: ConversationEntry* - the top conversation entry reference
  */
-Conversation* EditorEvent::getConversation()
+core::ConversationEntry* EditorEvent::getConversationStart()
 {
-  if(event.classification == EventClassifier::CONVERSATION)
-    return event.convo;
-  return NULL;
-}
-
-/*
- * Description: Returns the conversation pointer to the node of the index.
- *              If before is true, it gets one node before the index.
- *
- * Inputs: QString index - the node reference index
- *         bool before - true if the node returned is the node before index
- * Output: Conversation* - the returned conversation. NULL if out of range,
- *                         not found, or not in conversation
- */
-Conversation* EditorEvent::getConversation(QString index, bool before)
-{
-  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
-    return convoManipulator(index, false, before);
-  return NULL;
-}
-
-/*
- * Description: Returns the string index of the conversation pointer. If not
- *              found, the string returned is empty.
- *
- * Inputs: Conversation* convo - the conversation to find the index for
- * Output: QString - the returned index for the passed in conversation
- */
-QString EditorEvent::getConversationIndex(Conversation* convo)
-{
-  if(event.classification == EventClassifier::CONVERSATION)
-    return recursiveConversationFind(convo, conversation);
-  return "";
+  if(getEventType() == core::EventType::CONVERSATION)
+    return &static_cast<core::EventConversation*>(event)->getConversation().getFirstEntry();
+  return nullptr;
 }
 
 /*
  * Description: Returns the current event, set-up in this class.
  *
  * Inputs: none
- * Output: Event* - pointer to the event struct
+ * Output: Event* - pointer to the event class
  */
-Event* EditorEvent::getEvent()
+core::Event* EditorEvent::getEvent()
 {
-  return &event;
+  return event;
 }
 
 /*
  * Description: Returns the type of event handled by this class.
  *
  * Inputs: none
- * Output: EventClassifier - event classification enum class
+ * Output: EventClassification - event classification enum class
  */
-EventClassifier EditorEvent::getEventType() const
+core::EventType EditorEvent::getEventType() const
 {
-  return event.classification;
+  return event != nullptr ? event->getType() : core::EventType::NONE;
 }
 
 /*
@@ -403,10 +289,8 @@ EventClassifier EditorEvent::getEventType() const
  */
 int EditorEvent::getGiveItemChance()
 {
-  int id,chance,count;
-  GiveItemFlags flags;
-  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
-    return chance;
+  if(getEventType() == core::EventType::ITEMGIVE)
+    return static_cast<core::EventItemGive*>(event)->getChance();
   return -1;
 }
 
@@ -419,27 +303,23 @@ int EditorEvent::getGiveItemChance()
  */
 int EditorEvent::getGiveItemCount()
 {
-  int id,chance,count;
-  GiveItemFlags flags;
-  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
-    return count;
+  if(getEventType() == core::EventType::ITEMGIVE)
+    return static_cast<core::EventItemGive*>(event)->getItemCount();
   return -1;
 }
 
 /*
- * Description: Returns the give item event item flags. If it's not the
- *              give item event, NONE is returned.
+ * Description: Returns the give item event drop setting if there is no
+ *              room. If it's not the give item event, false is returned.
  *
  * Inputs: none
- * Output: GiveItemFlags - the flags for the give item event
+ * Output: bool - should the item be dropped if there is no inventory room
  */
-GiveItemFlags EditorEvent::getGiveItemFlags()
+bool EditorEvent::getGiveItemDropIfNoRoom()
 {
-  int id,chance,count;
-  GiveItemFlags flags;
-  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
-    return flags;
-  return GiveItemFlags::NONE;
+  if(getEventType() == core::EventType::ITEMGIVE)
+    return static_cast<core::EventItemGive*>(event)->isDropIfNoRoom();
+  return false;
 }
 
 /*
@@ -451,10 +331,8 @@ GiveItemFlags EditorEvent::getGiveItemFlags()
  */
 int EditorEvent::getGiveItemID()
 {
-  int id,chance,count;
-  GiveItemFlags flags;
-  if(EventSet::dataEventGiveItem(event, id, count, flags, chance))
-    return id;
+  if(getEventType() == core::EventType::ITEMGIVE)
+    return static_cast<core::EventItemGive*>(event)->getItemId();
   return -1;
 }
 
@@ -465,30 +343,29 @@ int EditorEvent::getGiveItemID()
  * Inputs: int index - the index in the event stack within the multiple set
  * Output: Event* - the event reference at the given index
  */
-Event* EditorEvent::getMultipleEvent(int index)
+core::Event* EditorEvent::getMultipleEvent(int index)
 {
-  std::vector<Event*> event_list;
-  if(EventSet::dataEventMultiple(&event, event_list))
+  if(getEventType() == core::EventType::MULTIPLE)
   {
-    if(index >= 0 && index < static_cast<int>(event_list.size()))
-      return event_list[index];
+    core::EventMultiple* multiple_event = static_cast<core::EventMultiple*>(event);
+    if(index >= 0 && index < getMultipleEventCount())
+      return &multiple_event->getEvent(index);
   }
   return nullptr;
 }
 
 /*
- * Description: Returns the set of events within the multiple event in the
- *              correct order. If the event is not a multiple event, returns a
- *              blank set.
+ * Description: Returns the total number of events contained within the multiple event.
  *
  * Inputs: none
- * Output: std::vector<Event> - the set of events with the multiple
+ * Output: int - event stack size
  */
-std::vector<Event> EditorEvent::getMultipleEvents()
+int EditorEvent::getMultipleEventCount()
 {
-  std::vector<Event> event_list;
-  EventSet::dataEventMultiple(event, event_list);
-  return event_list;
+  if(getEventType() == core::EventType::MULTIPLE)
+  {
+    return static_cast<core::EventMultiple*>(event)->getEventCount();
+  }
 }
 
 /*
@@ -501,32 +378,87 @@ std::vector<Event> EditorEvent::getMultipleEvents()
  */
 QString EditorEvent::getNotification()
 {
-  std::string notification;
-  if(EventSet::dataEventNotification(event, notification))
-    return QString::fromStdString(notification);
+  if(getEventType() == core::EventType::NOTIFICATION)
+    return QString::fromStdString(static_cast<core::EventNotification*>(event)->getNotification());
   return "";
 }
 
 /*
- * Description: Returns the property modifier event bool values associated with
- *              settings to be modified. If the event is not a property event,
- *              an empty ThingProperty is returned
+ * Description: Returns if the thing's active state should be enabled or disabled.
  *
  * Inputs: none
- * Output: ThingProperty - the returned property which defines modded bools
+ * Output: bool - true to make the thing active, false to make it inactive
  */
-ThingProperty EditorEvent::getPropertyBools()
+bool EditorEvent::getPropertyActive()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return bools;
-  }
-  return ThingProperty::NONE;
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isThingActive();
+  return false;
+}
+
+/*
+ * Description: Returns if the thing active state is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyActiveSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isThingActiveSet();
+  return false;
+}
+
+/*
+ * Description: Returns if the person's map movement to enabled or disabled (stuck in place).
+ *
+ * Inputs: none
+ * Output: bool - true to make the disable movement, false to allow normal movement
+ */
+bool EditorEvent::getPropertyDisableMove()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isPersonMovementDisabled();
+  return false;
+}
+
+/*
+ * Description: Returns if person disabled movement is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyDisableMoveSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isPersonMovementDisabledSet();
+  return false;
+}
+
+/*
+ * Description: Returns if a player is in range, the NPC will force an interaction.
+ *
+ * Inputs: none
+ * Output: bool - true to make the NPC force interaction, false to require player interaction
+ */
+bool EditorEvent::getPropertyForceInteract()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isNPCInteractionForced();
+  return false;
+}
+
+/*
+ * Description: Returns if NPC forced interaction is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyForceInteractSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isNPCInteractionForcedSet();
+  return false;
 }
 
 /*
@@ -538,16 +470,9 @@ ThingProperty EditorEvent::getPropertyBools()
  */
 int EditorEvent::getPropertyID()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return id;
-  }
-  return EventSet::kUNSET_ID;
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->getThingId();
+  return core::EventProperty::kUNSET_THING_ID;
 }
 
 /*
@@ -559,38 +484,39 @@ int EditorEvent::getPropertyID()
  */
 int EditorEvent::getPropertyInactive()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
+  if(getEventType() == core::EventType::PROPERTY)
   {
-    return inactive;
+    core::EventProperty* event_property = static_cast<core::EventProperty*>(event);
+    if(!event_property->isIOStateInactiveDisabled())
+      return event_property->getIOStateInactiveMillis();
   }
   return -1;
 }
 
 /*
- * Description: Returns the property modifier event definitions of which
- *              properties are being modified. If the event is not a property
- *              event, an empty ThingProperty is returned
+ * Description: Returns if interactive object inactive timeout property is modified in this event.
  *
  * Inputs: none
- * Output: ThingProperty - the returned property which defines all modded props
+ * Output: bool - true if it was modified, false if unmodified
  */
-ThingProperty EditorEvent::getPropertyMods()
+bool EditorEvent::getPropertyInactiveSet()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return props;
-  }
-  return ThingProperty::NONE;
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isIOStateInactiveSet();
+  return false;
+}
+
+/*
+ * Description: Returns if the person location should be reset by this event.
+ *
+ * Inputs: none
+ * Output: bool - true to reset the location, false to do nothing
+ */
+bool EditorEvent::getPropertyPersonReset()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isPersonLocationReset();
+  return false;
 }
 
 /*
@@ -603,16 +529,26 @@ ThingProperty EditorEvent::getPropertyMods()
  */
 int EditorEvent::getPropertyRespawn()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
+  if(getEventType() == core::EventType::PROPERTY)
   {
-    return respawn;
+    core::EventProperty* event_property = static_cast<core::EventProperty*>(event);
+    if(!event_property->isThingRespawnDisabled())
+      return event_property->getThingRespawnMillis();
   }
   return -1;
+}
+
+/*
+ * Description: Returns if the respawn time property is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyRespawnSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isThingRespawnSet();
+  return false;
 }
 
 /*
@@ -624,60 +560,76 @@ int EditorEvent::getPropertyRespawn()
  */
 int EditorEvent::getPropertySpeed()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return speed;
-  }
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->getPersonSpeed();
   return -1;
 }
 
 /*
- * Description: Returns the property modifier tracking state definition of the
- *              NPC to edit. If the event is not a property event, NOTRACK is
- *              returned
+ * Description: Returns if person map movement speed is modified in this event.
  *
  * Inputs: none
- * Output: TrackingState - the new tracking state property for the npc
+ * Output: bool - true if it was modified, false if unmodified
  */
-TrackingState EditorEvent::getPropertyTrack()
+bool EditorEvent::getPropertySpeedSet()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return track;
-  }
-  return TrackingState::NOTRACK;
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isPersonSpeedSet();
+  return false;
 }
 
 /*
- * Description: Returns the property modifier type which defines either a thing,
- *              person, npc, io, or item that the event modifies. If the event
- *              is not a property event, ISBASE (ie no define) is returned
+ * Description: Returns the property modifier tracking state definition of the
+ *              NPC to edit. If the event is not a property event, NONE is
+ *              returned
  *
  * Inputs: none
- * Output: ThingBase - the defined thing type for the modifying property event
+ * Output: Tracking - the new tracking state property for the npc
  */
-ThingBase EditorEvent::getPropertyType()
+core::Tracking EditorEvent::getPropertyTrack()
 {
-  ThingProperty bools, props;
-  int id, inactive, respawn, speed;
-  TrackingState track;
-  ThingBase type;
-  if(EventSet::dataEventPropMod(event, type, id, props, bools, respawn, speed,
-                                track, inactive))
-  {
-    return type;
-  }
-  return ThingBase::ISBASE;
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->getNPCTracking();
+  return core::Tracking::NONE;
+}
+
+/*
+ * Description: Returns if NPC movement tracking is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyTrackSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isNPCTrackingSet();
+  return false;
+}
+
+/*
+ * Description: Returns if the thing's rendering visibility should be enabled or disabled.
+ *
+ * Inputs: none
+ * Output: bool - true if the thing should be visible and rendered, false to hide it
+ */
+bool EditorEvent::getPropertyVisible()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isThingVisible();
+  return false;
+}
+
+/*
+ * Description: Returns if the thing visibile state is modified in this event.
+ *
+ * Inputs: none
+ * Output: bool - true if it was modified, false if unmodified
+ */
+bool EditorEvent::getPropertyVisibleSet()
+{
+  if(getEventType() == core::EventType::PROPERTY)
+    return static_cast<core::EventProperty*>(event)->isThingVisibleSet();
+  return false;
 }
 
 /*
@@ -688,9 +640,9 @@ ThingBase EditorEvent::getPropertyType()
  */
 int EditorEvent::getSoundID()
 {
-  if(event.classification != EventClassifier::NOEVENT)
-    return event.sound_id;
-  return -1;
+  if(event != nullptr)
+    return event->getSoundId();
+  return core::Event::kUNSET_SOUND_ID;
 }
 
 /*
@@ -699,12 +651,10 @@ int EditorEvent::getSoundID()
  * Inputs: none
  * Output: Event* - the returned event reference
  */
-Event* EditorEvent::getStartBattleEventLose()
+core::Event* EditorEvent::getStartBattleEventLose()
 {
-  Event *event_lose, *event_win;
-  BattleFlags flags;
-  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
-    return event_lose;
+  if(getEventType() == core::EventType::BATTLESTART)
+    return &static_cast<core::EventBattleStart*>(event)->getLoseEvent();
   return nullptr;
 }
 
@@ -714,28 +664,63 @@ Event* EditorEvent::getStartBattleEventLose()
  * Inputs: none
  * Output; Event* - the returned event reference
  */
-Event* EditorEvent::getStartBattleEventWin()
+core::Event* EditorEvent::getStartBattleEventWin()
 {
-  Event *event_lose, *event_win;
-  BattleFlags flags;
-  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
-    return event_win;
+  if(getEventType() == core::EventType::BATTLESTART)
+    return &static_cast<core::EventBattleStart*>(event)->getWinEvent();
   return nullptr;
 }
 
 /*
- * Description: Returns the start battle related flags
+ * Description: Returns if on lose, the game should be over
  *
  * Inputs: none
- * Output: BattleFlags - the return battle flags enumerator set
+ * Output; bool - true to end game on loss, false to go back to the map
  */
-BattleFlags EditorEvent::getStartBattleFlags()
+bool EditorEvent::getStartBattleGameOverOnLoss()
 {
-  Event *event_lose, *event_win;
-  BattleFlags flags;
-  if(EventSet::dataEventStartBattle(&event, flags, event_win, event_lose))
-    return flags;
-  return BattleFlags::NONE;
+  if(getEventType() == core::EventType::BATTLESTART)
+    return static_cast<core::EventBattleStart*>(event)->isGameOverOnLoss();
+  return false;
+}
+
+/*
+ * Description: Returns if on win, the initiating target should be removed from the map
+ *
+ * Inputs: none
+ * Output; bool - true to hide initiating thing on win, false to leave it on the map
+ */
+bool EditorEvent::getStartBattleHideTargetOnWin()
+{
+  if(getEventType() == core::EventType::BATTLESTART)
+    return static_cast<core::EventBattleStart*>(event)->isTargetHiddenOnWin();
+  return false;
+}
+
+/*
+ * Description: Returns if on battle end, the player health should be restored
+ *
+ * Inputs: none
+ * Output; bool - true to restore health to full when returning from battle. false to leave as is
+ */
+bool EditorEvent::getStartBattleRestoreHealth()
+{
+  if(getEventType() == core::EventType::BATTLESTART)
+    return static_cast<core::EventBattleStart*>(event)->isHealthRestored();
+  return false;
+}
+
+/*
+ * Description: Returns if on battle end, the player qd should be restored
+ *
+ * Inputs: none
+ * Output; bool - true to restore QD to full when returning from battle. false to leave as is
+ */
+bool EditorEvent::getStartBattleRestoreQd()
+{
+  if(getEventType() == core::EventType::BATTLESTART)
+    return static_cast<core::EventBattleStart*>(event)->isQdRestored();
+  return false;
 }
 
 /*
@@ -747,9 +732,8 @@ BattleFlags EditorEvent::getStartBattleFlags()
  */
 int EditorEvent::getStartMapID()
 {
-  int id;
-  if(EventSet::dataEventStartMap(event, id))
-    return id;
+  if(getEventType() == core::EventType::MAPSWITCH)
+    return static_cast<core::EventMapSwitch*>(event)->getMapId();
   return -1;
 }
 
@@ -762,9 +746,8 @@ int EditorEvent::getStartMapID()
  */
 int EditorEvent::getTakeItemCount()
 {
-  int id,count;
-  if(EventSet::dataEventTakeItem(event, id, count))
-    return count;
+  if(getEventType() == core::EventType::ITEMTAKE)
+    return static_cast<core::EventItemTake*>(event)->getItemCount();
   return -1;
 }
 
@@ -777,9 +760,8 @@ int EditorEvent::getTakeItemCount()
  */
 int EditorEvent::getTakeItemID()
 {
-  int id,count;
-  if(EventSet::dataEventTakeItem(event, id, count))
-    return id;
+  if(getEventType() == core::EventType::ITEMTAKE)
+    return static_cast<core::EventItemTake*>(event)->getItemId();
   return -1;
 }
 
@@ -793,9 +775,8 @@ int EditorEvent::getTakeItemID()
  */
 int EditorEvent::getTeleportSection()
 {
-  int thing_id,x,y,section_id;
-  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
-    return section_id;
+  if(getEventType() == core::EventType::TELEPORT)
+    return static_cast<core::EventTeleport*>(event)->getSectionId();
   return -1;
 }
 
@@ -808,9 +789,8 @@ int EditorEvent::getTeleportSection()
  */
 int EditorEvent::getTeleportThingID()
 {
-  int thing_id,x,y,section_id;
-  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
-    return thing_id;
+  if(getEventType() == core::EventType::TELEPORT)
+    return static_cast<core::EventTeleport*>(event)->getThingId();
   return -1;
 }
 
@@ -823,9 +803,8 @@ int EditorEvent::getTeleportThingID()
  */
 int EditorEvent::getTeleportX()
 {
-  int thing_id,x,y,section_id;
-  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
-    return x;
+  if(getEventType() == core::EventType::TELEPORT)
+    return static_cast<core::EventTeleport*>(event)->getTileHorizontal();
   return -1;
 }
 
@@ -838,9 +817,8 @@ int EditorEvent::getTeleportX()
  */
 int EditorEvent::getTeleportY()
 {
-  int thing_id,x,y,section_id;
-  if(EventSet::dataEventTeleport(event, thing_id, x, y, section_id))
-    return y;
+  if(getEventType() == core::EventType::TELEPORT)
+    return static_cast<core::EventTeleport*>(event)->getTileVertical();
   return -1;
 }
 
@@ -864,31 +842,61 @@ QString EditorEvent::getTextSummary(QString prefix)
  */
 int EditorEvent::getTriggerIOID()
 {
-  int io_id;
-  if(EventSet::dataEventTriggerIO(event, io_id))
-    return io_id;
+  if(getEventType() == core::EventType::TRIGGERIO)
+    return static_cast<core::EventTriggerIO*>(event)->getInteractiveObjectId();
   return -2;
 }
 
 /*
- * Description: Returns the selected events in the IO for the unlock IO event.
- *              UnlockIOEvent::NONE returned if invalid.
+ * Description: Returns if the IO unlock should target the enter event.
  *
  * Inputs: none
- * Output: UnlockIOEvent - the event(s) unlocked if triggered
+ * Output: bool - if true, it will try and unlock the enter event
  */
-UnlockIOEvent EditorEvent::getUnlockIOEventMode()
+bool EditorEvent::getUnlockIOEventEnter()
 {
-  int io_id, state_num, view_time;
-  UnlockIOMode mode;
-  UnlockIOEvent mode_events;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                 mode_view, view_time))
-  {
-    return mode_events;
-  }
-  return UnlockIOEvent::NONE;
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->isUnlockEventEnter();
+  return false;
+}
+
+/*
+ * Description: Returns if the IO unlock should target the exit event.
+ *
+ * Inputs: none
+ * Output: bool - if true, it will try and unlock the exit event
+ */
+bool EditorEvent::getUnlockIOEventExit()
+{
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->isUnlockEventExit();
+  return false;
+}
+
+/*
+ * Description: Returns if the IO unlock should target the use event.
+ *
+ * Inputs: none
+ * Output: bool - if true, it will try and unlock the use event
+ */
+bool EditorEvent::getUnlockIOEventUse()
+{
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->isUnlockEventUse();
+  return false;
+}
+
+/*
+ * Description: Returns if the IO unlock should target the walkover event.
+ *
+ * Inputs: none
+ * Output: bool - if true, it will try and unlock the walkover event
+ */
+bool EditorEvent::getUnlockIOEventWalkover()
+{
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->isUnlockEventWalkover();
+  return false;
 }
 
 /*
@@ -900,38 +908,22 @@ UnlockIOEvent EditorEvent::getUnlockIOEventMode()
  */
 int EditorEvent::getUnlockIOID()
 {
-  int io_id, state_num, view_time;
-  UnlockIOMode mode;
-  UnlockIOEvent mode_events;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                 mode_view, view_time))
-  {
-    return io_id;
-  }
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->getInteractiveObjectId();
   return -1;
 }
 
 /*
- * Description: Returns the mode(s) that are targetted within the IO for locked
- *              states when the unlock triggers. Returns UnlockIOMode::NONE if
- *              the event is not the unlock IO event
+ * Description: Returns if the IO unlock should target the player interaction available.
  *
  * Inputs: none
- * Output: UnlockIOMode - the mode(s) with the lock structs to target
+ * Output: bool - if true, it will try and unlock the player interaction
  */
-UnlockIOMode EditorEvent::getUnlockIOMode()
+bool EditorEvent::getUnlockIOInteraction()
 {
-  int io_id, state_num, view_time;
-  UnlockIOMode mode;
-  UnlockIOEvent mode_events;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                 mode_view, view_time))
-  {
-    return mode;
-  }
-  return UnlockIOMode::NONE;
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->isUnlockInteraction();
+  return false;
 }
 
 /*
@@ -944,15 +936,8 @@ UnlockIOMode EditorEvent::getUnlockIOMode()
  */
 int EditorEvent::getUnlockIOState()
 {
-  int io_id, state_num, view_time;
-  UnlockIOMode mode;
-  UnlockIOEvent mode_events;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                 mode_view, view_time))
-  {
-    return state_num;
-  }
+  if(getEventType() == core::EventType::UNLOCKIO)
+    return static_cast<core::EventUnlockIO*>(event)->getStateId();
   return -1;
 }
 
@@ -965,31 +950,35 @@ int EditorEvent::getUnlockIOState()
  */
 int EditorEvent::getUnlockThingID()
 {
-  int thing_id, view_time;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time))
-    return thing_id;
+  if(getEventType() == core::EventType::UNLOCKTHING)
+    return static_cast<core::EventUnlockThing*>(event)->getThingId();
   return -1;
 }
 
 /*
- * Description: Returns the tile mode of events to attempt unlock on the given
- *              tile unlock event. Returns NONE if invalid
+ * Description: Returns if the tile unlock should target the enter event.
  *
  * Inputs: none
- * Output: UnlockTileMode - which events to attempt unlock in tile
+ * Output: bool - if true, it will try and unlock the enter event
  */
-UnlockTileMode EditorEvent::getUnlockTileMode()
+bool EditorEvent::getUnlockTileEventEnter()
 {
-  int section_id, tile_x, tile_y, view_time;
-  UnlockTileMode mode;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                   mode_view, view_time))
-  {
-    return mode;
-  }
-  return UnlockTileMode::NONE;
+  if(getEventType() == core::EventType::UNLOCKTILE)
+    return static_cast<core::EventUnlockTile*>(event)->isUnlockEventEnter();
+  return false;
+}
+
+/*
+ * Description: Returns if the tile unlock should target the exit event.
+ *
+ * Inputs: none
+ * Output: bool - if true, it will try and unlock the exit event
+ */
+bool EditorEvent::getUnlockTileEventExit()
+{
+  if(getEventType() == core::EventType::UNLOCKTILE)
+    return static_cast<core::EventUnlockTile*>(event)->isUnlockEventExit();
+  return false;
 }
 
 /*
@@ -1002,14 +991,8 @@ UnlockTileMode EditorEvent::getUnlockTileMode()
  */
 int EditorEvent::getUnlockTileSection()
 {
-  int section_id, tile_x, tile_y, view_time;
-  UnlockTileMode mode;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                   mode_view, view_time))
-  {
-    return section_id;
-  }
+  if(getEventType() == core::EventType::UNLOCKTILE)
+    return static_cast<core::EventUnlockTile*>(event)->getSectionId();
   return -1;
 }
 
@@ -1022,14 +1005,8 @@ int EditorEvent::getUnlockTileSection()
  */
 int EditorEvent::getUnlockTileX()
 {
-  int section_id, tile_x, tile_y, view_time;
-  UnlockTileMode mode;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                   mode_view, view_time))
-  {
-    return tile_x;
-  }
+  if(getEventType() == core::EventType::UNLOCKTILE)
+    return static_cast<core::EventUnlockTile*>(event)->getTileHorizontal();
   return -1;
 }
 
@@ -1042,52 +1019,36 @@ int EditorEvent::getUnlockTileX()
  */
 int EditorEvent::getUnlockTileY()
 {
-  int section_id, tile_x, tile_y, view_time;
-  UnlockTileMode mode;
-  UnlockView mode_view;
-  if(EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                   mode_view, view_time))
-  {
-    return tile_y;
-  }
+  if(getEventType() == core::EventType::UNLOCKTILE)
+    return static_cast<core::EventUnlockTile*>(event)->getTileVertical();
   return -1;
 }
 
 /*
- * Description: Returns the view mode and how it views the point where the
- *              unlock occurs. Returns NONE if the event is not an unlock event
+ * Description: Returns if the target should be viewed when it gets unlocked.
  *
  * Inputs: none
- * Output: UnlockView - the unlock view reference for how the event is handled
+ * Output: bool - TRUE to view the unlock target. FALSE to unlock without showing the player
  */
-UnlockView EditorEvent::getUnlockViewMode()
+bool EditorEvent::getUnlockView()
 {
-  /* View data */
-  int view_time;
-  UnlockView mode_view = UnlockView::NONE;
+  if(isUnlockEvent())
+    return static_cast<core::EventUnlock*>(event)->isViewTarget();
+  return false;
+}
 
-  /* Determine classification */
-  if(event.classification == EventClassifier::UNLOCKIO)
-  {
-    int io_id, state_num;
-    UnlockIOMode mode;
-    UnlockIOEvent mode_events;
-    EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                mode_view, view_time);
-  }
-  else if(event.classification == EventClassifier::UNLOCKTHING)
-  {
-    int thing_id;
-    EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
-  }
-  else if(event.classification == EventClassifier::UNLOCKTILE)
-  {
-    int section_id, tile_x, tile_y;
-    UnlockTileMode mode;
-    EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                  mode_view, view_time);
-  }
-  return mode_view;
+/*
+ * Description: Returns if the view should scroll when the unlock occurs. This depends on
+ *              if the target will be viewed at all.
+ *
+ * Inputs: none
+ * Output: bool - TRUE to scroll the viewport to the target location. FALSE to fade in / fade out
+ */
+bool EditorEvent::getUnlockViewScroll()
+{
+  if(isUnlockEvent())
+    return static_cast<core::EventUnlock*>(event)->isViewScroll();
+  return false;
 }
 
 /*
@@ -1099,206 +1060,31 @@ UnlockView EditorEvent::getUnlockViewMode()
  */
 int EditorEvent::getUnlockViewTime()
 {
-  /* View data */
-  int view_time = 0;
-  UnlockView mode_view = UnlockView::NONE;
-
-  /* Determine classification */
-  if(event.classification == EventClassifier::UNLOCKIO)
-  {
-    int io_id, state_num;
-    UnlockIOMode mode;
-    UnlockIOEvent mode_events;
-    EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                mode_view, view_time);
-  }
-  else if(event.classification == EventClassifier::UNLOCKTHING)
-  {
-    int thing_id;
-    EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
-  }
-  else if(event.classification == EventClassifier::UNLOCKTILE)
-  {
-    int section_id, tile_x, tile_y;
-    UnlockTileMode mode;
-    EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                  mode_view, view_time);
-  }
-  return view_time;
+  if(isUnlockEvent())
+    return static_cast<core::EventUnlock*>(event)->getViewTimeMilliseconds();
+  return 0;
 }
 
 /*
- * Description: Inserts a passed in conversation node after the index node
- *              passed in. If the index is on a bad path on the tree, it fails.
- *              If option_node is set, a node with children can be passed in
- *              and set (only one extra layer deep). If the node doesn't exist,
- *              it creates it and all the ones on the way there.
+ * Description: Inserts a passed in conversation node at the index node address that is
+ *              passed into the method. If there are tree gaps along the way, it creates
+ *              blanks along the way.
  *
- * Inputs: QString index - the index reference node for where to insert after
- *         Conversation convo - the inserting conversation struct
- *         bool option_node - true if the convo node has children
- * Output: QString - the resulting index. Blank if failed
+ * Inputs: QString index - the index reference node for where to insert
+ *         ConversationEntry entry - the inserting conversation tree node
+ * Output: bool - true if the conversation tree was modified and the entry was inserted
  */
-QString EditorEvent::insertConversationAfter(QString index, Conversation convo,
-                                             bool option_node)
+bool EditorEvent::insertConversation(QString index, core::ConversationEntry& entry)
 {
-  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
+  if(getEventType() == core::EventType::CONVERSATION)
   {
-    Conversation* ref = convoManipulator(index, true);
-    if(ref != NULL)
-    {
-      /* If an option node conversation, insert accordingly */
-      if(option_node)
-      {
-        if(ref->next.size() <= 1 && convo.next.size() > 1)
-        {
-          /* Clear out the next nodes in the next nodes for the add */
-          for(uint16_t i = 0; i < convo.next.size(); i++)
-            convo.next[i].next.clear();
+    core::EventConversation* conversation_event = static_cast<core::EventConversation*>(event);
 
-          /* Append the existing to the new convo */
-          if(ref->next.size() == 1)
-            convo.next.front().next.push_back(ref->next.front());
-          ref->next.clear();
-
-          /* Append the new to the existing */
-          ref->next.push_back(convo);
-          return (index + ".1");
-        }
-      }
-      /* Not an option node */
-      else
-      {
-        /* Clear the passed in convo */
-        convo.next.clear();
-
-        /* Determine which version the insertion is - parent node to options */
-        if(ref->next.size() > 1)
-        {
-          ref->next.push_back(convo);
-          return (index + "." + QString::number(ref->next.size()));
-        }
-        /* Normal node */
-        else
-        {
-          if(ref->next.size() == 1)
-            convo.next.push_back(ref->next.front());
-          ref->next.clear();
-          ref->next.push_back(convo);
-          return (index + ".1");
-        }
-      }
-    }
+    core::ConversationEntryIndex entry_index = convertConversationIndex(index);
+    conversation_event->getConversation().insertEntry(entry_index, entry);
+    return true;
   }
-  return "";
-}
-
-/*
- * Description: Inserts a passed in conversation node before the index node
- *              passed in. If the index is on a bad path on the tree, it fails.
- *              If option_node is set, a node with children can be passed in
- *              and set (only one extra layer deep). If the node doesn't exist,
- *              it creates it and all the ones on the way there.
- *
- * Inputs: QString index - the index reference node for where to insert before
- *         Conversation convo - the inserting conversation struct
- *         bool option_node - true if the convo node has children
- * Output: QString - the resulting index. Blank if failed
- */
-QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
-                                              bool option_node)
-{
-  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
-  {
-    Conversation* ref = convoManipulator(index, true, true);
-    if(ref != NULL || (index == "1" && conversation != NULL))
-    {
-      /* If an option node conversation, insert accordingly */
-      if(option_node)
-      {
-        if((index == "1" || ref->next.size() <= 1) && convo.next.size() > 1)
-        {
-          /* Clear out the next nodes in the next nodes for the add */
-          for(uint16_t i = 0; i < convo.next.size(); i++)
-            convo.next[i].next.clear();
-
-          /* Separation if index is the top node */
-          if(index == "1")
-          {
-            /* Create the new base conversation */
-            Conversation base = EventSet::createBlankConversation();
-            base.action_event = conversation->action_event;
-            base.category = conversation->category;
-            base.next = conversation->next;
-            base.text = conversation->text;
-            base.thing_id = conversation->thing_id;
-
-            /* Copy the new conversation into the base */
-            conversation->action_event = convo.action_event;
-            conversation->category = convo.category;
-            conversation->next = convo.next;
-            conversation->text = convo.text;
-            conversation->thing_id = convo.thing_id;
-            conversation->next.front().next.push_back(base);
-          }
-          else
-          {
-            /* Append the existing to the new convo */
-            if(ref->next.size() == 1)
-              convo.next.front().next.push_back(ref->next.front());
-            ref->next.clear();
-
-            /* Append the new to the existing */
-            ref->next.push_back(convo);
-          }
-          return index;
-        }
-      }
-      /* Not an option node */
-      else
-      {
-        /* Clear the passed in convo */
-        convo.next.clear();
-
-        /* Determine which version the insertion is - parent node to options */
-        if(index == "1")
-        {
-          /* Create the new base conversation */
-          Conversation base = EventSet::createBlankConversation();
-          base.action_event = conversation->action_event;
-          base.category = conversation->category;
-          base.next = conversation->next;
-          base.text = conversation->text;
-          base.thing_id = conversation->thing_id;
-
-          /* Copy the new conversation into the base */
-          conversation->action_event = convo.action_event;
-          conversation->category = convo.category;
-          conversation->next = convo.next;
-          conversation->text = convo.text;
-          conversation->thing_id = convo.thing_id;
-          conversation->next.push_back(base);
-        }
-        else if(ref->next.size() > 1)
-        {
-          QStringList split_set = index.split(".");
-          ref->next.insert(ref->next.begin() + split_set.last().toInt() - 1,
-                           convo);
-        }
-        /* Normal node */
-        else
-        {
-          if(ref->next.size() == 1)
-            convo.next.push_back(ref->next.front());
-          ref->next.clear();
-          ref->next.push_back(convo);
-        }
-
-        return index;
-      }
-    }
-  }
-  return "";
+  return false;
 }
 
 /*
@@ -1309,7 +1095,9 @@ QString EditorEvent::insertConversationBefore(QString index, Conversation convo,
  */
 bool EditorEvent::isOneShot()
 {
-  return event.one_shot;
+  if(event != nullptr)
+    return event->isOneShot();
+  return false;
 }
 
 /*
@@ -1766,41 +1554,35 @@ void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
  *
  * Inputs: QString index - the reference conversation node to change info
  *         Conversation convo - new node information to place in index
- * Output: bool - true if the data set was successful
+ * Output: bool - true if the conversation tree was modified and the entry was set
  */
-bool EditorEvent::setConversation(QString index, Conversation convo)
+bool EditorEvent::setConversation(QString index, core::ConversationEntry& entry)
 {
-  if(event.classification == EventClassifier::CONVERSATION && !index.isEmpty())
+  if(getEventType() == core::EventType::CONVERSATION)
   {
-    /* Attempt to get the convo. Generates any on the way that don't exist */
-    Conversation* existing = convoManipulator(index, true);
-    if(existing != NULL)
-    {
-      existing->action_event = convo.action_event;
-      existing->category = convo.category;
-      existing->text = convo.text;
-      existing->thing_id = convo.thing_id;
-      return true;
-    }
+    core::EventConversation* conversation_event = static_cast<core::EventConversation*>(event);
+
+    core::ConversationEntryIndex entry_index = convertConversationIndex(index);
+    conversation_event->getConversation().setEntry(entry_index, entry);
+    return true;
   }
   return false;
 }
 
 /*
- * Description: Sets the event to the passed in event struct.
+ * Description: Sets the event to the passed in event struct. Assigns reference clean up of
+ *              the allocated memory for the event.
  *
- * Inputs: Event event - the event to load in
+ * Inputs: Event* event - the event to load in
  * Output: none
  */
-void EditorEvent::setEvent(Event event)
+void EditorEvent::setEvent(core::Event* event)
 {
   /* Remove old event */
   setEventBlank();
 
-  /* Create new event */
-  this->event = EventSet::copyEvent(event);
-  if(event.classification == EventClassifier::CONVERSATION)
-    conversation = this->event.convo;
+  /* Store new event */
+  this->event = event;
 }
 
 /*
@@ -1812,31 +1594,22 @@ void EditorEvent::setEvent(Event event)
 void EditorEvent::setEventBlank(bool delete_event)
 {
   if(delete_event)
-    event = EventSet::deleteEvent(event);
-  event = EventSet::createBlankEvent();
-  conversation = NULL;
+    delete event;
+  event = nullptr;
 }
 
 /*
- * Description: Sets the event in the class to the conversation. If base
- *              conversation is passed in, it is used (and takes control of
- *              deletion). Otherwise, one is generated.
+ * Description: Sets the event in the class to the conversation.
  *
- * Inputs: Conversation* convo - starting conversation tree
- *         int sound_id - the connected sound ID. Default unset ref
+ * Inputs: int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if event changed to conversation
  */
-bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
+bool EditorEvent::setEventConversation(int sound_id)
 {
-  /* Existing */
-  bool one_shot = event.one_shot;
+  core::EventConversation* conversation_event = new core::EventConversation();
+  updateEvent(conversation_event, isOneShot(), sound_id);
 
-  /* Create the new conversation */
-  setEventBlank();
-  event = EventSet::createEventConversation(convo, sound_id);
-  event.one_shot = one_shot;
-  event.convo->text = "First Entry.";
-  conversation = event.convo;
+  setEvent(conversation_event);
   return true;
 }
 
@@ -1847,44 +1620,25 @@ bool EditorEvent::setEventConversation(Conversation* convo, int sound_id)
  *
  * Inputs: int id - the id of the item to give (game side)
  *         int count - the number of items to give on trigger
+ *         bool drop_if_no_room - true to drop items if there is no inventory room
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventGiveItem(int id, int count, GiveItemFlags flags,
+bool EditorEvent::setEventGiveItem(int id, int count, bool drop_if_no_room,
                                    int chance, int sound_id)
 {
   if(id >= 0 && count > 0 && chance >= 0)
   {
-    /* Existing */
-    bool one_shot = event.one_shot;
+    core::EventItemGive* give_item_event = new core::EventItemGive();
+    give_item_event->setItemId(id);
+    give_item_event->setItemCount(count);
+    give_item_event->setDropIfNoRoom(drop_if_no_room);
+    updateEvent(give_item_event, isOneShot(), sound_id);
 
-    /* New data */
-    setEventBlank();
-    event = EventSet::createEventGiveItem(id, count, flags, chance, sound_id);
-    event.one_shot = one_shot;
+    setEvent(give_item_event);
     return true;
   }
   return false;
-}
-
-/*
- * Description: Sets the event in the class to the multiple trigger event,
- *              with the passed in set of events.
- *
- * Inputs: QVector<Event> events - the set of events to trigger
- *         int sound_id - the connected sound ID. Default unset ref
- * Output: bool - true if the multiple event was created
- */
-bool EditorEvent::setEventMultiple(std::vector<Event> events, int sound_id)
-{
-  /* Existing data */
-  bool one_shot = event.one_shot;
-
-  /* New data */
-  setEventBlank();
-  event = EventSet::createEventMultiple(events, sound_id);
-  event.one_shot = one_shot;
-  return true;
 }
 
 /*
@@ -1894,29 +1648,32 @@ bool EditorEvent::setEventMultiple(std::vector<Event> events, int sound_id)
  *
  * Inputs: int index - the index of the new event to modify in the stack
  *         Event new_event - the new event to load at said index
- * Output: bool - true if the multiple event was modified/created
+ * Output: bool - true if the multiple event was modified
  */
-bool EditorEvent::setEventMultiple(int index, Event new_event)
+bool EditorEvent::setEventInMultiple(int index, core::Event& new_event)
 {
-  if(index >= 0)
+  if(getEventType() == core::EventType::MULTIPLE && index >= 0)
   {
-    /* First check if the event is multiple */
-    if(getEventType() != EventClassifier::MULTIPLE)
-      setEventMultiple();
-
-    /* Proceed to edit if the event was set */
-    if(getEventType() == EventClassifier::MULTIPLE)
-    {
-      /* Add events if the index is out of range */
-      while(static_cast<int>(event.events.size()) <= index)
-        event.events.push_back(EventSet::createBlankEvent());
-
-      /* Modify the event */
-      event.events[index] = new_event;
-      return true;
-    }
+    static_cast<core::EventMultiple*>(event)->setEvent(index, new_event);
+    return true;
   }
   return false;
+}
+
+/*
+ * Description: Sets the event in the class to the multiple trigger event,
+ *              with the passed in set of events.
+ *
+ * Inputs: int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the multiple event was created
+ */
+bool EditorEvent::setEventMultiple(int sound_id)
+{
+  core::EventMultiple* multiple_event = new core::EventMultiple();
+  updateEvent(multiple_event, isOneShot(), sound_id);
+
+  setEvent(multiple_event);
+  return true;
 }
 
 /*
@@ -1931,42 +1688,256 @@ bool EditorEvent::setEventNotification(QString notification, int sound_id)
 {
   if(!notification.isEmpty())
   {
-    bool one_shot = event.one_shot;
-    setEventBlank();
-    event = EventSet::createEventNotification(notification.toStdString(),
-                                              sound_id);
-    event.one_shot = one_shot;
+    core::EventNotification* notification_event = new core::EventNotification();
+    notification_event->setNotification(notification.toStdString());
+    updateEvent(notification_event, isOneShot(), sound_id);
+
+    setEvent(notification_event);
     return true;
   }
   return false;
 }
 
 /*
- * Description: Sets the event to a new property modifier event with the
- *              passed in various properties (as defined by inputs).
+ * Description: Sets the event in the class to the property modifier event,
+ *              with a passed in reference thing ID.
  *
- * Inputs: ThingBase type - the type of thing modified by the event
- *         int id - the id of the thing
- *         ThingProperty props - which properties are being modified by the call
- *         ThingProperty bools - the bool values of the properties being modded
- *         int respawn - the modified respawn time (thing+)
- *         int speed - the modified speed (person+)
- *         TrackingState track - the modification of what tracking (npc)
- *         int inactive - modify the time before going inactive (io)
- *         int sound_id - the sound reference ID. Default to invalid
- * Output: bool - true if the event was created
+ * Inputs: int thing_id - the thing ID to be modified
+ *         int sound_id - the connected sound ID. Default unset ref
+ * Output: bool - true if the property event was created
  */
-bool EditorEvent::setEventPropMod(ThingBase type, int id, ThingProperty props,
-                                  ThingProperty bools, int respawn, int speed,
-                                  TrackingState track, int inactive,
-                                  int sound_id)
+bool EditorEvent::setEventProp(int thing_id, int sound_id)
 {
-  bool one_shot = event.one_shot;
-  setEventBlank();
-  event = EventSet::createEventPropMod(type, id, props, bools, respawn, speed,
-                                       track, inactive, sound_id);
-  event.one_shot = one_shot;
-  return true;
+  if(thing_id >= 0)
+  {
+    core::EventProperty* property_event;
+    if(getEventType() != core::EventType::PROPERTY)
+    {
+      property_event = new core::EventProperty();
+      updateEvent(property_event, isOneShot(), sound_id);
+      setEvent(property_event);
+    }
+    else
+    {
+      property_event = static_cast<core::EventProperty*>(event);
+      property_event->setSoundId(sound_id);
+    }
+
+    property_event->setThingId(thing_id);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event thing's active state to either
+ *              enabled or disabled.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         bool active - true if the thing should be active, false to make it inactive
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropActive(bool modified, bool active)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setThingActive(active);
+    else
+      property_event->resetThingActive();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event person's map movement to
+ *              enabled or disabled (stuck in place).
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         bool disable_move - true to lock the person in place, false to keep it free
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropDisableMove(bool modified, bool disable_move)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setPersonMovementDisabled(disable_move);
+    else
+      property_event->resetPersonMovementDisabled();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify if the player is in range,
+ *              the NPC will force an interaction.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         bool force_interact - true to make the NPC force interaction, false to require the
+ *                               player to interact
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropForceInteract(bool modified, bool force_interact)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setNPCInteractionForced(force_interact);
+    else
+      property_event->resetNPCInteractionForced();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify the time to return to the
+ *              previous state in the interactive object if inactive.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         int inactive_time - inactive timeout in milliseconds
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropInactive(bool modified, int inactive_time)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+    {
+      if(inactive_time < 0)
+        property_event->setIOStateInactiveDisabled();
+      else
+        property_event->setIOStateInactiveMillis(inactive_time);
+    }
+    else
+    {
+      property_event->resetIOStateInactive();
+    }
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify if the person's location should
+ *              be set to their starting map location.
+ *
+ * Inputs: bool reset - true if the location should be reset. false to make no change
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropPersonReset(bool reset)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(reset)
+      property_event->setPersonLocationReset();
+    else
+      property_event->resetPersonLocationReset();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify the time for the thing to
+ *              respawn after visibility is disabled.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         int respawn_time - respawn time delay in milliseconds. <0 if disabled
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropRespawn(bool modified, int respawn_time)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+    {
+      if(respawn_time < 0)
+        property_event->setThingRespawnDisabled();
+      else
+        property_event->setThingRespawnMillis(respawn_time);
+    }
+    else
+    {
+      property_event->resetThingRespawn();
+    }
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify the person map movement speed.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         int speed - configured person speed, in units (tiles per second) = (speed / 4)
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropSpeed(bool modified, int speed)
+{
+  if(getEventType() == core::EventType::PROPERTY && speed >= 0)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setPersonSpeed(speed);
+    else
+      property_event->resetPersonSpeed();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event to modify the NPC movement tracking for
+ *              when the player is in range.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         Tracking track_state - NPC tracking mode
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropTrack(bool modified, core::Tracking track_state)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setNPCTracking(track_state);
+    else
+      property_event->resetNPCTracking();
+    return true;
+  }
+  return false;
+}
+
+/*
+ * Description: Sets the property modifier event thing's visible state to either
+ *              visible (rendered) or hidden.
+ *
+ * Inputs: bool modified - true if the event should modify this property. false to ignore it
+ *         bool active - true if the thing should be visible, false to make it invisible
+ * Output: bool - true if the property event was modified
+ */
+bool EditorEvent::setEventPropVisible(bool modified, bool visible)
+{
+  if(getEventType() == core::EventType::PROPERTY)
+  {
+    core::EventProperty* property_event = static_cast<core::EventProperty*>(event);
+    if(modified)
+      property_event->setThingVisible(visible);
+    else
+      property_event->resetThingVisible();
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -1978,10 +1949,10 @@ bool EditorEvent::setEventPropMod(ThingBase type, int id, ThingProperty props,
  */
 bool EditorEvent::setEventSound(int sound_id)
 {
-  bool one_shot = event.one_shot;
-  setEventBlank();
-  event = EventSet::createEventSound(sound_id);
-  event.one_shot = one_shot;
+  core::EventSound* sound_event = new core::EventSound();
+  updateEvent(sound_event, isOneShot(), sound_id);
+
+  setEvent(sound_event);
   return true;
 }
 
@@ -1995,10 +1966,10 @@ bool EditorEvent::setEventSound(int sound_id)
  */
 bool EditorEvent::setEventStartBattle(int sound_id)
 {
-  bool one_shot = event.one_shot;
-  setEventBlank();
-  event = EventSet::createEventStartBattle(sound_id);
-  event.one_shot = one_shot;
+  core::EventBattleStart* battle_start_event = new core::EventBattleStart();
+  updateEvent(battle_start_event, isOneShot(), sound_id);
+
+  setEvent(battle_start_event);
   return true;
 }
 
@@ -2006,20 +1977,32 @@ bool EditorEvent::setEventStartBattle(int sound_id)
  * Description: Sets the event in the class to the start battle event. This is
  *              the additional properties call with events and flags.
  *
- * Inputs: BattleFlags flags - the battle set flags
- *         Event event_win - the event triggered upon battle win
- *         Event event_lose - the event triggered upon battle lose
+ * Inputs: bool game_over_on_loss - true to end the game if the player loses the battle
+ *         bool hide_target_on_win - true to hide initiating thing on battle win
+ *         bool restore_health - true to restore player health on battle end
+ *         bool restore_qd - true to restore player QD on battle end
+ *         Event* event_win - the event triggered upon battle win
+ *         Event* event_lose - the event triggered upon battle lose
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the battle event was created
  */
-bool EditorEvent::setEventStartBattle(BattleFlags flags, Event event_win,
-                                      Event event_lose, int sound_id)
+bool EditorEvent::setEventStartBattle(bool game_over_on_loss, bool hide_target_on_win,
+                                      bool restore_health, bool restore_qd,
+                                      core::Event& event_win, core::Event& event_lose,
+                                      int sound_id)
 {
-  Event new_event = EventSet::createEventStartBattle(flags, event_win,
-                                                     event_lose, sound_id);
-  new_event.one_shot = event.one_shot;
-  setEventBlank();
-  event = new_event;
+  core::EventBattleStart* battle_start_event = new core::EventBattleStart();
+  battle_start_event->setGameOverOnLoss(game_over_on_loss);
+  battle_start_event->setHealthRestored(restore_health);
+  battle_start_event->setQdRestored(restore_qd);
+  battle_start_event->setTargetHiddenOnWin(hide_target_on_win);
+  battle_start_event->setWinEvent(event_win);
+  battle_start_event->setLoseEvent(event_lose);
+  battle_start_event->setOneShot(isOneShot());
+  battle_start_event->setSoundId(sound_id);
+  updateEvent(battle_start_event, isOneShot(), sound_id);
+
+  setEvent(battle_start_event);
   return true;
 }
 
@@ -2036,10 +2019,11 @@ bool EditorEvent::setEventStartMap(int id, int sound_id)
 {
   if(id >= 0)
   {
-    bool one_shot = event.one_shot;
-    setEventBlank();
-    event = EventSet::createEventStartMap(id, sound_id);
-    event.one_shot = one_shot;
+    core::EventMapSwitch* map_switch_event = new core::EventMapSwitch();
+    map_switch_event->setMapId(id);
+    updateEvent(map_switch_event, isOneShot(), sound_id);
+
+    setEvent(map_switch_event);
     return true;
   }
   return false;
@@ -2059,10 +2043,12 @@ bool EditorEvent::setEventTakeItem(int id, int count, int sound_id)
 {
   if(id >= 0 && count > 0)
   {
-    bool one_shot = event.one_shot;
-    setEventBlank();
-    event = EventSet::createEventTakeItem(id, count, sound_id);
-    event.one_shot = one_shot;
+    core::EventItemTake* take_item_event = new core::EventItemTake();
+    take_item_event->setItemId(id);
+    take_item_event->setItemCount(count);
+    updateEvent(take_item_event, isOneShot(), sound_id);
+
+    setEvent(take_item_event);
     return true;
   }
   return false;
@@ -2082,14 +2068,16 @@ bool EditorEvent::setEventTakeItem(int id, int count, int sound_id)
 bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
                                    int sound_id)
 {
-  if(section_id >= 0 && x >= 0 && y >= 0)
+  if(thing_id >= 0 && x >= 0 && y >= 0)
   {
-    bool one_shot = event.one_shot;
-    if(thing_id < 0)
-      thing_id = EventSet::kUNSET_ID;
-    setEventBlank();
-    event = EventSet::createEventTeleport(thing_id, x, y, section_id, sound_id);
-    event.one_shot = one_shot;
+    core::EventTeleport* teleport_event = new core::EventTeleport();
+    teleport_event->setThingId(thing_id);
+    teleport_event->setSectionId(section_id);
+    teleport_event->setTileHorizontal(x);
+    teleport_event->setTileVertical(y);
+    updateEvent(teleport_event, isOneShot(), sound_id);
+
+    setEvent(teleport_event);
     return true;
   }
   return false;
@@ -2105,10 +2093,11 @@ bool EditorEvent::setEventTeleport(int thing_id, int section_id, int x, int y,
  */
 bool EditorEvent::setEventTriggerIO(int io_id, int sound_id)
 {
-  bool one_shot = event.one_shot;
-  setEventBlank();
-  event = EventSet::createEventTriggerIO(io_id, sound_id);
-  event.one_shot = one_shot;
+  core::EventTriggerIO* trigger_io_event = new core::EventTriggerIO();
+  trigger_io_event->setInteractiveObjectId(io_id);
+  updateEvent(trigger_io_event, isOneShot(), sound_id);
+
+  setEvent(trigger_io_event);
   return true;
 }
 
@@ -2118,29 +2107,37 @@ bool EditorEvent::setEventTriggerIO(int io_id, int sound_id)
  *              time.
  *
  * Inputs: int io_id - the IO reference ID
- *         UnlockIOMode mode - the lock mode to address in the IO
+ *         bool unlock_enter - if true, it will try and unlock the enter event
+ *         bool unlock_exit - if true, it will try and unlock the exit event
+ *         bool unlock_use - if true, it will try and unlock the use event
+ *         bool unlock_walkover - if true, it will try and unlock the walkover event
  *         int state_num - if state mode, the state connected num. -1 if all
- *         UnlockIOEvents events - the events to address within the state
- *         UnlockView view_mode - how th unlock point is viewed
+ *         bool unlock_interaction - if true, it will try and unlock the player interaction
+ *         bool view - should the unlock target be viewed by the player camera
+ *         bool view_scroll - should the camera scroll to the target instead of fading
  *         int view_time - how long to view the point
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
-                   UnlockIOEvent events, UnlockView view_mode, int view_time,
-                   int sound_id)
+bool EditorEvent::setEventUnlockIO(int io_id, bool unlock_enter, bool unlock_exit,
+                                   bool unlock_use, bool unlock_walkover, int state_num,
+                                   bool unlock_interaction, bool view, bool view_scroll,
+                                   int view_time, int sound_id)
 {
   if(view_time >= 0)
   {
-    bool one_shot = event.one_shot;
-    if(state_num < 0)
-      state_num = EventSet::kUNSET_ID;
-    if(io_id < 0)
-      io_id = EventSet::kUNSET_ID;
-    setEventBlank();
-    event = EventSet::createEventUnlockIO(io_id, mode, state_num, events,
-                                          view_mode, view_time, sound_id);
-    event.one_shot = one_shot;
+    core::EventUnlockIO* unlock_io_event = new core::EventUnlockIO();
+    unlock_io_event->setInteractiveObjectId(io_id);
+    unlock_io_event->setUnlockEventEnter(unlock_enter);
+    unlock_io_event->setUnlockEventExit(unlock_exit);
+    unlock_io_event->setUnlockEventUse(unlock_use);
+    unlock_io_event->setUnlockEventWalkover(unlock_walkover);
+    unlock_io_event->setUnlockInteraction(unlock_interaction);
+    unlock_io_event->setStateId(state_num);
+    updateUnlockEvent(unlock_io_event, view, view_scroll, view_time);
+    updateEvent(unlock_io_event, isOneShot(), sound_id);
+
+    setEvent(unlock_io_event);
     return true;
   }
   return false;
@@ -2151,23 +2148,23 @@ bool EditorEvent::setEventUnlockIO(int io_id, UnlockIOMode mode, int state_num,
  *              thing ID, view mode, and view time.
  *
  * Inputs: int thing_id - the thing reference ID
- *         UnlockView view_mode - how th unlock point is viewed
+ *         bool view - should the unlock target be viewed by the player camera
+ *         bool view_scroll - should the camera scroll to the target instead of fading
  *         int view_time - how long to view the point
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventUnlockThing(int thing_id, UnlockView view_mode,
-                                      int view_time, int sound_id)
+bool EditorEvent::setEventUnlockThing(int thing_id, bool view, bool view_scroll, int view_time,
+                                      int sound_id)
 {
   if(view_time >= 0)
   {
-    bool one_shot = event.one_shot;
-    if(thing_id < 0)
-      thing_id = EventSet::kUNSET_ID;
-    setEventBlank();
-    event = EventSet::createEventUnlockThing(thing_id, view_mode, view_time,
-                                             sound_id);
-    event.one_shot = one_shot;
+    core::EventUnlockThing* unlock_thing_event = new core::EventUnlockThing();
+    unlock_thing_event->setThingId(thing_id);
+    updateUnlockEvent(unlock_thing_event, view, view_scroll, view_time);
+    updateEvent(unlock_thing_event, isOneShot(), sound_id);
+
+    setEvent(unlock_thing_event);
     return true;
   }
   return false;
@@ -2181,26 +2178,30 @@ bool EditorEvent::setEventUnlockThing(int thing_id, UnlockView view_mode,
  * Inputs: int section_id - the section tile reference
  *         uint16_t tile_x - the tile x reference
  *         uint16_t tile_y - the tile y reference
- *         UnlockTileMode - the event modes to unlock in tile
- *         UnlockView view_mode - how th unlock point is viewed
+ *         bool unlock_enter - if true, it will try and unlock the enter event
+ *         bool unlock_exit - if true, it will try and unlock the exit event
+ *         bool view - should the unlock target be viewed by the player camera
+ *         bool view_scroll - should the camera scroll to the target instead of fading
  *         int view_time - how long to view the point
  *         int sound_id - the connected sound ID. Default unset ref
  * Output: bool - true if the event was created
  */
-bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x,
-                                     uint16_t tile_y, UnlockTileMode mode,
-                                     UnlockView view_mode, int view_time,
-                                     int sound_id)
+bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x, uint16_t tile_y,
+                                     bool unlock_enter, bool unlock_exit, bool view,
+                                     bool view_scroll, int view_time, int sound_id)
 {
   if(view_time >= 0)
   {
-    bool one_shot = event.one_shot;
-    if(section_id < 0)
-      section_id = EventSet::kUNSET_ID;
-    setEventBlank();
-    event = EventSet::createEventUnlockTile(section_id, tile_x, tile_y, mode,
-                                            view_mode, view_time, sound_id);
-    event.one_shot = one_shot;
+    core::EventUnlockTile* unlock_tile_event = new core::EventUnlockTile();
+    unlock_tile_event->setSectionId(section_id);
+    unlock_tile_event->setTileHorizontal(tile_x);
+    unlock_tile_event->setTileVertical(tile_y);
+    unlock_tile_event->setUnlockEventEnter(unlock_enter);
+    unlock_tile_event->setUnlockEventExit(unlock_exit);
+    updateUnlockEvent(unlock_tile_event, view, view_scroll, view_time);
+    updateEvent(unlock_tile_event, isOneShot(), sound_id);
+
+    setEvent(unlock_tile_event);
     return true;
   }
   return false;
@@ -2214,7 +2215,8 @@ bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x,
  */
 void EditorEvent::setOneShot(bool one_shot)
 {
-  event.one_shot = one_shot;
+  if(event != nullptr)
+    event->setOneShot(one_shot);
 }
 
 /*
@@ -2224,16 +2226,15 @@ void EditorEvent::setOneShot(bool one_shot)
  * Inputs: int id - the new event ID
  * Output: none
  */
-bool EditorEvent::setSoundID(int id)
+void EditorEvent::setSoundID(int id)
 {
-  if(event.classification != EventClassifier::NOEVENT)
+  if(event != nullptr)
   {
     if(id >= 0)
-      event.sound_id = id;
+      event->setSoundId(id);
     else
-      event.sound_id = EventSet::kUNSET_ID;
+      event->setSoundId(core::Event::kUNSET_SOUND_ID);
   }
-  return false;
 }
 
 /*============================================================================
@@ -2286,46 +2287,6 @@ QString EditorEvent::classToText(EventClassifier classification, QString prefix,
 }
 
 /*
- * Description: Converts the conversation index generated in EventView ("4.5.4")
- *              to the standardized conversation index, as required by this
- *              class ("1.1.1.1.5.1.1.1.1")
- *
- * Inputs: QString index - the base simplified index
- * Output: QString - the expanded index, for use in this class for reference
- */
-QString EditorEvent::convertConversationIndex(QString index)
-{
-  QStringList list = index.split('.');
-  QString result = "";
-
-  /* Loop through the split list */
-  for(int i = 0; i < list.size(); i++)
-  {
-    /* If not head, add separator */
-    if(i != 0)
-      result += ".";
-
-    if(i % 2 == 0)
-    {
-      int num = list[i].toInt();
-      for(int j = 0; j < num; j++)
-      {
-        if(j != 0)
-          result += ".1";
-        else
-          result += "1";
-      }
-    }
-    else
-    {
-      result += list[i];
-    }
-  }
-
-  return result;
-}
-
-/*
  * Description: Checks if the passed in base index (4.5.4 format) and how many
  *              children the item has and returns if it could become an option.
  *
@@ -2348,77 +2309,4 @@ bool EditorEvent::couldBeOption(QString base_index, int child_count)
   }
 
   return false;
-}
-
-/*
- * Description: Public static function. Creates a conversatioin with a given
- *              text, ID, and event.
- *
- * Inputs: QString text - the text displayed in the text box
- *         int id - the thing talking/interacting
- *         Event event - the event triggered on start of conversation node
- * Output: Conversation - created conversation node struct with above data
- */
-Conversation EditorEvent::createConversation(QString text, int id, Event event)
-{
-  Conversation convo = EventSet::createBlankConversation();
-  convo.text = text.toStdString();
-  convo.thing_id = id;
-  if(event.classification != EventClassifier::CONVERSATION)
-    convo.action_event = event;
-
-  return convo;
-}
-
-/*
- * Description: Public static function. Creates a conversatioin with a given
- *              text, ID, event, and vector of string event pairs for option
- *              children.
- *
- * Inputs: QString text - the text displayed in the text box
- *         int id - the thing talking/interacting
- *         Event event - the event triggered on start of conversation node
- *         QVec<QPair<QString,Event>> - the option string event pairs to add
- * Output: Conversation - created conversation node struct with above data
- */
-Conversation EditorEvent::createConversation(QString text, int id, Event event,
-                                         QVector<QPair<QString, Event>> options)
-{
-  Conversation convo = createConversation(text, id, event);
-
-  /* Loop through options */
-  for(int i = 0; i < options.size(); i++)
-  {
-    convo.next.push_back(EventSet::createBlankConversation());
-    convo.next.back().text = options[i].first.toStdString();
-    if(options[i].second.classification != EventClassifier::CONVERSATION)
-      convo.next.back().action_event = options[i].second;
-  }
-
-  return convo;
-}
-
-/*
- * Description: Prints the conversation to the qDebug terminal. Primarily used
- *              for testing and debugging. Note, this function is recursive
- *              from the initially passed in conversation node.
- *
- * Inputs: Conversation* convo - the convo to print data for and go to children
- *         QString index - the index of the current conversation node
- * Output: none
- */
-void EditorEvent::printConversation(Conversation* convo, QString index)
-{
-  if(convo != nullptr)
-  {
-    /* Print the current */
-    qDebug() << index << ": " << QString::fromStdString(convo->text) << " , "
-             << convo->thing_id << " , "
-             << (int)convo->action_event.classification;
-
-    /* First call the function with all children */
-    for(uint32_t i = 0; i < convo->next.size(); i++)
-      EditorEvent::printConversation(&convo->next[i],
-                                     index + "." + QString::number(i+1));
-  }
 }

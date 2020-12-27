@@ -73,6 +73,23 @@ SOURCES += \
     src/View/SoundView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
+    lib/fis-types/src/Event/ConversationEntry.cc \
+    lib/fis-types/src/Event/ConversationEntryIndex.cc \
+    lib/fis-types/src/Event/EventBattleStart.cc \
+    lib/fis-types/src/Event/EventConversation.cc \
+    lib/fis-types/src/Event/EventItemGive.cc \
+    lib/fis-types/src/Event/EventItemTake.cc \
+    lib/fis-types/src/Event/EventMapSwitch.cc \
+    lib/fis-types/src/Event/EventMultiple.cc \
+    lib/fis-types/src/Event/EventNone.cc \
+    lib/fis-types/src/Event/EventNotification.cc \
+    lib/fis-types/src/Event/EventProperty.cc \
+    lib/fis-types/src/Event/EventSound.cc \
+    lib/fis-types/src/Event/EventTeleport.cc \
+    lib/fis-types/src/Event/EventTriggerIO.cc \
+    lib/fis-types/src/Event/EventUnlockIO.cc \
+    lib/fis-types/src/Event/EventUnlockThing.cc \
+    lib/fis-types/src/Event/EventUnlockTile.cc \
     lib/fis-types/src/Foundation/Frame.cc \
     lib/fis-types/src/Foundation/Sprite.cc \
     lib/fis-types/src/Foundation/TileSprite.cc \
