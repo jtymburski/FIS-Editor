@@ -7,7 +7,26 @@
  *              locations where it's used.
  ******************************************************************************/
 #include "Database/EditorEvent.h"
-#include <QDebug>
+
+/**
+ * Event type enumerator to string key static map.
+ */
+const QMap<core::EventType, QString> EditorEvent::kTYPE_TO_TEXT_STRING = {
+  { core::EventType::BATTLESTART,  "Battle Start"   },
+  { core::EventType::CONVERSATION, "Conversation"   },
+  { core::EventType::ITEMGIVE,     "Item: Give"     },
+  { core::EventType::ITEMTAKE,     "Item: Take"     },
+  { core::EventType::MAPSWITCH,    "Map Switch"     },
+  { core::EventType::MULTIPLE,     "Multiple"       },
+  { core::EventType::NOTIFICATION, "Notification"   },
+  { core::EventType::PROPERTY,     "Property Mod"   },
+  { core::EventType::SOUND,        "Sound Only"     },
+  { core::EventType::TELEPORT,     "Teleport Thing" },
+  { core::EventType::TRIGGERIO,    "Trigger IO"     },
+  { core::EventType::UNLOCKIO,     "Unlock: IO"     },
+  { core::EventType::UNLOCKTHING,  "Unlock: Thing"  },
+  { core::EventType::UNLOCKTILE,   "Unlock: Tile"   }
+};
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -1060,7 +1079,7 @@ bool EditorEvent::isOneShot()
  */
 void EditorEvent::load(core::XmlData data, int index)
 {
-  event = PersistEvent::load(event, data, index);
+  event = core::PersistEvent::load(event, data, index);
 }
 
 /*
@@ -1078,7 +1097,7 @@ void EditorEvent::save(core::XmlWriter* writer, QString wrapper, bool write_wrap
     if(write_wrapper)
       writer->writeElement(wrapper.toStdString());
 
-    PersistEvent::save(event, writer);
+    core::PersistEvent::save(event, writer);
 
     if(write_wrapper)
       writer->jumpToParent();
@@ -1814,11 +1833,10 @@ EditorEvent& EditorEvent::operator= (const EditorEvent &source)
  *         bool one_shot - true if the event is a one shot
  * Output: QString - the summary text result
  */
-QString EditorEvent::classToText(EventClassifier classification, QString prefix,
+QString EditorEvent::classToText(core::EventType classification, QString prefix,
                                  bool one_shot)
 {
-  QString content = QString::fromStdString(
-                                 EventSet::classifierToStr(classification));
+  QString content = kTYPE_TO_TEXT_STRING.value(classification, "None");
   QString suffix = "";
   if(one_shot)
     suffix += " (once)";

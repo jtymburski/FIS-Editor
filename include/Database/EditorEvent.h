@@ -9,6 +9,7 @@
 #ifndef EDITOREVENT_H
 #define EDITOREVENT_H
 
+#include <QMap>
 #include <QPair>
 #include <QStringList>
 #include <QVector>
@@ -53,6 +54,11 @@ public:
 private:
   /* The event to be edited by this class */
   core::Event* event;
+
+  /*------------------- Constants -----------------------*/
+private:
+  /* Event type enumerator to readable string key map */
+  const static QMap<core::EventType, QString> kTYPE_TO_TEXT_STRING;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -305,7 +311,7 @@ public:
  *===========================================================================*/
 public:
   /* Returns the text summary for the given classification */
-  static QString classToText(EventClassifier classification,
+  static QString classToText(core::EventType classification,
                              QString prefix = "Event: ", bool one_shot = false);
 
   /* Using the base index, the conversation could be an option (convert true) */
