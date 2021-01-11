@@ -90,6 +90,7 @@ SOURCES += \
     lib/fis-types/src/Event/EventUnlockIO.cc \
     lib/fis-types/src/Event/EventUnlockThing.cc \
     lib/fis-types/src/Event/EventUnlockTile.cc \
+    lib/fis-types/src/Event/PersistEvent.cc \
     lib/fis-types/src/Foundation/Frame.cc \
     lib/fis-types/src/Foundation/Sprite.cc \
     lib/fis-types/src/Foundation/TileSprite.cc \

@@ -117,60 +117,6 @@ bool EditorEvent::isUnlockEvent() const
 }
 
 /*
- * Description: Recursive save of the conversation. Takes a conversation ref
- *              and starting index with file handling pointer and parses
- *              all embedded conversations from there. Default call with just
- *              FH pointer will use the base conversation in class.
- *
- * Inputs: FileHandler* fh - the file handling pointer
- *         Conversation* convo - the starting convo, default to NULL
- *         QString index - the starting index of the starting convo, default "1"
- * Output: none
- */
-void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
-                                   QString index)
-{
-  bool first_call = false;
-
-  /* If conversation is NULL, load in base conversation */
-  if(convo == NULL)
-  {
-    convo = event.convo;
-    first_call = true;
-  }
-
-  /* Proceed if not NULL */
-  if(convo != NULL)
-  {
-    fh->writeXmlElement("conversation", "id", index.toStdString());
-
-    /* Conversation Data */
-    fh->writeXmlData("text", convo->text);
-    fh->writeXmlData("id", convo->thing_id);
-    if(convo->delay > 0)
-      fh->writeXmlData("delay", convo->delay);
-    if(first_call)
-    {
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-    }
-    if(convo->action_event.classification != EventClassifier::NOEVENT)
-    {
-      EditorEvent convo_event(convo->action_event);
-      convo_event.save(fh);
-    }
-
-    fh->writeXmlElementEnd();
-
-    /* Go to the next conversations */
-    for(uint16_t i = 0; i < convo->next.size(); i++)
-      saveConversation(fh, &convo->next[i], index + "." + QString::number(i+1));
-  }
-}
-
-/*
  * Description: Updates the provided event (must be valid) with shared, top level properties.
  *
  * Inputs: core::Event* event - the valid event to update
@@ -180,8 +126,12 @@ void EditorEvent::saveConversation(FileHandler* fh, Conversation* convo,
  */
 void EditorEvent::updateEvent(core::Event* event, bool one_shot, int sound_id)
 {
-  event->setOneShot(one_shot);
-  event->setSoundId(sound_id);
+  if(getEventType() != core::EventType::NONE)
+  {
+    core::ExecutableEvent* executable_event = static_cast<core::ExecutableEvent*>(event);
+    executable_event->setOneShot(one_shot);
+    executable_event->setSoundId(sound_id);
+  }
 }
 
 /*
@@ -640,9 +590,9 @@ bool EditorEvent::getPropertyVisibleSet()
  */
 int EditorEvent::getSoundID()
 {
-  if(event != nullptr)
-    return event->getSoundId();
-  return core::Event::kUNSET_SOUND_ID;
+  if(getEventType() != core::EventType::NONE)
+    return static_cast<core::ExecutableEvent*>(event)->getSoundId();
+  return core::ExecutableEvent::kUNSET_SOUND_ID;
 }
 
 /*
@@ -1095,8 +1045,8 @@ bool EditorEvent::insertConversation(QString index, core::ConversationEntry& ent
  */
 bool EditorEvent::isOneShot()
 {
-  if(event != nullptr)
-    return event->isOneShot();
+  if(getEventType() != core::EventType::NONE)
+    return static_cast<core::ExecutableEvent*>(event)->isOneShot();
   return false;
 }
 
@@ -1108,442 +1058,30 @@ bool EditorEvent::isOneShot()
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorEvent::load(XmlData data, int index)
+void EditorEvent::load(core::XmlData data, int index)
 {
-  event = EventSet::updateEvent(event, data, index, 0);
+  event = PersistEvent::load(event, data, index);
 }
 
 /*
  * Description: Saves the event data to the file handling pointer.
  *
  * Inputs: FileHandler* fh - the file handling pointer
- *         bool game_only - true if the data should include game only relevant
- *         QString preface - the wrapper text element. default to "event"
- *         bool no_preface - no XML wrapper included if true. Default false
+ *         QString wrapper - the wrapper text element. default to "event"
+ *         bool write_wrapper - should the save wrap the event in a parent element? Default true
  * Output: none
  */
-void EditorEvent::save(FileHandler* fh, bool game_only, QString preface,
-                       bool no_preface)
+void EditorEvent::save(core::XmlWriter* writer, QString wrapper, bool write_wrapper)
 {
-  (void)game_only;
-  bool event_wrap = false;
-
-  if(fh != NULL && event.classification != EventClassifier::NOEVENT)
+  if(writer != nullptr && event != nullptr && event->isSaveable())
   {
-    if(!no_preface)
-      fh->writeXmlElement(preface.toStdString());
+    if(write_wrapper)
+      writer->writeElement(wrapper.toStdString());
 
-    /* -- BATTLE START EVENT -- */
-    if(event.classification == EventClassifier::BATTLESTART)
-    {
-      Event* event_lose = getStartBattleEventLose();
-      Event* event_win = getStartBattleEventWin();
-      BattleFlags flags = getStartBattleFlags();
+    PersistEvent::save(event, writer);
 
-      if(getSoundID() >= 0 || isOneShot() || flags != BattleFlags::NONE ||
-         event_lose->classification != EventClassifier::NOEVENT ||
-         event_win->classification != EventClassifier::NOEVENT)
-      {
-        fh->writeXmlElement("startbattle");
-        event_wrap = true;
-
-        /* Flags */
-        bool win_disappear, lose_gg, restore_health, restore_qd;
-        EventSet::dataEnumBattleFlags(flags, win_disappear, lose_gg,
-                                      restore_health, restore_qd);
-        if(win_disappear)
-          fh->writeXmlData("windisappear", win_disappear);
-        if(lose_gg)
-          fh->writeXmlData("losegg", lose_gg);
-        if(restore_health)
-          fh->writeXmlData("restorehealth", restore_health);
-        if(restore_qd)
-          fh->writeXmlData("restoreqd", restore_qd);
-
-        /* Win Event */
-        //if(!win_disappear && // Removed [2016-06-05]
-        if(event_win->classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent editor_win(*event_win);
-          editor_win.save(fh, game_only, "eventwin");
-        }
-
-        /* Lose Event */
-        if(!lose_gg && event_lose->classification != EventClassifier::NOEVENT)
-        {
-          EditorEvent editor_lose(*event_lose);
-          editor_lose.save(fh, game_only, "eventlose");
-        }
-      }
-      else
-      {
-        int zero = 0;
-        fh->writeXmlData("startbattle", zero);
-      }
-    }
-    /* -- CONVERSATION EVENT -- */
-    else if(event.classification == EventClassifier::CONVERSATION)
-    {
-      saveConversation(fh);
-    }
-    /* -- ITEM GIVE EVENT -- */
-    else if(event.classification == EventClassifier::ITEMGIVE)
-    {
-      fh->writeXmlElement("giveitem");
-      event_wrap = true;
-
-      /* Flag data */
-      GiveItemFlags flags = getGiveItemFlags();
-      bool auto_drop;
-      EventSet::dataEnumGiveFlags(flags, auto_drop);
-
-      /* Data */
-      fh->writeXmlData("id", getGiveItemID());
-      fh->writeXmlData("count", getGiveItemCount());
-      if(auto_drop)
-        fh->writeXmlData("autodrop", auto_drop);
-      if(getGiveItemChance() != EventSet::kGIVE_DEF_CHANCE)
-        fh->writeXmlData("chance", getGiveItemChance());
-    }
-    /* -- ITEM TAKE EVENT -- */
-    else if(event.classification == EventClassifier::ITEMTAKE)
-    {
-      fh->writeXmlElement("takeitem");
-      event_wrap = true;
-
-      /* Data */
-      fh->writeXmlData("id", getTakeItemID());
-      fh->writeXmlData("count", getTakeItemCount());
-    }
-    /* -- MAP SWITCH EVENT -- */
-    else if(event.classification == EventClassifier::MAPSWITCH)
-    {
-      fh->writeXmlElement("startmap");
-      event_wrap = true;
-
-      /* Data */
-      fh->writeXmlData("id", getStartMapID());
-    }
-    /* -- MULTIPLE EVENT -- */
-    else if(event.classification == EventClassifier::MULTIPLE)
-    {
-      /* Determine if data is valid */
-      bool valid = (getSoundID() >= 0 || isOneShot());
-      if(!valid)
-        for(uint32_t i = 0; i < event.events.size(); i++)
-          valid |= (event.events[i].classification != EventClassifier::NOEVENT);
-
-      /* If valid, print normal multiple event */
-      if(valid)
-      {
-        fh->writeXmlElement("multiple");
-        event_wrap = true;
-
-        /* Event data */
-        for(uint32_t i = 0; i < event.events.size(); i++)
-        {
-          if(event.events[i].classification != EventClassifier::NOEVENT)
-          {
-            fh->writeXmlElement("event", "id", i);
-            EditorEvent save_event(event.events[i]);
-            save_event.save(fh, game_only, "", true);
-            fh->writeXmlElementEnd();
-          }
-        }
-      }
-      /* Otherwise, just print blank holder */
-      else
-      {
-        int zero = 0;
-        fh->writeXmlData("multiple", zero);
-      }
-    }
-    /* -- NOTIFICATION EVENT -- */
-    else if(event.classification == EventClassifier::NOTIFICATION)
-    {
-      if(getSoundID() >= 0 || isOneShot())
-      {
-        fh->writeXmlElement("notification");
-        event_wrap = true;
-
-        /* Data */
-        fh->writeXmlData("text", getNotification().toStdString());
-      }
-      else
-      {
-        fh->writeXmlData("notification", getNotification().toStdString());
-      }
-    }
-    /* -- PROPERTY EVENT -- */
-    else if(event.classification == EventClassifier::PROPERTY)
-    {
-      if(getPropertyType() != ThingBase::ISBASE)
-      {
-        fh->writeXmlElement("propertymod");
-        event_wrap = true;
-
-        /* Get data */
-        ThingProperty bools, props;
-        int id, inactive_int, respawn_int, speed_int;
-        TrackingState track_enum;
-        ThingBase type;
-        EventSet::dataEventPropMod(event, type, id, props, bools, respawn_int,
-                                   speed_int, track_enum, inactive_int);
-
-        /* Break out property */
-        bool active, forced, inactive, move, reset, respawn, speed,
-             track, visible;
-        bool active_v, forced_v, inactive_v, move_v, reset_v, respawn_v,
-             speed_v, track_v, visible_v;
-        EventSet::dataEnumProperties(props, active, forced, inactive, move,
-                                     reset, respawn, speed, track, visible);
-        EventSet::dataEnumProperties(bools, active_v, forced_v, inactive_v,
-                                     move_v, reset_v, respawn_v, speed_v,
-                                     track_v, visible_v);
-
-        /* Thing type classifier */
-        QString type_str = QString::fromStdString(Helpers::typeToStr(type));
-        fh->writeXmlData("class", type_str.toStdString());
-
-        /* Thing ID */
-        fh->writeXmlData("id", id);
-
-        /* Thing Data */
-        if(active)
-          fh->writeXmlData("active", active_v);
-        if(respawn)
-          fh->writeXmlData("respawn", respawn_int);
-        if(visible)
-          fh->writeXmlData("visible", visible_v);
-
-        /* Person Data */
-        if(type == ThingBase::PERSON || type == ThingBase::NPC)
-        {
-          if(move)
-            fh->writeXmlData("movedisable", move_v);
-          if(reset)
-            fh->writeXmlData("resetlocation", reset_v);
-          if(speed)
-            fh->writeXmlData("speed", speed_int);
-        }
-
-        /* NPC Data */
-        if(type == ThingBase::NPC)
-        {
-          if(forced)
-            fh->writeXmlData("forceinteract", forced_v);
-          if(track)
-          {
-            QString track_str = "notrack";
-            if(track_enum == TrackingState::AVOIDPLAYER)
-              track_str = "avoidplayer";
-            else if(track_enum == TrackingState::TOPLAYER)
-              track_str = "toplayer";
-            fh->writeXmlData("tracking", track_str.toStdString());
-          }
-        }
-
-        /* IO Data */
-        if(type == ThingBase::INTERACTIVE)
-        {
-          if(inactive)
-            fh->writeXmlData("inactive", inactive_int);
-        }
-      }
-    }
-    /* -- SOUND ONLY EVENT -- */
-    else if(event.classification == EventClassifier::SOUNDONLY)
-    {
-      if(getSoundID() >= 0)
-      {
-        /* Two properties: more complex save */
-        if(isOneShot())
-        {
-          fh->writeXmlElement("justsound");
-          event_wrap = true;
-        }
-        /* Just the sound ID: simpler save */
-        else
-        {
-          fh->writeXmlData("justsound", getSoundID());
-        }
-      }
-    }
-    /* -- TELEPORT THING EVENT -- */
-    else if(event.classification == EventClassifier::TELEPORTTHING)
-    {
-      fh->writeXmlElement("teleportthing");
-      event_wrap = true;
-
-      /* Data */
-      fh->writeXmlData("x", getTeleportX());
-      fh->writeXmlData("y", getTeleportY());
-      if(getTeleportSection() >= 0)
-        fh->writeXmlData("section", getTeleportSection());
-      if(getTeleportThingID() != 0)
-        fh->writeXmlData("id", getTeleportThingID());
-    }
-    /* -- TRIGGER IO EVENT -- */
-    else if(event.classification == EventClassifier::TRIGGERIO)
-    {
-      fh->writeXmlElement("triggerio");
-      event_wrap = true;
-
-      /* Data */
-      fh->writeXmlData("id", getTriggerIOID());
-    }
-    /* -- UNLOCK IO EVENT -- */
-    else if(event.classification == EventClassifier::UNLOCKIO)
-    {
-      fh->writeXmlElement("unlockio");
-      event_wrap = true;
-
-      /* Access data */
-      int io_id, state_num, view_time;
-      UnlockIOMode mode;
-      UnlockIOEvent mode_events;
-      UnlockView mode_view;
-      EventSet::dataEventUnlockIO(event, io_id, mode, state_num, mode_events,
-                                  mode_view, view_time);
-
-      /* ID */
-      fh->writeXmlData("id", io_id);
-
-      /* Mode */
-      bool lock, events;
-      EventSet::dataEnumIOMode(mode, lock, events);
-      if(lock)
-        fh->writeXmlData("modelock", lock);
-      if(events)
-        fh->writeXmlData("modeevents", events);
-
-      /* Only if events enabled, proceed to remaining data */
-      if(events)
-      {
-        /* State */
-        if(state_num >= 0)
-          fh->writeXmlData("state", state_num);
-
-        /* Which events - check if all */
-        bool enter,exit,use,walkover;
-        EventSet::dataEnumIOEvent(mode_events, enter, exit, use, walkover);
-        if(enter && exit && use && walkover)
-        {
-          fh->writeXmlData("eventall", enter);
-        }
-        /* Parse individually */
-        else
-        {
-          if(enter)
-            fh->writeXmlData("evententer", enter);
-          if(exit)
-            fh->writeXmlData("eventexit", exit);
-          if(use)
-            fh->writeXmlData("eventuse", use);
-          if(walkover)
-            fh->writeXmlData("eventwalkover", walkover);
-        }
-      }
-
-      /* View */
-      bool view, scroll;
-      EventSet::dataEnumView(mode_view, view, scroll);
-      if(view)
-      {
-        fh->writeXmlData("view", view);
-        if(scroll)
-          fh->writeXmlData("viewscroll", scroll);
-        if(view_time != EventSet::kVIEW_TIME)
-          fh->writeXmlData("viewtime", view_time);
-      }
-    }
-    /* -- UNLOCK THING EVENT -- */
-    else if(event.classification == EventClassifier::UNLOCKTHING)
-    {
-      fh->writeXmlElement("unlockthing");
-      event_wrap = true;
-
-      /* Access data */
-      int thing_id, view_time;
-      UnlockView mode_view;
-      EventSet::dataEventUnlockThing(event, thing_id, mode_view, view_time);
-
-      /* ID */
-      fh->writeXmlData("id", thing_id);
-
-      /* View */
-      bool view, scroll;
-      EventSet::dataEnumView(mode_view, view, scroll);
-      if(view)
-      {
-        fh->writeXmlData("view", view);
-        if(scroll)
-          fh->writeXmlData("viewscroll", scroll);
-        if(view_time != EventSet::kVIEW_TIME)
-          fh->writeXmlData("viewtime", view_time);
-      }
-    }
-    /* -- UNLOCK TILE EVENT -- */
-    else if(event.classification == EventClassifier::UNLOCKTILE)
-    {
-      fh->writeXmlElement("unlocktile");
-      event_wrap = true;
-
-      /* Access data */
-      int section_id, tile_x, tile_y, view_time;
-      UnlockTileMode mode;
-      UnlockView mode_view;
-      EventSet::dataEventUnlockTile(event, section_id, tile_x, tile_y, mode,
-                                    mode_view, view_time);
-
-      /* X, Y, Section ID */
-      fh->writeXmlData("x", tile_x);
-      fh->writeXmlData("y", tile_y);
-      if(section_id >= 0)
-        fh->writeXmlData("sectionid", section_id);
-
-      /* Mode */
-      bool enter, exit;
-      EventSet::dataEnumTileEvent(mode, enter, exit);
-      if(enter && exit)
-      {
-        fh->writeXmlData("eventall", enter);
-      }
-      /* Parse individually */
-      else
-      {
-        if(enter)
-          fh->writeXmlData("evententer", enter);
-        if(exit)
-          fh->writeXmlData("eventexit", exit);
-      }
-
-      /* View */
-      bool view, scroll;
-      EventSet::dataEnumView(mode_view, view, scroll);
-      if(view)
-      {
-        fh->writeXmlData("view", view);
-        if(scroll)
-          fh->writeXmlData("viewscroll", scroll);
-        if(view_time != EventSet::kVIEW_TIME)
-          fh->writeXmlData("viewtime", view_time);
-      }
-    }
-
-    /* End wrapper */
-    if(event_wrap)
-    {
-      if(isOneShot())
-        fh->writeXmlData("one_shot", isOneShot());
-      if(getSoundID() >= 0)
-        fh->writeXmlData("sound_id", getSoundID());
-      fh->writeXmlElementEnd();
-    }
-
-    /* Overall wrapper */
-    if(!no_preface)
-      fh->writeXmlElementEnd();
+    if(write_wrapper)
+      writer->jumpToParent();
   }
 }
 
@@ -2215,8 +1753,8 @@ bool EditorEvent::setEventUnlockTile(int section_id, uint16_t tile_x, uint16_t t
  */
 void EditorEvent::setOneShot(bool one_shot)
 {
-  if(event != nullptr)
-    event->setOneShot(one_shot);
+  if(getEventType() != core::EventType::NONE)
+    static_cast<core::ExecutableEvent*>(event)->setOneShot(one_shot);
 }
 
 /*
@@ -2228,12 +1766,13 @@ void EditorEvent::setOneShot(bool one_shot)
  */
 void EditorEvent::setSoundID(int id)
 {
-  if(event != nullptr)
+  if(getEventType() != core::EventType::NONE)
   {
+    core::ExecutableEvent* executable_event = static_cast<core::ExecutableEvent*>(event);
     if(id >= 0)
-      event->setSoundId(id);
+      executable_event->setSoundId(id);
     else
-      event->setSoundId(core::Event::kUNSET_SOUND_ID);
+      executable_event->setSoundId(core::ExecutableEvent::kUNSET_SOUND_ID);
   }
 }
 

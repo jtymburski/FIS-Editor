@@ -31,6 +31,8 @@
 #include "Event/EventUnlockIO.h"
 #include "Event/EventUnlockThing.h"
 #include "Event/EventUnlockTile.h"
+#include "Event/ExecutableEvent.h"
+#include "Event/PersistEvent.h"
 #include "Map/Tracking.h"
 
 class EditorEvent
@@ -64,10 +66,6 @@ private:
 
   /* Returns if the configured event is an unlock base class */
   bool isUnlockEvent() const;
-
-  /* Saves the conversation - recursive call */
-  void saveConversation(FileHandler* fh, Conversation* convo = NULL,
-                        QString index = "1");
 
   /* Updates the provided event with the shared, top level properties */
   void updateEvent(core::Event* event, bool one_shot, int sound_id);
@@ -198,11 +196,10 @@ public:
   bool isOneShot();
 
   /* Loads the event data */
-  void load(XmlData data, int index);
+  void load(core::XmlData data, int index);
 
   /* Saves the event data */
-  void save(FileHandler* fh, bool game_only = false, QString preface = "event",
-            bool no_preface = false);
+  void save(core::XmlWriter* writer, QString wrapper = "event", bool write_wrapper = true);
 
   /* Sets the conversation entry at the index */
   bool setConversation(QString index, core::ConversationEntry& entry);
@@ -214,26 +211,26 @@ public:
   void setEventBlank(bool delete_event = true);
 
   /* Sets the conversation event */
-  bool setEventConversation(int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventConversation(int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to give item */
   bool setEventGiveItem(int id = 0, int count = 1,
                         bool drop_if_no_room = false,
                         int chance = core::EventItemGive::kMAX_CHANCE,
-                        int sound_id = core::Event::kUNSET_SOUND_ID);
+                        int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets a single new event in the multiple event */
   bool setEventInMultiple(int index, core::Event& new_event);
 
   /* Sets the event to multiple set */
-  bool setEventMultiple(int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventMultiple(int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to notification text */
   bool setEventNotification(QString notification = "Blank",
-                            int sound_id = core::Event::kUNSET_SOUND_ID);
+                            int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to a property modifier event */
-  bool setEventProp(int thing_id, int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventProp(int thing_id, int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
   bool setEventPropActive(bool modified, bool active = false);
   bool setEventPropDisableMove(bool modified, bool disable_move = false);
   bool setEventPropForceInteract(bool modified, bool force_interact = false);
@@ -245,28 +242,28 @@ public:
   bool setEventPropVisible(bool modified, bool visible = false);
 
   /* Sets the event to strictly a sound event */
-  bool setEventSound(int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventSound(int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to start battle */
-  bool setEventStartBattle(int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventStartBattle(int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
   bool setEventStartBattle(bool game_over_on_loss, bool hide_target_on_win, bool restore_health,
                            bool restore_qd, core::Event& event_win, core::Event& event_lose,
-                           int sound_id = core::Event::kUNSET_SOUND_ID);
+                           int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to start map */
-  bool setEventStartMap(int id = 0, int sound_id = core::Event::kUNSET_SOUND_ID);
+  bool setEventStartMap(int id = 0, int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to take item */
   bool setEventTakeItem(int id = 0, int count = 1,
-                        int sound_id = core::Event::kUNSET_SOUND_ID);
+                        int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to teleport a thing */
   bool setEventTeleport(int thing_id = 0, int section_id = 0, int x = 0,
-                        int y = 0, int sound_id = core::Event::kUNSET_SOUND_ID);
+                        int y = 0, int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to the trigger IO */
   bool setEventTriggerIO(int io_id = core::EventTriggerIO::kINITIATING_IO_ID,
-                         int sound_id = core::Event::kUNSET_SOUND_ID);
+                         int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to the unlock IO */
   bool setEventUnlockIO(int io_id = 0, bool unlock_enter = false, bool unlock_exit = false,
@@ -275,12 +272,12 @@ public:
                         bool unlock_interaction = false,
                         bool view = false, bool view_scroll = false,
                         int view_time = core::EventUnlock::kDEFAULT_VIEW_TIME_MS,
-                        int sound_id = core::Event::kUNSET_SOUND_ID);
+                        int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to the unlock thing */
   bool setEventUnlockThing(int thing_id = 0, bool view = false, bool view_scroll = false,
                            int view_time = core::EventUnlock::kDEFAULT_VIEW_TIME_MS,
-                           int sound_id = core::Event::kUNSET_SOUND_ID);
+                           int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets the event to the unlock tile */
   bool setEventUnlockTile(int section_id = core::EventUnlockTile::kACTIVE_SECTION_ID,
@@ -288,7 +285,7 @@ public:
                           bool unlock_enter = false, bool unlock_exit = false,
                           bool view = false, bool view_scroll = false,
                           int view_time = core::EventUnlock::kDEFAULT_VIEW_TIME_MS,
-                          int sound_id = core::Event::kUNSET_SOUND_ID);
+                          int sound_id = core::ExecutableEvent::kUNSET_SOUND_ID);
 
   /* Sets if the event is a one shot */
   void setOneShot(bool one_shot);
