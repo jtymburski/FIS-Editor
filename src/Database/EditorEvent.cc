@@ -116,9 +116,9 @@ core::ConversationEntryIndex EditorEvent::convertConversationIndex(QString index
  */
 void EditorEvent::copySelf(const EditorEvent &source)
 {
-  event = EventSet::deleteEvent(event);
-  event = EventSet::copyEvent(source.event);
-  conversation = event.convo;
+  setEventBlank();
+  if(source.event != nullptr)
+    event = source.event->clone();
 }
 
 /*
@@ -332,9 +332,8 @@ core::Event* EditorEvent::getMultipleEvent(int index)
 int EditorEvent::getMultipleEventCount()
 {
   if(getEventType() == core::EventType::MULTIPLE)
-  {
     return static_cast<core::EventMultiple*>(event)->getEventCount();
-  }
+  return 0;
 }
 
 /*
