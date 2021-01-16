@@ -75,6 +75,9 @@ SOURCES += \
     src/View/SpriteViewList.cc \
     lib/fis-types/src/Event/Conversation/ConversationEntry.cc \
     lib/fis-types/src/Event/Conversation/ConversationEntryIndex.cc \
+    lib/fis-types/src/Event/Lock/LockItem.cc \
+    lib/fis-types/src/Event/Lock/LockTrigger.cc \
+    lib/fis-types/src/Event/Lock/PersistLock.cc \
     lib/fis-types/src/Event/EventBattleStart.cc \
     lib/fis-types/src/Event/EventConversation.cc \
     lib/fis-types/src/Event/EventItemGive.cc \

@@ -23,11 +23,11 @@ EditorLock::EditorLock()
 }
 
 /*
- * Description: Constructor with single lock struct, as created by EventSet.
+ * Description: Constructor with single lock object.
  *
- * Inputs: Locked lock - an init lock struct
+ * Inputs: core::Lock* lock - an init lock
  */
-EditorLock::EditorLock(Locked lock) : EditorLock()
+EditorLock::EditorLock(core::Lock* lock) : EditorLock()
 {
   setLock(lock);
 }
@@ -47,7 +47,7 @@ EditorLock::EditorLock(const EditorLock &source) : EditorLock()
  */
 EditorLock::~EditorLock()
 {
-  setLockBlank();
+  delete lock;
 }
 
 /*============================================================================
@@ -63,6 +63,7 @@ EditorLock::~EditorLock()
  */
 void EditorLock::copySelf(const EditorLock &source)
 {
+  delete lock;
   lock = source.lock;
 }
 
@@ -79,10 +80,8 @@ void EditorLock::copySelf(const EditorLock &source)
  */
 bool EditorLock::getHaveItemConsume()
 {
-  int id, count;
-  bool consume;
-  if(EventSet::dataLockedItem(lock, id, count, consume))
-    return consume;
+  if(getLockType() == core::LockType::ITEM)
+    return static_cast<core::LockItem*>(lock)->isConsumeToUnlock();
   return false;
 }
 
@@ -95,10 +94,8 @@ bool EditorLock::getHaveItemConsume()
  */
 int EditorLock::getHaveItemCount()
 {
-  int id, count;
-  bool consume;
-  if(EventSet::dataLockedItem(lock, id, count, consume))
-    return count;
+  if(getLockType() == core::LockType::ITEM)
+    return static_cast<core::LockItem*>(lock)->getItemCount();
   return 0;
 }
 
@@ -111,33 +108,31 @@ int EditorLock::getHaveItemCount()
  */
 int EditorLock::getHaveItemID()
 {
-  int id, count;
-  bool consume;
-  if(EventSet::dataLockedItem(lock, id, count, consume))
-    return id;
-  return EventSet::kUNSET_ID;
+  if(getLockType() == core::LockType::ITEM)
+    return static_cast<core::LockItem*>(lock)->getItemId();
+  return core::LockItem::kUNSET_ITEM_ID;
 }
 
 /*
- * Description: Returns the current lock struct, set-up in this class.
+ * Description: Returns the current lock object, set-up in this class.
  *
  * Inputs: none
- * Output: Locked* - pointer to the lock struct contained
+ * Output: core::Lock* - pointer to the lock object managed internally
  */
-Locked* EditorLock::getLock()
+core::Lock* EditorLock::getLock()
 {
-  return &lock;
+  return lock;
 }
 
 /*
  * Description: Returns the type of lock handled by this class.
  *
  * Inputs: none
- * Output: LockedState - lock classification enum
+ * Output: core::LockType - lock classification enum
  */
-LockedState EditorLock::getLockType() const
+core::LockType EditorLock::getLockType() const
 {
-  return lock.state;
+  return lock != nullptr ? lock->getType() : core::LockType::NONE;
 }
 
 /*
@@ -149,9 +144,9 @@ LockedState EditorLock::getLockType() const
 QString EditorLock::getTextSummary(QString prefix)
 {
   QString content = "";
-  if(getLockType() == LockedState::ITEM)
+  if(getLockType() == core::LockType::ITEM)
     content = "Have Item";// ID " + QString::number(getHaveItemID());
-  else if(getLockType() == LockedState::TRIGGER)
+  else if(getLockType() == core::LockType::TRIGGER)
     content = "Trigger";
   else
     content = "None";
@@ -169,8 +164,8 @@ QString EditorLock::getTextSummary(QString prefix)
  */
 bool EditorLock::isPermanent()
 {
-  if(lock.state != LockedState::NONE)
-    return lock.permanent;
+  if(getLockType() != core::LockType::NONE)
+    return static_cast<core::FunctionalLock*>(lock)->isPermanent();
   return false;
 }
 
@@ -178,101 +173,47 @@ bool EditorLock::isPermanent()
  * Description: Loads the lock data from the XML struct and offset index. Uses
  *              existing functions in game EventSet class.
  *
- * Inputs: XmlData data - the XML data tree struct
+ * Inputs: core::XmlData data - the XML data tree struct
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorLock::load(XmlData data, int index)
+void EditorLock::load(core::XmlData data, int index)
 {
-  lock = EventSet::updateLocked(lock, data, index);
+  lock = core::PersistLock::load(lock, data, index);
 }
 
 /*
  * Description: Saves the lock data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
- *         bool game_only - true if the data should include game only relevant
- *         QString preface - the wrapper text element. default to "lock"
- *         bool no_preface - no XML wrapper included if true. Default false
- *         bool skip_empty - true to skip the empty state and save nothing
+ * Inputs: core::XmlWriter* writer - the save persistence interface
+ *         QString wrapper - the wrapper text element. default to "lock"
+ *         bool write_wrapper - TRUE (default) to wrap the lock save. FALSE to directly write
+ *         bool skip_empty - TRUE (default) to skip the empty state. FALSE to save even if blank
  * Output: none
  */
-void EditorLock::save(FileHandler* fh, bool game_only, QString preface,
-                      bool no_preface, bool skip_empty)
+void EditorLock::save(core::XmlWriter* writer, QString wrapper, bool write_wrapper, bool skip_empty)
 {
-  (void)game_only;
-
-  if(fh != nullptr)
+  if(writer != nullptr && lock != nullptr && (lock->isSaveable() || !skip_empty))
   {
-    /* If the lock has valid data */
-    if(lock.state != LockedState::NONE)
-    {
-      if(!no_preface)
-        fh->writeXmlElement(preface.toStdString());
+    if(write_wrapper)
+      writer->writeElement(wrapper.toStdString());
 
-      /* -- HAVE ITEM LOCK -- */
-      if(lock.state == LockedState::ITEM)
-      {
-        Locked lock_struct = EventSet::createLockHaveItem();
-        EditorLock default_lock(lock_struct);
+    core::PersistLock::save(lock, writer);
 
-        fh->writeXmlElement("item");
-
-        /* Data */
-        fh->writeXmlData("id", getHaveItemID());
-        if(getHaveItemCount() != default_lock.getHaveItemCount())
-          fh->writeXmlData("count", getHaveItemCount());
-        if(getHaveItemConsume() != default_lock.getHaveItemConsume())
-          fh->writeXmlData("consume", getHaveItemConsume());
-        if(isPermanent() != default_lock.isPermanent())
-          fh->writeXmlData("permanent", isPermanent());
-
-        fh->writeXmlElementEnd();
-      }
-      else if(lock.state == LockedState::TRIGGER)
-      {
-        Locked lock_struct = EventSet::createLockTriggered();
-        EditorLock default_lock(lock_struct);
-
-        /* Parse how the save is handled depending on data */
-        if(isPermanent() != default_lock.isPermanent())
-        {
-          fh->writeXmlElement("trigger");
-          fh->writeXmlData("permanent", isPermanent());
-          fh->writeXmlElementEnd();
-        }
-        else
-        {
-          int none = 0;
-          fh->writeXmlData("trigger", none);
-        }
-      }
-
-      if(!no_preface)
-        fh->writeXmlElementEnd();
-    }
-    /* If instructed to not skip empty, print none option - used for instance */
-    else if(!skip_empty)
-    {
-      int zero = 0;
-
-      if(!no_preface)
-        fh->writeXmlElement(preface.toStdString());
-      fh->writeXmlData("none", zero);
-      if(!no_preface)
-        fh->writeXmlElementEnd();
-    }
+    if(write_wrapper)
+      writer->jumpToParent();
   }
 }
 
 /*
  * Description: Sets the lock to the passed in locked handler (this).
  *
- * Inputs: Locked lock - the lock to load in
+ * Inputs: core::Lock* lock - the lock to load in
  * Output: none
  */
-void EditorLock::setLock(Locked lock)
+void EditorLock::setLock(core::Lock* lock)
 {
+  setLockBlank();
   this->lock = lock;
 }
 
@@ -284,7 +225,8 @@ void EditorLock::setLock(Locked lock)
  */
 void EditorLock::setLockBlank()
 {
-  lock = EventSet::createBlankLocked();
+  delete lock;
+  lock = new core::LockNone();
 }
 
 /*
@@ -303,7 +245,13 @@ bool EditorLock::setLockHaveItem(int id, int count, bool consume,
 {
   if(id >= 0 && count > 0)
   {
-    lock = EventSet::createLockHaveItem(id, count, consume, permanent);
+    core::LockItem* item_lock = new core::LockItem();
+    item_lock->setItemId(id);
+    item_lock->setItemCount(count);
+    item_lock->setConsumeToUnlock(consume);
+    item_lock->setPermanent(permanent);
+
+    setLock(item_lock);
     return true;
   }
   return false;
@@ -317,7 +265,10 @@ bool EditorLock::setLockHaveItem(int id, int count, bool consume,
  */
 bool EditorLock::setLockTrigger(bool permanent)
 {
-  lock = EventSet::createLockTriggered(permanent);
+  core::LockTrigger* trigger_lock = new core::LockTrigger();
+  trigger_lock->setPermanent(permanent);
+
+  setLock(trigger_lock);
   return true;
 }
 

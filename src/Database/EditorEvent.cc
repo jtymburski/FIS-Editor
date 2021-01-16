@@ -1084,7 +1084,7 @@ void EditorEvent::load(core::XmlData data, int index)
 /*
  * Description: Saves the event data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
+ * Inputs: core::XmlWriter* writer - the save persistence interface
  *         QString wrapper - the wrapper text element. default to "event"
  *         bool write_wrapper - should the save wrap the event in a parent element? Default true
  * Output: none

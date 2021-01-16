@@ -11,8 +11,13 @@
 
 #include <QString>
 
-#include "FileHandler.h"
-#include "Game/EventSet.h"
+#include "Event/Lock/FunctionalLock.h"
+#include "Event/Lock/Lock.h"
+#include "Event/Lock/LockItem.h"
+#include "Event/Lock/LockNone.h"
+#include "Event/Lock/LockTrigger.h"
+#include "Event/Lock/LockType.h"
+#include "Event/Lock/PersistLock.h"
 
 class EditorLock
 {
@@ -20,8 +25,8 @@ public:
   /* Constructor function */
   EditorLock();
 
-  /* Constructor function - with input lock struct */
-  EditorLock(Locked lock);
+  /* Constructor function - with input lock */
+  EditorLock(core::Lock* lock);
 
   /* Copy constructor */
   EditorLock(const EditorLock &source);
@@ -30,8 +35,8 @@ public:
   ~EditorLock();
 
 private:
-  /* The locked struct to be edited by this class */
-  Locked lock;
+  /* The lock to be edited by this class */
+  core::Lock* lock;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -50,10 +55,10 @@ public:
   int getHaveItemID();
 
   /* Returns the locked struct */
-  Locked* getLock();
+  core::Lock* getLock();
 
   /* Returns the lock type */
-  LockedState getLockType() const;
+  core::LockType getLockType() const;
 
   /* Returns a text list summary of the lock */
   QString getTextSummary(QString prefix = "Lock: ");
@@ -62,14 +67,14 @@ public:
   bool isPermanent();
 
   /* Loads the lock data */
-  void load(XmlData data, int index);
+  void load(core::XmlData data, int index);
 
   /* Saves the lock data */
-  void save(FileHandler* fh, bool game_only = false, QString preface = "lock",
-            bool no_preface = false, bool skip_empty = true);
+  void save(core::XmlWriter* writer, QString wrapper = "lock", bool write_wrapper = true,
+            bool skip_empty = true);
 
-  /* Sets the locked struct */
-  void setLock(Locked lock);
+  /* Sets the locked object */
+  void setLock(core::Lock* lock);
 
   /* Set the lock to default / none */
   void setLockBlank();
@@ -88,13 +93,6 @@ public:
 public:
   /* The copy operator */
   EditorLock& operator= (const EditorLock &source);
-
-/*============================================================================
- * PUBLIC STATIC FUNCTIONS
- *===========================================================================*/
-public:
-  /* Converts the conversation index to usable form */
-  //static QString convertConversationIndex(QString index);
 };
 
 #endif // EDITORLOCK_H
