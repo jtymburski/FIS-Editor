@@ -73,8 +73,8 @@ SOURCES += \
     src/View/SoundView.cc \
     src/View/SpriteView.cc \
     src/View/SpriteViewList.cc \
-    lib/fis-types/src/Event/ConversationEntry.cc \
-    lib/fis-types/src/Event/ConversationEntryIndex.cc \
+    lib/fis-types/src/Event/Conversation/ConversationEntry.cc \
+    lib/fis-types/src/Event/Conversation/ConversationEntryIndex.cc \
     lib/fis-types/src/Event/EventBattleStart.cc \
     lib/fis-types/src/Event/EventConversation.cc \
     lib/fis-types/src/Event/EventItemGive.cc \

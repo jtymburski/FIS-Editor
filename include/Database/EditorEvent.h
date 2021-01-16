@@ -14,8 +14,8 @@
 #include <QStringList>
 #include <QVector>
 
-#include "Event/ConversationEntry.h"
-#include "Event/ConversationEntryIndex.h"
+#include "Event/Conversation/ConversationEntry.h"
+#include "Event/Conversation/ConversationEntryIndex.h"
 #include "Event/Event.h"
 #include "Event/EventBattleStart.h"
 #include "Event/EventConversation.h"
