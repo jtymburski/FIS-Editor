@@ -14,16 +14,13 @@
 
 #include "Database/EditorEvent.h"
 #include "Database/EditorLock.h"
-#include "FileHandler.h"
+#include "Foundation/AccessOperation.h"
 
 class EditorEventSet
 {
 public:
   /* Constructor function */
   EditorEventSet();
-
-  /* Constructor function - with input event */
-  EditorEventSet(EventSet& set);
 
   /* Copy constructor */
   EditorEventSet(const EditorEventSet &source);
@@ -39,8 +36,20 @@ private:
   /* Locked status struct */
   EditorLock lock_data;
 
-  /* State of unlocked events */
-  UnlockedState unlocked_state;
+  /* State of access for unlocked events */
+  core::AccessOperation unlocked_access = core::AccessOperation::SEQUENTIAL;
+
+  /*------------------- Constants -----------------------*/
+private:
+  /* Load and save key names */
+  const static QString kKEY_ACCESS_NONE;
+  const static QString kKEY_ACCESS_RANDOM;
+  const static QString kKEY_ACCESS_SEQUENTIAL;
+  const static QString kKEY_LOCK;
+  const static QString kKEY_EVENT_LOCK;
+  const static QString kKEY_EVENT_UNLOCK;
+  const static QString kKEY_EVENT_UNLOCK_ACCESS;
+  const static QString kKEY_EVENT_UNLOCK_ID;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -54,7 +63,6 @@ private:
  *===========================================================================*/
 public:
   /* Add calls, for lists */
-  bool addEventUnlocked(Event new_event);
   bool addEventUnlocked(EditorEvent new_event);
 
   /* Clears all event data within the class */
@@ -62,10 +70,6 @@ public:
 
   /* Access getters for locked event */
   EditorEvent* getEventLocked();
-
-  /* Returns the event set conversion of the Editor Event Set. This creates
-   * copy of data for storage elsewhere (to be managed by caller) */
-  EventSet getEventSet();
 
   /* Access getters for unlocked event(s) */
   QVector<EditorEvent*> getEventUnlocked();
@@ -78,39 +82,31 @@ public:
   /* Returns a text list summary of the event set */
   QVector<QString> getTextSummary();
 
-  /* Returns the unlocked state enum */
-  UnlockedState getUnlockedState();
+  /* Returns the unlocked access enum */
+  core::AccessOperation getUnlockedAccess();
 
   /* Returns if the class is empty (default state after a clear() call) */
   bool isEmpty() const;
 
   /* Loads the event data */
-  void load(XmlData data, int index);
+  void load(core::XmlData data, int index);
 
   /* Saves the event data */
-  void save(FileHandler* fh, bool game_only = false,
-            QString preface = "eventset", bool no_preface = false,
+  void save(core::XmlWriter* writer, QString wrapper = "eventset", bool write_wrapper = true,
             bool skip_empty = true);
 
   /* Setters for locked event */
-  bool setEventLocked(Event new_event, bool delete_event = true);
   bool setEventLocked(EditorEvent new_event, bool delete_event = true);
 
-  /* Set for the event set */
-  bool setEventSet(EventSet& set, bool delete_prev = true);
-
   /* Setters for unlocked event(s) */
-  bool setEventUnlocked(int index, Event new_event, bool replace = false,
-                        bool delete_event = true);
   bool setEventUnlocked(int index, EditorEvent new_event, bool replace = false,
                         bool delete_event = true);
 
   /* Sets the locked status */
-  bool setLocked(Locked new_locked);
   bool setLocked(EditorLock new_locked);
 
   /* Sets the unlocked state */
-  bool setUnlockedState(UnlockedState state);
+  bool setUnlockedAccess(core::AccessOperation access);
 
   /* Shift unlocked events in list */
   int shiftUnlockedDown(int index);
@@ -128,13 +124,6 @@ public:
 public:
   /* The copy operator */
   EditorEventSet& operator= (const EditorEventSet &source);
-
-/*============================================================================
- * PUBLIC STATIC FUNCTIONS
- *===========================================================================*/
-public:
-  /* Converts the conversation index to usable form */
-  //static QString convertConversationIndex(QString index);
 };
 
 #endif // EDITOREVENTSET_H

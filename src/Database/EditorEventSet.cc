@@ -7,7 +7,16 @@
  *              locations where it's used.
  ******************************************************************************/
 #include "Database/EditorEventSet.h"
-//#include <QDebug>
+
+/* Constant Implementation - see header file for descriptions */
+const QString EditorEventSet::kKEY_ACCESS_NONE = "none";
+const QString EditorEventSet::kKEY_ACCESS_RANDOM = "random";
+const QString EditorEventSet::kKEY_ACCESS_SEQUENTIAL = "ordered";
+const QString EditorEventSet::kKEY_LOCK = "lock";
+const QString EditorEventSet::kKEY_EVENT_LOCK = "lockevent";
+const QString EditorEventSet::kKEY_EVENT_UNLOCK = "unlockevent";
+const QString EditorEventSet::kKEY_EVENT_UNLOCK_ACCESS = "unlockparse";
+const QString EditorEventSet::kKEY_EVENT_UNLOCK_ID = "id";
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -20,19 +29,6 @@
  */
 EditorEventSet::EditorEventSet()
 {
-  EventSet set;
-  unlocked_state = set.getUnlockedState();
-}
-
-/* Constructor function - with input event */
-/*
- * Description: Constructor with event set struct input, as defined by EventSet.
- *
- * Inputs: Locked lock - an init lock struct
- */
-EditorEventSet::EditorEventSet(EventSet& set) : EditorEventSet()
-{
-  setEventSet(set);
 }
 
 /*
@@ -81,25 +77,12 @@ void EditorEventSet::copySelf(const EditorEventSet &source)
   lock_data = source.lock_data;
 
   /* Unlocked parsing state */
-  unlocked_state = source.unlocked_state;
+  unlocked_access = source.unlocked_access;
 }
 
 /*============================================================================
  * PUBLIC FUNCTIONS
  *===========================================================================*/
-
-/*
- * Description: Adds an event to the unlocked stack of events that can be used.
- *
- * Inputs: Event new_event - the new event to add to the unlocked stack
- * Output: bool - true if event was added
- */
-bool EditorEventSet::addEventUnlocked(Event new_event)
-{
-  EditorEvent event(new_event);
-  bool success = addEventUnlocked(event);
-  return success;
-}
 
 /*
  * Description: Adds an event to the unlocked stack of events that can be used.
@@ -129,7 +112,6 @@ void EditorEventSet::clear(bool delete_data)
   unsetEventLocked(delete_data);
   unsetEventUnlocked(delete_data);
   unsetLocked();
-  //unlocked_state = UnlockedState::ORDERED;
 }
 
 /*
@@ -141,34 +123,6 @@ void EditorEventSet::clear(bool delete_data)
 EditorEvent* EditorEventSet::getEventLocked()
 {
   return &event_locked;
-}
-
-/*
- * Description: Converts the EditorEventSet into the EventSet game class and
- *              returns it. Used for storage within the various map objects
- *
- * Inputs: none
- * Output: EventSet - the game based EventSet class
- */
-EventSet EditorEventSet::getEventSet()
-{
-  EventSet new_set;
-
-  /* Locked event */
-  new_set.setEventLocked(EventSet::copyEvent(*event_locked.getEvent()));
-
-  /* Unlocked events */
-  for(int i = 0; i < events_unlocked.size(); i++)
-    new_set.addEventUnlocked(EventSet::copyEvent(
-                                             *events_unlocked[i]->getEvent()));
-
-  /* Locked data */
-  new_set.setLocked(*lock_data.getLock());
-
-  /* Unlocked events - how parsed */
-  new_set.setUnlockedState(unlocked_state);
-
-  return new_set;
 }
 
 /*
@@ -259,16 +213,16 @@ QVector<QString> EditorEventSet::getTextSummary()
 }
 
 /*
- * Description: Returns the unlocked state of the set. This defines how the
+ * Description: Returns the unlocked access state of the set. This defines how the
  *              unlocked stack of events is accessed and handled during a get
  *              call.
  *
  * Inputs: none
  * Output: UnlockedState - the unlocked state enum of the set.
  */
-UnlockedState EditorEventSet::getUnlockedState()
+core::AccessOperation EditorEventSet::getUnlockedAccess()
 {
-  return unlocked_state;
+  return unlocked_access;
 }
 
 /*
@@ -285,115 +239,117 @@ bool EditorEventSet::isEmpty() const
   bool unlocked_valid = false;
   for(int i = 0; i < events_unlocked.size(); i++)
     unlocked_valid |= (events_unlocked[i]->getEventType() !=
-                       EventClassifier::NOEVENT);
+                       core::EventType::NONE);
 
-  return (event_locked.getEventType() == EventClassifier::NOEVENT &&
-          !unlocked_valid && lock_data.getLockType() == LockedState::NONE);
+  return (event_locked.getEventType() == core::EventType::NONE &&
+          !unlocked_valid && lock_data.getLockType() == core::LockType::NONE);
 }
 
 /*
  * Description: Loads the event set data from the XML struct and offset index.
  *              Uses existing functions in game EventSet class.
  *
- * Inputs: XmlData data - the XML data tree struct
+ * Inputs: core::XmlData data - the XML data tree struct
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorEventSet::load(XmlData data, int index)
+void EditorEventSet::load(core::XmlData data, int index)
 {
-  EventSet set = getEventSet();
-  set.loadData(data, index, 0);
-  setEventSet(set);
+  QString element = QString::fromStdString(data.getElement(index));
+
+  /* Parse elements */
+  if(element == kKEY_EVENT_LOCK)
+  {
+    event_locked.load(data, index + 1);
+  }
+  else if(element == kKEY_EVENT_UNLOCK)
+  {
+    QString key = QString::fromStdString(data.getKey(index));
+    int unlock_index = std::stoi(data.getKeyValue(index));
+    if(key == kKEY_EVENT_UNLOCK_ID && unlock_index >= 0)
+    {
+      while(unlock_index >= events_unlocked.size())
+        events_unlocked.append(new EditorEvent());
+      getEventUnlocked(index)->load(data, index + 1);
+    }
+  }
+  else if(element == kKEY_EVENT_UNLOCK_ACCESS)
+  {
+    QString access_str = QString::fromStdString(data.getDataStringOrThrow());
+
+    if(access_str == kKEY_ACCESS_NONE)
+      unlocked_access = core::AccessOperation::NONE;
+    else if(access_str == kKEY_ACCESS_SEQUENTIAL)
+      unlocked_access = core::AccessOperation::SEQUENTIAL;
+    else if(access_str == kKEY_ACCESS_RANDOM)
+      unlocked_access = core::AccessOperation::RANDOM;
+    else
+      throw std::domain_error("Access operation mapping for load event set is not defined");
+  }
+  else if(element == kKEY_LOCK)
+  {
+    lock_data.load(data, index + 1);
+  }
 }
 
 /*
  * Description: Saves the event set data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
- *         bool game_only - true if the data should include game only relevant
- *         QString preface - the wrapper text element. default to "eventset"
- *         bool no_preface - no XML wrapper included if true. Default false
+ * Inputs: core::XmlWriter* writer - the save persistence interface
+ *         QString wrapper - the wrapper text element. default to "eventset"
+ *         bool write_wrapper - should the save wrap the event in a parent element? Default true
  *         bool skip_empty - false to save even if empty (default true)
  * Output: none
  */
-void EditorEventSet::save(FileHandler* fh, bool game_only,
-                          QString preface, bool no_preface, bool skip_empty)
+void EditorEventSet::save(core::XmlWriter* writer, QString wrapper, bool write_wrapper,
+                          bool skip_empty)
 {
-  if(fh != nullptr)
+  if(writer != nullptr && (!isEmpty() || !skip_empty))
   {
-    /* If the event set has valid data */
-    if(!isEmpty())
+    /* Wrapper */
+    if(write_wrapper)
+      writer->writeElement(wrapper.toStdString());
+
+    /* Locked status */
+    lock_data.save(writer, kKEY_LOCK);
+
+    /* Locked event */
+    event_locked.save(writer, kKEY_EVENT_LOCK);
+
+    /* Unlocked event(s) */
+    for(int i = 0; i < events_unlocked.size(); i++)
     {
-      /* Wrapper */
-      if(!no_preface)
-        fh->writeXmlElement(preface.toStdString());
-
-      /* Locked status */
-      lock_data.save(fh, game_only);
-
-      /* Locked event */
-      event_locked.save(fh, game_only, "lockevent");
-
-      /* Unlocked event(s) */
-      for(int i = 0; i < events_unlocked.size(); i++)
+      if(events_unlocked[i]->getEventType() != core::EventType::NONE)
       {
-        if(events_unlocked[i]->getEventType() != EventClassifier::NOEVENT)
-        {
-          fh->writeXmlElement("unlockevent", "id", i);
-          events_unlocked[i]->save(fh, game_only, "", true);
-          fh->writeXmlElementEnd();
-        }
+        writer->writeElement(kKEY_EVENT_UNLOCK.toStdString(), kKEY_EVENT_UNLOCK_ID.toStdString(),
+                             std::to_string(i));
+        events_unlocked[i]->save(writer, "", false);
+        writer->jumpToParent();
       }
-
-      /* Unlocked parse state */
-      EventSet default_set;
-      if(default_set.getUnlockedState() != unlocked_state)
-      {
-        std::string state = "";
-
-        if(unlocked_state == UnlockedState::NONE)
-          state = "none";
-        else if(unlocked_state == UnlockedState::ORDERED)
-          state = "ordered";
-        else if(unlocked_state == UnlockedState::RANDOM)
-          state = "random";
-
-        if(!state.empty())
-          fh->writeXmlData("unlockparse", state);
-      }
-
-      /* End Wrapper */
-      if(!no_preface)
-        fh->writeXmlElementEnd();
     }
-    /* If instructed to not skip empty, print none option - used for instance */
-    else if(!skip_empty)
+
+    /* Unlocked parse state */
+    if(unlocked_access != core::AccessOperation::SEQUENTIAL)
     {
-      int zero = 0;
+      QString access_str;
 
-      if(!no_preface)
-        fh->writeXmlElement(preface.toStdString());
-      fh->writeXmlData("none", zero);
-      if(!no_preface)
-        fh->writeXmlElementEnd();
+      if(unlocked_access == core::AccessOperation::NONE)
+        access_str = kKEY_ACCESS_NONE;
+      else if(unlocked_access == core::AccessOperation::SEQUENTIAL)
+        access_str = kKEY_ACCESS_SEQUENTIAL;
+      else if(unlocked_access == core::AccessOperation::RANDOM)
+        access_str = kKEY_ACCESS_RANDOM;
+      else
+        throw std::domain_error("Access operation mapping for save event set is not defined");
+
+      if(!access_str.isEmpty())
+        writer->writeData(kKEY_EVENT_UNLOCK_ACCESS.toStdString(), access_str.toStdString());
     }
+
+    /* End Wrapper */
+    if(write_wrapper)
+      writer->jumpToParent();
   }
-}
-
-/*
- * Description: Sets the event to be used while the set is locked. The passed in
- *              event needs to be deleted. Calls setEventLocked(EditorEvent)
- *              after converting the event.
- *
- * Inputs: Event new_event - the new event to use in a locked condition
- *         bool delete_event - true if the existing should be deleted
- * Output: bool - true if the locked event was set
- */
-bool EditorEventSet::setEventLocked(Event new_event, bool delete_event)
-{
-  EditorEvent event(new_event);
-  bool success = setEventLocked(event, delete_event);
-  return success;
 }
 
 /*
@@ -408,63 +364,6 @@ bool EditorEventSet::setEventLocked(EditorEvent new_event, bool delete_event)
   event_locked.setEventBlank(delete_event);
   event_locked = new_event;
   return true;
-}
-
-/*
- * Description: Takes the game based EventSet class and converts it to the
- *              EditorEventSet class.
- *
- * Inputs: EventSet& set - the game based class to convert
- *         bool delete_prev - delete the existing data. default true. If false,
- *                            just clears it without taking charge of memory
- * Output: bool - true if the event set was successful
- */
-bool EditorEventSet::setEventSet(EventSet& set, bool delete_prev)
-{
-  /* First clear old data */
-  clear(delete_prev);
-
-  /* Locked event */
-  Event* locked_event = set.getEventLockedRef(true);
-  event_locked.setEvent(*locked_event);
-
-  /* Unlocked events */
-  std::vector<Event*> unlocked_events = set.getEventUnlockedRef(true);
-  for(uint32_t i = 0; i < unlocked_events.size(); i++)
-    addEventUnlocked(*unlocked_events[i]);
-
-  /* Locked struct */
-  Locked lock_struct = set.getLockedState();
-  lock_data.setLock(lock_struct);
-
-  /* Unlocked state */
-  UnlockedState state = set.getUnlockedState();
-  unlocked_state = state;
-
-  return true;
-}
-
-/*
- * Description: Sets the event to be used within the unlocked stack set at the
- *              given index. If replace is true, will delete the event, at the
- *              index if it exists. Otherwise, it will push index+ back one and
- *              insert the new event. If the index is greater than the size of
- *              the array, it will push the event to the back of the stack. This
- *              class copies the data; caller must delete Event after call.
- *
- * Inputs: int index - the index in the unlocked stack to set the event
- *         Event new_event - the new event to insert or set
- *         bool replace - true to replace at index. false to insert. Default
- *                        false
- *         bool delete_event - true if the existing should be deleted
- * Output: bool - true if the insert or set was successful
- */
-bool EditorEventSet::setEventUnlocked(int index, Event new_event, bool replace,
-                                      bool delete_event)
-{
-  EditorEvent event(new_event);
-  bool success = setEventUnlocked(index, event, replace, delete_event);
-  return success;
 }
 
 /*
@@ -524,18 +423,6 @@ bool EditorEventSet::setEventUnlocked(int index, EditorEvent new_event,
 }
 
 /*
- * Description: Defines the locked information to use within the set.
- *
- * Inputs: Locked new_locked - the new locked struct with lock information
- * Output: bool - true if the locked struct was set
- */
-bool EditorEventSet::setLocked(Locked new_locked)
-{
-  EditorLock lock(new_locked);
-  return setLocked(lock);
-}
-
-/*
  * Description: Defined the editor locked class information to use within the
  *              set.
  *
@@ -555,9 +442,9 @@ bool EditorEventSet::setLocked(EditorLock new_locked)
  * Inputs: UnlockedState state - the state enumerator to use
  * Output: bool - true if the unlocked state was set
  */
-bool EditorEventSet::setUnlockedState(UnlockedState state)
+bool EditorEventSet::setUnlockedAccess(core::AccessOperation access)
 {
-  unlocked_state = state;
+  unlocked_access = access;
   return true;
 }
 
@@ -667,7 +554,7 @@ bool EditorEventSet::unsetEventUnlocked(bool delete_events)
  */
 bool EditorEventSet::unsetLocked()
 {
-  lock_data = EventSet::createBlankLocked();
+  lock_data = EditorLock();
   return true;
 }
 
