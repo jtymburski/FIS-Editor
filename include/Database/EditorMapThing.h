@@ -12,13 +12,15 @@
 #include "Database/EditorMatrix.h"
 #include "Database/EditorSprite.h"
 #include "Database/EditorTemplate.h"
-#include "Game/Map/MapThing.h"
+#include "Map/MapObjectType.h"
+#include "Map/MapThing.h"
+#include "Persistence/XmlData.h"
 
 class EditorMapThing : public EditorTemplate
 {
 public:
   /* Constructor function */
-  EditorMapThing(int id = -1, QString name = "Default Name",
+  EditorMapThing(int id = 0, QString name = "Default Name",
                  QString description = "");
 
   /* Copy constructor */
@@ -36,17 +38,13 @@ private:
 
   /* The event */
   EditorEventSet set;
-  bool event_base;
+  bool event_base = true;
 
   /* The view matrix */
   EditorMatrix* matrix;
 
   /* The actual thing for in game */
-  MapThing thing;
-
-  /* The X/Y position of the thing */
-  int x;
-  int y;
+  core::MapThing thing;
 
 protected:
   /* The rendering tile icons */
@@ -60,7 +58,7 @@ protected:
   void copySelf(const EditorMapThing &source, bool inc_matrix = true);
 
   /* Saves the thing data - virtualized */
-  virtual void saveData(FileHandler* fh, bool game_only = false,
+  virtual void saveData(core::XmlWriter* writer, bool game_only = false,
                         bool inc_matrix = true);
 
   /* Sets the matrix in the class - this is used by children to utilize the
@@ -81,7 +79,7 @@ public:
   EditorMapThing* getBaseThing() const;
 
   /* Gets the thing classification */
-  virtual ThingBase getClass() const;
+  virtual core::MapObjectType getClass() const;
 
   /* Gets the description of the thing */
   QString getDescription() const;
@@ -96,16 +94,16 @@ public:
   int getGameID() const;
 
   /* Gets the ID for the thing */
-  virtual int getID() const;
+  int getID() const override;
 
   /* Returns the matrix in the thing class */
   virtual EditorMatrix* getMatrix() const;
 
   /* Gets the user submitted name of the thing */
-  virtual QString getName() const;
+  QString getName() const override;
 
   /* Gets the proper formatted name and ID for listing */
-  virtual QString getNameList();
+  QString getNameList() override;
   QString getNameList(bool shortened);
 
   /* Returns the sound reference ID */
@@ -128,7 +126,7 @@ public:
   bool isVisible() const;
 
   /* Loads the thing data */
-  virtual void load(XmlData data, int index);
+  virtual void load(core::XmlData data, int index);
 
   /* Paint a sprite in the thing */
   bool paint(QPainter* painter, QRect rect, int offset_x = 0, int offset_y = 0);
@@ -136,7 +134,7 @@ public:
              int offset_x = 0, int offset_y = 0);
 
   /* Saves the thing data */
-  virtual void save(FileHandler* fh, bool game_only = false);
+  virtual void save(core::XmlWriter* writer, bool game_only = false);
 
   /* Sets if the thing is active */
   bool setActive(bool active);
@@ -158,10 +156,10 @@ public:
   void setGameID(int id);
 
   /* Sets the thing id (Backend) */
-  virtual void setID(int id);
+  void setID(int id) override;
 
   /* Sets the user submitted name */
-  virtual void setName(QString name, bool update = true);
+  void setName(QString name, bool update = true) override;
 
   /* Sets the connected sound ID */
   void setSoundID(int id);

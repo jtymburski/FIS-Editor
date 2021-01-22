@@ -20,21 +20,17 @@
  *         QString description - the description of the thing
  */
 EditorMapThing::EditorMapThing(int id, QString name, QString description)
+              : base{nullptr},
+                thing{core::MapThing(id)}
 {
-  base = NULL;
   matrix = new EditorMatrix(1, 1, false);
-  set.clear();
-  event_base = true;
-  x = 0;
-  y = 0;
 
   /* Make sure there's one frame in the sprite */
   if(dialog_image.frameCount() == 0)
     dialog_image.setPath(0, "");
 
   /* Load data */
-  setID(id);
-  setName(name);
+  EditorMapThing::setName(name);
   setDescription(description);
 }
 
@@ -100,12 +96,12 @@ void EditorMapThing::copySelf(const EditorMapThing &source, bool inc_matrix)
  * Description: Saves the data for the thing. This does not include the thing
  *              wrapper. Virtualized for other classes as well.
  *
- * Inputs: FileHandler* fh - the file handling data pointer
+ * Inputs: XmlWriter* writer - the save persistence interface
  *         bool game_only - true if only include game only data
  *         bool inc_matrix - true if include the base thing matrix
  * Output: none
  */
-void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
+void EditorMapThing::saveData(core::XmlWriter* writer, bool game_only, bool inc_matrix)
 {
   EditorMapThing default_thing;
 
@@ -113,59 +109,59 @@ void EditorMapThing::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
   if(base != NULL)
   {
     /* Write base settings */
-    fh->writeXmlData("base", base->getID());
+    writer->writeData("base", base->getID());
     QString startpoint = QString::number(getX()) + "," +
                          QString::number(getY());
-    fh->writeXmlData("startpoint", startpoint.toStdString());
+    writer->writeData("startpoint", startpoint.toStdString());
 
     /* Check the name and description, if it's different from base */
     if(base->getName() != getName())
-      fh->writeXmlData("name", getName().toStdString());
+      writer->writeData("name", getName().toStdString());
     if(base->getDescription() != getDescription())
-      fh->writeXmlData("description", getDescription().toStdString());
+      writer->writeData("description", getDescription().toStdString());
 
     /* Check game ID */
     if(getGameID() >= 0)
-      fh->writeXmlData("game_id", getGameID());
+      writer->writeData("game_id", getGameID());
 
     /* Activity status' */
     if(default_thing.isActive() != isActive())
-      fh->writeXmlData("active", isActive());
+      writer->writeData("active", isActive());
     if(default_thing.getActiveRespawn() != getActiveRespawn())
-      fh->writeXmlData("activetime", getActiveRespawn());
+      writer->writeData("activetime", getActiveRespawn());
 
     /* Event save, if relevant (isBaseEvent() is true) */
     if(!event_base)
-      set.save(fh, game_only, "eventset", false, false);
+      set.save(writer, "eventset", true, false);
   }
   /* Otherwise, is base - write core data */
   else
   {
     /* Write the core thing data */
-    fh->writeXmlData("name", getName().toStdString());
-    fh->writeXmlData("description", getDescription().toStdString());
+    writer->writeData("name", getName().toStdString());
+    writer->writeData("description", getDescription().toStdString());
     if(default_thing.isVisible() != isVisible())
-      fh->writeXmlData("visible", isVisible());
+      writer->writeData("visible", isVisible());
 
     /* Check game ID */
     if(getGameID() >= 0)
-      fh->writeXmlData("game_id", getGameID());
+      writer->writeData("game_id", getGameID());
 
     /* Check sound ID */
     if(getSoundID() >= 0)
-      fh->writeXmlData("sound_id", getSoundID());
+      writer->writeData("sound_id", getSoundID());
 
     /* Save the dialog image */
     if(!dialog_image.isAllNull() && dialog_image.frameCount() == 1)
-      fh->writeXmlData("image",
+      writer->writeData("image",
                 EditorHelpers::trimPath(dialog_image.getPath(0)).toStdString());
 
     /* Matrix save */
     if(inc_matrix)
-      matrix->save(fh, game_only);
+      matrix->save(writer, game_only);
 
     /* Event save */
-    set.save(fh, game_only);
+    set.save(writer);
   }
 }
 
@@ -216,7 +212,7 @@ void EditorMapThing::unsetMatrix()
  */
 int EditorMapThing::getActiveRespawn() const
 {
-  return thing.getActiveRespawn();
+  return thing.isRespawnTimeSet() ? thing.getRespawnTimeMilliseconds() : -1;
 }
 
 /*
@@ -234,11 +230,11 @@ EditorMapThing* EditorMapThing::getBaseThing() const
  * Description: Returns the thing classification - when dealing with casting.
  *
  * Inputs: none
- * Output: ThingBase - the thing classification
+ * Output: MapObjectType - the thing object classification
  */
-ThingBase EditorMapThing::getClass() const
+core::MapObjectType EditorMapThing::getClass() const
 {
-  return ThingBase::THING;
+  return core::MapObjectType::THING;
 }
 
 /*
@@ -299,7 +295,7 @@ EditorEventSet* EditorMapThing::getEventSet()
  */
 int EditorMapThing::getGameID() const
 {
-  return thing.getGameID();
+  return thing.isGameIdSet() ? thing.getGameId() : -1;
 }
 
 /*
@@ -310,7 +306,7 @@ int EditorMapThing::getGameID() const
  */
 int EditorMapThing::getID() const
 {
-  return thing.getID();
+  return thing.getId();
 }
 
 /*
@@ -382,9 +378,9 @@ QString EditorMapThing::getNameList(bool shortened)
  */
 int EditorMapThing::getSoundID() const
 {
-  if(base != nullptr && getClass() != ThingBase::ITEM)
+  if(base != nullptr && getClass() != core::MapObjectType::ITEM)
     return base->getSoundID();
-  return thing.getSoundID();
+  return thing.getSoundId();
 }
 
 /*
@@ -396,7 +392,7 @@ int EditorMapThing::getSoundID() const
  */
 int EditorMapThing::getX()
 {
-  return x;
+  return thing.isTileHorizontalSet() ? thing.getTileHorizontal() : 0;
 }
 
 /*
@@ -408,7 +404,7 @@ int EditorMapThing::getX()
  */
 int EditorMapThing::getY()
 {
-  return y;
+  return thing.isTileVerticalSet() ? thing.getTileVertical() : 0;
 }
 
 /*
@@ -466,7 +462,7 @@ bool EditorMapThing::isBaseEvent() const
  */
 bool EditorMapThing::isVisible() const
 {
-  if(base != nullptr && getClass() != ThingBase::ITEM)
+  if(base != nullptr && getClass() != core::MapObjectType::ITEM)
     return base->isVisible();
   return thing.isVisible();
 }
@@ -474,18 +470,18 @@ bool EditorMapThing::isVisible() const
 /*
  * Description: Loads the thing data from the XML struct and offset index.
  *
- * Inputs: XmlData data - the XML data tree struct
+ * Inputs: core::XmlData data - the XML data tree entry
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorMapThing::load(XmlData data, int index)
+void EditorMapThing::load(core::XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
 
   /* Parse elements */
   if(element == "active")
   {
-    setActive(data.getDataBool());
+    setActive(data.getDataBoolean());
   }
   else if(element == "activetime")
   {
@@ -544,7 +540,7 @@ void EditorMapThing::load(XmlData data, int index)
   }
   else if(element == "visible")
   {
-    setVisibility(data.getDataBool());
+    setVisibility(data.getDataBoolean());
   }
 }
 
@@ -604,17 +600,17 @@ bool EditorMapThing::paint(int frame_index, QPainter* painter, QRect rect,
 /*
  * Description: Saves the thing data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
+ * Inputs: XmlWriter* writer - the save persistence interface
  *         bool game_only - true if the data should include game only relevant
  * Output: none
  */
-void EditorMapThing::save(FileHandler* fh, bool game_only)
+void EditorMapThing::save(core::XmlWriter* writer, bool game_only)
 {
-  if(fh != NULL)
+  if(writer != NULL)
   {
-    fh->writeXmlElement("mapthing", "id", getID());
-    saveData(fh, game_only);
-    fh->writeXmlElementEnd();
+    writer->writeElement("mapthing", "id", std::to_string(getID()));
+    saveData(writer, game_only);
+    writer->jumpToParent();
   }
 }
 
@@ -626,7 +622,8 @@ void EditorMapThing::save(FileHandler* fh, bool game_only)
  */
 bool EditorMapThing::setActive(bool active)
 {
-  return thing.setActive(active, false);
+  thing.setActive(active);
+  return true;
 }
 
 /*
@@ -639,7 +636,7 @@ bool EditorMapThing::setActive(bool active)
  */
 void EditorMapThing::setActiveRespawn(int time)
 {
-  thing.setActiveRespawn(time);
+  thing.setRespawnTimeMilliseconds(time);
 }
 
 /*
@@ -711,7 +708,10 @@ void EditorMapThing::setEventSet(EditorEventSet set)
  */
 void EditorMapThing::setGameID(int id)
 {
-  thing.setGameID(id);
+  if(id >= 0)
+    thing.setGameId(id);
+  else
+    thing.unsetGameId();
 }
 
 /*
@@ -723,7 +723,7 @@ void EditorMapThing::setGameID(int id)
 void EditorMapThing::setID(int id)
 {
   if(id >= 0)
-    thing.setID(id);
+    thing.setId(id);
 }
 
 /*
@@ -749,7 +749,10 @@ void EditorMapThing::setName(QString name, bool update)
  */
 void EditorMapThing::setSoundID(int id)
 {
-  thing.setSoundID(id);
+  if(id >= 0)
+    thing.setSoundId(id);
+  else
+    thing.unsetSoundId();
 }
 
 /*
@@ -787,7 +790,7 @@ void EditorMapThing::setUseBaseEvent(bool use_base)
  */
 void EditorMapThing::setVisibility(bool visible)
 {
-  thing.setVisibility(visible);
+  thing.setVisible(visible);
 }
 
 /*
@@ -801,7 +804,7 @@ bool EditorMapThing::setX(int x)
 {
   if(x >= 0)
   {
-    this->x = x;
+    thing.setTileHorizontal(x);
     return true;
   }
   return false;
@@ -818,7 +821,7 @@ bool EditorMapThing::setY(int y)
 {
   if(y >= 0)
   {
-    this->y = y;
+    thing.setTileVertical(y);
     return true;
   }
   return false;

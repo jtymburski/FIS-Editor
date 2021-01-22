@@ -3,9 +3,10 @@ TEMPLATE = app
 
 QT += core gui widgets multimedia #opengl?
 
-CONFIG += c++11 #console? (console output), static? (static binary)
+CONFIG += c++17 #console? (console output), static? (static binary)
 
 DEFINES += QT_DEPRECATED_WARNINGS
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
 
 SOURCES += \
     src/Main.cc \
@@ -97,6 +98,7 @@ SOURCES += \
     lib/fis-types/src/Foundation/Frame.cc \
     lib/fis-types/src/Foundation/Sprite.cc \
     lib/fis-types/src/Foundation/TileSprite.cc \
+    lib/fis-types/src/Map/MapThing.cc \
     lib/fis-types/src/Parser/FilePath.cc \
     lib/fis-types/src/Parser/StringUtility.cc \
     lib/fis-types/src/Persistence/XmlData.cc \
