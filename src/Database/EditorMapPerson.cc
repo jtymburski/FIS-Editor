@@ -9,8 +9,27 @@
 //#include <QDebug>
 
 /* Constant Implementation - see header file for descriptions */
-const uint8_t EditorMapPerson::kTOTAL_DIRECTIONS = 4;
-const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
+const QString EditorMapPerson::kKEY_DIRECTION_EAST = "east";
+const QString EditorMapPerson::kKEY_DIRECTION_NORTH = "north";
+const QString EditorMapPerson::kKEY_DIRECTION_SOUTH = "south";
+const QString EditorMapPerson::kKEY_DIRECTION_WEST = "west";
+const QString EditorMapPerson::kKEY_SURFACE_GROUND = "ground";
+
+/*
+ * Direction enumerator to and from string key static map.
+ */
+const QHash<QString, core::Direction> EditorMapPerson::kDIRECTION_FROM_STRING = {
+  { kKEY_DIRECTION_EAST,  core::Direction::EAST  },
+  { kKEY_DIRECTION_NORTH, core::Direction::NORTH },
+  { kKEY_DIRECTION_SOUTH, core::Direction::SOUTH },
+  { kKEY_DIRECTION_WEST,  core::Direction::WEST  }
+};
+const QHash<core::Direction, QString> EditorMapPerson::kDIRECTION_TO_STRING = {
+  { core::Direction::EAST,  kKEY_DIRECTION_EAST  },
+  { core::Direction::NORTH, kKEY_DIRECTION_NORTH },
+  { core::Direction::SOUTH, kKEY_DIRECTION_SOUTH },
+  { core::Direction::WEST,  kKEY_DIRECTION_WEST  }
+};
 
 /*============================================================================
  * CONSTRUCTORS / DESTRUCTORS
@@ -24,7 +43,8 @@ const uint8_t EditorMapPerson::kTOTAL_SURFACES   = 1;
  *         QString description - the description of the person
  */
 EditorMapPerson::EditorMapPerson(int id, QString name, QString description)
-               : EditorMapThing(id, name, description)
+               : EditorMapThing(id, name, description),
+                 person{core::MapPerson(id)}
 {
   initializeMatrixes();
 
@@ -65,16 +85,15 @@ EditorMapPerson::~EditorMapPerson()
  */
 void EditorMapPerson::deleteMatrixes()
 {
-  for(uint16_t i = 0; i < matrix_set.size(); i++)
-  {
-    for(uint16_t j = 0; j < matrix_set[i].size(); j++)
-    {
-      delete matrix_set[i][j];
-      matrix_set[i][j] = NULL;
-    }
-  }
-
+  for(auto it = matrix_set.begin(); it != matrix_set.end(); it++)
+    delete it.value();
   matrix_set.clear();
+}
+
+/* Initialize a single matrix tied to the surface and direction dimension */
+void EditorMapPerson::initializeMatrix(core::Surface surface, core::Direction direction)
+{
+  matrix_set.insert(core::MapPersonRenderKey(surface, direction), new EditorMatrix(1, 1));
 }
 
 /*
@@ -88,18 +107,13 @@ void EditorMapPerson::initializeMatrixes()
 {
   deleteMatrixes();
 
-  for(uint8_t i = 0; i < kTOTAL_SURFACES; i++)
-  {
-    QList<EditorMatrix*> row;
-
-    for(uint8_t j = 0; j < kTOTAL_DIRECTIONS; j++)
-      row.push_back(new EditorMatrix(1, 1));
-    matrix_set.push_back(row);
-  }
+  initializeMatrix(core::Surface::GROUND, core::Direction::EAST);
+  initializeMatrix(core::Surface::GROUND, core::Direction::NORTH);
+  initializeMatrix(core::Surface::GROUND, core::Direction::SOUTH);
+  initializeMatrix(core::Surface::GROUND, core::Direction::WEST);
 
   /* Set the initial frames in the thing */
-  setMatrix(getState(MapPerson::SurfaceClassifier::GROUND,
-                     getStartingDirection()), true);
+  setMatrix(getState(core::Surface::GROUND, getStartingDirection()), true);
 }
 
 /*============================================================================
@@ -118,9 +132,8 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
   EditorMapThing::copySelf(source, false);
 
   /* Copy matrix data */
-  for(int i = 0; i < matrix_set.size(); i++)
-    for(int j = 0; j < matrix_set[i].size(); j++)
-      *matrix_set[i][j] = *source.matrix_set[i][j];
+  for(auto it = matrix_set.begin(); it != matrix_set.end(); it++)
+    *matrix_set[it.key()] = *source.matrix_set[it.key()];
 
   /* Person data */
   setSpeed(source.getSpeed());
@@ -132,59 +145,58 @@ void EditorMapPerson::copySelf(const EditorMapPerson &source)
  * Description: Saves the data for the person. This does not include the person
  *              wrapper. Virtualized for other classes as well.
  *
- * Inputs: FileHandler* fh - the file handling data pointer
+ * Inputs: XmlWriter* writer - the save persistence interface
  *         bool game_only - true if only include game only data
  *         bool inc_matrix - true if include the base thing matrix
  * Output: none
  */
-void EditorMapPerson::saveData(FileHandler* fh, bool game_only, bool inc_matrix)
+void EditorMapPerson::saveData(core::XmlWriter* writer, bool game_only, bool inc_matrix)
 {
   EditorMapPerson default_person;
 
   /* First write thing data */
-  EditorMapThing::saveData(fh, game_only, inc_matrix);
+  EditorMapThing::saveData(writer, game_only, inc_matrix);
 
   /* Next person data: Is base - write core data */
   if(getBasePerson() == NULL)
   {
     /* Write the core thing data */
     if(default_person.getSpeed() != getSpeed())
-      fh->writeXmlData("speed", getSpeed());
+      writer->writeData("speed", getSpeed());
 
     /* Matrix saves */
-    MapPerson::SurfaceClassifier surface = MapPerson::GROUND;
-    fh->writeXmlElement("ground");
+    core::Surface surface = core::Surface::GROUND;
+    writer->writeElement(kKEY_SURFACE_GROUND.toStdString());
 
-    fh->writeXmlElement("north");
-    getState(surface, Direction::NORTH)->save(fh, game_only, true);
-    fh->writeXmlElementEnd();
-    fh->writeXmlElement("east");
-    getState(surface, Direction::EAST)->save(fh, game_only, true);
-    fh->writeXmlElementEnd();
-    fh->writeXmlElement("south");
-    getState(surface, Direction::SOUTH)->save(fh, game_only, true);
-    fh->writeXmlElementEnd();
-    fh->writeXmlElement("west");
-    getState(surface, Direction::WEST)->save(fh, game_only, true);
-    fh->writeXmlElementEnd();
+    writer->writeElement(kKEY_DIRECTION_NORTH.toStdString());
+    getState(surface, core::Direction::NORTH)->save(writer, game_only, true);
+    writer->jumpToParent();
+    writer->writeElement(kKEY_DIRECTION_EAST.toStdString());
+    getState(surface, core::Direction::EAST)->save(writer, game_only, true);
+    writer->jumpToParent();
+    writer->writeElement(kKEY_DIRECTION_SOUTH.toStdString());
+    getState(surface, core::Direction::SOUTH)->save(writer, game_only, true);
+    writer->jumpToParent();
+    writer->writeElement(kKEY_DIRECTION_WEST.toStdString());
+    getState(surface, core::Direction::WEST)->save(writer, game_only, true);
+    writer->jumpToParent();
 
-    fh->writeXmlElementEnd();
+    writer->jumpToParent();
 
     /* Save the render matrix */
-    getState(surface, Direction::NORTH)->saveRender(fh);
+    getState(surface, core::Direction::NORTH)->saveRender(writer);
   }
   else
   {
     /* Speed */
     if(!isBaseSpeed())
-      fh->writeXmlData("speed", getSpeed());
+      writer->writeData("speed", getSpeed());
 
     /* Starting direction */
     if(default_person.getStartingDirection() != getStartingDirection())
     {
-      std::string dir_str = Helpers::directionToString(getStartingDirection());
-      std::transform(dir_str.begin(),dir_str.end(),dir_str.begin(),::tolower);
-      fh->writeXmlData("startingdir", dir_str);
+      QString dir_str = kDIRECTION_TO_STRING.value(getStartingDirection(), "");
+      writer->writeData("startingdir", dir_str.toStdString());
     }
   }
 }
@@ -210,11 +222,11 @@ EditorMapPerson* EditorMapPerson::getBasePerson() const
  * Description: Returns the person classification - when dealing with casting.
  *
  * Inputs: none
- * Output: ThingBase - the person classification
+ * Output: MapObjectType - the person object classification
  */
-ThingBase EditorMapPerson::getClass() const
+core::MapObjectType EditorMapPerson::getClass() const
 {
-  return ThingBase::PERSON;
+  return core::MapObjectType::PERSON;
 }
 
 /*
@@ -226,7 +238,7 @@ ThingBase EditorMapPerson::getClass() const
  */
 EditorMatrix* EditorMapPerson::getMatrix() const
 {
-  return getState(MapPerson::GROUND, getStartingDirection());
+  return getState(core::Surface::GROUND, getStartingDirection());
 }
 
 /*
@@ -263,7 +275,7 @@ uint16_t EditorMapPerson::getSpeed() const
  * Inputs: none
  * Output: Direction - the facing direction enum
  */
-Direction EditorMapPerson::getStartingDirection() const
+core::Direction EditorMapPerson::getStartingDirection() const
 {
   return person.getStartingDirection();
 }
@@ -273,38 +285,19 @@ Direction EditorMapPerson::getStartingDirection() const
  *              definition and the direction. Returns NULL if unset or
  *              invalid.
  *
- * Inputs: SurfaceClassifier surface - the surface that the person is on
+ * Inputs: Surface surface - the surface that the person is on
  *         Direction direction - the direction moving in
  * Output: EditorMatrix* - matrix reference, that defines the sprite data
  */
-EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
-                                        Direction direction) const
+EditorMatrix* EditorMapPerson::getState(core::Surface surface, core::Direction direction) const
 {
-  int surface_index = static_cast<int>(surface);
-  int dir_index = MapPerson::dirToInt(direction);
+  // Base is prioritized to fetch the matrix definitions
   EditorMapPerson* base = getBasePerson();
+  if(base != nullptr)
+    return base->getState(surface, direction);
 
-  /* Check if it's a base and the frames from it should be used instead */
-  if(base != NULL)
-  {
-    if(surface_index >= 0 && dir_index >= 0 &&
-       surface_index < base->matrix_set.size() &&
-       dir_index < base->matrix_set[surface_index].size())
-    {
-      return base->matrix_set[surface_index][dir_index];
-    }
-  }
-  else
-  {
-    if(surface_index >= 0 && dir_index >= 0 &&
-       surface_index < matrix_set.size() &&
-       dir_index < matrix_set[surface_index].size())
-    {
-      return matrix_set[surface_index][dir_index];
-    }
-  }
-
-  return NULL;
+  // Otherwise, check local definition
+  return matrix_set.value(core::MapPersonRenderKey(surface, direction), nullptr);
 }
 
 /*
@@ -312,16 +305,16 @@ EditorMatrix* EditorMapPerson::getState(MapPerson::SurfaceClassifier surface,
  *              contain the editor tile sprites.
  *
  * Inputs: none
- * Output: QList<QList<EditorMatrix*>> - stack of matrixes
+ * Output: QList<EditorMatrix*> - stack of matrixes
  */
-QList<QList<EditorMatrix*>> EditorMapPerson::getStates() const
+QList<EditorMatrix*> EditorMapPerson::getStates() const
 {
   EditorMapPerson* base = getBasePerson();
 
   /* Check if it's a base and the frames from it should be used instead */
   if(base != NULL)
-    return base->matrix_set;
-  return matrix_set;
+    return base->getStates();
+  return matrix_set.values();
 }
 
 /*
@@ -335,22 +328,13 @@ QList<QList<EditorMatrix*>> EditorMapPerson::getStates() const
 bool EditorMapPerson::isAllNull(int x, int y) const
 {
   bool is_null = true;
-  QList<QList<EditorMatrix*>> set = getStates();
 
   /* Loop through all matrixes */
-  for(int i = 0; i < set.size(); i++)
+  for(auto it = matrix_set.begin(); it != matrix_set.end(); it++)
   {
-    for(int j = 0; j < set[i].size(); j++)
-    {
-      /* If matrix is valid */
-      if(set[i][j] != NULL)
-      {
-        /* Get sprite, if valid */
-        EditorTileSprite* sprite = set[i][j]->getSprite(x, y);
-        if(sprite != NULL)
-          is_null &= sprite->isAllNull();
-      }
-    }
+    EditorTileSprite* sprite = it.value()->getSprite(x, y);
+    if(sprite != nullptr)
+      is_null &= sprite->isAllNull();
   }
 
   return is_null;
@@ -374,45 +358,33 @@ bool EditorMapPerson::isBaseSpeed() const
 /*
  * Description: Loads the person data from the XML struct and offset index.
  *
- * Inputs: XmlData data - the XML data tree struct
+ * Inputs: XmlData data - the XML data tree entry
  *         int index - the offset index into the struct
  * Output: none
  */
-void EditorMapPerson::load(XmlData data, int index)
+void EditorMapPerson::load(core::XmlData data, int index)
 {
   QString element = QString::fromStdString(data.getElement(index));
-  std::vector<std::string> elements = data.getTailElements(index);
 
   /* Parse elements */
-  if(elements.size() >= 4 && elements[2] == "sprites")
+  if(element == kKEY_SURFACE_GROUND)
   {
     /* Create the surface identifier */
-    MapPerson::SurfaceClassifier surface = MapPerson::GROUND;
-    if(elements[0] == "ground")
-      surface = MapPerson::GROUND;
+    core::Surface surface = core::Surface::GROUND;
 
     /* Determine direction */
-    Direction dir = Direction::DIRECTIONLESS;
-    QString dir_element = QString::fromStdString(data.getElement(index+1));
-    if(dir_element == "north")
-      dir = Direction::NORTH;
-    else if(dir_element == "east")
-      dir = Direction::EAST;
-    else if(dir_element == "south")
-      dir = Direction::SOUTH;
-    else if(dir_element == "west")
-      dir = Direction::WEST;
+    core::Direction dir = kDIRECTION_FROM_STRING.value(
+          QString::fromStdString(data.getElement(index + 1)), core::Direction::NONE);
 
     /* Only proceed if the direction was a valid direction */
     EditorMatrix* matrix = getState(surface, dir);
-    if(matrix != NULL)
+    if(matrix != nullptr && data.getElement(index + 2) == "sprites")
       matrix->load(data, index + 3);
   }
   else if(element == "rendermatrix")
   {
-    for(int i = 0; i < matrix_set.size(); i++)
-      for(int j = 0; j < matrix_set[i].size(); j++)
-        matrix_set[i][j]->load(data, index);
+    for(auto it = matrix_set.begin(); it != matrix_set.end(); it++)
+      it.value()->load(data, index);
   }
   else if(element == "speed")
   {
@@ -422,7 +394,10 @@ void EditorMapPerson::load(XmlData data, int index)
   }
   else if(element == "startingdir")
   {
-    person.addThingInformation(data, index, -1, nullptr, "");
+    core::Direction dir = kDIRECTION_FROM_STRING.value(
+          QString::fromStdString(data.getDataStringOrThrow()), core::Direction::NONE);
+    if(dir != core::Direction::NONE)
+      setStartingDirection(dir);
   }
   else
   {
@@ -433,17 +408,17 @@ void EditorMapPerson::load(XmlData data, int index)
 /*
  * Description: Saves the person data to the file handling pointer.
  *
- * Inputs: FileHandler* fh - the file handling pointer
+ * Inputs: XmlWriter* writer - the save persistence interface
  *         bool game_only - true if the data should include game only relevant
  * Output: none
  */
-void EditorMapPerson::save(FileHandler* fh, bool game_only)
+void EditorMapPerson::save(core::XmlWriter* writer, bool game_only)
 {
-  if(fh != NULL)
+  if(writer != NULL)
   {
-    fh->writeXmlElement("mapperson", "id", getID());
-    saveData(fh, game_only, false);
-    fh->writeXmlElementEnd();
+    writer->writeElement("mapperson", "id", std::to_string(getID()));
+    saveData(writer, game_only, false);
+    writer->jumpToParent();
   }
 }
 
@@ -489,19 +464,13 @@ void EditorMapPerson::setSpeed(uint16_t speed)
  * Description: Sets the person starting facing direction. This is used on
  *              initial creation and certain inactive cases.
  *
- * Inputs: Direction starting - the starting direction facing of the person
+ * Inputs: Direction direction - the starting direction facing of the person
  * Output: bool - returns if the direction was set
  */
-bool EditorMapPerson::setStartingDirection(Direction starting)
+bool EditorMapPerson::setStartingDirection(core::Direction direction)
 {
-  if(person.setStartingDirection(starting))
-  {
-    /* Set the initial frames in the thing */
-    //setMatrix(getState(MapPerson::SurfaceClassifier::GROUND,
-    //                   getStartingDirection()));
-    return true;
-  }
-  return false;
+  person.setStartingDirection(direction);
+  return true;
 }
 
 /*
@@ -512,9 +481,8 @@ bool EditorMapPerson::setStartingDirection(Direction starting)
  */
 void EditorMapPerson::setTileIcons(TileIcons* icons)
 {
-  for(int i = 0; i < matrix_set.size(); i++)
-    for(int j = 0; j < matrix_set[i].size(); j++)
-      matrix_set[i][j]->setTileIcons(icons);
+  for(auto it = matrix_set.begin(); it != matrix_set.end(); it++)
+    it.value()->setTileIcons(icons);
 
   EditorMapThing::setTileIcons(icons);
 }

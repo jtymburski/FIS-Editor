@@ -98,6 +98,7 @@ SOURCES += \
     lib/fis-types/src/Foundation/Frame.cc \
     lib/fis-types/src/Foundation/Sprite.cc \
     lib/fis-types/src/Foundation/TileSprite.cc \
+    lib/fis-types/src/Map/MapPerson.cc \
     lib/fis-types/src/Map/MapThing.cc \
     lib/fis-types/src/Parser/FilePath.cc \
     lib/fis-types/src/Parser/StringUtility.cc \

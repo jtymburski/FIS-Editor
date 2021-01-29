@@ -8,8 +8,10 @@
 #ifndef EDITORMAPPERSON_H
 #define EDITORMAPPERSON_H
 
+#include <QHash>
+
 #include "Database/EditorMapThing.h"
-#include "Game/Map/MapPerson.h"
+#include "Map/MapPerson.h"
 
 class EditorMapPerson : public EditorMapThing
 {
@@ -26,17 +28,28 @@ public:
 
 private:
   /* The set of thing matrixes for different grounds and directions */
-  QList<QList<EditorMatrix*>> matrix_set;
+  QHash<core::MapPersonRenderKey, EditorMatrix*> matrix_set;
 
   /* Reference person */
-  MapPerson person;
+  core::MapPerson person;
 
   /* Map Person to use base speed */
   bool speed_base;
 
   /* -------------------------- Constants ------------------------- */
-  const static uint8_t kTOTAL_DIRECTIONS; /* The max # of directions to move */
-  const static uint8_t kTOTAL_SURFACES; /* The max # of surfaces to walk on */
+
+  /* Direction enumerator from string key map */
+  const static QHash<QString, core::Direction> kDIRECTION_FROM_STRING;
+
+  /* Direction enumerator to string key map */
+  const static QHash<core::Direction, QString> kDIRECTION_TO_STRING;
+
+  /* Data storage key names */
+  const static QString kKEY_DIRECTION_EAST;
+  const static QString kKEY_DIRECTION_NORTH;
+  const static QString kKEY_DIRECTION_SOUTH;
+  const static QString kKEY_DIRECTION_WEST;
+  const static QString kKEY_SURFACE_GROUND;
 
 /*============================================================================
  * PRIVATE FUNCTIONS
@@ -44,6 +57,9 @@ private:
 private:
   /* Delete defines matrixes stored in class - called once at destruction */
   void deleteMatrixes();
+
+  /* Initialize a single matrix tied to the surface and direction dimension */
+  void initializeMatrix(core::Surface surface, core::Direction direction);
 
   /* Initialize matrixes stored in class - called once at start */
   void initializeMatrixes();
@@ -56,7 +72,7 @@ protected:
   void copySelf(const EditorMapPerson &source);
 
   /* Saves the person data - virtualized */
-  virtual void saveData(FileHandler* fh, bool game_only = false,
+  virtual void saveData(core::XmlWriter* writer, bool game_only = false,
                         bool inc_matrix = true);
 
 /*============================================================================
@@ -67,7 +83,7 @@ public:
   EditorMapPerson* getBasePerson() const;
 
   /* Gets the person classification */
-  virtual ThingBase getClass() const;
+  virtual core::MapObjectType getClass() const;
 
   /* Returns the matrix associated to the current direction */
   EditorMatrix* getMatrix() const;
@@ -76,12 +92,11 @@ public:
   uint16_t getSpeed() const;
 
   /* Returns the starting facing direction of the person */
-  Direction getStartingDirection() const;
+  core::Direction getStartingDirection() const;
 
   /* Returns the state at the defined surface and direction */
-  EditorMatrix* getState(MapPerson::SurfaceClassifier surface,
-                         Direction direction) const;
-  QList<QList<EditorMatrix*>> getStates() const;
+  EditorMatrix* getState(core::Surface surface, core::Direction direction) const;
+  QList<EditorMatrix*> getStates() const;
 
   /* Returns if the tile sprites in all matrixes at that x, y are null */
   virtual bool isAllNull(int x, int y) const;
@@ -90,10 +105,10 @@ public:
   bool isBaseSpeed() const;
 
   /* Loads the person data */
-  virtual void load(XmlData data, int index);
+  virtual void load(core::XmlData data, int index);
 
   /* Saves the person data */
-  virtual void save(FileHandler* fh, bool game_only = false);
+  virtual void save(core::XmlWriter* writer, bool game_only = false);
 
   /* Sets the base reference person */
   void setBase(EditorMapPerson* person, bool synchronize = true);
@@ -102,7 +117,7 @@ public:
   void setSpeed(uint16_t speed);
 
   /* Sets the starting direction of the person */
-  bool setStartingDirection(Direction starting);
+  bool setStartingDirection(core::Direction direction);
 
   /* Sets the rendering tile icons */
   void setTileIcons(TileIcons* icons);
@@ -117,5 +132,24 @@ public:
   /* The copy operator */
   EditorMapPerson& operator= (const EditorMapPerson &source);
 };
+
+/*
+ * qHash() inline definitions required by QHash<?> in order to hash non-primitive types.
+ * It simply attempts to return a unique hash value for unique interpretations.
+ */
+namespace core
+{
+  inline uint qHash(const Direction &direction)
+  {
+    return ::qHash(static_cast<uint>(direction));
+  }
+
+  inline uint qHash(const MapPersonRenderKey &key)
+  {
+    uint h1 = qHash(key.getDirection());
+    uint h2 = ::qHash(static_cast<uint>(key.getSurface()));
+    return h1 ^ (h2 << 4);
+  }
+}
 
 #endif // EDITORMAPPERSON_H

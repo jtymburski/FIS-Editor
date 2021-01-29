@@ -141,7 +141,7 @@ public:
   void setActiveRespawn(int time);
 
   /* Sets the base reference thing */
-  virtual void setBase(EditorMapThing* thing, bool synchronize = true);
+  void setBase(EditorMapThing* thing, bool synchronize = true);
 
   /* Sets the description of the thing */
   void setDescription(QString description);
